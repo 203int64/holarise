@@ -1,0 +1,123 @@
+{
+  "pillars": [
+    {
+      "id": "moi-truong",
+      "badge": "HolaGreen · Môi trường",
+      "title": "Làm Sạch & Gìn Giữ Màu Xanh Hòa Lạc",
+      "summary": "Lan tỏa tình yêu thiên nhiên và trách nhiệm công dân qua những sáng cuối tuần thanh niên, sinh viên, học sinh cùng chung tay thu gom, phân loại rác thải ven hồ Tân Xã và trồng thêm cây xanh cho Hòa Lạc.",
+      "image": "/assets/images/activity-environment.jpg",
+      "imageAlt": "Thanh niên và sinh viên Cộng đồng HolaRise phân loại chai nhựa và làm sạch bờ cỏ tại Tân Xã, Hòa Lạc",
+      "highlights": [
+        "Cuối Tuần Xanh định kỳ: thu gom và phân loại rác nhựa tái chế tại khu vực ven hồ Tân Xã và các tuyến đường Hòa Lạc.",
+        "Trồng và chăm sóc cây xanh bản địa cùng học sinh, sinh viên và cư dân địa phương.",
+        "Nâng cao ý thức giảm rác thải nhựa dùng một lần và giữ gìn mỹ quan đô thị đại học Hòa Lạc."
+      ],
+      "sdgs": ["SDG 11", "SDG 13", "SDG 15"]
+    },
+    {
+      "id": "workshop",
+      "badge": "HolaHeart · Giá trị cao đẹp",
+      "title": "Workshop Chia Sẻ Giá Trị Sống & Nuôi Dưỡng Tâm Hồn",
+      "summary": "Không gian văn hóa lành mạnh, truyền cảm hứng tại Tân Xã, Hòa Lạc — nơi người trẻ cùng tìm hiểu những bài học sâu sắc về lòng biết ơn, tình yêu thương gia đình, kỹ năng giao tiếp nhân văn và thực hành thủ công sáng tạo.",
+      "image": "/assets/images/activity-workshop.jpg",
+      "imageAlt": "Các bạn trẻ Cộng đồng HolaRise tham gia buổi Workshop HolaHeart chia sẻ giá trị sống cao đẹp tại Hòa Lạc",
+      "highlights": [
+        "Chuyên đề nhân văn sâu sắc: Lòng biết ơn cha mẹ – thầy cô, Văn hóa ứng xử tử tế, Thái độ sống tích cực và trách nhiệm.",
+        "Truyền cảm hứng học tập & rèn luyện: tiếp thêm ước mơ, nghị lực vươn lên cho học sinh, sinh viên và thanh niên.",
+        "Thực hành thủ công sáng tạo: tự tay viết thiệp tri ân, tái chế vật dụng thành chậu cây xanh thân thiện môi trường."
+      ],
+      "sdgs": ["SDG 4", "SDG 11"]
+    },
+    {
+      "id": "cong-dong",
+      "badge": "HolaConnect · Phụng sự Xã hội",
+      "title": "Cùng Vươn Lên, Cùng Sẻ Chia Với Cộng Đồng",
+      "summary": "Kết nối tấm lòng và sức trẻ của thanh niên, sinh viên, học sinh Hòa Lạc tới các em nhỏ và người dân địa phương thông qua hoạt động khuyến học, trao tặng tủ sách và hỗ trợ cộng đồng thiết thực.",
+      "image": "/assets/images/activity-community.jpg",
+      "imageAlt": "Tình nguyện viên Cộng đồng HolaRise đọc sách và giao lưu cùng trẻ em địa phương tại Tân Xã, Hòa Lạc",
+      "highlights": [
+        "Chương trình Tủ Sách Thanh Niên: quyên góp, trao tặng sách hay và tổ chức ngày hội đọc sách cho thiếu nhi Hòa Lạc.",
+        "Hỗ trợ chỉnh trang cảnh quan nhà văn hóa, trường học và thăm hỏi người cao tuổi tại địa phương.",
+        "Gắn kết cộng đồng bền vững trên nền tảng sự tôn trọng, chân thành và minh bạch."
+      ],
+      "sdgs": ["SDG 4", "SDG 11", "SDG 17"]
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "cuoi-tuan-xanh-ho-tan-xa",
+      "category": "moi-truong",
+      "categoryLabel": "HolaGreen",
+      "status": "Định kỳ hàng tháng",
+      "title": "Chiến Dịch \"Cuối Tuần Xanh — Làm Sạch Ven Hồ Tân Xã\"",
+      "location": "Khu vực ven hồ Tân Xã, Hòa Lạc, Hà Nội",
+      "metric": "650+ kg rác được thu gom & phân loại",
+      "description": "Hoạt động bảo vệ môi trường sáng Chủ Nhật quy tụ thanh niên, sinh viên và học sinh cùng thu gom rác sinh hoạt, phân loại chai nhựa tái chế và lan tỏa nếp sống xanh tới cộng đồng xung quanh.",
+      "image": "/assets/images/activity-environment.jpg",
+      "imageAlt": "Các bạn trẻ phân loại rác thải nhựa ven hồ Tân Xã vào buổi sáng"
+    },
+    {
+      "id": "chuoi-ws-tinh-yeu-thuong",
+      "category": "workshop",
+      "categoryLabel": "HolaHeart",
+      "status": "Đang mở đăng ký",
+      "title": "Chuỗi Workshop \"Cùng Vươn Lên Từ Những Giá Trị Cao Đẹp\"",
+      "location": "Không gian sinh hoạt cộng đồng, Tân Xã, Hòa Lạc, Hà Nội",
+      "metric": "14 buổi · 320+ lượt người trẻ tham dự",
+      "description": "Chuỗi chuyên đề cuối tuần chia sẻ những câu chuyện ý nghĩa về tình yêu thương gia đình, lòng biết ơn, nghệ thuật lắng nghe và động lực hoàn thiện bản thân cho giới trẻ Hòa Lạc.",
+      "image": "/assets/images/activity-workshop.jpg",
+      "imageAlt": "Buổi workshop chia sẻ giá trị sống cao đẹp của các bạn trẻ tại Tân Xã, Hòa Lạc"
+    },
+    {
+      "id": "vuon-cay-tuoi-tre",
+      "category": "moi-truong",
+      "categoryLabel": "HolaGreen",
+      "status": "Dự án dài hạn",
+      "title": "Dự Án \"Mầm Cây Thanh Niên Hòa Lạc\"",
+      "location": "Tân Xã & các điểm trường, khu dân cư tại Hòa Lạc, Hà Nội",
+      "metric": "180+ cây xanh được vun trồng & chăm sóc",
+      "description": "Mỗi nhóm thành viên cùng trồng mới và nhận trách nhiệm chăm sóc, theo dõi sự phát triển của cây xanh bản địa, góp phần tạo thêm bóng mát bền vững cho Hòa Lạc.",
+      "image": "/assets/images/hero-hoalac.jpg",
+      "imageAlt": "Thanh niên, sinh viên cùng nhau trồng cây con bên lối đi tại Hòa Lạc"
+    },
+    {
+      "id": "nhip-cau-yeu-thuong",
+      "category": "cong-dong",
+      "categoryLabel": "HolaConnect",
+      "status": "Theo mùa học",
+      "title": "Chương Trình \"Tủ Sách Thanh Niên Gửi Thiếu Nhi Hòa Lạc\"",
+      "location": "Tân Xã & các điểm sinh hoạt thiếu nhi quanh Hòa Lạc",
+      "metric": "150+ đầu sách chọn lọc & quà khuyến học",
+      "description": "Kết nối tấm lòng của học sinh, sinh viên và thanh niên để trao tặng sách quý, dụng cụ học tập và tổ chức những buổi đọc sách, giao lưu bổ ích cùng các em nhỏ.",
+      "image": "/assets/images/activity-community.jpg",
+      "imageAlt": "Tình nguyện viên trẻ đọc sách cùng các em nhỏ tại sân nhà văn hóa Hòa Lạc"
+    }
+  ],
+  "gallery": [
+    {
+      "src": "/assets/images/hero-hoalac.jpg",
+      "alt": "Buổi sáng thanh niên Cộng đồng HolaRise trồng cây và làm sạch lối đi tại Tân Xã, Hòa Lạc",
+      "caption": "Sáng cuối tuần tại Tân Xã, Hòa Lạc — thanh niên, sinh viên cùng vun trồng những mầm cây xanh mới."
+    },
+    {
+      "src": "/assets/images/activity-environment.jpg",
+      "alt": "Thanh niên, sinh viên phân loại chai nhựa tái chế dọc tuyến đường Tân Xã, Hòa Lạc",
+      "caption": "Thu gom và phân loại riêng rác nhựa tái chế trong chiến dịch Cuối Tuần Xanh (HolaGreen)."
+    },
+    {
+      "src": "/assets/images/activity-workshop.jpg",
+      "alt": "Buổi Workshop HolaHeart chia sẻ giá trị sống cao đẹp tại Hòa Lạc",
+      "caption": "Không khí trang trọng, ấm áp tại buổi Workshop HolaHeart chia sẻ về lòng biết ơn và lý tưởng sống đẹp."
+    },
+    {
+      "src": "/assets/images/activity-community.jpg",
+      "alt": "Đọc sách và giao lưu cùng thiếu nhi địa phương tại Hòa Lạc",
+      "caption": "Niềm vui của các em nhỏ khi cùng anh chị thanh niên, sinh viên đọc những cuốn sách mới trong chương trình HolaConnect."
+    },
+    {
+      "src": "/assets/images/og-cover.jpg",
+      "alt": "Con đường hàng cây xanh tại Hòa Lạc cùng bước chân thành viên HolaRise",
+      "caption": "Small Beginnings. Great Impact. — Những thay đổi tốt đẹp tại Hòa Lạc bắt đầu từ sự chung tay bền bỉ."
+    }
+  ]
+}

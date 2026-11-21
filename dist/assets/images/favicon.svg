@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none" role="img" aria-label="HolaRise">
+  <rect width="40" height="40" rx="10" fill="#1C3528"/>
+  <path d="M11 29V11H19.5C23.5 11 26 13.1 26 16.4C26 18.9 24.4 20.8 21.8 21.5L26.8 29H22.2L17.8 22H15V29H11ZM15 18.6H19.1C20.9 18.6 22 17.7 22 16.4C22 15 20.9 14.2 19.1 14.2H15V18.6Z" fill="#F7F5F0"/>
+  <path d="M9.5 27.5C13.5 27.5 15.8 20.5 22.5 19.5C18.5 21.2 16.2 28.2 9.5 27.5Z" fill="#D26E44"/>
+  <circle cx="30" cy="13.5" r="3" fill="#D26E44"/>
+  <rect x="28.2" y="18.5" width="3.6" height="10.5" rx="1" fill="#F7F5F0"/>
+</svg>

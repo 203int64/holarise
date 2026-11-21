@@ -1,0 +1,50 @@
+<section class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Đường dẫn trang">
+      <a href="/">Trang chủ</a>
+      <span aria-hidden="true">/</span>
+      <a href="/tin-tuc/">Tin tức &amp; Nhật ký</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ARTICLE_CATEGORY}}</span>
+    </nav>
+    <h1>{{ARTICLE_TITLE}}</h1>
+    <p style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.88rem; margin-top: 16px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">
+      <span style="color: var(--accent); font-weight: 500;">{{ARTICLE_CATEGORY}}</span>
+      <span>·</span>
+      <time datetime="{{ARTICLE_DATE}}">{{ARTICLE_DATE_DISPLAY}}</time>
+      <span>·</span>
+      <span>{{ARTICLE_READ_TIME}}</span>
+      <span>·</span>
+      <span>{{ARTICLE_AUTHOR}}</span>
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container article-wrap">
+    <figure class="article-cover">
+      <img src="{{ARTICLE_IMAGE}}" alt="{{ARTICLE_IMAGE_ALT}}" width="1200" height="675">
+    </figure>
+
+    <article class="article-body">
+      {{ARTICLE_PARAGRAPHS}}
+    </article>
+
+    <div style="margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
+      <a class="arrow-link" href="/tin-tuc/">← Quay lại tất cả bài viết</a>
+      <a class="btn btn--primary" href="/tham-gia/" data-magnetic>Đăng ký đồng hành cùng hoạt động tới</a>
+    </div>
+  </div>
+</section>
+
+<section class="section section--mist">
+  <div class="container">
+    <div class="section-header">
+      <div class="kicker">Đọc tiếp</div>
+      <h2 class="section-title">Các hoạt động khác của {{BRAND_SHORT_NAME}}</h2>
+    </div>
+    <div class="grid-2">
+      {{RELATED_NEWS_HTML}}
+    </div>
+  </div>
+</section>

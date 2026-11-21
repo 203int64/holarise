@@ -1,0 +1,60 @@
+<section class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Đường dẫn trang">
+      <a href="/">Trang chủ</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Hoạt động &amp; Chiến dịch</span>
+    </nav>
+    <h1>Hoạt động &amp; Chiến dịch Vì Cộng Đồng</h1>
+    <p>Tổng hợp các chương trình làm sạch môi trường, chuỗi workshop nuôi dưỡng giá trị cao đẹp và các dự án thiện nguyện thực chất đang triển khai tại Hòa Lạc.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="kicker">Ba trụ cột trọng tâm</div>
+      <h2 class="section-title">Chi tiết từng lĩnh vực hoạt động</h2>
+      <p class="section-lead">Mỗi mảng hoạt động được xây dựng thành chương trình định kỳ, có mục tiêu rõ ràng và ghi nhận kết quả công khai.</p>
+    </div>
+
+    <div class="grid-3" data-stagger-group>
+      {{PILLARS_DETAIL_HTML}}
+    </div>
+  </div>
+</section>
+
+<section class="section section--mist">
+  <div class="container">
+    <div class="section-header">
+      <div class="kicker">Chiến dịch tiêu biểu</div>
+      <h2 class="section-title">Các dự án đang &amp; đã triển khai tại Hòa Lạc</h2>
+      <p class="section-lead">Chọn chuyên mục bên dưới để xem nhanh các chiến dịch theo lĩnh vực bạn quan tâm.</p>
+    </div>
+
+    <div class="filter-bar" data-filter-group="[data-campaign-card]" role="group" aria-label="Lọc chiến dịch theo lĩnh vực">
+      <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Tất cả chiến dịch</button>
+      <button class="filter-btn" type="button" data-filter="moi-truong" aria-pressed="false">Môi trường Hòa Lạc</button>
+      <button class="filter-btn" type="button" data-filter="workshop" aria-pressed="false">Workshop Giá trị sống</button>
+      <button class="filter-btn" type="button" data-filter="cong-dong" aria-pressed="false">Phụng sự Cộng đồng</button>
+    </div>
+
+    <div class="grid-2" data-stagger-group>
+      {{CAMPAIGNS_HTML}}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="kicker">Thư viện hình ảnh</div>
+      <h2 class="section-title">Những khung hình thực tế từ hiện trường</h2>
+      <p class="section-lead">Mỗi bức ảnh là một kỷ niệm đẹp về tinh thần đoàn kết và trách nhiệm của thanh niên Hòa Lạc.</p>
+    </div>
+
+    <div class="gallery-grid">
+      {{GALLERY_HTML}}
+    </div>
+  </div>
+</section>

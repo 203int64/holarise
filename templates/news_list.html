@@ -1,0 +1,26 @@
+<section class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Đường dẫn trang">
+      <a href="/">Trang chủ</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Tin tức &amp; Nhật ký</span>
+    </nav>
+    <h1>Tin tức &amp; Nhật ký Hoạt động</h1>
+    <p>Cập nhật công khai kết quả các chiến dịch làm sạch môi trường, góc chia sẻ sau mỗi buổi workshop giá trị sống và hành trình phụng sự tại Hòa Lạc.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="filter-bar" data-filter-group="[data-news-card]" role="group" aria-label="Lọc bài viết theo chuyên mục">
+      <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Tất cả bài viết</button>
+      <button class="filter-btn" type="button" data-filter="moi-truong" aria-pressed="false">Môi trường</button>
+      <button class="filter-btn" type="button" data-filter="workshop" aria-pressed="false">Workshop</button>
+      <button class="filter-btn" type="button" data-filter="cong-dong" aria-pressed="false">Cộng đồng</button>
+    </div>
+
+    <div class="grid-3" data-stagger-group>
+      {{NEWS_LIST_HTML}}
+    </div>
+  </div>
+</section>

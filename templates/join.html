@@ -1,0 +1,97 @@
+<section class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Đường dẫn trang">
+      <a href="/">Trang chủ</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Tham gia &amp; Liên hệ</span>
+    </nav>
+    <h1>Tham gia &amp; Đồng hành cùng {{BRAND_SHORT_NAME}}</h1>
+    <p>Dù bạn muốn góp sức trong một buổi sáng dọn rác cuối tuần, tham dự workshop chia sẻ giá trị sống hay đề xuất hợp tác cộng đồng tại Hòa Lạc — chúng tôi luôn trân trọng chào đón bạn.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container join-grid">
+    <div class="form-card">
+      <div class="kicker">Cổng đăng ký trực tuyến</div>
+      <h2 style="margin: 0 0 10px; font-size: 1.6rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Đăng ký tham gia / Kết nối</h2>
+      <p style="margin: 0 0 28px; font-size: 0.94rem; color: var(--ink-secondary);">Điền thông tin ngắn gọn bên dưới, Ban Điều Phối sẽ liên hệ hướng dẫn chi tiết qua Zalo hoặc Email trong vòng 24 giờ.</p>
+
+      <form class="form-grid" data-club-form data-endpoint="{{FORM_ENDPOINT}}" novalidate>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="join-name">Họ và tên *</label>
+            <input id="join-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Trần Quốc Bảo" required>
+          </div>
+          <div class="field">
+            <label for="join-contact">Số điện thoại (Zalo) hoặc Email *</label>
+            <input id="join-contact" name="contact" type="text" autocomplete="tel" placeholder="09xx xxx xxx hoặc email" required>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="field">
+            <label for="join-role">Hình thức bạn muốn tham gia *</label>
+            <select id="join-role" name="role">
+              <option value="Tình nguyện viên chiến dịch môi trường">Tình nguyện viên chiến dịch môi trường</option>
+              <option value="Tham dự Workshop giá trị sống">Tham dự Workshop chia sẻ giá trị sống</option>
+              <option value="Thành viên sinh hoạt định kỳ">Thành viên sinh hoạt định kỳ cùng CLB</option>
+              <option value="Hỗ trợ truyền thông / tổ chức">Đóng góp kỹ năng (ảnh, thiết kế, điều phối)</option>
+              <option value="Đề xuất hợp tác / tài trợ minh bạch">Đề xuất hợp tác (Nhà trường / CLB / Doanh nghiệp)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="join-org">Bạn đang là (Học sinh / Sinh viên / Thanh niên tại Hòa Lạc)</label>
+            <input id="join-org" name="organization" type="text" autocomplete="organization" placeholder="Ví dụ: Học sinh THPT, Sinh viên Đại học, Đi làm tại Hòa Lạc...">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="join-message">Đôi lời giới thiệu hoặc nội dung bạn quan tâm</label>
+          <textarea id="join-message" name="note" rows="4" placeholder="Chia sẻ kỳ vọng của bạn, buổi sự kiện bạn muốn tham gia hoặc ý tưởng đóng góp cho cộng đồng Hòa Lạc..."></textarea>
+        </div>
+
+        <div class="form-status" role="status" aria-live="polite"></div>
+
+        <div>
+          <button class="btn btn--primary" type="submit" data-magnetic>Gửi đăng ký tham gia</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="info-panel">
+      <div class="info-box">
+        <h3>Thông tin liên hệ chính thức</h3>
+        <ul class="info-list">
+          <li><strong style="color: var(--ink); font-weight: 500;">Địa bàn:</strong> {{CONTACT_ADDRESS}}</li>
+          <li><strong style="color: var(--ink); font-weight: 500;">Lịch hoạt động:</strong> {{CONTACT_MEETING}}</li>
+          <li><strong style="color: var(--ink); font-weight: 500;">Email:</strong> <a href="mailto:{{CONTACT_EMAIL}}" style="color: var(--accent); font-weight: 500;">{{CONTACT_EMAIL}}</a></li>
+          <li><strong style="color: var(--ink); font-weight: 500;">Hotline:</strong> {{CONTACT_PHONE}}</li>
+        </ul>
+      </div>
+
+      <div class="info-box">
+        <h3>Quy trình đón tiếp thành viên mới</h3>
+        <ul class="clean-list" style="margin-bottom: 0;">
+          <li><strong style="color: var(--ink); font-weight: 500;">Bước 1:</strong> Đăng ký nhanh qua biểu mẫu trực tuyến.</li>
+          <li><strong style="color: var(--ink); font-weight: 500;">Bước 2:</strong> Điều phối viên gửi lịch hẹn, điểm tập trung tại Hòa Lạc và nhóm Zalo thông báo.</li>
+          <li><strong style="color: var(--ink); font-weight: 500;">Bước 3:</strong> Tham gia buổi trải nghiệm đầu tiên hoàn toàn tự nguyện và thân thiện.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="hairline" data-hairline></div></div>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="kicker">Giải đáp thắc mắc</div>
+      <h2 class="section-title">Câu hỏi thường gặp</h2>
+    </div>
+    <div class="faq-list">
+      {{FAQ_HTML}}
+    </div>
+  </div>
+</section>

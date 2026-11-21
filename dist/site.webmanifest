@@ -1,0 +1,16 @@
+{
+  "name": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên",
+  "short_name": "Cộng đồng HolaRise",
+  "description": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise – Hoa Lac Youth Empowerment Community): quy tụ thanh niên, sinh viên và học sinh tại Hòa Lạc cùng làm sạch môi trường sống (HolaGreen), tổ chức workshop chia sẻ nội dung cao đẹp (HolaHeart) và phụng sự xã hội bằng hành động thiết thực (HolaConnect).",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0B6E4F",
+  "icons": [
+    {
+      "src": "/assets/images/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

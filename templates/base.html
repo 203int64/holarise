@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{PAGE_TITLE}}</title>
+  <meta name="description" content="{{PAGE_DESCRIPTION}}">
+  <meta name="keywords" content="{{PAGE_KEYWORDS}}">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#FFFFFF">
+  <link rel="canonical" href="{{CANONICAL_URL}}">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <!-- Open Graph / Facebook / Zalo -->
+  <meta property="og:type" content="{{OG_TYPE}}">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:site_name" content="{{BRAND_FULL_NAME}}">
+  <meta property="og:title" content="{{PAGE_TITLE}}">
+  <meta property="og:description" content="{{PAGE_DESCRIPTION}}">
+  <meta property="og:url" content="{{CANONICAL_URL}}">
+  <meta property="og:image" content="{{OG_IMAGE_URL}}">
+  <meta property="og:image:alt" content="{{PAGE_TITLE}}">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{PAGE_TITLE}}">
+  <meta name="twitter:description" content="{{PAGE_DESCRIPTION}}">
+  <meta name="twitter:image" content="{{OG_IMAGE_URL}}">
+
+  <!-- Clean Vietnamese-native Inter (Light, Regular, Medium, SemiBold only) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  {{JSON_LD_SCRIPTS}}
+</head>
+<body class="{{BODY_CLASS}}">
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+  <div class="cursor-tag" id="cursor-tag" aria-hidden="true"></div>
+  <div class="float-preview" id="float-preview" aria-hidden="true">
+    <img id="float-preview-img" src="" alt="">
+  </div>
+  <a class="skip-link" href="#main-content">Chuyển tới nội dung chính</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand-link" href="/" aria-label="{{BRAND_FULL_NAME}} – Trang chủ">
+        <img src="{{LOGO_DARK}}" alt="HolaRise – {{BRAND_FULL_NAME}}" width="142" height="32">
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-subtext">Cùng Vươn Lên</span>
+      </a>
+
+      <nav class="main-nav" data-main-nav aria-label="Điều hướng chính">
+        {{NAV_LINKS}}
+      </nav>
+
+      <div class="header-actions">
+        <div class="live-status-pill" aria-label="Địa điểm và giờ địa phương">
+          <span class="live-status-dot" aria-hidden="true"></span>
+          <span>Tân Xã, Hòa Lạc · <span data-live-clock>07:00:00</span></span>
+        </div>
+        <a class="btn btn--primary btn--sm" href="/tham-gia/" data-magnetic>Tham gia</a>
+        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="Mở menu điều hướng">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    {{MAIN_CONTENT}}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" aria-label="{{BRAND_FULL_NAME}}">
+            <img src="{{LOGO_LIGHT}}" alt="HolaRise – {{BRAND_FULL_NAME}}" width="150" height="34" loading="lazy" style="height: 30px; width: auto;">
+          </a>
+          <p style="margin: 12px 0 6px; font-size: 0.82rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;">{{BRAND_FULL_NAME}}</p>
+          <p style="margin: 0 0 12px; font-size: 0.78rem; color: var(--ink-muted);">HolaRise – Hoa Lac Youth Empowerment Community</p>
+          <p style="margin: 0 0 10px;">{{BRAND_SUBTITLE}}</p>
+          <p style="font-size: 0.82rem; color: var(--accent); font-weight: 500;">Small Beginnings. Great Impact. · {{BRAND_TAGLINE}}</p>
+        </div>
+
+        <div>
+          <h2 class="footer-heading">Khám phá</h2>
+          <ul class="footer-links">
+            <li><a href="/">Trang chủ</a></li>
+            <li><a href="/gioi-thieu/">Giới thiệu &amp; Sứ mệnh</a></li>
+            <li><a href="/hoat-dong/">Hoạt động &amp; Chiến dịch</a></li>
+            <li><a href="/workshop/">Workshop giá trị sống</a></li>
+            <li><a href="/tin-tuc/">Tin tức &amp; Nhật ký</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="footer-heading">Lĩnh vực trọng tâm</h2>
+          <ul class="footer-links">
+            <li><a href="/hoat-dong/#moi-truong">Làm sạch &amp; Xanh hóa Hòa Lạc</a></li>
+            <li><a href="/workshop/">Workshop giá trị cao đẹp</a></li>
+            <li><a href="/hoat-dong/#cong-dong">Phụng sự cộng đồng địa phương</a></li>
+            <li><a href="/gioi-thieu/#sdgs">Định hướng UN SDGs</a></li>
+            <li><a href="/tham-gia/">Đăng ký tình nguyện viên</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="footer-heading">Kết nối tại Hòa Lạc</h2>
+          <ul class="footer-links">
+            <li>{{CONTACT_ADDRESS}}</li>
+            <li><a href="mailto:{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</a></li>
+            <li>{{CONTACT_PHONE}}</li>
+            <li>{{CONTACT_MEETING}}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© {{CURRENT_YEAR}} {{BRAND_FULL_NAME}} (HolaRise). Địa chỉ: {{CONTACT_ADDRESS}}.</span>
+        <span>Hotline: {{CONTACT_PHONE}} · {{CONTACT_EMAIL}} · holarise.org</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Native HTML5 <dialog> Đăng Ký Nhanh Workshop / Chiến Dịch -->
+  <dialog class="club-dialog" id="event-register-modal" closedby="any" aria-labelledby="modal-heading">
+    <div class="dialog-inner">
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
+      <span class="kicker" style="margin-bottom: 10px;">Đăng ký tham dự</span>
+      <h2 id="modal-heading" style="margin: 0 0 6px; font-size: 1.4rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Đăng ký tham gia hoạt động</h2>
+      <p id="modal-event-title" style="margin: 0 0 22px; font-size: 0.92rem; color: var(--accent); font-weight: 500;"></p>
+
+      <form class="form-grid" data-club-form data-endpoint="{{FORM_ENDPOINT}}" novalidate>
+        <input type="hidden" name="activity" id="modal-event-input" value="">
+        <div class="field">
+          <label for="modal-name">Họ và tên *</label>
+          <input id="modal-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Nguyễn Minh Anh" required>
+        </div>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="modal-contact">Số điện thoại / Zalo *</label>
+            <input id="modal-contact" name="contact" type="text" autocomplete="tel" placeholder="09xx xxx xxx" required>
+          </div>
+          <div class="field">
+            <label for="modal-org">Bạn đang là (Học sinh / Sinh viên / Thanh niên)</label>
+            <input id="modal-org" name="organization" type="text" autocomplete="organization" placeholder="Ví dụ: Học sinh THPT, Sinh viên, Đi làm tại Hòa Lạc...">
+          </div>
+        </div>
+        <div class="field">
+          <label for="modal-note">Lời nhắn thêm (không bắt buộc)</label>
+          <textarea id="modal-note" name="note" rows="3" placeholder="Bạn đi cùng bạn bè hay lần đầu tham gia?"></textarea>
+        </div>
+        <div class="form-status" role="status" aria-live="polite"></div>
+        <button class="btn btn--primary" type="submit">Xác nhận đăng ký</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Native HTML5 <dialog> Lightbox Xem Ảnh Sự Kiện -->
+  <dialog class="club-dialog club-dialog--lightbox" id="gallery-lightbox" closedby="any" aria-label="Xem ảnh sự kiện">
+    <div class="lightbox-stage">
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng ảnh">×</button>
+      <img id="lightbox-img" src="" alt="">
+      <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+  </dialog>
+
+  <script src="/assets/vendor/gsap.min.js" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js" defer></script>
+  <script src="/assets/vendor/lenis.min.js" defer></script>
+  <script src="/assets/js/motion.js" defer></script>
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+{
+  "brand": {
+    "brandName": "HolaRise",
+    "shortName": "Cộng đồng HolaRise",
+    "fullName": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên",
+    "englishName": "HolaRise – Hoa Lac Youth Empowerment Community",
+    "tagline": "Together We Rise, Together We Serve.",
+    "motto": "Small Beginnings. Great Impact.",
+    "subtitle": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise – Hoa Lac Youth Empowerment Community): quy tụ thanh niên, sinh viên và học sinh tại Hòa Lạc cùng làm sạch môi trường sống (HolaGreen), tổ chức workshop chia sẻ nội dung cao đẹp (HolaHeart) và phụng sự xã hội bằng hành động thiết thực (HolaConnect).",
+    "foundedYear": 2025,
+    "location": "Tân Xã, Hòa Lạc, Hà Nội",
+    "siteUrl": "https://holarise.org",
+    "language": "vi",
+    "locale": "vi_VN",
+    "ogImage": "/assets/images/og-cover.jpg",
+    "logoLight": "/assets/images/logo-holarise.png",
+    "logoDark": "/assets/images/logo-holarise.png"
+  },
+  "contact": {
+    "email": "phungsu@holarise.org",
+    "phoneDisplay": "077.777.7777",
+    "address": "Tân Xã, Hòa Lạc, Hà Nội",
+    "meetingTime": "Sinh hoạt & hoạt động định kỳ vào sáng Thứ Bảy hoặc Chủ Nhật hàng tuần",
+    "facebook": "https://facebook.com",
+    "zalo": "https://zalo.me/0777777777",
+    "youtube": "https://youtube.com",
+    "instagram": "https://instagram.com",
+    "formEndpoint": ""
+  },
+  "hero": {
+    "badge": "HolaRise – Hoa Lac Youth Empowerment Community · Tân Xã, Hòa Lạc",
+    "headline": "Từ những khởi đầu nhỏ tại Hòa Lạc, cùng vươn lên và cùng phụng sự",
+    "description": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise) là nơi hội tụ của thanh niên, sinh viên và học sinh trên mảnh đất Hòa Lạc. Chúng tôi kiến tạo những thay đổi tích cực từ những hành động giản dị mà bền bỉ: chung tay làm sạch môi trường sống (HolaGreen), tổ chức các buổi workshop chia sẻ giá trị sống cao đẹp (HolaHeart) và lan tỏa tinh thần tương thân tương ái tới cộng đồng (HolaConnect).",
+    "primaryCta": {
+      "label": "Tham gia Cộng đồng HolaRise",
+      "href": "/tham-gia/"
+    },
+    "secondaryCta": {
+      "label": "Khám phá 3 chương trình",
+      "href": "#chuong-trinh-trong-tam"
+    },
+    "image": "/assets/images/hero-hoalac.jpg",
+    "imageAlt": "Thanh niên, sinh viên và học sinh Cộng đồng HolaRise cùng trồng cây và làm sạch cảnh quan tại Tân Xã, Hòa Lạc"
+  },
+  "projectBlueprint": [
+    {
+      "code": "01 · Small Beginnings. Great Impact.",
+      "title": "Khởi đầu từ những việc làm thiết thực cho môi trường Hòa Lạc",
+      "description": "Hòa Lạc là ngôi nhà chung của hàng chục nghìn thanh niên, sinh viên và học sinh. Mọi tác động lớn lao đều bắt đầu từ ý thức gìn giữ nơi mình sống: cùng nhau thu gom và phân loại rác thải ven hồ Tân Xã, trồng thêm cây xanh và xây dựng nếp sống văn minh, xanh sạch cho khu vực.",
+      "image": "/assets/images/activity-environment.jpg",
+      "imageAlt": "Các bạn trẻ Cộng đồng HolaRise phân loại chai nhựa và làm sạch cảnh quan tại Tân Xã, Hòa Lạc"
+    },
+    {
+      "code": "02 · Hoa Lac Youth Empowerment",
+      "title": "Bồi đắp giá trị sống cao đẹp để người trẻ cùng vươn lên",
+      "description": "Bên cạnh tri thức trên giảng đường, mỗi người trẻ đều cần một môi trường lành mạnh để nuôi dưỡng tâm hồn và nhân cách. Các buổi Workshop HolaHeart mang đến những chuyên đề sâu sắc về lòng biết ơn gia đình – thầy cô, văn hóa ứng xử tử tế và khát vọng vươn lên sống có ích.",
+      "image": "/assets/images/activity-workshop.jpg",
+      "imageAlt": "Không gian chia sẻ ấm áp và giàu cảm hứng của các bạn trẻ trong buổi Workshop HolaHeart tại Hòa Lạc"
+    },
+    {
+      "code": "03 · Together We Rise, Together We Serve.",
+      "title": "Gắn kết thế hệ trẻ qua những hoạt động phụng sự xã hội",
+      "description": "Khi học sinh, sinh viên và thanh niên tại Hòa Lạc cùng chung tay trong một chiến dịch làm sạch cảnh quan hay trao tặng tủ sách cho thiếu nhi địa phương, tình bạn chân thành và tinh thần trách nhiệm công dân được hun đúc tự nhiên, bền chặt.",
+      "image": "/assets/images/activity-community.jpg",
+      "imageAlt": "Thanh niên tình nguyện HolaRise đọc sách và giao lưu cùng trẻ em địa phương tại Hòa Lạc"
+    }
+  ],
+  "impactMetrics": [
+    {
+      "value": 18,
+      "suffix": "+",
+      "label": "Chiến dịch môi trường & xã hội",
+      "detail": "Triển khai đều đặn tại Tân Xã & toàn khu vực Hòa Lạc"
+    },
+    {
+      "value": 420,
+      "suffix": "+",
+      "label": "Lượt thanh niên, sinh viên, học sinh",
+      "detail": "Đồng hành tích cực trong các hoạt động cuối tuần"
+    },
+    {
+      "value": 14,
+      "suffix": "+",
+      "label": "Buổi Workshop giá trị cao đẹp",
+      "detail": "Chia sẻ nhân cách, lòng biết ơn & kỹ năng sống"
+    },
+    {
+      "value": 1250,
+      "suffix": " kg",
+      "label": "Rác thải được thu gom & phân loại",
+      "detail": "Góp phần giữ gìn cảnh quan xanh sạch cho Hòa Lạc"
+    }
+  ],
+  "philosophy": {
+    "quote": "Từ những khởi đầu nhỏ bé nhất trên mảnh đất Hòa Lạc — một bàn tay nhặt sạch rác ven hồ, một mầm cây mới trồng hay một buổi sẻ chia thấm đẫm lòng biết ơn — thế hệ trẻ đang cùng nhau vươn lên và kiến tạo một cộng đồng nhân ái, văn minh.",
+    "quoteAuthor": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise)",
+    "mission": "Kết nối và trao quyền cho thanh niên, sinh viên, học sinh tại Hòa Lạc thông qua các hành động bảo vệ môi trường thiết thực, các buổi workshop lan tỏa giá trị sống cao đẹp và những chương trình phụng sự xã hội giàu tính nhân văn (Together We Rise, Together We Serve).",
+    "vision": "Trở thành cộng đồng thanh niên kiểu mẫu, uy tín và giàu sức lan tỏa tại Hòa Lạc — nơi mỗi khởi đầu nhỏ bé (Small Beginnings) đều vun đắp nên tác động lớn lao, bền vững cho con người và xã hội (Great Impact).",
+    "motto": "Small Beginnings. Great Impact. · Together We Rise, Together We Serve.",
+    "coreValues": [
+      {
+        "title": "Tình Yêu Thương & Lòng Biết Ơn",
+        "description": "Đề cao sự hiếu thảo với gia đình, lòng tôn kính thầy cô và sự quan tâm chân thành tới những người xung quanh qua từng lời nói, việc làm hằng ngày."
+      },
+      {
+        "title": "Khởi Đầu Nhỏ · Tác Động Lớn",
+        "description": "Bắt đầu từ những hành động cụ thể, thiết thực ngay tại Hòa Lạc: một tuyến đường sạch đẹp hơn, một mầm cây xanh tốt hơn và một thói quen tốt được duy trì bền bỉ."
+      },
+      {
+        "title": "Cùng Vươn Lên · Cùng Phụng Sự",
+        "description": "Mở rộng vòng tay chào đón mọi thanh niên, sinh viên và học sinh; cùng khích lệ nhau hoàn thiện tri thức, đạo đức trong khi cống hiến sức trẻ cho cộng đồng."
+      },
+      {
+        "title": "Chuẩn Mực & Minh Bạch",
+        "description": "Tổ chức hoạt động bài bản, công khai đầy đủ lịch trình, kết quả và nhật ký hình ảnh trên website để cộng đồng, nhà trường và phụ huynh luôn tin tưởng."
+      }
+    ]
+  },
+  "sdgs": [
+    {
+      "code": "SDG 4",
+      "title": "Giáo dục chất lượng",
+      "color": "#C5192D",
+      "description": "Tổ chức workshop bồi đắp giá trị sống, kỹ năng cho học sinh – sinh viên và trao tặng tủ sách khuyến học tại Hòa Lạc."
+    },
+    {
+      "code": "SDG 11",
+      "title": "Đô thị & Cộng đồng bền vững",
+      "color": "#FD9D24",
+      "description": "Chung tay xây dựng cảnh quan xanh sạch và nếp sống văn minh, nhân ái tại Tân Xã và đô thị Hòa Lạc."
+    },
+    {
+      "code": "SDG 13",
+      "title": "Hành động vì khí hậu",
+      "color": "#3F7E44",
+      "description": "Thực hành giảm rác nhựa dùng một lần và phân loại rác tái chế từ trường học, khu dân cư đến đời sống hằng ngày."
+    },
+    {
+      "code": "SDG 15",
+      "title": "Hệ sinh thái trên cạn",
+      "color": "#56C02B",
+      "description": "Làm sạch bờ cỏ ven hồ Tân Xã, các tuyến đường xanh và trồng chăm sóc cây bản địa tại khu vực Hòa Lạc."
+    },
+    {
+      "code": "SDG 17",
+      "title": "Quan hệ đối tác vì mục tiêu",
+      "color": "#19486A",
+      "description": "Phối hợp chặt chẽ cùng các trường học, đoàn thể thanh niên – sinh viên và cư dân địa phương vì sự phát triển bền vững."
+    }
+  ],
+  "principles": [
+    {
+      "title": "100% Tự Nguyện & Phi Lợi Nhuận",
+      "description": "Mọi chiến dịch bảo vệ môi trường, chương trình thiện nguyện và các buổi workshop chia sẻ giá trị sống đều được tổ chức phi lợi nhuận, mở rộng miễn phí cho thanh niên, sinh viên và học sinh tại Hòa Lạc."
+    },
+    {
+      "title": "Giá Trị Nhân Văn & Nội Dung Cao Đẹp",
+      "description": "Tất cả chuyên đề sinh hoạt và workshop đều được biên soạn chỉn chu, hướng tới bồi đắp đạo đức, lòng biết ơn, tinh thần trách nhiệm với gia đình – xã hội và lối sống xanh tích cực."
+    },
+    {
+      "title": "Tổ Chức Bài Bản & An Toàn Chu Đáo",
+      "description": "Mỗi chương trình đều công bố rõ thời gian, điểm hẹn tại Tân Xã, Hòa Lạc, số điện thoại Ban Điều Phối (077.777.7777), đồng thời chuẩn bị đầy đủ găng tay, dụng cụ và nước uống cho thành viên tham gia."
+    },
+    {
+      "title": "Minh Bạch Kết Quả & Nhật Ký Công Khai",
+      "description": "Sau từng đợt hoạt động, số lượt thành viên tham gia, khối lượng rác thu gom – phân loại và danh mục sách, quà khuyến học trao tặng đều được tổng hợp công khai trên holarise.org."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Ai có thể tham gia Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise)?",
+      "answer": "Cộng đồng HolaRise chào đón tất cả thanh niên, sinh viên các trường đại học/học viện, học sinh trung học và những người trẻ đang học tập, làm việc, sinh sống tại Tân Xã và toàn khu vực Hòa Lạc yêu thích các hoạt động vì xã hội, môi trường và phát triển bản thân."
+    },
+    {
+      "question": "Tham gia các chiến dịch môi trường và Workshop của HolaRise có mất phí không?",
+      "answer": "Các chiến dịch làm sạch môi trường (HolaGreen), hoạt động thiện nguyện cộng đồng (HolaConnect) và các buổi workshop chia sẻ giá trị sống (HolaHeart) đều hoàn toàn miễn phí. Bạn có thể chủ động đăng ký tham gia theo lịch cuối tuần phù hợp với việc học tập và công việc."
+    },
+    {
+      "question": "Mình là học sinh / sinh viên mới đăng ký tham gia lần đầu thì sẽ được hướng dẫn thế nào?",
+      "answer": "Trước mỗi buổi hoạt động, Ban Điều Phối sẽ liên hệ xác nhận, gửi sơ đồ điểm hẹn tại Tân Xã, Hòa Lạc và đón tiếp bạn ngay khi tới nơi. Các thành viên mới luôn được sắp xếp vào từng nhóm nhỏ để cùng làm quen và phối hợp thuận lợi nhất."
+    },
+    {
+      "question": "Nhà trường, CLB hoặc đơn vị tại Hòa Lạc muốn phối hợp tổ chức hoạt động thì liên hệ qua đâu?",
+      "answer": "Cộng đồng HolaRise luôn trân trọng cơ hội đồng hành cùng các trường học, đoàn thể và tổ chức có chung tâm huyết vì thế hệ trẻ và môi trường Hòa Lạc. Quý đơn vị và các bạn có thể liên hệ trực tiếp qua hotline 077.777.7777 hoặc email phungsu@holarise.org."
+    }
+  ],
+  "seo": {
+    "defaultTitle": "HolaRise | Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên",
+    "defaultDescription": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise – Hoa Lac Youth Empowerment Community) tại Tân Xã, Hòa Lạc, Hà Nội: kết nối thanh niên, sinh viên, học sinh cùng làm sạch môi trường, tổ chức workshop chia sẻ nội dung cao đẹp và phụng sự xã hội. Small Beginnings. Great Impact.",
+    "keywords": "HolaRise, Cộng đồng HolaRise, Cộng đồng Thanh niên Hòa Lạc Cùng Vươn Lên, Hoa Lac Youth Empowerment Community, CLB thanh niên Hòa Lạc, tình nguyện môi trường Tân Xã Hòa Lạc, workshop thanh niên sinh viên Hòa Lạc, holarise.org"
+  }
+}
