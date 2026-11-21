@@ -1,0 +1,30 @@
+name: Build & Deploy HolaRise to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Build & Deploy
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build static site and verify SEO & internal links
+        run: python3 build.py --check
+
+      - name: Deploy to Cloudflare Pages (when CLOUDFLARE_API_TOKEN is configured)
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: "0b87fb3e05ac5239dbad3604a33179d1"
+          command: pages deploy dist --project-name=holarise --branch=main
