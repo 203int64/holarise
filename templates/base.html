@@ -2,17 +2,23 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>{{PAGE_TITLE}}</title>
   <meta name="description" content="{{PAGE_DESCRIPTION}}">
   <meta name="keywords" content="{{PAGE_KEYWORDS}}">
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content="{{ROBOTS_CONTENT}}">
   <meta name="theme-color" content="#FFFFFF">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HolaRise">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="canonical" href="{{CANONICAL_URL}}">
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/images/pwa/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" sizes="180x180">
   <link rel="manifest" href="/site.webmanifest">
 
-  <!-- Open Graph / Facebook / Zalo -->
+  <!-- Open Graph / Facebook / Zalo / Messenger -->
   <meta property="og:type" content="{{OG_TYPE}}">
   <meta property="og:locale" content="vi_VN">
   <meta property="og:site_name" content="{{BRAND_FULL_NAME}}">
@@ -20,6 +26,10 @@
   <meta property="og:description" content="{{PAGE_DESCRIPTION}}">
   <meta property="og:url" content="{{CANONICAL_URL}}">
   <meta property="og:image" content="{{OG_IMAGE_URL}}">
+  <meta property="og:image:secure_url" content="{{OG_IMAGE_URL}}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="{{PAGE_TITLE}}">
 
   <!-- Twitter Card -->
@@ -27,13 +37,14 @@
   <meta name="twitter:title" content="{{PAGE_TITLE}}">
   <meta name="twitter:description" content="{{PAGE_DESCRIPTION}}">
   <meta name="twitter:image" content="{{OG_IMAGE_URL}}">
+  <meta name="twitter:image:alt" content="{{PAGE_TITLE}}">
 
   <!-- Clean Vietnamese-native Inter (Light, Regular, Medium, SemiBold only) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/styles.css?v={{CACHE_BUST}}">
   {{JSON_LD_SCRIPTS}}
 </head>
 <body class="{{BODY_CLASS}}">
@@ -44,12 +55,18 @@
   </div>
   <a class="skip-link" href="#main-content">Chuyển tới nội dung chính</a>
 
-  <header class="site-header">
+  <header class="site-header" data-site-header>
     <div class="container header-inner">
-      <a class="brand-link" href="/" aria-label="{{BRAND_FULL_NAME}} – Trang chủ">
-        <img src="{{LOGO_DARK}}" alt="HolaRise – {{BRAND_FULL_NAME}}" width="142" height="32">
-        <span class="brand-divider" aria-hidden="true"></span>
-        <span class="brand-subtext">Cùng Vươn Lên</span>
+      <a class="brand-link" href="/" data-brand-morph aria-label="{{BRAND_FULL_NAME}} – Trang chủ">
+        <span class="brand-morph-stage" aria-hidden="true">
+          <span class="brand-morph-bg"></span>
+          <span class="brand-glyph-canvas">
+            <img class="brand-part brand-part--h" src="/assets/images/logo-part-h.png" alt="" width="95" height="117">
+            <img class="brand-part brand-part--ola" src="/assets/images/logo-part-ola.png" alt="" width="178" height="117">
+            <img class="brand-part brand-part--r" src="/assets/images/logo-part-r.png" alt="" width="122" height="117">
+            <img class="brand-part brand-part--ise" src="/assets/images/logo-part-ise.png" alt="" width="166" height="117">
+          </span>
+        </span>
       </a>
 
       <nav class="main-nav" data-main-nav aria-label="Điều hướng chính">
@@ -61,17 +78,42 @@
           <span class="live-status-dot" aria-hidden="true"></span>
           <span>Tân Xã, Hòa Lạc · <span data-live-clock>07:00:00</span></span>
         </div>
-        <a class="btn btn--primary btn--sm" href="/tham-gia/" data-magnetic>Tham gia</a>
-        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="Mở menu điều hướng">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-            <line x1="4" y1="7" x2="20" y2="7"></line>
-            <line x1="4" y1="12" x2="20" y2="12"></line>
-            <line x1="4" y1="17" x2="20" y2="17"></line>
-          </svg>
+        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Mở menu điều hướng">
+          <span class="nav-toggle-bars" aria-hidden="true">
+            <span></span>
+            <span></span>
+          </span>
         </button>
       </div>
     </div>
   </header>
+
+  <!-- Full-Screen Mobile Editorial Glass Menu -->
+  <div class="mobile-drawer" id="mobile-drawer" data-mobile-drawer aria-hidden="true">
+    <div class="mobile-drawer-inner">
+      <nav class="mobile-drawer-nav" aria-label="Menu di động">
+        {{MOBILE_NAV_LINKS}}
+      </nav>
+      <div class="mobile-drawer-footer">
+        <a class="btn btn--primary" href="/tham-gia/" style="width: 100%; justify-content: space-between; padding: 15px 22px;">
+          <span>Đăng ký tham gia hoạt động</span>
+          <span aria-hidden="true">→</span>
+        </a>
+        <button class="btn btn--outline pwa-install-drawer-btn" type="button" data-pwa-install hidden>
+          <span>Cài ứng dụng HolaRise về máy</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12"></path>
+            <path d="m7 10 5 5 5-5"></path>
+            <path d="M5 21h14"></path>
+          </svg>
+        </button>
+        <div class="mobile-drawer-meta">
+          <span>{{CONTACT_ADDRESS}}</span>
+          <span>{{CONTACT_PHONE}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <main id="main-content">
     {{MAIN_CONTENT}}
@@ -81,13 +123,12 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <a href="/" aria-label="{{BRAND_FULL_NAME}}">
-            <img src="{{LOGO_LIGHT}}" alt="HolaRise – {{BRAND_FULL_NAME}}" width="150" height="34" loading="lazy" style="height: 30px; width: auto;">
+          <a class="footer-logo-row" href="/" aria-label="{{BRAND_FULL_NAME}}">
+            <img src="{{LOGO_LIGHT}}" alt="HolaRise – {{BRAND_FULL_NAME}}" width="104" height="24" loading="lazy" style="height: 22px; width: auto;">
           </a>
-          <p style="margin: 12px 0 6px; font-size: 0.82rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;">{{BRAND_FULL_NAME}}</p>
-          <p style="margin: 0 0 12px; font-size: 0.78rem; color: var(--ink-muted);">HolaRise – Hoa Lac Youth Empowerment Community</p>
-          <p style="margin: 0 0 10px;">{{BRAND_SUBTITLE}}</p>
-          <p style="font-size: 0.82rem; color: var(--accent); font-weight: 500;">Small Beginnings. Great Impact. · {{BRAND_TAGLINE}}</p>
+          <p style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;">{{BRAND_FULL_NAME}}</p>
+          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);">{{BRAND_SUBTITLE}}</p>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Small Beginnings. Great Impact. · {{BRAND_TAGLINE}}</p>
         </div>
 
         <div>
@@ -96,36 +137,45 @@
             <li><a href="/">Trang chủ</a></li>
             <li><a href="/gioi-thieu/">Giới thiệu &amp; Sứ mệnh</a></li>
             <li><a href="/hoat-dong/">Hoạt động &amp; Chiến dịch</a></li>
-            <li><a href="/workshop/">Workshop giá trị sống</a></li>
-            <li><a href="/tin-tuc/">Tin tức &amp; Nhật ký</a></li>
+            <li><a href="/workshop/">Lịch Workshop</a></li>
+            <li><a href="/tin-tuc/">Nhật ký hoạt động</a></li>
+            <li>
+              <button class="pwa-install-footer-btn" type="button" data-pwa-install hidden>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 3v12"></path>
+                  <path d="m7 10 5 5 5-5"></path>
+                  <path d="M5 21h14"></path>
+                </svg>
+                <span>Cài ứng dụng về máy</span>
+              </button>
+            </li>
           </ul>
         </div>
 
         <div>
-          <h2 class="footer-heading">Lĩnh vực trọng tâm</h2>
+          <h2 class="footer-heading">3 Chương trình</h2>
           <ul class="footer-links">
-            <li><a href="/hoat-dong/#moi-truong">Làm sạch &amp; Xanh hóa Hòa Lạc</a></li>
-            <li><a href="/workshop/">Workshop giá trị cao đẹp</a></li>
-            <li><a href="/hoat-dong/#cong-dong">Phụng sự cộng đồng địa phương</a></li>
-            <li><a href="/gioi-thieu/#sdgs">Định hướng UN SDGs</a></li>
-            <li><a href="/tham-gia/">Đăng ký tình nguyện viên</a></li>
+            <li><a href="/hoat-dong/#moi-truong">HolaGreen · Môi trường</a></li>
+            <li><a href="/workshop/">HolaHeart · Giá trị sống</a></li>
+            <li><a href="/hoat-dong/#cong-dong">HolaConnect · Cộng đồng</a></li>
+            <li><a href="/tham-gia/">Đăng ký tham gia</a></li>
           </ul>
         </div>
 
         <div>
-          <h2 class="footer-heading">Kết nối tại Hòa Lạc</h2>
+          <h2 class="footer-heading">Liên hệ tại Hòa Lạc</h2>
           <ul class="footer-links">
             <li>{{CONTACT_ADDRESS}}</li>
+            <li><a href="tel:{{CONTACT_PHONE}}">{{CONTACT_PHONE}}</a></li>
             <li><a href="mailto:{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</a></li>
-            <li>{{CONTACT_PHONE}}</li>
             <li>{{CONTACT_MEETING}}</li>
           </ul>
         </div>
       </div>
 
       <div class="footer-bottom">
-        <span>© {{CURRENT_YEAR}} {{BRAND_FULL_NAME}} (HolaRise). Địa chỉ: {{CONTACT_ADDRESS}}.</span>
-        <span>Hotline: {{CONTACT_PHONE}} · {{CONTACT_EMAIL}} · holarise.org</span>
+        <span>© {{CURRENT_YEAR}} {{BRAND_FULL_NAME}} (HolaRise) · {{CONTACT_ADDRESS}}</span>
+        <span>Hotline/Zalo: {{CONTACT_PHONE}} · {{CONTACT_EMAIL}}</span>
       </div>
     </div>
   </footer>
@@ -134,29 +184,39 @@
   <dialog class="club-dialog" id="event-register-modal" closedby="any" aria-labelledby="modal-heading">
     <div class="dialog-inner">
       <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
-      <span class="kicker" style="margin-bottom: 10px;">Đăng ký tham dự</span>
-      <h2 id="modal-heading" style="margin: 0 0 6px; font-size: 1.4rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Đăng ký tham gia hoạt động</h2>
-      <p id="modal-event-title" style="margin: 0 0 22px; font-size: 0.92rem; color: var(--accent); font-weight: 500;"></p>
+      <span class="kicker" style="margin-bottom: 8px;">Đăng ký nhanh · Miễn phí</span>
+      <h2 id="modal-heading" style="margin: 0 0 6px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Giữ chỗ tham gia hoạt động</h2>
+      <p id="modal-event-title" style="margin: 0 0 18px; font-size: 0.9rem; color: var(--accent); font-weight: 500;"></p>
 
-      <form class="form-grid" data-club-form data-endpoint="{{FORM_ENDPOINT}}" novalidate>
+      <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" novalidate>
+        <input type="hidden" name="source" value="event_modal">
         <input type="hidden" name="activity" id="modal-event-input" value="">
+        <input type="hidden" name="eventId" id="modal-event-id" value="">
+        <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
+          <label for="modal-website">Website</label>
+          <input id="modal-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
         <div class="field">
-          <label for="modal-name">Họ và tên *</label>
-          <input id="modal-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Nguyễn Minh Anh" required>
+          <label for="modal-name">Họ và tên <span aria-hidden="true">*</span></label>
+          <input id="modal-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Nguyễn Minh Anh" required minlength="2" enterkeyhint="next">
         </div>
         <div class="form-row-2">
           <div class="field">
-            <label for="modal-contact">Số điện thoại / Zalo *</label>
-            <input id="modal-contact" name="contact" type="text" autocomplete="tel" placeholder="09xx xxx xxx" required>
+            <label for="modal-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
+            <input id="modal-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="next">
           </div>
           <div class="field">
-            <label for="modal-org">Bạn đang là (Học sinh / Sinh viên / Thanh niên)</label>
-            <input id="modal-org" name="organization" type="text" autocomplete="organization" placeholder="Ví dụ: Học sinh THPT, Sinh viên, Đi làm tại Hòa Lạc...">
+            <label for="modal-email">Email nhận xác nhận</label>
+            <input id="modal-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" enterkeyhint="next">
           </div>
         </div>
         <div class="field">
-          <label for="modal-note">Lời nhắn thêm (không bắt buộc)</label>
-          <textarea id="modal-note" name="note" rows="3" placeholder="Bạn đi cùng bạn bè hay lần đầu tham gia?"></textarea>
+          <label for="modal-org">Trường / Đơn vị tại Hòa Lạc</label>
+          <input id="modal-org" name="organization" type="text" autocomplete="organization" placeholder="Ví dụ: ĐH FPT, ĐHQGHN, THPT..." enterkeyhint="next">
+        </div>
+        <div class="field">
+          <label for="modal-note">Lời nhắn (không bắt buộc)</label>
+          <textarea id="modal-note" name="note" rows="2" placeholder="Bạn đi một mình hay đi cùng bạn bè?"></textarea>
         </div>
         <div class="form-status" role="status" aria-live="polite"></div>
         <button class="btn btn--primary" type="submit">Xác nhận đăng ký</button>
@@ -173,10 +233,85 @@
     </div>
   </dialog>
 
-  <script src="/assets/vendor/gsap.min.js" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js" defer></script>
-  <script src="/assets/vendor/lenis.min.js" defer></script>
-  <script src="/assets/js/motion.js" defer></script>
-  <script src="/assets/js/main.js" defer></script>
+  <!-- Native HTML5 <dialog> Hướng Dẫn Cài Ứng Dụng (iOS Safari & Zalo/FB WebView) -->
+  <dialog class="club-dialog pwa-dialog" id="pwa-install-dialog" closedby="any" aria-labelledby="pwa-dialog-title-ios">
+    <div class="dialog-inner">
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng hướng dẫn">×</button>
+
+      <div data-pwa-guide="ios">
+        <span class="kicker" style="margin-bottom: 8px;">Cài đặt trên iPhone / iPad</span>
+        <h2 id="pwa-dialog-title-ios" class="pwa-dialog-title">Thêm HolaRise vào Màn hình chính</h2>
+        <p class="pwa-dialog-lead">Mở nhanh như ứng dụng gốc, xem lịch Workshop mượt mà ngay cả khi sóng yếu tại Hòa Lạc.</p>
+        <ol class="pwa-steps">
+          <li class="pwa-step">
+            <span class="pwa-step-num" aria-hidden="true">1</span>
+            <span>
+              Chạm biểu tượng <strong>Chia sẻ</strong>
+              <span class="pwa-inline-icon" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 16V3"></path>
+                  <path d="m7 8 5-5 5 5"></path>
+                  <path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path>
+                </svg>
+              </span>
+              ở thanh dưới cùng trình duyệt Safari.
+            </span>
+          </li>
+          <li class="pwa-step">
+            <span class="pwa-step-num" aria-hidden="true">2</span>
+            <span>Cuộn xuống chọn <strong>Thêm vào MH chính (Add to Home Screen)</strong> rồi bấm <strong>Thêm</strong>.</span>
+          </li>
+        </ol>
+      </div>
+
+      <div data-pwa-guide="webview" hidden>
+        <span class="kicker" style="margin-bottom: 8px;">Trình duyệt trong ứng dụng</span>
+        <h2 id="pwa-dialog-title-webview" class="pwa-dialog-title">Mở bằng Safari hoặc Chrome để cài đặt</h2>
+        <p class="pwa-dialog-lead">Trình duyệt mở từ Zalo, Messenger hoặc Facebook hiện không cho phép cài đặt trực tiếp ứng dụng về màn hình chính.</p>
+        <ol class="pwa-steps">
+          <li class="pwa-step">
+            <span class="pwa-step-num" aria-hidden="true">1</span>
+            <span>Bấm biểu tượng menu <strong>⋯</strong> (hoặc biểu tượng trình duyệt) ở góc màn hình.</span>
+          </li>
+          <li class="pwa-step">
+            <span class="pwa-step-num" aria-hidden="true">2</span>
+            <span>Chọn <strong>Mở bằng Safari</strong> (iPhone) hoặc <strong>Mở bằng Chrome</strong> (Android), sau đó bấm <strong>Cài ứng dụng</strong>.</span>
+          </li>
+        </ol>
+        <div class="pwa-copy-row">
+          <button class="btn btn--primary btn--sm" type="button" data-pwa-copy-url>Sao chép đường dẫn</button>
+          <span class="pwa-copy-feedback" data-pwa-copy-feedback role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Standalone PWA Bottom Tab Bar (Mobile <= 820px in display-mode: standalone only) -->
+  <nav class="pwa-tabbar" aria-label="Điều hướng nhanh ứng dụng">
+    {{PWA_TABBAR_LINKS}}
+  </nav>
+
+  <!-- PWA Offline Status Indicator & Non-disruptive Update Toast -->
+  <div class="pwa-offline-bar" id="pwa-offline-bar" role="status" aria-live="polite" hidden>
+    <span class="pwa-offline-dot" aria-hidden="true"></span>
+    <span>Đang xem chế độ ngoại tuyến · Nội dung đã lưu vẫn sẵn sàng</span>
+  </div>
+
+  <div class="pwa-update-toast" id="pwa-update-toast" role="status" aria-live="polite" hidden>
+    <span>HolaRise vừa có nội dung mới</span>
+    <div class="pwa-update-actions">
+      <button class="pwa-update-btn" type="button" data-pwa-update-apply>Cập nhật</button>
+      <button class="pwa-update-close" type="button" data-pwa-update-dismiss aria-label="Đóng thông báo cập nhật">×</button>
+    </div>
+  </div>
+
+  <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
+
+  <script src="/assets/vendor/gsap.min.js?v={{CACHE_BUST}}" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v={{CACHE_BUST}}" defer></script>
+  <script src="/assets/vendor/lenis.min.js?v={{CACHE_BUST}}" defer></script>
+  <script src="/assets/js/motion.js?v={{CACHE_BUST}}" defer></script>
+  <script src="/assets/js/main.js?v={{CACHE_BUST}}" defer></script>
+  <script src="/assets/js/pwa.js?v={{CACHE_BUST}}" defer></script>
 </body>
 </html>

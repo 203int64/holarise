@@ -1,62 +1,65 @@
 {
   "intro": {
-    "title": "Lịch Workshop Giá Trị Cao Đẹp & Hoạt Động Môi Trường Tại Hòa Lạc",
-    "description": "Mọi chương trình của Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise) đều mở rộng chào đón thanh niên, sinh viên và học sinh, công khai rõ thời gian, địa điểm tại Tân Xã, Hòa Lạc và hoàn toàn miễn phí. Liên hệ hỗ trợ: 077.777.7777."
+    "title": "Lịch Workshop & Hoạt Động Cuối Tuần Tại Hòa Lạc",
+    "description": "Mọi buổi hoạt động đều miễn phí, công khai rõ thời gian và điểm hẹn tại Tân Xã, Hòa Lạc. Bạn có thể đi một mình hoặc rủ bạn bè cùng tham gia."
   },
   "upcoming": [
     {
       "id": "ws-long-biet-on-va-song-xanh",
-      "type": "HolaHeart · Workshop Giá trị cao đẹp",
+      "type": "HolaHeart · Biết ơn & Tử tế",
+      "filters": ["biet-on", "tu-te"],
       "date": "2026-11-29",
-      "dateDisplay": "Chủ Nhật, 29/11/2026",
+      "dateDisplay": "CN, 29/11/2026",
       "time": "08:30 – 11:00",
-      "location": "Không gian Sinh hoạt Cộng đồng, Tân Xã, Hòa Lạc, Hà Nội",
-      "fee": "Miễn phí tham dự",
+      "location": "Tân Xã, Hòa Lạc",
+      "fee": "Miễn phí",
       "seats": "Còn 18/40 chỗ",
-      "title": "Workshop: Lòng Biết Ơn & Nét Đẹp Của Sự Tử Tế Giữa Đời Thường",
-      "summary": "Buổi giao lưu ấm áp dành cho thanh niên, sinh viên và học sinh cùng suy ngẫm về công ơn cha mẹ, thầy cô, tự tay viết thiệp tri ân và thực hành tái chế lọ thủy tinh thành chậu cây xanh.",
+      "title": "Workshop: Lòng Biết Ơn & Sự Tử Tế Giữa Đời Thường",
+      "summary": "Cùng sẻ chia về lòng biết ơn cha mẹ – thầy cô, tự tay viết thiệp tri ân và tái chế lọ thủy tinh thành chậu cây xanh.",
       "highlights": [
-        "Giao lưu chuyên đề nhân văn về lòng biết ơn và văn hóa ứng xử đẹp",
-        "Thực hành thủ công xanh: tái chế lọ thủy tinh thành chậu cây & viết thiệp tri ân",
-        "Tiệc trà nhẹ và kết nối những người bạn mới cùng chí hướng tại Hòa Lạc"
+        "Sẻ chia lòng biết ơn",
+        "Tái chế chậu cây xanh",
+        "Viết thiệp tri ân"
       ],
       "image": "/assets/images/activity-workshop.jpg",
       "imageAlt": "Các bạn trẻ tham gia buổi Workshop chia sẻ giá trị sống cao đẹp tại Tân Xã, Hòa Lạc"
     },
     {
       "id": "cleanup-ho-tan-xa-thang-12",
-      "type": "HolaGreen · Làm sạch môi trường",
+      "type": "HolaGreen · Sạch",
+      "filters": ["sach"],
       "date": "2026-12-06",
-      "dateDisplay": "Chủ Nhật, 06/12/2026",
+      "dateDisplay": "CN, 06/12/2026",
       "time": "06:45 – 09:15",
-      "location": "Điểm tập trung: Khu vực ven Hồ Tân Xã, Hòa Lạc, Hà Nội",
-      "fee": "Miễn phí (Đã chuẩn bị găng tay & dụng cụ)",
-      "seats": "Mở đăng ký tự do",
-      "title": "Cuối Tuần Xanh #19: Làm Sạch Cảnh Quan & Phân Loại Rác Ven Hồ Tân Xã",
-      "summary": "Chiến dịch thu gom, phân loại rác thải nhựa và làm đẹp cảnh quan ven hồ Tân Xã sáng Chủ Nhật. Các thành viên mới được phân nhóm chu đáo để cùng phối hợp hiệu quả và gắn kết.",
+      "location": "Ven Hồ Tân Xã, Hòa Lạc",
+      "fee": "Miễn phí (Có sẵn dụng cụ)",
+      "seats": "Mở đăng ký",
+      "title": "Cuối Tuần Xanh #19: Làm Sạch & Phân Loại Rác Hồ Tân Xã",
+      "summary": "Dọn sạch bờ cỏ ven hồ Tân Xã sáng Chủ Nhật, phân loại chai nhựa tái chế và kết nối những người bạn mới tích cực.",
       "highlights": [
-        "Trang bị đầy đủ găng tay vải, kẹp gắp rác và bao phân loại tại điểm hẹn Tân Xã",
-        "Tổng kết khối lượng rác tái chế và cập nhật nhật ký công khai cuối buổi",
-        "Cấp giấy xác nhận tham gia hoạt động xã hội cho học sinh, sinh viên"
+        "Có sẵn găng tay & kẹp rác",
+        "Ghép nhóm cho người mới",
+        "Chứng nhận tình nguyện"
       ],
       "image": "/assets/images/activity-environment.jpg",
       "imageAlt": "Thanh niên và sinh viên đeo găng tay vải phân loại chai nhựa tại ven hồ Tân Xã, Hòa Lạc"
     },
     {
       "id": "ws-truyen-cam-hung-va-ket-noi",
-      "type": "HolaConnect · Cùng Vươn Lên",
+      "type": "HolaConnect · Tử tế & Sẻ chia",
+      "filters": ["tu-te", "se-chia"],
       "date": "2026-12-13",
-      "dateDisplay": "Chủ Nhật, 13/12/2026",
+      "dateDisplay": "CN, 13/12/2026",
       "time": "14:30 – 17:00",
-      "location": "Tân Xã, Hòa Lạc, Hà Nội",
-      "fee": "Miễn phí tham dự",
+      "location": "Tân Xã, Hòa Lạc",
+      "fee": "Miễn phí",
       "seats": "Còn 25/35 chỗ",
-      "title": "Workshop: Nghệ Thuật Lắng Nghe & Khơi Dậy Khát Vọng Cống Hiến Của Tuổi Trẻ",
-      "summary": "Buổi tọa đàm và hoạt động nhóm dành cho học sinh, sinh viên và thanh niên tại Hòa Lạc — cùng rèn luyện kỹ năng giao tiếp chân thành, xây dựng tình bạn lành mạnh và định hướng mục tiêu sống có ích.",
+      "title": "Workshop: Nghệ Thuật Lắng Nghe & Khát Vọng Tuổi Trẻ",
+      "summary": "Thực hành giao tiếp chân thành, kết nối bạn đồng hành lành mạnh tại Hòa Lạc và định hướng mục tiêu sống có ích.",
       "highlights": [
-        "Chuyên đề kỹ năng lắng nghe tích cực và tôn trọng sự khác biệt",
-        "Giao lưu truyền cảm hứng học tập, rèn luyện bản thân và phụng sự xã hội",
-        "Tặng sổ tay \"30 Ngày Hành Động Tử Tế\" cho người tham dự"
+        "Kỹ năng lắng nghe",
+        "Kết nối bạn mới",
+        "Tặng sổ tay Tử Tế"
       ],
       "image": "/assets/images/activity-community.jpg",
       "imageAlt": "Các bạn trẻ giao lưu, chia sẻ kỹ năng sống tích cực tại Tân Xã, Hòa Lạc"
@@ -64,18 +67,18 @@
   ],
   "pastTopics": [
     {
-      "date": "Tháng 10/2026",
-      "title": "Workshop HolaHeart #14 tại Tân Xã, Hòa Lạc: Từ bàn tay nhỏ đến Trái Đất xanh – Thực hành sống giảm nhựa",
-      "participants": "38 thanh niên, sinh viên & học sinh"
+      "date": "10/2026",
+      "title": "Workshop HolaHeart #14: Từ bàn tay nhỏ đến Trái Đất xanh – Thực hành sống giảm nhựa",
+      "participants": "38 thành viên"
     },
     {
-      "date": "Tháng 09/2026",
+      "date": "09/2026",
       "title": "Tọa đàm Cùng Vươn Lên: Tinh thần trách nhiệm và vẻ đẹp của sự phụng sự trong giới trẻ",
-      "participants": "52 thành viên tham dự"
+      "participants": "52 thành viên"
     },
     {
-      "date": "Tháng 08/2026",
-      "title": "Chương trình HolaConnect: Làm thiệp tri ân và trao tặng 152 cuốn sách tới tủ sách thiếu nhi Hòa Lạc",
+      "date": "08/2026",
+      "title": "HolaConnect: Làm thiệp tri ân và trao tặng 152 cuốn sách tới tủ sách thiếu nhi Hòa Lạc",
       "participants": "34 thành viên"
     }
   ]

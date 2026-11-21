@@ -14,36 +14,47 @@
   <div class="container join-grid">
     <div class="form-card">
       <div class="kicker">Cổng đăng ký trực tuyến</div>
-      <h2 style="margin: 0 0 10px; font-size: 1.6rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Đăng ký tham gia / Kết nối</h2>
+      <h2 id="join-form-heading" style="margin: 0 0 10px; font-size: 1.6rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Đăng ký tham gia / Kết nối</h2>
       <p style="margin: 0 0 28px; font-size: 0.94rem; color: var(--ink-secondary);">Điền thông tin ngắn gọn bên dưới, Ban Điều Phối sẽ liên hệ hướng dẫn chi tiết qua Zalo hoặc Email trong vòng 24 giờ.</p>
 
-      <form class="form-grid" data-club-form data-endpoint="{{FORM_ENDPOINT}}" novalidate>
+      <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="join-form-heading" data-club-form data-draft-key="join-page" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" novalidate>
+        <input type="hidden" name="source" value="join_page">
+        <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
+          <label for="join-website">Website</label>
+          <input id="join-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
         <div class="form-row-2">
           <div class="field">
-            <label for="join-name">Họ và tên *</label>
-            <input id="join-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Trần Quốc Bảo" required>
+            <label for="join-name">Họ và tên <span aria-hidden="true">*</span></label>
+            <input id="join-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Trần Quốc Bảo" required minlength="2" enterkeyhint="next">
           </div>
           <div class="field">
-            <label for="join-contact">Số điện thoại (Zalo) hoặc Email *</label>
-            <input id="join-contact" name="contact" type="text" autocomplete="tel" placeholder="09xx xxx xxx hoặc email" required>
+            <label for="join-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
+            <input id="join-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="next">
           </div>
         </div>
 
         <div class="form-row-2">
           <div class="field">
-            <label for="join-role">Hình thức bạn muốn tham gia *</label>
-            <select id="join-role" name="role">
-              <option value="Tình nguyện viên chiến dịch môi trường">Tình nguyện viên chiến dịch môi trường</option>
-              <option value="Tham dự Workshop giá trị sống">Tham dự Workshop chia sẻ giá trị sống</option>
-              <option value="Thành viên sinh hoạt định kỳ">Thành viên sinh hoạt định kỳ cùng CLB</option>
-              <option value="Hỗ trợ truyền thông / tổ chức">Đóng góp kỹ năng (ảnh, thiết kế, điều phối)</option>
-              <option value="Đề xuất hợp tác / tài trợ minh bạch">Đề xuất hợp tác (Nhà trường / CLB / Doanh nghiệp)</option>
-            </select>
+            <label for="join-email">Email (để nhận thư xác nhận tự động)</label>
+            <input id="join-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" enterkeyhint="next">
           </div>
           <div class="field">
-            <label for="join-org">Bạn đang là (Học sinh / Sinh viên / Thanh niên tại Hòa Lạc)</label>
-            <input id="join-org" name="organization" type="text" autocomplete="organization" placeholder="Ví dụ: Học sinh THPT, Sinh viên Đại học, Đi làm tại Hòa Lạc...">
+            <label for="join-org">Bạn đang là (Học sinh / Sinh viên / Đi làm)</label>
+            <input id="join-org" name="organization" type="text" autocomplete="organization" placeholder="Ví dụ: ĐH FPT, ĐHQGHN, THPT Hòa Lạc..." enterkeyhint="next">
           </div>
+        </div>
+
+        <div class="field">
+          <label for="join-role">Hình thức bạn muốn tham gia <span aria-hidden="true">*</span></label>
+          <select id="join-role" name="role">
+            <option value="Tình nguyện viên chiến dịch môi trường">Tình nguyện viên chiến dịch môi trường</option>
+            <option value="Tham dự Workshop giá trị sống">Tham dự Workshop chia sẻ giá trị sống</option>
+            <option value="Thành viên sinh hoạt định kỳ">Thành viên sinh hoạt định kỳ cùng CLB</option>
+            <option value="Hỗ trợ truyền thông / tổ chức">Đóng góp kỹ năng (ảnh, thiết kế, điều phối)</option>
+            <option value="Đề xuất hợp tác / tài trợ minh bạch">Đề xuất hợp tác (Nhà trường / CLB / Doanh nghiệp)</option>
+          </select>
         </div>
 
         <div class="field">

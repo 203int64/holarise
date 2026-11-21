@@ -1,0 +1,13 @@
+name = "holarise"
+compatibility_date = "2026-11-21"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "holarise-db"
+database_id = "ede5479a-2304-4bd1-97ac-4f65f7be03df"
+migrations_dir = "migrations"
+
+[[kv_namespaces]]
+binding = "MEDIA_KV"
+id = "84511492700740039e98811e621a40bd"

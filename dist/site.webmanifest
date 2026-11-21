@@ -1,16 +1,107 @@
 {
+  "id": "/",
   "name": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên",
-  "short_name": "Cộng đồng HolaRise",
-  "description": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise – Hoa Lac Youth Empowerment Community): quy tụ thanh niên, sinh viên và học sinh tại Hòa Lạc cùng làm sạch môi trường sống (HolaGreen), tổ chức workshop chia sẻ nội dung cao đẹp (HolaHeart) và phụng sự xã hội bằng hành động thiết thực (HolaConnect).",
-  "start_url": "/",
+  "short_name": "HolaRise",
+  "description": "Kết nối thanh niên, sinh viên và học sinh tại Hòa Lạc cùng làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng (HolaConnect).",
+  "lang": "vi-VN",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#0B6E4F",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait-primary",
+  "background_color": "#FEF7EF",
+  "theme_color": "#FFFFFF",
+  "categories": [
+    "social",
+    "education",
+    "lifestyle"
+  ],
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/assets/images/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/assets/images/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/pwa/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/images/pwa/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Lịch Workshop sắp tới",
+      "short_name": "Workshop",
+      "description": "Xem lịch Workshop giá trị sống và giữ chỗ miễn phí",
+      "url": "/workshop/?source=pwa-shortcut",
+      "icons": [
+        {
+          "src": "/assets/images/pwa/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Hoạt động & Chiến dịch",
+      "short_name": "Hoạt động",
+      "description": "3 chương trình HolaGreen, HolaHeart, HolaConnect",
+      "url": "/hoat-dong/?source=pwa-shortcut",
+      "icons": [
+        {
+          "src": "/assets/images/pwa/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Đăng ký tham gia",
+      "short_name": "Tham gia",
+      "description": "Đăng ký tình nguyện viên và kết nối cùng HolaRise",
+      "url": "/tham-gia/?source=pwa-shortcut",
+      "icons": [
+        {
+          "src": "/assets/images/pwa/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/images/pwa/screenshot-mobile.jpg",
+      "sizes": "540x960",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Trang chủ HolaRise trên điện thoại"
+    },
+    {
+      "src": "/assets/images/pwa/screenshot-desktop.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Giao diện HolaRise trên máy tính"
     }
   ]
 }

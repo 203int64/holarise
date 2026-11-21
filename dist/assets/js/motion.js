@@ -1,15 +1,14 @@
 /**
- * HolaRise – Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên | v5+ 2026 Awwwards Motion Engine
- * 100% GPU-composited (transform / opacity / clip-path) — 60fps silky physics:
- * - Lenis Inertial Smooth Scroll synced 1:1 with GSAP 3 + ScrollTrigger
+ * HolaRise – Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên | v6 Native-Scroll Motion Engine
+ * ZERO scroll-hijacking (No Lenis wheel block, No ScrollTrigger pin:true traps!):
+ * - 100% Native 120Hz OS Trackpad Scrolling (impossible to ever get stuck in a section)
+ * - Native CSS position:sticky Split-Scroll for 03 Core Programs + Mechanical Odometer (01 -> 03)
  * - Pure White Hero Split-Line Reveal + Apple Scale-to-Fullbleed Cinema Frame
  * - Kinetic Text Decode / Scramble on Kicker Badges
- * - Scroll-Velocity Reactive Display Typography Skew
  * - Floating Spring Documentary Photo Preview on Blueprint Rows (velocity tilt!)
  * - Opposing Kinetic Scroll-Driven Watermark Band
- * - Mechanical Luxury Odometer (01 -> 02 -> 03) + Live Tab Scrub Progress Fill
+ * - Obsidian Manifesto Word-by-Word Lift & Illumination
  * - Optical Specular Glass Glare + 3D Perspective Plate Tilt on Documentary Photos
- * - Velocity Squash-and-Stretch Circular Cursor Tag
  * - Live Tân Xã, Hòa Lạc GMT+7 Clock
  */
 (function () {
@@ -17,7 +16,6 @@
 
   var prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var hasGsap = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
-  var hasLenis = typeof window.Lenis !== "undefined";
   var isFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
   /* 0. Live Tân Xã, Hòa Lạc GMT+7 Clock (tabular-nums) */
@@ -54,14 +52,15 @@
     updateProgress();
   }
 
-  /* 2. Story Stage + Mechanical Odometer + Live Tab Progress Controls */
+  /* 2. Story Stage + Glider Pill Tabs + Touch/Trackpad Horizontal Swipe (Zero Scroll Traps!) */
   var storyStage = document.querySelector("[data-story-stage]");
+  var storyTablist = storyStage ? storyStage.querySelector("[data-story-tablist]") : null;
+  var storyGlider = storyStage ? storyStage.querySelector("[data-story-glider]") : null;
   var storyTabs = storyStage ? Array.prototype.slice.call(storyStage.querySelectorAll("[data-story-tab]")) : [];
   var storyPanels = storyStage ? Array.prototype.slice.call(storyStage.querySelectorAll("[data-story-panel]")) : [];
   var storySlides = storyStage ? Array.prototype.slice.call(storyStage.querySelectorAll("[data-story-slide]")) : [];
   var odometerDrum = storyStage ? storyStage.querySelector("[data-odometer-drum]") : null;
   var activeStoryIndex = 0;
-  var storyTrigger = null;
 
   function setTabProgress(activeIndex, localProgress) {
     storyTabs.forEach(function (tab, i) {
@@ -73,10 +72,21 @@
   function setStoryStep(index, localProgress) {
     if (!storyPanels.length) return;
     var clamped = Math.max(0, Math.min(index, storyPanels.length - 1));
-    var pct = typeof localProgress === "number" ? Math.max(0.15, Math.min(1, localProgress)) : 1;
+    var pct = typeof localProgress === "number" ? Math.max(0.2, Math.min(1, localProgress)) : 1;
     setTabProgress(clamped, pct);
 
-    if (clamped === activeStoryIndex && storyPanels[clamped].classList.contains("is-active")) return;
+    if (storyTablist) {
+      storyTablist.style.setProperty("--active-idx", String(clamped));
+    }
+    if (storyGlider) {
+      storyGlider.style.setProperty("--active-idx", String(clamped));
+    }
+
+    if (odometerDrum) {
+      var stepPct = (clamped * 100) / storyPanels.length;
+      odometerDrum.style.transform = "translateY(-" + stepPct.toFixed(4) + "%)";
+    }
+
     activeStoryIndex = clamped;
 
     storyTabs.forEach(function (tab, i) {
@@ -87,32 +97,90 @@
     storyPanels.forEach(function (panel, i) {
       panel.classList.toggle("is-active", i === clamped);
     });
-    storySlides.forEach(function (slide, i) {
-      slide.classList.toggle("is-active", i === clamped);
+    storySlides.forEach(function (slide) {
+      var slideIdx = parseInt(slide.getAttribute("data-story-slide"), 10);
+      slide.classList.toggle("is-active", slideIdx === clamped);
     });
-    if (odometerDrum) {
-      odometerDrum.style.transform = "translateY(" + -clamped * 100 + "%)";
-    }
   }
 
   if (storyStage && storyPanels.length) {
     storyStage.classList.add("is-enhanced");
     setStoryStep(0, 1);
+
     storyTabs.forEach(function (tab, idx) {
       tab.addEventListener("click", function () {
         setStoryStep(idx, 1);
-        if (storyTrigger) {
-          var targetScroll =
-            storyTrigger.start +
-            ((idx + 0.35) / storyPanels.length) * (storyTrigger.end - storyTrigger.start);
-          if (window.__lacXanhLenis) {
-            window.__lacXanhLenis.scrollTo(targetScroll, { duration: 0.72 });
-          } else {
-            window.scrollTo({ top: targetScroll, behavior: "smooth" });
-          }
-        }
       });
     });
+
+    /* Touch swipe left/right on storyStage (never blocks vertical page scroll) */
+    var touchStartX = 0;
+    var touchStartY = 0;
+    storyStage.addEventListener(
+      "touchstart",
+      function (e) {
+        if (!e.touches || !e.touches.length) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      },
+      { passive: true }
+    );
+    storyStage.addEventListener(
+      "touchend",
+      function (e) {
+        if (!e.changedTouches || !e.changedTouches.length) return;
+        var dx = e.changedTouches[0].clientX - touchStartX;
+        var dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+          if (dx < 0 && activeStoryIndex < storyPanels.length - 1) {
+            setStoryStep(activeStoryIndex + 1, 1);
+          } else if (dx > 0 && activeStoryIndex > 0) {
+            setStoryStep(activeStoryIndex - 1, 1);
+          }
+        }
+      },
+      { passive: true }
+    );
+
+    /* Horizontal two-finger trackpad swipe support (vertical scroll passes straight through) */
+    var lastWheelSwitch = 0;
+    storyStage.addEventListener(
+      "wheel",
+      function (e) {
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY) * 1.4 && Math.abs(e.deltaX) > 22) {
+          var now = Date.now();
+          if (now - lastWheelSwitch < 480) return;
+          if (e.deltaX > 0 && activeStoryIndex < storyPanels.length - 1) {
+            lastWheelSwitch = now;
+            setStoryStep(activeStoryIndex + 1, 1);
+          } else if (e.deltaX < 0 && activeStoryIndex > 0) {
+            lastWheelSwitch = now;
+            setStoryStep(activeStoryIndex - 1, 1);
+          }
+        }
+      },
+      { passive: true }
+    );
+  }
+
+  /* 2B. Mobile Horizontal Photo Exhibition Progress Sync */
+  var hWrap = document.querySelector(".horizontal-track-wrap");
+  var hFillMobile = document.querySelector("[data-exhibition-fill]");
+  var hCountMobile = document.querySelector("[data-exhibition-count]");
+  if (hWrap && hFillMobile && window.innerWidth < 1024) {
+    var totalMobileCards = hWrap.querySelectorAll(".horizontal-card").length || 1;
+    var updateMobileGalleryProgress = function () {
+      var maxScroll = Math.max(1, hWrap.scrollWidth - hWrap.clientWidth);
+      var prog = Math.min(1, Math.max(0, hWrap.scrollLeft / maxScroll));
+      var pct = Math.max(1 / totalMobileCards, prog);
+      hFillMobile.style.transform = "scaleX(" + pct.toFixed(4) + ")";
+      if (hCountMobile) {
+        var cur = Math.min(totalMobileCards, Math.max(1, Math.round(prog * (totalMobileCards - 1)) + 1));
+        hCountMobile.textContent = "0" + cur + " / 0" + totalMobileCards;
+      }
+    };
+    hWrap.addEventListener("scroll", updateMobileGalleryProgress, { passive: true });
+    updateMobileGalleryProgress();
   }
 
   if (prefersReduced || !hasGsap) {
@@ -124,166 +192,115 @@
   var ScrollTrigger = window.ScrollTrigger;
   gsap.registerPlugin(ScrollTrigger);
 
-  /* 3. Lenis Inertial Smooth Scroll synced 1:1 with GSAP ScrollTrigger */
-  var isDesktopPointer = window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches;
-  if (hasLenis && isDesktopPointer) {
-    var lenis = new window.Lenis({
-      duration: 1.05,
-      easing: function (t) {
-        return Math.min(1, 1.001 - Math.pow(2, -10 * t));
-      },
-      smoothWheel: true,
-      wheelMultiplier: 0.98
-    });
-
-    lenis.on("scroll", ScrollTrigger.update);
-    gsap.ticker.add(function (time) {
-      lenis.raf(time * 1000);
-    });
-    gsap.ticker.lagSmoothing(0);
-    window.__lacXanhLenis = lenis;
-  }
-
-  /* 4. Kinetic Text Decode / Scramble on Kicker Badges */
-  var glyphs = "0123456789·/HOLARISECOMMUNITY";
-  function scrambleText(el) {
-    if (el.dataset.scrambled === "1") return;
-    el.dataset.scrambled = "1";
-    var original = el.textContent;
-    var len = original.length;
-    var start = performance.now();
-    var duration = 460;
-
-    function tick(now) {
-      var p = Math.min(1, (now - start) / duration);
-      var revealCount = Math.floor(p * len);
-      var out = "";
-      for (var i = 0; i < len; i++) {
-        var ch = original[i];
-        if (i < revealCount || ch === " " || ch === "·" || ch === "•") {
-          out += ch;
-        } else {
-          out += glyphs[(i + Math.floor(now / 35)) % glyphs.length];
-        }
-      }
-      el.textContent = out;
-      if (p < 1) {
-        requestAnimationFrame(tick);
-      } else {
-        el.textContent = original;
-      }
-    }
-    requestAnimationFrame(tick);
-  }
-
+  /* 3. Clean Fade-Up Kicker Badges (No garbled Vietnamese scramble letters) */
   document.querySelectorAll(".kicker").forEach(function (kicker) {
-    ScrollTrigger.create({
-      trigger: kicker,
-      start: "top 90%",
-      once: true,
-      onEnter: function () {
-        scrambleText(kicker);
+    gsap.from(kicker, {
+      y: 12,
+      opacity: 0,
+      duration: 0.65,
+      ease: "power3.out",
+      clearProps: "transform",
+      scrollTrigger: {
+        trigger: kicker,
+        start: "top 92%",
+        once: true
       }
     });
   });
 
-  /* 5. Chapter 1: Hero Buoyant Split-Line Reveal + Apple Scale-to-Fullbleed Cinema Frame */
-  var heroSection = document.querySelector(".hero-editorial");
-  if (heroSection) {
-    var heroLines = heroSection.querySelectorAll(".split-line-inner");
-    var heroFadeEls = heroSection.querySelectorAll("[data-hero-stagger]");
-    var cinemaFrame = heroSection.querySelector("[data-cinema-frame]");
-    var cinemaImg = heroSection.querySelector("[data-cinema-img]");
+  /* 4. Chapter 1: Immersive Hero Card Entrance + Live Scroll Parallax (Mobile & Desktop) */
+  var heroCard = document.querySelector("[data-hero-card]");
+  if (heroCard) {
+    var heroLines = heroCard.querySelectorAll(".split-line-inner");
+    var heroFadeEls = heroCard.querySelectorAll("[data-hero-stagger]");
+    var cinemaImg = heroCard.querySelector("[data-cinema-img]");
 
     var heroTl = gsap.timeline({ defaults: { ease: "power4.out" } });
+    heroTl.from(heroCard, { scale: 0.96, opacity: 0, duration: 0.85 }, 0);
+    if (cinemaImg) {
+      heroTl.fromTo(cinemaImg, { scale: 1.15 }, { scale: 1.06, duration: 1.25 }, 0);
+    }
     if (heroLines.length) {
-      heroTl.from(heroLines, { yPercent: 112, duration: 0.92, stagger: 0.085 }, 0.04);
+      heroTl.from(heroLines, { yPercent: 112, duration: 0.9, stagger: 0.09 }, 0.14);
     }
     if (heroFadeEls.length) {
-      heroTl.from(heroFadeEls, { y: 18, opacity: 0, duration: 0.78, stagger: 0.065 }, 0.14);
-    }
-    if (cinemaFrame) {
-      heroTl.from(
-        cinemaFrame,
-        { clipPath: "inset(8% 4% 0% 4% round 24px)", y: 26, opacity: 0, duration: 1.05 },
-        0.2
-      );
-    }
-
-    if (cinemaFrame && window.innerWidth >= 900) {
-      gsap.to(cinemaFrame, {
-        width: "100%",
-        borderRadius: "0px",
-        ease: "none",
-        scrollTrigger: {
-          trigger: cinemaFrame,
-          start: "top 82%",
-          end: "top 14%",
-          scrub: 0.55,
-          invalidateOnRefresh: true
-        }
-      });
+      heroTl.from(heroFadeEls, { y: 18, opacity: 0, duration: 0.72, stagger: 0.08 }, 0.24);
     }
 
     if (cinemaImg) {
       gsap.fromTo(
         cinemaImg,
-        { yPercent: -7, scale: 1.1 },
+        { yPercent: -5 },
         {
-          yPercent: 7,
-          scale: 1.0,
+          yPercent: 9,
           ease: "none",
           scrollTrigger: {
-            trigger: cinemaFrame || heroSection,
-            start: "top bottom",
+            trigger: heroCard,
+            start: "top top",
             end: "bottom top",
-            scrub: true,
+            scrub: 0.35,
             invalidateOnRefresh: true
           }
         }
       );
     }
+
+    gsap.to(heroCard, {
+      scale: 0.965,
+      ease: "none",
+      scrollTrigger: {
+        trigger: heroCard,
+        start: "top 15%",
+        end: "bottom top",
+        scrub: 0.4
+      }
+    });
   }
 
-  /* 6. Opposing Kinetic Scroll-Driven Watermark Band + Velocity Skew */
+  /* 4B. Smooth Scroll Reveal for Section Headers & Editorial Blocks (Mobile & Desktop) */
+  document.querySelectorAll("[data-reveal]").forEach(function (el) {
+    gsap.from(el, {
+      y: 28,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.out",
+      clearProps: "transform",
+      scrollTrigger: {
+        trigger: el,
+        start: "top 90%",
+        once: true
+      }
+    });
+  });
+
+  /* 5. Opposing Kinetic Scroll-Driven Watermark Band */
   var kineticLines = document.querySelectorAll("[data-kinetic-dir]");
   kineticLines.forEach(function (line) {
     var dir = parseFloat(line.getAttribute("data-kinetic-dir")) || 1;
     gsap.fromTo(
       line,
-      { xPercent: dir > 0 ? -12 : 4 },
+      { xPercent: dir > 0 ? -10 : 3 },
       {
-        xPercent: dir > 0 ? 4 : -14,
+        xPercent: dir > 0 ? 3 : -12,
         ease: "none",
         scrollTrigger: {
           trigger: line.closest(".kinetic-band") || line,
           start: "top bottom",
           end: "bottom top",
-          scrub: 0.65
+          scrub: 0.45
         }
       }
     );
   });
 
-  if (kineticLines.length) {
-    var skewKinetic = gsap.quickTo(kineticLines, "skewX", { duration: 0.35, ease: "power3.out" });
-    ScrollTrigger.create({
-      onUpdate: function (self) {
-        var v = self.getVelocity();
-        var s = Math.max(-6, Math.min(6, v / 360));
-        skewKinetic(s);
-      }
-    });
-  }
-
-  /* 7. Architectural 1px Hairline Draw */
+  /* 6. Architectural 1px Hairline Draw */
   document.querySelectorAll("[data-hairline]").forEach(function (line) {
     gsap.fromTo(
       line,
       { scaleX: 0 },
       {
         scaleX: 1,
-        duration: 0.95,
+        duration: 0.9,
         ease: "power3.out",
         scrollTrigger: {
           trigger: line,
@@ -294,7 +311,7 @@
     );
   });
 
-  /* 8. Tabular Metric Counters */
+  /* 7. Tabular Metric Counters */
   document.querySelectorAll("[data-counter]").forEach(function (el) {
     var target = parseInt(el.getAttribute("data-counter"), 10) || 0;
     if (!target) return;
@@ -306,7 +323,7 @@
       onEnter: function () {
         gsap.to(obj, {
           val: target,
-          duration: 1.25,
+          duration: 1.2,
           ease: "power3.out",
           onUpdate: function () {
             el.textContent = Math.round(obj.val).toLocaleString("vi-VN");
@@ -316,7 +333,7 @@
     });
   });
 
-  /* 9. Obsidian Manifesto Word-by-Word Kinetic Lift & Illumination */
+  /* 8. Obsidian Manifesto Word-by-Word Kinetic Lift & Illumination */
   var manifestoEl = document.querySelector("[data-scrub-words]");
   if (manifestoEl) {
     var rawText = manifestoEl.textContent.trim();
@@ -331,30 +348,30 @@
     gsap.to(wordSpans, {
       opacity: 1,
       y: 0,
-      stagger: 0.055,
+      stagger: 0.05,
       ease: "none",
       scrollTrigger: {
         trigger: manifestoEl,
-        start: "top 80%",
-        end: "bottom 42%",
-        scrub: 0.55
+        start: "top 82%",
+        end: "bottom 45%",
+        scrub: 0.4
       }
     });
   }
 
-  /* 10. Frameless Image Plate Clip-Path Wipes */
+  /* 9. Frameless Image Plate Clip-Path Wipes */
   document.querySelectorAll("[data-curtain]").forEach(function (wrap) {
     var img = wrap.querySelector("img");
     gsap.fromTo(
       wrap,
-      { clipPath: "inset(14% 0% 0% 0% round 12px)" },
+      { clipPath: "inset(12% 0% 0% 0% round 12px)" },
       {
         clipPath: "inset(0% 0% 0% 0% round 12px)",
-        duration: 0.92,
+        duration: 0.88,
         ease: "power4.out",
         scrollTrigger: {
           trigger: wrap,
-          start: "top 86%",
+          start: "top 88%",
           once: true
         }
       }
@@ -362,14 +379,14 @@
     if (img) {
       gsap.fromTo(
         img,
-        { scale: 1.13 },
+        { scale: 1.1 },
         {
           scale: 1,
-          duration: 1.15,
+          duration: 1.1,
           ease: "power3.out",
           scrollTrigger: {
             trigger: wrap,
-            start: "top 86%",
+            start: "top 88%",
             once: true
           }
         }
@@ -377,50 +394,30 @@
     }
   });
 
-  /* 11. Buoyant Staggered Reveals */
+  /* 10. Buoyant Staggered Reveals */
   document.querySelectorAll("[data-stagger-group]").forEach(function (group) {
     var items = group.querySelectorAll("[data-stagger-item]");
     if (!items.length) return;
     gsap.from(items, {
-      y: 26,
+      y: 22,
       opacity: 0,
-      duration: 0.78,
-      stagger: 0.07,
+      duration: 0.72,
+      stagger: 0.065,
       ease: "power3.out",
       clearProps: "transform",
       scrollTrigger: {
         trigger: group,
-        start: "top 86%",
+        start: "top 88%",
         once: true
       }
     });
   });
 
-  /* 12. Desktop-Only Choreography via gsap.matchMedia() */
+  /* 11. Desktop Scroll-Linked Exhibition & Interactive Physics (ZERO pin:true traps!) */
   var mm = gsap.matchMedia();
 
   mm.add("(min-width: 1024px)", function () {
-    /* Pinned Scrollytelling 03 Core Programs + Live Tab Scrub Progress */
-    var storySection = document.querySelector("[data-story-section]");
-    if (storySection && storyStage && storyPanels.length > 1) {
-      storyTrigger = ScrollTrigger.create({
-        trigger: storySection,
-        start: "top 72px",
-        end: "+=" + storyPanels.length * 440,
-        pin: true,
-        scrub: true,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onUpdate: function (self) {
-          var scaled = self.progress * storyPanels.length;
-          var idx = Math.min(storyPanels.length - 1, Math.floor(scaled));
-          var localProg = idx === storyPanels.length - 1 && self.progress >= 0.99 ? 1 : scaled - idx;
-          setStoryStep(idx, localProg);
-        }
-      });
-    }
-
-    /* Museum Horizontal Exhibition + Live Progress Rail + Counter-Parallax */
+    /* Horizontal Exhibition: Gentle Scroll-Linked Glide WITHOUT locking vertical scroll! */
     var hSection = document.querySelector("[data-horizontal-section]");
     var hTrack = document.querySelector("[data-horizontal-track]");
     var hFill = document.querySelector("[data-exhibition-fill]");
@@ -428,75 +425,46 @@
 
     if (hSection && hTrack) {
       var hCards = hTrack.querySelectorAll(".horizontal-card");
-      var hImgs = hTrack.querySelectorAll(".horizontal-frame img");
       var totalCards = hCards.length || 1;
-      var getScrollAmount = function () {
-        return Math.max(0, hTrack.scrollWidth - window.innerWidth + 48);
+      var getGlideAmount = function () {
+        return Math.min(360, Math.max(0, hTrack.scrollWidth - window.innerWidth));
       };
 
-      var setSkew = gsap.quickTo(hCards, "skewX", { duration: 0.34, ease: "power3.out" });
-
-      gsap.to(hTrack, {
-        x: function () {
-          return -getScrollAmount();
-        },
-        ease: "none",
-        scrollTrigger: {
-          trigger: hSection,
-          start: "top 64px",
-          end: function () {
-            return "+=" + getScrollAmount();
+      gsap.fromTo(
+        hTrack,
+        { x: 40 },
+        {
+          x: function () {
+            return -getGlideAmount();
           },
-          pin: true,
-          scrub: 0.8,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          onUpdate: function (self) {
-            var v = self.getVelocity();
-            var skew = Math.max(-3.6, Math.min(3.6, -v / 480));
-            setSkew(skew);
-            if (hFill) {
-              var pct = Math.max(1 / totalCards, self.progress);
-              hFill.style.transform = "scaleX(" + pct.toFixed(4) + ")";
+          ease: "none",
+          scrollTrigger: {
+            trigger: hSection,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.4,
+            invalidateOnRefresh: true,
+            onUpdate: function (self) {
+              if (hFill) {
+                var pct = Math.max(1 / totalCards, self.progress);
+                hFill.style.transform = "scaleX(" + pct.toFixed(4) + ")";
+              }
+              if (hCount) {
+                var cur = Math.min(totalCards, Math.max(1, Math.round(self.progress * (totalCards - 1)) + 1));
+                hCount.textContent = "0" + cur + " / 0" + totalCards;
+              }
             }
-            if (hCount) {
-              var cur = Math.min(totalCards, Math.max(1, Math.round(self.progress * (totalCards - 1)) + 1));
-              hCount.textContent = "0" + cur + " / 0" + totalCards;
-            }
-          },
-          onScrubComplete: function () {
-            setSkew(0);
           }
         }
-      });
-
-      if (hImgs.length) {
-        gsap.fromTo(
-          hImgs,
-          { xPercent: -6 },
-          {
-            xPercent: 6,
-            ease: "none",
-            scrollTrigger: {
-              trigger: hSection,
-              start: "top 64px",
-              end: function () {
-                return "+=" + getScrollAmount();
-              },
-              scrub: true,
-              invalidateOnRefresh: true
-            }
-          }
-        );
-      }
+      );
     }
 
     /* Fine-Pointer Interactive Magic */
     if (isFinePointer) {
-      /* 12A. Optical Glass Specular Glare + Subtle 3D Perspective Tilt on Photo Plates */
+      /* Optical Glass Specular Glare + Subtle 3D Perspective Tilt on Photo Plates */
       document.querySelectorAll(".plate-media, .story-media-frame").forEach(function (plate) {
-        var rX = gsap.quickTo(plate, "rotateX", { duration: 0.35, ease: "power3.out" });
-        var rY = gsap.quickTo(plate, "rotateY", { duration: 0.35, ease: "power3.out" });
+        var rX = gsap.quickTo(plate, "rotateX", { duration: 0.32, ease: "power3.out" });
+        var rY = gsap.quickTo(plate, "rotateY", { duration: 0.32, ease: "power3.out" });
         gsap.set(plate, { transformPerspective: 1000 });
 
         plate.addEventListener("pointerenter", function () {
@@ -510,8 +478,8 @@
           var yPct = ((e.clientY - rect.top) / rect.height) * 100;
           plate.style.setProperty("--glare-x", xPct.toFixed(1) + "%");
           plate.style.setProperty("--glare-y", yPct.toFixed(1) + "%");
-          rY(((xPct - 50) / 50) * 3.2);
-          rX(((50 - yPct) / 50) * 3.2);
+          rY(((xPct - 50) / 50) * 2.8);
+          rX(((50 - yPct) / 50) * 2.8);
         });
 
         plate.addEventListener("pointerleave", function () {
@@ -521,13 +489,13 @@
         });
       });
 
-      /* 12B. Floating Spring Photo Preview on Blueprint Rows */
+      /* Floating Spring Photo Preview on Blueprint Rows */
       var floatBox = document.getElementById("float-preview");
       var floatImg = document.getElementById("float-preview-img");
       if (floatBox && floatImg) {
-        var fx = gsap.quickTo(floatBox, "x", { duration: 0.34, ease: "power3.out" });
-        var fy = gsap.quickTo(floatBox, "y", { duration: 0.34, ease: "power3.out" });
-        var frot = gsap.quickTo(floatBox, "rotation", { duration: 0.42, ease: "power3.out" });
+        var fx = gsap.quickTo(floatBox, "x", { duration: 0.32, ease: "power3.out" });
+        var fy = gsap.quickTo(floatBox, "y", { duration: 0.32, ease: "power3.out" });
+        var frot = gsap.quickTo(floatBox, "rotation", { duration: 0.4, ease: "power3.out" });
         var lastX = 0;
 
         document.querySelectorAll("[data-hover-photo]").forEach(function (row) {
@@ -542,13 +510,13 @@
             fx(e.clientX + 26);
             fy(e.clientY - 120);
             floatBox.classList.add("is-visible");
-            gsap.to(floatBox, { scale: 1, duration: 0.34, ease: "power3.out" });
+            gsap.to(floatBox, { scale: 1, duration: 0.32, ease: "power3.out" });
           });
 
           row.addEventListener("pointermove", function (e) {
             var dx = e.clientX - lastX;
             lastX = e.clientX;
-            var tilt = Math.max(-5, Math.min(5, dx * 0.32));
+            var tilt = Math.max(-4.5, Math.min(4.5, dx * 0.3));
             fx(e.clientX + 26);
             fy(e.clientY - 120);
             frot(tilt);
@@ -557,16 +525,16 @@
           row.addEventListener("pointerleave", function () {
             floatBox.classList.remove("is-visible");
             frot(0);
-            gsap.to(floatBox, { scale: 0.86, duration: 0.24, ease: "power2.out" });
+            gsap.to(floatBox, { scale: 0.86, duration: 0.22, ease: "power2.out" });
           });
         });
       }
 
-      /* 12C. Velocity Squash-and-Stretch Circular Cursor Tag */
+      /* Velocity Squash-and-Stretch Circular Cursor Tag */
       var cursorTag = document.getElementById("cursor-tag");
       if (cursorTag) {
-        var xTo = gsap.quickTo(cursorTag, "x", { duration: 0.18, ease: "power3.out" });
-        var yTo = gsap.quickTo(cursorTag, "y", { duration: 0.18, ease: "power3.out" });
+        var xTo = gsap.quickTo(cursorTag, "x", { duration: 0.16, ease: "power3.out" });
+        var yTo = gsap.quickTo(cursorTag, "y", { duration: 0.16, ease: "power3.out" });
         var prevX = 0;
         var prevY = 0;
 
@@ -580,15 +548,15 @@
 
           if (cursorTag.classList.contains("is-active")) {
             var speed = Math.min(Math.hypot(vx, vy), 45);
-            var stretch = 1 + (speed / 45) * 0.16;
+            var stretch = 1 + (speed / 45) * 0.15;
             var squash = 1 - (speed / 45) * 0.08;
             gsap.to(cursorTag, {
               scaleX: stretch,
               scaleY: squash,
-              duration: 0.18,
+              duration: 0.16,
               overwrite: "auto",
               onComplete: function () {
-                gsap.to(cursorTag, { scaleX: 1, scaleY: 1, duration: 0.25, overwrite: "auto" });
+                gsap.to(cursorTag, { scaleX: 1, scaleY: 1, duration: 0.22, overwrite: "auto" });
               }
             });
           }
@@ -605,22 +573,18 @@
         });
       }
 
-      /* 12D. Elastic Feather-Light Magnetic Pull on Primary CTA Buttons */
+      /* Elastic Feather-Light Magnetic Pull on Primary CTA Buttons */
       document.querySelectorAll("[data-magnetic]").forEach(function (btn) {
         btn.addEventListener("mousemove", function (e) {
           var rect = btn.getBoundingClientRect();
-          var x = (e.clientX - rect.left - rect.width / 2) * 0.24;
-          var y = (e.clientY - rect.top - rect.height / 2) * 0.24;
-          gsap.to(btn, { x: x, y: y, duration: 0.26, ease: "power3.out" });
+          var x = (e.clientX - rect.left - rect.width / 2) * 0.22;
+          var y = (e.clientY - rect.top - rect.height / 2) * 0.22;
+          gsap.to(btn, { x: x, y: y, duration: 0.24, ease: "power3.out" });
         });
         btn.addEventListener("mouseleave", function () {
-          gsap.to(btn, { x: 0, y: 0, duration: 0.55, ease: "elastic.out(1, 0.55)" });
+          gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.55)" });
         });
       });
     }
-
-    return function () {
-      storyTrigger = null;
-    };
   });
 })();
