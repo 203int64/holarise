@@ -729,12 +729,16 @@ code {
 
 @container (width < 720px) {
   .cms-table,
+  .cms-table caption,
   .cms-table thead,
   .cms-table tbody,
   .cms-table tr,
   .cms-table th,
   .cms-table td {
     display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
   .cms-table thead {
     display: none;
@@ -1097,7 +1101,7 @@ dialog.cms-dialog::backdrop {
 
 @media (max-width: 920px) {
   .admin-shell {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .admin-sidebar {
     display: none;
@@ -1129,6 +1133,7 @@ dialog.cms-dialog::backdrop {
   }
 
   .admin-main {
+    min-width: 0;
     padding: 18px 16px calc(86px + env(safe-area-inset-bottom));
   }
 
@@ -1174,6 +1179,12 @@ dialog.cms-dialog::backdrop {
 
   .stat-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .stat-strip .stat-chip:first-child {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
   .icon-btn {
     width: 44px;
