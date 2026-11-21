@@ -56,5 +56,5 @@
   - `assets/js/admin.js`
   - `build.py`
 
-### [ ] Phase 6: Triển khai Production & Kiểm chứng Thực tế (Reality Gate)
+### [x] Phase 6: Triển khai Production & Kiểm chứng Thực tế (Reality Gate)
 - **Goal:** Build `python3 build.py --check`, chạy full `node --test`, triển khai lên Cloudflare Pages `holarise`, và chạy kiểm thử thực tế End-to-End bằng cả API + `browser` subagent trên `375px` & `1440px` (rồi dọn sạch bản ghi test).
