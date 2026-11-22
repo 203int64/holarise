@@ -9,7 +9,7 @@
  * - Opposing Kinetic Scroll-Driven Watermark Band
  * - Obsidian Manifesto Word-by-Word Lift & Illumination
  * - Optical Specular Glass Glare + 3D Perspective Plate Tilt on Documentary Photos
- * - Live Tân Xã, Hòa Lạc GMT+7 Clock
+ * - Live Hòa Lạc, Hà Nội GMT+7 Clock
  */
 (function () {
   "use strict";
@@ -17,8 +17,9 @@
   var prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var hasGsap = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
   var isFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  var desktopMq = window.matchMedia("(min-width: 1024px)");
 
-  /* 0. Live Tân Xã, Hòa Lạc GMT+7 Clock (tabular-nums) */
+  /* 0. Live Hòa Lạc, Hà Nội GMT+7 Clock (tabular-nums) */
   var clockEls = document.querySelectorAll("[data-live-clock]");
   if (clockEls.length) {
     var updateClock = function () {
@@ -43,12 +44,24 @@
   /* 1. Native CSS Scroll Progress fallback ONLY when animation-timeline: scroll() is unsupported */
   var progressBar = document.getElementById("scroll-progress");
   if (progressBar && !prefersReduced && !(window.CSS && CSS.supports("animation-timeline", "scroll()"))) {
+    var progressRafPending = false;
     var updateProgress = function () {
       var scrollable = document.documentElement.scrollHeight - window.innerHeight;
       var pct = scrollable > 0 ? Math.min(Math.max(window.scrollY / scrollable, 0), 1) : 0;
       progressBar.style.transform = "scaleX(" + pct + ")";
     };
-    window.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener(
+      "scroll",
+      function () {
+        if (progressRafPending) return;
+        progressRafPending = true;
+        window.requestAnimationFrame(function () {
+          progressRafPending = false;
+          updateProgress();
+        });
+      },
+      { passive: true }
+    );
     updateProgress();
   }
 
@@ -60,6 +73,7 @@
   var storyPanels = storyStage ? Array.prototype.slice.call(storyStage.querySelectorAll("[data-story-panel]")) : [];
   var storySlides = storyStage ? Array.prototype.slice.call(storyStage.querySelectorAll("[data-story-slide]")) : [];
   var odometerDrum = storyStage ? storyStage.querySelector("[data-odometer-drum]") : null;
+  var desktopMediaFrame = storyStage ? storyStage.querySelector(".story-media-frame--desktop") : null;
   var activeStoryIndex = 0;
 
   function setTabProgress(activeIndex, localProgress) {
@@ -69,9 +83,10 @@
     });
   }
 
-  function setStoryStep(index, localProgress) {
+  function setStoryStep(index, localProgress, force) {
     if (!storyPanels.length) return;
     var clamped = Math.max(0, Math.min(index, storyPanels.length - 1));
+    if (!force && storyStage.classList.contains("is-enhanced") && clamped === activeStoryIndex) return;
     var pct = typeof localProgress === "number" ? Math.max(0.2, Math.min(1, localProgress)) : 1;
     setTabProgress(clamped, pct);
 
@@ -87,12 +102,17 @@
       odometerDrum.style.transform = "translateY(-" + stepPct.toFixed(4) + "%)";
     }
 
+    if (desktopMediaFrame) {
+      desktopMediaFrame.setAttribute("data-cursor-label", "0" + (clamped + 1) + " · 0" + storyPanels.length);
+    }
+
     activeStoryIndex = clamped;
 
     storyTabs.forEach(function (tab, i) {
       var on = i === clamped;
       tab.classList.toggle("is-active", on);
       tab.setAttribute("aria-selected", String(on));
+      tab.setAttribute("tabindex", on ? "0" : "-1");
     });
     storyPanels.forEach(function (panel, i) {
       panel.classList.toggle("is-active", i === clamped);
@@ -104,12 +124,24 @@
   }
 
   if (storyStage && storyPanels.length) {
+    setStoryStep(0, 1, true);
     storyStage.classList.add("is-enhanced");
-    setStoryStep(0, 1);
 
     storyTabs.forEach(function (tab, idx) {
       tab.addEventListener("click", function () {
         setStoryStep(idx, 1);
+      });
+      tab.addEventListener("keydown", function (e) {
+        var nextIdx = null;
+        if (e.key === "ArrowRight") nextIdx = (idx + 1) % storyTabs.length;
+        else if (e.key === "ArrowLeft") nextIdx = (idx - 1 + storyTabs.length) % storyTabs.length;
+        else if (e.key === "Home") nextIdx = 0;
+        else if (e.key === "End") nextIdx = storyTabs.length - 1;
+        if (nextIdx !== null) {
+          e.preventDefault();
+          setStoryStep(nextIdx, 1);
+          storyTabs[nextIdx].focus();
+        }
       });
     });
 
@@ -163,24 +195,111 @@
     );
   }
 
-  /* 2B. Mobile Horizontal Photo Exhibition Progress Sync */
+  /* 2B. Mobile Horizontal Photo Exhibition Sync (Desktop uses sticky runway ScrollTrigger) */
+  var hSectionEl = document.querySelector("[data-horizontal-section]");
   var hWrap = document.querySelector(".horizontal-track-wrap");
   var hFillMobile = document.querySelector("[data-exhibition-fill]");
   var hCountMobile = document.querySelector("[data-exhibition-count]");
-  if (hWrap && hFillMobile && window.innerWidth < 1024) {
-    var totalMobileCards = hWrap.querySelectorAll(".horizontal-card").length || 1;
+  var hPrevBtn = document.querySelector("[data-exhibition-prev]");
+  var hNextBtn = document.querySelector("[data-exhibition-next]");
+  if (hWrap && hFillMobile) {
+    var totalGalleryCards = hWrap.querySelectorAll(".horizontal-card").length || 1;
+    var galleryRafPending = false;
     var updateMobileGalleryProgress = function () {
+      if (desktopMq.matches && hasGsap && !prefersReduced) return;
       var maxScroll = Math.max(1, hWrap.scrollWidth - hWrap.clientWidth);
       var prog = Math.min(1, Math.max(0, hWrap.scrollLeft / maxScroll));
-      var pct = Math.max(1 / totalMobileCards, prog);
+      var pct = Math.max(1 / totalGalleryCards, prog);
       hFillMobile.style.transform = "scaleX(" + pct.toFixed(4) + ")";
       if (hCountMobile) {
-        var cur = Math.min(totalMobileCards, Math.max(1, Math.round(prog * (totalMobileCards - 1)) + 1));
-        hCountMobile.textContent = "0" + cur + " / 0" + totalMobileCards;
+        var cur = Math.min(totalGalleryCards, Math.max(1, Math.round(prog * (totalGalleryCards - 1)) + 1));
+        hCountMobile.textContent = "0" + cur + " / 0" + totalGalleryCards;
+      }
+      if (hPrevBtn) hPrevBtn.disabled = hWrap.scrollLeft <= 4;
+      if (hNextBtn) hNextBtn.disabled = hWrap.scrollLeft >= maxScroll - 4;
+    };
+    hWrap.addEventListener(
+      "scroll",
+      function () {
+        if (galleryRafPending) return;
+        galleryRafPending = true;
+        window.requestAnimationFrame(function () {
+          galleryRafPending = false;
+          updateMobileGalleryProgress();
+        });
+      },
+      { passive: true }
+    );
+    updateMobileGalleryProgress();
+
+    var stepGallery = function (dir) {
+      if (desktopMq.matches && hasGsap && !prefersReduced && hSectionEl) {
+        var rect = hSectionEl.getBoundingClientRect();
+        var sectionTop = window.scrollY + rect.top;
+        var runway = Math.max(1, hSectionEl.offsetHeight - window.innerHeight);
+        var curProg = Math.min(1, Math.max(0, (window.scrollY - sectionTop) / runway));
+        var curIdx = Math.round(curProg * (totalGalleryCards - 1));
+        var nextIdx = Math.max(0, Math.min(totalGalleryCards - 1, curIdx + dir));
+        var targetProg = totalGalleryCards > 1 ? nextIdx / (totalGalleryCards - 1) : 0;
+        window.scrollTo({
+          top: sectionTop + targetProg * runway,
+          behavior: "smooth"
+        });
+        return;
+      }
+      var card = hWrap.querySelector(".horizontal-card");
+      var step = card ? card.getBoundingClientRect().width + 24 : 380;
+      hWrap.scrollBy({ left: dir * step, behavior: prefersReduced ? "auto" : "smooth" });
+    };
+
+    if (hPrevBtn) {
+      hPrevBtn.addEventListener("click", function () {
+        stepGallery(-1);
+      });
+    }
+    if (hNextBtn) {
+      hNextBtn.addEventListener("click", function () {
+        stepGallery(1);
+      });
+    }
+  }
+
+  /* 2C. Desktop Orbital Reading Progress + Back-to-Top Ring (Zero work on Mobile < 1024px) */
+  var orbitalBtn = document.getElementById("orbital-top-btn");
+  if (orbitalBtn && window.matchMedia("(min-width: 1024px)").matches) {
+    var orbitalFill = orbitalBtn.querySelector(".orbital-ring-fill");
+    var circumference = 2 * Math.PI * 19;
+    if (orbitalFill) {
+      orbitalFill.style.strokeDasharray = circumference.toFixed(2);
+      orbitalFill.style.strokeDashoffset = circumference.toFixed(2);
+    }
+    var orbitalRafPending = false;
+    var syncOrbital = function () {
+      var y = window.scrollY || 0;
+      var scrollable = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      var pct = Math.min(1, Math.max(0, y / scrollable));
+      orbitalBtn.classList.toggle("is-visible", y > 440);
+      if (orbitalFill) {
+        orbitalFill.style.strokeDashoffset = (circumference * (1 - pct)).toFixed(2);
       }
     };
-    hWrap.addEventListener("scroll", updateMobileGalleryProgress, { passive: true });
-    updateMobileGalleryProgress();
+    window.addEventListener(
+      "scroll",
+      function () {
+        if (orbitalRafPending) return;
+        orbitalRafPending = true;
+        window.requestAnimationFrame(function () {
+          orbitalRafPending = false;
+          syncOrbital();
+        });
+      },
+      { passive: true }
+    );
+    syncOrbital();
+
+    orbitalBtn.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: prefersReduced ? "auto" : "smooth" });
+    });
   }
 
   if (prefersReduced || !hasGsap) {
@@ -208,17 +327,24 @@
     });
   });
 
-  /* 4. Chapter 1: Immersive Hero Card Entrance + Live Scroll Parallax (Mobile & Desktop) */
+  /* 4. Chapter 1: Immersive Hero Card Entrance + Desktop Depth & Mouse Parallax */
   var heroCard = document.querySelector("[data-hero-card]");
   if (heroCard) {
     var heroLines = heroCard.querySelectorAll(".split-line-inner");
     var heroFadeEls = heroCard.querySelectorAll("[data-hero-stagger]");
+    var heroBottom = heroCard.querySelector(".hero-card-bottom");
+    var heroTag = heroCard.querySelector(".hero-glass-tag");
     var cinemaImg = heroCard.querySelector("[data-cinema-img]");
 
     var heroTl = gsap.timeline({ defaults: { ease: "power4.out" } });
-    heroTl.from(heroCard, { scale: 0.96, opacity: 0, duration: 0.85 }, 0);
+    heroTl.fromTo(
+      heroCard,
+      { clipPath: "inset(4% 2% 4% 2% round 34px)", scale: 0.96, opacity: 0 },
+      { clipPath: "inset(0% 0% 0% 0% round 26px)", scale: 1, opacity: 1, duration: 0.95, clearProps: "clipPath" },
+      0
+    );
     if (cinemaImg) {
-      heroTl.fromTo(cinemaImg, { scale: 1.15 }, { scale: 1.06, duration: 1.25 }, 0);
+      heroTl.fromTo(cinemaImg, { scale: 1.2 }, { scale: 1.05, duration: 1.25 }, 0);
     }
     if (heroLines.length) {
       heroTl.from(heroLines, { yPercent: 112, duration: 0.9, stagger: 0.09 }, 0.14);
@@ -227,32 +353,121 @@
       heroTl.from(heroFadeEls, { y: 18, opacity: 0, duration: 0.72, stagger: 0.08 }, 0.24);
     }
 
-    if (cinemaImg) {
+    var heroMm = gsap.matchMedia();
+
+    heroMm.add("(max-width: 1023px)", function () {
+      if (cinemaImg) {
+        gsap.fromTo(
+          cinemaImg,
+          { yPercent: -5 },
+          {
+            yPercent: 9,
+            ease: "none",
+            scrollTrigger: {
+              trigger: heroCard,
+              start: "top top",
+              end: "bottom top",
+              scrub: 0.35,
+              invalidateOnRefresh: true
+            }
+          }
+        );
+      }
+
+      gsap.to(heroCard, {
+        scale: 0.965,
+        ease: "none",
+        scrollTrigger: {
+          trigger: heroCard,
+          start: "top 15%",
+          end: "bottom top",
+          scrub: 0.4
+        }
+      });
+    });
+
+    heroMm.add("(min-width: 1024px)", function () {
       gsap.fromTo(
-        cinemaImg,
-        { yPercent: -5 },
+        heroCard,
+        { scale: 1 },
         {
-          yPercent: 9,
+          scale: 0.92,
           ease: "none",
           scrollTrigger: {
             trigger: heroCard,
             start: "top top",
             end: "bottom top",
-            scrub: 0.35,
+            scrub: 0.45,
             invalidateOnRefresh: true
           }
         }
       );
-    }
 
-    gsap.to(heroCard, {
-      scale: 0.965,
-      ease: "none",
-      scrollTrigger: {
-        trigger: heroCard,
-        start: "top 15%",
-        end: "bottom top",
-        scrub: 0.4
+      if (cinemaImg) {
+        gsap.fromTo(
+          cinemaImg,
+          { yPercent: -8, scale: 1.05 },
+          {
+            yPercent: 16,
+            scale: 1.18,
+            ease: "none",
+            scrollTrigger: {
+              trigger: heroCard,
+              start: "top top",
+              end: "bottom top",
+              scrub: 0.45,
+              invalidateOnRefresh: true
+            }
+          }
+        );
+      }
+
+      if (heroBottom) {
+        gsap.fromTo(
+          heroBottom,
+          { y: 0, opacity: 1 },
+          {
+            y: -56,
+            opacity: 0.2,
+            ease: "none",
+            scrollTrigger: {
+              trigger: heroCard,
+              start: "top top",
+              end: "bottom top",
+              scrub: 0.45,
+              invalidateOnRefresh: true
+            }
+          }
+        );
+      }
+
+      if (isFinePointer && cinemaImg) {
+        var imgX = gsap.quickTo(cinemaImg, "x", { duration: 0.55, ease: "power3.out" });
+        var imgY = gsap.quickTo(cinemaImg, "y", { duration: 0.55, ease: "power3.out" });
+        var tagX = heroTag ? gsap.quickTo(heroTag, "x", { duration: 0.45, ease: "power3.out" }) : null;
+        var tagY = heroTag ? gsap.quickTo(heroTag, "y", { duration: 0.45, ease: "power3.out" }) : null;
+
+        heroCard.addEventListener("pointermove", function (e) {
+          var rect = heroCard.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+          var nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+          var ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+          imgX(-nx * 14);
+          imgY(-ny * 10);
+          if (tagX && tagY) {
+            tagX(nx * 7);
+            tagY(ny * 5);
+          }
+        });
+
+        heroCard.addEventListener("pointerleave", function () {
+          imgX(0);
+          imgY(0);
+          if (tagX && tagY) {
+            tagX(0);
+            tagY(0);
+          }
+        });
       }
     });
   }
@@ -273,25 +488,89 @@
     });
   });
 
-  /* 5. Opposing Kinetic Scroll-Driven Watermark Band */
+  /* 5. Opposing Kinetic Scroll-Driven Typography Band v2
+     - Mobile (< 1024px): Native CSS animation-timeline: view() runs on compositor thread (zero JS overhead).
+       Only falls back to GSAP when view() is unsupported.
+     - Desktop (>= 1024px): GSAP ScrollTrigger drives opposing horizontal glide + scroll-velocity skew! */
+  var kineticBand = document.querySelector("[data-kinetic-band]");
   var kineticLines = document.querySelectorAll("[data-kinetic-dir]");
-  kineticLines.forEach(function (line) {
-    var dir = parseFloat(line.getAttribute("data-kinetic-dir")) || 1;
-    gsap.fromTo(
-      line,
-      { xPercent: dir > 0 ? -10 : 3 },
-      {
-        xPercent: dir > 0 ? 3 : -12,
-        ease: "none",
-        scrollTrigger: {
-          trigger: line.closest(".kinetic-band") || line,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.45
+  var supportsViewTimeline = Boolean(
+    window.CSS && CSS.supports && CSS.supports("(animation-timeline: view()) and (animation-range: entry)")
+  );
+
+  if (kineticLines.length) {
+    var kineticMm = gsap.matchMedia();
+
+    kineticMm.add("(min-width: 1024px)", function () {
+      var skewSetters = [];
+      kineticLines.forEach(function (line) {
+        var dir = parseFloat(line.getAttribute("data-kinetic-dir")) || 1;
+        gsap.fromTo(
+          line,
+          { x: 0, xPercent: dir > 0 ? -28 : 2 },
+          {
+            x: 0,
+            xPercent: dir > 0 ? 2 : -28,
+            ease: "none",
+            scrollTrigger: {
+              trigger: kineticBand || line,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.55,
+              invalidateOnRefresh: true
+            }
+          }
+        );
+        skewSetters.push({
+          dir: dir,
+          set: gsap.quickTo(line, "skewX", { duration: 0.55, ease: "power3.out" })
+        });
+      });
+
+      var skewResetTimer = null;
+      ScrollTrigger.create({
+        trigger: kineticBand || kineticLines[0],
+        start: "top bottom",
+        end: "bottom top",
+        onUpdate: function (self) {
+          var velocity = self.getVelocity();
+          var clamped = Math.max(-8, Math.min(8, velocity / 240));
+          skewSetters.forEach(function (item) {
+            item.set(clamped * (item.dir > 0 ? -1 : 1));
+          });
+          if (skewResetTimer) clearTimeout(skewResetTimer);
+          skewResetTimer = setTimeout(function () {
+            skewSetters.forEach(function (item) {
+              item.set(0);
+            });
+          }, 140);
         }
-      }
-    );
-  });
+      });
+    });
+
+    if (!supportsViewTimeline) {
+      kineticMm.add("(max-width: 1023px)", function () {
+        kineticLines.forEach(function (line) {
+          var dir = parseFloat(line.getAttribute("data-kinetic-dir")) || 1;
+          gsap.fromTo(
+            line,
+            { x: 0, xPercent: dir > 0 ? -16 : 2 },
+            {
+              x: 0,
+              xPercent: dir > 0 ? 2 : -18,
+              ease: "none",
+              scrollTrigger: {
+                trigger: kineticBand || line,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 0.35
+              }
+            }
+          );
+        });
+      });
+    }
+  }
 
   /* 6. Architectural 1px Hairline Draw */
   document.querySelectorAll("[data-hairline]").forEach(function (line) {
@@ -333,28 +612,96 @@
     });
   });
 
-  /* 8. Obsidian Manifesto Word-by-Word Kinetic Lift & Illumination */
+  /* 8. Obsidian Manifesto Word-by-Word Kinetic Lift, Blur-Reveal & Ambient Light Sweep */
   var manifestoEl = document.querySelector("[data-scrub-words]");
+  var manifestoGlow = document.querySelector("[data-manifesto-glow]");
   if (manifestoEl) {
     var rawText = manifestoEl.textContent.trim();
     var words = rawText.split(/\s+/);
-    manifestoEl.innerHTML = words
-      .map(function (w) {
-        return '<span class="scrub-word">' + w + "</span>";
-      })
-      .join(" ");
+    var sunriseWords = {
+      "vươn": true,
+      "lên": true,
+      "tử": true,
+      "tế": true,
+      "biết": true,
+      "ơn": true,
+      "mầm": true,
+      "cây": true
+    };
+    var emeraldWords = {
+      "hòa": true,
+      "lạc": true,
+      "xanh": true,
+      "ấm": true,
+      "áp": true
+    };
+    var frag = document.createDocumentFragment();
+    words.forEach(function (w, idx) {
+      var span = document.createElement("span");
+      span.className = "scrub-word";
+      var cleanWord = w.replace(/^[\u201C\u201D"'(\[]+|[.,;:!?\u201C\u201D"')\]—–-]+$/g, "").toLowerCase();
+      if (sunriseWords[cleanWord]) {
+        span.classList.add("scrub-word--highlight");
+      } else if (emeraldWords[cleanWord]) {
+        span.classList.add("scrub-word--emerald");
+      }
+      span.textContent = w;
+      frag.appendChild(span);
+      if (idx < words.length - 1) {
+        frag.appendChild(document.createTextNode(" "));
+      }
+    });
+    manifestoEl.textContent = "";
+    manifestoEl.appendChild(frag);
 
     var wordSpans = manifestoEl.querySelectorAll(".scrub-word");
-    gsap.to(wordSpans, {
-      opacity: 1,
-      y: 0,
-      stagger: 0.05,
-      ease: "none",
-      scrollTrigger: {
-        trigger: manifestoEl,
-        start: "top 82%",
-        end: "bottom 45%",
-        scrub: 0.4
+    var manifestoMm = gsap.matchMedia();
+
+    manifestoMm.add("(max-width: 1023px)", function () {
+      gsap.to(wordSpans, {
+        opacity: 1,
+        y: 0,
+        stagger: 0.045,
+        ease: "none",
+        scrollTrigger: {
+          trigger: manifestoEl,
+          start: "top 85%",
+          end: "bottom 48%",
+          scrub: 0.35
+        }
+      });
+    });
+
+    manifestoMm.add("(min-width: 1024px)", function () {
+      gsap.to(wordSpans, {
+        opacity: 1,
+        y: 0,
+        stagger: 0.055,
+        ease: "power1.out",
+        scrollTrigger: {
+          trigger: manifestoEl,
+          start: "top 72%",
+          end: "bottom 42%",
+          scrub: 0.55
+        }
+      });
+
+      if (manifestoGlow) {
+        gsap.fromTo(
+          manifestoGlow,
+          { xPercent: -25, yPercent: -15 },
+          {
+            xPercent: 35,
+            yPercent: 20,
+            ease: "none",
+            scrollTrigger: {
+              trigger: manifestoGlow.closest(".manifesto-section") || manifestoEl,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.8
+            }
+          }
+        );
       }
     });
   }
@@ -364,11 +711,12 @@
     var img = wrap.querySelector("img");
     gsap.fromTo(
       wrap,
-      { clipPath: "inset(12% 0% 0% 0% round 12px)" },
+      { clipPath: "inset(16% 3% 16% 3% round 22px)" },
       {
-        clipPath: "inset(0% 0% 0% 0% round 12px)",
-        duration: 0.88,
+        clipPath: "inset(0% 0% 0% 0% round 16px)",
+        duration: 0.96,
         ease: "power4.out",
+        clearProps: "clipPath",
         scrollTrigger: {
           trigger: wrap,
           start: "top 88%",
@@ -379,10 +727,10 @@
     if (img) {
       gsap.fromTo(
         img,
-        { scale: 1.1 },
+        { scale: 1.2 },
         {
           scale: 1,
-          duration: 1.1,
+          duration: 1.15,
           ease: "power3.out",
           scrollTrigger: {
             trigger: wrap,
@@ -413,81 +761,132 @@
     });
   });
 
-  /* 11. Desktop Scroll-Linked Exhibition & Interactive Physics (ZERO pin:true traps!) */
+  /* 11. Desktop Horizontal Exhibition Runway & Tactile Physics (ZERO pin:true traps!) */
   var mm = gsap.matchMedia();
 
   mm.add("(min-width: 1024px)", function () {
-    /* Horizontal Exhibition: Gentle Scroll-Linked Glide WITHOUT locking vertical scroll! */
+    /* True Scroll-Driven Horizontal Gallery Runway (CSS sticky stage + GSAP travel) */
     var hSection = document.querySelector("[data-horizontal-section]");
     var hTrack = document.querySelector("[data-horizontal-track]");
-    var hFill = document.querySelector("[data-exhibition-fill]");
-    var hCount = document.querySelector("[data-exhibition-count]");
+    var hCards = hTrack ? Array.prototype.slice.call(hTrack.querySelectorAll(".horizontal-card")) : [];
+    var hImages = hTrack ? Array.prototype.slice.call(hTrack.querySelectorAll(".horizontal-frame img")) : [];
+    var totalDeskCards = hCards.length || 1;
 
     if (hSection && hTrack) {
-      var hCards = hTrack.querySelectorAll(".horizontal-card");
-      var totalCards = hCards.length || 1;
-      var getGlideAmount = function () {
-        return Math.min(360, Math.max(0, hTrack.scrollWidth - window.innerWidth));
+      var getMaxShift = function () {
+        return Math.max(0, hTrack.scrollWidth - window.innerWidth + 80);
       };
+      var cardSkewSetters = hCards.map(function (c) {
+        return gsap.quickTo(c, "skewX", { duration: 0.42, ease: "power3.out" });
+      });
+      var cardSkewReset = null;
 
       gsap.fromTo(
         hTrack,
-        { x: 40 },
+        { x: 0 },
         {
           x: function () {
-            return -getGlideAmount();
+            return -getMaxShift();
           },
           ease: "none",
           scrollTrigger: {
             trigger: hSection,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.4,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 0.65,
             invalidateOnRefresh: true,
             onUpdate: function (self) {
-              if (hFill) {
-                var pct = Math.max(1 / totalCards, self.progress);
-                hFill.style.transform = "scaleX(" + pct.toFixed(4) + ")";
+              if (hFillMobile) {
+                var pct = Math.max(1 / totalDeskCards, self.progress);
+                hFillMobile.style.transform = "scaleX(" + pct.toFixed(4) + ")";
               }
-              if (hCount) {
-                var cur = Math.min(totalCards, Math.max(1, Math.round(self.progress * (totalCards - 1)) + 1));
-                hCount.textContent = "0" + cur + " / 0" + totalCards;
+              if (hCountMobile) {
+                var cur = Math.min(totalDeskCards, Math.max(1, Math.round(self.progress * (totalDeskCards - 1)) + 1));
+                hCountMobile.textContent = "0" + cur + " / 0" + totalDeskCards;
               }
+              if (hPrevBtn) hPrevBtn.disabled = self.progress <= 0.02;
+              if (hNextBtn) hNextBtn.disabled = self.progress >= 0.98;
+
+              var skew = Math.max(-3.5, Math.min(3.5, -(self.getVelocity() / 520)));
+              cardSkewSetters.forEach(function (set) {
+                set(skew);
+              });
+              if (cardSkewReset) clearTimeout(cardSkewReset);
+              cardSkewReset = setTimeout(function () {
+                cardSkewSetters.forEach(function (set) {
+                  set(0);
+                });
+              }, 130);
             }
           }
         }
       );
+
+      if (hImages.length) {
+        gsap.fromTo(
+          hImages,
+          { xPercent: -6 },
+          {
+            xPercent: 6,
+            ease: "none",
+            scrollTrigger: {
+              trigger: hSection,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 0.65,
+              invalidateOnRefresh: true
+            }
+          }
+        );
+      }
     }
 
     /* Fine-Pointer Interactive Magic */
     if (isFinePointer) {
-      /* Optical Glass Specular Glare + Subtle 3D Perspective Tilt on Photo Plates */
-      document.querySelectorAll(".plate-media, .story-media-frame").forEach(function (plate) {
-        var rX = gsap.quickTo(plate, "rotateX", { duration: 0.32, ease: "power3.out" });
-        var rY = gsap.quickTo(plate, "rotateY", { duration: 0.32, ease: "power3.out" });
-        gsap.set(plate, { transformPerspective: 1000 });
-
-        plate.addEventListener("pointerenter", function () {
-          plate.style.setProperty("--glare-opacity", "1");
+      /* Desktop Pointer Hairline Spotlight on Architectural Cards (Zero Mobile Cost) */
+      document
+        .querySelectorAll(".metric-item, .event-card, .value-col, .sdg-col, .editorial-card")
+        .forEach(function (card) {
+          card.setAttribute("data-spotlight", "");
+          card.addEventListener("pointermove", function (e) {
+            var rect = card.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+            var x = e.clientX - rect.left;
+            var y = e.clientY - rect.top;
+            card.style.setProperty("--mx", x.toFixed(1) + "px");
+            card.style.setProperty("--my", y.toFixed(1) + "px");
+          });
         });
 
-        plate.addEventListener("pointermove", function (e) {
-          var rect = plate.getBoundingClientRect();
-          if (!rect.width || !rect.height) return;
-          var xPct = ((e.clientX - rect.left) / rect.width) * 100;
-          var yPct = ((e.clientY - rect.top) / rect.height) * 100;
-          plate.style.setProperty("--glare-x", xPct.toFixed(1) + "%");
-          plate.style.setProperty("--glare-y", yPct.toFixed(1) + "%");
-          rY(((xPct - 50) / 50) * 2.8);
-          rX(((50 - yPct) / 50) * 2.8);
-        });
+      /* Optical Glass Specular Glare + Pronounced 3D Perspective Tilt on Photo Plates */
+      document
+        .querySelectorAll(".plate-media, .event-card-media, .horizontal-frame")
+        .forEach(function (plate) {
+          var rX = gsap.quickTo(plate, "rotateX", { duration: 0.28, ease: "power3.out" });
+          var rY = gsap.quickTo(plate, "rotateY", { duration: 0.28, ease: "power3.out" });
+          gsap.set(plate, { transformPerspective: 900 });
 
-        plate.addEventListener("pointerleave", function () {
-          plate.style.setProperty("--glare-opacity", "0");
-          rX(0);
-          rY(0);
+          plate.addEventListener("pointerenter", function () {
+            plate.style.setProperty("--glare-opacity", "1");
+          });
+
+          plate.addEventListener("pointermove", function (e) {
+            var rect = plate.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+            var xPct = ((e.clientX - rect.left) / rect.width) * 100;
+            var yPct = ((e.clientY - rect.top) / rect.height) * 100;
+            plate.style.setProperty("--glare-x", xPct.toFixed(1) + "%");
+            plate.style.setProperty("--glare-y", yPct.toFixed(1) + "%");
+            rY(((xPct - 50) / 50) * 5.5);
+            rX(((50 - yPct) / 50) * 5.5);
+          });
+
+          plate.addEventListener("pointerleave", function () {
+            plate.style.setProperty("--glare-opacity", "0");
+            rX(0);
+            rY(0);
+          });
         });
-      });
 
       /* Floating Spring Photo Preview on Blueprint Rows */
       var floatBox = document.getElementById("float-preview");
@@ -530,11 +929,14 @@
         });
       }
 
-      /* Velocity Squash-and-Stretch Circular Cursor Tag */
+      /* Dual Tactile Cursor: Precision Follower Dot + Velocity Squash-and-Stretch Tag */
+      var cursorDot = document.getElementById("cursor-dot");
       var cursorTag = document.getElementById("cursor-tag");
-      if (cursorTag) {
-        var xTo = gsap.quickTo(cursorTag, "x", { duration: 0.16, ease: "power3.out" });
-        var yTo = gsap.quickTo(cursorTag, "y", { duration: 0.16, ease: "power3.out" });
+      if (cursorTag || cursorDot) {
+        var dotX = cursorDot ? gsap.quickTo(cursorDot, "x", { duration: 0.08, ease: "power3.out" }) : null;
+        var dotY = cursorDot ? gsap.quickTo(cursorDot, "y", { duration: 0.08, ease: "power3.out" }) : null;
+        var xTo = cursorTag ? gsap.quickTo(cursorTag, "x", { duration: 0.16, ease: "power3.out" }) : null;
+        var yTo = cursorTag ? gsap.quickTo(cursorTag, "y", { duration: 0.16, ease: "power3.out" }) : null;
         var prevX = 0;
         var prevY = 0;
 
@@ -543,10 +945,17 @@
           var vy = e.clientY - prevY;
           prevX = e.clientX;
           prevY = e.clientY;
-          xTo(e.clientX);
-          yTo(e.clientY);
+          if (cursorDot) {
+            cursorDot.classList.add("is-visible");
+            dotX(e.clientX);
+            dotY(e.clientY);
+          }
+          if (xTo && yTo) {
+            xTo(e.clientX);
+            yTo(e.clientY);
+          }
 
-          if (cursorTag.classList.contains("is-active")) {
+          if (cursorTag && cursorTag.classList.contains("is-active")) {
             var speed = Math.min(Math.hypot(vx, vy), 45);
             var stretch = 1 + (speed / 45) * 0.15;
             var squash = 1 - (speed / 45) * 0.08;
@@ -562,15 +971,39 @@
           }
         });
 
-        document.querySelectorAll("[data-cursor-label]").forEach(function (target) {
-          target.addEventListener("pointerenter", function () {
-            cursorTag.textContent = target.getAttribute("data-cursor-label") || "Xem";
-            cursorTag.classList.add("is-active");
-          });
-          target.addEventListener("pointerleave", function () {
-            cursorTag.classList.remove("is-active");
-          });
+        document.documentElement.addEventListener("mouseleave", function () {
+          if (cursorDot) cursorDot.classList.remove("is-visible");
+          if (cursorTag) cursorTag.classList.remove("is-active");
         });
+
+        if (cursorTag) {
+          var activeCursorTarget = null;
+          document.querySelectorAll("[data-cursor-label]").forEach(function (target) {
+            target.addEventListener("pointerenter", function () {
+              activeCursorTarget = target;
+              cursorTag.textContent = target.getAttribute("data-cursor-label") || "Xem";
+              cursorTag.classList.add("is-active");
+              if (cursorDot) cursorDot.classList.add("is-hidden");
+            });
+            target.addEventListener("pointermove", function (e) {
+              var innerControl = e.target && e.target.closest ? e.target.closest("a, button") : null;
+              var suppressForChildControl = Boolean(innerControl && innerControl !== target);
+              if (suppressForChildControl) {
+                cursorTag.classList.remove("is-active");
+                if (cursorDot) cursorDot.classList.remove("is-hidden");
+              } else {
+                cursorTag.textContent = target.getAttribute("data-cursor-label") || "Xem";
+                cursorTag.classList.add("is-active");
+                if (cursorDot) cursorDot.classList.add("is-hidden");
+              }
+            });
+            target.addEventListener("pointerleave", function () {
+              if (activeCursorTarget === target) activeCursorTarget = null;
+              cursorTag.classList.remove("is-active");
+              if (cursorDot) cursorDot.classList.remove("is-hidden");
+            });
+          });
+        }
       }
 
       /* Elastic Feather-Light Magnetic Pull on Primary CTA Buttons */
@@ -587,4 +1020,11 @@
       });
     }
   });
+
+  /* Recalculate ScrollTrigger geometry cleanly once Be Vietnam Pro & Lora finish loading */
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      ScrollTrigger.refresh();
+    });
+  }
 })();

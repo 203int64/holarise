@@ -14,6 +14,7 @@ import shutil
 import struct
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
@@ -237,7 +238,7 @@ def render_hero_upcoming_bar(upcoming: list) -> str:
       <span class="upcoming-title">{esc(ws['title'])}</span>
       <span class="upcoming-date">· {esc(ws['dateDisplay'])} ({esc(ws['time'])}) · {esc(ws['fee'])}</span>
     </div>
-    <button class="btn btn--outline btn--sm" type="button" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}">Giữ chỗ miễn phí</button>
+    <button class="btn btn--outline btn--sm" type="button" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}">Giữ chỗ miễn phí</button>
   </div>
 </div>"""
 
@@ -290,7 +291,7 @@ def render_story_stage(pillars: list) -> str:
         </article>"""
         )
 
-        priority_attr = ' fetchpriority="low" loading="lazy"' if idx > 0 else ' loading="lazy"'
+        priority_attr = ' fetchpriority="low" loading="lazy" decoding="async"' if idx > 0 else ' loading="lazy" decoding="async"'
         slides.append(
             f"""<div class="story-slide{active_cls}" data-story-slide="{idx}">
           <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="960" height="720"{priority_attr}>
@@ -313,7 +314,18 @@ def render_story_stage(pillars: list) -> str:
         </div>
       </div>
 
-      <div class="story-media-frame story-media-frame--desktop">
+      <div class="story-media-frame story-media-frame--desktop" data-cursor-label="01 · 03">
+        <div class="story-stage-hud" aria-hidden="true">
+          <div class="story-odometer-row">
+            <div class="story-odometer">
+              <div class="story-odometer-drum" data-odometer-drum>
+                {"".join(odometer_digits)}
+              </div>
+            </div>
+            <span class="story-odometer-total">/ 0{len(pillars)}</span>
+          </div>
+          <span class="story-hud-kicker">Chương trình trọng tâm</span>
+        </div>
         {" ".join(slides)}
       </div>
     </div>"""
@@ -335,7 +347,7 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
         cards.append(
             f"""<article class="editorial-card" data-stagger-item{anchor_id}>
         <div class="plate-media" data-curtain>
-          <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="640" height="420" loading="lazy">
+          <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
         </div>
         <div class="card-meta"><span class="cat">{esc(p['badge'])}</span></div>
         <h3 class="card-title">{esc(p['title'])}</h3>
@@ -359,8 +371,8 @@ def render_workshops(upcoming: list) -> str:
         cat_attr = f' data-workshop-card data-category="{esc(filters_attr)}"' if filters_attr else " data-workshop-card"
         cards.append(
             f"""<article class="event-card" data-stagger-item{cat_attr}>
-        <div class="event-card-media" data-curtain>
-          <img src="{esc(ws['image'])}" alt="{esc(ws['imageAlt'])}" width="640" height="420" loading="lazy">
+        <div class="event-card-media" data-curtain data-cursor-label="Đăng ký">
+          <img src="{esc(ws['image'])}" alt="{esc(ws['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
           <div class="event-card-badges">
             <span class="glass-badge">{esc(ws['dateDisplay'])}</span>
             <span class="glass-badge glass-badge--accent">{esc(ws['fee'])}</span>
@@ -379,7 +391,7 @@ def render_workshops(upcoming: list) -> str:
             <span>{ICON_PIN} {esc(ws['location'])}</span>
           </div>
           <div class="card-footer">
-            <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}">
+            <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}">
               <span>Đăng ký giữ chỗ</span>
               <span aria-hidden="true">→</span>
             </button>
@@ -388,6 +400,38 @@ def render_workshops(upcoming: list) -> str:
       </article>"""
         )
     return "\n      ".join(cards)
+
+
+def render_join_event_options(upcoming: list) -> str:
+    cards = [
+        """<div class="join-event-option">
+        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-flexible" value="" data-event-title="" data-event-date="Ngày đầu của tuần - Chủ nhật" data-event-time="Nhận lịch chi tiết qua Zalo" data-event-location="Hòa Lạc, Hà Nội" data-event-type="Lịch mở hàng tuần" checked>
+        <label class="join-event-card" for="join-ev-flexible">
+          <span class="join-event-top">
+            <span class="join-event-date">Chủ nhật gần nhất</span>
+            <span class="join-event-seats">Linh hoạt</span>
+          </span>
+          <span class="join-event-title">Chủ nhật gần nhất (nhận lịch qua Zalo)</span>
+          <span class="join-event-meta">Chưa chốt ngày cụ thể — Ban Điều Phối gửi lịch Chủ nhật tới cho bạn.</span>
+        </label>
+      </div>"""
+    ]
+    for ws in upcoming:
+        safe_id = esc(ws["id"])
+        cards.append(
+            f"""<div class="join-event-option">
+        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-{safe_id}" value="{safe_id}" data-event-title="{esc(ws['title'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-type="{esc(ws['type'])}" data-event-seats="{esc(ws['seats'])}">
+        <label class="join-event-card" for="join-ev-{safe_id}">
+          <span class="join-event-top">
+            <span class="join-event-date">{esc(ws['dateDisplay'])}</span>
+            <span class="join-event-seats">{esc(ws['seats'])}</span>
+          </span>
+          <span class="join-event-title">{esc(ws['title'])}</span>
+          <span class="join-event-meta">{esc(ws['time'])} · {esc(ws['location'])}</span>
+        </label>
+      </div>"""
+        )
+    return '<div class="join-event-grid">\n      ' + "\n      ".join(cards) + "\n    </div>"
 
 
 def render_sdgs(sdgs: list) -> str:
@@ -412,7 +456,7 @@ def render_news_cards(articles: list, filterable: bool = False) -> str:
         cards.append(
             f"""<article class="editorial-card" data-stagger-item{attr}>
         <a class="plate-media" data-curtain data-cursor-label="Đọc" href="{href}" aria-label="{esc(a['title'])}">
-          <img src="{esc(a['image'])}" alt="{esc(a['imageAlt'])}" width="640" height="420" loading="lazy">
+          <img src="{esc(a['image'])}" alt="{esc(a['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
         </a>
         <div class="card-meta">
           <span class="cat">{esc(a['category'])}</span>
@@ -436,7 +480,7 @@ def render_campaigns(campaigns: list) -> str:
         cards.append(
             f"""<article class="editorial-card" data-stagger-item data-campaign-card data-category="{esc(filter_tokens)}">
         <div class="plate-media" data-curtain>
-          <img src="{esc(c['image'])}" alt="{esc(c['imageAlt'])}" width="720" height="460" loading="lazy">
+          <img src="{esc(c['image'])}" alt="{esc(c['imageAlt'])}" width="720" height="460" loading="lazy" decoding="async">
         </div>
         <div class="card-meta">
           <span class="cat">{esc(c['categoryLabel'])}</span>
@@ -463,7 +507,7 @@ def render_horizontal_gallery(gallery: list) -> str:
         items.append(
             f"""<button class="horizontal-card" type="button" data-cursor-label="Xem" data-lightbox-src="{esc(g['src'])}" data-lightbox-alt="{esc(g['alt'])}" data-lightbox-caption="{esc(g['caption'])}">
         <div class="horizontal-frame">
-          <img src="{esc(g['src'])}" alt="{esc(g['alt'])}" width="960" height="600" loading="lazy">
+          <img src="{esc(g['src'])}" alt="{esc(g['alt'])}" width="960" height="600" loading="lazy" decoding="async">
         </div>
         <div class="horizontal-caption">
           <span>{esc(g['caption'])}</span>
@@ -479,7 +523,7 @@ def render_gallery(gallery: list) -> str:
     for g in gallery:
         items.append(
             f"""<button class="gallery-item" type="button" data-cursor-label="Xem" data-lightbox-src="{esc(g['src'])}" data-lightbox-alt="{esc(g['alt'])}" data-lightbox-caption="{esc(g['caption'])}">
-        <img src="{esc(g['src'])}" alt="{esc(g['alt'])}" width="720" height="480" loading="lazy">
+        <img src="{esc(g['src'])}" alt="{esc(g['alt'])}" width="720" height="480" loading="lazy" decoding="async">
         <span class="gallery-caption">{esc(g['caption'])}</span>
       </button>"""
         )
@@ -514,23 +558,89 @@ def render_numbered_cards(items: list) -> str:
     return "\n      ".join(cards)
 
 
+PAST_FALLBACK_IMAGES = (
+    "/assets/images/activity-environment.jpg",
+    "/assets/images/activity-workshop.jpg",
+    "/assets/images/activity-community.jpg",
+)
+
+
 def render_past_workshops(past_list: list) -> str:
     rows = []
-    for item in past_list:
+    for idx, item in enumerate(past_list):
+        photo = item.get("image") or PAST_FALLBACK_IMAGES[idx % len(PAST_FALLBACK_IMAGES)]
+        alt = item.get("imageAlt") or item["title"]
         rows.append(
-            f"""<div class="past-item" data-stagger-item>
+            f"""<div class="past-item" data-stagger-item data-hover-photo="{esc(photo)}" data-hover-alt="{esc(alt)}">
         <span class="past-item-date">{esc(item['date'])}</span>
         <h3 class="past-item-title">{esc(item['title'])}</h3>
         <span class="past-item-meta">{esc(item['participants'])}</span>
+        <span class="past-item-arrow" aria-hidden="true">↗</span>
       </div>"""
         )
     return "\n      ".join(rows)
 
 
+_SAFE_REL_LINK_RE = re.compile(
+    r"\[([^\[\]]+)\]\((/(?:[a-z0-9_-][a-z0-9/_-]*)?(?:#[a-z0-9_-]+)?)\)"
+)
+_BOLD_RE = re.compile(r"\*\*([^*]+)\*\*")
+
+
+def format_inline_safe(escaped_line: str) -> str:
+    with_links = _SAFE_REL_LINK_RE.sub(r'<a href="\2">\1</a>', escaped_line)
+    return _BOLD_RE.sub(r"<strong>\1</strong>", with_links)
+
+
+def render_article_body(paragraphs: list) -> str:
+    """Mirror functions/_lib/render.js renderSafeArticleBody() for static article builds."""
+    out = []
+    in_list = False
+
+    def close_list():
+        nonlocal in_list
+        if in_list:
+            out.append("</ul>")
+            in_list = False
+
+    for raw in paragraphs or []:
+        line = str(raw or "").strip()
+        if not line:
+            continue
+        if line.startswith("- "):
+            if not in_list:
+                out.append('<ul class="clean-list">')
+                in_list = True
+            out.append(f"<li>{format_inline_safe(esc(line[2:].strip()))}</li>")
+            continue
+
+        close_list()
+        if line.startswith("### "):
+            out.append(f"<h3>{format_inline_safe(esc(line[4:].strip()))}</h3>")
+        elif line.startswith("## "):
+            out.append(f"<h2>{format_inline_safe(esc(line[3:].strip()))}</h2>")
+        elif line.startswith("> "):
+            out.append(f"<blockquote>{format_inline_safe(esc(line[2:].strip()))}</blockquote>")
+        else:
+            out.append(f"<p>{format_inline_safe(esc(line))}</p>")
+
+    close_list()
+    return "\n      ".join(out)
+
+
 def organization_schema(site: dict) -> dict:
     b = site["brand"]
     c = site["contact"]
-    return {
+    same_as = []
+    for key in ("facebook", "youtube", "instagram"):
+        raw = (c.get(key) or "").strip()
+        if not raw:
+            continue
+        parsed = urlparse(raw)
+        if parsed.scheme in ("http", "https") and parsed.path.strip("/"):
+            same_as.append(raw)
+
+    schema = {
         "@context": "https://schema.org",
         "@type": "NGO",
         "name": b["fullName"],
@@ -548,7 +658,7 @@ def organization_schema(site: dict) -> dict:
         "telephone": c["phoneDisplay"],
         "areaServed": {
             "@type": "Place",
-            "name": "Tân Xã, Hòa Lạc, Hà Nội, Việt Nam",
+            "name": "Hòa Lạc, Hà Nội, Việt Nam",
         },
         "address": {
             "@type": "PostalAddress",
@@ -557,8 +667,10 @@ def organization_schema(site: dict) -> dict:
             "addressRegion": "Hà Nội",
             "addressCountry": "VN",
         },
-        "sameAs": [u for u in [c.get("facebook"), c.get("youtube"), c.get("instagram")] if u],
     }
+    if same_as:
+        schema["sameAs"] = same_as
+    return schema
 
 
 def breadcrumb_schema(site_url: str, crumbs: list) -> dict:
@@ -703,7 +815,7 @@ def collect_precache_urls() -> list:
 
     for html_file in sorted(DIST_DIR.rglob("*.html")):
         rel = html_file.relative_to(DIST_DIR).as_posix()
-        if rel.startswith("admin/") or rel.startswith("_templates/"):
+        if rel == "404.html" or rel.startswith("admin/") or rel.startswith("_templates/"):
             continue
         if rel == "index.html":
             urls.add("/")
@@ -988,6 +1100,14 @@ def generate_cloudflare_headers() -> str:
   Content-Type: application/manifest+json; charset=utf-8
   Cache-Control: public, max-age=3600, must-revalidate
 
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/404.html
+  X-Robots-Tag: noindex, follow
+  Cache-Control: public, max-age=0, must-revalidate
+
 /
   Cache-Control: public, max-age=0, must-revalidate
 
@@ -1007,6 +1127,9 @@ def generate_cloudflare_headers() -> str:
   Cache-Control: public, max-age=0, must-revalidate
 
 /tham-gia/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/chinh-sach/*
   Cache-Control: public, max-age=0, must-revalidate
 
 /offline/*
@@ -1031,6 +1154,60 @@ def generate_cloudflare_headers() -> str:
 
 /assets/images/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+"""
+
+
+def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list) -> str:
+    """Generate dist/llms.txt from canonical JSON sources (Single Source of Truth)."""
+    b = site["brand"]
+    c = site["contact"]
+    metrics_lines = []
+    for m in site.get("impactMetrics", []):
+        val = f"{int(m['value']):,}".replace(",", ".")
+        metrics_lines.append(f"- {val}{m['suffix']} {m['label']} ({m['detail']})")
+
+    pillars_lines = [
+        f"- **{p['badge']} ({p['title']})**: {p['summary']} [{p.get('metricBadge', '')}]"
+        for p in activities.get("pillars", [])
+    ]
+    upcoming_lines = [
+        f"- {ws['dateDisplay']} ({ws['time']}): {ws['title']} — {ws['location']} ({ws['fee']}, {ws['seats']})"
+        for ws in workshops.get("upcoming", [])
+    ]
+    news_lines = []
+    for a in news:
+        slug_url = abs_url(b["siteUrl"], f"/tin-tuc/{a['slug']}/")
+        news_lines.append(f"- [{a['title']}]({slug_url}): {a['excerpt']} ({a['dateDisplay']})")
+
+    return f"""# {b['brandName']} — {b['fullName']}
+
+> {b['subtitle']}
+
+- Website: {b['siteUrl']}
+- Khu vực hoạt động: {b['location']}
+- Thời gian hoạt động: {c['meetingTime']} · Văn phòng / Điểm hẹn: {c['address']}
+- Liên hệ: {c['email']} | Hotline/Zalo: {c['phoneDisplay']}
+- Chi phí tham gia: 100% miễn phí cho học sinh, sinh viên và thanh niên tại Hòa Lạc.
+
+## Số liệu tác động (Single Source of Truth)
+{chr(10).join(metrics_lines)}
+
+## Các trang chính
+- [Trang chủ]({abs_url(b['siteUrl'], '/')}): Tổng quan 3 trụ cột hoạt động, số liệu và lịch hẹn gần nhất.
+- [Giới thiệu & Sứ mệnh]({abs_url(b['siteUrl'], '/gioi-thieu/')}): Sứ mệnh, tầm nhìn, 4 giá trị cốt lõi, nguyên tắc minh bạch và 5 UN SDGs.
+- [Hoạt động & Chiến dịch]({abs_url(b['siteUrl'], '/hoat-dong/')}): Chi tiết HolaGreen, HolaHeart, HolaConnect và các chiến dịch tại Hòa Lạc.
+- [Lịch Workshop & Sự kiện]({abs_url(b['siteUrl'], '/workshop/')}): Lịch đăng ký giữ chỗ miễn phí hàng tuần.
+- [Tin tức & Nhật ký]({abs_url(b['siteUrl'], '/tin-tuc/')}): Báo cáo kết quả công khai từng chiến dịch và workshop.
+- [Đăng ký tham gia]({abs_url(b['siteUrl'], '/tham-gia/')}): Biểu mẫu đăng ký tình nguyện viên và kết nối hợp tác.
+
+## Ba chương trình trọng tâm
+{chr(10).join(pillars_lines)}
+
+## Lịch sự kiện sắp tới
+{chr(10).join(upcoming_lines)}
+
+## Nhật ký hoạt động mới nhất
+{chr(10).join(news_lines)}
 """
 
 
@@ -1072,6 +1249,10 @@ def build_site() -> list:
             "HERO_SECONDARY_LABEL": esc(h["secondaryCta"]["label"]),
             "HERO_UPCOMING_BAR": f"<!-- CMS:HERO_UPCOMING_BAR:START -->\n{render_hero_upcoming_bar(workshops['upcoming'])}\n<!-- CMS:HERO_UPCOMING_BAR:END -->",
             "IMPACT_METRICS_HTML": render_impact_metrics(site["impactMetrics"]),
+            "PHILOSOPHY_QUOTE": esc(p["quote"]),
+            "PHILOSOPHY_MOTTO": esc(p["motto"]),
+            "PHILOSOPHY_MISSION": esc(p["mission"]),
+            "PHILOSOPHY_VISION": esc(p["vision"]),
             "STORY_STAGE_HTML": render_story_stage(activities["pillars"]),
             "UPCOMING_WORKSHOPS_HTML": f"<!-- CMS:UPCOMING_WORKSHOPS:START -->\n{render_workshops(workshops['upcoming'])}\n<!-- CMS:UPCOMING_WORKSHOPS:END -->",
             "HORIZONTAL_GALLERY_HTML": render_horizontal_gallery(activities["gallery"]),
@@ -1126,8 +1307,8 @@ def build_site() -> list:
         site,
         "gioi-thieu/index.html",
         "/gioi-thieu/",
-        f"Giới thiệu & Sứ mệnh | {b['fullName']}",
-        f"Tìm hiểu về sứ mệnh, tầm nhìn, 4 giá trị cốt lõi, định hướng UN SDGs và nguyên tắc minh bạch của {b['fullName']}.",
+        f"Giới thiệu & Sứ mệnh Thanh niên Hòa Lạc | {b['brandName']}",
+        f"Tìm hiểu sứ mệnh, tầm nhìn, 4 giá trị cốt lõi, định hướng 5 UN SDGs và 4 nguyên tắc minh bạch của {b['shortName']} tại Hòa Lạc.",
         about_main,
         [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Giới thiệu", "/gioi-thieu/")])],
     )
@@ -1147,8 +1328,8 @@ def build_site() -> list:
         site,
         "hoat-dong/index.html",
         "/hoat-dong/",
-        f"Hoạt động & Chiến dịch Môi trường – Cộng đồng | {b['shortName']} Hòa Lạc",
-        f"Khám phá các chiến dịch làm sạch môi trường Hòa Lạc, trồng cây xanh, workshop chia sẻ giá trị sống và thiện nguyện cộng đồng của {b['fullName']}.",
+        f"Hoạt động Môi trường & Cộng đồng Hòa Lạc | {b['brandName']}",
+        f"Khám phá các chiến dịch làm sạch môi trường, trồng cây xanh, workshop giá trị sống và thiện nguyện cộng đồng của {b['brandName']} tại Hòa Lạc.",
         activities_main,
         [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Hoạt động", "/hoat-dong/")])],
     )
@@ -1169,8 +1350,8 @@ def build_site() -> list:
         site,
         "workshop/index.html",
         "/workshop/",
-        f"Lịch Workshop Giá Trị Sống & Sự Kiện Hòa Lạc | {b['shortName']}",
-        f"Đăng ký tham dự các buổi workshop chia sẻ nội dung cao đẹp, kỹ năng sống tích cực và chiến dịch môi trường cuối tuần tại Hòa Lạc cùng {b['shortName']}.",
+        f"Lịch Workshop Giá Trị Sống & Sự Kiện Hòa Lạc | {b['brandName']}",
+        f"Đăng ký tham dự miễn phí các buổi workshop giá trị sống, kỹ năng tích cực và chiến dịch môi trường cuối tuần tại Hòa Lạc cùng {b['brandName']}.",
         ws_main,
         [
             org_ld,
@@ -1192,7 +1373,7 @@ def build_site() -> list:
         site,
         "tin-tuc/index.html",
         "/tin-tuc/",
-        f"Tin tức & Nhật ký Hoạt động | {b['fullName']}",
+        f"Tin tức & Nhật ký Hoạt động Hòa Lạc | {b['brandName']}",
         f"Cập nhật bài viết, hình ảnh và báo cáo kết quả các chiến dịch môi trường, workshop và hoạt động cộng đồng tại Hòa Lạc của {b['shortName']}.",
         news_list_main,
         [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Tin tức", "/tin-tuc/")])],
@@ -1203,7 +1384,7 @@ def build_site() -> list:
     news_detail_tpl = load_template("news_detail.html")
     for article in news:
         related = [a for a in news if a["slug"] != article["slug"]][:2]
-        paragraphs = "\n      ".join(f"<p>{esc(para)}</p>" for para in article["content"])
+        paragraphs = render_article_body(article["content"])
         slug_path = f"/tin-tuc/{article['slug']}/"
         detail_main = render_template(
             news_detail_tpl,
@@ -1242,7 +1423,7 @@ def build_site() -> list:
             site,
             f"tin-tuc/{article['slug']}/index.html",
             slug_path,
-            f"{article['title']} | {b['shortName']} Hòa Lạc",
+            f"{article['title']} | {b['brandName']}",
             article["excerpt"],
             detail_main,
             [
@@ -1312,6 +1493,7 @@ def build_site() -> list:
             "CONTACT_PHONE": esc(c["phoneDisplay"]),
             "CONTACT_PHONE_RAW": esc(join_phone_raw),
             "CONTACT_ZALO": esc(c.get("zalo", "")),
+            "JOIN_UPCOMING_EVENTS_HTML": f"<!-- CMS:JOIN_EVENTS:START -->\n{render_join_event_options(workshops['upcoming'])}\n<!-- CMS:JOIN_EVENTS:END -->",
             "FAQ_HTML": render_faqs(site["faqs"]),
         },
     )
@@ -1320,8 +1502,8 @@ def build_site() -> list:
         site,
         "tham-gia/index.html",
         "/tham-gia/",
-        f"Đăng ký Tham gia & Liên hệ | {b['fullName']}",
-        f"Đăng ký làm tình nguyện viên môi trường, tham dự workshop giá trị sống hoặc kết nối hợp tác cùng {b['fullName']}.",
+        f"Đăng ký Tình nguyện viên & Workshop Hòa Lạc | {b['brandName']}",
+        f"Đăng ký làm tình nguyện viên môi trường, tham dự workshop giá trị sống hoặc kết nối hợp tác cùng {b['shortName']} tại Hòa Lạc.",
         join_main,
         [
             org_ld,
@@ -1330,6 +1512,34 @@ def build_site() -> list:
         ],
     )
     sitemap_urls.append(("/tham-gia/", "0.9", "monthly"))
+
+    # 7a-2. Privacy Policy & Community Rules (/chinh-sach/)
+    privacy_main = render_template(
+        load_template("privacy.html"),
+        {
+            "BRAND_SHORT_NAME": esc(b["shortName"]),
+            "BRAND_FULL_NAME": esc(b["fullName"]),
+            "CONTACT_ADDRESS": esc(c["address"]),
+            "CONTACT_MEETING": esc(c["meetingTime"]),
+            "CONTACT_EMAIL": esc(c["email"]),
+            "CONTACT_PHONE": esc(c["phoneDisplay"]),
+            "CONTACT_PHONE_RAW": esc(join_phone_raw),
+        },
+    )
+    write_page(
+        base_tpl,
+        site,
+        "chinh-sach/index.html",
+        "/chinh-sach/",
+        f"Bảo mật & Quy tắc Cộng đồng | {b['brandName']}",
+        f"Chính sách bảo mật thông tin đăng ký và 4 quy tắc sinh hoạt tình nguyện minh bạch của {b['fullName']}.",
+        privacy_main,
+        [
+            org_ld,
+            breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Bảo mật & Quy tắc", "/chinh-sach/")]),
+        ],
+    )
+    sitemap_urls.append(("/chinh-sach/", "0.5", "yearly"))
 
     # 7b. Offline PWA fallback page (not indexed, not in sitemap.xml)
     offline_phone_raw = re.sub(r"[^0-9+]", "", c["phoneDisplay"])
@@ -1353,6 +1563,30 @@ def build_site() -> list:
         offline_main,
         [org_ld],
         body_class="is-offline-page",
+        robots="noindex, nofollow",
+    )
+
+    # 7b-2. Cloudflare Pages native 404 page (eliminates catch-all Soft 404; excluded from sitemap & SW precache)
+    not_found_main = render_template(
+        load_template("404.html"),
+        {
+            "BRAND_SHORT_NAME": esc(b["shortName"]),
+            "CONTACT_ADDRESS": esc(c["address"]),
+            "CONTACT_MEETING": esc(c["meetingTime"]),
+            "CONTACT_EMAIL": esc(c["email"]),
+            "CONTACT_PHONE": esc(c["phoneDisplay"]),
+            "CONTACT_PHONE_RAW": esc(offline_phone_raw),
+        },
+    )
+    write_page(
+        base_tpl,
+        site,
+        "404.html",
+        "/404.html",
+        f"Không tìm thấy trang (404) | {b['brandName']}",
+        f"Trang bạn tìm không tồn tại hoặc đã được di chuyển. Khám phá lịch Workshop, hoạt động môi trường và tin tức mới nhất của {b['brandName']}.",
+        not_found_main,
+        [org_ld],
         robots="noindex, nofollow",
     )
 
@@ -1502,6 +1736,9 @@ Sitemap: {abs_url(b['siteUrl'], '/sitemap.xml')}
         generate_service_worker(CURRENT_BUILD_HASH, precache_urls), encoding="utf-8"
     )
     (DIST_DIR / "_headers").write_text(generate_cloudflare_headers(), encoding="utf-8")
+    (DIST_DIR / "llms.txt").write_text(
+        generate_llms_txt(site, activities, workshops, news), encoding="utf-8"
+    )
 
     return sitemap_urls
 
@@ -1518,6 +1755,8 @@ def verify_dist() -> list:
 
         if "{{" in text or "}}" in text:
             errors.append(f"[{rel}] Unreplaced template placeholder found")
+        if re.search(r'\bhref="#"', text):
+            errors.append(f"[{rel}] Dead placeholder link href=\"#\" found")
 
         is_admin_page = rel == Path("admin/index.html")
         if is_admin_page:
@@ -1557,7 +1796,10 @@ def verify_dist() -> list:
             errors.append(f"[{rel}] Missing JSON-LD structured data")
         for idx, block in enumerate(ld_blocks):
             try:
-                json.loads(block)
+                parsed_ld = json.loads(block)
+                for same_url in (parsed_ld.get("sameAs") or []) if isinstance(parsed_ld, dict) else []:
+                    if not urlparse(same_url).path.strip("/"):
+                        errors.append(f"[{rel}] Placeholder sameAs root URL in JSON-LD: {same_url}")
             except json.JSONDecodeError as exc:
                 errors.append(f"[{rel}] Invalid JSON-LD #{idx + 1}: {exc}")
 
@@ -1573,20 +1815,23 @@ def verify_dist() -> list:
                 errors.append(f"[{rel}] Missing asset {attr}=\"{target}\"")
 
         for img_tag in re.findall(r"<img\b[^>]*>", text):
-            if 'src=""' in img_tag or 'class="brand-part' in img_tag:
+            if re.search(r'\bsrc=""', img_tag):
+                errors.append(f"[{rel}] Empty img src attribute: {img_tag[:80]}")
+            if 'id="float-preview-img"' in img_tag or 'id="lightbox-img"' in img_tag or 'class="brand-part' in img_tag:
                 continue
             if 'alt=""' in img_tag or "alt=" not in img_tag:
                 errors.append(f"[{rel}] Image missing descriptive alt: {img_tag[:80]}")
 
-    for required_file in ["sitemap.xml", "robots.txt", "site.webmanifest", "sw.js", "_headers", "offline/index.html"]:
+    for required_file in ["sitemap.xml", "robots.txt", "llms.txt", "404.html", "chinh-sach/index.html", "site.webmanifest", "sw.js", "_headers", "offline/index.html"]:
         if not (DIST_DIR / required_file).exists():
             errors.append(f"Missing technical SEO/PWA file: {required_file}")
 
-    # Verify offline page has noindex and is excluded from sitemap.xml
-    offline_html_path = DIST_DIR / "offline" / "index.html"
-    if offline_html_path.exists():
-        if "noindex" not in offline_html_path.read_text(encoding="utf-8"):
-            errors.append("[offline/index.html] Offline fallback page must declare robots noindex")
+    # Verify offline & 404 pages have noindex and are excluded from sitemap.xml
+    for noindex_rel in ("offline/index.html", "404.html"):
+        noindex_path = DIST_DIR / noindex_rel
+        if noindex_path.exists() and "noindex" not in noindex_path.read_text(encoding="utf-8"):
+            errors.append(f"[{noindex_rel}] Fallback page must declare robots noindex")
+
     sitemap_path = DIST_DIR / "sitemap.xml"
     if sitemap_path.exists():
         sm_txt = sitemap_path.read_text(encoding="utf-8")
@@ -1594,6 +1839,20 @@ def verify_dist() -> list:
             errors.append("[sitemap.xml] Offline fallback route must not be included in sitemap.xml")
         if "/admin/" in sm_txt:
             errors.append("[sitemap.xml] Admin route must not be included in sitemap.xml")
+        if "/404.html" in sm_txt:
+            errors.append("[sitemap.xml] 404 page must not be included in sitemap.xml")
+        if "/chinh-sach/" not in sm_txt:
+            errors.append("[sitemap.xml] Privacy route /chinh-sach/ must be included in sitemap.xml")
+
+    # Verify llms.txt single-source-of-truth impact metrics
+    llms_path = DIST_DIR / "llms.txt"
+    if llms_path.exists():
+        llms_txt = llms_path.read_text(encoding="utf-8")
+        site_cfg = load_json("site.json")
+        for m in site_cfg.get("impactMetrics", []):
+            formatted_val = f"{int(m['value']):,}".replace(",", ".")
+            if formatted_val not in llms_txt:
+                errors.append(f"[llms.txt] Missing impact metric value from site.json: {formatted_val}")
 
     # Verify Web App Manifest contract & actual icon/screenshot pixel sizes
     manifest_path = DIST_DIR / "site.webmanifest"
@@ -1673,8 +1932,8 @@ def verify_dist() -> list:
                 total_bytes = 0
                 for u in precache_urls:
                     clean = u.split("?")[0]
-                    if clean.startswith("/admin") or "admin.css" in clean or "admin.js" in clean:
-                        errors.append(f"[sw.js] Admin route/asset must not be precached: {u}")
+                    if clean.startswith("/admin") or clean == "/404.html" or "admin.css" in clean or "admin.js" in clean:
+                        errors.append(f"[sw.js] Non-precachable route/asset must not be precached: {u}")
                     if clean == "/":
                         p = DIST_DIR / "index.html"
                     elif clean.endswith("/"):

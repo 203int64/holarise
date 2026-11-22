@@ -39,19 +39,20 @@
   <meta name="twitter:image" content="{{OG_IMAGE_URL}}">
   <meta name="twitter:image:alt" content="{{PAGE_TITLE}}">
 
-  <!-- Clean Vietnamese-native Inter (Light, Regular, Medium, SemiBold only) -->
+  <!-- Vietnamese-native Editorial Typography: Be Vietnam Pro (UI/Display) + Lora (Manifesto/Quotes) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
   <link rel="stylesheet" href="/assets/css/styles.css?v={{CACHE_BUST}}">
   {{JSON_LD_SCRIPTS}}
 </head>
 <body class="{{BODY_CLASS}}">
   <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+  <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
   <div class="cursor-tag" id="cursor-tag" aria-hidden="true"></div>
   <div class="float-preview" id="float-preview" aria-hidden="true">
-    <img id="float-preview-img" src="" alt="">
+    <img id="float-preview-img" alt="">
   </div>
   <a class="skip-link" href="#main-content">Chuyển tới nội dung chính</a>
 
@@ -76,7 +77,7 @@
       <div class="header-actions">
         <div class="live-status-pill" aria-label="Địa điểm và giờ địa phương">
           <span class="live-status-dot" aria-hidden="true"></span>
-          <span>Tân Xã, Hòa Lạc · <span data-live-clock>07:00:00</span></span>
+          <span>Hòa Lạc, Hà Nội · <span data-live-clock>07:00:00</span></span>
         </div>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Mở menu điều hướng">
           <span class="nav-toggle-bars" aria-hidden="true">
@@ -139,6 +140,7 @@
             <li><a href="/hoat-dong/">Hoạt động &amp; Chiến dịch</a></li>
             <li><a href="/workshop/">Lịch Workshop</a></li>
             <li><a href="/tin-tuc/">Nhật ký hoạt động</a></li>
+            <li><a href="/chinh-sach/">Bảo mật &amp; Quy tắc cộng đồng</a></li>
             <li>
               <button class="pwa-install-footer-btn" type="button" data-pwa-install hidden>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -165,10 +167,10 @@
         <div>
           <h2 class="footer-heading">Liên hệ tại Hòa Lạc</h2>
           <ul class="footer-links">
-            <li>{{CONTACT_ADDRESS}}</li>
-            <li><a href="tel:{{CONTACT_PHONE}}">{{CONTACT_PHONE}}</a></li>
+            <li>Văn phòng: {{CONTACT_ADDRESS}}</li>
+            <li><a href="tel:{{CONTACT_PHONE_RAW}}">{{CONTACT_PHONE}}</a></li>
             <li><a href="mailto:{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</a></li>
-            <li>{{CONTACT_MEETING}}</li>
+            <li>Thời gian hoạt động: {{CONTACT_MEETING}}</li>
           </ul>
         </div>
       </div>
@@ -185,8 +187,13 @@
     <div class="dialog-inner">
       <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
       <span class="kicker" style="margin-bottom: 8px;">Đăng ký nhanh · Miễn phí</span>
-      <h2 id="modal-heading" style="margin: 0 0 6px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Giữ chỗ tham gia hoạt động</h2>
-      <p id="modal-event-title" style="margin: 0 0 18px; font-size: 0.9rem; color: var(--accent); font-weight: 500;"></p>
+      <h2 id="modal-heading" style="margin: 0 0 12px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Giữ chỗ tham gia hoạt động</h2>
+
+      <div class="modal-event-ticket">
+        <span class="modal-ticket-type" id="modal-event-type">Chủ nhật tại Hòa Lạc</span>
+        <p class="modal-ticket-title" id="modal-event-title"></p>
+        <div class="modal-ticket-meta" id="modal-event-meta"></div>
+      </div>
 
       <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" novalidate>
         <input type="hidden" name="source" value="event_modal">
@@ -196,42 +203,117 @@
           <label for="modal-website">Website</label>
           <input id="modal-website" name="website" type="text" tabindex="-1" autocomplete="off">
         </div>
+        <p class="form-required-note">Các mục có dấu <span aria-hidden="true">*</span> là bắt buộc.</p>
         <div class="field">
           <label for="modal-name">Họ và tên <span aria-hidden="true">*</span></label>
-          <input id="modal-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Nguyễn Minh Anh" required minlength="2" enterkeyhint="next">
+          <input id="modal-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Nguyễn Minh Anh" required minlength="2" enterkeyhint="next" data-error="modal-name-error">
+          <div id="modal-name-error" class="field-error">
+            <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span data-error-text>Lỗi: Vui lòng nhập họ và tên đầy đủ (tối thiểu 2 ký tự).</span>
+          </div>
         </div>
         <div class="form-row-2">
           <div class="field">
             <label for="modal-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
-            <input id="modal-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="next">
+            <input id="modal-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="next" data-error="modal-phone-error">
+            <div id="modal-phone-error" class="field-error">
+              <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span data-error-text>Lỗi: Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).</span>
+            </div>
           </div>
           <div class="field">
             <label for="modal-email">Email nhận xác nhận</label>
-            <input id="modal-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" enterkeyhint="next">
+            <input id="modal-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" enterkeyhint="next" data-error="modal-email-error">
+            <div id="modal-email-error" class="field-error">
+              <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span data-error-text>Lỗi: Email chưa đúng định dạng (ví dụ: tenban@gmail.com), hoặc bạn có thể để trống.</span>
+            </div>
           </div>
         </div>
         <div class="field">
           <label for="modal-org">Trường / Đơn vị tại Hòa Lạc</label>
           <input id="modal-org" name="organization" type="text" autocomplete="organization" placeholder="Ví dụ: ĐH FPT, ĐHQGHN, THPT..." enterkeyhint="next">
+          <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Chọn nhanh đơn vị">
+            <button type="button" class="quick-chip" data-org-chip="ĐH FPT" aria-pressed="false">ĐH FPT</button>
+            <button type="button" class="quick-chip" data-org-chip="ĐHQGHN (VNU)" aria-pressed="false">ĐHQGHN</button>
+            <button type="button" class="quick-chip" data-org-chip="THPT Hòa Lạc" aria-pressed="false">THPT Hòa Lạc</button>
+            <button type="button" class="quick-chip" data-org-chip="Đã đi làm" aria-pressed="false">Đi làm</button>
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label-text">Phong cách tham gia</span>
+          <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Phong cách đi Chủ nhật">
+            <button type="button" class="quick-chip is-selected" data-vibe-chip="Đi một mình (ghép nhóm)" aria-pressed="true">Đi một mình (ghép nhóm)</button>
+            <button type="button" class="quick-chip" data-vibe-chip="Đi cùng bạn bè" aria-pressed="false">Đi cùng bạn bè</button>
+            <button type="button" class="quick-chip" data-vibe-chip="Lần đầu tham gia" aria-pressed="false">Lần đầu tham gia</button>
+          </div>
         </div>
         <div class="field">
           <label for="modal-note">Lời nhắn (không bắt buộc)</label>
-          <textarea id="modal-note" name="note" rows="2" placeholder="Bạn đi một mình hay đi cùng bạn bè?"></textarea>
+          <textarea id="modal-note" name="note" rows="2" placeholder="Câu hỏi thêm hoặc điều bạn mong chờ trong buổi Chủ nhật này..."></textarea>
         </div>
         <div class="form-status" role="status" aria-live="polite"></div>
-        <button class="btn btn--primary" type="submit">Xác nhận đăng ký</button>
+        <button class="btn btn--primary" type="submit">Giữ chỗ Chủ nhật này</button>
+        <p class="form-privacy-note">Miễn phí 100% · Thông tin chỉ dùng để điều phối buổi hoạt động. Xem <a href="/chinh-sach/">Chính sách bảo mật</a>.</p>
       </form>
+
+      <div class="modal-pass-success" id="modal-pass-success" hidden>
+        <div class="modal-pass-badge">
+          <span class="live-status-dot" aria-hidden="true"></span>
+          <span>ĐÃ GIỮ CHỖ THÀNH CÔNG</span>
+        </div>
+        <div class="modal-pass-code-row">
+          <span>Mã vé giữ chỗ:</span>
+          <strong class="pass-code" id="modal-pass-code"></strong>
+        </div>
+        <p class="modal-pass-summary" id="modal-pass-summary"></p>
+        <span id="modal-pass-invite-text" class="visually-hidden"></span>
+        <div class="pass-actions-buttons">
+          <button type="button" class="btn btn--primary btn--sm" data-pass-download="modal">Tải ảnh vé (PNG)</button>
+          <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Rủ bạn cùng đi</button>
+          <span class="copy-control">
+            <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
+              <span>Sao chép lời mời</span>
+            </button>
+            <span class="copy-tip" role="status"></span>
+          </span>
+        </div>
+        <button type="button" class="pass-reset-link" data-pass-new="modal">Đăng ký thêm</button>
+      </div>
     </div>
   </dialog>
 
-  <!-- Native HTML5 <dialog> Lightbox Xem Ảnh Sự Kiện -->
+  <!-- Native HTML5 <dialog> Lightbox Xem Ảnh Sự Kiện (Prev/Next + Keyboard + Touch Swipe) -->
   <dialog class="club-dialog club-dialog--lightbox" id="gallery-lightbox" closedby="any" aria-label="Xem ảnh sự kiện">
     <div class="lightbox-stage">
       <button class="modal-close" type="button" data-modal-close aria-label="Đóng ảnh">×</button>
-      <img id="lightbox-img" src="" alt="">
-      <div class="lightbox-caption" id="lightbox-caption"></div>
+      <div class="lightbox-media-wrap">
+        <button class="lightbox-nav lightbox-nav--prev" type="button" data-lightbox-prev aria-label="Ảnh trước">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <img id="lightbox-img" alt="">
+        <button class="lightbox-nav lightbox-nav--next" type="button" data-lightbox-next aria-label="Ảnh tiếp theo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="lightbox-bar">
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+        <span class="lightbox-counter" id="lightbox-counter" aria-live="polite"></span>
+      </div>
     </div>
   </dialog>
+
+  <!-- Desktop Orbital Reading Progress & Back-to-Top Ring (Desktop >= 1024px only) -->
+  <button class="orbital-top-btn" id="orbital-top-btn" type="button" aria-label="Cuộn lên đầu trang">
+    <svg class="orbital-ring" viewBox="0 0 44 44" aria-hidden="true">
+      <circle class="orbital-ring-track" cx="22" cy="22" r="19"></circle>
+      <circle class="orbital-ring-fill" cx="22" cy="22" r="19"></circle>
+    </svg>
+    <svg class="orbital-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 19V5"></path>
+      <path d="m5 12 7-7 7 7"></path>
+    </svg>
+  </button>
 
   <!-- Native HTML5 <dialog> Hướng Dẫn Cài Ứng Dụng (iOS Safari & Zalo/FB WebView) -->
   <dialog class="club-dialog pwa-dialog" id="pwa-install-dialog" closedby="any" aria-labelledby="pwa-dialog-title-ios">
@@ -309,9 +391,9 @@
 
   <script src="/assets/vendor/gsap.min.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/vendor/ScrollTrigger.min.js?v={{CACHE_BUST}}" defer></script>
-  <script src="/assets/vendor/lenis.min.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/motion.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/main.js?v={{CACHE_BUST}}" defer></script>
+  <script src="/assets/js/join-pass.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/pwa.js?v={{CACHE_BUST}}" defer></script>
 </body>
 </html>

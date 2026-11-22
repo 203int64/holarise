@@ -13,6 +13,14 @@
   Content-Type: application/manifest+json; charset=utf-8
   Cache-Control: public, max-age=3600, must-revalidate
 
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/404.html
+  X-Robots-Tag: noindex, follow
+  Cache-Control: public, max-age=0, must-revalidate
+
 /
   Cache-Control: public, max-age=0, must-revalidate
 
@@ -32,6 +40,9 @@
   Cache-Control: public, max-age=0, must-revalidate
 
 /tham-gia/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/chinh-sach/*
   Cache-Control: public, max-age=0, must-revalidate
 
 /offline/*

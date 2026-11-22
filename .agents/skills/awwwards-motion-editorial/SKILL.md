@@ -47,3 +47,23 @@ description: >-
 - Hiding content permanently at `opacity: 0` if JS fails or loads late (use a JS-added root class like `html.has-motion` before setting initial hidden states).
 - Over-animating every paragraph or adding jarring bounce/wobble effects that undermine NGO trustworthiness.
 - Measuring animated elements directly for layout math — always measure static wrapper containers and set `invalidateOnRefresh: true`.
+
+## 5. Conversion Copy, Content Realism, Nested Geometry & Ship Craft (Distilled from `ai-design-skills`)
+- **Law #0 Lock:** Never overwrite the existing HolaRise Design System (`Be Vietnam Pro` + `Lora`, `#FFFFFF / #F6F7F6 / #0B110F / #0B6E4F / #D97948`, custom editorial rhythm) with generic SaaS fonts or Tailwind-only defaults.
+- **Conversion Copy & Risk Reversal:**
+  - Every primary CTA must state a concrete verb + outcome (e.g., *"Giữ chỗ cuối tuần này"*, *"Xem lịch Workshop cuối tuần"*); ban generic labels like *"Learn more"*, *"Submit"*, or bare *"Đăng ký tham gia"*.
+  - Place explicit risk-reversal reassurance (*"Miễn phí 100% · Có sẵn dụng cụ · Đi một mình vẫn được ghép nhóm"*) right beside primary CTAs and registration forms, and place concrete proof directly next to claims.
+- **Content Realism:**
+  - Never invent statistics, prices, phone numbers, testimonials, or partner logos. When real facts are missing, preserve or mark explicit `{{placeholder}}` values until the user supplies real data.
+  - Ban AI hype filler words (*"revolutionize"*, *"supercharge"*, *"cutting edge"*, *"effortless"*, *"world class"*, etc.); state concrete outcomes in natural Vietnamese.
+- **Typography Wrapping:**
+  - Apply `text-wrap: balance` selectively on short standalone headings (`h1–h3`, max ~6 lines, never globally with `*` and never on bordered box pills).
+  - Apply `text-wrap: pretty` on multi-line body copy, leads, FAQs, and editorial quotes. Always preserve `padding-block: 0.08–0.1em` on Vietnamese `.split-line-mask`.
+- **Nested Radius & Card Borders:**
+  - When a rounded child sits inside a rounded container with `gap < 32px` and `outer - gap > 2px`, align inner radius to `inner = outer - gap`; keep radius values snapped to the token scale (`--radius-sm/md/lg/xl`, `999px`).
+  - Avoid single-sided accent borders on rounded cards (`border-left: 3px` is reserved for unboxed editorial blockquotes; boxed callouts use full hairline borders + flat surface).
+- **Complete UI States & Motion Hygiene:**
+  - Interactive controls must ship `:hover`, `:active` (`scale(0.98)` / `translateY(1px)`, suppressed under `prefers-reduced-motion: reduce`), `:focus-visible`, `:disabled`/loading, empty state, and accessible inline field errors (`data-error` + dynamic `aria-describedby` added only while invalid + single polite live region; explain `*` once before the form).
+  - Use `var(--ease-expo)` for UI transitions rather than raw `ease`/`linear` defaults (except continuous spinners or `scroll()`/`view()` timeline animations); throttle native `scroll` listeners via `requestAnimationFrame`.
+- **Ship Requirements:**
+  - Maintain a branded `404.html` (`noindex`, excluded from `sitemap.xml` and SW precache), a `/chinh-sach/` privacy & community rules page linked from the footer and registration forms, digits-only `tel:` links (`CONTACT_PHONE_RAW`), zero dead `href="#"` links, and zero horizontal overflow at `390px`.

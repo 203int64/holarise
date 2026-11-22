@@ -12,16 +12,36 @@
 
 <section class="section">
   <div class="container">
-    <div class="filter-bar" data-filter-group="[data-news-card]" role="group" aria-label="Lọc bài viết theo bộ lọc 4 chữ">
-      <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Tất cả</button>
-      <button class="filter-btn" type="button" data-filter="sach" aria-pressed="false">🌱 Sạch</button>
-      <button class="filter-btn" type="button" data-filter="biet-on" aria-pressed="false">💛 Biết ơn</button>
-      <button class="filter-btn" type="button" data-filter="tu-te" aria-pressed="false">✨ Tử tế</button>
-      <button class="filter-btn" type="button" data-filter="se-chia" aria-pressed="false">🤝 Sẻ chia</button>
+    <div class="filter-bar-row">
+      <div class="filter-bar" data-filter-group="[data-news-card]" role="group" aria-label="Lọc bài viết theo bộ lọc 4 chữ">
+        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Tất cả</button>
+        <button class="filter-btn" type="button" data-filter="sach" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+          <span>Sạch</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="biet-on" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          <span>Biết ơn</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="tu-te" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <span>Tử tế</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="se-chia" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Sẻ chia</span>
+        </button>
+      </div>
+      <span class="filter-count" data-filter-count="[data-news-card]" aria-live="polite"></span>
     </div>
 
     <div class="grid-3" data-stagger-group>
       {{NEWS_LIST_HTML}}
+    </div>
+
+    <div class="filter-empty" data-filter-empty="[data-news-card]" hidden>
+      <p>Chưa có bài viết nào thuộc nhóm giá trị này.</p>
+      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-news-card]">Xem tất cả bài viết</button>
     </div>
   </div>
 </section>

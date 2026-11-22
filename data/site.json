@@ -8,7 +8,7 @@
     "motto": "Small Beginnings. Great Impact.",
     "subtitle": "Kết nối thanh niên, sinh viên và học sinh tại Hòa Lạc cùng làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng (HolaConnect).",
     "foundedYear": 2025,
-    "location": "Tân Xã, Hòa Lạc, Hà Nội",
+    "location": "Hòa Lạc, Hà Nội",
     "siteUrl": "https://holarise.pages.dev",
     "language": "vi",
     "locale": "vi_VN",
@@ -21,7 +21,7 @@
     "email": "phungsu@holarise.org",
     "phoneDisplay": "077.777.7777",
     "address": "Tân Xã, Hòa Lạc, Hà Nội",
-    "meetingTime": "Sáng Thứ Bảy hoặc Chủ Nhật hàng tuần",
+    "meetingTime": "Ngày đầu của tuần - Chủ nhật",
     "facebook": "https://facebook.com",
     "zalo": "https://zalo.me/0777777777",
     "youtube": "https://youtube.com",
@@ -46,14 +46,14 @@
       "href": "#lich-hen"
     },
     "image": "/assets/images/hero-hoalac.jpg",
-    "imageAlt": "Thanh niên, sinh viên và học sinh Cộng đồng HolaRise cùng trồng cây và làm sạch cảnh quan tại Tân Xã, Hòa Lạc"
+    "imageAlt": "Thanh niên, sinh viên và học sinh Cộng đồng HolaRise cùng trồng cây và làm sạch cảnh quan tại Hòa Lạc"
   },
   "impactMetrics": [
     {
       "value": 18,
       "suffix": "+",
       "label": "Chiến dịch xanh",
-      "detail": "Tân Xã & Hòa Lạc"
+      "detail": "Toàn khu vực Hòa Lạc"
     },
     {
       "value": 420,
@@ -110,7 +110,7 @@
       "code": "SDG 11",
       "title": "Cộng đồng bền vững",
       "color": "#FD9D24",
-      "description": "Xây dựng cảnh quan xanh sạch và nếp sống văn minh tại Tân Xã."
+      "description": "Xây dựng cảnh quan xanh sạch và nếp sống văn minh tại Hòa Lạc."
     },
     {
       "code": "SDG 13",
@@ -122,7 +122,7 @@
       "code": "SDG 15",
       "title": "Hệ sinh thái trên cạn",
       "color": "#56C02B",
-      "description": "Làm sạch ven hồ Tân Xã và trồng cây xanh bản địa tại Hòa Lạc."
+      "description": "Làm sạch cảnh quan hồ nước và trồng cây xanh bản địa tại Hòa Lạc."
     },
     {
       "code": "SDG 17",
@@ -142,7 +142,7 @@
     },
     {
       "title": "Chu Đáo & An Toàn",
-      "description": "Thông báo rõ điểm hẹn tại Tân Xã, Hòa Lạc và chuẩn bị sẵn găng tay, dụng cụ, nước uống."
+      "description": "Thông báo rõ điểm hẹn tại Hòa Lạc và chuẩn bị sẵn găng tay, dụng cụ, nước uống."
     },
     {
       "title": "Nhật Ký Kết Quả Công Khai",
@@ -152,7 +152,7 @@
   "faqs": [
     {
       "question": "Ai có thể tham gia Cộng đồng HolaRise?",
-      "answer": "Tất cả học sinh, sinh viên và thanh niên đang học tập, làm việc tại Tân Xã và khu vực Hòa Lạc đều có thể đăng ký tham gia."
+      "answer": "Tất cả học sinh, sinh viên và thanh niên đang học tập, làm việc tại khu vực Hòa Lạc đều có thể đăng ký tham gia."
     },
     {
       "question": "Tham gia hoạt động và Workshop có mất phí không?",
@@ -160,16 +160,28 @@
     },
     {
       "question": "Đi một mình lần đầu thì làm quen thế nào?",
-      "answer": "Trước buổi hoạt động, Ban Điều Phối sẽ liên hệ qua Zalo, gửi vị trí điểm hẹn tại Tân Xã và ghép bạn vào nhóm nhỏ để dễ dàng làm quen."
+      "answer": "Trước buổi hoạt động, Ban Điều Phối sẽ liên hệ qua Zalo, gửi vị trí điểm hẹn tại Hòa Lạc và ghép bạn vào nhóm nhỏ để dễ dàng làm quen."
     },
     {
       "question": "Trường học hoặc CLB muốn phối hợp tổ chức thì liên hệ đâu?",
       "answer": "Quý trường và các CLB có thể liên hệ trực tiếp qua Hotline/Zalo 077.777.7777 hoặc email phungsu@holarise.org."
+    },
+    {
+      "question": "Nếu trời mưa hoặc có việc đột xuất muốn đổi lịch thì sao?",
+      "answer": "Bạn chỉ cần nhắn lại cho Ban Điều Phối qua Zalo hoặc Email trước giờ hẹn. Nếu thời tiết xấu, lịch dọn rác ngoài trời sẽ được thông báo dời sang tuần kế tiếp hoặc chuyển sang sinh hoạt trong nhà."
+    },
+    {
+      "question": "Đi hoạt động môi trường cần chuẩn bị gì và mỗi buổi kéo dài bao lâu?",
+      "answer": "Mỗi buổi thường kéo dài 2 đến 2,5 tiếng vào sáng cuối tuần. Bạn chỉ cần mặc trang phục gọn nhẹ, đi giày thể thao và mang chai nước cá nhân; găng tay, kẹp rác và dụng cụ bảo hộ đều đã có CLB chuẩn bị sẵn."
+    },
+    {
+      "question": "Tham gia hoạt động có được cấp giấy chứng nhận tình nguyện không?",
+      "answer": "Có. Ban Điều Phối ghi nhận đầy đủ số buổi và giờ tham gia thực tế để xác nhận hoặc cấp giấy chứng nhận tình nguyện bản mềm/bản in theo nhu cầu học tập và rèn luyện của sinh viên."
     }
   ],
   "seo": {
     "defaultTitle": "HolaRise | Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên",
-    "defaultDescription": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise) tại Tân Xã, Hòa Lạc: kết nối thanh niên, sinh viên, học sinh cùng làm sạch môi trường, tham gia workshop giá trị sống và phụng sự xã hội.",
-    "keywords": "HolaRise, Cộng đồng HolaRise, Cộng đồng Thanh niên Hòa Lạc Cùng Vươn Lên, Hoa Lac Youth Empowerment Community, CLB thanh niên Hòa Lạc, tình nguyện môi trường Tân Xã Hòa Lạc, workshop sinh viên Hòa Lạc"
+    "defaultDescription": "HolaRise kết nối thanh niên, sinh viên Hòa Lạc làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng.",
+    "keywords": "HolaRise, Cộng đồng HolaRise, Cộng đồng Thanh niên Hòa Lạc Cùng Vươn Lên, Hoa Lac Youth Empowerment Community, CLB thanh niên Hòa Lạc, tình nguyện môi trường Hòa Lạc, workshop sinh viên Hòa Lạc"
   }
 }

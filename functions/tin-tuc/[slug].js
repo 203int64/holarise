@@ -8,10 +8,29 @@ import {
   serializePostRow,
 } from "../_lib/render.js";
 
+async function renderNotFoundResponse(request, env) {
+  if (env?.ASSETS) {
+    try {
+      const notFoundRes = await env.ASSETS.fetch(new Request(new URL("/404.html", request.url)));
+      if (notFoundRes && notFoundRes.ok) {
+        return new Response(await notFoundRes.text(), {
+          status: 404,
+          headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
+        });
+      }
+    } catch (_err) {}
+  }
+
+  return new Response(
+    `<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Không tìm thấy bài viết | ${BRAND_SHORT_NAME}</title><link rel="stylesheet" href="/assets/css/styles.css"></head><body style="display:grid;place-items:center;min-height:100vh;padding:24px;text-align:center;"><div><h1 style="margin:0 0 12px;font-size:1.6rem;">Không tìm thấy bài viết</h1><p style="margin:0 0 24px;color:#4c5853;">Bài viết này có thể đã được gỡ xuống hoặc chưa xuất bản.</p><a class="btn btn--primary" href="/tin-tuc/">Quay lại Tin tức &amp; Nhật ký</a></div></body></html>`,
+    { status: 404, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } }
+  );
+}
+
 export async function onRequestGet({ request, env, params }) {
   const slug = String(params?.slug || "").trim();
   if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
-    return new Response("Không tìm thấy bài viết.", { status: 404 });
+    return renderNotFoundResponse(request, env);
   }
 
   if (!env?.DB || !env?.ASSETS) {
@@ -35,11 +54,7 @@ export async function onRequestGet({ request, env, params }) {
   ]);
 
   if (!row) {
-    // Clean 404 when article is deleted or draft
-    return new Response(
-      `<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Không tìm thấy bài viết | ${BRAND_SHORT_NAME}</title><link rel="stylesheet" href="/assets/css/styles.css"></head><body style="display:grid;place-items:center;min-height:100vh;padding:24px;text-align:center;"><div><h1 style="margin:0 0 12px;font-size:1.6rem;">Không tìm thấy bài viết</h1><p style="margin:0 0 24px;color:#4c5853;">Bài viết này có thể đã được gỡ xuống hoặc chưa xuất bản.</p><a class="btn btn--primary" href="/tin-tuc/">Quay lại Tin tức &amp; Nhật ký</a></div></body></html>`,
-      { status: 404, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } }
-    );
+    return renderNotFoundResponse(request, env);
   }
 
   if (!shellRes.ok) {
@@ -50,7 +65,7 @@ export async function onRequestGet({ request, env, params }) {
   const related = (relatedRes?.results || []).map(serializePostRow);
   const canonicalUrl = absUrl(`/tin-tuc/${article.slug}/`);
   const ogImageUrl = absUrl(article.image);
-  const pageTitle = `${article.title} | ${BRAND_SHORT_NAME} Hòa Lạc`;
+  const pageTitle = `${article.title} | HolaRise`;
 
   const replacements = {
     __SSR_PAGE_TITLE__: escHtml(pageTitle),

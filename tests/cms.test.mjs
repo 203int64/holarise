@@ -35,6 +35,7 @@ import { onRequestGet as settingsGet, onRequestPut as settingsPut } from "../fun
 import { onRequest as rootMiddleware } from "../functions/_middleware.js";
 import { onRequestGet as ssrHome } from "../functions/index.js";
 import { onRequestGet as ssrWorkshop } from "../functions/workshop/index.js";
+import { onRequestGet as ssrJoin } from "../functions/tham-gia/index.js";
 import { onRequestGet as ssrNewsList } from "../functions/tin-tuc/index.js";
 import { onRequestGet as ssrPostDetail, onRequestHead as ssrPostHead } from "../functions/tin-tuc/[slug].js";
 import { onRequestHead as mediaHead } from "../functions/api/media/[id].js";
@@ -144,6 +145,8 @@ test("Vietnamese slugify, URL guards, CSV formula injection & XSS sanitization",
   const html = renderSafeArticleBody([
     "## Tiêu đề phụ **nổi bật**",
     "<script>alert('xss')</script> an toàn",
+    "Xem thêm [Lịch Workshop cuối tuần](/workshop/) và [Hoạt động](/hoat-dong/#moi-truong).",
+    "Chặn link độc [x](javascript:alert(1)), [y](//evil.com/) và [z](https://evil.com/).",
     "- Mục một",
     "- Mục hai",
     "> Trích dẫn hay",
@@ -151,6 +154,11 @@ test("Vietnamese slugify, URL guards, CSV formula injection & XSS sanitization",
   assert.ok(html.includes("<h2>Tiêu đề phụ <strong>nổi bật</strong></h2>"));
   assert.ok(!html.includes("<script>"));
   assert.ok(html.includes("&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;"));
+  assert.ok(html.includes('<a href="/workshop/">Lịch Workshop cuối tuần</a>'));
+  assert.ok(html.includes('<a href="/hoat-dong/#moi-truong">Hoạt động</a>'));
+  assert.ok(!html.includes("javascript:alert(1)\">"));
+  assert.ok(!html.includes('href="//evil.com'));
+  assert.ok(!html.includes('href="https://evil.com'));
   assert.ok(html.includes('<ul class="clean-list">'));
   assert.ok(html.includes("<blockquote>Trích dẫn hay</blockquote>"));
 
@@ -623,6 +631,44 @@ test("SSR Pages Functions inject live D1 events, brand-new articles with OG/JSON
   const wsHtml = await wsRes.text();
   assert.ok(wsHtml.includes("Chiến dịch SSR Live Test"));
   assert.ok(wsHtml.includes('"@type": "Event"'));
+
+  const joinRes = await ssrJoin({ request: makeReq("/tham-gia/"), env });
+  assert.equal(joinRes.status, 200);
+  const joinHtml = await joinRes.text();
+  assert.ok(joinHtml.includes("Chiến dịch SSR Live Test"));
+  assert.ok(joinHtml.includes('id="join-ev-ev-live-ssr"'));
+  assert.ok(joinHtml.includes("Ngày đầu của tuần - Chủ nhật"));
+  assert.ok(!joinHtml.includes("Thứ Bảy"));
+
+  // Join Studio packaged registration payload stores cleanly in existing D1 schema
+  const packagedJoinReg = await publicRegister({
+    request: makeReq("/api/registrations", {
+      method: "POST",
+      ip: "5.5.5.5",
+      body: {
+        source: "join_page",
+        eventId: "ev-live-ssr",
+        activity: "Chiến dịch SSR Live Test",
+        fullName: "Lê Minh Hoàng",
+        phone: "0912345678",
+        email: "hoang@fpt.edu.vn",
+        role: "Tình nguyện viên chiến dịch môi trường",
+        organization: "ĐH FPT",
+        note: "[Phong cách: Đi một mình (ghép nhóm) | Hứng thú: Trồng cây xanh | Rủ bởi: Minh Anh] Hẹn gặp Chủ nhật!",
+      },
+    }),
+    env,
+  });
+  assert.equal(packagedJoinReg.status, 201);
+  const packagedBody = await packagedJoinReg.json();
+  assert.ok(packagedBody.id.startsWith("REG-"));
+  const storedJoinReg = await db
+    .prepare("SELECT * FROM registrations WHERE id = ?")
+    .bind(packagedBody.id)
+    .first();
+  assert.equal(storedJoinReg.event_id, "ev-live-ssr");
+  assert.equal(storedJoinReg.activity_title, "Chiến dịch SSR Live Test");
+  assert.ok(storedJoinReg.note.includes("Rủ bởi: Minh Anh"));
 
   const nlRes = await ssrNewsList({ request: makeReq("/tin-tuc/"), env });
   assert.equal(nlRes.status, 200);

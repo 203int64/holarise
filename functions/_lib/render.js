@@ -98,7 +98,7 @@ export function renderHeroUpcomingBar(upcoming) {
       <span class="upcoming-title">${escHtml(ws.title)}</span>
       <span class="upcoming-date">· ${escHtml(ws.dateDisplay)} (${escHtml(ws.time)}) · ${escHtml(ws.fee)}</span>
     </div>
-    <button class="btn btn--outline btn--sm" type="button" data-register-event="${escHtml(ws.title)}" data-event-id="${escHtml(ws.id)}">Giữ chỗ miễn phí</button>
+    <button class="btn btn--outline btn--sm" type="button" data-register-event="${escHtml(ws.title)}" data-event-id="${escHtml(ws.id)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-fee="${escHtml(ws.fee)}" data-event-type="${escHtml(ws.type)}">Giữ chỗ miễn phí</button>
   </div>
 </div>`;
 }
@@ -117,8 +117,8 @@ export function renderWorkshopsHtml(upcoming) {
         ? ` data-workshop-card data-category="${escHtml(filtersAttr)}"`
         : " data-workshop-card";
       return `<article class="event-card" data-stagger-item${catAttr}>
-        <div class="event-card-media" data-curtain>
-          <img src="${escHtml(ws.image)}" alt="${escHtml(ws.imageAlt || ws.title)}" width="640" height="420" loading="lazy">
+        <div class="event-card-media" data-curtain data-cursor-label="Đăng ký">
+          <img src="${escHtml(ws.image)}" alt="${escHtml(ws.imageAlt || ws.title)}" width="640" height="420" loading="lazy" decoding="async">
           <div class="event-card-badges">
             <span class="glass-badge">${escHtml(ws.dateDisplay)}</span>
             <span class="glass-badge glass-badge--accent">${escHtml(ws.fee)}</span>
@@ -137,7 +137,7 @@ export function renderWorkshopsHtml(upcoming) {
             <span>${ICON_PIN} ${escHtml(ws.location)}</span>
           </div>
           <div class="card-footer">
-            <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="${escHtml(ws.title)}" data-event-id="${escHtml(ws.id)}">
+            <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="${escHtml(ws.title)}" data-event-id="${escHtml(ws.id)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-fee="${escHtml(ws.fee)}" data-event-type="${escHtml(ws.type)}">
               <span>Đăng ký giữ chỗ</span>
               <span aria-hidden="true">→</span>
             </button>
@@ -148,16 +148,56 @@ export function renderWorkshopsHtml(upcoming) {
     .join("\n      ");
 }
 
+export function renderJoinEventOptionsHtml(upcoming) {
+  const cards = [
+    `<div class="join-event-option">
+        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-flexible" value="" data-event-title="" data-event-date="Ngày đầu của tuần - Chủ nhật" data-event-time="Nhận lịch chi tiết qua Zalo" data-event-location="Hòa Lạc, Hà Nội" data-event-type="Lịch mở hàng tuần" checked>
+        <label class="join-event-card" for="join-ev-flexible">
+          <span class="join-event-top">
+            <span class="join-event-date">Chủ nhật gần nhất</span>
+            <span class="join-event-seats">Linh hoạt</span>
+          </span>
+          <span class="join-event-title">Chủ nhật gần nhất (nhận lịch qua Zalo)</span>
+          <span class="join-event-meta">Chưa chốt ngày cụ thể — Ban Điều Phối gửi lịch Chủ nhật tới cho bạn.</span>
+        </label>
+      </div>`,
+  ];
+  for (const ws of upcoming || []) {
+    const safeId = escHtml(ws.id);
+    cards.push(`<div class="join-event-option">
+        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-${safeId}" value="${safeId}" data-event-title="${escHtml(ws.title)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-type="${escHtml(ws.type)}" data-event-seats="${escHtml(ws.seats)}">
+        <label class="join-event-card" for="join-ev-${safeId}">
+          <span class="join-event-top">
+            <span class="join-event-date">${escHtml(ws.dateDisplay)}</span>
+            <span class="join-event-seats">${escHtml(ws.seats)}</span>
+          </span>
+          <span class="join-event-title">${escHtml(ws.title)}</span>
+          <span class="join-event-meta">${escHtml(ws.time)} · ${escHtml(ws.location)}</span>
+        </label>
+      </div>`);
+  }
+  return `<div class="join-event-grid">\n      ${cards.join("\n      ")}\n    </div>`;
+}
+
+const PAST_FALLBACK_IMAGES = [
+  "/assets/images/activity-environment.jpg",
+  "/assets/images/activity-workshop.jpg",
+  "/assets/images/activity-community.jpg",
+];
+
 export function renderPastWorkshopsHtml(pastList) {
   if (!pastList || pastList.length === 0) return "";
   return pastList
-    .map(
-      (item) => `<div class="past-item" data-stagger-item>
+    .map((item, idx) => {
+      const photo = item.image || PAST_FALLBACK_IMAGES[idx % PAST_FALLBACK_IMAGES.length];
+      const alt = item.imageAlt || item.title;
+      return `<div class="past-item" data-stagger-item data-hover-photo="${escHtml(photo)}" data-hover-alt="${escHtml(alt)}">
         <span class="past-item-date">${escHtml(item.dateDisplay || item.date)}</span>
         <h3 class="past-item-title">${escHtml(item.title)}</h3>
         <span class="past-item-meta">${escHtml(item.participants)}</span>
-      </div>`
-    )
+        <span class="past-item-arrow" aria-hidden="true">↗</span>
+      </div>`;
+    })
     .join("\n      ");
 }
 
@@ -174,7 +214,7 @@ export function renderNewsCardsHtml(articles, filterable = false) {
       const href = `/tin-tuc/${escHtml(a.slug)}/`;
       return `<article class="editorial-card" data-stagger-item${attr}>
         <a class="plate-media" data-curtain data-cursor-label="Đọc" href="${href}" aria-label="${escHtml(a.title)}">
-          <img src="${escHtml(a.image)}" alt="${escHtml(a.imageAlt || a.title)}" width="640" height="420" loading="lazy">
+          <img src="${escHtml(a.image)}" alt="${escHtml(a.imageAlt || a.title)}" width="640" height="420" loading="lazy" decoding="async">
         </a>
         <div class="card-meta">
           <span class="cat">${escHtml(a.category)}</span>
@@ -192,7 +232,12 @@ export function renderNewsCardsHtml(articles, filterable = false) {
 }
 
 function formatInlineSafe(escapedLine) {
-  return escapedLine.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  return escapedLine
+    .replace(
+      /\[([^\[\]]+)\]\((\/(?:[a-z0-9_-][a-z0-9/_-]*)?(?:#[a-z0-9_-]+)?)\)/g,
+      '<a href="$2">$1</a>'
+    )
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 }
 
 /**

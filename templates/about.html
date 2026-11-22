@@ -15,7 +15,7 @@
     <div class="join-grid">
       <div>
         <div class="plate-media" data-curtain style="margin-bottom: 24px;">
-          <img src="{{HERO_IMAGE}}" alt="{{HERO_IMAGE_ALT}}" width="900" height="540">
+          <img src="{{HERO_IMAGE}}" alt="{{HERO_IMAGE_ALT}}" width="900" height="540" fetchpriority="high" decoding="async">
         </div>
         <div class="grid-2" style="gap: 20px;">
           <div class="value-col">
@@ -35,14 +35,10 @@
         <p style="color: var(--ink-secondary); line-height: 1.72; margin-bottom: 20px;">
           Hòa Lạc là nơi học tập và sinh sống của hàng chục nghìn học sinh, sinh viên và người trẻ. <strong style="color: var(--ink); font-weight: 500;">{{BRAND_SHORT_NAME}}</strong> ra đời để tạo nên một không gian kết nối lành mạnh mỗi cuối tuần: cùng làm sạch cảnh quan thiên nhiên, cùng trò chuyện về những giá trị sống tử tế và sẻ chia với người dân địa phương.
         </p>
-        <div style="padding: 18px 20px; border-radius: var(--radius-md); background: var(--surface); border-left: 3px solid var(--accent);">
-          <p style="margin: 0; font-size: 0.98rem; font-weight: 400; color: var(--ink); line-height: 1.62;">
-            “{{PHILOSOPHY_QUOTE}}”
-          </p>
-          <p style="margin: 8px 0 0; font-size: 0.8rem; font-weight: 500; color: var(--accent);">
-            {{PHILOSOPHY_MOTTO}}
-          </p>
-        </div>
+        <blockquote class="editorial-callout">
+          <p class="editorial-callout-quote">“{{PHILOSOPHY_QUOTE}}”</p>
+          <footer class="editorial-callout-motto">{{PHILOSOPHY_MOTTO}}</footer>
+        </blockquote>
       </div>
     </div>
   </div>
@@ -96,8 +92,15 @@
       <div>
         <h2>Cùng viết tiếp câu chuyện đẹp tại Hòa Lạc</h2>
         <p>Đăng ký tham gia hoạt động cuối tuần hoặc kết nối hợp tác cùng {{BRAND_SHORT_NAME}}.</p>
+        <p class="cta-reassurance">Miễn phí 100% · Có sẵn dụng cụ · Mở cửa cho học sinh, sinh viên &amp; người trẻ Hòa Lạc</p>
       </div>
-      <a class="btn btn--light" href="/tham-gia/" data-magnetic>Tham gia ngay →</a>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+        <a class="btn btn--light" href="/tham-gia/" data-magnetic>
+          <span>Giữ chỗ hoạt động cuối tuần</span>
+          <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+        </a>
+        <a class="btn btn--ghost-dark" href="/hoat-dong/">Xem 3 chương trình hoạt động</a>
+      </div>
     </div>
   </div>
 </section>

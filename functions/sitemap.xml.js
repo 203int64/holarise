@@ -7,6 +7,7 @@ const STATIC_ROUTES = [
   ["/workshop/", "0.9", "weekly"],
   ["/tin-tuc/", "0.8", "weekly"],
   ["/tham-gia/", "0.9", "monthly"],
+  ["/chinh-sach/", "0.5", "yearly"],
 ];
 
 export async function onRequestGet({ request, env }) {

@@ -205,7 +205,7 @@ export function validateEventInput(body) {
     (ISO_DATE_RE.test(date) ? formatIsoDateVi(date, true) : date);
 
   const time = cleanStr(body.time, 60);
-  const location = cleanStr(body.location, 140) || "Tân Xã, Hòa Lạc";
+  const location = cleanStr(body.location, 140) || "Hòa Lạc, Hà Nội";
   const fee = cleanStr(body.fee, 80) || "Miễn phí";
   const seats = cleanStr(body.seats, 80) || "Mở đăng ký";
   const summary = cleanStr(body.summary, 360);

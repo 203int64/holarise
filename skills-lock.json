@@ -7,6 +7,62 @@
       "sourceType": "github",
       "skillPath": "agent_reach/skill/SKILL.md",
       "computedHash": "05fdf9ff0759d7020c0c153d7a6963787fe93d89d25f016c41065a006340b5b0"
+    },
+    "blog-refresher": {
+      "source": "Illyism/seo-skills",
+      "commit": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+      "sourceType": "github",
+      "skillPath": "seo/blog-refresher/SKILL.md",
+      "computedHash": "09d2624fe15f79acef6f437f434fd5399f5ce40d4af0be667d6f87998e61ca46",
+      "installMode": "copy"
+    },
+    "internal-linking": {
+      "source": "Illyism/seo-skills",
+      "commit": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+      "sourceType": "github",
+      "skillPath": "seo/internal-linking/SKILL.md",
+      "computedHash": "0f4320f545264414447f0b438cd419c3f0a72e686439f965bd546421b3d87e4b",
+      "installMode": "copy"
+    },
+    "intro": {
+      "source": "Illyism/seo-skills",
+      "commit": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+      "sourceType": "github",
+      "skillPath": "content/intro/SKILL.md",
+      "computedHash": "afa1a2655b61003b7bbfa74df5856608f3514277fa33203987a55daa08fa91de",
+      "installMode": "copy"
+    },
+    "seo-blog-images": {
+      "source": "Illyism/seo-skills",
+      "commit": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+      "sourceType": "github",
+      "skillPath": "content/seo-blog-images/SKILL.md",
+      "computedHash": "51e1b38e2df2dfad1efd363b27cc0b2436e6a95f874ef31f6d2dc67b2d89ff75",
+      "installMode": "copy"
+    },
+    "seo-roast": {
+      "source": "Illyism/seo-skills",
+      "commit": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+      "sourceType": "github",
+      "skillPath": "seo/seo-roast/SKILL.md",
+      "computedHash": "3e2d1da7b95e9a5f25e31ec3e159fbb99f93618c2ca5ae8cda2c1a03fbddb1d6",
+      "installMode": "copy"
+    },
+    "seo-title-optimization": {
+      "source": "Illyism/seo-skills",
+      "commit": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+      "sourceType": "github",
+      "skillPath": "seo/seo-title-optimization/SKILL.md",
+      "computedHash": "c5df5d80947ef4c5a866bccde4806e573ceefcabf30d768e832e2b479082c087",
+      "installMode": "copy"
+    },
+    "unslop-seo": {
+      "source": "Illyism/seo-skills",
+      "commit": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+      "sourceType": "github",
+      "skillPath": "content/unslop-seo/SKILL.md",
+      "computedHash": "c3ebdceb145ac6a6da2be16fdd99a7596ff29524a19f4730c439e00e36777005",
+      "installMode": "copy"
     }
   }
 }

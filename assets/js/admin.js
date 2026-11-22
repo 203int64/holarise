@@ -641,7 +641,7 @@
     $("#ev-date").value = ev && /^\d{4}-\d{2}-\d{2}$/.test(ev.date) ? ev.date : new Date().toISOString().slice(0, 10);
     $("#ev-date-display").value = ev ? ev.dateDisplay || "" : "";
     $("#ev-time").value = ev ? ev.time || "" : "07:30 – 10:30";
-    $("#ev-location").value = ev ? ev.location || "" : "Tân Xã, Hòa Lạc";
+    $("#ev-location").value = ev ? ev.location || "" : "Hòa Lạc, Hà Nội";
     $("#ev-fee").value = ev ? ev.fee || "" : "Miễn phí";
     $("#ev-seats").value = ev ? ev.seats || "" : "Mở đăng ký";
     $("#ev-summary").value = ev ? ev.summary || "" : "";

@@ -1,8 +1,8 @@
 <!-- PART 1: Full-Bleed Visual Editorial Hero Card (Immersive on Mobile & Desktop) -->
 <section class="hero-stage" aria-label="Giới thiệu Cộng đồng HolaRise">
   <div class="container">
-    <div class="hero-card" data-hero-card>
-      <img class="hero-card-img" src="{{HERO_IMAGE}}" alt="{{HERO_IMAGE_ALT}}" width="1600" height="1000" fetchpriority="high" data-cinema-img>
+    <div class="hero-card" data-hero-card data-cursor-label="Khám phá">
+      <img class="hero-card-img" src="{{HERO_IMAGE}}" alt="{{HERO_IMAGE_ALT}}" width="1600" height="1000" fetchpriority="high" decoding="async" data-cinema-img>
       <div class="hero-card-scrim" aria-hidden="true"></div>
 
       <div class="hero-card-top" data-hero-stagger>
@@ -38,6 +38,46 @@
 <!-- Compact Next Event Strip -->
 {{HERO_UPCOMING_BAR}}
 
+<!-- SIGNATURE: Opposing Kinetic Scroll-Driven Typography Band v2 -->
+<section class="kinetic-band" data-kinetic-band aria-hidden="true">
+  <div class="kinetic-track">
+    <div class="kinetic-line kinetic-line--primary" data-kinetic-dir="1">
+      <span class="kinetic-word kinetic-word--strong">HolaRise</span>
+      <span class="kinetic-sep"></span>
+      <span class="kinetic-word">Hòa Lạc · Hà Nội</span>
+      <span class="kinetic-sep"></span>
+      <span class="kinetic-word kinetic-word--strong">Cùng Vươn Lên</span>
+      <span class="kinetic-sep"></span>
+      <span class="kinetic-word">Phụng Sự Cộng Đồng</span>
+      <span class="kinetic-sep"></span>
+      <span class="kinetic-word kinetic-word--strong">HolaRise</span>
+      <span class="kinetic-sep"></span>
+      <span class="kinetic-word">Hòa Lạc · Hà Nội</span>
+      <span class="kinetic-sep"></span>
+      <span class="kinetic-word kinetic-word--strong">Cùng Vươn Lên</span>
+      <span class="kinetic-sep"></span>
+      <span class="kinetic-word">Phụng Sự Cộng Đồng</span>
+    </div>
+    <div class="kinetic-line kinetic-line--secondary" data-kinetic-dir="-1">
+      <span class="kinetic-word kinetic-word--serif">Small Beginnings, Great Impact</span>
+      <span class="kinetic-sep kinetic-sep--emerald"></span>
+      <span class="kinetic-word kinetic-word--outline">HolaGreen</span>
+      <span class="kinetic-sep"></span>
+      <span class="kinetic-word kinetic-word--outline">HolaHeart</span>
+      <span class="kinetic-sep kinetic-sep--emerald"></span>
+      <span class="kinetic-word kinetic-word--outline">HolaConnect</span>
+      <span class="kinetic-sep"></span>
+      <span class="kinetic-word kinetic-word--serif">Small Beginnings, Great Impact</span>
+      <span class="kinetic-sep kinetic-sep--emerald"></span>
+      <span class="kinetic-word kinetic-word--outline">HolaGreen</span>
+      <span class="kinetic-sep"></span>
+      <span class="kinetic-word kinetic-word--outline">HolaHeart</span>
+      <span class="kinetic-sep kinetic-sep--emerald"></span>
+      <span class="kinetic-word kinetic-word--outline">HolaConnect</span>
+    </div>
+  </div>
+</section>
+
 <!-- PART 2: 03 Chương Trình Trọng Tâm (Spring Sliding Indicator + Swipeable Photo Stage) -->
 <section class="section story-section" id="chuong-trinh-trong-tam" data-story-section aria-label="Ba chương trình trọng tâm">
   <div class="container">
@@ -70,6 +110,38 @@
   </div>
 </section>
 
+<!-- PART 3B: Obsidian Editorial Manifesto (Word-by-Word Scroll Illumination) -->
+<section class="manifesto-section section--obsidian" aria-label="Tuyên ngôn Cộng đồng HolaRise">
+  <div class="manifesto-glow" data-manifesto-glow aria-hidden="true"></div>
+  <div class="container">
+    <div class="manifesto-top" data-reveal>
+      <div class="kicker kicker--sunrise">Tuyên ngôn hành động</div>
+      <span class="manifesto-coords" aria-label="Tọa độ Hòa Lạc, Hà Nội">21°00'N · 105°31'E · HÒA LẠC, HÀ NỘI</span>
+    </div>
+
+    <blockquote class="manifesto-quote" data-scrub-words>“{{PHILOSOPHY_QUOTE}}”</blockquote>
+
+    <div class="manifesto-meta" data-reveal>
+      <span class="manifesto-motto">{{PHILOSOPHY_MOTTO}}</span>
+      <a class="arrow-link arrow-link--dark" href="/gioi-thieu/">
+        <span>Đọc câu chuyện &amp; 4 giá trị cốt lõi</span>
+        <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
+    </div>
+
+    <div class="mission-grid" data-stagger-group>
+      <div class="mission-col" data-stagger-item>
+        <h3>01 · Sứ mệnh</h3>
+        <p>{{PHILOSOPHY_MISSION}}</p>
+      </div>
+      <div class="mission-col" data-stagger-item>
+        <h3>02 · Tầm nhìn</h3>
+        <p>{{PHILOSOPHY_VISION}}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- PART 4: Lịch Sự Kiện Sắp Tới (Horizontal Snap Cards on Mobile, 3-Column Grid on Desktop) -->
 <section class="section" id="lich-hen">
   <div class="container">
@@ -91,28 +163,38 @@
   </div>
 </section>
 
-<!-- Visual Photo Strip (Swipe on Mobile / Scroll on Desktop) -->
+<!-- Visual Photo Strip (Swipe on Mobile / Sticky Horizontal Runway on Desktop) -->
 <section class="horizontal-section" data-horizontal-section aria-label="Khoảnh khắc Hòa Lạc">
-  <div class="container">
-    <div class="section-header--split" style="margin-bottom: 0;" data-reveal>
-      <div>
-        <div class="kicker">Hình ảnh hiện trường</div>
-        <h2 class="section-title" style="margin-bottom: 0;">Khoảnh khắc tuổi trẻ tại Tân Xã, Hòa Lạc</h2>
+  <div class="horizontal-sticky-stage">
+    <div class="container">
+      <div class="section-header--split" style="margin-bottom: 0;" data-reveal>
+        <div>
+          <div class="kicker">Hình ảnh hiện trường</div>
+          <h2 class="section-title" style="margin-bottom: 0;">Khoảnh khắc tuổi trẻ tại Hòa Lạc</h2>
+        </div>
+        <span class="swipe-hint">Vuốt ngang xem ảnh · Chạm để phóng to</span>
       </div>
-      <span class="swipe-hint">Vuốt ngang xem ảnh · Chạm để phóng to</span>
+
+      <div class="exhibition-progress-row">
+        <div class="exhibition-progress-track" aria-hidden="true">
+          <div class="exhibition-progress-fill" data-exhibition-fill></div>
+        </div>
+        <span class="exhibition-progress-count" data-exhibition-count aria-live="polite">01 / 04</span>
+        <div class="exhibition-arrows" aria-label="Điều hướng ảnh hiện trường">
+          <button class="exhibition-arrow-btn" type="button" data-exhibition-prev aria-label="Xem ảnh trước">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="exhibition-arrow-btn" type="button" data-exhibition-next aria-label="Xem ảnh tiếp theo">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="exhibition-progress-row" aria-hidden="true">
-      <div class="exhibition-progress-track">
-        <div class="exhibition-progress-fill" data-exhibition-fill></div>
+    <div class="horizontal-track-wrap">
+      <div class="horizontal-track" data-horizontal-track>
+        {{HORIZONTAL_GALLERY_HTML}}
       </div>
-      <span class="exhibition-progress-count" data-exhibition-count>01 / 04</span>
-    </div>
-  </div>
-
-  <div class="horizontal-track-wrap">
-    <div class="horizontal-track" data-horizontal-track>
-      {{HORIZONTAL_GALLERY_HTML}}
     </div>
   </div>
 </section>
@@ -136,11 +218,12 @@
     <div class="cta-band" data-reveal>
       <div>
         <h2>Dành một sáng cuối tuần ý nghĩa tại Hòa Lạc</h2>
-        <p>Tham gia làm sạch môi trường hoặc dự buổi workshop ấm áp cùng những người bạn mới tại Tân Xã, Hòa Lạc.</p>
+        <p>Tham gia làm sạch môi trường hoặc dự buổi workshop ấm áp cùng những người bạn mới tại Hòa Lạc.</p>
+        <p class="cta-reassurance">Miễn phí 100% · Có sẵn dụng cụ · Đi một mình vẫn được ghép nhóm</p>
       </div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px;">
         <a class="btn btn--light" href="/tham-gia/" data-magnetic>
-          <span>Đăng ký tham gia</span>
+          <span>Giữ chỗ cuối tuần này</span>
           <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
         </a>
         <a class="btn btn--ghost-dark" href="/tin-tuc/">Nhật ký hoạt động</a>
