@@ -62,7 +62,7 @@
       "detail": "Học sinh · Sinh viên"
     },
     {
-      "value": 14,
+      "value": 15,
       "suffix": "+",
       "label": "Buổi Workshop",
       "detail": "Giá trị sống & kỹ năng"
@@ -147,6 +147,26 @@
     {
       "title": "Nhật Ký Kết Quả Công Khai",
       "description": "Cập nhật minh bạch số thành viên, khối lượng rác thu gom và sách trao tặng sau từng sự kiện."
+    }
+  ],
+  "testimonials": [
+    {
+      "name": "Nguyễn Minh Anh",
+      "initials": "MA",
+      "role": "Sinh viên năm 2 · ĐH FPT Hòa Lạc",
+      "quote": "Lúc mới lên Hòa Lạc học, cuối tuần mình chỉ nằm trong phòng lướt điện thoại. Từ ngày tham gia Cuối Tuần Xanh bên hồ Tân Xã, mình có thêm những người bạn mới cực kỳ tích cực và thấy sáng Chủ Nhật trôi qua thật ý nghĩa."
+    },
+    {
+      "name": "Trần Hoàng Long",
+      "initials": "HL",
+      "role": "Sinh viên năm 3 · ĐHQGHN tại Hòa Lạc",
+      "quote": "Workshop Lòng Biết Ơn của HolaHeart đã chạm đến mình sâu sắc. Buổi chiều hôm ấy, lần đầu tiên sau nhiều năm xa nhà, mình gọi điện về cho mẹ chỉ để nói lời cảm ơn. Một cộng đồng chân thành và ấm áp."
+    },
+    {
+      "name": "Lê Thu Trang",
+      "initials": "TT",
+      "role": "Học sinh THPT Thạch Thất",
+      "quote": "Tham gia dự án Mầm Cây Thanh Niên và tủ sách thiếu nhi giúp em tự tin hơn khi giao tiếp. Các anh chị sinh viên hướng dẫn rất tận tình, không phân biệt tuổi tác hay khóa lớp, cảm giác như một đại gia đình."
     }
   ],
   "faqs": [

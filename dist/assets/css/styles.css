@@ -5411,3 +5411,83 @@ form.form-grid[hidden] {
     font-size: 0.58rem;
   }
 }
+
+/* ==========================================================================
+   Testimonial Cards (Volunteer Voices & Real Experiences)
+   ========================================================================== */
+.testimonial-card {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg, 16px);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: 0 14px 36px rgba(28, 58, 43, 0.08);
+}
+
+.testimonial-quote {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.68;
+  color: var(--ink);
+  font-style: italic;
+  position: relative;
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.testimonial-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(28, 58, 43, 0.08);
+  color: #1C3A2B;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--border-subtle);
+}
+
+[data-theme="dark"] .testimonial-badge {
+  background: rgba(217, 121, 72, 0.15);
+  color: #f5b38c;
+  border-color: rgba(217, 121, 72, 0.3);
+}
+
+.testimonial-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.testimonial-name {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.testimonial-role {
+  font-size: 0.82rem;
+  color: var(--ink-secondary);
+}
+

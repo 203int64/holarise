@@ -558,6 +558,25 @@ def render_numbered_cards(items: list) -> str:
     return "\n      ".join(cards)
 
 
+def render_testimonials(testimonials: list) -> str:
+    cards = []
+    for item in testimonials:
+        initials = item.get("initials", item["name"][:2].upper())
+        cards.append(
+            f"""<article class="testimonial-card" data-stagger-item>
+        <div class="testimonial-quote">“{esc(item['quote'])}”</div>
+        <div class="testimonial-author">
+          <div class="testimonial-badge" aria-hidden="true">{esc(initials)}</div>
+          <div class="testimonial-info">
+            <span class="testimonial-name">{esc(item['name'])}</span>
+            <span class="testimonial-role">{esc(item['role'])}</span>
+          </div>
+        </div>
+      </article>"""
+        )
+    return "\n      ".join(cards)
+
+
 PAST_FALLBACK_IMAGES = (
     "/assets/images/activity-environment.jpg",
     "/assets/images/activity-workshop.jpg",
@@ -1256,6 +1275,7 @@ def build_site() -> list:
             "STORY_STAGE_HTML": render_story_stage(activities["pillars"]),
             "UPCOMING_WORKSHOPS_HTML": f"<!-- CMS:UPCOMING_WORKSHOPS:START -->\n{render_workshops(workshops['upcoming'])}\n<!-- CMS:UPCOMING_WORKSHOPS:END -->",
             "HORIZONTAL_GALLERY_HTML": render_horizontal_gallery(activities["gallery"]),
+            "TESTIMONIALS_HTML": render_testimonials(site.get("testimonials", [])),
             "FAQ_HTML": render_faqs(site["faqs"]),
         },
     )
@@ -1300,6 +1320,7 @@ def build_site() -> list:
             "CORE_VALUES_HTML": render_numbered_cards(p["coreValues"]),
             "SDGS_HTML": render_sdgs(site["sdgs"]),
             "PRINCIPLES_HTML": render_numbered_cards(site["principles"]),
+            "TESTIMONIALS_HTML": render_testimonials(site.get("testimonials", [])),
         },
     )
     write_page(

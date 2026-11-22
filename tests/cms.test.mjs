@@ -326,7 +326,7 @@ test("Full end-to-end CMS & Registration API flow on real SQLite D1 mock", async
   });
   assert.equal(pUpdate.status, 200);
   const listPosts = await (await postsList({ request: makeReq("/api/admin/posts", { cookie: adminCookie }), env })).json();
-  assert.equal(listPosts.items.length, 4); // 3 seeded + 1 created
+  assert.equal(listPosts.items.length, 7); // 6 seeded + 1 created
 
   const pDel = await postsDelete({
     request: makeReq(`/api/admin/posts/${createdPost.id}`, { method: "DELETE", cookie: adminCookie }),
@@ -371,7 +371,7 @@ test("Full end-to-end CMS & Registration API flow on real SQLite D1 mock", async
   });
   assert.equal(evUpd.status, 200);
   const evList = await (await eventsList({ request: makeReq("/api/admin/events", { cookie: adminCookie }), env })).json();
-  assert.equal(evList.items.length, 7);
+  assert.equal(evList.items.length, 11); // 10 seeded + 1 created
 
   // 7. Public registration (honeypot ignored, real submission stored + status updated + CSV exported)
   const hpRes = await publicRegister({

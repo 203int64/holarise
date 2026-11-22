@@ -59,7 +59,7 @@ def generate_seed_sql() -> str:
             f"VALUES ({sql_str(ev_id)}, 'past', 'Chuyên đề đã tổ chức', '[]', "
             f"{sql_str(past.get('date', ''))}, {sql_str(past.get('date', ''))}, '', 'Tân Xã, Hòa Lạc', 'Miễn phí', '', "
             f"{sql_str(past['title'])}, '', '[]', {sql_str(past.get('participants', ''))}, "
-            f"'/assets/images/activity-workshop.jpg', {sql_str(past['title'])}, 'published', {idx}, {sql_str(now)}, {sql_str(now)});"
+            f"{sql_str(past.get('image', '/assets/images/activity-workshop.jpg'))}, {sql_str(past.get('imageAlt', past['title']))}, 'published', {idx}, {sql_str(now)}, {sql_str(now)});"
         )
 
     default_settings = {

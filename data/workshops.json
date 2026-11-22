@@ -21,8 +21,8 @@
         "Tái chế chậu cây xanh",
         "Viết thiệp tri ân"
       ],
-      "image": "/assets/images/activity-workshop.jpg",
-      "imageAlt": "Các bạn trẻ Cộng đồng HolaRise tham gia buổi Workshop chia sẻ giá trị sống cao đẹp tại Tân Xã, Hòa Lạc"
+      "image": "/assets/images/events/activity-gratitude-workshop.jpg",
+      "imageAlt": "Bàn hoa lá khô ép thủ công và thiệp tri ân tại workshop HolaHeart"
     },
     {
       "id": "cleanup-ho-tan-xa-thang-12",
@@ -41,8 +41,8 @@
         "Ghép nhóm cho người mới",
         "Chứng nhận tình nguyện"
       ],
-      "image": "/assets/images/activity-environment.jpg",
-      "imageAlt": "Thanh niên và sinh viên đeo găng tay vải phân loại chai nhựa tại ven hồ Tân Xã, Hòa Lạc"
+      "image": "/assets/images/events/activity-lake-cleanup.jpg",
+      "imageAlt": "Đôi tay đeo găng bảo hộ nhặt rác và phân loại chai nhựa ven hồ Tân Xã"
     },
     {
       "id": "ws-truyen-cam-hung-va-ket-noi",
@@ -61,25 +61,80 @@
         "Kết nối bạn mới",
         "Tặng sổ tay Tử Tế"
       ],
-      "image": "/assets/images/activity-community.jpg",
-      "imageAlt": "Các bạn trẻ Cộng đồng HolaRise giao lưu, rèn luyện kỹ năng lắng nghe và sẻ chia tích cực tại Hòa Lạc"
+      "image": "/assets/images/events/activity-workshop-journal.jpg",
+      "imageAlt": "Sổ tay Tử Tế và tài liệu sinh hoạt tại buổi giao lưu kết nối bạn trẻ"
+    },
+    {
+      "id": "ws-tai-che-sen-da-thang-12",
+      "type": "HolaGreen · Tái chế & Sáng tạo",
+      "filters": ["sach", "tu-te"],
+      "date": "2026-12-20",
+      "dateDisplay": "CN, 20/12/2026",
+      "time": "09:00 – 11:30",
+      "location": "Không gian Xanh Tân Xã, Hòa Lạc",
+      "fee": "Miễn phí (Tặng sen đá & lọ mầm)",
+      "seats": "Còn 20/35 chỗ",
+      "title": "Workshop: Tái Chế Thủy Tinh & Sống Xanh Bền Vững",
+      "summary": "Học cách làm sạch chai lọ thủy tinh phế liệu, phối đất trồng sen đá mini trang trí bàn học và thực hành lối sống giảm rác thải.",
+      "highlights": [
+        "Mang về chậu sen đá",
+        "Phối đất trồng mầm",
+        "Thực hành Zero Waste"
+      ],
+      "image": "/assets/images/events/activity-glass-upcycling.jpg",
+      "imageAlt": "Chậu sen đá mini xanh mướt trồng trong lọ thủy tinh tái chế"
+    },
+    {
+      "id": "chien-dich-trong-cay-cuoi-nam",
+      "type": "HolaGreen · Mầm xanh",
+      "filters": ["sach"],
+      "date": "2026-12-27",
+      "dateDisplay": "CN, 27/12/2026",
+      "time": "07:00 – 09:30",
+      "location": "Đường trục chính Tân Xã, Hòa Lạc",
+      "fee": "Miễn phí (Cung cấp xẻng & cây giống)",
+      "seats": "Mở đăng ký",
+      "title": "Dự Án Mầm Cây #03: Ươm Xanh Những Cung Đường",
+      "summary": "Cùng trồng 100 cây xanh bóng mát cuối năm, gắn biển chăm sóc và lưu lại dấu ấn tuổi trẻ ý nghĩa cho Hòa Lạc.",
+      "highlights": [
+        "Cung cấp cây giống & xẻng",
+        "Gắn thẻ nhóm chăm sóc",
+        "Chứng nhận tình nguyện"
+      ],
+      "image": "/assets/images/events/activity-tree-planting.jpg",
+      "imageAlt": "Cận cảnh vun gốc và ươm mầm cây xanh bản địa tại Hòa Lạc"
     }
   ],
   "pastTopics": [
     {
       "date": "10/2026",
       "title": "Workshop HolaHeart #14: Lòng biết ơn gia đình và thực hành làm thiệp tri ân",
-      "participants": "38 thành viên"
+      "participants": "38 thành viên",
+      "image": "/assets/images/events/activity-gratitude-workshop.jpg"
     },
     {
       "date": "09/2026",
       "title": "Tọa đàm Cùng Vươn Lên: Tinh thần trách nhiệm và vẻ đẹp của sự phụng sự trong giới trẻ",
-      "participants": "52 thành viên"
+      "participants": "52 thành viên",
+      "image": "/assets/images/events/activity-workshop-journal.jpg"
     },
     {
       "date": "08/2026",
       "title": "Workshop HolaGreen #13: Từ bàn tay nhỏ đến Trái Đất xanh – Thực hành sống giảm nhựa",
-      "participants": "34 thành viên"
+      "participants": "34 thành viên",
+      "image": "/assets/images/events/activity-glass-upcycling.jpg"
+    },
+    {
+      "date": "07/2026",
+      "title": "Chiến dịch Mùa Hè Xanh: Phân loại rác & Tuyên truyền phân loại tại nguồn cho bà con Tân Xã",
+      "participants": "48 thành viên",
+      "image": "/assets/images/events/activity-plastic-sorting.jpg"
+    },
+    {
+      "date": "06/2026",
+      "title": "Đợt trao sách Mầm Tri Thức #01: Tặng 120 đầu sách khoa học cho các điểm trường Thạch Thất",
+      "participants": "30 thành viên",
+      "image": "/assets/images/events/activity-book-donation.jpg"
     }
   ]
 }
