@@ -127,6 +127,32 @@
       "description": "Không gian ngoài trời ấm áp giúp người trẻ xa nhà rèn luyện kỹ năng lắng nghe không phán xét và tìm kiếm bạn đồng hành tích cực.",
       "image": "/assets/images/events/activity-workshop-journal.jpg",
       "imageAlt": "Sổ tay Tử Tế và tài liệu sinh hoạt kết nối người trẻ tại Hòa Lạc"
+    },
+    {
+      "id": "vuon-uom-mam-xanh",
+      "category": "moi-truong",
+      "categoryLabel": "HolaGreen",
+      "filters": ["sach"],
+      "status": "Giai đoạn ươm mầm",
+      "title": "Vườn Ươm Cây Giống Bản Địa",
+      "location": "Vườn thực nghiệm sinh thái, Tân Xã",
+      "metric": "300 bầu cây giống non",
+      "description": "Ươm giống, chăm sóc và theo dõi tỷ lệ bén rễ của các loại cây bóng mát bản địa trước khi phủ xanh các cung đường Hòa Lạc.",
+      "image": "/assets/images/events/activity-tree-seedlings.jpg",
+      "imageAlt": "Những khay bầu cây giống non lá xanh mướt đang được chăm sóc tại vườn ươm"
+    },
+    {
+      "id": "ngay-hoi-sach-tuoi-tho",
+      "category": "cong-dong",
+      "categoryLabel": "HolaConnect",
+      "filters": ["se-chia", "tu-te"],
+      "status": "Định kỳ theo tháng",
+      "title": "Ngày Hội Sách & Tuổi Thơ",
+      "location": "Các nhà văn hóa thôn, Thạch Thất",
+      "metric": "200 đầu sách & 45 tranh vẽ",
+      "description": "Tổ chức không gian đọc sách và vẽ tranh chủ đề bảo vệ thiên nhiên xanh cho các em nhỏ tại nhà văn hóa địa phương.",
+      "image": "/assets/images/events/activity-children-drawings.jpg",
+      "imageAlt": "Bút màu và những bức tranh thiếu nhi vẽ ước mơ cây xanh tại ngày hội đọc sách"
     }
   ],
   "gallery": [
@@ -142,7 +168,7 @@
     },
     {
       "src": "/assets/images/events/activity-gratitude-workshop.jpg",
-      "alt": "Bàn làm thiệp hoa lá khô thủ công gửi lời tri ân cha mẹ và thầy cô",
+      "alt": "Bàn làm thiệp hoa lá khô thủ công gửi lời tri n cha mẹ và thầy cô",
       "caption": "Bàn làm thiệp hoa lá khô thủ công gửi lời tri ân cha mẹ và thầy cô."
     },
     {
@@ -169,6 +195,26 @@
       "src": "/assets/images/events/activity-plastic-sorting.jpg",
       "alt": "Phân loại chai nhựa và vỏ lon tái chế sau buổi dọn sạch cảnh quan",
       "caption": "Tách riêng chai nhựa và vỏ lon chuyển giao cho điểm tái chế địa phương."
+    },
+    {
+      "src": "/assets/images/events/activity-tree-seedlings.jpg",
+      "alt": "Vườn ươm 300 bầu cây giống non xanh tươi sẵn sàng xuất vườn",
+      "caption": "Vườn ươm 300 bầu cây non chuẩn bị xuất vườn phủ xanh các tuyến đường."
+    },
+    {
+      "src": "/assets/images/events/activity-children-drawings.jpg",
+      "alt": "Bút màu và những bức tranh thiếu nhi vẽ bảo vệ môi trường",
+      "caption": "Những nét vẽ màu sáp hồn nhiên của các em nhỏ về một Hòa Lạc xanh ngát."
+    },
+    {
+      "src": "/assets/images/events/activity-nature-trail.jpg",
+      "alt": "Tuyến đường rợp bóng cây xanh mát dẫn lối tình nguyện viên",
+      "caption": "Tuyến đường rợp bóng cây xanh mát dẫn lối người trẻ hành động vì cộng đồng."
+    },
+    {
+      "src": "/assets/images/events/activity-compost-nursery.jpg",
+      "alt": "Khay ươm mầm sinh thái phối trộn đất dinh dưỡng hữu cơ",
+      "caption": "Khay ươm mầm sinh thái phối trộn đất dinh dưỡng hữu cơ bảo vệ môi trường."
     }
   ]
 }

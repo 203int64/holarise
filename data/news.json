@@ -116,5 +116,65 @@
       "Mỗi cuốn sách đều được bọc cẩn thận kèm lời chúc viết tay ở trang đầu. Trong buổi sáng trao tặng, tình nguyện viên cùng các em nhỏ đọc sách, chơi đố vui môi trường và chuẩn bị cho [các buổi workshop và giao lưu sắp tới](/workshop/).",
       "Toàn bộ danh mục sách và hình ảnh được lưu trữ công khai theo [nguyên tắc hoạt động minh bạch](/gioi-thieu/#minh-bach). Bạn có thể [đăng ký đồng hành đợt trao sách tiếp theo](/tham-gia/) ngay trên website."
     ]
+  },
+  {
+    "slug": "cam-nang-di-cuoi-tuan-xanh-lan-dau-cho-sinh-vien",
+    "title": "Cẩm nang Cuối Tuần Xanh: Đi một mình có bỡ ngỡ không?",
+    "category": "HolaGreen · Sạch",
+    "categorySlug": "moi-truong",
+    "filters": ["sach", "tu-te"],
+    "date": "2026-09-20",
+    "dateDisplay": "20/09/2026",
+    "readTime": "3 phút đọc",
+    "author": "Ban Điều Phối HolaRise",
+    "image": "/assets/images/events/activity-nature-trail.jpg",
+    "imageAlt": "Lối đi rợp bóng cây xanh mát dẫn ra điểm hẹn làm sạch ven hồ Tân Xã",
+    "excerpt": "Hướng dẫn chi tiết từ trang phục, cách di chuyển đến quy trình ghép nhóm nhỏ cho người trẻ lần đầu tham gia Cuối Tuần Xanh.",
+    "content": [
+      "Nhiều bạn sinh viên chia sẻ rằng trước khi tham gia buổi đầu tiên, các bạn từng ngập ngừng vì 'chưa quen ai và sợ đi một mình bỡ ngỡ'. Cẩm nang này được Ban Điều Phối đúc kết để giúp bạn hoàn toàn an tâm khi bắt đầu.",
+      "Trước mỗi sáng hoạt động, bạn chỉ cần đăng ký qua biểu mẫu để nhận [thẻ check-in pass điện tử](/tham-gia/). Khi đến điểm hẹn ven hồ Tân Xã, điều phối viên sẽ đón bạn tại bàn tiếp nhận và ghép bạn vào nhóm nhỏ 4-5 người cùng trường hoặc cùng lứa tuổi.",
+      "Về dụng cụ: CLB đã chuẩn bị sẵn găng tay bảo hộ dệt sợi, kẹp rác inox và túi phân loại. Bạn chỉ cần mặc quần áo thoải mái, đi giày thể thao và mang theo bình nước cá nhân để hạn chế đồ nhựa dùng một lần.",
+      "Sau 2 tiếng lao động ngoài trời hít thở không khí trong lành, mọi người cùng ngồi lại uống trà, trò chuyện và ghi nhận chứng nhận tình nguyện theo đúng [quy chuẩn minh bạch của HolaRise](/gioi-thieu/#minh-bach)."
+    ]
+  },
+  {
+    "slug": "ngay-hoi-sach-va-tuoi-tho-nha-van-hoa-thach-that",
+    "title": "Ngày Hội Sách & Tuổi Thơ: 200 cuốn sách tìm bạn đọc nhỏ",
+    "category": "HolaConnect · Sẻ chia",
+    "categorySlug": "cong-dong",
+    "filters": ["se-chia", "tu-te"],
+    "date": "2026-09-06",
+    "dateDisplay": "06/09/2026",
+    "readTime": "3 phút đọc",
+    "author": "Ban Phụng Sự HolaRise",
+    "image": "/assets/images/events/activity-children-drawings.jpg",
+    "imageAlt": "Bút màu và những bức tranh vẽ ước mơ cây xanh của các em nhỏ tại buổi đọc sách",
+    "excerpt": "Buổi giao lưu đọc sách kết hợp vẽ tranh bảo vệ thiên nhiên thu hút hơn 40 em nhỏ cùng phụ huynh tại Thạch Thất.",
+    "content": [
+      "Sáng Chủ Nhật đầu tháng 9 tại Nhà Văn Hóa thôn, ngày hội 'Sách & Tuổi Thơ' thuộc [chương trình phụng sự HolaConnect](/hoat-dong/#cong-dong) đã diễn ra trong không khí rộn rã tiếng cười của các em nhỏ địa phương.",
+      "Đội ngũ tình nguyện viên đã vận chuyển và sắp đặt 200 đầu sách truyện tranh giáo dục, khoa học thường thức và lịch sử danh nhân lên các kệ gỗ nhỏ để các em tự do chọn đọc.",
+      "Bên cạnh giờ đọc sách, các em còn được tham gia cuộc thi vẽ tranh với chủ đề 'Hòa Lạc Xanh Trong Mắt Em', sử dụng sáp màu hữu cơ và giấy vẽ tái chế để khắc họa tình yêu quê hương và cây xanh.",
+      "Toàn bộ tranh vẽ và những lời cảm ơn viết tay của phụ huynh đã trở thành nguồn động viên to lớn cho các bạn sinh viên tiếp tục mở rộng [các dự án cộng đồng ý nghĩa](/workshop/)."
+    ]
+  },
+  {
+    "slug": "hanh-trinh-uom-mam-xanh-tu-vuon-cay-giong-hoa-lac",
+    "title": "Vườn Ươm Mầm Xanh: 300 bầu cây sẵn sàng phủ bóng",
+    "category": "HolaGreen · Sạch",
+    "categorySlug": "moi-truong",
+    "filters": ["sach"],
+    "date": "2026-08-23",
+    "dateDisplay": "23/08/2026",
+    "readTime": "3 phút đọc",
+    "author": "Ban Dự Án Xanh HolaRise",
+    "image": "/assets/images/events/activity-tree-seedlings.jpg",
+    "imageAlt": "Những khay bầu cây giống non xanh tươi đang được chăm sóc cẩn thận tại vườn ươm",
+    "excerpt": "Giai đoạn chuẩn bị giống cây bản địa và đất mùn hữu cơ đã hoàn tất, hướng tới chiến dịch phủ xanh các tuyến đường vào cuối năm.",
+    "content": [
+      "Để chuẩn bị cho chiến dịch phủ xanh quy mô lớn vào quý 4, nhóm dự án Môi trường HolaGreen đã phối hợp cùng các kỹ sư nông nghiệp địa phương thiết lập khu vườn ươm mầm xanh với 300 bầu cây giống bản địa.",
+      "Các giống cây được lựa chọn kỹ càng bao gồm bàng Đài Loan, muồng hoàng yến và cây bóng mát thân gỗ chịu hạn tốt, phù hợp với thổ nhưỡng gò đồi đất đỏ đặc trưng của vùng Hòa Lạc.",
+      "Mỗi tuần, các nhóm sinh viên luân phiên nhau tưới nước, tỉa cành và phối trộn phân bón compost hữu cơ để đảm bảo cây giống đạt chuẩn chiều cao và độ bén rễ trước khi xuất vườn.",
+      "Hoạt động ươm giống thể hiện cam kết làm việc bài bản, bền bỉ và trách nhiệm dài hạn của [cộng đồng thanh niên HolaRise](/gioi-thieu/) vì một Hòa Lạc xanh tươi bền vững."
+    ]
   }
 ]
