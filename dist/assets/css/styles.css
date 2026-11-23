@@ -6383,35 +6383,71 @@ form.form-grid[hidden] {
 /* Magazine Story Chapters (#chuong-trinh on /gioi-thieu/) */
 .pillar-chapters {
   display: grid;
-  gap: clamp(48px, 6vw, 72px);
+  gap: 0;
 }
 
 .pillar-chapter {
   --pillar-accent: var(--accent);
+  --pillar-soft: rgba(11, 110, 79, 0.11);
+  --pillar-ripple: rgba(11, 110, 79, 0.14);
+  position: relative;
+  overflow: hidden;
   display: grid;
   grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
-  gap: clamp(28px, 4.5vw, 56px);
+  gap: clamp(28px, 4.5vw, 52px);
   align-items: center;
-  padding-top: clamp(40px, 5vw, 56px);
-  border-top: 1px solid var(--line);
+  padding: clamp(28px, 4vw, 48px);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line);
+  background: var(--bg);
   scroll-margin-top: calc(var(--header-height) + 28px);
 }
 
-.pillar-chapter:first-child {
-  padding-top: 0;
-  border-top: 0;
+.pillar-chapter > *:not(.pillar-ripple-bg) {
+  position: relative;
+  z-index: 1;
+}
+
+.pillar-ripple-bg {
+  position: absolute;
+  top: -68px;
+  left: -68px;
+  width: 320px;
+  height: 320px;
+  color: var(--pillar-ripple);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pillar-chapter--reverse .pillar-ripple-bg {
+  left: auto;
+  right: -68px;
 }
 
 .pillar-chapter[data-pillar-theme="sunrise"] {
-  --pillar-accent: var(--sunrise);
+  --pillar-accent: #c86432;
+  --pillar-soft: rgba(217, 121, 72, 0.13);
+  --pillar-ripple: rgba(200, 100, 50, 0.18);
+  border-color: rgba(217, 121, 72, 0.25);
+  background: linear-gradient(145deg, #fffbf7 0%, #fdf1e8 100%);
 }
 
 .pillar-chapter[data-pillar-theme="emerald"] {
-  --pillar-accent: var(--accent);
+  --pillar-accent: #0b6e4f;
+  --pillar-soft: rgba(11, 110, 79, 0.12);
+  --pillar-ripple: rgba(11, 110, 79, 0.16);
+  border-color: rgba(11, 110, 79, 0.22);
+  background: linear-gradient(145deg, #f6fbf8 0%, #e7f4ec 100%);
 }
 
 .pillar-chapter[data-pillar-theme="obsidian"] {
-  --pillar-accent: var(--ink);
+  --pillar-accent: #8ce0bd;
+  --pillar-soft: rgba(140, 224, 189, 0.14);
+  --pillar-ripple: rgba(140, 224, 189, 0.15);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(145deg, #0c1512 0%, #13231d 100%);
+  color: var(--ink-on-dark);
+  box-shadow: 0 24px 60px rgba(11, 17, 15, 0.16);
 }
 
 @media (min-width: 961px) {
@@ -6422,6 +6458,93 @@ form.form-grid[hidden] {
   .pillar-chapter--reverse .pillar-collage {
     order: -1;
   }
+}
+
+.pillar-level-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 14px;
+  padding: 10px 14px;
+  margin-bottom: 22px;
+  border-radius: var(--radius-md);
+  background: var(--pillar-soft);
+  border: 1px solid rgba(14, 21, 18, 0.06);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] .pillar-level-bar {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.pillar-emblem {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--pillar-accent);
+  color: #ffffff;
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] .pillar-emblem {
+  color: #0b110f;
+}
+
+.pillar-level-meta {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  margin-right: auto;
+}
+
+.pillar-level-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--pillar-accent);
+}
+
+.pillar-scale-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] .pillar-scale-label {
+  color: rgba(244, 247, 245, 0.76);
+}
+
+.pillar-level-dots {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.pillar-level-seg {
+  width: 16px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(14, 21, 18, 0.14);
+}
+
+.pillar-level-seg:nth-child(2) {
+  height: 7px;
+}
+
+.pillar-level-seg:nth-child(3) {
+  height: 9px;
+}
+
+.pillar-level-seg.is-lit {
+  background: var(--pillar-accent);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] .pillar-level-seg:not(.is-lit) {
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .pillar-chapter-eyebrow {
@@ -6471,6 +6594,46 @@ form.form-grid[hidden] {
   font-size: 0.93rem;
   line-height: 1.72;
   color: var(--ink-secondary);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] h3,
+.pillar-chapter[data-pillar-theme="obsidian"] .pillar-lead,
+.pillar-chapter[data-pillar-theme="obsidian"] .pillar-focus-list strong {
+  color: var(--ink-on-dark);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] .pillar-story {
+  color: rgba(244, 247, 245, 0.76);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] .pillar-focus-list {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] .arrow-link {
+  color: var(--pillar-accent);
+  border-bottom-color: rgba(140, 224, 189, 0.42);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] .arrow-link:hover {
+  border-bottom-color: var(--pillar-accent);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] .btn--outline {
+  color: #f4f7f5;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] .btn--outline:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] .pillar-photo {
+  background: #0e1915;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .pillar-focus-list {
@@ -6576,11 +6739,56 @@ form.form-grid[hidden] {
   transform: translateY(0);
 }
 
+.pillar-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.pillar-connector-stem {
+  width: 1px;
+  height: 22px;
+  background: var(--line-strong);
+}
+
+.pillar-connector-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.pillar-connector-pill svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
 @media (max-width: 960px) {
   .pillar-chapter {
     grid-template-columns: 1fr;
     gap: 24px;
-    padding-top: 36px;
+    padding: 24px 20px;
+    border-radius: var(--radius-lg);
+  }
+
+  .pillar-ripple-bg {
+    width: 220px;
+    height: 220px;
+    top: -52px;
+    left: -52px;
+  }
+
+  .pillar-chapter--reverse .pillar-ripple-bg {
+    left: auto;
+    right: -52px;
   }
 
   .pillar-focus-list {

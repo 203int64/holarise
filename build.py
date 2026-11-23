@@ -349,14 +349,71 @@ def render_story_stage(pillars: list) -> str:
     </div>"""
 
 
+PILLAR_IDENTITY_META = {
+    "holaheart": {
+        "theme": "sunrise",
+        "level_num": 1,
+        "level_label": "Cấp độ 01 · Cá nhân (Tu thân)",
+        "scale_label": "Từ một trái tim",
+        "icon_svg": '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+        "connector_next": "Từ nội lực bước ra cảnh quan",
+    },
+    "holagreen": {
+        "theme": "emerald",
+        "level_num": 2,
+        "level_label": "Cấp độ 02 · Không gian sống (Hòa Lạc)",
+        "scale_label": "Ra môi trường quanh mình",
+        "icon_svg": '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
+        "connector_next": "Từ mảng xanh lan tỏa tới cộng đồng",
+    },
+    "holaconnect": {
+        "theme": "obsidian",
+        "level_num": 3,
+        "level_label": "Cấp độ 03 · Cộng đồng & Xã hội (Lan tỏa)",
+        "scale_label": "Tới cộng đồng rộng lớn",
+        "icon_svg": '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+        "connector_next": "",
+    },
+}
+
+
+def render_pillar_ripple_svg(level_num: int) -> str:
+    radii = [46, 86, 126][: max(1, min(3, level_num))]
+    circles = "".join(
+        f'<circle cx="150" cy="150" r="{r}" fill="none" stroke="currentColor" stroke-width="1.25" stroke-dasharray="{6 + idx * 4} {6 + idx * 2}" opacity="{0.65 - idx * 0.14:.2f}"/>'
+        for idx, r in enumerate(radii)
+    )
+    return (
+        '<svg class="pillar-ripple-bg" viewBox="0 0 300 300" aria-hidden="true">'
+        '<circle cx="150" cy="150" r="9" fill="currentColor" opacity="0.22"/>'
+        f"{circles}</svg>"
+    )
+
+
 def render_pillars(pillars: list, detailed: bool = False) -> str:
     chapters = []
+    total_pillars = len(pillars)
     for idx, p in enumerate(pillars, start=1):
         filter_key = p.get("filterKey") or derive_pillar_filter(p.get("badge", ""), [], p.get("id", ""))
         anchor_id = f' id="{esc(p["id"])}"' if detailed else ""
         reverse_cls = " pillar-chapter--reverse" if idx % 2 == 0 else ""
-        theme_map = {"holaheart": "sunrise", "holagreen": "emerald", "holaconnect": "obsidian"}
-        theme = theme_map.get(filter_key, "emerald")
+        meta = PILLAR_IDENTITY_META.get(
+            filter_key,
+            {
+                "theme": "emerald",
+                "level_num": idx,
+                "level_label": f"Cấp độ 0{idx}",
+                "scale_label": p.get("metricBadge", ""),
+                "icon_svg": PILLAR_IDENTITY_META["holagreen"]["icon_svg"],
+                "connector_next": "",
+            },
+        )
+        theme = meta["theme"]
+        level_num = meta["level_num"]
+        level_segments = "".join(
+            f'<span class="pillar-level-seg{" is-lit" if seg <= level_num else ""}"></span>'
+            for seg in range(1, 4)
+        )
 
         cta_href = f"/lich-hoat-dong/?nhom={esc(filter_key)}"
         cta_label = f"Xem lịch {p['badge']}"
@@ -389,7 +446,7 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
             )
 
         collage_buttons = []
-        for frame_idx, frame in enumerate(photo_frames):
+        for frame in photo_frames:
             main_cls = " pillar-photo--main" if frame["is_main"] else ""
             cap = frame["caption"]
             full_cap = f"{p['badge']} · {cap}" if p["badge"] not in cap else cap
@@ -404,7 +461,18 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
 
         chapters.append(
             f"""<article class="pillar-chapter{reverse_cls}"{anchor_id} data-pillar-theme="{esc(theme)}" data-reveal>
+        {render_pillar_ripple_svg(level_num)}
         <div class="pillar-chapter-copy">
+          <div class="pillar-level-bar">
+            <span class="pillar-emblem" aria-hidden="true">{meta['icon_svg']}</span>
+            <div class="pillar-level-meta">
+              <span class="pillar-level-label">{esc(meta['level_label'])}</span>
+              <span class="pillar-scale-label">{esc(meta['scale_label'])}</span>
+            </div>
+            <div class="pillar-level-dots" role="img" aria-label="Cấp độ {level_num} trên 3">
+              {level_segments}
+            </div>
+          </div>
           <div class="pillar-chapter-eyebrow">
             <span class="pillar-chapter-num" aria-hidden="true">0{idx}</span>
             <span class="pillar-chapter-kicker">{esc(p['badge'])}</span>
@@ -425,6 +493,18 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
         </div>
       </article>"""
         )
+
+        if idx < total_pillars and meta.get("connector_next"):
+            chapters.append(
+                f"""<div class="pillar-connector" aria-hidden="true">
+        <span class="pillar-connector-stem"></span>
+        <span class="pillar-connector-pill">
+          <span>{esc(meta['connector_next'])}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+        <span class="pillar-connector-stem"></span>
+      </div>"""
+            )
     return "\n      ".join(chapters)
 
 
