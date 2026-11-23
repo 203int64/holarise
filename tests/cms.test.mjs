@@ -637,7 +637,7 @@ test("SSR Pages Functions inject live D1 events, brand-new articles with OG/JSON
   const joinHtml = await joinRes.text();
   assert.ok(joinHtml.includes("Chiến dịch SSR Live Test"));
   assert.ok(joinHtml.includes('id="join-ev-ev-live-ssr"'));
-  assert.ok(joinHtml.includes("Ngày đầu của tuần - Chủ nhật"));
+  assert.ok(!joinHtml.includes("Chủ nhật gần nhất (nhận lịch qua Zalo)"));
   assert.ok(!joinHtml.includes("Thứ Bảy"));
 
   // Join Studio packaged registration payload stores cleanly in existing D1 schema

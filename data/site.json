@@ -7,7 +7,6 @@
     "tagline": "Together We Rise, Together We Serve.",
     "motto": "Small Beginnings. Great Impact.",
     "subtitle": "Kết nối thanh niên, sinh viên và học sinh tại Hòa Lạc cùng làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng (HolaConnect).",
-    "foundedYear": 2025,
     "location": "Hòa Lạc, Hà Nội",
     "siteUrl": "https://holarise.org",
     "language": "vi",
@@ -21,61 +20,55 @@
     "email": "phungsu@holarise.org",
     "phoneDisplay": "077.777.1948",
     "address": "Tân Xã, Hòa Lạc, Hà Nội",
-    "meetingTime": "Ngày đầu của tuần - Chủ nhật",
-    "facebook": "https://facebook.com",
+    "meetingTime": "Lịch được công bố theo từng hoạt động.",
+    "facebook": "",
     "zalo": "https://zalo.me/0777771948",
-    "youtube": "https://youtube.com",
-    "instagram": "https://instagram.com",
+    "youtube": "",
+    "instagram": "",
     "formEndpoint": "/api/registrations"
   },
   "hero": {
     "badge": "HolaRise – Hoa Lac Youth Empowerment Community",
     "headline": "Khởi đầu nhỏ, cùng vươn lên và phụng sự tại Hòa Lạc",
-    "description": "Học sinh, sinh viên và thanh niên Hòa Lạc cùng hành động mỗi cuối tuần vì môi trường xanh, giá trị sống đẹp và cộng đồng tử tế.",
+    "description": "HolaRise hướng tới kết nối người trẻ tại Hòa Lạc qua các hoạt động môi trường, giá trị sống và sẻ chia cộng đồng.",
     "quickPills": [
       "Môi trường",
       "Workshop Giá trị sống",
       "Phụng sự xã hội"
     ],
     "primaryCta": {
-      "label": "Tham gia cuối tuần này",
+      "label": "Nhận thông tin hoạt động",
       "href": "/tham-gia/"
     },
     "secondaryCta": {
       "label": "Xem lịch hoạt động",
       "href": "#lich-hen"
     },
-    "image": "/assets/images/hero-hoalac.jpg",
-    "imageAlt": "Thanh niên, sinh viên và học sinh Cộng đồng HolaRise cùng trồng cây và làm sạch cảnh quan tại Hòa Lạc"
+    "image": "/assets/images/events/tanxa-lake-setting.jpg",
+    "imageAlt": "Hồ Tân Xã, Hòa Lạc trong một ngày nhiều mây."
   },
   "impactMetrics": [
     {
-      "value": 18,
-      "suffix": "+",
-      "label": "Chiến dịch xanh",
-      "detail": "Toàn khu vực Hòa Lạc"
+      "value": 3,
+      "suffix": "",
+      "label": "Mảng hoạt động",
+      "detail": "HolaGreen · HolaHeart · HolaConnect"
     },
     {
-      "value": 420,
-      "suffix": "+",
-      "label": "Thành viên trẻ",
-      "detail": "Học sinh · Sinh viên"
+      "value": 1,
+      "suffix": "",
+      "label": "Sự kiện HolaHeart đã tổ chức",
+      "detail": "15/11/2026 · Mây Lang Thang Cafe"
     },
     {
-      "value": 15,
-      "suffix": "+",
-      "label": "Buổi Workshop",
-      "detail": "Giá trị sống & kỹ năng"
-    },
-    {
-      "value": 1250,
-      "suffix": " kg",
-      "label": "Rác thu gom",
-      "detail": "Phân loại tái chế"
+      "value": 8,
+      "suffix": "",
+      "label": "Ảnh tư liệu HolaHeart",
+      "detail": "Ảnh thật trong album sự kiện"
     }
   ],
   "philosophy": {
-    "quote": "Từ một bàn tay nhặt rác ven hồ, một mầm cây mới trồng hay một buổi sẻ chia ấm áp lòng biết ơn — người trẻ Hòa Lạc đang cùng nhau vươn lên và lan tỏa điều tử tế.",
+    "quote": "Từ một hành động nhỏ ven hồ, một mầm cây được chăm sóc hay một buổi sẻ chia, mỗi người trẻ đều có thể góp phần làm Hòa Lạc tốt hơn.",
     "quoteAuthor": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise)",
     "mission": "Kết nối thanh niên, sinh viên và học sinh tại Hòa Lạc qua hành động bảo vệ môi trường, workshop giá trị sống và hoạt động phụng sự xã hội.",
     "vision": "Trở thành cộng đồng người trẻ kiểu mẫu, ấm áp và uy tín tại Hòa Lạc — nơi mỗi khởi đầu nhỏ tạo nên tác động bền vững.",
@@ -104,7 +97,7 @@
       "code": "SDG 4",
       "title": "Giáo dục chất lượng",
       "color": "#C5192D",
-      "description": "Workshop kỹ năng sống và trao tặng tủ sách thiếu nhi Hòa Lạc."
+      "description": "Hướng tới workshop kỹ năng sống và hoạt động chia sẻ sách cho thiếu nhi tại Hòa Lạc."
     },
     {
       "code": "SDG 11",
@@ -133,75 +126,51 @@
   ],
   "principles": [
     {
-      "title": "100% Tự Nguyện & Miễn Phí",
-      "description": "Mọi chiến dịch môi trường và buổi workshop đều phi lợi nhuận, mở cửa miễn phí cho học sinh, sinh viên."
+      "title": "Thông tin rõ ràng",
+      "description": "Ngày, địa điểm, chi phí và nội dung sẽ được ghi cụ thể trong thông báo của từng hoạt động."
     },
     {
-      "title": "Nội Dung Nhân Văn & Lành Mạnh",
-      "description": "Các chuyên đề hướng tới lòng biết ơn, trách nhiệm với gia đình – xã hội và lối sống xanh."
+      "title": "Tôn trọng người tham gia",
+      "description": "Hình ảnh và lời chia sẻ cá nhân chỉ được dùng khi có sự đồng thuận phù hợp."
     },
     {
-      "title": "Chu Đáo & An Toàn",
-      "description": "Thông báo rõ điểm hẹn tại Hòa Lạc và chuẩn bị sẵn găng tay, dụng cụ, nước uống."
+      "title": "Phân biệt ảnh tư liệu và minh họa",
+      "description": "Ảnh do AI tạo được gắn nhãn rõ ràng; ảnh sự kiện được trình bày riêng theo đúng bối cảnh."
     },
     {
-      "title": "Nhật Ký Kết Quả Công Khai",
-      "description": "Cập nhật minh bạch số thành viên, khối lượng rác thu gom và sách trao tặng sau từng sự kiện."
+      "title": "Cập nhật kết quả có căn cứ",
+      "description": "Số liệu và kết quả chỉ được công bố khi đã được xác nhận."
     }
   ],
-  "testimonials": [
-    {
-      "name": "Nguyễn Minh Anh",
-      "initials": "MA",
-      "role": "Sinh viên năm 2 · ĐH FPT Hòa Lạc",
-      "quote": "Lúc mới lên Hòa Lạc học, cuối tuần mình chỉ nằm trong phòng lướt điện thoại. Từ ngày tham gia Cuối Tuần Xanh bên hồ Tân Xã, mình có thêm những người bạn mới cực kỳ tích cực và thấy sáng Chủ Nhật trôi qua thật ý nghĩa."
-    },
-    {
-      "name": "Trần Hoàng Long",
-      "initials": "HL",
-      "role": "Sinh viên năm 3 · ĐHQGHN tại Hòa Lạc",
-      "quote": "Workshop Lòng Biết Ơn của HolaHeart đã chạm đến mình sâu sắc. Buổi chiều hôm ấy, lần đầu tiên sau nhiều năm xa nhà, mình gọi điện về cho mẹ chỉ để nói lời cảm ơn. Một cộng đồng chân thành và ấm áp."
-    },
-    {
-      "name": "Lê Thu Trang",
-      "initials": "TT",
-      "role": "Học sinh THPT Thạch Thất",
-      "quote": "Tham gia dự án Mầm Cây Thanh Niên và tủ sách thiếu nhi giúp em tự tin hơn khi giao tiếp. Các anh chị sinh viên hướng dẫn rất tận tình, không phân biệt tuổi tác hay khóa lớp, cảm giác như một đại gia đình."
-    }
-  ],
+  "testimonials": [],
   "faqs": [
     {
-      "question": "Ai có thể tham gia Cộng đồng HolaRise?",
-      "answer": "Tất cả học sinh, sinh viên và thanh niên đang học tập, làm việc tại khu vực Hòa Lạc đều có thể đăng ký tham gia."
+      "question": "Ai có thể quan tâm đến hoạt động của HolaRise?",
+      "answer": "Học sinh, sinh viên và người trẻ tại Hòa Lạc có thể gửi thông tin liên hệ để nhận phản hồi khi có lịch phù hợp."
     },
     {
-      "question": "Tham gia hoạt động và Workshop có mất phí không?",
-      "answer": "Hoàn toàn miễn phí. Ban Điều Phối đã chuẩn bị sẵn dụng cụ, găng tay và tài liệu sinh hoạt."
+      "question": "Khi nào có hoạt động tiếp theo?",
+      "answer": "Hiện chưa có lịch sắp tới được xác nhận. Lịch mới sẽ được đăng tại trang Workshop sau khi chốt."
     },
     {
-      "question": "Đi một mình lần đầu thì làm quen thế nào?",
-      "answer": "Trước buổi hoạt động, Ban Điều Phối sẽ liên hệ qua Zalo, gửi vị trí điểm hẹn tại Hòa Lạc và ghép bạn vào nhóm nhỏ để dễ dàng làm quen."
+      "question": "Chi phí tham gia là bao nhiêu?",
+      "answer": "Chi phí, nếu có, sẽ được ghi trong thông báo của từng hoạt động; không mặc định mọi buổi đều miễn phí."
     },
     {
-      "question": "Trường học hoặc CLB muốn phối hợp tổ chức thì liên hệ đâu?",
-      "answer": "Quý trường và các CLB có thể liên hệ trực tiếp qua Hotline/Zalo 077.777.1948 hoặc email phungsu@holarise.org."
+      "question": "Tổ chức hoặc nhóm sinh viên muốn kết nối thì liên hệ thế nào?",
+      "answer": "Bạn có thể liên hệ qua phungsu@holarise.org hoặc Zalo 077.777.1948 để trao đổi."
     },
     {
-      "question": "Nếu trời mưa hoặc có việc đột xuất muốn đổi lịch thì sao?",
-      "answer": "Bạn chỉ cần nhắn lại cho Ban Điều Phối qua Zalo hoặc Email trước giờ hẹn. Nếu thời tiết xấu, lịch dọn rác ngoài trời sẽ được thông báo dời sang tuần kế tiếp hoặc chuyển sang sinh hoạt trong nhà."
-    },
-    {
-      "question": "Đi hoạt động môi trường cần chuẩn bị gì và mỗi buổi kéo dài bao lâu?",
-      "answer": "Mỗi buổi thường kéo dài 2 đến 2,5 tiếng vào sáng cuối tuần. Bạn chỉ cần mặc trang phục gọn nhẹ, đi giày thể thao và mang chai nước cá nhân; găng tay, kẹp rác và dụng cụ bảo hộ đều đã có CLB chuẩn bị sẵn."
-    },
-    {
-      "question": "Tham gia hoạt động có được cấp giấy chứng nhận tình nguyện không?",
-      "answer": "Có. Ban Điều Phối ghi nhận đầy đủ số buổi và giờ tham gia thực tế để xác nhận hoặc cấp giấy chứng nhận tình nguyện bản mềm/bản in theo nhu cầu học tập và rèn luyện của sinh viên."
+      "question": "Cần chuẩn bị dụng cụ gì?",
+      "answer": "Danh sách chuẩn bị sẽ được ghi trong thông báo của hoạt động cụ thể."
     }
   ],
   "seo": {
     "defaultTitle": "HolaRise | Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên",
     "defaultDescription": "HolaRise kết nối thanh niên, sinh viên Hòa Lạc làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng.",
-    "keywords": "HolaRise, Cộng đồng HolaRise, Cộng đồng Thanh niên Hòa Lạc Cùng Vươn Lên, Hoa Lac Youth Empowerment Community, CLB thanh niên Hòa Lạc, tình nguyện môi trường Hòa Lạc, workshop sinh viên Hòa Lạc"
+    "keywords": "HolaRise, Cộng đồng HolaRise, Cộng đồng Thanh niên Hòa Lạc Cùng Vươn Lên, Hoa Lac Youth Empowerment Community, CLB thanh niên Hòa Lạc, tình nguyện môi trường Hòa Lạc, workshop sinh viên Hòa Lạc",
+    "googleSiteVerification": "",
+    "bingSiteVerification": "",
+    "indexNowKey": ""
   }
 }

@@ -95,7 +95,7 @@ def render_template(template: str, mapping: dict) -> str:
     result = template
     for key, val in mapping.items():
         result = result.replace("{{" + key + "}}", str(val))
-    return result
+    return "\n".join(line.rstrip() for line in result.split("\n"))
 
 
 def abs_url(site_url: str, path: str) -> str:
@@ -292,9 +292,15 @@ def render_story_stage(pillars: list) -> str:
         )
 
         priority_attr = ' fetchpriority="low" loading="lazy" decoding="async"' if idx > 0 else ' loading="lazy" decoding="async"'
+        image_label = (
+            '<span class="image-origin-badge image-origin-badge--ai">Ảnh minh họa AI</span>'
+            if p.get("imageIsIllustration")
+            else ""
+        )
         slides.append(
             f"""<div class="story-slide{active_cls}" data-story-slide="{idx}">
           <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="960" height="720"{priority_attr}>
+          {image_label}
           <div class="story-slide-scrim" aria-hidden="true"></div>
           <span class="story-slide-badge">{esc(metric_badge)}</span>
         </div>"""
@@ -340,19 +346,44 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
         cta_href = "/workshop/" if p["id"] == "workshop" else f'/hoat-dong/#{esc(p["id"])}'
         cta_label = "Xem lịch Workshop" if p["id"] == "workshop" else "Tìm hiểu chi tiết"
         footer_html = (
-            f'<div class="card-footer"><span class="seats-note">{esc(metric_badge)}</span><a class="btn btn--outline btn--sm" href="/tham-gia/">Tham gia</a></div>'
+            f'<div class="card-footer"><span class="seats-note">{esc(metric_badge)}</span><a class="btn btn--outline btn--sm" href="/tham-gia/">Gửi quan tâm</a></div>'
             if detailed
             else f'<div class="card-footer"><a class="arrow-link" href="{cta_href}">{cta_label} →</a></div>'
         )
+        image_label = (
+            '<span class="image-origin-badge image-origin-badge--ai">Ảnh minh họa AI</span>'
+            if p.get("imageIsIllustration")
+            else '<span class="image-origin-badge image-origin-badge--documentary">Ảnh sự kiện thật</span>'
+            if p["id"] == "workshop"
+            else ""
+        )
+        support_html = ""
+        support_images = p.get("supportImages", [])
+        if detailed and support_images:
+            figures = []
+            for photo in support_images:
+                figures.append(
+                    f"""<figure class="illustrative-image">
+          <img src="{esc(photo['src'])}" alt="{esc(photo['alt'])}" width="640" height="420" loading="lazy" decoding="async">
+          <span class="image-origin-badge image-origin-badge--ai">Ảnh minh họa AI</span>
+        </figure>"""
+                )
+            support_html = f"""<details class="illustrative-details">
+          <summary>Xem thêm {len(support_images)} ảnh minh họa AI</summary>
+          <p>Ảnh được tạo bằng AI để minh họa hoạt động; không ghi lại một sự kiện đã diễn ra.</p>
+          <div class="illustrative-grid">{"".join(figures)}</div>
+        </details>"""
         cards.append(
             f"""<article class="editorial-card" data-stagger-item{anchor_id}>
         <div class="plate-media" data-curtain>
           <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
+          {image_label}
         </div>
         <div class="card-meta"><span class="cat">{esc(p['badge'])}</span></div>
         <h3 class="card-title">{esc(p['title'])}</h3>
         <p class="card-text">{esc(p['summary'])}</p>
         <div class="visual-chip-row" style="margin-bottom: 18px;">{chips_html}</div>
+        {support_html}
         {footer_html}
       </article>"""
         )
@@ -365,6 +396,11 @@ ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
 
 
 def render_workshops(upcoming: list) -> str:
+    if not upcoming:
+        return """<div class="schedule-empty" role="status">
+        <p>Chưa có lịch sắp tới được xác nhận. Lịch mới sẽ xuất hiện tại đây sau khi chốt ngày, giờ và địa điểm.</p>
+        <a class="btn btn--outline btn--sm" href="/tham-gia/">Nhận thông tin khi có lịch</a>
+      </div>"""
     cards = []
     for ws in upcoming:
         filters_attr = " ".join(ws.get("filters", []))
@@ -403,19 +439,7 @@ def render_workshops(upcoming: list) -> str:
 
 
 def render_join_event_options(upcoming: list) -> str:
-    cards = [
-        """<div class="join-event-option">
-        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-flexible" value="" data-event-title="" data-event-date="Ngày đầu của tuần - Chủ nhật" data-event-time="Nhận lịch chi tiết qua Zalo" data-event-location="Hòa Lạc, Hà Nội" data-event-type="Lịch mở hàng tuần" checked>
-        <label class="join-event-card" for="join-ev-flexible">
-          <span class="join-event-top">
-            <span class="join-event-date">Chủ nhật gần nhất</span>
-            <span class="join-event-seats">Linh hoạt</span>
-          </span>
-          <span class="join-event-title">Chủ nhật gần nhất (nhận lịch qua Zalo)</span>
-          <span class="join-event-meta">Chưa chốt ngày cụ thể — Ban Điều Phối gửi lịch Chủ nhật tới cho bạn.</span>
-        </label>
-      </div>"""
-    ]
+    cards = []
     for ws in upcoming:
         safe_id = esc(ws["id"])
         cards.append(
@@ -431,6 +455,8 @@ def render_join_event_options(upcoming: list) -> str:
         </label>
       </div>"""
         )
+    if not cards:
+        return '<div class="schedule-empty" role="status"><p>Chưa có lịch hoạt động được xác nhận. Bạn vẫn có thể gửi mảng quan tâm; biểu mẫu này chưa phải đăng ký cho một sự kiện cụ thể.</p></div>'
     return '<div class="join-event-grid">\n      ' + "\n      ".join(cards) + "\n    </div>"
 
 
@@ -477,10 +503,16 @@ def render_campaigns(campaigns: list) -> str:
     cards = []
     for c in campaigns:
         filter_tokens = " ".join(c.get("filters", [])) or c["category"]
+        image_label = (
+            '<span class="image-origin-badge image-origin-badge--ai">Ảnh minh họa AI</span>'
+            if c.get("imageIsIllustration")
+            else ""
+        )
         cards.append(
             f"""<article class="editorial-card" data-stagger-item data-campaign-card data-category="{esc(filter_tokens)}">
         <div class="plate-media" data-curtain>
           <img src="{esc(c['image'])}" alt="{esc(c['imageAlt'])}" width="720" height="460" loading="lazy" decoding="async">
+          {image_label}
         </div>
         <div class="card-meta">
           <span class="cat">{esc(c['categoryLabel'])}</span>
@@ -494,7 +526,7 @@ def render_campaigns(campaigns: list) -> str:
           <span>{ICON_CHECK} {esc(c['metric'])}</span>
         </div>
         <div class="card-footer">
-          <button class="btn btn--outline btn--sm" type="button" data-register-event="{esc(c['title'])}">Đăng ký đồng hành →</button>
+          <a class="btn btn--outline btn--sm" href="/tham-gia/">Gửi quan tâm về ý tưởng này →</a>
         </div>
       </article>"""
         )
@@ -508,6 +540,7 @@ def render_horizontal_gallery(gallery: list) -> str:
             f"""<button class="horizontal-card" type="button" data-cursor-label="Xem" data-lightbox-src="{esc(g['src'])}" data-lightbox-alt="{esc(g['alt'])}" data-lightbox-caption="{esc(g['caption'])}">
         <div class="horizontal-frame">
           <img src="{esc(g['src'])}" alt="{esc(g['alt'])}" width="960" height="600" loading="lazy" decoding="async">
+          {f'<span class="image-origin-badge image-origin-badge--documentary">{esc(g.get("label", "Ảnh tư liệu"))}</span>' if g.get('label') else ''}
         </div>
         <div class="horizontal-caption">
           <span>{esc(g['caption'])}</span>
@@ -524,6 +557,7 @@ def render_gallery(gallery: list) -> str:
         items.append(
             f"""<button class="gallery-item" type="button" data-cursor-label="Xem" data-lightbox-src="{esc(g['src'])}" data-lightbox-alt="{esc(g['alt'])}" data-lightbox-caption="{esc(g['caption'])}">
         <img src="{esc(g['src'])}" alt="{esc(g['alt'])}" width="720" height="480" loading="lazy" decoding="async">
+        {f'<span class="image-origin-badge image-origin-badge--documentary">{esc(g.get("label", "Ảnh tư liệu"))}</span>' if g.get('label') else ''}
         <span class="gallery-caption">{esc(g['caption'])}</span>
       </button>"""
         )
@@ -559,6 +593,8 @@ def render_numbered_cards(items: list) -> str:
 
 
 def render_testimonials(testimonials: list) -> str:
+    if not testimonials:
+        return '<p class="testimonial-empty">Chưa có lời chia sẻ cá nhân nào được duyệt để đăng công khai.</p>'
     cards = []
     for item in testimonials:
         initials = item.get("initials", item["name"][:2].upper())
@@ -589,11 +625,17 @@ def render_past_workshops(past_list: list) -> str:
     for idx, item in enumerate(past_list):
         photo = item.get("image") or PAST_FALLBACK_IMAGES[idx % len(PAST_FALLBACK_IMAGES)]
         alt = item.get("imageAlt") or item["title"]
+        title = esc(item["title"])
+        if item.get("href", "").startswith("/"):
+            event_href = esc(item["href"])
+            title = f'<a class="past-item-title-link" href="{event_href}">{title}</a>'
+        meta_parts = [item.get("time", ""), item.get("location", ""), item.get("participants", "")]
+        meta = " · ".join(esc(part) for part in meta_parts if part)
         rows.append(
             f"""<div class="past-item" data-stagger-item data-hover-photo="{esc(photo)}" data-hover-alt="{esc(alt)}">
         <span class="past-item-date">{esc(item['date'])}</span>
-        <h3 class="past-item-title">{esc(item['title'])}</h3>
-        <span class="past-item-meta">{esc(item['participants'])}</span>
+        <h3 class="past-item-title">{title}</h3>
+        <span class="past-item-meta">{meta}</span>
         <span class="past-item-arrow" aria-hidden="true">↗</span>
       </div>"""
         )
@@ -603,11 +645,17 @@ def render_past_workshops(past_list: list) -> str:
 _SAFE_REL_LINK_RE = re.compile(
     r"\[([^\[\]]+)\]\((/(?:[a-z0-9_-][a-z0-9/_-]*)?(?:#[a-z0-9_-]+)?)\)"
 )
+_SAFE_MUSICSPACE_LINK_RE = re.compile(
+    r"\[([^\[\]]+)\]\((https://musicspace\.edu\.vn(?:/[^\s)]*)?)\)", re.IGNORECASE
+)
 _BOLD_RE = re.compile(r"\*\*([^*]+)\*\*")
 
 
 def format_inline_safe(escaped_line: str) -> str:
-    with_links = _SAFE_REL_LINK_RE.sub(r'<a href="\2">\1</a>', escaped_line)
+    with_external_links = _SAFE_MUSICSPACE_LINK_RE.sub(
+        r'<a href="\2" rel="noopener noreferrer">\1</a>', escaped_line
+    )
+    with_links = _SAFE_REL_LINK_RE.sub(r'<a href="\2">\1</a>', with_external_links)
     return _BOLD_RE.sub(r"<strong>\1</strong>", with_links)
 
 
@@ -783,6 +831,13 @@ def write_page(
         ev_scripts = "\n  ".join(json_ld_script(s) for s in event_schemas)
         json_ld_html += f"\n  <!-- CMS:EVENTS_JSON_LD:START -->\n  {ev_scripts}\n  <!-- CMS:EVENTS_JSON_LD:END -->"
     phone_raw = re.sub(r"[^0-9+]", "", c["phoneDisplay"])
+    verification_tags = []
+    g_verify = (site.get("seo", {}).get("googleSiteVerification") or "").strip()
+    b_verify = (site.get("seo", {}).get("bingSiteVerification") or "").strip()
+    if g_verify:
+        verification_tags.append(f'\n  <meta name="google-site-verification" content="{esc(g_verify)}">')
+    if b_verify:
+        verification_tags.append(f'\n  <meta name="msvalidate.01" content="{esc(b_verify)}">')
 
     rendered = render_template(
         base_tpl,
@@ -791,6 +846,7 @@ def write_page(
             "PAGE_DESCRIPTION": esc(description),
             "PAGE_KEYWORDS": esc(site["seo"]["keywords"]),
             "ROBOTS_CONTENT": esc(robots),
+            "VERIFICATION_META": "".join(verification_tags),
             "CANONICAL_URL": esc(canonical),
             "OG_TYPE": esc(og_type),
             "OG_IMAGE_URL": esc(og_img_url),
@@ -828,6 +884,7 @@ def collect_precache_urls() -> list:
     urls = set()
     excluded_prefixes = (
         "/assets/images/events/",
+        "/assets/images/illustrations/",
         "/assets/images/pwa/screenshot-",
         "/assets/images/og-cover.jpg",
     )
@@ -1198,10 +1255,29 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
         f"- {ws['dateDisplay']} ({ws['time']}): {ws['title']} — {ws['location']} ({ws['fee']}, {ws['seats']})"
         for ws in workshops.get("upcoming", [])
     ]
+    if not upcoming_lines:
+        upcoming_lines = [
+            f"- Hiện chưa có lịch sắp tới được xác nhận. Lịch mới sẽ được cập nhật tại {abs_url(b['siteUrl'], '/workshop/')}."
+        ]
+
+    past_lines = []
+    for item in workshops.get("pastTopics", []):
+        href = item.get("href")
+        if href:
+            past_lines.append(
+                f"- {item['date']} ({item['time']}): [{item['title']}]({abs_url(b['siteUrl'], href)}) — {item['location']}"
+            )
+        else:
+            past_lines.append(f"- {item['date']} ({item['time']}): {item['title']} — {item['location']}")
+
     news_lines = []
     for a in news:
         slug_url = abs_url(b["siteUrl"], f"/tin-tuc/{a['slug']}/")
         news_lines.append(f"- [{a['title']}]({slug_url}): {a['excerpt']} ({a['dateDisplay']})")
+
+    past_section = ""
+    if past_lines:
+        past_section = "\n## Sự kiện đã tổ chức\n" + "\n".join(past_lines) + "\n"
 
     return f"""# {b['brandName']} — {b['fullName']}
 
@@ -1211,7 +1287,7 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
 - Khu vực hoạt động: {b['location']}
 - Thời gian hoạt động: {c['meetingTime']} · Văn phòng / Điểm hẹn: {c['address']}
 - Liên hệ: {c['email']} | Hotline/Zalo: {c['phoneDisplay']}
-- Chi phí tham gia: 100% miễn phí cho học sinh, sinh viên và thanh niên tại Hòa Lạc.
+- Chi phí tham gia: Chi phí, nếu có, được ghi rõ trong thông báo của từng hoạt động.
 
 ## Số liệu tác động (Single Source of Truth)
 {chr(10).join(metrics_lines)}
@@ -1220,7 +1296,7 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
 - [Trang chủ]({abs_url(b['siteUrl'], '/')}): Tổng quan 3 trụ cột hoạt động, số liệu và lịch hẹn gần nhất.
 - [Giới thiệu & Sứ mệnh]({abs_url(b['siteUrl'], '/gioi-thieu/')}): Sứ mệnh, tầm nhìn, 4 giá trị cốt lõi, nguyên tắc minh bạch và 5 UN SDGs.
 - [Hoạt động & Chiến dịch]({abs_url(b['siteUrl'], '/hoat-dong/')}): Chi tiết HolaGreen, HolaHeart, HolaConnect và các chiến dịch tại Hòa Lạc.
-- [Lịch Workshop & Sự kiện]({abs_url(b['siteUrl'], '/workshop/')}): Lịch đăng ký giữ chỗ miễn phí hàng tuần.
+- [Lịch Workshop & Sự kiện]({abs_url(b['siteUrl'], '/workshop/')}): Lịch đăng ký và thông tin các hoạt động đã tổ chức.
 - [Tin tức & Nhật ký]({abs_url(b['siteUrl'], '/tin-tuc/')}): Báo cáo kết quả công khai từng chiến dịch và workshop.
 - [Đăng ký tham gia]({abs_url(b['siteUrl'], '/tham-gia/')}): Biểu mẫu đăng ký tình nguyện viên và kết nối hợp tác.
 
@@ -1229,7 +1305,7 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
 
 ## Lịch sự kiện sắp tới
 {chr(10).join(upcoming_lines)}
-
+{past_section}
 ## Nhật ký hoạt động mới nhất
 {chr(10).join(news_lines)}
 """
@@ -1289,8 +1365,13 @@ def build_site() -> list:
         {
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "name": b["fullName"],
-            "url": b["siteUrl"],
+            "name": b.get("brandName", "HolaRise"),
+            "alternateName": [
+                b["shortName"],
+                b["fullName"],
+                b.get("englishName", "HolaRise – Hoa Lac Youth Empowerment Community"),
+            ],
+            "url": abs_url(b["siteUrl"], "/"),
             "inLanguage": "vi-VN",
         },
         faq_schema(site["faqs"]),
@@ -1775,6 +1856,10 @@ Sitemap: {abs_url(b['siteUrl'], '/sitemap.xml')}
     (DIST_DIR / "llms.txt").write_text(
         generate_llms_txt(site, activities, workshops, news), encoding="utf-8"
     )
+
+    indexnow_key = (site.get("seo", {}).get("indexNowKey") or "").strip()
+    if indexnow_key and re.fullmatch(r"[A-Za-z0-9-]{8,128}", indexnow_key):
+        (DIST_DIR / f"{indexnow_key}.txt").write_text(indexnow_key + "\n", encoding="utf-8")
 
     return sitemap_urls
 

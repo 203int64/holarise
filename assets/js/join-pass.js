@@ -9,7 +9,7 @@
   var prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var isFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   var SITE_URL = "https://holarise.org";
-  var DEFAULT_SCHEDULE = "Ngày đầu của tuần - Chủ nhật";
+  var DEFAULT_SCHEDULE = "Chưa có lịch được xác nhận";
 
   var joinForm = document.querySelector("[data-join-studio]");
   var passEl = document.querySelector("[data-sunrise-pass]");
@@ -59,7 +59,7 @@
       if (ruParam && inviteBanner && inviteBannerText) {
         joinForm.dataset.invitedBy = ruParam;
         inviteBannerText.textContent =
-          ruParam + " đang rủ bạn cùng tham gia Chủ nhật này tại Hòa Lạc! Chọn buổi phù hợp bên dưới nhé.";
+          ruParam + " mời bạn tìm hiểu về HolaRise. Lịch hoạt động đã xác nhận sẽ được đăng tại trang Workshop.";
         inviteBanner.hidden = false;
       }
 
@@ -175,7 +175,7 @@
 
     var evId = (checkedEvent && checkedEvent.value) || "";
     var evTitle = (checkedEvent && checkedEvent.getAttribute("data-event-title")) || "";
-    var evDate = (checkedEvent && checkedEvent.getAttribute("data-event-date")) || "Chủ nhật gần nhất";
+    var evDate = (checkedEvent && checkedEvent.getAttribute("data-event-date")) || "Chưa có lịch được xác nhận";
     var evTime = (checkedEvent && checkedEvent.getAttribute("data-event-time")) || DEFAULT_SCHEDULE;
 
     if (hiddenEventId) hiddenEventId.value = evId;
@@ -188,10 +188,10 @@
     if (passNameEl) passNameEl.textContent = nameVal || "Tên của bạn";
     if (passOrgEl) passOrgEl.textContent = orgVal || "Thanh niên · Sinh viên Hòa Lạc";
     if (passGreetingEl) passGreetingEl.textContent = greeting;
-    if (passEventEl) passEventEl.textContent = evTitle || "Chủ nhật gần nhất";
+    if (passEventEl) passEventEl.textContent = evTitle || "Chưa có sự kiện cụ thể";
     if (passScheduleEl) passScheduleEl.textContent = evId ? evDate + " (" + evTime + ")" : DEFAULT_SCHEDULE;
     if (passVibeEl) {
-      passVibeEl.textContent = (activeVibe && activeVibe.getAttribute("data-vibe-chip")) || "Đi một mình (ghép nhóm)";
+      passVibeEl.textContent = (activeVibe && activeVibe.getAttribute("data-vibe-chip")) || "Quan tâm tìm hiểu";
     }
     if (passCodeEl) passCodeEl.textContent = "CHỜ XÁC NHẬN";
 
@@ -206,13 +206,13 @@
     if (readinessBarEl) readinessBarEl.style.width = pct + "%";
     if (readinessHintEl) {
       if (pct >= 95) {
-        readinessHintEl.textContent = "Thẻ đã sẵn sàng! Bấm giữ chỗ để đóng dấu xác nhận.";
+        readinessHintEl.textContent = "Phiếu xem trước đã đủ thông tin để gửi.";
       } else if (nameVal.length < 2) {
-        readinessHintEl.textContent = "Nhập họ tên và SĐT/Zalo để hoàn thiện thẻ.";
+        readinessHintEl.textContent = "Nhập họ tên và SĐT/Zalo để hoàn thiện phiếu thông tin.";
       } else if (phoneDigits < 8) {
-        readinessHintEl.textContent = "Thêm số điện thoại / Zalo (ít nhất 8 chữ số) để nhận điểm hẹn.";
+        readinessHintEl.textContent = "Thêm số điện thoại / Zalo để HolaRise có thể phản hồi.";
       } else {
-        readinessHintEl.textContent = "Chọn thêm trường/đơn vị nếu muốn thẻ in đầy đủ 100%.";
+        readinessHintEl.textContent = "Có thể bổ sung đơn vị học tập/công tác nếu bạn muốn.";
       }
     }
   }
@@ -269,7 +269,7 @@
     }
   }
 
-  /* 4. Post-Submit Stamped Ticket & Share Message Builder */
+  /* 4. Post-submit interest slip & share message builder */
   function buildInviteLink(snapshot) {
     var url = new URL("/tham-gia/", SITE_URL);
     if (snapshot.eventId) url.searchParams.set("event", snapshot.eventId);
@@ -279,16 +279,7 @@
 
   function buildInviteText(snapshot) {
     var link = buildInviteLink(snapshot);
-    var label =
-      snapshot.eventTitle && snapshot.eventTitle !== "Chủ nhật gần nhất"
-        ? '"' + snapshot.eventTitle + '"'
-        : "hoạt động Chủ nhật của HolaRise";
-    return (
-      "Chủ nhật này đi cùng mình không? Mình vừa giữ chỗ " +
-      label +
-      " tại Hòa Lạc (Miễn phí 100%, có sẵn dụng cụ). Đăng ký nhanh ở đây nhé: " +
-      link
-    );
+    return "Mình đang tìm hiểu về các hoạt động của HolaRise tại Hòa Lạc. Lịch và chi phí (nếu có) sẽ được công bố theo từng hoạt động: " + link;
   }
 
   document.addEventListener("holarise:registration-success", function (e) {
@@ -305,12 +296,11 @@
       if (modalPassCodeEl) modalPassCodeEl.textContent = snap.id || "REG-HOLARISE";
       if (modalPassSummaryEl) {
         modalPassSummaryEl.textContent =
-          (snap.fullName || "Bạn") +
-          " đã giữ chỗ \"" +
-          (snap.eventTitle || "Hoạt động HolaRise") +
-          "\" (" +
-          [snap.eventDate, snap.eventTime].filter(Boolean).join(" · ") +
-          "). Ban Điều Phối sẽ liên hệ qua Zalo trong 24 giờ.";
+          "HolaRise đã ghi nhận thông tin quan tâm của " +
+          (snap.fullName || "bạn") +
+          " (mã " +
+          (snap.id || "REG-HOLARISE") +
+          "). Đây chưa phải xác nhận chỗ tham dự.";
       }
       if (modalInviteTarget) modalInviteTarget.textContent = inviteMsg;
       modalSuccessEl.hidden = false;
@@ -324,24 +314,24 @@
       confirmedSnapshots.join = snap;
       passEl.setAttribute("data-pass-theme", snap.theme || "emerald");
       passEl.classList.add("is-confirmed");
-      if (passStateEl) passStateEl.textContent = "Đã giữ chỗ";
+      if (passStateEl) passStateEl.textContent = "Đã gửi thông tin";
       if (passBadgeEl) passBadgeEl.textContent = snap.badge || "HolaGreen · Sạch";
       if (passNameEl) passNameEl.textContent = snap.fullName || "Thành viên mới";
       if (passOrgEl) passOrgEl.textContent = snap.organization || "Thanh niên · Sinh viên Hòa Lạc";
       if (passGreetingEl && snap.greeting) passGreetingEl.textContent = snap.greeting;
-      if (passEventEl) passEventEl.textContent = snap.eventTitle || "Chủ nhật gần nhất";
+      if (passEventEl) passEventEl.textContent = snap.eventTitle || "Chưa có sự kiện cụ thể";
       if (passScheduleEl) {
         passScheduleEl.textContent = snap.eventId
           ? snap.eventDate + " (" + snap.eventTime + ")"
           : DEFAULT_SCHEDULE;
       }
-      if (passVibeEl) passVibeEl.textContent = snap.vibe || "Đi một mình (ghép nhóm)";
+      if (passVibeEl) passVibeEl.textContent = snap.vibe || "Quan tâm tìm hiểu";
       if (passCodeEl) passCodeEl.textContent = snap.id || "REG-HOLARISE";
 
       if (readinessPctEl) readinessPctEl.textContent = "100%";
       if (readinessBarEl) readinessBarEl.style.width = "100%";
       if (readinessHintEl) {
-        readinessHintEl.textContent = "Đã giữ chỗ thành công! Tải ảnh thẻ hoặc rủ bạn bè cùng đi.";
+        readinessHintEl.textContent = "Đã ghi nhận thông tin. Lưu phiếu nếu bạn muốn.";
       }
 
       if (joinInviteTarget) joinInviteTarget.textContent = inviteMsg;
@@ -529,7 +519,7 @@
       ctx.fillStyle = "#FFFFFF";
       ctx.font = '600 21px "Be Vietnam Pro", -apple-system, sans-serif';
       ctx.textAlign = "center";
-      ctx.fillText("ĐÃ GIỮ CHỖ", cardX + cardW - 64 - 110, cardY + 91);
+      ctx.fillText("ĐÃ GHI NHẬN", cardX + cardW - 64 - 110, cardY + 91);
       ctx.textAlign = "left";
 
       /* Program Tag Pill */
@@ -599,7 +589,7 @@
       ctx.fillStyle = "#F5B38C";
       ctx.textAlign = "center";
       ctx.font = '700 20px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText("ĐÃ GIỮ CHỖ", 0, -4);
+      ctx.fillText("ĐÃ GỬI THÔNG TIN", 0, -4);
       ctx.font = '600 17px "Be Vietnam Pro", -apple-system, sans-serif';
       ctx.fillText("HÒA LẠC", 0, 24);
       ctx.restore();
@@ -637,15 +627,15 @@
         drawWrappedLines(ctx, val, x, y + 40, colW, 38, 2);
       }
 
-      drawMeta("BUỔI HẸN", snapshot.eventTitle || "Chủ nhật gần nhất", padX, metaY1);
+      drawMeta("MẢNG QUAN TÂM", snapshot.eventTitle || "Chưa có sự kiện cụ thể", padX, metaY1);
       drawMeta(
         "THỜI GIAN",
         snapshot.eventId ? snapshot.eventDate + " · " + snapshot.eventTime : DEFAULT_SCHEDULE,
         col2X,
         metaY1
       );
-      drawMeta("PHONG CÁCH", snapshot.vibe || "Đi một mình (ghép nhóm)", padX, metaY2);
-      drawMeta("MÃ GIỮ CHỖ", snapshot.id || "REG-HOLARISE", col2X, metaY2, "#F5B38C");
+      drawMeta("CÁCH ĐỒNG HÀNH", snapshot.vibe || "Quan tâm tìm hiểu", padX, metaY2);
+      drawMeta("MÃ THÔNG TIN", snapshot.id || "REG-HOLARISE", col2X, metaY2, "#F5B38C");
 
       /* Bottom Barcode & Coordinates */
       var footY = cardY + cardH - 115;
@@ -667,11 +657,11 @@
       ctx.textAlign = "right";
       ctx.fillStyle = "rgba(244, 247, 245, 0.65)";
       ctx.font = '500 21px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText("21°00'N · 105°31'E · MIỄN PHÍ 100%", cardX + cardW - 64, footY + 60);
+      ctx.fillText("HÒA LẠC · CHƯA CÓ LỊCH CỤ THỂ", cardX + cardW - 64, footY + 60);
       ctx.restore();
 
       var fileName =
-        "holarise-pass-" + String(snapshot.id || "chu-nhat").toLowerCase().replace(/[^a-z0-9-]+/g, "-") + ".png";
+        "holarise-interest-" + String(snapshot.id || "hola-rise").toLowerCase().replace(/[^a-z0-9-]+/g, "-") + ".png";
 
       if (canvas.toBlob) {
         canvas.toBlob(function (blob) {

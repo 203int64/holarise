@@ -1,140 +1,20 @@
 {
   "intro": {
-    "title": "Lịch Workshop & Hoạt Động Cuối Tuần Tại Hòa Lạc",
-    "description": "Mọi buổi hoạt động đều miễn phí, công khai rõ thời gian và điểm hẹn tại Hòa Lạc. Bạn có thể đi một mình hoặc rủ bạn bè cùng tham gia."
+    "title": "Lịch Workshop & Hoạt Động Tại Hòa Lạc",
+    "description": "Chưa có lịch sắp tới được xác nhận. Thông tin ngày, giờ, địa điểm và chi phí sẽ được đăng tại đây khi chốt."
   },
-  "upcoming": [
-    {
-      "id": "ws-long-biet-on-va-song-xanh",
-      "type": "HolaHeart · Biết ơn & Tử tế",
-      "filters": ["biet-on", "tu-te"],
-      "date": "2026-11-29",
-      "dateDisplay": "CN, 29/11/2026",
-      "time": "08:30 – 11:00",
-      "location": "Hòa Lạc, Hà Nội",
-      "fee": "Miễn phí",
-      "seats": "Còn 18/40 chỗ",
-      "title": "Workshop: Lòng Biết Ơn & Sự Tử Tế Giữa Đời Thường",
-      "summary": "Cùng sẻ chia về lòng biết ơn cha mẹ – thầy cô, tự tay viết thiệp tri ân và tái chế lọ thủy tinh thành chậu cây xanh.",
-      "highlights": [
-        "Sẻ chia lòng biết ơn",
-        "Tái chế chậu cây xanh",
-        "Viết thiệp tri ân"
-      ],
-      "image": "/assets/images/events/activity-gratitude-workshop.jpg",
-      "imageAlt": "Bàn hoa lá khô ép thủ công và thiệp tri ân tại workshop HolaHeart"
-    },
-    {
-      "id": "cleanup-ho-tan-xa-thang-12",
-      "type": "HolaGreen · Sạch",
-      "filters": ["sach"],
-      "date": "2026-12-06",
-      "dateDisplay": "CN, 06/12/2026",
-      "time": "06:45 – 09:15",
-      "location": "Ven Hồ Tân Xã, Hòa Lạc",
-      "fee": "Miễn phí (Có sẵn dụng cụ)",
-      "seats": "Mở đăng ký",
-      "title": "Cuối Tuần Xanh #19: Làm Sạch & Phân Loại Rác Hồ Tân Xã",
-      "summary": "Dọn sạch bờ cỏ ven hồ Tân Xã sáng Chủ Nhật, phân loại chai nhựa tái chế và kết nối những người bạn mới tích cực.",
-      "highlights": [
-        "Có sẵn găng tay & kẹp rác",
-        "Ghép nhóm cho người mới",
-        "Chứng nhận tình nguyện"
-      ],
-      "image": "/assets/images/events/activity-lake-cleanup.jpg",
-      "imageAlt": "Đôi tay đeo găng bảo hộ nhặt rác và phân loại chai nhựa ven hồ Tân Xã"
-    },
-    {
-      "id": "ws-truyen-cam-hung-va-ket-noi",
-      "type": "HolaConnect · Tử tế & Sẻ chia",
-      "filters": ["tu-te", "se-chia"],
-      "date": "2026-12-13",
-      "dateDisplay": "CN, 13/12/2026",
-      "time": "14:30 – 17:00",
-      "location": "Hòa Lạc, Hà Nội",
-      "fee": "Miễn phí",
-      "seats": "Còn 25/35 chỗ",
-      "title": "Workshop: Nghệ Thuật Lắng Nghe & Khát Vọng Tuổi Trẻ",
-      "summary": "Thực hành giao tiếp chân thành, kết nối bạn đồng hành lành mạnh tại Hòa Lạc và định hướng mục tiêu sống có ích.",
-      "highlights": [
-        "Kỹ năng lắng nghe",
-        "Kết nối bạn mới",
-        "Tặng sổ tay Tử Tế"
-      ],
-      "image": "/assets/images/events/activity-workshop-journal.jpg",
-      "imageAlt": "Sổ tay Tử Tế và tài liệu sinh hoạt tại buổi giao lưu kết nối bạn trẻ"
-    },
-    {
-      "id": "ws-tai-che-sen-da-thang-12",
-      "type": "HolaGreen · Tái chế & Sáng tạo",
-      "filters": ["sach", "tu-te"],
-      "date": "2026-12-20",
-      "dateDisplay": "CN, 20/12/2026",
-      "time": "09:00 – 11:30",
-      "location": "Không gian Xanh Tân Xã, Hòa Lạc",
-      "fee": "Miễn phí (Tặng sen đá & lọ mầm)",
-      "seats": "Còn 20/35 chỗ",
-      "title": "Workshop: Tái Chế Thủy Tinh & Sống Xanh Bền Vững",
-      "summary": "Học cách làm sạch chai lọ thủy tinh phế liệu, phối đất trồng sen đá mini trang trí bàn học và thực hành lối sống giảm rác thải.",
-      "highlights": [
-        "Mang về chậu sen đá",
-        "Phối đất trồng mầm",
-        "Thực hành Zero Waste"
-      ],
-      "image": "/assets/images/events/activity-glass-upcycling.jpg",
-      "imageAlt": "Chậu sen đá mini xanh mướt trồng trong lọ thủy tinh tái chế"
-    },
-    {
-      "id": "chien-dich-trong-cay-cuoi-nam",
-      "type": "HolaGreen · Mầm xanh",
-      "filters": ["sach"],
-      "date": "2026-12-27",
-      "dateDisplay": "CN, 27/12/2026",
-      "time": "07:00 – 09:30",
-      "location": "Đường trục chính Tân Xã, Hòa Lạc",
-      "fee": "Miễn phí (Cung cấp xẻng & cây giống)",
-      "seats": "Mở đăng ký",
-      "title": "Dự Án Mầm Cây #03: Ươm Xanh Những Cung Đường",
-      "summary": "Cùng trồng 100 cây xanh bóng mát cuối năm, gắn biển chăm sóc và lưu lại dấu ấn tuổi trẻ ý nghĩa cho Hòa Lạc.",
-      "highlights": [
-        "Cung cấp cây giống & xẻng",
-        "Gắn thẻ nhóm chăm sóc",
-        "Chứng nhận tình nguyện"
-      ],
-      "image": "/assets/images/events/activity-tree-planting.jpg",
-      "imageAlt": "Cận cảnh vun gốc và ươm mầm cây xanh bản địa tại Hòa Lạc"
-    }
-  ],
+  "upcoming": [],
   "pastTopics": [
     {
-      "date": "10/2026",
-      "title": "Workshop HolaHeart #14: Lòng biết ơn gia đình và thực hành làm thiệp tri ân",
-      "participants": "38 thành viên",
-      "image": "/assets/images/events/activity-gratitude-workshop.jpg"
-    },
-    {
-      "date": "09/2026",
-      "title": "Tọa đàm Cùng Vươn Lên: Tinh thần trách nhiệm và vẻ đẹp của sự phụng sự trong giới trẻ",
-      "participants": "52 thành viên",
-      "image": "/assets/images/events/activity-workshop-journal.jpg"
-    },
-    {
-      "date": "08/2026",
-      "title": "Workshop HolaGreen #13: Từ bàn tay nhỏ đến Trái Đất xanh – Thực hành sống giảm nhựa",
-      "participants": "34 thành viên",
-      "image": "/assets/images/events/activity-glass-upcycling.jpg"
-    },
-    {
-      "date": "07/2026",
-      "title": "Chiến dịch Mùa Hè Xanh: Phân loại rác & Tuyên truyền phân loại tại nguồn cho bà con Tân Xã",
-      "participants": "48 thành viên",
-      "image": "/assets/images/events/activity-plastic-sorting.jpg"
-    },
-    {
-      "date": "06/2026",
-      "title": "Đợt trao sách Mầm Tri Thức #01: Tặng 120 đầu sách khoa học cho các điểm trường Thạch Thất",
-      "participants": "30 thành viên",
-      "image": "/assets/images/events/activity-book-donation.jpg"
+      "id": "holaheart-first-event-2026",
+      "date": "15/11/2026",
+      "title": "HolaHeart · Tình yêu thương của Mẹ trong thời đại AI",
+      "time": "14:00–16:50",
+      "location": "Mây Lang Thang Cafe, Hòa Lạc",
+      "participants": "Xem bài tổng kết & album 8 ảnh tư liệu",
+      "image": "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg",
+      "imageAlt": "Diễn giả cầm micro chia sẻ tại sự kiện HolaHeart ngày 15/11/2026.",
+      "href": "/tin-tuc/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/"
     }
   ]
 }

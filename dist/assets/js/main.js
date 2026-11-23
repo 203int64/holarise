@@ -415,7 +415,7 @@
         var eventDate = btn.getAttribute("data-event-date") || "Ngày đầu của tuần - Chủ nhật";
         var eventTime = btn.getAttribute("data-event-time") || "";
         var eventLocation = btn.getAttribute("data-event-location") || "Hòa Lạc, Hà Nội";
-        var eventFee = btn.getAttribute("data-event-fee") || "Miễn phí";
+        var eventFee = btn.getAttribute("data-event-fee") || "Chi phí theo thông báo";
         var eventType = btn.getAttribute("data-event-type") || "Chủ nhật tại Hòa Lạc";
 
         if (eventTitleDisplay) eventTitleDisplay.textContent = title;
@@ -890,7 +890,7 @@
         eventTitle:
           (payload.activity || "").trim() ||
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-title")) ||
-          "Chủ nhật gần nhất",
+          "Chưa có sự kiện cụ thể",
         eventDate:
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-date")) ||
           (modalContainer && modalContainer.dataset.eventDate) ||
@@ -903,7 +903,7 @@
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-location")) ||
           (modalContainer && modalContainer.dataset.eventLocation) ||
           "Hòa Lạc, Hà Nội",
-        vibe: vibeValue || "Đi một mình (ghép nhóm)",
+        vibe: vibeValue || "Quan tâm tìm hiểu",
         skills: skillValues,
       };
 
@@ -947,7 +947,7 @@
               (result.data && result.data.message) ||
               "Cảm ơn " +
                 nameVal +
-                "! Ban Điều Phối HolaRise đã nhận được đăng ký và sẽ liên hệ với bạn trong vòng 24 giờ.";
+                "! HolaRise đã ghi nhận thông tin quan tâm của bạn. Đây chưa phải xác nhận tham dự một sự kiện.";
           }
           passSnapshot.id = (result.data && result.data.id) || "REG-HOLARISE";
           var preservedActivity = (form.querySelector('[name="activity"]') || {}).value || "";

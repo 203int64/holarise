@@ -113,7 +113,7 @@ export async function onRequestPost(context) {
       ok: true,
       id: record.id,
       emailSentHint: Boolean(record.email),
-      message: `Cảm ơn ${record.full_name}! Ban Điều Phối HolaRise đã nhận được đăng ký của bạn (mã ${record.id}) và sẽ liên hệ trong vòng 24 giờ.`,
+      message: `Cảm ơn ${record.full_name}! HolaRise đã ghi nhận thông tin quan tâm của bạn (mã ${record.id}). Đây chưa phải xác nhận tham dự một sự kiện.`,
     },
     201
   );

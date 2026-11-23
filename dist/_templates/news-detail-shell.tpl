@@ -44,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=96c76fc53b">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=578685c674">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -204,7 +204,7 @@
 
     <div style="margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
       <a class="arrow-link" href="/tin-tuc/">← Quay lại tất cả bài viết</a>
-      <a class="btn btn--primary" href="/tham-gia/" data-magnetic>Đăng ký đồng hành cùng hoạt động tới</a>
+      <a class="btn btn--primary" href="/tham-gia/" data-magnetic>Nhận thông tin hoạt động</a>
     </div>
   </div>
 </section>
@@ -273,7 +273,7 @@
             <li>Văn phòng: Tân Xã, Hòa Lạc, Hà Nội</li>
             <li><a href="tel:0777771948">077.777.1948</a></li>
             <li><a href="mailto:phungsu@holarise.org">phungsu@holarise.org</a></li>
-            <li>Thời gian hoạt động: Ngày đầu của tuần - Chủ nhật</li>
+            <li>Thời gian hoạt động: Lịch được công bố theo từng hoạt động.</li>
           </ul>
         </div>
       </div>
@@ -293,11 +293,11 @@
   <dialog class="club-dialog" id="event-register-modal" closedby="any" aria-labelledby="modal-heading">
     <div class="dialog-inner">
       <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
-      <span class="kicker" style="margin-bottom: 8px;">Đăng ký nhanh · Miễn phí</span>
-      <h2 id="modal-heading" style="margin: 0 0 12px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Giữ chỗ tham gia hoạt động</h2>
+      <span class="kicker" style="margin-bottom: 8px;">Gửi thông tin quan tâm</span>
+      <h2 id="modal-heading" style="margin: 0 0 12px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Trao đổi về hoạt động HolaRise</h2>
 
       <div class="modal-event-ticket">
-        <span class="modal-ticket-type" id="modal-event-type">Chủ nhật tại Hòa Lạc</span>
+        <span class="modal-ticket-type" id="modal-event-type">Thông tin hoạt động</span>
         <p class="modal-ticket-title" id="modal-event-title"></p>
         <div class="modal-ticket-meta" id="modal-event-meta"></div>
       </div>
@@ -329,7 +329,7 @@
             </div>
           </div>
           <div class="field">
-            <label for="modal-email">Email nhận xác nhận</label>
+          <label for="modal-email">Email (không bắt buộc)</label>
             <input id="modal-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" enterkeyhint="next" data-error="modal-email-error">
             <div id="modal-email-error" class="field-error">
               <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -348,36 +348,36 @@
           </div>
         </div>
         <div class="field">
-          <span class="field-label-text">Phong cách tham gia</span>
-          <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Phong cách đi Chủ nhật">
-            <button type="button" class="quick-chip is-selected" data-vibe-chip="Đi một mình (ghép nhóm)" aria-pressed="true">Đi một mình (ghép nhóm)</button>
-            <button type="button" class="quick-chip" data-vibe-chip="Đi cùng bạn bè" aria-pressed="false">Đi cùng bạn bè</button>
-            <button type="button" class="quick-chip" data-vibe-chip="Lần đầu tham gia" aria-pressed="false">Lần đầu tham gia</button>
+          <span class="field-label-text">Cách bạn muốn đồng hành</span>
+          <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Cách bạn muốn đồng hành">
+            <button type="button" class="quick-chip is-selected" data-vibe-chip="Quan tâm tìm hiểu" aria-pressed="true">Muốn tìm hiểu trước</button>
+            <button type="button" class="quick-chip" data-vibe-chip="Đi cùng bạn bè" aria-pressed="false">Có thể đi cùng bạn</button>
+            <button type="button" class="quick-chip" data-vibe-chip="Lần đầu tham gia" aria-pressed="false">Lần đầu tìm hiểu</button>
           </div>
         </div>
         <div class="field">
           <label for="modal-note">Lời nhắn (không bắt buộc)</label>
-          <textarea id="modal-note" name="note" rows="2" placeholder="Câu hỏi thêm hoặc điều bạn mong chờ trong buổi Chủ nhật này..."></textarea>
+          <textarea id="modal-note" name="note" rows="2" placeholder="Bạn muốn hỏi thêm điều gì về HolaRise?"></textarea>
         </div>
         <div class="form-status" role="status" aria-live="polite"></div>
-        <button class="btn btn--primary" type="submit">Giữ chỗ Chủ nhật này</button>
-        <p class="form-privacy-note">Miễn phí 100% · Thông tin chỉ dùng để điều phối buổi hoạt động. Xem <a href="/chinh-sach/">Chính sách bảo mật</a>.</p>
+        <button class="btn btn--primary" type="submit">Gửi thông tin quan tâm</button>
+        <p class="form-privacy-note">Đây chưa phải đăng ký cho một sự kiện cụ thể. Chi phí, nếu có, sẽ được ghi trong thông báo từng hoạt động. Xem <a href="/chinh-sach/">Chính sách bảo mật</a>.</p>
       </form>
 
       <div class="modal-pass-success" id="modal-pass-success" hidden>
         <div class="modal-pass-badge">
           <span class="live-status-dot" aria-hidden="true"></span>
-          <span>ĐÃ GIỮ CHỖ THÀNH CÔNG</span>
+          <span>ĐÃ GHI NHẬN THÔNG TIN</span>
         </div>
         <div class="modal-pass-code-row">
-          <span>Mã vé giữ chỗ:</span>
+          <span>Mã thông tin:</span>
           <strong class="pass-code" id="modal-pass-code"></strong>
         </div>
         <p class="modal-pass-summary" id="modal-pass-summary"></p>
         <span id="modal-pass-invite-text" class="visually-hidden"></span>
         <div class="pass-actions-buttons">
-          <button type="button" class="btn btn--primary btn--sm" data-pass-download="modal">Tải ảnh vé (PNG)</button>
-          <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Rủ bạn cùng đi</button>
+          <button type="button" class="btn btn--primary btn--sm" data-pass-download="modal">Tải phiếu (PNG)</button>
+          <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Chia sẻ thông tin HolaRise</button>
           <span class="copy-control">
             <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
               <span>Sao chép lời mời</span>
@@ -504,11 +504,11 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/vendor/gsap.min.js?v=96c76fc53b" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=96c76fc53b" defer></script>
-  <script src="/assets/js/motion.js?v=96c76fc53b" defer></script>
-  <script src="/assets/js/main.js?v=96c76fc53b" defer></script>
-  <script src="/assets/js/join-pass.js?v=96c76fc53b" defer></script>
-  <script src="/assets/js/pwa.js?v=96c76fc53b" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=578685c674" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=578685c674" defer></script>
+  <script src="/assets/js/motion.js?v=578685c674" defer></script>
+  <script src="/assets/js/main.js?v=578685c674" defer></script>
+  <script src="/assets/js/join-pass.js?v=578685c674" defer></script>
+  <script src="/assets/js/pwa.js?v=578685c674" defer></script>
 </body>
 </html>

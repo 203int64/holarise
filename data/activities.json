@@ -5,48 +5,131 @@
       "badge": "HolaGreen",
       "shortTab": "Môi trường",
       "title": "Làm Sạch & Giữ Màu Xanh Hòa Lạc",
-      "summary": "Thu gom, phân loại rác nhựa tại các tuyến đường, hồ nước Hòa Lạc và trồng thêm cây xanh bản địa mỗi sáng cuối tuần.",
-      "image": "/assets/images/events/activity-lake-cleanup.jpg",
-      "imageAlt": "Đôi tay đeo găng bảo hộ thu gom và phân loại rác thải nhựa ven hồ Tân Xã",
+      "summary": "HolaGreen hướng tới các hoạt động làm sạch cảnh quan, phân loại rác và chăm sóc mảng xanh tại Hòa Lạc. Lịch tổ chức sẽ được công bố riêng khi xác nhận.",
+      "image": "/assets/images/illustrations/holagreen/G01.jpg",
+      "imageAlt": "Ảnh minh họa AI: nhóm tình nguyện viên thu gom rác ven hồ Tân Xã.",
       "highlights": [
         "Làm sạch Hòa Lạc",
         "Phân loại nhựa",
         "Trồng cây bản địa"
       ],
-      "metricBadge": "1.250 kg rác thu gom",
-      "sdgs": ["SDG 11", "SDG 13", "SDG 15"]
+      "metricBadge": "Ảnh minh họa AI",
+      "sdgs": [
+        "SDG 11",
+        "SDG 13",
+        "SDG 15"
+      ],
+      "imageIsIllustration": true,
+      "supportImages": [
+        {
+          "src": "/assets/images/illustrations/holagreen/G02.jpg",
+          "alt": "Góc sát cỏ khi nhặt một mẩu rác.",
+          "label": "Ảnh minh họa AI"
+        },
+        {
+          "src": "/assets/images/illustrations/holagreen/G03.jpg",
+          "alt": "Nhóm tình nguyện đang cùng làm sạch bờ hồ.",
+          "label": "Ảnh minh họa AI"
+        },
+        {
+          "src": "/assets/images/illustrations/holagreen/G04.jpg",
+          "alt": "Góc qua vai một người đang tham gia hoạt động.",
+          "label": "Ảnh minh họa AI"
+        },
+        {
+          "src": "/assets/images/illustrations/holagreen/G05.jpg",
+          "alt": "Khung cảnh được nhìn qua thân cây ven hồ.",
+          "label": "Ảnh minh họa AI"
+        },
+        {
+          "src": "/assets/images/illustrations/holagreen/G06.jpg",
+          "alt": "Nhóm làm việc lúc chạng vạng.",
+          "label": "Ảnh minh họa AI"
+        },
+        {
+          "src": "/assets/images/illustrations/holagreen/G07.jpg",
+          "alt": "Góc mắt cá nhìn xuống nhóm đang dọn rác.",
+          "label": "Ảnh minh họa AI"
+        },
+        {
+          "src": "/assets/images/illustrations/holagreen/G08.jpg",
+          "alt": "Góc thấp sát túi rác và bàn tay đeo găng.",
+          "label": "Ảnh minh họa AI"
+        },
+        {
+          "src": "/assets/images/illustrations/holagreen/G09.jpg",
+          "alt": "Góc sát mặt cỏ nhìn lên nhóm đang làm việc.",
+          "label": "Ảnh minh họa AI"
+        }
+      ]
     },
     {
       "id": "workshop",
       "badge": "HolaHeart",
       "shortTab": "Workshop",
-      "title": "Workshop Giá Trị Sống & Lòng Biết Ơn",
-      "summary": "Không gian ấm áp tại Hòa Lạc để người trẻ sẻ chia về lòng biết ơn gia đình – thầy cô và làm đồ tái chế.",
-      "image": "/assets/images/events/activity-gratitude-workshop.jpg",
-      "imageAlt": "Bàn làm việc mộc mạc với hoa lá khô ép và những tấm thiệp tri ân viết tay",
+      "title": "Tình Yêu Thương Của Mẹ Trong Thời Đại AI",
+      "summary": "Buổi gặp gỡ đầu tiên của HolaHeart, mở ra không gian để người trẻ cùng lắng nghe và trò chuyện về tình yêu thương của Mẹ trong bối cảnh AI.",
+      "image": "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg",
+      "imageAlt": "Diễn giả cầm micro chia sẻ với người tham dự tại sự kiện HolaHeart.",
       "highlights": [
-        "Lòng biết ơn",
-        "Giao tiếp tử tế",
-        "Thủ công tái chế"
+        "Tình yêu thương của Mẹ",
+        "Góc nhìn trong thời đại AI",
+        "Cùng lắng nghe & trò chuyện"
       ],
-      "metricBadge": "15+ buổi Workshop",
-      "sdgs": ["SDG 4", "SDG 11"]
+      "metricBadge": "Sự kiện đầu tiên · 15/11/2026",
+      "sdgs": [
+        "SDG 4",
+        "SDG 11"
+      ],
+      "imageIsIllustration": false
     },
     {
       "id": "cong-dong",
       "badge": "HolaConnect",
       "shortTab": "Cộng đồng",
-      "title": "Trao Tủ Sách & Sẻ Chia Địa Phương",
-      "summary": "Học sinh, sinh viên Hòa Lạc cùng trao tặng sách hay, đọc sách cùng thiếu nhi và hỗ trợ bà con địa phương.",
-      "image": "/assets/images/events/activity-book-donation.jpg",
-      "imageAlt": "Những chồng sách thiếu nhi và quà học tập được chuẩn bị gửi tới các em nhỏ Hòa Lạc",
+      "title": "Kết Nối & Sẻ Chia Cùng Cộng Đồng",
+      "summary": "HolaConnect là hướng hoạt động dành cho việc kết nối, sẻ chia sách và tạo không gian lắng nghe tại địa phương. Lịch tổ chức sẽ được công bố riêng khi xác nhận.",
+      "image": "/assets/images/illustrations/holaconnect/C01.jpg",
+      "imageAlt": "Ảnh minh họa AI: tình nguyện viên cùng phân loại sách.",
       "highlights": [
         "Tủ sách thiếu nhi",
         "Đọc sách cuối tuần",
         "Hỗ trợ địa phương"
       ],
-      "metricBadge": "152 cuốn sách trao tặng",
-      "sdgs": ["SDG 4", "SDG 11", "SDG 17"]
+      "metricBadge": "Ảnh minh họa AI",
+      "sdgs": [
+        "SDG 4",
+        "SDG 11",
+        "SDG 17"
+      ],
+      "imageIsIllustration": true,
+      "supportImages": [
+        {
+          "src": "/assets/images/illustrations/holaconnect/C02.jpg",
+          "alt": "Tình nguyện viên đọc sách cùng trẻ em.",
+          "label": "Ảnh minh họa AI"
+        },
+        {
+          "src": "/assets/images/illustrations/holaconnect/C03.jpg",
+          "alt": "Nhóm nhỏ trò chuyện trong không gian ngoài trời.",
+          "label": "Ảnh minh họa AI"
+        },
+        {
+          "src": "/assets/images/illustrations/holaconnect/C04.jpg",
+          "alt": "Sách được trao tay trong một hoạt động minh họa.",
+          "label": "Ảnh minh họa AI"
+        },
+        {
+          "src": "/assets/images/illustrations/holaconnect/C05.jpg",
+          "alt": "Tình nguyện viên vẽ cùng trẻ em.",
+          "label": "Ảnh minh họa AI"
+        },
+        {
+          "src": "/assets/images/illustrations/holaconnect/C06.jpg",
+          "alt": "Mọi người cùng chuyển sách vào không gian sinh hoạt.",
+          "label": "Ảnh minh họa AI"
+        }
+      ]
     }
   ],
   "campaigns": [
@@ -54,167 +137,118 @@
       "id": "cuoi-tuan-xanh-ho-tan-xa",
       "category": "moi-truong",
       "categoryLabel": "HolaGreen",
-      "filters": ["sach"],
-      "status": "Định kỳ hàng tuần",
-      "title": "Cuối Tuần Xanh — Ven Hồ Tân Xã",
-      "location": "Ven hồ Tân Xã, Hòa Lạc",
-      "metric": "650+ kg rác thu gom",
-      "description": "Thu gom rác sinh hoạt, phân loại chai nhựa tái chế và giữ gìn cảnh quan ven hồ Tân Xã sáng Chủ Nhật.",
-      "image": "/assets/images/events/activity-lake-cleanup.jpg",
-      "imageAlt": "Đôi tay đeo găng bảo hộ phân loại rác thải nhựa ven hồ Tân Xã vào buổi sáng cuối tuần"
-    },
-    {
-      "id": "chuoi-ws-tinh-yeu-thuong",
-      "category": "workshop",
-      "categoryLabel": "HolaHeart",
-      "filters": ["biet-on", "tu-te"],
-      "status": "Đang mở đăng ký",
-      "title": "Chuỗi Workshop Cùng Vươn Lên",
-      "location": "Hòa Lạc, Hà Nội",
-      "metric": "15 buổi · 320+ người trẻ",
-      "description": "Trò chuyện cuối tuần về lòng biết ơn, tình yêu thương gia đình, nghệ thuật lắng nghe và phát triển bản thân.",
-      "image": "/assets/images/events/activity-gratitude-workshop.jpg",
-      "imageAlt": "Bàn làm việc với hoa lá khô ép và những tấm thiệp thủ công tri ân gia đình"
-    },
-    {
-      "id": "vuon-cay-tuoi-tre",
-      "category": "moi-truong",
-      "categoryLabel": "HolaGreen",
-      "filters": ["sach"],
-      "status": "Dự án dài hạn",
-      "title": "Dự Án Mầm Cây Thanh Niên",
-      "location": "Các điểm trường & tuyến đường Hòa Lạc",
-      "metric": "180+ cây xanh được trồng",
-      "description": "Mỗi nhóm thành viên cùng trồng mới và chăm sóc cây xanh bản địa, tạo thêm bóng mát bền vững cho Hòa Lạc.",
-      "image": "/assets/images/events/activity-tree-planting.jpg",
-      "imageAlt": "Cận cảnh ươm trồng mầm cây xanh non vào đất ẩm dọc tuyến đường Hòa Lạc"
+      "filters": [
+        "sach"
+      ],
+      "status": "Gợi ý hoạt động",
+      "title": "Cuối Tuần Xanh — Làm sạch ven hồ Tân Xã",
+      "location": "Ven hồ Tân Xã, Hòa Lạc · lịch chưa công bố",
+      "metric": "Chưa có kết quả được công bố",
+      "description": "Gợi ý hoạt động: thu gom rác trên bờ và phân loại vật liệu có thể tái chế. Ảnh bên dưới là minh họa AI, không ghi lại một buổi đã diễn ra.",
+      "image": "/assets/images/illustrations/holagreen/G03.jpg",
+      "imageAlt": "Ảnh minh họa AI: tình nguyện viên cùng nhặt rác ven hồ Tân Xã.",
+      "imageIsIllustration": true
     },
     {
       "id": "nhip-cau-yeu-thuong",
       "category": "cong-dong",
       "categoryLabel": "HolaConnect",
-      "filters": ["se-chia", "tu-te"],
-      "status": "Theo mùa học",
-      "title": "Tủ Sách Gửi Thiếu Nhi Hòa Lạc",
-      "location": "Các điểm trường & nhà văn hóa Hòa Lạc",
-      "metric": "152 cuốn sách & quà học tập",
-      "description": "Quyên góp sách quý, dụng cụ học tập và tổ chức những buổi đọc sách vui vẻ cùng các em nhỏ địa phương.",
-      "image": "/assets/images/events/activity-book-donation.jpg",
-      "imageAlt": "Những chồng sách truyện thiếu nhi và quà học tập được chọn lọc kỹ càng"
-    },
-    {
-      "id": "song-xanh-tai-che",
-      "category": "moi-truong",
-      "categoryLabel": "HolaGreen",
-      "filters": ["sach", "tu-te"],
-      "status": "Định kỳ hàng tháng",
-      "title": "Sáng Tạo Xanh & Tái Chế Thủy Tinh",
-      "location": "Không gian sinh thái Tân Xã, Hòa Lạc",
-      "metric": "85 chậu sen đá tái chế",
-      "description": "Thu gom chai lọ thủy tinh đã qua sử dụng, tái chế thành chậu cây mầm xanh trang trí góc học tập cho sinh viên.",
-      "image": "/assets/images/events/activity-glass-upcycling.jpg",
-      "imageAlt": "Chậu sen đá xanh xinh xắn được trồng trong lọ thủy tinh tái chế"
+      "filters": [
+        "se-chia",
+        "tu-te"
+      ],
+      "status": "Gợi ý hoạt động",
+      "title": "Phân loại sách & sẻ chia cùng thiếu nhi",
+      "location": "Địa điểm sẽ được công bố khi có lịch",
+      "metric": "Chưa có kết quả được công bố",
+      "description": "Gợi ý hoạt động: phân loại sách quyên góp và chuẩn bị cho một buổi đọc chung. Ảnh bên dưới là minh họa AI, không ghi lại một buổi đã diễn ra.",
+      "image": "/assets/images/illustrations/holaconnect/C04.jpg",
+      "imageAlt": "Ảnh minh họa AI: sách được trao tay trong một hoạt động cộng đồng.",
+      "imageIsIllustration": true
     },
     {
       "id": "vong-tron-lang-nghe",
       "category": "cong-dong",
       "categoryLabel": "HolaConnect",
-      "filters": ["tu-te", "se-chia"],
-      "status": "Mỗi chiều Chủ Nhật",
-      "title": "Vòng Tròn Lắng Nghe & Đồng Hành",
-      "location": "Công viên Công nghệ cao Hòa Lạc",
-      "metric": "12 buổi · 160+ lượt sẻ chia",
-      "description": "Không gian ngoài trời ấm áp giúp người trẻ xa nhà rèn luyện kỹ năng lắng nghe không phán xét và tìm kiếm bạn đồng hành tích cực.",
-      "image": "/assets/images/events/activity-workshop-journal.jpg",
-      "imageAlt": "Sổ tay Tử Tế và tài liệu sinh hoạt kết nối người trẻ tại Hòa Lạc"
-    },
-    {
-      "id": "vuon-uom-mam-xanh",
-      "category": "moi-truong",
-      "categoryLabel": "HolaGreen",
-      "filters": ["sach"],
-      "status": "Giai đoạn ươm mầm",
-      "title": "Vườn Ươm Cây Giống Bản Địa",
-      "location": "Vườn thực nghiệm sinh thái, Tân Xã",
-      "metric": "300 bầu cây giống non",
-      "description": "Ươm giống, chăm sóc và theo dõi tỷ lệ bén rễ của các loại cây bóng mát bản địa trước khi phủ xanh các cung đường Hòa Lạc.",
-      "image": "/assets/images/events/activity-tree-seedlings.jpg",
-      "imageAlt": "Những khay bầu cây giống non lá xanh mướt đang được chăm sóc tại vườn ươm"
+      "filters": [
+        "tu-te",
+        "se-chia"
+      ],
+      "status": "Gợi ý hoạt động",
+      "title": "Vòng tròn lắng nghe & đồng hành",
+      "location": "Địa điểm sẽ được công bố khi có lịch",
+      "metric": "Chưa có kết quả được công bố",
+      "description": "Gợi ý hoạt động: tạo một không gian trò chuyện nhỏ để người trẻ thực hành lắng nghe. Ảnh bên dưới là minh họa AI, không ghi lại một buổi đã diễn ra.",
+      "image": "/assets/images/illustrations/holaconnect/C03.jpg",
+      "imageAlt": "Ảnh minh họa AI: một nhóm nhỏ cùng trò chuyện ngoài trời.",
+      "imageIsIllustration": true
     },
     {
       "id": "ngay-hoi-sach-tuoi-tho",
       "category": "cong-dong",
       "categoryLabel": "HolaConnect",
-      "filters": ["se-chia", "tu-te"],
-      "status": "Định kỳ theo tháng",
-      "title": "Ngày Hội Sách & Tuổi Thơ",
-      "location": "Các nhà văn hóa thôn, Thạch Thất",
-      "metric": "200 đầu sách & 45 tranh vẽ",
-      "description": "Tổ chức không gian đọc sách và vẽ tranh chủ đề bảo vệ thiên nhiên xanh cho các em nhỏ tại nhà văn hóa địa phương.",
-      "image": "/assets/images/events/activity-children-drawings.jpg",
-      "imageAlt": "Bút màu và những bức tranh thiếu nhi vẽ ước mơ cây xanh tại ngày hội đọc sách"
+      "filters": [
+        "se-chia",
+        "tu-te"
+      ],
+      "status": "Gợi ý hoạt động",
+      "title": "Đọc sách & vẽ cùng trẻ em",
+      "location": "Địa điểm sẽ được công bố khi có lịch",
+      "metric": "Chưa có kết quả được công bố",
+      "description": "Gợi ý hoạt động: kết hợp đọc truyện với một buổi vẽ sáng tạo. Ảnh bên dưới là minh họa AI, không ghi lại một buổi đã diễn ra.",
+      "image": "/assets/images/illustrations/holaconnect/C05.jpg",
+      "imageAlt": "Ảnh minh họa AI: tình nguyện viên vẽ cùng trẻ em.",
+      "imageIsIllustration": true
     }
   ],
   "gallery": [
     {
-      "src": "/assets/images/events/activity-tree-planting.jpg",
-      "alt": "Cận cảnh ươm trồng mầm cây xanh bản địa phủ mát các cung đường Hòa Lạc",
-      "caption": "Ươm trồng 180 cây xanh bóng mát phủ xanh cung đường Hòa Lạc."
+      "src": "/assets/images/events/holaheart-2026-11-15/01-group-men.jpg",
+      "alt": "Nhóm thành viên chụp ảnh lưu niệm tại sự kiện HolaHeart.",
+      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Nhóm thành viên nam cùng lưu lại ảnh sau chương trình.",
+      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
     },
     {
-      "src": "/assets/images/events/activity-lake-cleanup.jpg",
-      "alt": "Đôi tay đeo găng bảo hộ nhặt và phân loại rác thải nhựa ven hồ",
-      "caption": "Thu gom và phân loại rác nhựa tái chế ven hồ Tân Xã sáng Chủ Nhật."
+      "src": "/assets/images/events/holaheart-2026-11-15/02-conversation.jpg",
+      "alt": "Người tham dự trò chuyện tại sự kiện HolaHeart.",
+      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Các thành viên trò chuyện trong không gian ngoài trời.",
+      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
     },
     {
-      "src": "/assets/images/events/activity-gratitude-workshop.jpg",
-      "alt": "Bàn làm thiệp hoa lá khô thủ công gửi lời tri n cha mẹ và thầy cô",
-      "caption": "Bàn làm thiệp hoa lá khô thủ công gửi lời tri ân cha mẹ và thầy cô."
+      "src": "/assets/images/events/holaheart-2026-11-15/03-group-women.jpg",
+      "alt": "Nhóm thành viên nữ chụp ảnh lưu niệm tại sự kiện HolaHeart.",
+      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Nhóm thành viên cùng lưu lại kỷ niệm của buổi gặp gỡ.",
+      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
     },
     {
-      "src": "/assets/images/events/activity-book-donation.jpg",
-      "alt": "Những chồng sách thiếu nhi chọn lọc chuẩn bị trao tặng các em nhỏ",
-      "caption": "Trao tặng 152 cuốn sách thiếu nhi và quà học tập ý nghĩa."
+      "src": "/assets/images/events/holaheart-2026-11-15/04-wide-venue.jpg",
+      "alt": "Không gian tổ chức sự kiện HolaHeart tại Mây Lang Thang Cafe.",
+      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Toàn cảnh không gian tổ chức tại Mây Lang Thang Cafe, Hòa Lạc.",
+      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
     },
     {
-      "src": "/assets/images/events/activity-glass-upcycling.jpg",
-      "alt": "Lọ thủy tinh phế liệu tái chế thành chậu sen đá xanh mát góc bàn học",
-      "caption": "Biến chai lọ thủy tinh phế liệu thành chậu sen đá mầm xanh bàn học."
+      "src": "/assets/images/events/holaheart-2026-11-15/05-listening-moment.jpg",
+      "alt": "Người tham dự lắng nghe tại sự kiện HolaHeart.",
+      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Người tham dự lắng nghe phần chia sẻ.",
+      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
     },
     {
-      "src": "/assets/images/events/activity-tanxa-sunrise.jpg",
-      "alt": "Mặt nước hồ Tân Xã sương sớm phản chiếu bóng cây xanh thanh bình",
-      "caption": "Mặt nước hồ Tân Xã sương sớm – điểm hẹn làm sạch môi trường cuối tuần."
+      "src": "/assets/images/events/holaheart-2026-11-15/06-app-activity.jpg",
+      "alt": "Người tham dự tương tác với hoạt động trên điện thoại.",
+      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Một khoảnh khắc tương tác trong chương trình.",
+      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
     },
     {
-      "src": "/assets/images/events/activity-workshop-journal.jpg",
-      "alt": "Sổ tay Tử Tế và những trang viết lưu giữ khát vọng sống đẹp",
-      "caption": "Sổ tay Tử Tế và những trang viết lưu giữ khát vọng tuổi trẻ."
+      "src": "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg",
+      "alt": "Diễn giả cầm micro chia sẻ với người tham dự tại sự kiện HolaHeart.",
+      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Diễn giả chia sẻ với người tham dự tại sự kiện.",
+      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
     },
     {
-      "src": "/assets/images/events/activity-plastic-sorting.jpg",
-      "alt": "Phân loại chai nhựa và vỏ lon tái chế sau buổi dọn sạch cảnh quan",
-      "caption": "Tách riêng chai nhựa và vỏ lon chuyển giao cho điểm tái chế địa phương."
-    },
-    {
-      "src": "/assets/images/events/activity-tree-seedlings.jpg",
-      "alt": "Vườn ươm 300 bầu cây giống non xanh tươi sẵn sàng xuất vườn",
-      "caption": "Vườn ươm 300 bầu cây non chuẩn bị xuất vườn phủ xanh các tuyến đường."
-    },
-    {
-      "src": "/assets/images/events/activity-children-drawings.jpg",
-      "alt": "Bút màu và những bức tranh thiếu nhi vẽ bảo vệ môi trường",
-      "caption": "Những nét vẽ màu sáp hồn nhiên của các em nhỏ về một Hòa Lạc xanh ngát."
-    },
-    {
-      "src": "/assets/images/events/activity-nature-trail.jpg",
-      "alt": "Tuyến đường rợp bóng cây xanh mát dẫn lối tình nguyện viên",
-      "caption": "Tuyến đường rợp bóng cây xanh mát dẫn lối người trẻ hành động vì cộng đồng."
-    },
-    {
-      "src": "/assets/images/events/activity-compost-nursery.jpg",
-      "alt": "Khay ươm mầm sinh thái phối trộn đất dinh dưỡng hữu cơ",
-      "caption": "Khay ươm mầm sinh thái phối trộn đất dinh dưỡng hữu cơ bảo vệ môi trường."
+      "src": "/assets/images/events/holaheart-2026-11-15/08-pair-at-event.jpg",
+      "alt": "Hai thành viên chụp ảnh lưu niệm tại sự kiện HolaHeart.",
+      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Hai thành viên cùng lưu lại khoảnh khắc tại sự kiện.",
+      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
     }
   ]
 }

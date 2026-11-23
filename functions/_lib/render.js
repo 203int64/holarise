@@ -98,7 +98,7 @@ export function renderHeroUpcomingBar(upcoming) {
       <span class="upcoming-title">${escHtml(ws.title)}</span>
       <span class="upcoming-date">· ${escHtml(ws.dateDisplay)} (${escHtml(ws.time)}) · ${escHtml(ws.fee)}</span>
     </div>
-    <button class="btn btn--outline btn--sm" type="button" data-register-event="${escHtml(ws.title)}" data-event-id="${escHtml(ws.id)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-fee="${escHtml(ws.fee)}" data-event-type="${escHtml(ws.type)}">Giữ chỗ miễn phí</button>
+    <button class="btn btn--outline btn--sm" type="button" data-register-event="${escHtml(ws.title)}" data-event-id="${escHtml(ws.id)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-fee="${escHtml(ws.fee)}" data-event-type="${escHtml(ws.type)}">Gửi thông tin quan tâm</button>
   </div>
 </div>`;
 }
@@ -106,8 +106,8 @@ export function renderHeroUpcomingBar(upcoming) {
 export function renderWorkshopsHtml(upcoming) {
   if (!upcoming || upcoming.length === 0) {
     return `<div style="grid-column: 1 / -1; padding: 36px 24px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); text-align: center;">
-      <p style="margin: 0 0 14px; color: var(--ink-secondary);">Lịch sự kiện cuối tuần mới đang được Ban Điều Phối cập nhật.</p>
-      <a class="btn btn--primary btn--sm" href="/tham-gia/">Đăng ký nhận lịch sớm nhất</a>
+      <p style="margin: 0 0 14px; color: var(--ink-secondary);">Chưa có lịch hoạt động được xác nhận.</p>
+      <a class="btn btn--primary btn--sm" href="/tham-gia/">Gửi thông tin quan tâm</a>
     </div>`;
   }
   return upcoming
@@ -138,7 +138,7 @@ export function renderWorkshopsHtml(upcoming) {
           </div>
           <div class="card-footer">
             <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="${escHtml(ws.title)}" data-event-id="${escHtml(ws.id)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-fee="${escHtml(ws.fee)}" data-event-type="${escHtml(ws.type)}">
-              <span>Đăng ký giữ chỗ</span>
+              <span>Gửi thông tin quan tâm</span>
               <span aria-hidden="true">→</span>
             </button>
           </div>
@@ -149,19 +149,7 @@ export function renderWorkshopsHtml(upcoming) {
 }
 
 export function renderJoinEventOptionsHtml(upcoming) {
-  const cards = [
-    `<div class="join-event-option">
-        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-flexible" value="" data-event-title="" data-event-date="Ngày đầu của tuần - Chủ nhật" data-event-time="Nhận lịch chi tiết qua Zalo" data-event-location="Hòa Lạc, Hà Nội" data-event-type="Lịch mở hàng tuần" checked>
-        <label class="join-event-card" for="join-ev-flexible">
-          <span class="join-event-top">
-            <span class="join-event-date">Chủ nhật gần nhất</span>
-            <span class="join-event-seats">Linh hoạt</span>
-          </span>
-          <span class="join-event-title">Chủ nhật gần nhất (nhận lịch qua Zalo)</span>
-          <span class="join-event-meta">Chưa chốt ngày cụ thể — Ban Điều Phối gửi lịch Chủ nhật tới cho bạn.</span>
-        </label>
-      </div>`,
-  ];
+  const cards = [];
   for (const ws of upcoming || []) {
     const safeId = escHtml(ws.id);
     cards.push(`<div class="join-event-option">
@@ -175,6 +163,9 @@ export function renderJoinEventOptionsHtml(upcoming) {
           <span class="join-event-meta">${escHtml(ws.time)} · ${escHtml(ws.location)}</span>
         </label>
       </div>`);
+  }
+  if (cards.length === 0) {
+    return '<div class="schedule-empty" role="status"><p>Chưa có lịch hoạt động được xác nhận. Bạn vẫn có thể gửi mảng quan tâm; biểu mẫu này chưa phải đăng ký cho một sự kiện cụ thể.</p></div>';
   }
   return `<div class="join-event-grid">\n      ${cards.join("\n      ")}\n    </div>`;
 }
@@ -191,10 +182,17 @@ export function renderPastWorkshopsHtml(pastList) {
     .map((item, idx) => {
       const photo = item.image || PAST_FALLBACK_IMAGES[idx % PAST_FALLBACK_IMAGES.length];
       const alt = item.imageAlt || item.title;
+      const href = item.id === "holaheart-first-event-2026"
+        ? "/tin-tuc/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/"
+        : "";
+      const meta = [item.time, item.location, item.participants]
+        .filter(Boolean)
+        .map(escHtml)
+        .join(" · ");
       return `<div class="past-item" data-stagger-item data-hover-photo="${escHtml(photo)}" data-hover-alt="${escHtml(alt)}">
         <span class="past-item-date">${escHtml(item.dateDisplay || item.date)}</span>
-        <h3 class="past-item-title">${escHtml(item.title)}</h3>
-        <span class="past-item-meta">${escHtml(item.participants)}</span>
+        <h3 class="past-item-title">${href ? `<a class="past-item-title-link" href="${href}">${escHtml(item.title)}</a>` : escHtml(item.title)}</h3>
+        <span class="past-item-meta">${meta}</span>
         <span class="past-item-arrow" aria-hidden="true">↗</span>
       </div>`;
     })
@@ -232,7 +230,11 @@ export function renderNewsCardsHtml(articles, filterable = false) {
 }
 
 function formatInlineSafe(escapedLine) {
-  return escapedLine
+  const withMusicSpaceLinks = escapedLine.replace(
+    /\[([^\[\]]+)\]\((https:\/\/musicspace\.edu\.vn(?:\/[^\s)]*)?)\)/gi,
+    '<a href="$2" rel="noopener noreferrer">$1</a>'
+  );
+  return withMusicSpaceLinks
     .replace(
       /\[([^\[\]]+)\]\((\/(?:[a-z0-9_-][a-z0-9/_-]*)?(?:#[a-z0-9_-]+)?)\)/g,
       '<a href="$2">$1</a>'
