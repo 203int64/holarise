@@ -7,13 +7,13 @@
       "title": "Làm Sạch & Giữ Màu Xanh Hòa Lạc",
       "summary": "HolaGreen hướng tới các hoạt động làm sạch cảnh quan, phân loại rác và chăm sóc mảng xanh tại Hòa Lạc. Lịch tổ chức sẽ được công bố riêng khi xác nhận.",
       "image": "/assets/images/illustrations/holagreen/G01.jpg",
-      "imageAlt": "Ảnh minh họa AI: nhóm tình nguyện viên thu gom rác ven hồ Tân Xã.",
+      "imageAlt": "Ảnh minh họa: nhóm tình nguyện viên thu gom rác ven hồ Tân Xã.",
       "highlights": [
         "Làm sạch Hòa Lạc",
         "Phân loại nhựa",
         "Trồng cây bản địa"
       ],
-      "metricBadge": "Ảnh minh họa AI",
+      "metricBadge": "Ảnh minh họa",
       "sdgs": [
         "SDG 11",
         "SDG 13",
@@ -24,42 +24,42 @@
         {
           "src": "/assets/images/illustrations/holagreen/G02.jpg",
           "alt": "Góc sát cỏ khi nhặt một mẩu rác.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         },
         {
           "src": "/assets/images/illustrations/holagreen/G03.jpg",
           "alt": "Nhóm tình nguyện đang cùng làm sạch bờ hồ.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         },
         {
           "src": "/assets/images/illustrations/holagreen/G04.jpg",
           "alt": "Góc qua vai một người đang tham gia hoạt động.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         },
         {
           "src": "/assets/images/illustrations/holagreen/G05.jpg",
           "alt": "Khung cảnh được nhìn qua thân cây ven hồ.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         },
         {
           "src": "/assets/images/illustrations/holagreen/G06.jpg",
           "alt": "Nhóm làm việc lúc chạng vạng.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         },
         {
           "src": "/assets/images/illustrations/holagreen/G07.jpg",
           "alt": "Góc mắt cá nhìn xuống nhóm đang dọn rác.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         },
         {
           "src": "/assets/images/illustrations/holagreen/G08.jpg",
           "alt": "Góc thấp sát túi rác và bàn tay đeo găng.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         },
         {
           "src": "/assets/images/illustrations/holagreen/G09.jpg",
           "alt": "Góc sát mặt cỏ nhìn lên nhóm đang làm việc.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         }
       ]
     },
@@ -90,13 +90,13 @@
       "title": "Kết Nối & Sẻ Chia Cùng Cộng Đồng",
       "summary": "HolaConnect là hướng hoạt động dành cho việc kết nối, sẻ chia sách và tạo không gian lắng nghe tại địa phương. Lịch tổ chức sẽ được công bố riêng khi xác nhận.",
       "image": "/assets/images/illustrations/holaconnect/C01.jpg",
-      "imageAlt": "Ảnh minh họa AI: tình nguyện viên cùng phân loại sách.",
+      "imageAlt": "Ảnh minh họa: tình nguyện viên cùng phân loại sách.",
       "highlights": [
         "Tủ sách thiếu nhi",
         "Đọc sách cuối tuần",
         "Hỗ trợ địa phương"
       ],
-      "metricBadge": "Ảnh minh họa AI",
+      "metricBadge": "Ảnh minh họa",
       "sdgs": [
         "SDG 4",
         "SDG 11",
@@ -107,27 +107,27 @@
         {
           "src": "/assets/images/illustrations/holaconnect/C02.jpg",
           "alt": "Tình nguyện viên đọc sách cùng trẻ em.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         },
         {
           "src": "/assets/images/illustrations/holaconnect/C03.jpg",
           "alt": "Nhóm nhỏ trò chuyện trong không gian ngoài trời.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         },
         {
           "src": "/assets/images/illustrations/holaconnect/C04.jpg",
           "alt": "Sách được trao tay trong một hoạt động minh họa.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         },
         {
           "src": "/assets/images/illustrations/holaconnect/C05.jpg",
           "alt": "Tình nguyện viên vẽ cùng trẻ em.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         },
         {
           "src": "/assets/images/illustrations/holaconnect/C06.jpg",
           "alt": "Mọi người cùng chuyển sách vào không gian sinh hoạt.",
-          "label": "Ảnh minh họa AI"
+          "label": "Ảnh minh họa"
         }
       ]
     }
@@ -144,9 +144,9 @@
       "title": "Cuối Tuần Xanh — Làm sạch ven hồ Tân Xã",
       "location": "Ven hồ Tân Xã, Hòa Lạc · lịch chưa công bố",
       "metric": "Chưa có kết quả được công bố",
-      "description": "Gợi ý hoạt động: thu gom rác trên bờ và phân loại vật liệu có thể tái chế. Ảnh bên dưới là minh họa AI, không ghi lại một buổi đã diễn ra.",
+      "description": "Gợi ý hoạt động: thu gom rác trên bờ và phân loại vật liệu có thể tái chế.",
       "image": "/assets/images/illustrations/holagreen/G03.jpg",
-      "imageAlt": "Ảnh minh họa AI: tình nguyện viên cùng nhặt rác ven hồ Tân Xã.",
+      "imageAlt": "Ảnh minh họa: tình nguyện viên cùng nhặt rác ven hồ Tân Xã.",
       "imageIsIllustration": true
     },
     {
@@ -161,9 +161,9 @@
       "title": "Phân loại sách & sẻ chia cùng thiếu nhi",
       "location": "Địa điểm sẽ được công bố khi có lịch",
       "metric": "Chưa có kết quả được công bố",
-      "description": "Gợi ý hoạt động: phân loại sách quyên góp và chuẩn bị cho một buổi đọc chung. Ảnh bên dưới là minh họa AI, không ghi lại một buổi đã diễn ra.",
+      "description": "Gợi ý hoạt động: phân loại sách quyên góp và chuẩn bị cho một buổi đọc chung.",
       "image": "/assets/images/illustrations/holaconnect/C04.jpg",
-      "imageAlt": "Ảnh minh họa AI: sách được trao tay trong một hoạt động cộng đồng.",
+      "imageAlt": "Ảnh minh họa: sách được trao tay trong một hoạt động cộng đồng.",
       "imageIsIllustration": true
     },
     {
@@ -178,9 +178,9 @@
       "title": "Vòng tròn lắng nghe & đồng hành",
       "location": "Địa điểm sẽ được công bố khi có lịch",
       "metric": "Chưa có kết quả được công bố",
-      "description": "Gợi ý hoạt động: tạo một không gian trò chuyện nhỏ để người trẻ thực hành lắng nghe. Ảnh bên dưới là minh họa AI, không ghi lại một buổi đã diễn ra.",
+      "description": "Gợi ý hoạt động: tạo một không gian trò chuyện nhỏ để người trẻ thực hành lắng nghe.",
       "image": "/assets/images/illustrations/holaconnect/C03.jpg",
-      "imageAlt": "Ảnh minh họa AI: một nhóm nhỏ cùng trò chuyện ngoài trời.",
+      "imageAlt": "Ảnh minh họa: một nhóm nhỏ cùng trò chuyện ngoài trời.",
       "imageIsIllustration": true
     },
     {
@@ -195,9 +195,9 @@
       "title": "Đọc sách & vẽ cùng trẻ em",
       "location": "Địa điểm sẽ được công bố khi có lịch",
       "metric": "Chưa có kết quả được công bố",
-      "description": "Gợi ý hoạt động: kết hợp đọc truyện với một buổi vẽ sáng tạo. Ảnh bên dưới là minh họa AI, không ghi lại một buổi đã diễn ra.",
+      "description": "Gợi ý hoạt động: kết hợp đọc truyện với một buổi vẽ sáng tạo.",
       "image": "/assets/images/illustrations/holaconnect/C05.jpg",
-      "imageAlt": "Ảnh minh họa AI: tình nguyện viên vẽ cùng trẻ em.",
+      "imageAlt": "Ảnh minh họa: tình nguyện viên vẽ cùng trẻ em.",
       "imageIsIllustration": true
     }
   ],

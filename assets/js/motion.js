@@ -119,7 +119,9 @@
     });
     storySlides.forEach(function (slide) {
       var slideIdx = parseInt(slide.getAttribute("data-story-slide"), 10);
-      slide.classList.toggle("is-active", slideIdx === clamped);
+      var isActiveSlide = slideIdx === clamped;
+      slide.classList.toggle("is-active", isActiveSlide);
+      slide.setAttribute("tabindex", isActiveSlide ? "0" : "-1");
     });
   }
 

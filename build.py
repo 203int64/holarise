@@ -257,6 +257,17 @@ def render_impact_metrics(metrics: list) -> str:
     return "\n      ".join(blocks)
 
 
+def render_image_tooltip(alt: str, label: str = "") -> str:
+    """Keep photo provenance and context available without a persistent image badge."""
+    detail = (alt or "").strip()
+    generated_prefix = "Ảnh minh họa:"
+    if detail.startswith(generated_prefix):
+        detail = detail[len(generated_prefix):].strip()
+    parts = [part.strip() for part in (label, detail) if part and part.strip()]
+    caption = " · ".join(parts)
+    return f'<span class="image-note-caption" aria-hidden="true">{esc(caption)}</span>' if caption else ""
+
+
 def render_story_stage(pillars: list) -> str:
     tabs = []
     panels = []
@@ -274,7 +285,8 @@ def render_story_stage(pillars: list) -> str:
 
         chips_html = "".join(f'<span class="visual-chip">{esc(h)}</span>' for h in p["highlights"])
         metric_badge = p.get("metricBadge", "")
-        metric_html = f'<span class="story-metric-pill">{esc(metric_badge)}</span>' if metric_badge else ""
+        display_metric_badge = "" if p.get("imageIsIllustration") else metric_badge
+        metric_html = f'<span class="story-metric-pill">{esc(display_metric_badge)}</span>' if display_metric_badge else ""
         cta_href = "/workshop/" if p["id"] == "workshop" else f'/hoat-dong/#{esc(p["id"])}'
         cta_label = "Xem lịch Workshop" if p["id"] == "workshop" else "Xem hoạt động"
 
@@ -292,17 +304,12 @@ def render_story_stage(pillars: list) -> str:
         )
 
         priority_attr = ' fetchpriority="low" loading="lazy" decoding="async"' if idx > 0 else ' loading="lazy" decoding="async"'
-        image_label = (
-            '<span class="image-origin-badge image-origin-badge--ai">Ảnh minh họa AI</span>'
-            if p.get("imageIsIllustration")
-            else ""
-        )
+        image_label = "Ảnh minh họa" if p.get("imageIsIllustration") else "Ảnh tư liệu HolaHeart · 15/11/2026"
         slides.append(
-            f"""<div class="story-slide{active_cls}" data-story-slide="{idx}">
+            f"""<div class="story-slide image-note{active_cls}" data-story-slide="{idx}" tabindex="{0 if idx == 0 else -1}" role="group" aria-label="Chú thích ảnh: {esc(image_label)} · {esc(p['imageAlt'])}">
           <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="960" height="720"{priority_attr}>
-          {image_label}
+          {render_image_tooltip(p['imageAlt'], image_label)}
           <div class="story-slide-scrim" aria-hidden="true"></div>
-          <span class="story-slide-badge">{esc(metric_badge)}</span>
         </div>"""
         )
 
@@ -342,42 +349,36 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
     for p in pillars:
         chips_html = "".join(f'<span class="visual-chip">{esc(h)}</span>' for h in p["highlights"])
         metric_badge = p.get("metricBadge", " · ".join(p.get("sdgs", [])))
+        metric_html = f'<span class="seats-note">{esc(metric_badge)}</span>' if not p.get("imageIsIllustration") else ""
         anchor_id = f' id="{esc(p["id"])}"' if detailed else ""
         cta_href = "/workshop/" if p["id"] == "workshop" else f'/hoat-dong/#{esc(p["id"])}'
         cta_label = "Xem lịch Workshop" if p["id"] == "workshop" else "Tìm hiểu chi tiết"
         footer_html = (
-            f'<div class="card-footer"><span class="seats-note">{esc(metric_badge)}</span><a class="btn btn--outline btn--sm" href="/tham-gia/">Gửi quan tâm</a></div>'
+            f'<div class="card-footer">{metric_html}<a class="btn btn--outline btn--sm" href="/tham-gia/">Gửi quan tâm</a></div>'
             if detailed
             else f'<div class="card-footer"><a class="arrow-link" href="{cta_href}">{cta_label} →</a></div>'
         )
-        image_label = (
-            '<span class="image-origin-badge image-origin-badge--ai">Ảnh minh họa AI</span>'
-            if p.get("imageIsIllustration")
-            else '<span class="image-origin-badge image-origin-badge--documentary">Ảnh sự kiện thật</span>'
-            if p["id"] == "workshop"
-            else ""
-        )
+        image_label = "Ảnh minh họa" if p.get("imageIsIllustration") else "Ảnh tư liệu HolaHeart · 15/11/2026" if p["id"] == "workshop" else ""
         support_html = ""
         support_images = p.get("supportImages", [])
         if detailed and support_images:
             figures = []
             for photo in support_images:
                 figures.append(
-                    f"""<figure class="illustrative-image">
+                    f"""<figure class="illustrative-image image-note" tabindex="0" role="group" aria-label="Chú thích ảnh: {esc(photo.get('label', 'Ảnh minh họa'))} · {esc(photo['alt'])}">
           <img src="{esc(photo['src'])}" alt="{esc(photo['alt'])}" width="640" height="420" loading="lazy" decoding="async">
-          <span class="image-origin-badge image-origin-badge--ai">Ảnh minh họa AI</span>
+          {render_image_tooltip(photo['alt'], photo.get('label', 'Ảnh minh họa'))}
         </figure>"""
                 )
             support_html = f"""<details class="illustrative-details">
-          <summary>Xem thêm {len(support_images)} ảnh minh họa AI</summary>
-          <p>Ảnh được tạo bằng AI để minh họa hoạt động; không ghi lại một sự kiện đã diễn ra.</p>
+            <summary>Xem thêm {len(support_images)} góc hình ảnh</summary>
           <div class="illustrative-grid">{"".join(figures)}</div>
         </details>"""
         cards.append(
             f"""<article class="editorial-card" data-stagger-item{anchor_id}>
-        <div class="plate-media" data-curtain>
+        <div class="plate-media image-note" data-curtain tabindex="0" role="group" aria-label="Chú thích ảnh: {esc(image_label)} · {esc(p['imageAlt'])}">
           <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
-          {image_label}
+          {render_image_tooltip(p['imageAlt'], image_label)}
         </div>
         <div class="card-meta"><span class="cat">{esc(p['badge'])}</span></div>
         <h3 class="card-title">{esc(p['title'])}</h3>
@@ -503,16 +504,12 @@ def render_campaigns(campaigns: list) -> str:
     cards = []
     for c in campaigns:
         filter_tokens = " ".join(c.get("filters", [])) or c["category"]
-        image_label = (
-            '<span class="image-origin-badge image-origin-badge--ai">Ảnh minh họa AI</span>'
-            if c.get("imageIsIllustration")
-            else ""
-        )
+        image_label = "Ảnh minh họa" if c.get("imageIsIllustration") else ""
         cards.append(
             f"""<article class="editorial-card" data-stagger-item data-campaign-card data-category="{esc(filter_tokens)}">
-        <div class="plate-media" data-curtain>
+        <div class="plate-media image-note" data-curtain tabindex="0" role="group" aria-label="Chú thích ảnh: {esc(image_label)} · {esc(c['imageAlt'])}">
           <img src="{esc(c['image'])}" alt="{esc(c['imageAlt'])}" width="720" height="460" loading="lazy" decoding="async">
-          {image_label}
+          {render_image_tooltip(c['imageAlt'], image_label)}
         </div>
         <div class="card-meta">
           <span class="cat">{esc(c['categoryLabel'])}</span>
@@ -535,16 +532,12 @@ def render_campaigns(campaigns: list) -> str:
 
 def render_horizontal_gallery(gallery: list) -> str:
     items = []
-    for idx, g in enumerate(gallery, start=1):
+    for g in gallery:
         items.append(
-            f"""<button class="horizontal-card" type="button" data-cursor-label="Xem" data-lightbox-src="{esc(g['src'])}" data-lightbox-alt="{esc(g['alt'])}" data-lightbox-caption="{esc(g['caption'])}">
+            f"""<button class="horizontal-card" type="button" aria-label="Xem ảnh: {esc(g.get('label', 'Ảnh tư liệu HolaHeart · 15/11/2026'))} · {esc(g['alt'])}" data-cursor-label="Xem" data-lightbox-src="{esc(g['src'])}" data-lightbox-alt="{esc(g['alt'])}" data-lightbox-caption="{esc(g['caption'])}">
         <div class="horizontal-frame">
           <img src="{esc(g['src'])}" alt="{esc(g['alt'])}" width="960" height="600" loading="lazy" decoding="async">
-          {f'<span class="image-origin-badge image-origin-badge--documentary">{esc(g.get("label", "Ảnh tư liệu"))}</span>' if g.get('label') else ''}
-        </div>
-        <div class="horizontal-caption">
-          <span>{esc(g['caption'])}</span>
-          <span class="horizontal-index">{idx:02d} / {len(gallery):02d}</span>
+          {render_image_tooltip(g['alt'], g.get('label', 'Ảnh tư liệu HolaHeart · 15/11/2026'))}
         </div>
       </button>"""
         )
@@ -555,13 +548,25 @@ def render_gallery(gallery: list) -> str:
     items = []
     for g in gallery:
         items.append(
-            f"""<button class="gallery-item" type="button" data-cursor-label="Xem" data-lightbox-src="{esc(g['src'])}" data-lightbox-alt="{esc(g['alt'])}" data-lightbox-caption="{esc(g['caption'])}">
+            f"""<button class="gallery-item image-note" type="button" aria-label="Xem ảnh: {esc(g.get('label', 'Ảnh tư liệu HolaHeart · 15/11/2026'))} · {esc(g['alt'])}" data-cursor-label="Xem" data-lightbox-src="{esc(g['src'])}" data-lightbox-alt="{esc(g['alt'])}" data-lightbox-caption="{esc(g['caption'])}">
         <img src="{esc(g['src'])}" alt="{esc(g['alt'])}" width="720" height="480" loading="lazy" decoding="async">
-        {f'<span class="image-origin-badge image-origin-badge--documentary">{esc(g.get("label", "Ảnh tư liệu"))}</span>' if g.get('label') else ''}
-        <span class="gallery-caption">{esc(g['caption'])}</span>
+        {render_image_tooltip(g['alt'], g.get('label', 'Ảnh tư liệu HolaHeart · 15/11/2026'))}
       </button>"""
         )
     return '<div class="gallery-grid">\n      ' + "\n      ".join(items) + "\n    </div>"
+
+
+def render_photo_wall(photos: list) -> str:
+    tiles = []
+    for photo in photos:
+        caption = f"{photo.get('sourceLabel', 'Ảnh tư liệu MusicSpace')} · {photo['caption']}"
+        tiles.append(
+            f"""<div class="heart-memory-tile image-note">
+        <img src="{esc(photo['src'])}" alt="{esc(photo.get('alt', photo['caption']))}" width="640" height="420" loading="lazy" decoding="async">
+        <span class="image-note-caption" aria-hidden="true">{esc(caption)}</span>
+      </div>"""
+        )
+    return "\n      ".join(tiles)
 
 
 def render_faqs(faqs: list) -> str:
@@ -885,6 +890,7 @@ def collect_precache_urls() -> list:
     excluded_prefixes = (
         "/assets/images/events/",
         "/assets/images/illustrations/",
+        "/assets/images/musicspace-archive/",
         "/assets/images/pwa/screenshot-",
         "/assets/images/og-cover.jpg",
     )
@@ -1318,6 +1324,7 @@ def build_site() -> list:
     site = load_json("site.json")
     activities = load_json("activities.json")
     workshops = load_json("workshops.json")
+    heart_photo_wall = load_json("musicspace-photo-wall.json")
     news = load_json("news.json")
 
     if DIST_DIR.exists():
@@ -1448,6 +1455,7 @@ def build_site() -> list:
         {
             "WORKSHOP_INTRO_TITLE": esc(workshops["intro"]["title"]),
             "WORKSHOP_INTRO_DESC": esc(workshops["intro"]["description"]),
+            "MUSICSPACE_PHOTO_WALL_HTML": render_photo_wall(heart_photo_wall),
             "UPCOMING_WORKSHOPS_HTML": f"<!-- CMS:UPCOMING_WORKSHOPS:START -->\n{render_workshops(workshops['upcoming'])}\n<!-- CMS:UPCOMING_WORKSHOPS:END -->",
             "PAST_WORKSHOPS_HTML": f"<!-- CMS:PAST_WORKSHOPS:START -->\n{render_past_workshops(workshops['pastTopics'])}\n<!-- CMS:PAST_WORKSHOPS:END -->",
         },

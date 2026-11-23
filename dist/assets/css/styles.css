@@ -2081,11 +2081,6 @@ a.quick-pill:hover {
   will-change: opacity;
 }
 
-.story-slide > .image-origin-badge {
-  top: 16px;
-  left: 16px;
-}
-
 .story-slide.is-active {
   opacity: 1;
   pointer-events: auto;
@@ -2111,19 +2106,6 @@ a.quick-pill:hover {
   height: 45%;
   background: linear-gradient(to top, rgba(11, 17, 15, 0.62) 0%, transparent 100%);
   pointer-events: none;
-}
-
-.story-slide-badge {
-  position: absolute;
-  left: 16px;
-  bottom: 16px;
-  padding: 6px 13px;
-  border-radius: 999px;
-  background: rgba(11, 17, 15, 0.86);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: #ffffff;
-  font-size: 0.78rem;
-  font-weight: 500;
 }
 
 .story-media-frame--mobile {
@@ -2403,31 +2385,64 @@ html.has-motion .scrub-word {
   --glare-opacity: 0;
 }
 
-.image-origin-badge {
+.image-note-caption {
   position: absolute;
-  z-index: 5;
-  top: 12px;
-  left: 12px;
-  max-width: calc(100% - 24px);
-  padding: 6px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 999px;
-  background: rgba(11, 17, 15, 0.88);
+  z-index: 6;
+  inset: auto auto 10px 10px;
+  display: block;
+  width: max-content;
+  max-width: min(300px, calc(100% - 20px));
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9px;
+  background: rgba(11, 17, 15, 0.78);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
   color: #fff;
-  font-size: 0.72rem;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: 0.015em;
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.18s var(--ease-expo), transform 0.18s var(--ease-expo), visibility 0.18s;
   pointer-events: none;
-  white-space: normal;
 }
 
-.image-origin-badge--ai {
-  background: rgba(11, 17, 15, 0.9);
+.image-note:hover > .image-note-caption,
+.image-note:focus-visible > .image-note-caption,
+.image-note:active > .image-note-caption,
+.horizontal-card:hover .image-note-caption,
+.horizontal-card:focus-visible .image-note-caption,
+.horizontal-card:active .image-note-caption {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
-.image-origin-badge--documentary {
-  background: rgba(11, 70, 51, 0.92);
+.image-note:focus-visible {
+  outline: 2px solid #c6f1dc;
+  outline-offset: -4px;
+}
+
+.story-slide:focus-visible,
+.plate-media:focus-visible,
+.illustrative-image:focus-visible {
+  outline: 2px solid #c6f1dc;
+  outline-offset: -4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image-note-caption {
+    transition: none;
+    transform: none;
+  }
 }
 
 .illustrative-details {
@@ -2477,13 +2492,6 @@ html.has-motion .scrub-word {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.illustrative-image .image-origin-badge {
-  top: 6px;
-  left: 6px;
-  padding: 4px 7px;
-  font-size: 0.62rem;
 }
 
 .schedule-empty {
@@ -2779,24 +2787,6 @@ html.has-motion .scrub-word {
   will-change: transform;
 }
 
-.horizontal-caption {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  font-size: 0.88rem;
-  color: var(--ink-secondary);
-  line-height: 1.5;
-}
-
-.horizontal-index {
-  font-size: 0.76rem;
-  font-weight: 500;
-  color: var(--ink-muted);
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
-}
-
 @media (min-width: 1024px) {
   .horizontal-section {
     height: 220vh;
@@ -2926,6 +2916,109 @@ html.has-motion .scrub-word {
   padding: 76px 0 56px;
   background: var(--bg);
   border-bottom: 1px solid var(--line);
+}
+
+.page-hero--heart {
+  position: relative;
+  display: flex;
+  min-height: 570px;
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  padding: clamp(88px, 10vw, 132px) 0;
+  border-bottom: 0;
+  background: var(--obsidian);
+  color: var(--ink-on-dark);
+}
+
+.page-hero--heart > .container {
+  position: relative;
+  z-index: 2;
+}
+
+.page-hero--heart .breadcrumb {
+  color: rgba(244, 247, 245, 0.68);
+}
+
+.page-hero--heart .breadcrumb a:hover {
+  color: #fff;
+}
+
+.page-hero.page-hero--heart h1 {
+  max-width: 900px;
+  color: #fff;
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+}
+
+.page-hero.page-hero--heart p {
+  max-width: 730px;
+  color: rgba(244, 247, 245, 0.82);
+  font-size: clamp(1rem, 1.35vw, 1.12rem);
+}
+
+.heart-memory-wall {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(96px, 1fr));
+  overflow: hidden;
+}
+
+.heart-memory-tile {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.heart-memory-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.42) saturate(0.66);
+  transition: transform 0.6s var(--ease-expo);
+}
+
+.heart-memory-tile .image-note-caption {
+  right: 10px;
+  bottom: 10px;
+  left: auto;
+  max-width: min(80%, 280px);
+  font-size: 0.66rem;
+}
+
+.heart-memory-tile:hover img {
+  transform: scale(1.06);
+}
+
+@media (max-width: 1023px) {
+  .heart-memory-wall {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: repeat(6, minmax(96px, 1fr));
+  }
+
+  .page-hero--heart {
+    min-height: 650px;
+  }
+}
+
+@media (max-width: 599px) {
+  .page-hero--heart {
+    min-height: 620px;
+    padding: 88px 0 72px;
+  }
+
+  .heart-memory-wall {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(8, minmax(78px, 1fr));
+  }
+
+  .heart-memory-tile:nth-child(29),
+  .heart-memory-tile:nth-child(30) {
+    grid-column: span 2;
+  }
 }
 
 .breadcrumb {
@@ -3136,17 +3229,6 @@ html.has-motion .scrub-word {
 
 .gallery-item:hover img {
   transform: scale(1.04);
-}
-
-.gallery-caption {
-  position: absolute;
-  inset: auto 0 0 0;
-  padding: 32px 18px 14px;
-  background: linear-gradient(to top, rgba(11, 17, 15, 0.78), transparent);
-  color: #ffffff;
-  font-size: 0.84rem;
-  text-align: left;
-  line-height: 1.45;
 }
 
 .value-col {
