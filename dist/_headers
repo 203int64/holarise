@@ -30,13 +30,10 @@
 /gioi-thieu/*
   Cache-Control: public, max-age=0, must-revalidate
 
-/hoat-dong/*
+/lich-hoat-dong/*
   Cache-Control: public, max-age=0, must-revalidate
 
-/workshop/*
-  Cache-Control: public, max-age=0, must-revalidate
-
-/tin-tuc/*
+/hanh-trinh/*
   Cache-Control: public, max-age=0, must-revalidate
 
 /tham-gia/*

@@ -1,28 +1,30 @@
-import { renderNewsCardsHtml, replaceMarker, serializePostRow } from "../_lib/render.js";
+import {
+  parsePartnersJson,
+  renderPartnersStripHtml,
+  replaceMarker,
+} from "../_lib/render.js";
 
 export async function onRequestGet({ request, env }) {
-  const staticAssetReq = new Request(new URL("/tin-tuc/index.html", request.url), { method: "GET" });
+  const staticAssetReq = new Request(new URL("/gioi-thieu/index.html", request.url), { method: "GET" });
 
   if (!env?.DB || !env?.ASSETS) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
 
-  const [assetRes, dbRes] = await Promise.all([
+  const [assetRes, partnersRow] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
-    env.DB.prepare(
-      "SELECT * FROM posts WHERE status = 'published' ORDER BY date DESC, created_at DESC LIMIT 60"
-    )
-      .all()
+    env.DB.prepare("SELECT value FROM settings WHERE key = 'partners_json'")
+      .first()
       .catch(() => null),
   ]);
 
-  if (!assetRes.ok || !dbRes) {
+  if (!assetRes.ok) {
     return assetRes;
   }
 
-  const posts = (dbRes.results || []).map(serializePostRow);
+  const partners = parsePartnersJson(partnersRow?.value || "[]");
   let html = await assetRes.text();
-  html = replaceMarker(html, "NEWS_LIST", renderNewsCardsHtml(posts, true));
+  html = replaceMarker(html, "PARTNERS_STRIP", renderPartnersStripHtml(partners));
 
   const headers = new Headers(assetRes.headers);
   headers.set("Content-Type", "text/html; charset=utf-8");

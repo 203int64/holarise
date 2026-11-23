@@ -1,10 +1,11 @@
 [
   {
     "slug": "tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart",
-    "title": "Tình yêu thương của Mẹ trong thời đại AI: Sự kiện đầu tiên của HolaHeart",
-    "category": "HolaHeart · Biết ơn & Tử tế",
-    "categorySlug": "workshop",
+    "title": "Tình yêu thương của Mẹ trong thời đại AI: Buổi đối thoại khởi đầu của HolaHeart",
+    "category": "HolaHeart · Giá trị sống",
+    "categorySlug": "holaheart",
     "filters": [
+      "holaheart",
       "biet-on",
       "tu-te"
     ],
@@ -13,13 +14,14 @@
     "readTime": "2 phút đọc",
     "author": "Ban Điều Phối HolaRise",
     "image": "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg",
-    "imageAlt": "Diễn giả cầm micro chia sẻ với người tham dự tại sự kiện HolaHeart.",
-    "excerpt": "Ngày 15/11/2026, HolaHeart tổ chức buổi gặp gỡ đầu tiên tại Mây Lang Thang Cafe, Hòa Lạc, với chủ đề Tình yêu thương của Mẹ trong thời đại AI.",
+    "imageAlt": "Diễn giả cầm micro chia sẻ với người tham dự tại sự kiện HolaHeart ngày 15/11/2026.",
+    "excerpt": "Ngày 15/11/2026 tại Mây Lang Thang Cafe, Hòa Lạc, HolaHeart mở ra một buổi chiều lắng nghe và suy ngẫm về tình yêu thương của Mẹ giữa thời đại AI.",
     "content": [
-      "Ngày 15/11/2026, HolaHeart tổ chức sự kiện đầu tiên với chủ đề **Tình yêu thương của Mẹ trong thời đại AI** tại Mây Lang Thang Cafe, Hòa Lạc. Thời gian: 14:00–16:50.",
-      "Buổi gặp gỡ mở ra không gian lắng nghe và trao đổi về tình yêu thương của Mẹ trong bối cảnh AI. Những bức ảnh ghi lại phần chia sẻ, không khí trò chuyện và một khoảnh khắc tương tác trong chương trình.",
+      "Chiều ngày 15/11/2026 (14:00–16:50), trong không gian ấm áp tại Mây Lang Thang Cafe, Hòa Lạc, **HolaHeart** đã tổ chức chuyên đề đối thoại **Tình yêu thương của Mẹ trong thời đại AI**.",
+      "Giữa nhịp sống số nơi công nghệ ngày càng hiện diện trong từng khoảnh khắc, buổi gặp gỡ tạo ra một khoảng lặng cần thiết để người trẻ cùng ngồi lại, lắng nghe những câu chuyện đời thực về gia đình và nhận ra điều gì không thể thay thế trong tình thân.",
+      "Không có khoảng cách giữa người nói và người nghe, từng chia sẻ chân thành đã biến buổi chiều tại Hòa Lạc thành điểm tựa cảm xúc nhẹ nhõm — đúng tinh thần vun bồi nội lực từ bên trong của **HolaHeart**.",
       "Xem thông tin sự kiện trên [MusicSpace](https://musicspace.edu.vn/love/event/tinh-yeu-thuong-cua-me-thoi-dai-ai).",
-      "Xem [album 8 ảnh thật của sự kiện trên HolaRise](/hoat-dong/#thu-vien-anh)."
+      "Xem [toàn bộ album 8 ảnh tư liệu thật tại Hành trình HolaRise](/hanh-trinh/#thu-vien-anh)."
     ]
   }
 ]

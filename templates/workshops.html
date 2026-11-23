@@ -1,15 +1,48 @@
-<section class="page-hero page-hero--heart">
-  <div class="heart-memory-wall" aria-hidden="true">
-    {{MUSICSPACE_PHOTO_WALL_HTML}}
-  </div>
+<section class="page-hero">
   <div class="container">
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
       <a href="/">Trang chủ</a>
       <span aria-hidden="true">/</span>
-      <span aria-current="page">Workshop &amp; Sự kiện</span>
+      <span aria-current="page">Lịch hoạt động</span>
     </nav>
     <h1>{{WORKSHOP_INTRO_TITLE}}</h1>
     <p>{{WORKSHOP_INTRO_DESC}}</p>
+  </div>
+</section>
+
+<section class="section" id="lich-su-kien">
+  <div class="container">
+    <div class="section-header--split" style="margin-bottom: 24px;">
+      <div>
+        <div class="kicker">Nhịp tuần · 1–2 hoạt động/tuần</div>
+        <h2 class="section-title" style="margin-bottom: 6px;">Các buổi sinh hoạt &amp; đối thoại sắp mở</h2>
+        <p class="section-lead">Lọc theo 3 mảng hoạt động để chọn buổi phù hợp với lịch học tập và làm việc của bạn.</p>
+      </div>
+      <a class="arrow-link" href="/tham-gia/">Nhận thông báo khi mở lịch mới →</a>
+    </div>
+
+    <div class="filter-bar-row">
+      <div class="filter-bar" data-filter-group="[data-workshop-card]" role="group" aria-label="Lọc lịch theo 3 trụ cột">
+        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Tất cả</button>
+        <button class="filter-btn" type="button" data-filter="holaheart" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          <span>HolaHeart</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="holagreen" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+          <span>HolaGreen</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="holaconnect" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>HolaConnect</span>
+        </button>
+      </div>
+      <span class="filter-count" data-filter-count="[data-workshop-card]" aria-live="polite"></span>
+    </div>
+
+    <!-- CMS:SCHEDULE_UPCOMING:START -->
+    {{SCHEDULE_UPCOMING_HTML}}
+    <!-- CMS:SCHEDULE_UPCOMING:END -->
   </div>
 </section>
 
@@ -17,57 +50,17 @@
   <div class="container">
     <div class="section-header--split" style="margin-bottom: 28px;">
       <div>
-        <div class="kicker">Những dấu mốc đã được lưu lại</div>
-        <h2 class="section-title">HolaHeart · cuộc gặp đầu tiên</h2>
-        <p class="section-lead">Một buổi chiều để người trẻ cùng lắng nghe và nghĩ về tình yêu thương của Mẹ trong thời đại AI.</p>
+        <div class="kicker">Dấu mốc thực tế</div>
+        <h2 class="section-title" style="margin-bottom: 6px;">Những chương trình đã tổ chức</h2>
+        <p class="section-lead">Các buổi gặp gỡ, đêm nhạc và đối thoại đã diễn ra được lưu trữ đầy đủ hình ảnh thật tại Hành trình HolaRise.</p>
       </div>
-      <a class="arrow-link" href="/tin-tuc/">Đọc nhật ký &amp; xem album ảnh →</a>
+      <a class="arrow-link" href="/hanh-trinh/">Xem toàn bộ Hành trình &amp; Kho ảnh →</a>
     </div>
 
     <div class="past-list" data-stagger-group>
+      <!-- CMS:PAST_WORKSHOPS:START -->
       {{PAST_WORKSHOPS_HTML}}
-    </div>
-  </div>
-</section>
-
-<section class="section" id="lich-su-kien">
-  <div class="container">
-    <div class="section-header">
-      <div class="kicker">Lịch đã xác nhận</div>
-      <h2 class="section-title">Lịch Workshop &amp; Hoạt động sắp diễn ra</h2>
-      <p class="section-lead">Lịch hiển thị sau khi ngày, giờ và địa điểm được xác nhận.</p>
-    </div>
-
-    <div class="filter-bar-row">
-      <div class="filter-bar" data-filter-group="[data-workshop-card]" role="group" aria-label="Lọc workshop theo bộ lọc 4 chữ">
-        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Tất cả</button>
-        <button class="filter-btn" type="button" data-filter="sach" aria-pressed="false">
-          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
-          <span>Sạch</span>
-        </button>
-        <button class="filter-btn" type="button" data-filter="biet-on" aria-pressed="false">
-          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-          <span>Biết ơn</span>
-        </button>
-        <button class="filter-btn" type="button" data-filter="tu-te" aria-pressed="false">
-          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-          <span>Tử tế</span>
-        </button>
-        <button class="filter-btn" type="button" data-filter="se-chia" aria-pressed="false">
-          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Sẻ chia</span>
-        </button>
-      </div>
-      <span class="filter-count" data-filter-count="[data-workshop-card]" aria-live="polite"></span>
-    </div>
-
-    <div class="grid-3" data-stagger-group>
-      {{UPCOMING_WORKSHOPS_HTML}}
-    </div>
-
-    <div class="filter-empty" data-filter-empty="[data-workshop-card]" hidden>
-      <p>Hiện chưa có buổi Workshop sắp tới nào thuộc bộ lọc này.</p>
-      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-workshop-card]">Xem tất cả lịch hẹn</button>
+      <!-- CMS:PAST_WORKSHOPS:END -->
     </div>
   </div>
 </section>
@@ -76,12 +69,12 @@
   <div class="container">
     <div class="cta-band">
       <div>
-        <h2>Bạn muốn đề xuất một chủ đề Workshop ý nghĩa?</h2>
-        <p>Chúng tôi luôn lắng nghe gợi ý từ sinh viên và cư dân Hòa Lạc, hoặc sẵn sàng đồng tổ chức workshop cùng CLB/đơn vị của bạn.</p>
+        <h2>Muốn đồng tổ chức một buổi tại trường hoặc không gian của bạn?</h2>
+        <p>HolaRise sẵn sàng phối hợp cùng các CLB sinh viên, trường học và quán không gian văn hóa tại Hòa Lạc – Thạch Thất.</p>
       </div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px;">
-        <a class="btn btn--light" href="/tham-gia/" data-magnetic>Gửi đề xuất đồng hành</a>
-        <a class="btn btn--ghost-dark" href="/hoat-dong/">Khám phá 3 trụ cột hoạt động</a>
+        <a class="btn btn--light" href="/tham-gia/?chuong-trinh=hoptac" data-magnetic>Đề xuất hợp tác</a>
+        <a class="btn btn--ghost-dark" href="/gioi-thieu/#mo-hinh-tac-dong">Tìm hiểu 3 trụ cột</a>
       </div>
     </div>
   </div>

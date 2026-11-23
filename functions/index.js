@@ -1,10 +1,12 @@
 import {
   buildEventsJsonLd,
+  parsePartnersJson,
   renderHeroUpcomingBar,
+  renderHomeUpcomingSectionHtml,
   renderHorizontalGalleryHtml,
-  renderWorkshopsHtml,
+  renderPartnersStripHtml,
   replaceMarker,
-  serializeEventRow,
+  splitEventsByDate,
 } from "./_lib/render.js";
 
 export async function onRequestGet({ request, env }) {
@@ -14,10 +16,10 @@ export async function onRequestGet({ request, env }) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
 
-  const [assetRes, dbRes, featuredRes] = await Promise.all([
+  const [assetRes, eventsRes, featuredRes, partnersRow] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
     env.DB.prepare(
-      "SELECT * FROM events WHERE kind = 'upcoming' AND status = 'published' ORDER BY sort_order ASC, date ASC, created_at DESC LIMIT 20"
+      "SELECT * FROM events WHERE status = 'published' ORDER BY sort_order ASC, date ASC, created_at DESC LIMIT 60"
     )
       .all()
       .catch(() => null),
@@ -31,17 +33,23 @@ export async function onRequestGet({ request, env }) {
     )
       .all()
       .catch(() => null),
+    env.DB.prepare("SELECT value FROM settings WHERE key = 'partners_json'")
+      .first()
+      .catch(() => null),
   ]);
 
-  if (!assetRes.ok || !dbRes) {
+  if (!assetRes.ok || !eventsRes) {
     return assetRes;
   }
 
-  const upcoming = (dbRes.results || []).map(serializeEventRow);
+  const { upcoming } = splitEventsByDate(eventsRes.results || []);
+  const partners = parsePartnersJson(partnersRow?.value || "[]");
+
   let html = await assetRes.text();
   html = replaceMarker(html, "HERO_UPCOMING_BAR", renderHeroUpcomingBar(upcoming));
-  html = replaceMarker(html, "UPCOMING_WORKSHOPS", renderWorkshopsHtml(upcoming));
+  html = replaceMarker(html, "HOME_UPCOMING_SECTION", renderHomeUpcomingSectionHtml(upcoming));
   html = replaceMarker(html, "EVENTS_JSON_LD", buildEventsJsonLd(upcoming.slice(0, 1)));
+  html = replaceMarker(html, "PARTNERS_STRIP", renderPartnersStripHtml(partners));
 
   let homePhotos = (featuredRes?.results || []).map((r) => ({
     url: r.url,

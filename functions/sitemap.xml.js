@@ -3,9 +3,8 @@ import { absUrl, escHtml } from "./_lib/render.js";
 const STATIC_ROUTES = [
   ["/", "1.0", "weekly"],
   ["/gioi-thieu/", "0.9", "monthly"],
-  ["/hoat-dong/", "0.9", "weekly"],
-  ["/workshop/", "0.9", "weekly"],
-  ["/tin-tuc/", "0.8", "weekly"],
+  ["/lich-hoat-dong/", "0.9", "weekly"],
+  ["/hanh-trinh/", "0.9", "weekly"],
   ["/tham-gia/", "0.9", "monthly"],
   ["/chinh-sach/", "0.5", "yearly"],
 ];
@@ -36,7 +35,7 @@ export async function onRequestGet({ request, env }) {
   for (const row of postsRes.results || []) {
     const lastmod = String(row.updated_at || row.date || today).slice(0, 10);
     entries.push(`  <url>
-    <loc>${escHtml(absUrl(`/tin-tuc/${row.slug}/`))}</loc>
+    <loc>${escHtml(absUrl(`/hanh-trinh/${row.slug}/`))}</loc>
     <lastmod>${escHtml(lastmod)}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

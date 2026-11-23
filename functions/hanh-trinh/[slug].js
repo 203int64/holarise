@@ -22,7 +22,7 @@ async function renderNotFoundResponse(request, env) {
   }
 
   return new Response(
-    `<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Không tìm thấy bài viết | ${BRAND_SHORT_NAME}</title><link rel="stylesheet" href="/assets/css/styles.css"></head><body style="display:grid;place-items:center;min-height:100vh;padding:24px;text-align:center;"><div><h1 style="margin:0 0 12px;font-size:1.6rem;">Không tìm thấy bài viết</h1><p style="margin:0 0 24px;color:#4c5853;">Bài viết này có thể đã được gỡ xuống hoặc chưa xuất bản.</p><a class="btn btn--primary" href="/tin-tuc/">Quay lại Tin tức &amp; Nhật ký</a></div></body></html>`,
+    `<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Không tìm thấy bài viết | ${BRAND_SHORT_NAME}</title><link rel="stylesheet" href="/assets/css/styles.css"></head><body style="display:grid;place-items:center;min-height:100vh;padding:24px;text-align:center;"><div><h1 style="margin:0 0 12px;font-size:1.6rem;">Không tìm thấy bài viết</h1><p style="margin:0 0 24px;color:#4c5853;">Bài viết này có thể đã được gỡ xuống hoặc chưa xuất bản.</p><a class="btn btn--primary" href="/hanh-trinh/">Quay lại Hành trình HolaRise</a></div></body></html>`,
     { status: 404, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } }
   );
 }
@@ -35,7 +35,7 @@ export async function onRequestGet({ request, env, params }) {
 
   if (!env?.DB || !env?.ASSETS) {
     return env?.ASSETS
-      ? env.ASSETS.fetch(new Request(new URL(`/tin-tuc/${slug}/index.html`, request.url)))
+      ? env.ASSETS.fetch(new Request(new URL(`/hanh-trinh/${slug}/index.html`, request.url)))
       : new Response("Not Found", { status: 404 });
   }
 
@@ -58,12 +58,12 @@ export async function onRequestGet({ request, env, params }) {
   }
 
   if (!shellRes.ok) {
-    return env.ASSETS.fetch(new Request(new URL(`/tin-tuc/${slug}/index.html`, request.url)));
+    return env.ASSETS.fetch(new Request(new URL(`/hanh-trinh/${slug}/index.html`, request.url)));
   }
 
   const article = serializePostRow(row);
   const related = (relatedRes?.results || []).map(serializePostRow);
-  const canonicalUrl = absUrl(`/tin-tuc/${article.slug}/`);
+  const canonicalUrl = absUrl(`/hanh-trinh/${article.slug}/`);
   const ogImageUrl = absUrl(article.image);
   const pageTitle = `${article.title} | HolaRise`;
 

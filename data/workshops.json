@@ -1,7 +1,7 @@
 {
   "intro": {
-    "title": "Có những hành trình bắt đầu trước khi được kể lại",
-    "description": "Ở Hòa Lạc, những kết nối của người trẻ đã được vun đắp qua những lần ngồi lại, cùng làm và sẻ chia. Trang này giữ lại vài lát cắt của hành trình ấy; buổi HolaHeart ngày 15/11/2026 là một dấu mốc được kể lại ở đây."
+    "title": "Lịch hoạt động tại Hòa Lạc – Thạch Thất",
+    "description": "HolaRise duy trì nhịp 1–2 buổi sinh hoạt, đối thoại và hành động cộng đồng mỗi tuần luân phiên giữa HolaHeart, HolaGreen và HolaConnect."
   },
   "upcoming": [],
   "pastTopics": [
@@ -11,10 +11,21 @@
       "title": "HolaHeart · Tình yêu thương của Mẹ trong thời đại AI",
       "time": "14:00–16:50",
       "location": "Mây Lang Thang Cafe, Hòa Lạc",
-      "participants": "Xem bài tổng kết & album 8 ảnh tư liệu",
+      "participants": "Xem tường thuật & album 8 ảnh thật",
       "image": "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg",
       "imageAlt": "Diễn giả cầm micro chia sẻ tại sự kiện HolaHeart ngày 15/11/2026.",
-      "href": "/tin-tuc/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/"
+      "href": "/hanh-trinh/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/"
+    },
+    {
+      "id": "holaheart-musicspace-series",
+      "date": "2025 – 2026",
+      "title": "Chuỗi Âm nhạc & Workshop · HolaHeart × MusicSpace",
+      "time": "Định kỳ buổi tối",
+      "location": "Hòa Lạc – Thạch Thất",
+      "participants": "Xem 14 khoảnh khắc tuyển chọn",
+      "image": "/assets/images/musicspace-archive/15-671661990_1333975782086922_4394124200415584759_n.jpg",
+      "imageAlt": "Vòng tròn chia sẻ ngoài trời trong chuỗi HolaHeart × MusicSpace tại Hòa Lạc.",
+      "href": "/hanh-trinh/#musicspace-chapter"
     }
   ]
 }

@@ -1,15 +1,10 @@
 /**
- * HolaRise – Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên | v6 Native-Scroll Motion Engine
- * ZERO scroll-hijacking (No Lenis wheel block, No ScrollTrigger pin:true traps!):
- * - 100% Native 120Hz OS Trackpad Scrolling (impossible to ever get stuck in a section)
- * - Native CSS position:sticky Split-Scroll for 03 Core Programs + Mechanical Odometer (01 -> 03)
- * - Pure White Hero Split-Line Reveal + Apple Scale-to-Fullbleed Cinema Frame
- * - Kinetic Text Decode / Scramble on Kicker Badges
- * - Floating Spring Documentary Photo Preview on Blueprint Rows (velocity tilt!)
- * - Opposing Kinetic Scroll-Driven Watermark Band
- * - Obsidian Manifesto Word-by-Word Lift & Illumination
- * - Optical Specular Glass Glare + 3D Perspective Plate Tilt on Documentary Photos
- * - Live Hòa Lạc, Hà Nội GMT+7 Clock
+ * HolaRise – Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên | Native-Scroll Motion Engine
+ * ZERO scroll-hijacking:
+ * - Native CSS position:sticky Split-Scroll + Mechanical Odometer (01 -> 03)
+ * - Editorial Hero Split-Line Reveal + Scale-to-Fullbleed Cinema Frame
+ * - Opposing Kinetic Scroll-Driven Band
+ * - Obsidian Manifesto Word-by-Word Illumination
  */
 (function () {
   "use strict";
@@ -18,28 +13,6 @@
   var hasGsap = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
   var isFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   var desktopMq = window.matchMedia("(min-width: 1024px)");
-
-  /* 0. Live Hòa Lạc, Hà Nội GMT+7 Clock (tabular-nums) */
-  var clockEls = document.querySelectorAll("[data-live-clock]");
-  if (clockEls.length) {
-    var updateClock = function () {
-      try {
-        var now = new Date();
-        var fmt = new Intl.DateTimeFormat("vi-VN", {
-          timeZone: "Asia/Ho_Chi_Minh",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false
-        }).format(now);
-        clockEls.forEach(function (el) {
-          el.textContent = fmt;
-        });
-      } catch (e) {}
-    };
-    updateClock();
-    setInterval(updateClock, 1000);
-  }
 
   /* 1. Native CSS Scroll Progress fallback ONLY when animation-timeline: scroll() is unsupported */
   var progressBar = document.getElementById("scroll-progress");
@@ -215,7 +188,9 @@
       hFillMobile.style.transform = "scaleX(" + pct.toFixed(4) + ")";
       if (hCountMobile) {
         var cur = Math.min(totalGalleryCards, Math.max(1, Math.round(prog * (totalGalleryCards - 1)) + 1));
-        hCountMobile.textContent = "0" + cur + " / 0" + totalGalleryCards;
+        var pCur = cur < 10 ? "0" + cur : String(cur);
+        var pTot = totalGalleryCards < 10 ? "0" + totalGalleryCards : String(totalGalleryCards);
+        hCountMobile.textContent = pCur + " / " + pTot;
       }
       if (hPrevBtn) hPrevBtn.disabled = hWrap.scrollLeft <= 4;
       if (hNextBtn) hNextBtn.disabled = hWrap.scrollLeft >= maxScroll - 4;
@@ -622,20 +597,24 @@
     var words = rawText.split(/\s+/);
     var sunriseWords = {
       "vươn": true,
-      "lên": true,
+      "xa": true,
       "tử": true,
       "tế": true,
-      "biết": true,
-      "ơn": true,
-      "mầm": true,
-      "cây": true
+      "nhân": true,
+      "cách": true,
+      "sẻ": true,
+      "chia": true,
+      "bên": true,
+      "trong": true
     };
     var emeraldWords = {
       "hòa": true,
       "lạc": true,
+      "thạch": true,
+      "thất": true,
       "xanh": true,
-      "ấm": true,
-      "áp": true
+      "cộng": true,
+      "đồng": true
     };
     var frag = document.createDocumentFragment();
     words.forEach(function (w, idx) {
@@ -804,7 +783,9 @@
               }
               if (hCountMobile) {
                 var cur = Math.min(totalDeskCards, Math.max(1, Math.round(self.progress * (totalDeskCards - 1)) + 1));
-                hCountMobile.textContent = "0" + cur + " / 0" + totalDeskCards;
+                var pCur = cur < 10 ? "0" + cur : String(cur);
+                var pTot = totalDeskCards < 10 ? "0" + totalDeskCards : String(totalDeskCards);
+                hCountMobile.textContent = pCur + " / " + pTot;
               }
               if (hPrevBtn) hPrevBtn.disabled = self.progress <= 0.02;
               if (hNextBtn) hNextBtn.disabled = self.progress >= 0.98;
@@ -929,83 +910,6 @@
             gsap.to(floatBox, { scale: 0.86, duration: 0.22, ease: "power2.out" });
           });
         });
-      }
-
-      /* Dual Tactile Cursor: Precision Follower Dot + Velocity Squash-and-Stretch Tag */
-      var cursorDot = document.getElementById("cursor-dot");
-      var cursorTag = document.getElementById("cursor-tag");
-      if (cursorTag || cursorDot) {
-        var dotX = cursorDot ? gsap.quickTo(cursorDot, "x", { duration: 0.08, ease: "power3.out" }) : null;
-        var dotY = cursorDot ? gsap.quickTo(cursorDot, "y", { duration: 0.08, ease: "power3.out" }) : null;
-        var xTo = cursorTag ? gsap.quickTo(cursorTag, "x", { duration: 0.16, ease: "power3.out" }) : null;
-        var yTo = cursorTag ? gsap.quickTo(cursorTag, "y", { duration: 0.16, ease: "power3.out" }) : null;
-        var prevX = 0;
-        var prevY = 0;
-
-        window.addEventListener("pointermove", function (e) {
-          var vx = e.clientX - prevX;
-          var vy = e.clientY - prevY;
-          prevX = e.clientX;
-          prevY = e.clientY;
-          if (cursorDot) {
-            cursorDot.classList.add("is-visible");
-            dotX(e.clientX);
-            dotY(e.clientY);
-          }
-          if (xTo && yTo) {
-            xTo(e.clientX);
-            yTo(e.clientY);
-          }
-
-          if (cursorTag && cursorTag.classList.contains("is-active")) {
-            var speed = Math.min(Math.hypot(vx, vy), 45);
-            var stretch = 1 + (speed / 45) * 0.15;
-            var squash = 1 - (speed / 45) * 0.08;
-            gsap.to(cursorTag, {
-              scaleX: stretch,
-              scaleY: squash,
-              duration: 0.16,
-              overwrite: "auto",
-              onComplete: function () {
-                gsap.to(cursorTag, { scaleX: 1, scaleY: 1, duration: 0.22, overwrite: "auto" });
-              }
-            });
-          }
-        });
-
-        document.documentElement.addEventListener("mouseleave", function () {
-          if (cursorDot) cursorDot.classList.remove("is-visible");
-          if (cursorTag) cursorTag.classList.remove("is-active");
-        });
-
-        if (cursorTag) {
-          var activeCursorTarget = null;
-          document.querySelectorAll("[data-cursor-label]").forEach(function (target) {
-            target.addEventListener("pointerenter", function () {
-              activeCursorTarget = target;
-              cursorTag.textContent = target.getAttribute("data-cursor-label") || "Xem";
-              cursorTag.classList.add("is-active");
-              if (cursorDot) cursorDot.classList.add("is-hidden");
-            });
-            target.addEventListener("pointermove", function (e) {
-              var innerControl = e.target && e.target.closest ? e.target.closest("a, button") : null;
-              var suppressForChildControl = Boolean(innerControl && innerControl !== target);
-              if (suppressForChildControl) {
-                cursorTag.classList.remove("is-active");
-                if (cursorDot) cursorDot.classList.remove("is-hidden");
-              } else {
-                cursorTag.textContent = target.getAttribute("data-cursor-label") || "Xem";
-                cursorTag.classList.add("is-active");
-                if (cursorDot) cursorDot.classList.add("is-hidden");
-              }
-            });
-            target.addEventListener("pointerleave", function () {
-              if (activeCursorTarget === target) activeCursorTarget = null;
-              cursorTag.classList.remove("is-active");
-              if (cursorDot) cursorDot.classList.remove("is-hidden");
-            });
-          });
-        }
       }
 
       /* Elastic Feather-Light Magnetic Pull on Primary CTA Buttons */

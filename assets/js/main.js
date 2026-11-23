@@ -89,12 +89,13 @@
     };
   }
 
-  /* 3. Category & 4-Word Value Filters (Home, Activities, Workshops & News) */
-  var initialLocFilter = "";
+  /* 3. Pillar & Category Filters (?nhom= or legacy ?loc=) */
+  var initialGroupFilter = "";
   try {
-    initialLocFilter = (new URLSearchParams(window.location.search).get("loc") || "").trim();
+    var qs = new URLSearchParams(window.location.search);
+    initialGroupFilter = (qs.get("nhom") || qs.get("loc") || "").trim().toLowerCase();
   } catch (e) {
-    initialLocFilter = "";
+    initialGroupFilter = "";
   }
 
   document.querySelectorAll("[data-filter-group]").forEach(function (group) {
@@ -152,9 +153,9 @@
 
     updateMeta(totalCount);
 
-    if (initialLocFilter) {
+    if (initialGroupFilter) {
       buttons.forEach(function (btn) {
-        if (btn.getAttribute("data-filter") === initialLocFilter) {
+        if ((btn.getAttribute("data-filter") || "").toLowerCase() === initialGroupFilter) {
           applyFilter(btn);
         }
       });
@@ -412,11 +413,11 @@
       btn.addEventListener("click", function () {
         var title = btn.getAttribute("data-register-event") || "Hoạt động cộng đồng HolaRise";
         var eventId = btn.getAttribute("data-event-id") || "";
-        var eventDate = btn.getAttribute("data-event-date") || "Ngày đầu của tuần - Chủ nhật";
+        var eventDate = btn.getAttribute("data-event-date") || "Công bố theo từng hoạt động";
         var eventTime = btn.getAttribute("data-event-time") || "";
-        var eventLocation = btn.getAttribute("data-event-location") || "Hòa Lạc, Hà Nội";
-        var eventFee = btn.getAttribute("data-event-fee") || "Chi phí theo thông báo";
-        var eventType = btn.getAttribute("data-event-type") || "Chủ nhật tại Hòa Lạc";
+        var eventLocation = btn.getAttribute("data-event-location") || "Hòa Lạc – Thạch Thất, Hà Nội";
+        var eventFee = btn.getAttribute("data-event-fee") || "Phi lợi nhuận · Minh bạch";
+        var eventType = btn.getAttribute("data-event-type") || "Cộng đồng HolaRise";
 
         if (eventTitleDisplay) eventTitleDisplay.textContent = title;
         if (eventTypeDisplay) eventTypeDisplay.textContent = eventType;
@@ -862,10 +863,20 @@
         var sv = btn.getAttribute("data-skill-chip");
         if (sv) skillValues.push(sv);
       });
+      var partnerValues = [];
+      form.querySelectorAll('[data-partner-chip][aria-pressed="true"]').forEach(function (btn) {
+        var pv = btn.getAttribute("data-partner-chip");
+        if (pv) partnerValues.push(pv);
+      });
+      var isPartnerMode = checkedRoleRadio && checkedRoleRadio.getAttribute("data-mode") === "partner";
       var invitedBy = form.dataset.invitedBy || "";
       var metaParts = [];
-      if (vibeValue) metaParts.push("Phong cách: " + vibeValue);
-      if (skillValues.length) metaParts.push("Hứng thú: " + skillValues.join(", "));
+      if (isPartnerMode) {
+        if (partnerValues.length) metaParts.push("Hợp tác: " + partnerValues.join(", "));
+      } else {
+        if (vibeValue) metaParts.push("Tâm thế: " + vibeValue);
+        if (skillValues.length) metaParts.push("Hứng thú: " + skillValues.join(", "));
+      }
       if (invitedBy) metaParts.push("Rủ bởi: " + invitedBy);
       var rawNote = (payload.note || "").trim();
       if (metaParts.length) {
@@ -890,21 +901,22 @@
         eventTitle:
           (payload.activity || "").trim() ||
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-title")) ||
-          "Chưa có sự kiện cụ thể",
+          (isPartnerMode ? "Hợp tác Tổ chức · Chapter 01" : "Nhịp tuần Hòa Lạc – Thạch Thất"),
         eventDate:
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-date")) ||
           (modalContainer && modalContainer.dataset.eventDate) ||
-          "Ngày đầu của tuần - Chủ nhật",
+          "Theo lịch từng hoạt động",
         eventTime:
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-time")) ||
           (modalContainer && modalContainer.dataset.eventTime) ||
-          "Nhận lịch chi tiết qua Zalo",
+          "1–2 buổi / tuần",
         eventLocation:
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-location")) ||
           (modalContainer && modalContainer.dataset.eventLocation) ||
-          "Hòa Lạc, Hà Nội",
-        vibe: vibeValue || "Quan tâm tìm hiểu",
+          "Hòa Lạc – Thạch Thất, Hà Nội",
+        vibe: isPartnerMode ? partnerValues[0] || "Hợp tác tổ chức" : vibeValue || "Muốn tìm hiểu trước",
         skills: skillValues,
+        isPartner: isPartnerMode,
       };
 
       var resetBtn = function () {
@@ -957,7 +969,7 @@
             if (interactedFields) interactedFields.delete(field);
             setFieldErrorState(field, "", false);
           });
-          form.querySelectorAll("[data-org-chip], [data-skill-chip]").forEach(function (chip) {
+          form.querySelectorAll("[data-org-chip], [data-skill-chip], [data-partner-chip]").forEach(function (chip) {
             chip.classList.remove("is-selected");
             chip.setAttribute("aria-pressed", "false");
           });

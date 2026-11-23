@@ -49,8 +49,6 @@
 </head>
 <body class="{{BODY_CLASS}}">
   <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
-  <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
-  <div class="cursor-tag" id="cursor-tag" aria-hidden="true"></div>
   <div class="float-preview" id="float-preview" aria-hidden="true">
     <img id="float-preview-img" alt="">
   </div>
@@ -75,10 +73,7 @@
       </nav>
 
       <div class="header-actions">
-        <div class="live-status-pill" aria-label="Địa điểm và giờ địa phương">
-          <span class="live-status-dot" aria-hidden="true"></span>
-          <span>Hòa Lạc, Hà Nội · <span data-live-clock>07:00:00</span></span>
-        </div>
+        <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/">Tham gia</a>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Mở menu điều hướng">
           <span class="nav-toggle-bars" aria-hidden="true">
             <span></span>
@@ -129,18 +124,17 @@
           </a>
           <p style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;">{{BRAND_FULL_NAME}}</p>
           <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);">{{BRAND_SUBTITLE}}</p>
-          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Small Beginnings. Great Impact. · {{BRAND_TAGLINE}}</p>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">{{BRAND_TAGLINE}} · Chapter 01 · Hòa Lạc – Thạch Thất</p>
         </div>
 
         <div>
           <h2 class="footer-heading">Khám phá</h2>
           <ul class="footer-links">
             <li><a href="/">Trang chủ</a></li>
-            <li><a href="/gioi-thieu/">Giới thiệu &amp; Sứ mệnh</a></li>
-            <li><a href="/hoat-dong/">Hoạt động &amp; Chiến dịch</a></li>
-            <li><a href="/workshop/">Lịch Workshop</a></li>
-            <li><a href="/tin-tuc/">Nhật ký hoạt động</a></li>
-            <li><a href="/chinh-sach/">Bảo mật &amp; Quy tắc cộng đồng</a></li>
+            <li><a href="/gioi-thieu/">Về HolaRise</a></li>
+            <li><a href="/lich-hoat-dong/">Lịch hoạt động</a></li>
+            <li><a href="/hanh-trinh/">Hành trình &amp; Kho ảnh</a></li>
+            <li><a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a></li>
             <li>
               <button class="pwa-install-footer-btn" type="button" data-pwa-install hidden>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -155,22 +149,22 @@
         </div>
 
         <div>
-          <h2 class="footer-heading">3 Chương trình</h2>
+          <h2 class="footer-heading">3 Trụ cột</h2>
           <ul class="footer-links">
-            <li><a href="/hoat-dong/#moi-truong">HolaGreen · Môi trường</a></li>
-            <li><a href="/workshop/">HolaHeart · Giá trị sống</a></li>
-            <li><a href="/hoat-dong/#cong-dong">HolaConnect · Cộng đồng</a></li>
-            <li><a href="/tham-gia/">Đăng ký tham gia</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holaheart">HolaHeart · Nội lực &amp; Lắng nghe</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holagreen">HolaGreen · Sinh thái &amp; Cảnh quan</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holaconnect">HolaConnect · Phụng sự &amp; Kết nối</a></li>
+            <li><a href="/tham-gia/">Tham gia &amp; Hợp tác</a></li>
           </ul>
         </div>
 
         <div>
-          <h2 class="footer-heading">Liên hệ tại Hòa Lạc</h2>
+          <h2 class="footer-heading">Liên hệ · Chapter 01</h2>
           <ul class="footer-links">
-            <li>Văn phòng: {{CONTACT_ADDRESS}}</li>
+            <li>Địa bàn: {{CONTACT_ADDRESS}}</li>
             <li><a href="tel:{{CONTACT_PHONE_RAW}}">{{CONTACT_PHONE}}</a></li>
             <li><a href="mailto:{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</a></li>
-            <li>Thời gian hoạt động: {{CONTACT_MEETING}}</li>
+            <li>Nhịp sinh hoạt: {{CONTACT_MEETING}}</li>
           </ul>
         </div>
       </div>
@@ -331,7 +325,7 @@
       <div data-pwa-guide="ios">
         <span class="kicker" style="margin-bottom: 8px;">Cài đặt trên iPhone / iPad</span>
         <h2 id="pwa-dialog-title-ios" class="pwa-dialog-title">Thêm HolaRise vào Màn hình chính</h2>
-        <p class="pwa-dialog-lead">Mở nhanh như ứng dụng gốc, xem lịch Workshop mượt mà ngay cả khi sóng yếu tại Hòa Lạc.</p>
+        <p class="pwa-dialog-lead">Mở nhanh như ứng dụng gốc, theo dõi lịch hoạt động và hành trình cộng đồng mượt mà tại Hòa Lạc – Thạch Thất.</p>
         <ol class="pwa-steps">
           <li class="pwa-step">
             <span class="pwa-step-num" aria-hidden="true">1</span>

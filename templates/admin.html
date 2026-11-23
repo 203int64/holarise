@@ -230,8 +230,8 @@
       <section class="tab-panel" id="panel-events" data-panel="events" hidden>
         <div class="page-head">
           <div>
-            <h1>Sự kiện &amp; Workshop</h1>
-            <p class="page-sub">Đăng lịch hoạt động mới để hiển thị ngay lập tức trên Trang chủ và trang Workshop.</p>
+            <h1>Lịch hoạt động</h1>
+            <p class="page-sub">Đăng lịch hoạt động mới để hiển thị ngay lập tức trên Trang chủ và trang Lịch hoạt động.</p>
           </div>
           <div class="page-actions">
             <button class="btn btn--primary" type="button" id="btn-new-event">+ Đăng sự kiện mới</button>
@@ -245,8 +245,8 @@
       <section class="tab-panel" id="panel-posts" data-panel="posts" hidden>
         <div class="page-head">
           <div>
-            <h1>Bài viết &amp; Nhật ký Hoạt động</h1>
-            <p class="page-sub">Bài xuất bản sẽ có ngay đường dẫn chuẩn SEO <code>/tin-tuc/&lt;slug&gt;/</code> và ảnh preview trên Zalo/Facebook.</p>
+            <h1>Hành trình &amp; Bài viết</h1>
+            <p class="page-sub">Bài xuất bản sẽ có ngay đường dẫn chuẩn SEO <code>/hanh-trinh/&lt;slug&gt;/</code> và ảnh preview trên Zalo/Facebook.</p>
           </div>
           <div class="page-actions">
             <button class="btn btn--primary" type="button" id="btn-new-post">+ Viết bài mới</button>
@@ -256,16 +256,28 @@
         <div id="posts-container"></div>
       </section>
 
-      <!-- PANEL 4: TEAM & SETTINGS -->
+      <!-- PANEL 4: PARTNERS, TEAM & SETTINGS -->
       <section class="tab-panel" id="panel-settings" data-panel="settings" hidden>
         <div class="page-head">
           <div>
-            <h1>Đội ngũ &amp; Cài đặt Hệ thống</h1>
-            <p class="page-sub">Cấu hình đồng bộ Google Sheets + Email tự động, quản lý tài khoản Ban Điều Phối và bảo mật mật khẩu.</p>
+            <h1>Đối tác, Đội ngũ &amp; Cài đặt</h1>
+            <p class="page-sub">Quản lý đơn vị &amp; không gian đồng hành, cấu hình đồng bộ Google Sheets + Email tự động và tài khoản Ban Điều Phối.</p>
           </div>
         </div>
 
         <div class="settings-grid">
+          <!-- Partners Management (Super Admin & Editor) -->
+          <section class="panel-box" id="box-partners">
+            <div class="panel-box-head panel-box-head--row">
+              <div>
+                <h2>Đối tác &amp; Không gian đồng hành</h2>
+                <p>Các đối tác đang bật sẽ tự động hiển thị trên Trang chủ và trang Về HolaRise; danh sách trống sẽ tự ẩn sạch sẽ.</p>
+              </div>
+              <button class="btn btn--primary btn--sm" type="button" id="btn-new-partner">+ Thêm đối tác</button>
+            </div>
+            <div id="partners-container"></div>
+          </section>
+
           <!-- Google Sheets & Email Integration (Super Admin) -->
           <section class="panel-box" id="box-integrations" hidden>
             <div class="panel-box-head">
@@ -395,17 +407,17 @@
         </div>
 
         <div class="field">
-          <label for="ev-title">Tên sự kiện / Workshop <span aria-hidden="true">*</span></label>
-          <input id="ev-title" name="title" type="text" required minlength="4" placeholder="Ví dụ: Cuối Tuần Xanh #20: Làm sạch ven hồ Tân Xã">
+          <label for="ev-title">Tên sự kiện / Hoạt động <span aria-hidden="true">*</span></label>
+          <input id="ev-title" name="title" type="text" required minlength="4" placeholder="Ví dụ: HolaHeart #16: Đối thoại Giá trị sống tại Hòa Lạc – Thạch Thất">
         </div>
 
         <div class="form-row-2">
           <div class="field">
             <label for="ev-type">Chương trình</label>
             <select id="ev-type" name="type">
-              <option value="HolaGreen · Sạch">HolaGreen · Sạch</option>
-              <option value="HolaHeart · Biết ơn &amp; Tử tế">HolaHeart · Biết ơn &amp; Tử tế</option>
-              <option value="HolaConnect · Tử tế &amp; Sẻ chia">HolaConnect · Tử tế &amp; Sẻ chia</option>
+              <option value="HolaHeart · Giá trị sống">HolaHeart · Giá trị sống</option>
+              <option value="HolaGreen · Sinh thái">HolaGreen · Sinh thái</option>
+              <option value="HolaConnect · Phụng sự">HolaConnect · Phụng sự</option>
               <option value="Chuyên đề đã tổ chức">Chuyên đề đã tổ chức</option>
             </select>
           </div>
@@ -430,7 +442,7 @@
         <div class="form-row-3">
           <div class="field">
             <label for="ev-location">Địa điểm</label>
-            <input id="ev-location" name="location" type="text" placeholder="Ven Hồ Tân Xã, Hòa Lạc">
+            <input id="ev-location" name="location" type="text" placeholder="Hòa Lạc – Thạch Thất, Hà Nội">
           </div>
           <div class="field">
             <label for="ev-fee">Chi phí</label>
@@ -443,7 +455,7 @@
         </div>
 
         <fieldset class="chip-fieldset">
-          <legend>Bộ lọc 4 chữ (giúp người dùng lọc trên trang Workshop)</legend>
+          <legend>Nhóm lọc phụ trợ (tuỳ chọn)</legend>
           <div class="check-chips">
             <label class="check-chip"><input type="checkbox" name="filters" value="sach"><span>Sạch</span></label>
             <label class="check-chip"><input type="checkbox" name="filters" value="biet-on"><span>Biết ơn</span></label>
@@ -454,7 +466,7 @@
 
         <div class="field">
           <label for="ev-summary">Mô tả ngắn (1 câu gọn, tối đa 25 chữ) <span aria-hidden="true">*</span></label>
-          <textarea id="ev-summary" name="summary" rows="2" placeholder="Dọn sạch bờ cỏ ven hồ Tân Xã sáng Chủ Nhật và phân loại chai nhựa tái chế."></textarea>
+          <textarea id="ev-summary" name="summary" rows="2" placeholder="Buổi đối thoại &amp; kết nối giá trị sống dành cho người trẻ tại Hòa Lạc – Thạch Thất."></textarea>
         </div>
 
         <div class="field">
@@ -496,14 +508,14 @@
 
         <div class="field">
           <label for="post-title">Tiêu đề bài viết <span aria-hidden="true">*</span></label>
-          <input id="post-title" name="title" type="text" required minlength="5" placeholder="Ví dụ: Cuối Tuần Xanh #19 tại Hồ Tân Xã: 60 bạn trẻ thu gom 210 kg rác">
+          <input id="post-title" name="title" type="text" required minlength="5" placeholder="Ví dụ: HolaGreen Thạch Thất: 60 bạn trẻ cùng phủ xanh cung đường mới">
         </div>
 
         <div class="form-row-2">
           <div class="field">
             <label for="post-slug">Đường dẫn SEO (slug)</label>
-            <span class="field-hint">Tự tạo từ tiêu đề → <code>/tin-tuc/&lt;slug&gt;/</code></span>
-            <input id="post-slug" name="slug" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="cuoi-tuan-xanh-19-ho-tan-xa">
+            <span class="field-hint">Tự tạo từ tiêu đề → <code>/hanh-trinh/&lt;slug&gt;/</code></span>
+            <input id="post-slug" name="slug" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="holagreen-thach-that-phu-xanh">
           </div>
           <div class="field">
             <label for="post-status">Trạng thái xuất bản</label>
@@ -563,7 +575,7 @@
         <div class="field">
           <label for="post-content">Nội dung bài viết <span aria-hidden="true">*</span></label>
           <span class="field-hint">Xuống dòng để tách đoạn. Hỗ trợ <code>## Tiêu đề mục</code>, <code>- Gạch đầu dòng</code>, <code>&gt; Trích dẫn</code>, và <code>**in đậm**</code>.</span>
-          <textarea id="post-content" name="content" rows="10" required placeholder="6h45 sáng Chủ Nhật, các bạn trẻ HolaRise đã có mặt tại ven hồ Tân Xã..."></textarea>
+          <textarea id="post-content" name="content" rows="10" required placeholder="Chiều cuối tuần tại Hòa Lạc – Thạch Thất, các bạn trẻ HolaRise đã cùng nhau..."></textarea>
         </div>
 
         <div class="form-alert" id="post-alert" role="alert" hidden></div>
@@ -647,6 +659,55 @@
         <div class="dialog-foot">
           <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
           <button class="btn btn--primary" type="submit">Tạo tài khoản</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 5: PARTNER EDITOR -->
+  <dialog class="cms-dialog" id="partner-dialog" closedby="any" aria-labelledby="partner-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="partner-dialog-title">Thêm đối tác đồng hành</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <form class="admin-form dialog-body" id="partner-form" novalidate>
+        <input type="hidden" id="pn-id" name="id">
+        <div class="field">
+          <label for="pn-name">Tên đơn vị / Không gian / CLB <span aria-hidden="true">*</span></label>
+          <input id="pn-name" name="name" type="text" required minlength="2" maxlength="120" placeholder="Ví dụ: MusicSpace, Mây Lang Thang Cafe...">
+        </div>
+        <div class="field">
+          <label for="pn-role">Vai trò đồng hành</label>
+          <select id="pn-role" name="role">
+            <option value="Không gian Đồng hành">Không gian Đồng hành</option>
+            <option value="Đối tác Chương trình">Đối tác Chương trình</option>
+            <option value="Nhà trường &amp; CLB">Nhà trường &amp; CLB</option>
+            <option value="Đơn vị Hỗ trợ">Đơn vị Hỗ trợ</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="pn-website">Website / Liên kết giới thiệu (tùy chọn, HTTPS)</label>
+          <input id="pn-website" name="websiteUrl" type="url" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="https://musicspace.edu.vn">
+        </div>
+        <div class="field">
+          <label for="pn-logo-file">Logo đơn vị (tùy chọn — nếu bỏ trống sẽ hiện chữ viết tắt tinh tế)</label>
+          <div class="uploader-box">
+            <img id="pn-logo-preview" class="uploader-preview" src="/assets/images/logo-mark.png" alt="Xem trước logo đối tác">
+            <div class="uploader-controls">
+              <input id="pn-logo-file" type="file" accept="image/*" class="file-input" data-upload-target="pn-logo" data-preview-target="pn-logo-preview" data-meta-target="pn-logo-meta">
+              <div class="upload-meta" id="pn-logo-meta">Chọn ảnh logo PNG/JPG gọn nhẹ.</div>
+              <input id="pn-logo" name="logoUrl" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="/api/media/... hoặc để trống">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="check-chip"><input type="checkbox" id="pn-active" name="isActive" checked><span>Hiển thị công khai trên Website (Trang chủ &amp; Về HolaRise)</span></label>
+        </div>
+        <div class="form-alert" id="partner-alert" role="alert" hidden></div>
+        <div class="dialog-foot">
+          <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
+          <button class="btn btn--primary" type="submit">Lưu đối tác</button>
         </div>
       </form>
     </div>

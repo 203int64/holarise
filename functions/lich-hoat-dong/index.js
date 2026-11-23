@@ -1,41 +1,35 @@
 import {
   buildEventsJsonLd,
   renderPastWorkshopsHtml,
-  renderWorkshopsHtml,
+  renderScheduleUpcomingContentHtml,
   replaceMarker,
-  serializeEventRow,
+  splitEventsByDate,
 } from "../_lib/render.js";
 
 export async function onRequestGet({ request, env }) {
-  const staticAssetReq = new Request(new URL("/workshop/index.html", request.url), { method: "GET" });
+  const staticAssetReq = new Request(new URL("/lich-hoat-dong/index.html", request.url), { method: "GET" });
 
   if (!env?.DB || !env?.ASSETS) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
 
-  const [assetRes, upcomingRes, pastRes] = await Promise.all([
+  const [assetRes, eventsRes] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
     env.DB.prepare(
-      "SELECT * FROM events WHERE kind = 'upcoming' AND status = 'published' ORDER BY sort_order ASC, date ASC, created_at DESC LIMIT 40"
-    )
-      .all()
-      .catch(() => null),
-    env.DB.prepare(
-      "SELECT * FROM events WHERE kind = 'past' AND status = 'published' ORDER BY sort_order ASC, date DESC, created_at DESC LIMIT 30"
+      "SELECT * FROM events WHERE status = 'published' ORDER BY sort_order ASC, date ASC, created_at DESC LIMIT 80"
     )
       .all()
       .catch(() => null),
   ]);
 
-  if (!assetRes.ok || !upcomingRes || !pastRes) {
+  if (!assetRes.ok || !eventsRes) {
     return assetRes;
   }
 
-  const upcoming = (upcomingRes.results || []).map(serializeEventRow);
-  const past = (pastRes.results || []).map(serializeEventRow);
+  const { upcoming, past } = splitEventsByDate(eventsRes.results || []);
 
   let html = await assetRes.text();
-  html = replaceMarker(html, "UPCOMING_WORKSHOPS", renderWorkshopsHtml(upcoming));
+  html = replaceMarker(html, "SCHEDULE_UPCOMING", renderScheduleUpcomingContentHtml(upcoming));
   html = replaceMarker(html, "PAST_WORKSHOPS", renderPastWorkshopsHtml(past));
   html = replaceMarker(html, "EVENTS_JSON_LD", buildEventsJsonLd(upcoming));
 

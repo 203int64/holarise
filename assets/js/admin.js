@@ -15,15 +15,16 @@
     regCounts: { all: 0, new: 0, contacted: 0, attended: 0, cancelled: 0 },
     events: [],
     posts: [],
+    partners: [],
     users: [],
     slugTouched: false,
   };
 
   const TAB_TITLES = {
     registrations: "Đơn đăng ký",
-    events: "Sự kiện & Workshop",
-    posts: "Bài viết & Tin tức",
-    settings: "Đội ngũ & Cài đặt",
+    events: "Lịch hoạt động",
+    posts: "Hành trình & Bài viết",
+    settings: "Đối tác & Cài đặt",
   };
 
   const REG_STATUS_LABEL = {
@@ -641,16 +642,16 @@
     $("#ev-kind").value = ev ? ev.kind : "upcoming";
     $("#ev-status").value = ev ? ev.status : "published";
     $("#ev-title").value = ev ? ev.title : "";
-    $("#ev-type").value = ev ? ev.type : "HolaGreen · Sạch";
+    $("#ev-type").value = ev ? ev.type : "HolaHeart · Giá trị sống";
     $("#ev-date").value = ev && /^\d{4}-\d{2}-\d{2}$/.test(ev.date) ? ev.date : new Date().toISOString().slice(0, 10);
     $("#ev-date-display").value = ev ? ev.dateDisplay || "" : "";
     $("#ev-time").value = ev ? ev.time || "" : "07:30 – 10:30";
-    $("#ev-location").value = ev ? ev.location || "" : "Hòa Lạc, Hà Nội";
+    $("#ev-location").value = ev ? ev.location || "" : "Hòa Lạc – Thạch Thất, Hà Nội";
     $("#ev-fee").value = ev ? ev.fee || "" : "Miễn phí";
     $("#ev-seats").value = ev ? ev.seats || "" : "Mở đăng ký";
     $("#ev-summary").value = ev ? ev.summary || "" : "";
     $("#ev-participants").value = ev ? ev.participants || "" : "";
-    const imgUrl = ev ? ev.image : "/assets/images/activity-workshop.jpg";
+    const imgUrl = ev ? ev.image : "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg";
     $("#ev-image").value = imgUrl;
     $("#ev-image-preview").src = imgUrl;
     $("#ev-image-meta").textContent = "Chọn ảnh từ thư viện hoặc chụp trực tiếp.";
@@ -676,7 +677,7 @@
         renderEmptyState(
           box,
           "Chưa có bài viết nào",
-          "Viết bài nhật ký hoạt động đầu tiên — trang SEO /tin-tuc/<slug>/ sẽ xuất hiện ngay lập tức.",
+          "Viết bài tường thuật đầu tiên — trang SEO /hanh-trinh/<slug>/ sẽ xuất hiện ngay lập tức.",
           "+ Viết bài mới",
           "new-post"
         );
@@ -698,7 +699,7 @@
               <p class="item-excerpt">${esc(p.excerpt)}</p>
             </div>
             <div class="item-actions">
-              ${p.status === "published" ? `<a class="btn btn--ghost btn--sm" href="/tin-tuc/${esc(p.slug)}/" target="_blank" rel="noopener">Xem ↗</a>` : ""}
+              ${p.status === "published" ? `<a class="btn btn--ghost btn--sm" href="/hanh-trinh/${esc(p.slug)}/" target="_blank" rel="noopener">Xem ↗</a>` : ""}
               <button class="btn btn--outline btn--sm" type="button" data-edit-post="${esc(p.id)}">Sửa</button>
               <button class="btn btn--danger-ghost btn--sm" type="button" data-delete-post="${esc(p.id)}">Xóa</button>
             </div>
@@ -740,9 +741,80 @@
   }
 
   /* =========================================================================
-     TAB 4: SETTINGS & TEAM USERS
+     TAB 4: PARTNERS, SETTINGS & TEAM USERS
      ========================================================================= */
+  function renderPartnersList() {
+    const box = $("#partners-container");
+    if (!box) return;
+    if (!state.partners.length) {
+      renderEmptyState(
+        box,
+        "Chưa công bố đối tác nào",
+        "Trang web sẽ tự động ẩn dải đối tác cho tới khi bạn thêm và bật hiển thị một đơn vị đồng hành.",
+        "+ Thêm đối tác đầu tiên",
+        "new-partner"
+      );
+      return;
+    }
+
+    box.innerHTML = `<div class="item-list">${state.partners
+      .map(
+        (p) => `<article class="item-row">
+          ${p.logoUrl ? `<img class="item-thumb" src="${esc(p.logoUrl)}" alt="${esc(p.name)}" loading="lazy">` : ""}
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="badge badge--${p.isActive ? "published" : "draft"}">${p.isActive ? "Đang hiển thị" : "Đang ẩn"}</span>
+              <span>${esc(p.role || "Đơn vị Đồng hành")}</span>
+            </div>
+            <h3>${esc(p.name)}</h3>
+            ${p.websiteUrl ? `<p class="item-excerpt">${esc(p.websiteUrl)}</p>` : ""}
+          </div>
+          <div class="item-actions">
+            <button class="btn btn--outline btn--sm" type="button" data-toggle-partner="${esc(p.id)}">${p.isActive ? "Ẩn" : "Hiện"}</button>
+            <button class="btn btn--outline btn--sm" type="button" data-edit-partner="${esc(p.id)}">Sửa</button>
+            <button class="btn btn--danger-ghost btn--sm" type="button" data-delete-partner="${esc(p.id)}">Xóa</button>
+          </div>
+        </article>`
+      )
+      .join("")}</div>`;
+  }
+
+  function openPartnerDialog(partner = null) {
+    const form = $("#partner-form");
+    if (!form) return;
+    form.reset();
+    showAlert($("#partner-alert"), "");
+    $("#partner-dialog-title").textContent = partner ? "Chỉnh sửa đối tác đồng hành" : "Thêm đối tác đồng hành";
+    $("#pn-id").value = partner ? partner.id : "";
+    $("#pn-name").value = partner ? partner.name : "";
+    $("#pn-role").value = partner ? partner.role || "Không gian Đồng hành" : "Không gian Đồng hành";
+    $("#pn-website").value = partner ? partner.websiteUrl || "" : "";
+    $("#pn-logo").value = partner ? partner.logoUrl || "" : "";
+    $("#pn-logo-preview").src = partner && partner.logoUrl ? partner.logoUrl : "/assets/images/logo-mark.png";
+    $("#pn-logo-meta").textContent = "Chọn ảnh logo PNG/JPG gọn nhẹ (tùy chọn).";
+    $("#pn-active").checked = partner ? Boolean(partner.isActive) : true;
+    $("#partner-dialog").showModal();
+  }
+
+  async function savePartnersList(nextList, successMsg) {
+    const res = await api("/api/admin/partners", {
+      method: "PUT",
+      body: { items: nextList },
+    });
+    state.partners = res.items || [];
+    renderPartnersList();
+    if (successMsg) toast(successMsg, "success");
+  }
+
   async function loadSettings() {
+    try {
+      const pRes = await api("/api/admin/partners");
+      state.partners = pRes.items || [];
+      renderPartnersList();
+    } catch (err) {
+      renderErrorState($("#partners-container"), err.message, "settings");
+    }
+
     if (state.user?.role !== "super_admin") return;
     try {
       const [sRes, uRes] = await Promise.all([api("/api/admin/settings"), api("/api/admin/users")]);
@@ -1114,6 +1186,40 @@
       }
     });
 
+    // Partner modal & submit
+    $("#btn-new-partner")?.addEventListener("click", () => openPartnerDialog(null));
+    $("#partner-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = e.currentTarget.querySelector('button[type="submit"]');
+      const alertEl = $("#partner-alert");
+      showAlert(alertEl, "");
+
+      const id = $("#pn-id").value.trim();
+      const item = {
+        id: id || undefined,
+        name: $("#pn-name").value.trim(),
+        role: $("#pn-role").value,
+        websiteUrl: $("#pn-website").value.trim(),
+        logoUrl: $("#pn-logo").value.trim(),
+        isActive: $("#pn-active").checked,
+      };
+      const next = id
+        ? state.partners.map((p) => (p.id === id ? { ...p, ...item } : p))
+        : [...state.partners, item];
+
+      btn.disabled = true;
+      btn.textContent = "Đang lưu...";
+      try {
+        await savePartnersList(next, id ? "Đã cập nhật đối tác!" : "Đã thêm đối tác đồng hành!");
+        $("#partner-dialog").close();
+      } catch (err) {
+        showAlert(alertEl, formatApiError(err));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Lưu đối tác";
+      }
+    });
+
     // Team user modal
     $("#btn-new-user")?.addEventListener("click", () => {
       $("#user-form").reset();
@@ -1177,11 +1283,33 @@
 
     // Delegated click handler for dynamic rows & retry/empty buttons
     document.addEventListener("click", async (e) => {
-      const btn = e.target.closest("button[data-open-reg], button[data-edit-event], button[data-delete-event], button[data-edit-post], button[data-delete-post], button[data-toggle-user], button[data-delete-user], button[data-retry], button[data-empty-cta]");
+      const btn = e.target.closest("button[data-open-reg], button[data-edit-event], button[data-delete-event], button[data-edit-post], button[data-delete-post], button[data-toggle-partner], button[data-edit-partner], button[data-delete-partner], button[data-toggle-user], button[data-delete-user], button[data-retry], button[data-empty-cta]");
       if (!btn) return;
 
       if (btn.dataset.openReg) {
         openRegDialog(btn.dataset.openReg);
+      } else if (btn.dataset.editPartner) {
+        const pn = state.partners.find((x) => x.id === btn.dataset.editPartner);
+        if (pn) openPartnerDialog(pn);
+      } else if (btn.dataset.togglePartner) {
+        const next = state.partners.map((x) =>
+          x.id === btn.dataset.togglePartner ? { ...x, isActive: !x.isActive } : x
+        );
+        try {
+          await savePartnersList(next, "Đã cập nhật trạng thái hiển thị đối tác.");
+        } catch (err) {
+          toast(err.message, "error");
+        }
+      } else if (btn.dataset.deletePartner) {
+        const pn = state.partners.find((x) => x.id === btn.dataset.deletePartner);
+        if (pn && window.confirm(`Xóa đối tác "${pn.name}"?`)) {
+          const next = state.partners.filter((x) => x.id !== pn.id);
+          try {
+            await savePartnersList(next, "Đã xóa đối tác.");
+          } catch (err) {
+            toast(err.message, "error");
+          }
+        }
       } else if (btn.dataset.editEvent) {
         const ev = state.events.find((x) => x.id === btn.dataset.editEvent);
         if (ev) openEventDialog(ev);
@@ -1238,6 +1366,8 @@
         openEventDialog(null);
       } else if (btn.dataset.emptyCta === "new-post") {
         openPostDialog(null);
+      } else if (btn.dataset.emptyCta === "new-partner") {
+        openPartnerDialog(null);
       }
     });
   }

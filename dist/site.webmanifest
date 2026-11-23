@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên",
   "short_name": "HolaRise",
-  "description": "Kết nối thanh niên, sinh viên và học sinh tại Hòa Lạc cùng làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng (HolaConnect).",
+  "description": "Khởi nguồn từ Hòa Lạc – Thạch Thất, kết nối thế hệ trẻ cùng vun bồi nội lực (HolaHeart), kiến tạo cảnh quan xanh (HolaGreen) và phụng sự cộng đồng (HolaConnect).",
   "lang": "vi-VN",
   "dir": "ltr",
   "start_url": "/?source=pwa",
@@ -49,10 +49,10 @@
   ],
   "shortcuts": [
     {
-      "name": "Lịch Workshop sắp tới",
-      "short_name": "Workshop",
-      "description": "Xem lịch Workshop giá trị sống và giữ chỗ miễn phí",
-      "url": "/workshop/?source=pwa-shortcut",
+      "name": "Lịch hoạt động",
+      "short_name": "Lịch",
+      "description": "Xem lịch hoạt động hằng tuần của HolaHeart, HolaGreen, HolaConnect",
+      "url": "/lich-hoat-dong/?source=pwa-shortcut",
       "icons": [
         {
           "src": "/assets/images/pwa/icon-192.png",
@@ -62,10 +62,10 @@
       ]
     },
     {
-      "name": "Hoạt động & Chiến dịch",
-      "short_name": "Hoạt động",
-      "description": "3 chương trình HolaGreen, HolaHeart, HolaConnect",
-      "url": "/hoat-dong/?source=pwa-shortcut",
+      "name": "Hành trình & Kho ảnh",
+      "short_name": "Hành trình",
+      "description": "Xem tường thuật và triển lãm ảnh thật của HolaRise",
+      "url": "/hanh-trinh/?source=pwa-shortcut",
       "icons": [
         {
           "src": "/assets/images/pwa/icon-192.png",
@@ -75,9 +75,9 @@
       ]
     },
     {
-      "name": "Đăng ký tham gia",
+      "name": "Tham gia & Hợp tác",
       "short_name": "Tham gia",
-      "description": "Đăng ký tình nguyện viên và kết nối cùng HolaRise",
+      "description": "Nhận Thẻ Gieo Mầm hoặc kết nối hợp tác cùng HolaRise",
       "url": "/tham-gia/?source=pwa-shortcut",
       "icons": [
         {

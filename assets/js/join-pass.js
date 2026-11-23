@@ -9,7 +9,7 @@
   var prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var isFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   var SITE_URL = "https://holarise.org";
-  var DEFAULT_SCHEDULE = "Chưa có lịch được xác nhận";
+  var DEFAULT_SCHEDULE = "1–2 buổi / tuần";
 
   var joinForm = document.querySelector("[data-join-studio]");
   var passEl = document.querySelector("[data-sunrise-pass]");
@@ -59,7 +59,7 @@
       if (ruParam && inviteBanner && inviteBannerText) {
         joinForm.dataset.invitedBy = ruParam;
         inviteBannerText.textContent =
-          ruParam + " mời bạn tìm hiểu về HolaRise. Lịch hoạt động đã xác nhận sẽ được đăng tại trang Workshop.";
+          ruParam + " mời bạn tìm hiểu và gieo mầm hành trình cùng HolaRise tại Hòa Lạc – Thạch Thất.";
         inviteBanner.hidden = false;
       }
 
@@ -130,7 +130,7 @@
       });
     });
 
-    form.querySelectorAll("[data-skill-chip]").forEach(function (chip) {
+    form.querySelectorAll("[data-skill-chip], [data-partner-chip]").forEach(function (chip) {
       chip.addEventListener("click", function () {
         var nextState = chip.getAttribute("aria-pressed") !== "true";
         chip.classList.toggle("is-selected", nextState);
@@ -161,21 +161,70 @@
     var checkedRole = joinForm.querySelector('input[type="radio"][name="role"]:checked');
     var checkedEvent = joinForm.querySelector('input[type="radio"][name="eventChoice"]:checked');
     var activeVibe = joinForm.querySelector('[data-vibe-chip][aria-pressed="true"]');
+    var activePartner = joinForm.querySelector('[data-partner-chip][aria-pressed="true"]');
+    var isPartnerMode = Boolean(checkedRole && checkedRole.getAttribute("data-mode") === "partner");
 
-    var theme = (checkedRole && checkedRole.getAttribute("data-theme")) || "emerald";
-    var badge = (checkedRole && checkedRole.getAttribute("data-badge")) || "HolaGreen · Sạch";
+    joinForm.setAttribute("data-join-mode", isPartnerMode ? "partner" : "youth");
+    joinForm.querySelectorAll("[data-youth-only]").forEach(function (el) {
+      el.hidden = isPartnerMode;
+    });
+    joinForm.querySelectorAll("[data-partner-only]").forEach(function (el) {
+      el.hidden = !isPartnerMode;
+    });
+    var eventsStep = joinForm.querySelector("[data-join-events-step]");
+    if (eventsStep) eventsStep.hidden = isPartnerMode;
+
+    var orgLabelEl = document.getElementById("join-org-label");
+    var nameLabelEl = document.getElementById("join-name-label");
+    var howLegendEl = document.getElementById("join-how-legend");
+    var noteLabelEl = document.getElementById("join-note-label");
+    var submitBtnEl = document.getElementById("join-submit-btn");
+    var passEventLabelEl = passEl.querySelector("[data-pass-event-label]");
+    var passVibeLabelEl = passEl.querySelector("[data-pass-vibe-label]");
+
+    if (orgLabelEl) {
+      orgLabelEl.textContent = isPartnerMode
+        ? "Tên Nhà trường / CLB / Tổ chức / Doanh nghiệp"
+        : "Đơn vị học tập / công tác";
+    }
+    if (orgInput) {
+      orgInput.placeholder = isPartnerMode
+        ? "Ví dụ: CLB Tình nguyện ĐH FPT, MusicSpace, Doanh nghiệp..."
+        : "Ví dụ: ĐH FPT, ĐHQGHN, THPT Thạch Thất...";
+    }
+    if (nameLabelEl) {
+      nameLabelEl.innerHTML = isPartnerMode
+        ? 'Người đại diện liên hệ <span aria-hidden="true">*</span>'
+        : 'Họ và tên <span aria-hidden="true">*</span>';
+    }
+    if (howLegendEl) {
+      howLegendEl.textContent = isPartnerMode ? "Đề xuất hợp tác" : "Cách bạn muốn đồng hành";
+    }
+    if (noteLabelEl) {
+      noteLabelEl.textContent = isPartnerMode
+        ? "Nội dung đề xuất hợp tác & thời gian dự kiến"
+        : "Lời nhắn hoặc câu chuyện bạn muốn chia sẻ";
+    }
+    if (submitBtnEl && !submitBtnEl.classList.contains("is-loading")) {
+      submitBtnEl.textContent = isPartnerMode
+        ? "Gửi đề xuất kết nối đối tác"
+        : "Gửi thông tin & Nhận thẻ Gieo Mầm";
+    }
+
+    var theme = (checkedRole && checkedRole.getAttribute("data-theme")) || "sunrise";
+    var badge = (checkedRole && checkedRole.getAttribute("data-badge")) || "HolaHeart · Nội lực";
     var greeting =
       (checkedRole && checkedRole.getAttribute("data-greeting")) ||
-      "Găng tay, kẹp rác và nhóm đồng đội đã sẵn sàng cho sáng Chủ nhật!";
+      "Hạt mầm nội lực đã được gieo — hẹn gặp bạn trong những buổi gặp gỡ đầy chiều sâu.";
     var placeholder = checkedRole && checkedRole.getAttribute("data-placeholder");
 
     if (noteInput && placeholder) {
       noteInput.placeholder = placeholder;
     }
 
-    var evId = (checkedEvent && checkedEvent.value) || "";
-    var evTitle = (checkedEvent && checkedEvent.getAttribute("data-event-title")) || "";
-    var evDate = (checkedEvent && checkedEvent.getAttribute("data-event-date")) || "Chưa có lịch được xác nhận";
+    var evId = !isPartnerMode && checkedEvent ? checkedEvent.value || "" : "";
+    var evTitle = !isPartnerMode && checkedEvent ? checkedEvent.getAttribute("data-event-title") || "" : "";
+    var evDate = (checkedEvent && checkedEvent.getAttribute("data-event-date")) || "Theo lịch tuần";
     var evTime = (checkedEvent && checkedEvent.getAttribute("data-event-time")) || DEFAULT_SCHEDULE;
 
     if (hiddenEventId) hiddenEventId.value = evId;
@@ -183,17 +232,27 @@
 
     passEl.setAttribute("data-pass-theme", theme);
     passEl.classList.remove("is-confirmed");
-    if (passStateEl) passStateEl.textContent = "Bản xem trước";
+    if (passStateEl) passStateEl.textContent = isPartnerMode ? "Hồ sơ Đối tác" : "Hạt Mầm Khởi Đầu";
     if (passBadgeEl) passBadgeEl.textContent = badge;
-    if (passNameEl) passNameEl.textContent = nameVal || "Tên của bạn";
-    if (passOrgEl) passOrgEl.textContent = orgVal || "Thanh niên · Sinh viên Hòa Lạc";
-    if (passGreetingEl) passGreetingEl.textContent = greeting;
-    if (passEventEl) passEventEl.textContent = evTitle || "Chưa có sự kiện cụ thể";
-    if (passScheduleEl) passScheduleEl.textContent = evId ? evDate + " (" + evTime + ")" : DEFAULT_SCHEDULE;
-    if (passVibeEl) {
-      passVibeEl.textContent = (activeVibe && activeVibe.getAttribute("data-vibe-chip")) || "Quan tâm tìm hiểu";
+    if (passNameEl) passNameEl.textContent = nameVal || (isPartnerMode ? "Đại diện đơn vị" : "Tên của bạn");
+    if (passOrgEl) {
+      passOrgEl.textContent =
+        orgVal || (isPartnerMode ? "Đối tác · Tổ chức đồng hành" : "Người trẻ · Hòa Lạc – Thạch Thất");
     }
-    if (passCodeEl) passCodeEl.textContent = "CHỜ XÁC NHẬN";
+    if (passGreetingEl) passGreetingEl.textContent = greeting;
+    if (passEventLabelEl) passEventLabelEl.textContent = isPartnerMode ? "Định hướng" : "Hành trình chọn";
+    if (passEventEl) {
+      passEventEl.textContent =
+        evTitle || (isPartnerMode ? "Hợp tác Chapter 01" : "Nhịp tuần Hòa Lạc – Thạch Thất");
+    }
+    if (passScheduleEl) passScheduleEl.textContent = evId ? evDate + " (" + evTime + ")" : DEFAULT_SCHEDULE;
+    if (passVibeLabelEl) passVibeLabelEl.textContent = isPartnerMode ? "Hình thức" : "Tâm thế";
+    if (passVibeEl) {
+      passVibeEl.textContent = isPartnerMode
+        ? (activePartner && activePartner.getAttribute("data-partner-chip")) || "Đồng hành chiến lược"
+        : (activeVibe && activeVibe.getAttribute("data-vibe-chip")) || "Muốn tìm hiểu trước";
+    }
+    if (passCodeEl) passCodeEl.textContent = "SEED-PREVIEW";
 
     var pct = 25;
     if (nameVal.length >= 2) pct += 35;
@@ -279,7 +338,7 @@
 
   function buildInviteText(snapshot) {
     var link = buildInviteLink(snapshot);
-    return "Mình đang tìm hiểu về các hoạt động của HolaRise tại Hòa Lạc. Lịch và chi phí (nếu có) sẽ được công bố theo từng hoạt động: " + link;
+    return "Mình vừa nhận Thẻ Gieo Mầm cùng HolaRise (Hòa Lạc – Thạch Thất). Cùng xem hành trình và tham gia cuối tuần này nhé: " + link;
   }
 
   document.addEventListener("holarise:registration-success", function (e) {
@@ -312,21 +371,24 @@
 
     if (joinForm && passEl) {
       confirmedSnapshots.join = snap;
-      passEl.setAttribute("data-pass-theme", snap.theme || "emerald");
+      passEl.setAttribute("data-pass-theme", snap.theme || "sunrise");
       passEl.classList.add("is-confirmed");
-      if (passStateEl) passStateEl.textContent = "Đã gửi thông tin";
-      if (passBadgeEl) passBadgeEl.textContent = snap.badge || "HolaGreen · Sạch";
+      if (passStateEl) passStateEl.textContent = snap.isPartner ? "Đã tiếp nhận" : "Đã Gieo Mầm";
+      if (passBadgeEl) passBadgeEl.textContent = snap.badge || "HolaHeart · Nội lực";
       if (passNameEl) passNameEl.textContent = snap.fullName || "Thành viên mới";
-      if (passOrgEl) passOrgEl.textContent = snap.organization || "Thanh niên · Sinh viên Hòa Lạc";
+      if (passOrgEl) {
+        passOrgEl.textContent =
+          snap.organization || (snap.isPartner ? "Đối tác · Tổ chức đồng hành" : "Người trẻ · Hòa Lạc – Thạch Thất");
+      }
       if (passGreetingEl && snap.greeting) passGreetingEl.textContent = snap.greeting;
-      if (passEventEl) passEventEl.textContent = snap.eventTitle || "Chưa có sự kiện cụ thể";
+      if (passEventEl) passEventEl.textContent = snap.eventTitle || "Nhịp tuần Hòa Lạc – Thạch Thất";
       if (passScheduleEl) {
         passScheduleEl.textContent = snap.eventId
           ? snap.eventDate + " (" + snap.eventTime + ")"
           : DEFAULT_SCHEDULE;
       }
-      if (passVibeEl) passVibeEl.textContent = snap.vibe || "Quan tâm tìm hiểu";
-      if (passCodeEl) passCodeEl.textContent = snap.id || "REG-HOLARISE";
+      if (passVibeEl) passVibeEl.textContent = snap.vibe || "Muốn tìm hiểu trước";
+      if (passCodeEl) passCodeEl.textContent = snap.id || "SEED-HOLARISE";
 
       if (readinessPctEl) readinessPctEl.textContent = "100%";
       if (readinessBarEl) readinessBarEl.style.width = "100%";
@@ -510,7 +572,7 @@
 
       ctx.fillStyle = "rgba(244, 247, 245, 0.88)";
       ctx.font = '600 22px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText("HOLARISE · HÒA LẠC", padX + 76, cardY + 92);
+      ctx.fillText("HOLARISE · CHAPTER 01", padX + 76, cardY + 92);
 
       /* Status Pill */
       drawRoundedRect(ctx, cardX + cardW - 64 - 220, cardY + 58, 220, 50, 25);
@@ -519,7 +581,7 @@
       ctx.fillStyle = "#FFFFFF";
       ctx.font = '600 21px "Be Vietnam Pro", -apple-system, sans-serif';
       ctx.textAlign = "center";
-      ctx.fillText("ĐÃ GHI NHẬN", cardX + cardW - 64 - 110, cardY + 91);
+      ctx.fillText(snapshot.isPartner ? "ĐÃ TIẾP NHẬN" : "ĐÃ GIEO MẦM", cardX + cardW - 64 - 110, cardY + 91);
       ctx.textAlign = "left";
 
       /* Program Tag Pill */
@@ -589,9 +651,9 @@
       ctx.fillStyle = "#F5B38C";
       ctx.textAlign = "center";
       ctx.font = '700 20px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText("ĐÃ GỬI THÔNG TIN", 0, -4);
+      ctx.fillText(snapshot.isPartner ? "ĐỐI TÁC ĐỒNG HÀNH" : "ĐÃ GIEO MẦM", 0, -4);
       ctx.font = '600 17px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText("HÒA LẠC", 0, 24);
+      ctx.fillText("CHAPTER 01", 0, 24);
       ctx.restore();
 
       /* Perforation Line & Side Cutouts */
@@ -627,15 +689,15 @@
         drawWrappedLines(ctx, val, x, y + 40, colW, 38, 2);
       }
 
-      drawMeta("MẢNG QUAN TÂM", snapshot.eventTitle || "Chưa có sự kiện cụ thể", padX, metaY1);
+      drawMeta(snapshot.isPartner ? "ĐỊNH HƯỚNG" : "HÀNH TRÌNH", snapshot.eventTitle || "Nhịp tuần Hòa Lạc – Thạch Thất", padX, metaY1);
       drawMeta(
-        "THỜI GIAN",
+        "NHỊP HOẠT ĐỘNG",
         snapshot.eventId ? snapshot.eventDate + " · " + snapshot.eventTime : DEFAULT_SCHEDULE,
         col2X,
         metaY1
       );
-      drawMeta("CÁCH ĐỒNG HÀNH", snapshot.vibe || "Quan tâm tìm hiểu", padX, metaY2);
-      drawMeta("MÃ THÔNG TIN", snapshot.id || "REG-HOLARISE", col2X, metaY2, "#F5B38C");
+      drawMeta(snapshot.isPartner ? "HÌNH THỨC" : "TÂM THẾ", snapshot.vibe || "Muốn tìm hiểu trước", padX, metaY2);
+      drawMeta("MÃ GIEO MẦM", snapshot.id || "SEED-HOLARISE", col2X, metaY2, "#F5B38C");
 
       /* Bottom Barcode & Coordinates */
       var footY = cardY + cardH - 115;
@@ -657,7 +719,7 @@
       ctx.textAlign = "right";
       ctx.fillStyle = "rgba(244, 247, 245, 0.65)";
       ctx.font = '500 21px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText("HÒA LẠC · CHƯA CÓ LỊCH CỤ THỂ", cardX + cardW - 64, footY + 60);
+      ctx.fillText("TOGETHER WE RISE, TOGETHER WE SERVE", cardX + cardW - 64, footY + 60);
       ctx.restore();
 
       var fileName =

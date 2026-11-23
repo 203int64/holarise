@@ -1,7 +1,7 @@
 import {
-  renderJoinEventOptionsHtml,
+  renderJoinEventsSectionHtml,
   replaceMarker,
-  serializeEventRow,
+  splitEventsByDate,
 } from "../_lib/render.js";
 
 export async function onRequestGet({ request, env }) {
@@ -11,23 +11,23 @@ export async function onRequestGet({ request, env }) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
 
-  const [assetRes, upcomingRes] = await Promise.all([
+  const [assetRes, eventsRes] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
     env.DB.prepare(
-      "SELECT * FROM events WHERE kind = 'upcoming' AND status = 'published' ORDER BY sort_order ASC, date ASC, created_at DESC LIMIT 20"
+      "SELECT * FROM events WHERE status = 'published' ORDER BY sort_order ASC, date ASC, created_at DESC LIMIT 60"
     )
       .all()
       .catch(() => null),
   ]);
 
-  if (!assetRes.ok || !upcomingRes) {
+  if (!assetRes.ok || !eventsRes) {
     return assetRes;
   }
 
-  const upcoming = (upcomingRes.results || []).map(serializeEventRow);
+  const { upcoming } = splitEventsByDate(eventsRes.results || []);
 
   let html = await assetRes.text();
-  html = replaceMarker(html, "JOIN_EVENTS", renderJoinEventOptionsHtml(upcoming));
+  html = replaceMarker(html, "JOIN_EVENTS_SECTION", renderJoinEventsSectionHtml(upcoming));
 
   const headers = new Headers(assetRes.headers);
   headers.set("Content-Type", "text/html; charset=utf-8");

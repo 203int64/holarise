@@ -1,182 +1,86 @@
 [
   {
-    "src": "/assets/images/musicspace-archive/01-20251123_205901.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Không gian gặp gỡ ngoài trời",
-    "alt": "Không gian gặp gỡ ngoài trời"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/02-20251123_214129.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Nhóm bạn lưu lại khoảnh khắc sau buổi gặp",
-    "alt": "Nhóm bạn lưu lại khoảnh khắc sau buổi gặp"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/03-20251123_214911.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Người biểu diễn trước khán giả",
-    "alt": "Người biểu diễn trước khán giả"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/04-20251129_210710.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Ánh đèn trong khu vườn",
-    "alt": "Ánh đèn trong khu vườn"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/05-20251129_210747.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Không gian giao lưu ngoài trời",
-    "alt": "Không gian giao lưu ngoài trời"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/06-20251129_214646.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Bạn bè trò chuyện bên bàn",
-    "alt": "Bạn bè trò chuyện bên bàn"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/07-20260217_232807.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Nhóm bạn chụp ảnh trong buổi gặp",
-    "alt": "Nhóm bạn chụp ảnh trong buổi gặp"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/08-20260301_114915.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Sân khấu trong một sự kiện MusicSpace",
-    "alt": "Sân khấu trong một sự kiện MusicSpace"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/09-20260410_195407.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Bảng hiệu quán cà phê buổi tối",
-    "alt": "Bảng hiệu quán cà phê buổi tối"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/10-20260410_200646.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Người chơi nhạc trên sân khấu",
-    "alt": "Người chơi nhạc trên sân khấu"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/11-20260410_201727.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Khán giả ngồi nghe ngoài trời",
-    "alt": "Khán giả ngồi nghe ngoài trời"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/12-20260610_151117.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Hai người trò chuyện cạnh cây đàn",
-    "alt": "Hai người trò chuyện cạnh cây đàn"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/13-20260610_200706.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Buổi nghe nhạc trong quán cà phê",
-    "alt": "Buổi nghe nhạc trong quán cà phê"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/14-669789766_1333975738753593_4404130237654970176_n.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Người tham dự lắng nghe trong không gian ấm",
-    "alt": "Người tham dự lắng nghe trong không gian ấm"
-  },
-  {
     "src": "/assets/images/musicspace-archive/15-671661990_1333975782086922_4394124200415584759_n.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Một buổi chia sẻ ngoài trời",
-    "alt": "Một buổi chia sẻ ngoài trời"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/16-690752677_122182419716606562_7552953363142475605_n.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Nhiều góc ghi lại khoảnh khắc trên sân khấu",
-    "alt": "Nhiều góc ghi lại khoảnh khắc trên sân khấu"
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Vòng tròn chia sẻ ngoài trời dưới ánh đèn vàng — nơi những câu chuyện được lắng nghe trọn vẹn.",
+    "alt": "Các bạn trẻ quây quần ngoài trời lắng nghe phần chia sẻ trong đêm nhạc HolaHeart × MusicSpace."
   },
   {
     "src": "/assets/images/musicspace-archive/17-727286384_1390720079745825_4011272925670930964_n.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Khán giả hưởng ứng phần trình diễn",
-    "alt": "Khán giả hưởng ứng phần trình diễn"
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Khoảnh khắc cả khán phòng cùng hòa giọng — năng lượng ấm áp kết nối những người trẻ lần đầu gặp gỡ.",
+    "alt": "Khán giả giơ hoa và ánh đèn hưởng ứng trong đêm kết nối HolaHeart × MusicSpace."
   },
   {
     "src": "/assets/images/musicspace-archive/18-727499415_1390719623079204_9117129290636815785_n.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Mọi người chụp ảnh lưu niệm",
-    "alt": "Mọi người chụp ảnh lưu niệm"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/19-727519673_1390719833079183_3755124694997001171_n.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Nhóm bạn bên bàn cà phê",
-    "alt": "Nhóm bạn bên bàn cà phê"
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Sau mỗi buổi gặp, điều ở lại lâu nhất không phải sân khấu mà là những người bạn cùng chí hướng.",
+    "alt": "Tập thể người tham dự lưu lại kỷ niệm sau chương trình HolaHeart × MusicSpace."
   },
   {
     "src": "/assets/images/musicspace-archive/20-755693961_122189660252606562_3081193787115111591_n.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Người hát cùng ban nhạc",
-    "alt": "Người hát cùng ban nhạc"
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Âm nhạc mộc mở lối cho sự đồng cảm — bước đệm tự nhiên trước mỗi phiên đối thoại giá trị sống.",
+    "alt": "Ca sĩ và ban nhạc trình diễn mộc dưới ánh đèn vàng ấm."
   },
   {
-    "src": "/assets/images/musicspace-archive/21-853372990_122199062222606562_450963024884915659_n.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Hai người cùng chơi đàn",
-    "alt": "Hai người cùng chơi đàn"
+    "src": "/assets/images/musicspace-archive/14-669789766_1333975738753593_4404130237654970176_n.jpg",
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Chậm lại một nhịp giữa tuần học tập bận rộn để lắng nghe chính mình.",
+    "alt": "Người tham dự lặng lẽ lắng nghe trong không gian ánh sáng ấm."
   },
   {
-    "src": "/assets/images/musicspace-archive/22-DSC_0748.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Góc gần phím đàn",
-    "alt": "Góc gần phím đàn"
+    "src": "/assets/images/musicspace-archive/13-20260610_200706.jpg",
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Một không gian không khoảng cách — nơi sinh viên, người đi làm và người yêu nghệ thuật ngồi ngang hàng.",
+    "alt": "Toàn cảnh buổi giao lưu âm nhạc và trò chuyện tại quán cà phê Hòa Lạc."
+  },
+  {
+    "src": "/assets/images/musicspace-archive/11-20260410_201727.jpg",
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Những buổi tối ngoài trời tại Hòa Lạc — giản dị, chân thành và giàu kết nối.",
+    "alt": "Khán giả ngồi quây quần ngoài trời thưởng thức chương trình âm nhạc buổi tối."
   },
   {
     "src": "/assets/images/musicspace-archive/23-IMG_0009.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Nhóm bạn tại MusicSpace",
-    "alt": "Nhóm bạn tại MusicSpace"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/24-IMG_0295.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Một buổi chiếu hình trong không gian tối",
-    "alt": "Một buổi chiếu hình trong không gian tối"
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Những gương mặt trẻ đồng hành cùng hành trình MusicSpace từ những ngày đầu tiên.",
+    "alt": "Nhóm thành viên chụp ảnh trước phông nền MusicSpace."
   },
   {
     "src": "/assets/images/musicspace-archive/25-IMG_0305.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Cuộc trò chuyện quanh bàn",
-    "alt": "Cuộc trò chuyện quanh bàn"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/26-IMG_0722.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Ánh đèn trước một quán cà phê",
-    "alt": "Ánh đèn trước một quán cà phê"
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Từ những bàn tròn nhỏ khởi đầu tình bạn bền vững khắp Hòa Lạc – Thạch Thất.",
+    "alt": "Các nhóm bạn trò chuyện quanh bàn trong không gian sinh hoạt chung."
   },
   {
     "src": "/assets/images/musicspace-archive/27-IMG_6670.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Bàn tay chơi đàn guitar",
-    "alt": "Bàn tay chơi đàn guitar"
-  },
-  {
-    "src": "/assets/images/musicspace-archive/28-IMG_6924.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Nhóm người trẻ cùng tập nhạc",
-    "alt": "Nhóm người trẻ cùng tập nhạc"
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Tiếng đàn acoustic mộc mạc — chất xúc tác giúp người trẻ mở lòng dễ dàng hơn.",
+    "alt": "Cận cảnh bàn tay chơi đàn guitar mộc bên bàn trò chuyện."
   },
   {
     "src": "/assets/images/musicspace-archive/29-IMG_7858.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Người chơi đàn bên phím nhạc",
-    "alt": "Người chơi đàn bên phím nhạc"
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Sự tập trung và tận hiến trên từng phím đàn trong đêm nghệ thuật cộng đồng.",
+    "alt": "Thành viên trẻ tập trung chơi đàn piano trên sân khấu ánh sáng dịu."
   },
   {
-    "src": "/assets/images/musicspace-archive/30-PXL_20250528_150628237.jpg",
-    "sourceLabel": "Ảnh tư liệu MusicSpace",
-    "caption": "Một buổi giao lưu âm nhạc",
-    "alt": "Một buổi giao lưu âm nhạc"
+    "src": "/assets/images/musicspace-archive/22-DSC_0748.jpg",
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Sự chỉn chu đến từng chi tiết nhỏ để mỗi buổi gặp thực sự đáng nhớ.",
+    "alt": "Phím đàn piano bên những nhành hoa tím trong không gian sự kiện."
+  },
+  {
+    "src": "/assets/images/musicspace-archive/12-20260610_151117.jpg",
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Từng thanh âm hòa quyện trước giờ khai mạc chương trình.",
+    "alt": "Hai thành viên cùng chơi guitar và trống cajon trong buổi gặp mặt."
+  },
+  {
+    "src": "/assets/images/musicspace-archive/06-20251129_214646.jpg",
+    "sourceLabel": "HolaHeart × MusicSpace",
+    "caption": "Những cuộc trò chuyện kéo dài sau khi ánh đèn sân khấu khép lại.",
+    "alt": "Nhóm bạn trẻ trò chuyện bên bàn ngoài trời sau đêm nhạc."
   }
 ]

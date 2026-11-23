@@ -1,82 +1,20 @@
 {
   "pillars": [
     {
-      "id": "moi-truong",
-      "badge": "HolaGreen",
-      "shortTab": "Môi trường",
-      "title": "Làm Sạch & Giữ Màu Xanh Hòa Lạc",
-      "summary": "HolaGreen hướng tới các hoạt động làm sạch cảnh quan, phân loại rác và chăm sóc mảng xanh tại Hòa Lạc. Lịch tổ chức sẽ được công bố riêng khi xác nhận.",
-      "image": "/assets/images/illustrations/holagreen/G01.jpg",
-      "imageAlt": "Ảnh minh họa: nhóm tình nguyện viên thu gom rác ven hồ Tân Xã.",
-      "highlights": [
-        "Làm sạch Hòa Lạc",
-        "Phân loại nhựa",
-        "Trồng cây bản địa"
-      ],
-      "metricBadge": "Ảnh minh họa",
-      "sdgs": [
-        "SDG 11",
-        "SDG 13",
-        "SDG 15"
-      ],
-      "imageIsIllustration": true,
-      "supportImages": [
-        {
-          "src": "/assets/images/illustrations/holagreen/G02.jpg",
-          "alt": "Góc sát cỏ khi nhặt một mẩu rác.",
-          "label": "Ảnh minh họa"
-        },
-        {
-          "src": "/assets/images/illustrations/holagreen/G03.jpg",
-          "alt": "Nhóm tình nguyện đang cùng làm sạch bờ hồ.",
-          "label": "Ảnh minh họa"
-        },
-        {
-          "src": "/assets/images/illustrations/holagreen/G04.jpg",
-          "alt": "Góc qua vai một người đang tham gia hoạt động.",
-          "label": "Ảnh minh họa"
-        },
-        {
-          "src": "/assets/images/illustrations/holagreen/G05.jpg",
-          "alt": "Khung cảnh được nhìn qua thân cây ven hồ.",
-          "label": "Ảnh minh họa"
-        },
-        {
-          "src": "/assets/images/illustrations/holagreen/G06.jpg",
-          "alt": "Nhóm làm việc lúc chạng vạng.",
-          "label": "Ảnh minh họa"
-        },
-        {
-          "src": "/assets/images/illustrations/holagreen/G07.jpg",
-          "alt": "Góc mắt cá nhìn xuống nhóm đang dọn rác.",
-          "label": "Ảnh minh họa"
-        },
-        {
-          "src": "/assets/images/illustrations/holagreen/G08.jpg",
-          "alt": "Góc thấp sát túi rác và bàn tay đeo găng.",
-          "label": "Ảnh minh họa"
-        },
-        {
-          "src": "/assets/images/illustrations/holagreen/G09.jpg",
-          "alt": "Góc sát mặt cỏ nhìn lên nhóm đang làm việc.",
-          "label": "Ảnh minh họa"
-        }
-      ]
-    },
-    {
-      "id": "workshop",
+      "id": "holaheart",
+      "filterKey": "holaheart",
       "badge": "HolaHeart",
-      "shortTab": "Workshop",
-      "title": "Tình Yêu Thương Của Mẹ Trong Thời Đại AI",
-      "summary": "Buổi gặp gỡ đầu tiên của HolaHeart, mở ra không gian để người trẻ cùng lắng nghe và trò chuyện về tình yêu thương của Mẹ trong bối cảnh AI.",
+      "shortTab": "01 · HolaHeart",
+      "title": "Gốc rễ Nội lực & Lòng biết ơn",
+      "summary": "Giữ trọn chiều sâu con người giữa kỷ nguyên công nghệ. Không gian âm nhạc, đối thoại và lắng nghe không phán xét — nơi người trẻ nuôi dưỡng lòng biết ơn gia đình, hiểu mình và sống vững vàng từ bên trong.",
       "image": "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg",
-      "imageAlt": "Diễn giả cầm micro chia sẻ với người tham dự tại sự kiện HolaHeart.",
+      "imageAlt": "Không gian đối thoại và lắng nghe tại sự kiện HolaHeart: Tình yêu thương của Mẹ trong thời đại AI.",
       "highlights": [
-        "Tình yêu thương của Mẹ",
-        "Góc nhìn trong thời đại AI",
-        "Cùng lắng nghe & trò chuyện"
+        "Đối thoại giá trị sống",
+        "Âm nhạc kết nối",
+        "Thực hành lắng nghe"
       ],
-      "metricBadge": "Sự kiện đầu tiên · 15/11/2026",
+      "metricBadge": "Trụ cột 01 · Nội lực & Nhân cách",
       "sdgs": [
         "SDG 4",
         "SDG 11"
@@ -84,171 +22,99 @@
       "imageIsIllustration": false
     },
     {
-      "id": "cong-dong",
-      "badge": "HolaConnect",
-      "shortTab": "Cộng đồng",
-      "title": "Kết Nối & Sẻ Chia Cùng Cộng Đồng",
-      "summary": "HolaConnect là hướng hoạt động dành cho việc kết nối, sẻ chia sách và tạo không gian lắng nghe tại địa phương. Lịch tổ chức sẽ được công bố riêng khi xác nhận.",
-      "image": "/assets/images/illustrations/holaconnect/C01.jpg",
-      "imageAlt": "Ảnh minh họa: tình nguyện viên cùng phân loại sách.",
+      "id": "holagreen",
+      "filterKey": "holagreen",
+      "badge": "HolaGreen",
+      "shortTab": "02 · HolaGreen",
+      "title": "Sinh thái & Cảnh quan Bền vững",
+      "summary": "Trả lại vẻ đẹp nguyên bản cho đất mình sống. Từ không gian đại học Hòa Lạc đến những tuyến đường, mặt nước và mảng xanh khắp Thạch Thất — mỗi hành động môi trường là cam kết dài hạn với tương lai.",
+      "image": "/assets/images/editorial-holagreen.jpg",
+      "imageAlt": "Đôi tay người trẻ vun đất trồng và chăm sóc mầm xanh bản địa tại Hòa Lạc – Thạch Thất.",
       "highlights": [
-        "Tủ sách thiếu nhi",
-        "Đọc sách cuối tuần",
-        "Hỗ trợ địa phương"
+        "Cảnh quan Thạch Thất",
+        "Phân loại & Giảm nhựa",
+        "Ươm mầm xanh bản địa"
       ],
-      "metricBadge": "Ảnh minh họa",
+      "metricBadge": "Trụ cột 02 · Môi trường sống",
+      "sdgs": [
+        "SDG 11",
+        "SDG 13",
+        "SDG 15"
+      ],
+      "imageIsIllustration": false
+    },
+    {
+      "id": "holaconnect",
+      "filterKey": "holaconnect",
+      "badge": "HolaConnect",
+      "shortTab": "03 · HolaConnect",
+      "title": "Phụng sự & Kết nối Cộng đồng",
+      "summary": "Đưa tri thức và lòng trắc ẩn hòa vào đời sống bản địa. Đồng hành cùng trẻ em, trường học và cư dân khắp Hòa Lạc – Thạch Thất qua văn hóa đọc, giáo dục và những nhịp cầu sẻ chia thiết thực.",
+      "image": "/assets/images/editorial-holaconnect.jpg",
+      "imageAlt": "Không gian đọc sách và sẻ chia tri thức ấm áp cùng cộng đồng địa phương.",
+      "highlights": [
+        "Văn hóa đọc & Tủ sách",
+        "Đồng hành thiếu nhi",
+        "Mạng lưới bản địa"
+      ],
+      "metricBadge": "Trụ cột 03 · Phụng sự & Lan tỏa",
       "sdgs": [
         "SDG 4",
         "SDG 11",
         "SDG 17"
       ],
-      "imageIsIllustration": true,
-      "supportImages": [
-        {
-          "src": "/assets/images/illustrations/holaconnect/C02.jpg",
-          "alt": "Tình nguyện viên đọc sách cùng trẻ em.",
-          "label": "Ảnh minh họa"
-        },
-        {
-          "src": "/assets/images/illustrations/holaconnect/C03.jpg",
-          "alt": "Nhóm nhỏ trò chuyện trong không gian ngoài trời.",
-          "label": "Ảnh minh họa"
-        },
-        {
-          "src": "/assets/images/illustrations/holaconnect/C04.jpg",
-          "alt": "Sách được trao tay trong một hoạt động minh họa.",
-          "label": "Ảnh minh họa"
-        },
-        {
-          "src": "/assets/images/illustrations/holaconnect/C05.jpg",
-          "alt": "Tình nguyện viên vẽ cùng trẻ em.",
-          "label": "Ảnh minh họa"
-        },
-        {
-          "src": "/assets/images/illustrations/holaconnect/C06.jpg",
-          "alt": "Mọi người cùng chuyển sách vào không gian sinh hoạt.",
-          "label": "Ảnh minh họa"
-        }
-      ]
+      "imageIsIllustration": false
     }
   ],
-  "campaigns": [
-    {
-      "id": "cuoi-tuan-xanh-ho-tan-xa",
-      "category": "moi-truong",
-      "categoryLabel": "HolaGreen",
-      "filters": [
-        "sach"
-      ],
-      "status": "Gợi ý hoạt động",
-      "title": "Cuối Tuần Xanh — Làm sạch ven hồ Tân Xã",
-      "location": "Ven hồ Tân Xã, Hòa Lạc · lịch chưa công bố",
-      "metric": "Chưa có kết quả được công bố",
-      "description": "Gợi ý hoạt động: thu gom rác trên bờ và phân loại vật liệu có thể tái chế.",
-      "image": "/assets/images/illustrations/holagreen/G03.jpg",
-      "imageAlt": "Ảnh minh họa: tình nguyện viên cùng nhặt rác ven hồ Tân Xã.",
-      "imageIsIllustration": true
-    },
-    {
-      "id": "nhip-cau-yeu-thuong",
-      "category": "cong-dong",
-      "categoryLabel": "HolaConnect",
-      "filters": [
-        "se-chia",
-        "tu-te"
-      ],
-      "status": "Gợi ý hoạt động",
-      "title": "Phân loại sách & sẻ chia cùng thiếu nhi",
-      "location": "Địa điểm sẽ được công bố khi có lịch",
-      "metric": "Chưa có kết quả được công bố",
-      "description": "Gợi ý hoạt động: phân loại sách quyên góp và chuẩn bị cho một buổi đọc chung.",
-      "image": "/assets/images/illustrations/holaconnect/C04.jpg",
-      "imageAlt": "Ảnh minh họa: sách được trao tay trong một hoạt động cộng đồng.",
-      "imageIsIllustration": true
-    },
-    {
-      "id": "vong-tron-lang-nghe",
-      "category": "cong-dong",
-      "categoryLabel": "HolaConnect",
-      "filters": [
-        "tu-te",
-        "se-chia"
-      ],
-      "status": "Gợi ý hoạt động",
-      "title": "Vòng tròn lắng nghe & đồng hành",
-      "location": "Địa điểm sẽ được công bố khi có lịch",
-      "metric": "Chưa có kết quả được công bố",
-      "description": "Gợi ý hoạt động: tạo một không gian trò chuyện nhỏ để người trẻ thực hành lắng nghe.",
-      "image": "/assets/images/illustrations/holaconnect/C03.jpg",
-      "imageAlt": "Ảnh minh họa: một nhóm nhỏ cùng trò chuyện ngoài trời.",
-      "imageIsIllustration": true
-    },
-    {
-      "id": "ngay-hoi-sach-tuoi-tho",
-      "category": "cong-dong",
-      "categoryLabel": "HolaConnect",
-      "filters": [
-        "se-chia",
-        "tu-te"
-      ],
-      "status": "Gợi ý hoạt động",
-      "title": "Đọc sách & vẽ cùng trẻ em",
-      "location": "Địa điểm sẽ được công bố khi có lịch",
-      "metric": "Chưa có kết quả được công bố",
-      "description": "Gợi ý hoạt động: kết hợp đọc truyện với một buổi vẽ sáng tạo.",
-      "image": "/assets/images/illustrations/holaconnect/C05.jpg",
-      "imageAlt": "Ảnh minh họa: tình nguyện viên vẽ cùng trẻ em.",
-      "imageIsIllustration": true
-    }
-  ],
+  "campaigns": [],
   "gallery": [
     {
-      "src": "/assets/images/events/holaheart-2026-11-15/01-group-men.jpg",
-      "alt": "Nhóm thành viên chụp ảnh lưu niệm tại sự kiện HolaHeart.",
-      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Nhóm thành viên nam cùng lưu lại ảnh sau chương trình.",
-      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
-    },
-    {
-      "src": "/assets/images/events/holaheart-2026-11-15/02-conversation.jpg",
-      "alt": "Người tham dự trò chuyện tại sự kiện HolaHeart.",
-      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Các thành viên trò chuyện trong không gian ngoài trời.",
-      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
-    },
-    {
-      "src": "/assets/images/events/holaheart-2026-11-15/03-group-women.jpg",
-      "alt": "Nhóm thành viên nữ chụp ảnh lưu niệm tại sự kiện HolaHeart.",
-      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Nhóm thành viên cùng lưu lại kỷ niệm của buổi gặp gỡ.",
-      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
-    },
-    {
-      "src": "/assets/images/events/holaheart-2026-11-15/04-wide-venue.jpg",
-      "alt": "Không gian tổ chức sự kiện HolaHeart tại Mây Lang Thang Cafe.",
-      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Toàn cảnh không gian tổ chức tại Mây Lang Thang Cafe, Hòa Lạc.",
-      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
-    },
-    {
       "src": "/assets/images/events/holaheart-2026-11-15/05-listening-moment.jpg",
-      "alt": "Người tham dự lắng nghe tại sự kiện HolaHeart.",
-      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Người tham dự lắng nghe phần chia sẻ.",
-      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
-    },
-    {
-      "src": "/assets/images/events/holaheart-2026-11-15/06-app-activity.jpg",
-      "alt": "Người tham dự tương tác với hoạt động trên điện thoại.",
-      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Một khoảnh khắc tương tác trong chương trình.",
-      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
+      "alt": "Những người trẻ chăm chú lắng nghe trong buổi đối thoại HolaHeart ngày 15/11/2026.",
+      "caption": "Một buổi chiều không màn hình — chỉ có sự lắng nghe trọn vẹn và những câu chuyện chạm đến trái tim.",
+      "label": "HolaHeart · 15/11/2026"
     },
     {
       "src": "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg",
-      "alt": "Diễn giả cầm micro chia sẻ với người tham dự tại sự kiện HolaHeart.",
-      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Diễn giả chia sẻ với người tham dự tại sự kiện.",
-      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
+      "alt": "Diễn giả chia sẻ cùng các bạn trẻ và gia đình tại Mây Lang Thang Cafe.",
+      "caption": "Không bục giảng xa cách — cuộc trò chuyện về Tình yêu thương của Mẹ trong thời đại AI diễn ra ngay giữa vòng tròn người tham dự.",
+      "label": "HolaHeart · 15/11/2026"
+    },
+    {
+      "src": "/assets/images/events/holaheart-2026-11-15/02-conversation.jpg",
+      "alt": "Các thành viên trao đổi cởi mở giữa không gian xanh ngoài trời.",
+      "caption": "Những câu hỏi khó nói ở giảng đường được cởi mở trong bầu không khí bình đẳng và tin cậy.",
+      "label": "HolaHeart · 15/11/2026"
+    },
+    {
+      "src": "/assets/images/events/holaheart-2026-11-15/04-wide-venue.jpg",
+      "alt": "Toàn cảnh không gian ấm áp tại Mây Lang Thang Cafe, Hòa Lạc.",
+      "caption": "Không gian mộc mạc tại Hòa Lạc — nơi nhiều thế hệ cùng ngồi lại lắng nghe một chủ đề chung.",
+      "label": "HolaHeart · 15/11/2026"
+    },
+    {
+      "src": "/assets/images/events/holaheart-2026-11-15/06-app-activity.jpg",
+      "alt": "Người tham dự tương tác ghi lại suy nghĩ cá nhân trong chương trình.",
+      "caption": "Khoảnh khắc lắng lại để viết ra điều mình trân quý và gửi lời cảm ơn tới người thân.",
+      "label": "HolaHeart · 15/11/2026"
+    },
+    {
+      "src": "/assets/images/events/holaheart-2026-11-15/03-group-women.jpg",
+      "alt": "Các bạn nữ lưu lại nụ cười sau buổi đối thoại HolaHeart.",
+      "caption": "Niềm vui nhẹ nhõm sau một buổi chiều được thấu hiểu và tiếp thêm nội lực.",
+      "label": "HolaHeart · 15/11/2026"
+    },
+    {
+      "src": "/assets/images/events/holaheart-2026-11-15/01-group-men.jpg",
+      "alt": "Nhóm bạn trẻ nam chụp ảnh lưu niệm cuối chương trình HolaHeart.",
+      "caption": "Những người bạn mới gặp lần đầu đã sẵn sàng đồng hành cho các hoạt động tiếp theo.",
+      "label": "HolaHeart · 15/11/2026"
     },
     {
       "src": "/assets/images/events/holaheart-2026-11-15/08-pair-at-event.jpg",
-      "alt": "Hai thành viên chụp ảnh lưu niệm tại sự kiện HolaHeart.",
-      "caption": "Ảnh chụp tại sự kiện HolaHeart ngày 15/11/2026. Hai thành viên cùng lưu lại khoảnh khắc tại sự kiện.",
-      "label": "Ảnh tư liệu HolaHeart · 15/11/2026"
+      "alt": "Hai thành viên cùng lưu lại khoảnh khắc kết nối tại sự kiện HolaHeart.",
+      "caption": "Mỗi cuộc gặp thật là một hạt mầm kết nối dài lâu tại Hòa Lạc – Thạch Thất.",
+      "label": "HolaHeart · 15/11/2026"
     }
   ]
 }

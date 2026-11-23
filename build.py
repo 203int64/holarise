@@ -112,12 +112,9 @@ def json_ld_script(data: dict) -> str:
 
 def build_nav_links(active_path: str) -> str:
     items = [
-        ("/", "Trang chủ"),
-        ("/gioi-thieu/", "Giới thiệu"),
-        ("/hoat-dong/", "Hoạt động"),
-        ("/workshop/", "Workshop"),
-        ("/tin-tuc/", "Tin tức"),
-        ("/tham-gia/", "Tham gia"),
+        ("/gioi-thieu/", "Về HolaRise"),
+        ("/lich-hoat-dong/", "Lịch hoạt động"),
+        ("/hanh-trinh/", "Hành trình"),
     ]
     links = []
     for href, label in items:
@@ -131,11 +128,9 @@ def build_nav_links(active_path: str) -> str:
 def build_mobile_nav_links(active_path: str) -> str:
     items = [
         ("/", "01", "Trang chủ"),
-        ("/gioi-thieu/", "02", "Giới thiệu & Sứ mệnh"),
-        ("/hoat-dong/", "03", "Hoạt động & Chiến dịch"),
-        ("/workshop/", "04", "Lịch Workshop"),
-        ("/tin-tuc/", "05", "Nhật ký hoạt động"),
-        ("/tham-gia/", "06", "Tham gia cùng HolaRise"),
+        ("/gioi-thieu/", "02", "Về HolaRise"),
+        ("/lich-hoat-dong/", "03", "Lịch hoạt động"),
+        ("/hanh-trinh/", "04", "Hành trình & Kho ảnh"),
     ]
     links = []
     for idx, (href, num, label) in enumerate(items):
@@ -160,18 +155,13 @@ def build_pwa_tabbar_links(active_path: str) -> str:
             '<path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V20h13V9.5"></path>',
         ),
         (
-            "/hoat-dong/",
-            "Hoạt động",
-            '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>',
-        ),
-        (
-            "/workshop/",
-            "Workshop",
+            "/lich-hoat-dong/",
+            "Lịch",
             '<rect x="3" y="5" width="18" height="16" rx="2.5"></rect><path d="M16 3v4M8 3v4M3 10h18"></path>',
         ),
         (
-            "/tin-tuc/",
-            "Tin tức",
+            "/hanh-trinh/",
+            "Hành trình",
             '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5Z"></path><path d="M8 7h8M8 11h8M8 15h5"></path>',
         ),
         (
@@ -192,6 +182,21 @@ def build_pwa_tabbar_links(active_path: str) -> str:
             f"</a>"
         )
     return "\n      ".join(links)
+
+
+def derive_pillar_filter(label: str = "", filters: list = None, fallback_slug: str = "") -> str:
+    tokens = [str(x or "").lower() for x in (filters or [])]
+    for t in tokens:
+        if t in ("holaheart", "holagreen", "holaconnect"):
+            return t
+    lower = f"{label or ''} {fallback_slug or ''}".lower()
+    if "holagreen" in lower or "moi-truong" in lower or "sach" in tokens:
+        return "holagreen"
+    if "holaconnect" in lower or "cong-dong" in lower or "se-chia" in tokens:
+        return "holaconnect"
+    if "holaheart" in lower or "workshop" in lower or "biet-on" in tokens:
+        return "holaheart"
+    return "holaheart"
 
 
 def render_hero_headline_lines(headline: str) -> str:
@@ -285,10 +290,10 @@ def render_story_stage(pillars: list) -> str:
 
         chips_html = "".join(f'<span class="visual-chip">{esc(h)}</span>' for h in p["highlights"])
         metric_badge = p.get("metricBadge", "")
-        display_metric_badge = "" if p.get("imageIsIllustration") else metric_badge
-        metric_html = f'<span class="story-metric-pill">{esc(display_metric_badge)}</span>' if display_metric_badge else ""
-        cta_href = "/workshop/" if p["id"] == "workshop" else f'/hoat-dong/#{esc(p["id"])}'
-        cta_label = "Xem lịch Workshop" if p["id"] == "workshop" else "Xem hoạt động"
+        metric_html = f'<span class="story-metric-pill">{esc(metric_badge)}</span>' if metric_badge else ""
+        filter_key = p.get("filterKey") or derive_pillar_filter(p.get("badge", ""), [], p.get("id", ""))
+        cta_href = f"/lich-hoat-dong/?nhom={esc(filter_key)}"
+        cta_label = f"Xem lịch {p['badge']}"
 
         panels.append(
             f"""<article class="story-panel{active_cls}" data-story-panel="{idx}">
@@ -298,13 +303,13 @@ def render_story_stage(pillars: list) -> str:
           <div class="visual-chip-row" aria-label="Hoạt động tiêu biểu">{chips_html}</div>
           <div class="story-panel-footer">
             {metric_html}
-            <a class="arrow-link" href="{cta_href}"><span>{cta_label}</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
+            <a class="arrow-link" href="{cta_href}"><span>{esc(cta_label)}</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
           </div>
         </article>"""
         )
 
         priority_attr = ' fetchpriority="low" loading="lazy" decoding="async"' if idx > 0 else ' loading="lazy" decoding="async"'
-        image_label = "Ảnh minh họa" if p.get("imageIsIllustration") else "Ảnh tư liệu HolaHeart · 15/11/2026"
+        image_label = "Tư liệu HolaHeart · 15/11/2026" if filter_key == "holaheart" else f"{p['badge']} · Hòa Lạc – Thạch Thất"
         slides.append(
             f"""<div class="story-slide image-note{active_cls}" data-story-slide="{idx}" tabindex="{0 if idx == 0 else -1}" role="group" aria-label="Chú thích ảnh: {esc(image_label)} · {esc(p['imageAlt'])}">
           <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="960" height="720"{priority_attr}>
@@ -315,11 +320,11 @@ def render_story_stage(pillars: list) -> str:
 
     return f"""<div class="story-stage" data-story-stage>
       <div class="story-controls-col">
-        <div class="story-nav" role="tablist" aria-label="Chọn chương trình trọng tâm" data-story-tablist>
+        <div class="story-nav" role="tablist" aria-label="Chọn trụ cột hoạt động" data-story-tablist>
           <span class="story-nav-glider" data-story-glider aria-hidden="true"></span>
           {" ".join(tabs)}
         </div>
-        <div class="story-media-frame story-media-frame--mobile" data-story-swipe aria-label="Vuốt ngang để đổi chương trình">
+        <div class="story-media-frame story-media-frame--mobile" data-story-swipe aria-label="Vuốt ngang để đổi trụ cột">
           {" ".join(slides)}
         </div>
         <div class="story-panels">
@@ -327,7 +332,7 @@ def render_story_stage(pillars: list) -> str:
         </div>
       </div>
 
-      <div class="story-media-frame story-media-frame--desktop" data-cursor-label="01 · 03">
+      <div class="story-media-frame story-media-frame--desktop">
         <div class="story-stage-hud" aria-hidden="true">
           <div class="story-odometer-row">
             <div class="story-odometer">
@@ -337,7 +342,7 @@ def render_story_stage(pillars: list) -> str:
             </div>
             <span class="story-odometer-total">/ 0{len(pillars)}</span>
           </div>
-          <span class="story-hud-kicker">Chương trình trọng tâm</span>
+          <span class="story-hud-kicker">Mô hình Tạo Tác Động</span>
         </div>
         {" ".join(slides)}
       </div>
@@ -348,32 +353,19 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
     cards = []
     for p in pillars:
         chips_html = "".join(f'<span class="visual-chip">{esc(h)}</span>' for h in p["highlights"])
-        metric_badge = p.get("metricBadge", " · ".join(p.get("sdgs", [])))
-        metric_html = f'<span class="seats-note">{esc(metric_badge)}</span>' if not p.get("imageIsIllustration") else ""
+        filter_key = p.get("filterKey") or derive_pillar_filter(p.get("badge", ""), [], p.get("id", ""))
         anchor_id = f' id="{esc(p["id"])}"' if detailed else ""
-        cta_href = "/workshop/" if p["id"] == "workshop" else f'/hoat-dong/#{esc(p["id"])}'
-        cta_label = "Xem lịch Workshop" if p["id"] == "workshop" else "Tìm hiểu chi tiết"
+        cta_href = f"/lich-hoat-dong/?nhom={esc(filter_key)}"
+        cta_label = f"Xem lịch {p['badge']}"
         footer_html = (
-            f'<div class="card-footer">{metric_html}<a class="btn btn--outline btn--sm" href="/tham-gia/">Gửi quan tâm</a></div>'
+            f'<div class="card-footer">'
+            f'<a class="arrow-link" href="{cta_href}">{esc(cta_label)} →</a>'
+            f'<a class="btn btn--outline btn--sm" href="/tham-gia/?chuong-trinh={esc(filter_key)}">Tham gia</a>'
+            f'</div>'
             if detailed
-            else f'<div class="card-footer"><a class="arrow-link" href="{cta_href}">{cta_label} →</a></div>'
+            else f'<div class="card-footer"><a class="arrow-link" href="{cta_href}">{esc(cta_label)} →</a></div>'
         )
-        image_label = "Ảnh minh họa" if p.get("imageIsIllustration") else "Ảnh tư liệu HolaHeart · 15/11/2026" if p["id"] == "workshop" else ""
-        support_html = ""
-        support_images = p.get("supportImages", [])
-        if detailed and support_images:
-            figures = []
-            for photo in support_images:
-                figures.append(
-                    f"""<figure class="illustrative-image image-note" tabindex="0" role="group" aria-label="Chú thích ảnh: {esc(photo.get('label', 'Ảnh minh họa'))} · {esc(photo['alt'])}">
-          <img src="{esc(photo['src'])}" alt="{esc(photo['alt'])}" width="640" height="420" loading="lazy" decoding="async">
-          {render_image_tooltip(photo['alt'], photo.get('label', 'Ảnh minh họa'))}
-        </figure>"""
-                )
-            support_html = f"""<details class="illustrative-details">
-            <summary>Xem thêm {len(support_images)} góc hình ảnh</summary>
-          <div class="illustrative-grid">{"".join(figures)}</div>
-        </details>"""
+        image_label = "Tư liệu HolaHeart · 15/11/2026" if filter_key == "holaheart" else f"{p['badge']} · Hòa Lạc – Thạch Thất"
         cards.append(
             f"""<article class="editorial-card" data-stagger-item{anchor_id}>
         <div class="plate-media image-note" data-curtain tabindex="0" role="group" aria-label="Chú thích ảnh: {esc(image_label)} · {esc(p['imageAlt'])}">
@@ -384,7 +376,6 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
         <h3 class="card-title">{esc(p['title'])}</h3>
         <p class="card-text">{esc(p['summary'])}</p>
         <div class="visual-chip-row" style="margin-bottom: 18px;">{chips_html}</div>
-        {support_html}
         {footer_html}
       </article>"""
         )
@@ -398,17 +389,15 @@ ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
 
 def render_workshops(upcoming: list) -> str:
     if not upcoming:
-        return """<div class="schedule-empty" role="status">
-        <p>Chưa có lịch sắp tới được xác nhận. Lịch mới sẽ xuất hiện tại đây sau khi chốt ngày, giờ và địa điểm.</p>
-        <a class="btn btn--outline btn--sm" href="/tham-gia/">Nhận thông tin khi có lịch</a>
-      </div>"""
+        return ""
     cards = []
     for ws in upcoming:
-        filters_attr = " ".join(ws.get("filters", []))
-        cat_attr = f' data-workshop-card data-category="{esc(filters_attr)}"' if filters_attr else " data-workshop-card"
+        pillar = derive_pillar_filter(ws.get("type", ""), ws.get("filters", []))
+        token_set = [pillar] + [x for x in ws.get("filters", []) if x != pillar]
+        cat_attr = f' data-workshop-card data-category="{esc(" ".join(token_set))}"'
         cards.append(
             f"""<article class="event-card" data-stagger-item{cat_attr}>
-        <div class="event-card-media" data-curtain data-cursor-label="Đăng ký">
+        <div class="event-card-media" data-curtain>
           <img src="{esc(ws['image'])}" alt="{esc(ws['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
           <div class="event-card-badges">
             <span class="glass-badge">{esc(ws['dateDisplay'])}</span>
@@ -429,7 +418,7 @@ def render_workshops(upcoming: list) -> str:
           </div>
           <div class="card-footer">
             <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}">
-              <span>Đăng ký giữ chỗ</span>
+              <span>Đăng ký tham gia</span>
               <span aria-hidden="true">→</span>
             </button>
           </div>
@@ -437,6 +426,52 @@ def render_workshops(upcoming: list) -> str:
       </article>"""
         )
     return "\n      ".join(cards)
+
+
+def render_home_upcoming_section(upcoming: list) -> str:
+    if not upcoming:
+        return ""
+    return f"""<section class="section" id="lich-hen">
+  <div class="container">
+    <div class="section-header--split" style="margin-bottom: 28px;" data-reveal>
+      <div>
+        <div class="kicker">Lịch tuần này</div>
+        <h2 class="section-title" style="margin-bottom: 6px;">Hoạt động sắp diễn ra tại Hòa Lạc – Thạch Thất</h2>
+        <p class="section-lead">Đăng ký tham gia trực tiếp ngay trên từng buổi gặp mặt.</p>
+      </div>
+      <a class="arrow-link" href="/lich-hoat-dong/">
+        <span>Xem toàn bộ lịch</span>
+        <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
+    </div>
+
+    <div class="events-rail" data-stagger-group>
+      {render_workshops(upcoming)}
+    </div>
+  </div>
+</section>"""
+
+
+def render_schedule_upcoming_content(upcoming: list) -> str:
+    if not upcoming:
+        return """<div class="schedule-empty-flagship" role="status">
+      <div class="schedule-empty-copy">
+        <span class="kicker">Nhịp hoạt động định kỳ</span>
+        <h3>Ban Điều Phối đang chuẩn bị cho những cuộc gặp tiếp theo tại Hòa Lạc – Thạch Thất</h3>
+        <p>Các buổi HolaHeart, HolaGreen và HolaConnect được tổ chức luân phiên 1–2 buổi mỗi tuần theo tinh thần phi lợi nhuận. Để lại liên hệ để nhận lịch mới nhất ngay khi mở đăng ký.</p>
+      </div>
+      <div class="schedule-empty-actions">
+        <a class="btn btn--primary" href="/tham-gia/">Nhận thông báo lịch tuần mới →</a>
+        <a class="btn btn--outline" href="/gioi-thieu/#chuong-trinh">Tìm hiểu 3 trụ cột</a>
+      </div>
+    </div>"""
+    return f"""<div class="grid-3" data-stagger-group>
+      {render_workshops(upcoming)}
+    </div>
+    <div class="filter-empty" data-filter-empty="[data-workshop-card]" hidden>
+      <p>Hiện chưa có buổi sắp tới nào thuộc nhóm này trong tuần.</p>
+      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-workshop-card]">Xem tất cả lịch hoạt động</button>
+    </div>"""
 
 
 def render_join_event_options(upcoming: list) -> str:
@@ -457,8 +492,18 @@ def render_join_event_options(upcoming: list) -> str:
       </div>"""
         )
     if not cards:
-        return '<div class="schedule-empty" role="status"><p>Chưa có lịch hoạt động được xác nhận. Bạn vẫn có thể gửi mảng quan tâm; biểu mẫu này chưa phải đăng ký cho một sự kiện cụ thể.</p></div>'
+        return ""
     return '<div class="join-event-grid">\n      ' + "\n      ".join(cards) + "\n    </div>"
+
+
+def render_join_events_section(upcoming: list) -> str:
+    inner = render_join_event_options(upcoming)
+    if not inner:
+        return ""
+    return f"""<fieldset class="join-fieldset" data-join-events-step>
+          <legend class="join-legend">Chọn hoạt động bạn muốn tham gia</legend>
+          {inner}
+        </fieldset>"""
 
 
 def render_sdgs(sdgs: list) -> str:
@@ -477,12 +522,15 @@ def render_sdgs(sdgs: list) -> str:
 def render_news_cards(articles: list, filterable: bool = False) -> str:
     cards = []
     for a in articles:
-        filter_tokens = " ".join(a.get("filters", [])) or a["categorySlug"]
-        attr = f' data-news-card data-category="{esc(filter_tokens)}"' if filterable else ""
-        href = f'/tin-tuc/{esc(a["slug"])}/'
+        pillar = derive_pillar_filter(a.get("category", ""), a.get("filters", []), a.get("categorySlug", ""))
+        tokens = [pillar] + [x for x in a.get("filters", []) if x != pillar]
+        if a.get("categorySlug") and a["categorySlug"] not in tokens:
+            tokens.append(a["categorySlug"])
+        attr = f' data-news-card data-category="{esc(" ".join(tokens))}"' if filterable else ""
+        href = f'/hanh-trinh/{esc(a["slug"])}/'
         cards.append(
             f"""<article class="editorial-card" data-stagger-item{attr}>
-        <a class="plate-media" data-curtain data-cursor-label="Đọc" href="{href}" aria-label="{esc(a['title'])}">
+        <a class="plate-media" data-curtain href="{href}" aria-label="{esc(a['title'])}">
           <img src="{esc(a['image'])}" alt="{esc(a['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
         </a>
         <div class="card-meta">
@@ -493,37 +541,7 @@ def render_news_cards(articles: list, filterable: bool = False) -> str:
         <h3 class="card-title"><a href="{href}">{esc(a['title'])}</a></h3>
         <p class="card-text">{esc(a['excerpt'])}</p>
         <div class="card-footer">
-          <a class="arrow-link" href="{href}">Xem hình &amp; nhật ký →</a>
-        </div>
-      </article>"""
-        )
-    return "\n      ".join(cards)
-
-
-def render_campaigns(campaigns: list) -> str:
-    cards = []
-    for c in campaigns:
-        filter_tokens = " ".join(c.get("filters", [])) or c["category"]
-        image_label = "Ảnh minh họa" if c.get("imageIsIllustration") else ""
-        cards.append(
-            f"""<article class="editorial-card" data-stagger-item data-campaign-card data-category="{esc(filter_tokens)}">
-        <div class="plate-media image-note" data-curtain tabindex="0" role="group" aria-label="Chú thích ảnh: {esc(image_label)} · {esc(c['imageAlt'])}">
-          <img src="{esc(c['image'])}" alt="{esc(c['imageAlt'])}" width="720" height="460" loading="lazy" decoding="async">
-          {render_image_tooltip(c['imageAlt'], image_label)}
-        </div>
-        <div class="card-meta">
-          <span class="cat">{esc(c['categoryLabel'])}</span>
-          <span>·</span>
-          <span>{esc(c['status'])}</span>
-        </div>
-        <h3 class="card-title">{esc(c['title'])}</h3>
-        <p class="card-text">{esc(c['description'])}</p>
-        <div class="event-info-inline">
-          <span>{ICON_PIN} {esc(c['location'])}</span>
-          <span>{ICON_CHECK} {esc(c['metric'])}</span>
-        </div>
-        <div class="card-footer">
-          <a class="btn btn--outline btn--sm" href="/tham-gia/">Gửi quan tâm về ý tưởng này →</a>
+          <a class="arrow-link" href="{href}">Xem tường thuật &amp; hình ảnh →</a>
         </div>
       </article>"""
         )
@@ -531,26 +549,40 @@ def render_campaigns(campaigns: list) -> str:
 
 
 def render_horizontal_gallery(gallery: list) -> str:
+    total = len(gallery)
     items = []
-    for g in gallery:
+    for idx, g in enumerate(gallery, start=1):
+        src = g.get("src") or g.get("url") or ""
+        caption = g.get("caption") or g.get("alt") or "Khoảnh khắc HolaRise tại Hòa Lạc – Thạch Thất"
+        alt = g.get("alt") or caption
+        label = g.get("label") or g.get("sourceLabel") or ""
+        full_caption = f"{label} · {caption}" if label and label not in caption else caption
         items.append(
-            f"""<button class="horizontal-card" type="button" aria-label="Xem ảnh: {esc(g.get('label', 'Ảnh tư liệu HolaHeart · 15/11/2026'))} · {esc(g['alt'])}" data-cursor-label="Xem" data-lightbox-src="{esc(g['src'])}" data-lightbox-alt="{esc(g['alt'])}" data-lightbox-caption="{esc(g['caption'])}">
+            f"""<button class="horizontal-card" type="button" aria-label="Xem ảnh: {esc(alt)}" data-lightbox-src="{esc(src)}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}">
         <div class="horizontal-frame">
-          <img src="{esc(g['src'])}" alt="{esc(g['alt'])}" width="960" height="600" loading="lazy" decoding="async">
-          {render_image_tooltip(g['alt'], g.get('label', 'Ảnh tư liệu HolaHeart · 15/11/2026'))}
+          <img src="{esc(src)}" alt="{esc(alt)}" width="960" height="600" loading="lazy" decoding="async">
+        </div>
+        <div class="horizontal-caption">
+          <span>{esc(caption)}</span>
+          <span class="horizontal-index">{idx:02d} / {total:02d}</span>
         </div>
       </button>"""
         )
     return "\n      ".join(items)
 
 
-def render_gallery(gallery: list) -> str:
+def render_gallery(gallery: list, default_label: str = "Tư liệu HolaRise") -> str:
     items = []
     for g in gallery:
+        src = g.get("src") or g.get("url") or ""
+        label = g.get("label") or g.get("sourceLabel") or default_label
+        caption = g.get("caption") or g.get("alt") or label
+        alt = g.get("alt") or caption
+        full_caption = f"{label} · {caption}" if label and label not in caption else caption
         items.append(
-            f"""<button class="gallery-item image-note" type="button" aria-label="Xem ảnh: {esc(g.get('label', 'Ảnh tư liệu HolaHeart · 15/11/2026'))} · {esc(g['alt'])}" data-cursor-label="Xem" data-lightbox-src="{esc(g['src'])}" data-lightbox-alt="{esc(g['alt'])}" data-lightbox-caption="{esc(g['caption'])}">
-        <img src="{esc(g['src'])}" alt="{esc(g['alt'])}" width="720" height="480" loading="lazy" decoding="async">
-        {render_image_tooltip(g['alt'], g.get('label', 'Ảnh tư liệu HolaHeart · 15/11/2026'))}
+            f"""<button class="gallery-item image-note" type="button" aria-label="Xem ảnh: {esc(alt)}" data-lightbox-src="{esc(src)}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}">
+        <img src="{esc(src)}" alt="{esc(alt)}" width="720" height="480" loading="lazy" decoding="async">
+        {render_image_tooltip(caption, label)}
       </button>"""
         )
     return '<div class="gallery-grid">\n      ' + "\n      ".join(items) + "\n    </div>"
@@ -597,9 +629,32 @@ def render_numbered_cards(items: list) -> str:
     return "\n      ".join(cards)
 
 
+def render_testimonials_section(testimonials: list) -> str:
+    if not testimonials:
+        return ""
+    return f"""<section class="section section--mist" aria-label="Góc nhìn người trẻ Hòa Lạc – Thạch Thất">
+  <div class="container">
+    <div class="section-header--split" style="margin-bottom: 28px;" data-reveal>
+      <div>
+        <div class="kicker">Chia sẻ cộng đồng</div>
+        <h2 class="section-title" style="margin-bottom: 0;">Góc nhìn từ người đồng hành</h2>
+      </div>
+      <a class="arrow-link" href="/tham-gia/">
+        <span>Tham gia cùng HolaRise</span>
+        <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
+    </div>
+
+    <div class="grid-3" data-stagger-group>
+      {render_testimonials(testimonials)}
+    </div>
+  </div>
+</section>"""
+
+
 def render_testimonials(testimonials: list) -> str:
     if not testimonials:
-        return '<p class="testimonial-empty">Chưa có lời chia sẻ cá nhân nào được duyệt để đăng công khai.</p>'
+        return ""
     cards = []
     for item in testimonials:
         initials = item.get("initials", item["name"][:2].upper())
@@ -1200,13 +1255,10 @@ def generate_cloudflare_headers() -> str:
 /gioi-thieu/*
   Cache-Control: public, max-age=0, must-revalidate
 
-/hoat-dong/*
+/lich-hoat-dong/*
   Cache-Control: public, max-age=0, must-revalidate
 
-/workshop/*
-  Cache-Control: public, max-age=0, must-revalidate
-
-/tin-tuc/*
+/hanh-trinh/*
   Cache-Control: public, max-age=0, must-revalidate
 
 /tham-gia/*
@@ -1248,13 +1300,9 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
     """Generate dist/llms.txt from canonical JSON sources (Single Source of Truth)."""
     b = site["brand"]
     c = site["contact"]
-    metrics_lines = []
-    for m in site.get("impactMetrics", []):
-        val = f"{int(m['value']):,}".replace(",", ".")
-        metrics_lines.append(f"- {val}{m['suffix']} {m['label']} ({m['detail']})")
 
     pillars_lines = [
-        f"- **{p['badge']} ({p['title']})**: {p['summary']} [{p.get('metricBadge', '')}]"
+        f"- **{p['badge']} ({p['title']})**: {p['summary']}"
         for p in activities.get("pillars", [])
     ]
     upcoming_lines = [
@@ -1263,7 +1311,7 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
     ]
     if not upcoming_lines:
         upcoming_lines = [
-            f"- Hiện chưa có lịch sắp tới được xác nhận. Lịch mới sẽ được cập nhật tại {abs_url(b['siteUrl'], '/workshop/')}."
+            f"- Nhịp hoạt động định kỳ 1–2 buổi/tuần tại Hòa Lạc – Thạch Thất. Theo dõi lịch cập nhật tại {abs_url(b['siteUrl'], '/lich-hoat-dong/')}."
         ]
 
     past_lines = []
@@ -1278,41 +1326,38 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
 
     news_lines = []
     for a in news:
-        slug_url = abs_url(b["siteUrl"], f"/tin-tuc/{a['slug']}/")
+        slug_url = abs_url(b["siteUrl"], f"/hanh-trinh/{a['slug']}/")
         news_lines.append(f"- [{a['title']}]({slug_url}): {a['excerpt']} ({a['dateDisplay']})")
 
     past_section = ""
     if past_lines:
-        past_section = "\n## Sự kiện đã tổ chức\n" + "\n".join(past_lines) + "\n"
+        past_section = "\n## Dấu mốc đã tổ chức\n" + "\n".join(past_lines) + "\n"
 
     return f"""# {b['brandName']} — {b['fullName']}
 
 > {b['subtitle']}
 
 - Website: {b['siteUrl']}
-- Khu vực hoạt động: {b['location']}
-- Thời gian hoạt động: {c['meetingTime']} · Văn phòng / Điểm hẹn: {c['address']}
+- Định vị: Chapter 01 · {b['location']} (tầm nhìn lan tỏa tới nhiều địa phương trên cả nước)
+- Nhịp sinh hoạt: {c['meetingTime']}
 - Liên hệ: {c['email']} | Hotline/Zalo: {c['phoneDisplay']}
-- Chi phí tham gia: Chi phí, nếu có, được ghi rõ trong thông báo của từng hoạt động.
+- Nguyên tắc: Cộng đồng phi lợi nhuận, công khai minh bạch chi phí (nếu phát sinh) trước mỗi hoạt động.
 
-## Số liệu tác động (Single Source of Truth)
-{chr(10).join(metrics_lines)}
+## Các trang chính (Flagship 3+1)
+- [Trang chủ]({abs_url(b['siteUrl'], '/')}): Tuyên ngôn, khoảnh khắc thật và mô hình Tạo Tác Động 3 trụ cột.
+- [Về HolaRise]({abs_url(b['siteUrl'], '/gioi-thieu/')}): Câu chuyện Chapter 01 Hòa Lạc – Thạch Thất, Theory of Change, 3 trụ cột, 4 nguyên tắc minh bạch và 5 UN SDGs.
+- [Lịch hoạt động]({abs_url(b['siteUrl'], '/lich-hoat-dong/')}): Lịch 1–2 buổi/tuần lọc theo HolaHeart, HolaGreen, HolaConnect.
+- [Hành trình]({abs_url(b['siteUrl'], '/hanh-trinh/')}): Tường thuật sự kiện và triển lãm ảnh thật (HolaHeart 15/11 & HolaHeart × MusicSpace).
+- [Tham gia & Hợp tác]({abs_url(b['siteUrl'], '/tham-gia/')}): Đăng ký Thẻ Gieo Mầm cho người trẻ và cổng kết nối đối tác, nhà trường, CLB.
+- [Chuẩn mực Minh bạch & An toàn]({abs_url(b['siteUrl'], '/chinh-sach/')}): Quy tắc cộng đồng và quyền riêng tư dữ liệu, hình ảnh.
 
-## Các trang chính
-- [Trang chủ]({abs_url(b['siteUrl'], '/')}): Tổng quan 3 trụ cột hoạt động, số liệu và lịch hẹn gần nhất.
-- [Giới thiệu & Sứ mệnh]({abs_url(b['siteUrl'], '/gioi-thieu/')}): Sứ mệnh, tầm nhìn, 4 giá trị cốt lõi, nguyên tắc minh bạch và 5 UN SDGs.
-- [Hoạt động & Chiến dịch]({abs_url(b['siteUrl'], '/hoat-dong/')}): Chi tiết HolaGreen, HolaHeart, HolaConnect và các chiến dịch tại Hòa Lạc.
-- [Lịch Workshop & Sự kiện]({abs_url(b['siteUrl'], '/workshop/')}): Lịch đăng ký và thông tin các hoạt động đã tổ chức.
-- [Tin tức & Nhật ký]({abs_url(b['siteUrl'], '/tin-tuc/')}): Báo cáo kết quả công khai từng chiến dịch và workshop.
-- [Đăng ký tham gia]({abs_url(b['siteUrl'], '/tham-gia/')}): Biểu mẫu đăng ký tình nguyện viên và kết nối hợp tác.
-
-## Ba chương trình trọng tâm
+## Mô hình Tạo Tác Động (Heart → Green → Connect)
 {chr(10).join(pillars_lines)}
 
-## Lịch sự kiện sắp tới
+## Lịch hoạt động sắp tới
 {chr(10).join(upcoming_lines)}
 {past_section}
-## Nhật ký hoạt động mới nhất
+## Dấu mốc & Tường thuật mới nhất
 {chr(10).join(news_lines)}
 """
 
@@ -1340,7 +1385,10 @@ def build_site() -> list:
 
     sitemap_urls = []
 
-    # 1. Home page (Visual-First 5 core sections)
+    # Combine top 5 HolaHeart 15/11 + top 5 HolaHeart x MusicSpace for Homepage runway
+    home_gallery_mix = list(activities["gallery"][:5]) + list(heart_photo_wall[:5])
+
+    # 1. Home page
     home_main = render_template(
         load_template("home.html"),
         {
@@ -1355,15 +1403,15 @@ def build_site() -> list:
             "HERO_SECONDARY_HREF": esc(h["secondaryCta"]["href"]),
             "HERO_SECONDARY_LABEL": esc(h["secondaryCta"]["label"]),
             "HERO_UPCOMING_BAR": f"<!-- CMS:HERO_UPCOMING_BAR:START -->\n{render_hero_upcoming_bar(workshops['upcoming'])}\n<!-- CMS:HERO_UPCOMING_BAR:END -->",
-            "IMPACT_METRICS_HTML": render_impact_metrics(site["impactMetrics"]),
+            "HOME_UPCOMING_SECTION": f"<!-- CMS:HOME_UPCOMING_SECTION:START -->\n{render_home_upcoming_section(workshops['upcoming'])}\n<!-- CMS:HOME_UPCOMING_SECTION:END -->",
             "PHILOSOPHY_QUOTE": esc(p["quote"]),
             "PHILOSOPHY_MOTTO": esc(p["motto"]),
             "PHILOSOPHY_MISSION": esc(p["mission"]),
             "PHILOSOPHY_VISION": esc(p["vision"]),
             "STORY_STAGE_HTML": render_story_stage(activities["pillars"]),
-            "UPCOMING_WORKSHOPS_HTML": f"<!-- CMS:UPCOMING_WORKSHOPS:START -->\n{render_workshops(workshops['upcoming'])}\n<!-- CMS:UPCOMING_WORKSHOPS:END -->",
-            "HORIZONTAL_GALLERY_HTML": f"<!-- CMS:HORIZONTAL_GALLERY:START -->\n{render_horizontal_gallery(activities['gallery'])}\n<!-- CMS:HORIZONTAL_GALLERY:END -->",
-            "TESTIMONIALS_HTML": render_testimonials(site.get("testimonials", [])),
+            "HORIZONTAL_GALLERY_HTML": f"<!-- CMS:HORIZONTAL_GALLERY:START -->\n{render_horizontal_gallery(home_gallery_mix)}\n<!-- CMS:HORIZONTAL_GALLERY:END -->",
+            "PARTNERS_STRIP": "<!-- CMS:PARTNERS_STRIP:START --><!-- CMS:PARTNERS_STRIP:END -->",
+            "TESTIMONIALS_SECTION": render_testimonials_section(site.get("testimonials", [])),
             "FAQ_HTML": render_faqs(site["faqs"]),
         },
     )
@@ -1397,7 +1445,7 @@ def build_site() -> list:
     )
     sitemap_urls.append(("/", "1.0", "weekly"))
 
-    # 2. About page
+    # 2. About page (/gioi-thieu/ — Về HolaRise)
     about_main = render_template(
         load_template("about.html"),
         {
@@ -1410,10 +1458,12 @@ def build_site() -> list:
             "PHILOSOPHY_MOTTO": esc(p["motto"]),
             "PHILOSOPHY_MISSION": esc(p["mission"]),
             "PHILOSOPHY_VISION": esc(p["vision"]),
+            "PILLARS_DETAIL_HTML": render_pillars(activities["pillars"], detailed=True),
             "CORE_VALUES_HTML": render_numbered_cards(p["coreValues"]),
             "SDGS_HTML": render_sdgs(site["sdgs"]),
             "PRINCIPLES_HTML": render_numbered_cards(site["principles"]),
-            "TESTIMONIALS_HTML": render_testimonials(site.get("testimonials", [])),
+            "PARTNERS_STRIP": "<!-- CMS:PARTNERS_STRIP:START --><!-- CMS:PARTNERS_STRIP:END -->",
+            "TESTIMONIALS_SECTION": render_testimonials_section(site.get("testimonials", [])),
         },
     )
     write_page(
@@ -1421,86 +1471,68 @@ def build_site() -> list:
         site,
         "gioi-thieu/index.html",
         "/gioi-thieu/",
-        f"Giới thiệu & Sứ mệnh Thanh niên Hòa Lạc | {b['brandName']}",
-        f"Tìm hiểu sứ mệnh, tầm nhìn, 4 giá trị cốt lõi, định hướng 5 UN SDGs và 4 nguyên tắc minh bạch của {b['shortName']} tại Hòa Lạc.",
+        f"Về HolaRise · Chapter 01 Hòa Lạc – Thạch Thất | {b['brandName']}",
+        f"Khám phá mô hình Tạo Tác Động (HolaHeart → HolaGreen → HolaConnect), sứ mệnh khởi nguồn từ Hòa Lạc – Thạch Thất và chuẩn mực minh bạch của {b['brandName']}.",
         about_main,
-        [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Giới thiệu", "/gioi-thieu/")])],
+        [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Về HolaRise", "/gioi-thieu/")])],
     )
     sitemap_urls.append(("/gioi-thieu/", "0.9", "monthly"))
 
-    # 3. Activities page
-    activities_main = render_template(
-        load_template("activities.html"),
-        {
-            "PILLARS_DETAIL_HTML": render_pillars(activities["pillars"], detailed=True),
-            "CAMPAIGNS_HTML": render_campaigns(activities["campaigns"]),
-            "GALLERY_HTML": f"<!-- CMS:ACTIVITIES_GALLERY:START -->\n{render_gallery(activities['gallery'])}\n<!-- CMS:ACTIVITIES_GALLERY:END -->",
-        },
-    )
-    write_page(
-        base_tpl,
-        site,
-        "hoat-dong/index.html",
-        "/hoat-dong/",
-        f"Hoạt động Môi trường & Cộng đồng Hòa Lạc | {b['brandName']}",
-        f"Khám phá các chiến dịch làm sạch môi trường, trồng cây xanh, workshop giá trị sống và thiện nguyện cộng đồng của {b['brandName']} tại Hòa Lạc.",
-        activities_main,
-        [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Hoạt động", "/hoat-dong/")])],
-    )
-    sitemap_urls.append(("/hoat-dong/", "0.9", "weekly"))
-
-    # 4. Workshops page
+    # 3. Schedule page (/lich-hoat-dong/)
     ws_main = render_template(
         load_template("workshops.html"),
         {
             "WORKSHOP_INTRO_TITLE": esc(workshops["intro"]["title"]),
             "WORKSHOP_INTRO_DESC": esc(workshops["intro"]["description"]),
-            "MUSICSPACE_PHOTO_WALL_HTML": render_photo_wall(heart_photo_wall),
-            "UPCOMING_WORKSHOPS_HTML": f"<!-- CMS:UPCOMING_WORKSHOPS:START -->\n{render_workshops(workshops['upcoming'])}\n<!-- CMS:UPCOMING_WORKSHOPS:END -->",
-            "PAST_WORKSHOPS_HTML": f"<!-- CMS:PAST_WORKSHOPS:START -->\n{render_past_workshops(workshops['pastTopics'])}\n<!-- CMS:PAST_WORKSHOPS:END -->",
+            "SCHEDULE_UPCOMING_HTML": render_schedule_upcoming_content(workshops["upcoming"]),
+            "PAST_WORKSHOPS_HTML": render_past_workshops(workshops["pastTopics"]),
         },
     )
     write_page(
         base_tpl,
         site,
-        "workshop/index.html",
-        "/workshop/",
-        f"Lịch Workshop Giá Trị Sống & Sự Kiện Hòa Lạc | {b['brandName']}",
-        f"Đăng ký tham dự miễn phí các buổi workshop giá trị sống, kỹ năng tích cực và chiến dịch môi trường cuối tuần tại Hòa Lạc cùng {b['brandName']}.",
+        "lich-hoat-dong/index.html",
+        "/lich-hoat-dong/",
+        f"Lịch hoạt động Hòa Lạc – Thạch Thất | {b['brandName']}",
+        f"Cập nhật lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc – Thạch Thất của {b['shortName']} trên 3 trụ cột: HolaHeart, HolaGreen và HolaConnect.",
         ws_main,
         [
             org_ld,
-            breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Workshop", "/workshop/")]),
+            breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Lịch hoạt động", "/lich-hoat-dong/")]),
         ],
         event_schemas=events_schema(site, workshops["upcoming"]),
     )
-    sitemap_urls.append(("/workshop/", "0.9", "weekly"))
+    sitemap_urls.append(("/lich-hoat-dong/", "0.9", "weekly"))
 
-    # 5. News list page
+    # 4. Journey & Photo Archive page (/hanh-trinh/)
+    c = site["contact"]
     news_list_main = render_template(
         load_template("news_list.html"),
         {
-            "NEWS_LIST_HTML": f"<!-- CMS:NEWS_LIST:START -->\n{render_news_cards(news, filterable=True)}\n<!-- CMS:NEWS_LIST:END -->",
+            "NEWS_LIST_HTML": render_news_cards(news, filterable=True),
+            "GALLERY_HTML": render_gallery(activities["gallery"], "HolaHeart · 15/11/2026"),
+            "MUSICSPACE_GALLERY_HTML": render_gallery(heart_photo_wall, "HolaHeart × MusicSpace"),
+            "CONTACT_EMAIL": esc(c["email"]),
         },
     )
     write_page(
         base_tpl,
         site,
-        "tin-tuc/index.html",
-        "/tin-tuc/",
-        f"Tin tức & Nhật ký Hoạt động Hòa Lạc | {b['brandName']}",
-        f"Cập nhật bài viết, hình ảnh và báo cáo kết quả các chiến dịch môi trường, workshop và hoạt động cộng đồng tại Hòa Lạc của {b['shortName']}.",
+        "hanh-trinh/index.html",
+        "/hanh-trinh/",
+        f"Hành trình & Khoảnh khắc thật Hòa Lạc – Thạch Thất | {b['brandName']}",
+        f"Tường thuật sự kiện và triển lãm ảnh tư liệu thật từ chuỗi đêm nhạc HolaHeart × MusicSpace và chuyên đề giá trị sống của {b['shortName']}.",
         news_list_main,
-        [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Tin tức", "/tin-tuc/")])],
+        [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Hành trình", "/hanh-trinh/")])],
     )
-    sitemap_urls.append(("/tin-tuc/", "0.8", "weekly"))
+    sitemap_urls.append(("/hanh-trinh/", "0.9", "weekly"))
 
-    # 6. Individual news detail pages
+    # 5. Individual Journey detail pages (/hanh-trinh/<slug>/)
     news_detail_tpl = load_template("news_detail.html")
     for article in news:
         related = [a for a in news if a["slug"] != article["slug"]][:2]
         paragraphs = render_article_body(article["content"])
-        slug_path = f"/tin-tuc/{article['slug']}/"
+        slug_path = f"/hanh-trinh/{article['slug']}/"
         detail_main = render_template(
             news_detail_tpl,
             {
@@ -1536,7 +1568,7 @@ def build_site() -> list:
         write_page(
             base_tpl,
             site,
-            f"tin-tuc/{article['slug']}/index.html",
+            f"hanh-trinh/{article['slug']}/index.html",
             slug_path,
             f"{article['title']} | {b['brandName']}",
             article["excerpt"],
@@ -1546,7 +1578,7 @@ def build_site() -> list:
                 article_schema,
                 breadcrumb_schema(
                     b["siteUrl"],
-                    [("Trang chủ", "/"), ("Tin tức", "/tin-tuc/"), (article["title"], slug_path)],
+                    [("Trang chủ", "/"), ("Hành trình", "/hanh-trinh/"), (article["title"], slug_path)],
                 ),
             ],
             og_type="article",
@@ -1554,7 +1586,7 @@ def build_site() -> list:
         )
         sitemap_urls.append((slug_path, "0.7", "monthly"))
 
-    # 6b. SSR shell template for dynamic CMS articles (/tin-tuc/<new-slug>/)
+    # 5b. SSR shell template for dynamic CMS articles (/hanh-trinh/<new-slug>/)
     ssr_detail_main = render_template(
         news_detail_tpl,
         {
@@ -1575,7 +1607,7 @@ def build_site() -> list:
         base_tpl,
         site,
         "_templates/news-detail-shell.tpl",
-        "/tin-tuc/__SSR_SLUG__/",
+        "/hanh-trinh/__SSR_SLUG__/",
         "__SSR_PAGE_TITLE__",
         "__SSR_PAGE_DESCRIPTION__",
         ssr_detail_main,
@@ -1588,14 +1620,13 @@ def build_site() -> list:
     shell_txt = shell_txt.replace(
         abs_url(b["siteUrl"], "/__SSR_OG_IMAGE_PATH__"), "__SSR_OG_IMAGE_URL__"
     ).replace(
-        abs_url(b["siteUrl"], "/tin-tuc/__SSR_SLUG__/"), "__SSR_CANONICAL_URL__"
+        abs_url(b["siteUrl"], "/hanh-trinh/__SSR_SLUG__/"), "__SSR_CANONICAL_URL__"
     ).replace(
         "</head>", "  __SSR_EXTRA_JSON_LD__\n</head>", 1
     )
     shell_path.write_text(shell_txt, encoding="utf-8")
 
-    # 7. Join & Contact page
-    c = site["contact"]
+    # 6. Join & Contact page (/tham-gia/)
     join_phone_raw = re.sub(r"[^0-9+]", "", c["phoneDisplay"])
     join_main = render_template(
         load_template("join.html"),
@@ -1608,7 +1639,7 @@ def build_site() -> list:
             "CONTACT_PHONE": esc(c["phoneDisplay"]),
             "CONTACT_PHONE_RAW": esc(join_phone_raw),
             "CONTACT_ZALO": esc(c.get("zalo", "")),
-            "JOIN_UPCOMING_EVENTS_HTML": f"<!-- CMS:JOIN_EVENTS:START -->\n{render_join_event_options(workshops['upcoming'])}\n<!-- CMS:JOIN_EVENTS:END -->",
+            "JOIN_EVENTS_SECTION_HTML": render_join_events_section(workshops["upcoming"]),
             "FAQ_HTML": render_faqs(site["faqs"]),
         },
     )
@@ -1617,8 +1648,8 @@ def build_site() -> list:
         site,
         "tham-gia/index.html",
         "/tham-gia/",
-        f"Đăng ký Tình nguyện viên & Workshop Hòa Lạc | {b['brandName']}",
-        f"Đăng ký làm tình nguyện viên môi trường, tham dự workshop giá trị sống hoặc kết nối hợp tác cùng {b['shortName']} tại Hòa Lạc.",
+        f"Tham gia & Hợp tác tại Hòa Lạc – Thạch Thất | {b['brandName']}",
+        f"Đăng ký nhận Thẻ Gieo Mầm, theo dõi lịch hoạt động hằng tuần hoặc đề xuất hợp tác cùng {b['shortName']} tại Hòa Lạc – Thạch Thất.",
         join_main,
         [
             org_ld,
@@ -1699,7 +1730,7 @@ def build_site() -> list:
         "404.html",
         "/404.html",
         f"Không tìm thấy trang (404) | {b['brandName']}",
-        f"Trang bạn tìm không tồn tại hoặc đã được di chuyển. Khám phá lịch Workshop, hoạt động môi trường và tin tức mới nhất của {b['brandName']}.",
+        f"Trang bạn tìm không tồn tại hoặc đã được di chuyển. Khám phá Lịch hoạt động, Hành trình và 3 trụ cột của {b['brandName']}.",
         not_found_main,
         [org_ld],
         robots="noindex, nofollow",
@@ -1796,10 +1827,10 @@ Sitemap: {abs_url(b['siteUrl'], '/sitemap.xml')}
         ],
         "shortcuts": [
             {
-                "name": "Lịch Workshop sắp tới",
-                "short_name": "Workshop",
-                "description": "Xem lịch Workshop giá trị sống và giữ chỗ miễn phí",
-                "url": "/workshop/?source=pwa-shortcut",
+                "name": "Lịch hoạt động",
+                "short_name": "Lịch",
+                "description": "Xem lịch hoạt động hằng tuần của HolaHeart, HolaGreen, HolaConnect",
+                "url": "/lich-hoat-dong/?source=pwa-shortcut",
                 "icons": [
                     {
                         "src": "/assets/images/pwa/icon-192.png",
@@ -1809,10 +1840,10 @@ Sitemap: {abs_url(b['siteUrl'], '/sitemap.xml')}
                 ],
             },
             {
-                "name": "Hoạt động & Chiến dịch",
-                "short_name": "Hoạt động",
-                "description": "3 chương trình HolaGreen, HolaHeart, HolaConnect",
-                "url": "/hoat-dong/?source=pwa-shortcut",
+                "name": "Hành trình & Kho ảnh",
+                "short_name": "Hành trình",
+                "description": "Xem tường thuật và triển lãm ảnh thật của HolaRise",
+                "url": "/hanh-trinh/?source=pwa-shortcut",
                 "icons": [
                     {
                         "src": "/assets/images/pwa/icon-192.png",
@@ -1822,9 +1853,9 @@ Sitemap: {abs_url(b['siteUrl'], '/sitemap.xml')}
                 ],
             },
             {
-                "name": "Đăng ký tham gia",
+                "name": "Tham gia & Hợp tác",
                 "short_name": "Tham gia",
-                "description": "Đăng ký tình nguyện viên và kết nối cùng HolaRise",
+                "description": "Nhận Thẻ Gieo Mầm hoặc kết nối hợp tác cùng HolaRise",
                 "url": "/tham-gia/?source=pwa-shortcut",
                 "icons": [
                     {
@@ -1975,15 +2006,13 @@ def verify_dist() -> list:
         if "/chinh-sach/" not in sm_txt:
             errors.append("[sitemap.xml] Privacy route /chinh-sach/ must be included in sitemap.xml")
 
-    # Verify llms.txt single-source-of-truth impact metrics
+    # Verify llms.txt reflects canonical routes
     llms_path = DIST_DIR / "llms.txt"
     if llms_path.exists():
         llms_txt = llms_path.read_text(encoding="utf-8")
-        site_cfg = load_json("site.json")
-        for m in site_cfg.get("impactMetrics", []):
-            formatted_val = f"{int(m['value']):,}".replace(",", ".")
-            if formatted_val not in llms_txt:
-                errors.append(f"[llms.txt] Missing impact metric value from site.json: {formatted_val}")
+        for req_route in ("/lich-hoat-dong/", "/hanh-trinh/", "/gioi-thieu/", "/tham-gia/"):
+            if req_route not in llms_txt:
+                errors.append(f"[llms.txt] Missing canonical route: {req_route}")
 
     # Verify Web App Manifest contract & actual icon/screenshot pixel sizes
     manifest_path = DIST_DIR / "site.webmanifest"

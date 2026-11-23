@@ -1,36 +1,32 @@
 # HolaRise — Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên
 
-> Kết nối thanh niên, sinh viên và học sinh tại Hòa Lạc cùng làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng (HolaConnect).
+> Khởi nguồn từ Hòa Lạc – Thạch Thất, kết nối thế hệ trẻ cùng vun bồi nội lực (HolaHeart), kiến tạo cảnh quan xanh (HolaGreen) và phụng sự cộng đồng (HolaConnect).
 
 - Website: https://holarise.org
-- Khu vực hoạt động: Hòa Lạc, Hà Nội
-- Thời gian hoạt động: Lịch được công bố theo từng hoạt động. · Văn phòng / Điểm hẹn: Tân Xã, Hòa Lạc, Hà Nội
+- Định vị: Chapter 01 · Hòa Lạc – Thạch Thất, Hà Nội (tầm nhìn lan tỏa tới nhiều địa phương trên cả nước)
+- Nhịp sinh hoạt: 1–2 hoạt động mỗi tuần tại Hòa Lạc – Thạch Thất
 - Liên hệ: phungsu@holarise.org | Hotline/Zalo: 077.777.1948
-- Chi phí tham gia: Chi phí, nếu có, được ghi rõ trong thông báo của từng hoạt động.
+- Nguyên tắc: Cộng đồng phi lợi nhuận, công khai minh bạch chi phí (nếu phát sinh) trước mỗi hoạt động.
 
-## Số liệu tác động (Single Source of Truth)
-- 3 Mảng hoạt động (HolaGreen · HolaHeart · HolaConnect)
-- 1 Sự kiện HolaHeart đã tổ chức (15/11/2026 · Mây Lang Thang Cafe)
-- 8 Ảnh tư liệu HolaHeart (Ảnh thật trong album sự kiện)
+## Các trang chính (Flagship 3+1)
+- [Trang chủ](https://holarise.org/): Tuyên ngôn, khoảnh khắc thật và mô hình Tạo Tác Động 3 trụ cột.
+- [Về HolaRise](https://holarise.org/gioi-thieu/): Câu chuyện Chapter 01 Hòa Lạc – Thạch Thất, Theory of Change, 3 trụ cột, 4 nguyên tắc minh bạch và 5 UN SDGs.
+- [Lịch hoạt động](https://holarise.org/lich-hoat-dong/): Lịch 1–2 buổi/tuần lọc theo HolaHeart, HolaGreen, HolaConnect.
+- [Hành trình](https://holarise.org/hanh-trinh/): Tường thuật sự kiện và triển lãm ảnh thật (HolaHeart 15/11 & HolaHeart × MusicSpace).
+- [Tham gia & Hợp tác](https://holarise.org/tham-gia/): Đăng ký Thẻ Gieo Mầm cho người trẻ và cổng kết nối đối tác, nhà trường, CLB.
+- [Chuẩn mực Minh bạch & An toàn](https://holarise.org/chinh-sach/): Quy tắc cộng đồng và quyền riêng tư dữ liệu, hình ảnh.
 
-## Các trang chính
-- [Trang chủ](https://holarise.org/): Tổng quan 3 trụ cột hoạt động, số liệu và lịch hẹn gần nhất.
-- [Giới thiệu & Sứ mệnh](https://holarise.org/gioi-thieu/): Sứ mệnh, tầm nhìn, 4 giá trị cốt lõi, nguyên tắc minh bạch và 5 UN SDGs.
-- [Hoạt động & Chiến dịch](https://holarise.org/hoat-dong/): Chi tiết HolaGreen, HolaHeart, HolaConnect và các chiến dịch tại Hòa Lạc.
-- [Lịch Workshop & Sự kiện](https://holarise.org/workshop/): Lịch đăng ký và thông tin các hoạt động đã tổ chức.
-- [Tin tức & Nhật ký](https://holarise.org/tin-tuc/): Báo cáo kết quả công khai từng chiến dịch và workshop.
-- [Đăng ký tham gia](https://holarise.org/tham-gia/): Biểu mẫu đăng ký tình nguyện viên và kết nối hợp tác.
+## Mô hình Tạo Tác Động (Heart → Green → Connect)
+- **HolaHeart (Gốc rễ Nội lực & Lòng biết ơn)**: Giữ trọn chiều sâu con người giữa kỷ nguyên công nghệ. Không gian âm nhạc, đối thoại và lắng nghe không phán xét — nơi người trẻ nuôi dưỡng lòng biết ơn gia đình, hiểu mình và sống vững vàng từ bên trong.
+- **HolaGreen (Sinh thái & Cảnh quan Bền vững)**: Trả lại vẻ đẹp nguyên bản cho đất mình sống. Từ không gian đại học Hòa Lạc đến những tuyến đường, mặt nước và mảng xanh khắp Thạch Thất — mỗi hành động môi trường là cam kết dài hạn với tương lai.
+- **HolaConnect (Phụng sự & Kết nối Cộng đồng)**: Đưa tri thức và lòng trắc ẩn hòa vào đời sống bản địa. Đồng hành cùng trẻ em, trường học và cư dân khắp Hòa Lạc – Thạch Thất qua văn hóa đọc, giáo dục và những nhịp cầu sẻ chia thiết thực.
 
-## Ba chương trình trọng tâm
-- **HolaGreen (Làm Sạch & Giữ Màu Xanh Hòa Lạc)**: HolaGreen hướng tới các hoạt động làm sạch cảnh quan, phân loại rác và chăm sóc mảng xanh tại Hòa Lạc. Lịch tổ chức sẽ được công bố riêng khi xác nhận. [Ảnh minh họa]
-- **HolaHeart (Tình Yêu Thương Của Mẹ Trong Thời Đại AI)**: Buổi gặp gỡ đầu tiên của HolaHeart, mở ra không gian để người trẻ cùng lắng nghe và trò chuyện về tình yêu thương của Mẹ trong bối cảnh AI. [Sự kiện đầu tiên · 15/11/2026]
-- **HolaConnect (Kết Nối & Sẻ Chia Cùng Cộng Đồng)**: HolaConnect là hướng hoạt động dành cho việc kết nối, sẻ chia sách và tạo không gian lắng nghe tại địa phương. Lịch tổ chức sẽ được công bố riêng khi xác nhận. [Ảnh minh họa]
+## Lịch hoạt động sắp tới
+- Nhịp hoạt động định kỳ 1–2 buổi/tuần tại Hòa Lạc – Thạch Thất. Theo dõi lịch cập nhật tại https://holarise.org/lich-hoat-dong/.
 
-## Lịch sự kiện sắp tới
-- Hiện chưa có lịch sắp tới được xác nhận. Lịch mới sẽ được cập nhật tại https://holarise.org/workshop/.
+## Dấu mốc đã tổ chức
+- 15/11/2026 (14:00–16:50): [HolaHeart · Tình yêu thương của Mẹ trong thời đại AI](https://holarise.org/hanh-trinh/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/) — Mây Lang Thang Cafe, Hòa Lạc
+- 2025 – 2026 (Định kỳ buổi tối): [Chuỗi Âm nhạc & Workshop · HolaHeart × MusicSpace](https://holarise.org/hanh-trinh/#musicspace-chapter) — Hòa Lạc – Thạch Thất
 
-## Sự kiện đã tổ chức
-- 15/11/2026 (14:00–16:50): [HolaHeart · Tình yêu thương của Mẹ trong thời đại AI](https://holarise.org/tin-tuc/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/) — Mây Lang Thang Cafe, Hòa Lạc
-
-## Nhật ký hoạt động mới nhất
-- [Tình yêu thương của Mẹ trong thời đại AI: Sự kiện đầu tiên của HolaHeart](https://holarise.org/tin-tuc/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/): Ngày 15/11/2026, HolaHeart tổ chức buổi gặp gỡ đầu tiên tại Mây Lang Thang Cafe, Hòa Lạc, với chủ đề Tình yêu thương của Mẹ trong thời đại AI. (15/11/2026)
+## Dấu mốc & Tường thuật mới nhất
+- [Tình yêu thương của Mẹ trong thời đại AI: Buổi đối thoại khởi đầu của HolaHeart](https://holarise.org/hanh-trinh/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/): Ngày 15/11/2026 tại Mây Lang Thang Cafe, Hòa Lạc, HolaHeart mở ra một buổi chiều lắng nghe và suy ngẫm về tình yêu thương của Mẹ giữa thời đại AI. (15/11/2026)

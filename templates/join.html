@@ -3,14 +3,10 @@
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
       <a href="/">Trang chủ</a>
       <span aria-hidden="true">/</span>
-      <span aria-current="page">Tham gia &amp; Liên hệ</span>
+      <span aria-current="page">Tham gia &amp; Hợp tác</span>
     </nav>
-    <h1>Tham gia &amp; Đồng hành cùng {{BRAND_SHORT_NAME}}</h1>
-    <p>Gửi thông tin để HolaRise biết mảng hoạt động bạn quan tâm. Đây chưa phải đăng ký cho một sự kiện cụ thể; lịch và chi phí sẽ được công bố sau khi xác nhận.</p>
-    <div class="join-schedule-pill">
-      <span class="live-status-dot" aria-hidden="true"></span>
-          <span>Lịch tiếp theo: <strong>Chưa có lịch được xác nhận</strong></span>
-    </div>
+    <h1>Gieo mầm hành trình cùng {{BRAND_SHORT_NAME}}</h1>
+    <p>Chọn nhánh giá trị bạn quan tâm để nhận lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc – Thạch Thất, hoặc kết nối đồng hành cùng trường học, câu lạc bộ và doanh nghiệp của bạn.</p>
   </div>
 </section>
 
@@ -24,11 +20,11 @@
 
   <div class="container join-grid join-grid--studio">
     <div class="form-card form-card--studio">
-      <div class="kicker">Đăng ký nhận thông tin</div>
-      <h2 id="join-form-heading" style="margin: 0 0 10px; font-size: 1.6rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Chia sẻ mảng hoạt động bạn quan tâm</h2>
-      <p style="margin: 0 0 22px; font-size: 0.94rem; color: var(--ink-secondary);">Thông tin bạn gửi giúp Ban Điều Phối phản hồi về lịch phù hợp khi được xác nhận.</p>
+      <div class="kicker">Khởi đầu hành trình · Thẻ Gieo Mầm</div>
+      <h2 id="join-form-heading" style="margin: 0 0 10px; font-size: 1.6rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Chọn hướng đồng hành phù hợp với bạn</h2>
+      <p style="margin: 0 0 22px; font-size: 0.94rem; color: var(--ink-secondary);">Bạn có thể gửi thông tin nhanh trong 30 giây hoặc nhắn trực tiếp Ban Điều Phối qua Zalo.</p>
 
-      <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="join-form-heading" data-club-form data-join-studio data-draft-key="join-page" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" novalidate>
+      <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="join-form-heading" data-club-form data-join-studio data-join-mode="youth" data-draft-key="join-page" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" novalidate>
         <input type="hidden" name="source" value="join_page">
         <input type="hidden" name="activity" id="join-activity-input" value="">
         <input type="hidden" name="eventId" id="join-event-id-input" value="">
@@ -39,86 +35,85 @@
         <p class="form-required-note">Các mục có dấu <span aria-hidden="true">*</span> là bắt buộc.</p>
 
         <fieldset class="join-fieldset">
-          <legend class="join-legend">01 · Chọn hành trình bạn muốn góp mặt <span aria-hidden="true">*</span></legend>
+          <legend class="join-legend">Chọn hành trình bạn muốn góp mặt <span aria-hidden="true">*</span></legend>
           <div class="role-card-grid">
             <div class="role-option">
-              <input class="visually-hidden" type="radio" name="role" id="join-role-green" value="Quan tâm HolaGreen" data-theme="emerald" data-badge="HolaGreen · Môi trường" data-greeting="Bạn đã chọn quan tâm tới HolaGreen. Lịch tiếp theo chưa được xác nhận." data-placeholder="Bạn quan tâm tới nội dung môi trường nào?" checked>
-              <label class="role-card" for="join-role-green">
-                <span class="role-card-icon" aria-hidden="true">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
-                </span>
-                <span class="role-card-copy">
-                  <span class="role-card-title">Chiến dịch môi trường</span>
-                  <span class="role-card-sub">HolaGreen · Hoạt động môi trường</span>
-                </span>
-              </label>
-            </div>
-
-            <div class="role-option">
-              <input class="visually-hidden" type="radio" name="role" id="join-role-heart" value="Quan tâm HolaHeart" data-theme="sunrise" data-badge="HolaHeart · Giá trị sống" data-greeting="Bạn đã chọn quan tâm tới HolaHeart." data-placeholder="Chủ đề giá trị sống nào bạn muốn gợi ý cho HolaHeart?">
+              <input class="visually-hidden" type="radio" name="role" id="join-role-heart" value="Quan tâm HolaHeart" data-mode="youth" data-theme="sunrise" data-badge="HolaHeart · Nội lực" data-greeting="Hạt mầm nội lực đã được gieo — hẹn gặp bạn trong những buổi đối thoại &amp; âm nhạc đầy lắng đọng." data-placeholder="Bạn quan tâm tới chủ đề giá trị sống hoặc âm nhạc nào tại HolaHeart?" checked>
               <label class="role-card" for="join-role-heart">
                 <span class="role-card-icon" aria-hidden="true">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                 </span>
                 <span class="role-card-copy">
-                  <span class="role-card-title">Workshop giá trị sống</span>
-                  <span class="role-card-sub">HolaHeart · Lòng biết ơn &amp; lắng nghe</span>
+                  <span class="role-card-title">HolaHeart · Giá trị sống</span>
+                  <span class="role-card-sub">Đối thoại, âm nhạc &amp; lắng nghe</span>
                 </span>
               </label>
             </div>
 
             <div class="role-option">
-              <input class="visually-hidden" type="radio" name="role" id="join-role-connect" value="Quan tâm HolaConnect" data-theme="obsidian" data-badge="HolaConnect · Sẻ chia" data-greeting="Bạn đã chọn quan tâm tới HolaConnect." data-placeholder="Bạn muốn kết nối hoặc chia sẻ điều gì cùng cộng đồng tại Hòa Lạc?">
+              <input class="visually-hidden" type="radio" name="role" id="join-role-green" value="Quan tâm HolaGreen" data-mode="youth" data-theme="emerald" data-badge="HolaGreen · Sinh thái" data-greeting="Cùng nhau giữ xanh Hòa Lạc – Thạch Thất từ những hành động thiết thực và bền bỉ nhất." data-placeholder="Bạn hứng thú với hoạt động cảnh quan, phân loại rác hay trồng cây bản địa?">
+              <label class="role-card" for="join-role-green">
+                <span class="role-card-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+                </span>
+                <span class="role-card-copy">
+                  <span class="role-card-title">HolaGreen · Sinh thái</span>
+                  <span class="role-card-sub">Phủ xanh &amp; cảnh quan bền vững</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="role-option">
+              <input class="visually-hidden" type="radio" name="role" id="join-role-connect" value="Quan tâm HolaConnect" data-mode="youth" data-theme="obsidian" data-badge="HolaConnect · Phụng sự" data-greeting="Đưa tri thức và lòng trắc ẩn hòa vào đời sống cộng đồng địa phương khắp Thạch Thất." data-placeholder="Bạn muốn tham gia tủ sách thiếu nhi hay hoạt động sẻ chia cộng đồng nào?">
               <label class="role-card" for="join-role-connect">
                 <span class="role-card-icon" aria-hidden="true">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </span>
                 <span class="role-card-copy">
-                  <span class="role-card-title">Kết nối cộng đồng</span>
-                  <span class="role-card-sub">HolaConnect · Lắng nghe &amp; sẻ chia</span>
+                  <span class="role-card-title">HolaConnect · Cộng đồng</span>
+                  <span class="role-card-sub">Tủ sách, giáo dục &amp; phụng sự</span>
                 </span>
               </label>
             </div>
 
             <div class="role-option">
-              <input class="visually-hidden" type="radio" name="role" id="join-role-skill" value="Đề xuất đóng góp kỹ năng" data-theme="emerald" data-badge="Kỹ năng · Kết nối" data-greeting="Cảm ơn bạn đã chia sẻ kỹ năng mình quan tâm đóng góp." data-placeholder="Chia sẻ kỹ năng bạn muốn đóng góp (nếu phù hợp với hoạt động sắp tới)...">
+              <input class="visually-hidden" type="radio" name="role" id="join-role-skill" value="Đề xuất đóng góp kỹ năng" data-mode="youth" data-theme="emerald" data-badge="Ban Chuyên Môn · Kết nối" data-greeting="Sự chuyên tâm của bạn về hình ảnh, điều phối hay thiết kế sẽ giúp cộng đồng lan tỏa sâu hơn." data-placeholder="Chia sẻ thế mạnh bạn muốn đóng góp cùng Ban Điều Phối...">
               <label class="role-card" for="join-role-skill">
                 <span class="role-card-icon" aria-hidden="true">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                 </span>
                 <span class="role-card-copy">
                   <span class="role-card-title">Đóng góp kỹ năng</span>
-                  <span class="role-card-sub">Ảnh, thiết kế, MC, điều phối</span>
+                  <span class="role-card-sub">Ảnh, thiết kế, điều phối, dẫn dắt</span>
                 </span>
               </label>
             </div>
 
             <div class="role-option role-option--wide">
-              <input class="visually-hidden" type="radio" name="role" id="join-role-partner" value="Đề xuất kết nối tổ chức" data-theme="sunrise" data-badge="Đối tác · Kết nối" data-greeting="Cảm ơn bạn đã gửi đề xuất kết nối." data-placeholder="Tên trường/CLB/đơn vị và nội dung bạn muốn trao đổi cùng HolaRise...">
+              <input class="visually-hidden" type="radio" name="role" id="join-role-partner" value="Đề xuất kết nối tổ chức" data-mode="partner" data-theme="sunrise" data-badge="Đối tác · Đồng hành" data-greeting="HolaRise trân trọng mọi cơ hội hợp tác minh bạch cùng nhà trường, câu lạc bộ và không gian văn hóa." data-placeholder="Mô tả ngắn gọn đề xuất hợp tác, địa điểm dự kiến hoặc thời gian phù hợp để Ban Điều Phối trao đổi...">
               <label class="role-card" for="join-role-partner">
                 <span class="role-card-icon" aria-hidden="true">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg>
                 </span>
                 <span class="role-card-copy">
                   <span class="role-card-title">Hợp tác Nhà trường / CLB / Doanh nghiệp</span>
-                  <span class="role-card-sub">Đồng tổ chức chiến dịch, tủ sách &amp; workshop minh bạch</span>
+                  <span class="role-card-sub">Đồng tổ chức chương trình, không gian đồng hành &amp; tài trợ minh bạch</span>
                 </span>
               </label>
             </div>
           </div>
         </fieldset>
 
-        <fieldset class="join-fieldset">
-          <legend class="join-legend">02 · Lịch hoạt động</legend>
-          {{JOIN_UPCOMING_EVENTS_HTML}}
-        </fieldset>
+        <!-- CMS:JOIN_EVENTS_SECTION:START -->
+        {{JOIN_EVENTS_SECTION_HTML}}
+        <!-- CMS:JOIN_EVENTS_SECTION:END -->
 
         <fieldset class="join-fieldset">
-          <legend class="join-legend">03 · Thông tin liên hệ để nhận phản hồi</legend>
+          <legend class="join-legend">Thông tin liên hệ</legend>
           <div class="form-grid">
             <div class="form-row-2">
               <div class="field">
-                <label for="join-name">Họ và tên <span aria-hidden="true">*</span></label>
+                <label for="join-name" id="join-name-label">Họ và tên <span aria-hidden="true">*</span></label>
                 <input id="join-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Trần Quốc Bảo" required minlength="2" enterkeyhint="next" data-error="join-name-error">
                 <div id="join-name-error" class="field-error">
                   <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -145,12 +140,12 @@
                 </div>
               </div>
               <div class="field">
-                <label for="join-org">Bạn đang học / làm việc tại</label>
-                <input id="join-org" name="organization" type="text" autocomplete="organization" placeholder="Ví dụ: ĐH FPT, ĐHQGHN, THPT Hòa Lạc..." enterkeyhint="next">
-                <div class="quick-chip-row" role="group" aria-label="Chọn nhanh trường hoặc đơn vị">
+                <label for="join-org" id="join-org-label">Đơn vị học tập / công tác</label>
+                <input id="join-org" name="organization" type="text" autocomplete="organization" placeholder="Ví dụ: ĐH FPT, ĐHQGHN, THPT Thạch Thất..." enterkeyhint="next">
+                <div class="quick-chip-row" data-youth-only role="group" aria-label="Chọn nhanh trường hoặc đơn vị">
                   <button type="button" class="quick-chip" data-org-chip="ĐH FPT" aria-pressed="false">ĐH FPT</button>
                   <button type="button" class="quick-chip" data-org-chip="ĐHQGHN (VNU)" aria-pressed="false">ĐHQGHN (VNU)</button>
-                  <button type="button" class="quick-chip" data-org-chip="THPT Hòa Lạc" aria-pressed="false">THPT Hòa Lạc</button>
+                  <button type="button" class="quick-chip" data-org-chip="THPT Thạch Thất" aria-pressed="false">THPT Thạch Thất</button>
                   <button type="button" class="quick-chip" data-org-chip="Đã đi làm" aria-pressed="false">Đã đi làm</button>
                 </div>
               </div>
@@ -159,31 +154,42 @@
         </fieldset>
 
         <fieldset class="join-fieldset">
-          <legend class="join-legend">04 · Cách bạn muốn đồng hành</legend>
+          <legend class="join-legend" id="join-how-legend">Cách bạn muốn đồng hành</legend>
           <div class="form-grid" style="gap: 14px;">
-            <div class="field">
-              <span class="field-label-text">Điều nào phù hợp với bạn?</span>
+            <div class="field" data-youth-only>
+              <span class="field-label-text">Tâm thế tham gia</span>
               <div class="quick-chip-row" role="group" aria-label="Cách bạn muốn đồng hành">
-                <button type="button" class="quick-chip is-selected" data-vibe-chip="Quan tâm tìm hiểu" aria-pressed="true">Muốn tìm hiểu trước</button>
+                <button type="button" class="quick-chip is-selected" data-vibe-chip="Muốn tìm hiểu trước" aria-pressed="true">Muốn tìm hiểu trước</button>
                 <button type="button" class="quick-chip" data-vibe-chip="Đi cùng bạn bè" aria-pressed="false">Có thể đi cùng bạn</button>
-                <button type="button" class="quick-chip" data-vibe-chip="Lần đầu tham gia" aria-pressed="false">Lần đầu tìm hiểu</button>
+                <button type="button" class="quick-chip" data-vibe-chip="Sẵn sàng điều phối" aria-pressed="false">Sẵn sàng hỗ trợ BTC</button>
               </div>
             </div>
 
-            <div class="field">
-              <span class="field-label-text">Điều bạn hứng thú (chọn nhiều nếu muốn)</span>
+            <div class="field" data-youth-only>
+              <span class="field-label-text">Kỹ năng hoặc lĩnh vực bạn hứng thú (chọn nhiều)</span>
               <div class="quick-chip-row" role="group" aria-label="Điều bạn hứng thú">
                 <button type="button" class="quick-chip" data-skill-chip="Chụp ảnh / Video" aria-pressed="false">Chụp ảnh / Video</button>
+                <button type="button" class="quick-chip" data-skill-chip="Âm nhạc / Nghệ thuật" aria-pressed="false">Âm nhạc / Nghệ thuật</button>
                 <button type="button" class="quick-chip" data-skill-chip="Thiết kế" aria-pressed="false">Thiết kế</button>
                 <button type="button" class="quick-chip" data-skill-chip="Dẫn hoạt động" aria-pressed="false">Dẫn hoạt động</button>
-                <button type="button" class="quick-chip" data-skill-chip="Trồng cây xanh" aria-pressed="false">Trồng cây xanh</button>
-                <button type="button" class="quick-chip" data-skill-chip="Đọc sách" aria-pressed="false">Đọc sách</button>
+                <button type="button" class="quick-chip" data-skill-chip="Trồng cây & Sinh thái" aria-pressed="false">Trồng cây &amp; Sinh thái</button>
+                <button type="button" class="quick-chip" data-skill-chip="Văn hóa đọc" aria-pressed="false">Văn hóa đọc</button>
+              </div>
+            </div>
+
+            <div class="field" data-partner-only hidden>
+              <span class="field-label-text">Hình thức hợp tác đề xuất (chọn nhiều nếu phù hợp)</span>
+              <div class="quick-chip-row" role="group" aria-label="Hình thức hợp tác">
+                <button type="button" class="quick-chip" data-partner-chip="Đồng tổ chức chương trình" aria-pressed="false">Đồng tổ chức chương trình</button>
+                <button type="button" class="quick-chip" data-partner-chip="Không gian đồng hành" aria-pressed="false">Hỗ trợ không gian / địa điểm</button>
+                <button type="button" class="quick-chip" data-partner-chip="Tài trợ hiện vật / học cụ" aria-pressed="false">Tài trợ hiện vật / học cụ</button>
+                <button type="button" class="quick-chip" data-partner-chip="Truyền thông & Kết nối" aria-pressed="false">Truyền thông &amp; Kết nối</button>
               </div>
             </div>
 
             <div class="field">
-              <label for="join-message">Đôi lời giới thiệu hoặc nội dung bạn quan tâm</label>
-              <textarea id="join-message" name="note" rows="3" placeholder="Bạn quan tâm điều gì hoặc muốn hỏi thêm về HolaRise?"></textarea>
+              <label for="join-message" id="join-note-label">Lời nhắn hoặc câu chuyện bạn muốn chia sẻ</label>
+              <textarea id="join-message" name="note" rows="3" placeholder="Bạn quan tâm tới chủ đề giá trị sống hoặc âm nhạc nào tại HolaHeart?"></textarea>
             </div>
           </div>
         </fieldset>
@@ -191,11 +197,11 @@
         <div class="form-status" role="status" aria-live="polite"></div>
 
         <div class="form-submit-stack">
-          <div>
-            <button class="btn btn--primary" type="submit" data-magnetic>Gửi thông tin quan tâm</button>
+          <div class="form-submit-row">
+            <button class="btn btn--primary" type="submit" data-magnetic id="join-submit-btn">Gửi thông tin &amp; Nhận thẻ Gieo Mầm</button>
+            <a class="btn btn--outline" href="{{CONTACT_ZALO}}" target="_blank" rel="noopener noreferrer">Nhắn Zalo Ban Điều Phối ↗</a>
           </div>
-          <p class="form-privacy-note">Đây là biểu mẫu quan tâm, chưa phải đăng ký cho một sự kiện cụ thể. Chi phí và thông tin chuẩn bị sẽ được thông báo theo lịch từng hoạt động.</p>
-          <p class="form-privacy-note">Thông tin được xử lý theo <a href="/chinh-sach/">Chính sách bảo mật &amp; Quy tắc cộng đồng</a>.</p>
+          <p class="form-privacy-note">Mọi hoạt động của HolaRise đều minh bạch chi phí trước khi tổ chức. Xem <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a>.</p>
         </div>
       </form>
     </div>
@@ -204,48 +210,48 @@
       <div class="sunrise-pass-stage">
         <div class="pass-readiness">
           <div class="pass-readiness-top">
-            <span class="pass-readiness-label">Thông tin đã điền</span>
+            <span class="pass-readiness-label">Mức hoàn thiện Thẻ Gieo Mầm</span>
             <span class="pass-readiness-pct" data-pass-pct>25%</span>
           </div>
           <div class="pass-readiness-bar" aria-hidden="true">
             <span class="pass-readiness-fill" data-pass-bar style="width: 25%;"></span>
           </div>
-          <p class="pass-readiness-hint" data-pass-hint>Nhập họ tên và SĐT/Zalo để xem trước phiếu thông tin.</p>
+          <p class="pass-readiness-hint" data-pass-hint>Nhập họ tên và SĐT/Zalo để khởi tạo Hạt Mầm Đầu Tiên.</p>
         </div>
 
-        <article class="sunrise-pass" data-sunrise-pass data-pass-theme="emerald" aria-label="Bản xem trước phiếu quan tâm HolaRise">
+        <article class="sunrise-pass" data-sunrise-pass data-pass-theme="sunrise" aria-label="Bản xem trước Thẻ Gieo Mầm HolaRise">
           <div class="sunrise-pass-glare" aria-hidden="true"></div>
           <div class="pass-header">
             <div class="pass-brand">
               <img src="/assets/images/logo-mark.png" alt="Biểu trưng HolaRise" width="28" height="28">
-              <span>HOLARISE · HÒA LẠC</span>
+              <span>HOLARISE · CHAPTER 01</span>
             </div>
-            <span class="pass-state-pill" data-pass-state>Bản xem trước</span>
+            <span class="pass-state-pill" data-pass-state>Hạt Mầm Khởi Đầu</span>
           </div>
 
-          <span class="pass-program-tag" data-pass-badge>HolaGreen · Sạch</span>
+          <span class="pass-program-tag" data-pass-badge>HolaHeart · Nội lực</span>
           <div class="pass-member-name" data-pass-name>Tên của bạn</div>
-          <div class="pass-member-org" data-pass-org>Thanh niên · Sinh viên Hòa Lạc</div>
-          <p class="pass-greeting" data-pass-greeting>Phiếu xem trước này không phải vé tham dự hay xác nhận giữ chỗ.</p>
+          <div class="pass-member-org" data-pass-org>Người trẻ · Hòa Lạc – Thạch Thất</div>
+          <p class="pass-greeting" data-pass-greeting>Hạt mầm nội lực đã được gieo — hẹn gặp bạn trong những buổi đối thoại &amp; âm nhạc đầy lắng đọng.</p>
 
           <div class="pass-divider" aria-hidden="true"></div>
 
           <div class="pass-meta-grid">
             <div class="pass-meta-item">
-              <span class="pass-meta-key">Trạng thái lịch</span>
-              <strong class="pass-meta-val" data-pass-event>Chưa có lịch cụ thể</strong>
+              <span class="pass-meta-key" data-pass-event-label>Hành trình chọn</span>
+              <strong class="pass-meta-val" data-pass-event>Nhịp tuần Hòa Lạc – Thạch Thất</strong>
             </div>
             <div class="pass-meta-item">
-              <span class="pass-meta-key">Thời gian</span>
-              <strong class="pass-meta-val" data-pass-schedule>{{CONTACT_MEETING}}</strong>
+              <span class="pass-meta-key">Nhịp hoạt động</span>
+              <strong class="pass-meta-val" data-pass-schedule>1–2 buổi / tuần</strong>
             </div>
             <div class="pass-meta-item">
-              <span class="pass-meta-key">Phong cách</span>
-              <strong class="pass-meta-val" data-pass-vibe>Quan tâm tìm hiểu</strong>
+              <span class="pass-meta-key" data-pass-vibe-label>Tâm thế</span>
+              <strong class="pass-meta-val" data-pass-vibe>Muốn tìm hiểu trước</strong>
             </div>
             <div class="pass-meta-item">
-              <span class="pass-meta-key">Mã thông tin</span>
-              <strong class="pass-meta-val pass-code" data-pass-code>CHỜ XÁC NHẬN</strong>
+              <span class="pass-meta-key">Mã Gieo Mầm</span>
+              <strong class="pass-meta-val pass-code" data-pass-code>SEED-PREVIEW</strong>
             </div>
           </div>
 
@@ -253,21 +259,21 @@
             <svg class="pass-barcode" width="84" height="20" viewBox="0 0 84 20" fill="currentColor" aria-hidden="true">
               <rect x="0" y="0" width="2" height="20"/><rect x="4" y="0" width="4" height="20"/><rect x="10" y="0" width="2" height="20"/><rect x="15" y="0" width="1" height="20"/><rect x="18" y="0" width="3" height="20"/><rect x="24" y="0" width="2" height="20"/><rect x="28" y="0" width="5" height="20"/><rect x="35" y="0" width="2" height="20"/><rect x="40" y="0" width="1" height="20"/><rect x="44" y="0" width="3" height="20"/><rect x="50" y="0" width="2" height="20"/><rect x="55" y="0" width="4" height="20"/><rect x="61" y="0" width="2" height="20"/><rect x="66" y="0" width="1" height="20"/><rect x="70" y="0" width="3" height="20"/><rect x="76" y="0" width="2" height="20"/><rect x="81" y="0" width="3" height="20"/>
             </svg>
-            <span>HÒA LẠC · CHỜ XÁC NHẬN LỊCH</span>
+            <span>TOGETHER WE RISE, TOGETHER WE SERVE</span>
           </div>
 
           <div class="pass-stamp" aria-hidden="true">
-            <span>ĐÃ GỬI THÔNG TIN</span>
-            <span>CHỜ PHẢN HỒI</span>
+            <span>ĐÃ GIEO MẦM</span>
+            <span>CHAPTER 01</span>
           </div>
         </article>
 
         <div class="pass-actions" id="join-pass-actions" hidden>
-          <p class="pass-actions-title">HolaRise đã ghi nhận thông tin quan tâm. Phiếu này không xác nhận chỗ tham dự một sự kiện.</p>
+          <p class="pass-actions-title">HolaRise đã ghi nhận Hạt Mầm Khởi Đầu của bạn. Tải thẻ về máy hoặc gửi rủ bạn bè cùng đi cuối tuần nhé!</p>
           <span id="join-pass-invite-text" class="visually-hidden"></span>
           <div class="pass-actions-buttons">
-            <button type="button" class="btn btn--primary btn--sm" data-pass-download="join">Tải phiếu (PNG)</button>
-            <button type="button" class="btn btn--outline btn--sm" data-pass-share="join">Chia sẻ thông tin HolaRise</button>
+            <button type="button" class="btn btn--primary btn--sm" data-pass-download="join">Tải Thẻ Gieo Mầm (PNG)</button>
+            <button type="button" class="btn btn--outline btn--sm" data-pass-share="join">Rủ bạn cùng đi</button>
             <span class="copy-control">
               <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="join-pass-invite-text" data-copy-invite>
                 <span>Sao chép lời mời</span>
@@ -286,20 +292,19 @@
       <div class="info-box">
         <h3>Thông tin liên hệ chính thức</h3>
         <ul class="info-list">
-          <li><strong style="color: var(--ink); font-weight: 500;">Khu vực hoạt động:</strong> Hòa Lạc, Hà Nội</li>
-          <li><strong style="color: var(--ink); font-weight: 500;">Văn phòng:</strong> {{CONTACT_ADDRESS}}</li>
-          <li><strong style="color: var(--ink); font-weight: 500;">Thời gian hoạt động:</strong> {{CONTACT_MEETING}}</li>
+          <li><strong style="color: var(--ink); font-weight: 500;">Khởi nguồn:</strong> Chapter 01 · {{CONTACT_ADDRESS}}</li>
+          <li><strong style="color: var(--ink); font-weight: 500;">Nhịp sinh hoạt:</strong> {{CONTACT_MEETING}}</li>
           <li><strong style="color: var(--ink); font-weight: 500;">Email:</strong> <a href="mailto:{{CONTACT_EMAIL}}" style="color: var(--accent); font-weight: 500;">{{CONTACT_EMAIL}}</a></li>
-          <li><strong style="color: var(--ink); font-weight: 500;">Hotline:</strong> <a href="tel:{{CONTACT_PHONE_RAW}}" style="color: var(--accent); font-weight: 500;">{{CONTACT_PHONE}}</a></li>
+          <li><strong style="color: var(--ink); font-weight: 500;">Hotline / Zalo:</strong> <a href="tel:{{CONTACT_PHONE_RAW}}" style="color: var(--accent); font-weight: 500;">{{CONTACT_PHONE}}</a></li>
         </ul>
       </div>
 
       <div class="info-box">
-        <h3>Quy trình đón tiếp thành viên mới</h3>
+        <h3>Từ Hạt Mầm Khởi Đầu đến hành trình thật</h3>
         <ul class="clean-list" style="margin-bottom: 0;">
-          <li><strong style="color: var(--ink); font-weight: 500;">Bước 1:</strong> Gửi biểu mẫu quan tâm trực tuyến.</li>
-          <li><strong style="color: var(--ink); font-weight: 500;">Bước 2:</strong> HolaRise phản hồi khi có thông tin hoặc lịch phù hợp được xác nhận.</li>
-          <li><strong style="color: var(--ink); font-weight: 500;">Bước 3:</strong> Bạn xem thông báo cụ thể rồi quyết định có tham gia hay không.</li>
+          <li><strong style="color: var(--ink); font-weight: 500;">Bước 1 · Gieo Mầm:</strong> Chọn nhánh bạn quan tâm và để lại thông tin hoặc nhắn trực tiếp Zalo.</li>
+          <li><strong style="color: var(--ink); font-weight: 500;">Bước 2 · Kết nối lịch tuần:</strong> Nhận thông tin cụ thể (giờ, địa điểm, chi phí minh bạch nếu có) của buổi phù hợp.</li>
+          <li><strong style="color: var(--ink); font-weight: 500;">Bước 3 · Đồng hành thực tế:</strong> Góp mặt cùng cộng đồng tại Hòa Lạc – Thạch Thất và lưu lại dấu ấn của riêng bạn.</li>
         </ul>
       </div>
     </div>

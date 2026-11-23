@@ -33,7 +33,7 @@ import {
   onRequestPatch as photoPatch,
   onRequestDelete as photoDelete,
 } from "../functions/api/admin/photos/[id].js";
-import { onRequestGet as ssrActivities } from "../functions/hoat-dong/index.js";
+import { onRequestGet as ssrJourney } from "../functions/hanh-trinh/index.js";
 import { onRequestGet as ssrHome } from "../functions/index.js";
 
 const ROOT = path.resolve(new URL("..", import.meta.url).pathname);
@@ -343,9 +343,9 @@ test("RBAC + Full Media Portal CRUD + KV cleanup on delete + SSR /hoat-dong/ & /
   assert.equal(attached.items.length, 2);
   assert.equal(attached.coverUrl, img1.url);
 
-  // 8. Verify SSR /hoat-dong/ renders published album (XSS escaped!), Drive link, excludes draft album
-  const actRes = await ssrActivities({
-    request: new Request(`${ORIGIN}/hoat-dong/`),
+  // 8. Verify SSR /hanh-trinh/ renders published album (XSS escaped!), Drive link, excludes draft album, keeps static gallery
+  const actRes = await ssrJourney({
+    request: new Request(`${ORIGIN}/hanh-trinh/`),
     env,
   });
   assert.equal(actRes.status, 200);
@@ -354,6 +354,7 @@ test("RBAC + Full Media Portal CRUD + KV cleanup on delete + SSR /hoat-dong/ & /
   assert.ok(!actHtml.includes("<script>alert(1)</script>"));
   assert.ok(actHtml.includes("https://drive.google.com/drive/folders/holarise-tan-xa"));
   assert.ok(!actHtml.includes("Album Nháp Nội Bộ"));
+  assert.ok(actHtml.includes("HolaHeart × MusicSpace"));
 
   // 9. Verify SSR / renders featured home photo in HORIZONTAL_GALLERY
   const homeRes = await ssrHome({

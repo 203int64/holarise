@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>__SSR_PAGE_TITLE__</title>
   <meta name="description" content="__SSR_PAGE_DESCRIPTION__">
-  <meta name="keywords" content="HolaRise, Cộng đồng HolaRise, Cộng đồng Thanh niên Hòa Lạc Cùng Vươn Lên, Hoa Lac Youth Empowerment Community, CLB thanh niên Hòa Lạc, tình nguyện môi trường Hòa Lạc, workshop sinh viên Hòa Lạc">
+  <meta name="keywords" content="HolaRise, Cộng đồng Thanh niên Hòa Lạc, Thạch Thất, HolaHeart, HolaGreen, HolaConnect, tình nguyện sinh viên Hòa Lạc, thiện nguyện Thạch Thất, workshop giá trị sống">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#FFFFFF">
   <meta name="mobile-web-app-capable" content="yes">
@@ -44,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=b3e88542f9">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=4c560294b9">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -58,8 +58,8 @@
   "slogan": "Together We Rise, Together We Serve.",
   "url": "https://holarise.org",
   "logo": "https://holarise.org/assets/images/logo-mark.png",
-  "image": "https://holarise.org/assets/images/og-cover.jpg?v=3",
-  "description": "HolaRise kết nối thanh niên, sinh viên Hòa Lạc làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng.",
+  "image": "https://holarise.org/assets/images/og-cover.jpg?v=4",
+  "description": "HolaRise khởi nguồn từ Hòa Lạc – Thạch Thất, kết nối người trẻ qua 3 trụ cột: HolaHeart (giá trị sống), HolaGreen (sinh thái bền vững) và HolaConnect (phụng sự cộng đồng).",
   "email": "phungsu@holarise.org",
   "telephone": "077.777.1948",
   "areaServed": {
@@ -79,8 +79,6 @@
 </head>
 <body class="">
   <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
-  <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
-  <div class="cursor-tag" id="cursor-tag" aria-hidden="true"></div>
   <div class="float-preview" id="float-preview" aria-hidden="true">
     <img id="float-preview-img" alt="">
   </div>
@@ -101,19 +99,13 @@
       </a>
 
       <nav class="main-nav" data-main-nav aria-label="Điều hướng chính">
-        <a class="nav-link" href="/">Trang chủ</a>
-        <a class="nav-link" href="/gioi-thieu/">Giới thiệu</a>
-        <a class="nav-link" href="/hoat-dong/">Hoạt động</a>
-        <a class="nav-link" href="/workshop/">Workshop</a>
-        <a class="nav-link is-active" href="/tin-tuc/" aria-current="page">Tin tức</a>
-        <a class="nav-link" href="/tham-gia/">Tham gia</a>
+        <a class="nav-link" href="/gioi-thieu/">Về HolaRise</a>
+        <a class="nav-link" href="/lich-hoat-dong/">Lịch hoạt động</a>
+        <a class="nav-link is-active" href="/hanh-trinh/" aria-current="page">Hành trình</a>
       </nav>
 
       <div class="header-actions">
-        <div class="live-status-pill" aria-label="Địa điểm và giờ địa phương">
-          <span class="live-status-dot" aria-hidden="true"></span>
-          <span>Hòa Lạc, Hà Nội · <span data-live-clock>07:00:00</span></span>
-        </div>
+        <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/">Tham gia</a>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Mở menu điều hướng">
           <span class="nav-toggle-bars" aria-hidden="true">
             <span></span>
@@ -129,11 +121,9 @@
     <div class="mobile-drawer-inner">
       <nav class="mobile-drawer-nav" aria-label="Menu di động">
         <a class="drawer-link" href="/" style="--i: 0;"><span class="drawer-link-num">01</span><span class="drawer-link-label">Trang chủ</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
-        <a class="drawer-link" href="/gioi-thieu/" style="--i: 1;"><span class="drawer-link-num">02</span><span class="drawer-link-label">Giới thiệu &amp; Sứ mệnh</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
-        <a class="drawer-link" href="/hoat-dong/" style="--i: 2;"><span class="drawer-link-num">03</span><span class="drawer-link-label">Hoạt động &amp; Chiến dịch</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
-        <a class="drawer-link" href="/workshop/" style="--i: 3;"><span class="drawer-link-num">04</span><span class="drawer-link-label">Lịch Workshop</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
-        <a class="drawer-link is-active" href="/tin-tuc/" style="--i: 4;" aria-current="page"><span class="drawer-link-num">05</span><span class="drawer-link-label">Nhật ký hoạt động</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
-        <a class="drawer-link" href="/tham-gia/" style="--i: 5;"><span class="drawer-link-num">06</span><span class="drawer-link-label">Tham gia cùng HolaRise</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
+        <a class="drawer-link" href="/gioi-thieu/" style="--i: 1;"><span class="drawer-link-num">02</span><span class="drawer-link-label">Về HolaRise</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
+        <a class="drawer-link" href="/lich-hoat-dong/" style="--i: 2;"><span class="drawer-link-num">03</span><span class="drawer-link-label">Lịch hoạt động</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
+        <a class="drawer-link is-active" href="/hanh-trinh/" style="--i: 3;" aria-current="page"><span class="drawer-link-num">04</span><span class="drawer-link-label">Hành trình &amp; Kho ảnh</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
       </nav>
       <div class="mobile-drawer-footer">
         <a class="btn btn--primary" href="/tham-gia/" style="width: 100%; justify-content: space-between; padding: 15px 22px;">
@@ -149,7 +139,7 @@
           </svg>
         </button>
         <div class="mobile-drawer-meta">
-          <span>Tân Xã, Hòa Lạc, Hà Nội</span>
+          <span>Hòa Lạc – Thạch Thất, Hà Nội</span>
           <span>077.777.1948</span>
         </div>
       </div>
@@ -162,7 +152,7 @@
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
       <a href="/">Trang chủ</a>
       <span aria-hidden="true">/</span>
-      <a href="/tin-tuc/">Tin tức &amp; Nhật ký</a>
+      <a href="/hanh-trinh/">Hành trình</a>
       <span aria-hidden="true">/</span>
       <span aria-current="page">__SSR_ARTICLE_CATEGORY__</span>
     </nav>
@@ -203,8 +193,8 @@
     </article>
 
     <div style="margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
-      <a class="arrow-link" href="/tin-tuc/">← Quay lại tất cả bài viết</a>
-      <a class="btn btn--primary" href="/tham-gia/" data-magnetic>Nhận thông tin hoạt động</a>
+      <a class="arrow-link" href="/hanh-trinh/">← Quay lại Hành trình HolaRise</a>
+      <a class="btn btn--primary" href="/tham-gia/" data-magnetic>Tham gia cùng HolaRise</a>
     </div>
   </div>
 </section>
@@ -213,7 +203,7 @@
   <div class="container">
     <div class="section-header">
       <div class="kicker">Đọc tiếp</div>
-      <h2 class="section-title">Các hoạt động khác của Cộng đồng HolaRise</h2>
+      <h2 class="section-title">Các dấu mốc khác của Cộng đồng HolaRise</h2>
     </div>
     <div class="grid-2">
       __SSR_RELATED_NEWS__
@@ -231,19 +221,18 @@
             <img src="/assets/images/logo-holarise.png" alt="HolaRise – Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên" width="104" height="24" loading="lazy" style="height: 22px; width: auto;">
           </a>
           <p style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;">Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên</p>
-          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);">Kết nối thanh niên, sinh viên và học sinh tại Hòa Lạc cùng làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng (HolaConnect).</p>
-          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Small Beginnings. Great Impact. · Together We Rise, Together We Serve.</p>
+          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);">Khởi nguồn từ Hòa Lạc – Thạch Thất, kết nối thế hệ trẻ cùng vun bồi nội lực (HolaHeart), kiến tạo cảnh quan xanh (HolaGreen) và phụng sự cộng đồng (HolaConnect).</p>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Together We Rise, Together We Serve. · Chapter 01 · Hòa Lạc – Thạch Thất</p>
         </div>
 
         <div>
           <h2 class="footer-heading">Khám phá</h2>
           <ul class="footer-links">
             <li><a href="/">Trang chủ</a></li>
-            <li><a href="/gioi-thieu/">Giới thiệu &amp; Sứ mệnh</a></li>
-            <li><a href="/hoat-dong/">Hoạt động &amp; Chiến dịch</a></li>
-            <li><a href="/workshop/">Lịch Workshop</a></li>
-            <li><a href="/tin-tuc/">Nhật ký hoạt động</a></li>
-            <li><a href="/chinh-sach/">Bảo mật &amp; Quy tắc cộng đồng</a></li>
+            <li><a href="/gioi-thieu/">Về HolaRise</a></li>
+            <li><a href="/lich-hoat-dong/">Lịch hoạt động</a></li>
+            <li><a href="/hanh-trinh/">Hành trình &amp; Kho ảnh</a></li>
+            <li><a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a></li>
             <li>
               <button class="pwa-install-footer-btn" type="button" data-pwa-install hidden>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -258,22 +247,22 @@
         </div>
 
         <div>
-          <h2 class="footer-heading">3 Chương trình</h2>
+          <h2 class="footer-heading">3 Trụ cột</h2>
           <ul class="footer-links">
-            <li><a href="/hoat-dong/#moi-truong">HolaGreen · Môi trường</a></li>
-            <li><a href="/workshop/">HolaHeart · Giá trị sống</a></li>
-            <li><a href="/hoat-dong/#cong-dong">HolaConnect · Cộng đồng</a></li>
-            <li><a href="/tham-gia/">Đăng ký tham gia</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holaheart">HolaHeart · Nội lực &amp; Lắng nghe</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holagreen">HolaGreen · Sinh thái &amp; Cảnh quan</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holaconnect">HolaConnect · Phụng sự &amp; Kết nối</a></li>
+            <li><a href="/tham-gia/">Tham gia &amp; Hợp tác</a></li>
           </ul>
         </div>
 
         <div>
-          <h2 class="footer-heading">Liên hệ tại Hòa Lạc</h2>
+          <h2 class="footer-heading">Liên hệ · Chapter 01</h2>
           <ul class="footer-links">
-            <li>Văn phòng: Tân Xã, Hòa Lạc, Hà Nội</li>
+            <li>Địa bàn: Hòa Lạc – Thạch Thất, Hà Nội</li>
             <li><a href="tel:0777771948">077.777.1948</a></li>
             <li><a href="mailto:phungsu@holarise.org">phungsu@holarise.org</a></li>
-            <li>Thời gian hoạt động: Lịch được công bố theo từng hoạt động.</li>
+            <li>Nhịp sinh hoạt: 1–2 hoạt động mỗi tuần tại Hòa Lạc – Thạch Thất</li>
           </ul>
         </div>
       </div>
@@ -434,7 +423,7 @@
       <div data-pwa-guide="ios">
         <span class="kicker" style="margin-bottom: 8px;">Cài đặt trên iPhone / iPad</span>
         <h2 id="pwa-dialog-title-ios" class="pwa-dialog-title">Thêm HolaRise vào Màn hình chính</h2>
-        <p class="pwa-dialog-lead">Mở nhanh như ứng dụng gốc, xem lịch Workshop mượt mà ngay cả khi sóng yếu tại Hòa Lạc.</p>
+        <p class="pwa-dialog-lead">Mở nhanh như ứng dụng gốc, theo dõi lịch hoạt động và hành trình cộng đồng mượt mà tại Hòa Lạc – Thạch Thất.</p>
         <ol class="pwa-steps">
           <li class="pwa-step">
             <span class="pwa-step-num" aria-hidden="true">1</span>
@@ -482,9 +471,8 @@
   <!-- Standalone PWA Bottom Tab Bar (Mobile <= 820px in display-mode: standalone only) -->
   <nav class="pwa-tabbar" aria-label="Điều hướng nhanh ứng dụng">
     <a class="pwa-tab" href="/"><svg class="pwa-tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V20h13V9.5"></path></svg><span class="pwa-tab-label">Trang chủ</span></a>
-      <a class="pwa-tab" href="/hoat-dong/"><svg class="pwa-tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg><span class="pwa-tab-label">Hoạt động</span></a>
-      <a class="pwa-tab" href="/workshop/"><svg class="pwa-tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2.5"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg><span class="pwa-tab-label">Workshop</span></a>
-      <a class="pwa-tab is-active" href="/tin-tuc/" aria-current="page"><svg class="pwa-tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5Z"></path><path d="M8 7h8M8 11h8M8 15h5"></path></svg><span class="pwa-tab-label">Tin tức</span></a>
+      <a class="pwa-tab" href="/lich-hoat-dong/"><svg class="pwa-tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2.5"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg><span class="pwa-tab-label">Lịch</span></a>
+      <a class="pwa-tab is-active" href="/hanh-trinh/" aria-current="page"><svg class="pwa-tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5Z"></path><path d="M8 7h8M8 11h8M8 15h5"></path></svg><span class="pwa-tab-label">Hành trình</span></a>
       <a class="pwa-tab" href="/tham-gia/"><svg class="pwa-tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg><span class="pwa-tab-label">Tham gia</span></a>
   </nav>
 
@@ -504,11 +492,11 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/vendor/gsap.min.js?v=b3e88542f9" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=b3e88542f9" defer></script>
-  <script src="/assets/js/motion.js?v=b3e88542f9" defer></script>
-  <script src="/assets/js/main.js?v=b3e88542f9" defer></script>
-  <script src="/assets/js/join-pass.js?v=b3e88542f9" defer></script>
-  <script src="/assets/js/pwa.js?v=b3e88542f9" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=4c560294b9" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=4c560294b9" defer></script>
+  <script src="/assets/js/motion.js?v=4c560294b9" defer></script>
+  <script src="/assets/js/main.js?v=4c560294b9" defer></script>
+  <script src="/assets/js/join-pass.js?v=4c560294b9" defer></script>
+  <script src="/assets/js/pwa.js?v=4c560294b9" defer></script>
 </body>
 </html>

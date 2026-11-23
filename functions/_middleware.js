@@ -1,17 +1,73 @@
 /**
  * Global Pages Functions middleware:
+ * - Canonicalizes www.holarise.org -> https://holarise.org (301 permanent redirect)
+ * - 301 Permanent Redirects for legacy IA routes (/workshop/, /hoat-dong/, /tin-tuc/)
  * - Blocks direct external access to internal SSR templates (/_templates/*)
+ * - Marks *.pages.dev preview/default hosts with X-Robots-Tag: noindex, nofollow
  * - Ensures consistent baseline security headers on dynamic Function responses.
  */
 
+const CANONICAL_ORIGIN = "https://holarise.org";
+
+function buildLegacyRedirectPath(pathname, search) {
+  const cleanPath = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  if (cleanPath === "/workshop") {
+    return `/lich-hoat-dong/${search}`;
+  }
+  if (cleanPath === "/hoat-dong") {
+    return `/gioi-thieu/${search}#chuong-trinh`;
+  }
+  if (cleanPath === "/tin-tuc") {
+    return `/hanh-trinh/${search}`;
+  }
+  if (cleanPath.startsWith("/tin-tuc/")) {
+    const rest = cleanPath.slice("/tin-tuc/".length);
+    if (rest && !rest.includes("/")) {
+      return `/hanh-trinh/${rest}/${search}`;
+    }
+    return `/hanh-trinh/${search}`;
+  }
+  return null;
+}
+
 export async function onRequest(context) {
   const url = new URL(context.request.url);
+  const host = url.hostname.toLowerCase();
+
+  if (host === "www.holarise.org") {
+    const redirectPath = buildLegacyRedirectPath(url.pathname, url.search) || `${url.pathname}${url.search}`;
+    const target = `${CANONICAL_ORIGIN}${redirectPath}`;
+    return new Response(null, {
+      status: 301,
+      headers: {
+        Location: target,
+        "Cache-Control": "public, max-age=86400",
+      },
+    });
+  }
+
+  const legacyTarget = buildLegacyRedirectPath(url.pathname, url.search);
+  if (legacyTarget) {
+    return new Response(null, {
+      status: 301,
+      headers: {
+        Location: `${url.origin}${legacyTarget}`,
+        "Cache-Control": "public, max-age=86400",
+      },
+    });
+  }
+
   if (url.pathname === "/_templates" || url.pathname.startsWith("/_templates/")) {
     return new Response("Not Found", { status: 404 });
   }
 
   const response = await context.next();
   const headers = new Headers(response.headers);
+
+  if (host.endsWith(".pages.dev")) {
+    headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+
   if (!headers.has("X-Content-Type-Options")) {
     headers.set("X-Content-Type-Options", "nosniff");
   }

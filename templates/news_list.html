@@ -3,45 +3,105 @@
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
       <a href="/">Trang chủ</a>
       <span aria-hidden="true">/</span>
-      <span aria-current="page">Tin tức &amp; Nhật ký</span>
+      <span aria-current="page">Hành trình</span>
     </nav>
-    <h1>Tin tức &amp; Nhật ký Hoạt động</h1>
-    <p>Cập nhật công khai kết quả các chiến dịch làm sạch môi trường, góc chia sẻ sau mỗi buổi workshop giá trị sống và hành trình phụng sự tại Hòa Lạc.</p>
+    <h1>Hành trình HolaRise</h1>
+    <p>Từ những đêm nhạc &amp; workshop kết nối đầu tiên cùng MusicSpace đến các chuyên đề giá trị sống và hành động cộng đồng khắp Hòa Lạc – Thạch Thất — mọi dấu mốc đều được lưu bằng tư liệu thật.</p>
   </div>
 </section>
 
-<section class="section">
+<section class="section" id="cau-chuyen">
   <div class="container">
+    <div class="section-header--split" style="margin-bottom: 24px;">
+      <div>
+        <div class="kicker">Tường thuật &amp; Nhật ký</div>
+        <h2 class="section-title" style="margin-bottom: 0;">Những dấu mốc có hồ sơ chi tiết</h2>
+      </div>
+      <a class="arrow-link" href="/lich-hoat-dong/">Xem lịch hoạt động tuần này →</a>
+    </div>
+
     <div class="filter-bar-row">
-      <div class="filter-bar" data-filter-group="[data-news-card]" role="group" aria-label="Lọc bài viết theo bộ lọc 4 chữ">
+      <div class="filter-bar" data-filter-group="[data-news-card]" role="group" aria-label="Lọc câu chuyện theo 3 trụ cột">
         <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Tất cả</button>
-        <button class="filter-btn" type="button" data-filter="sach" aria-pressed="false">
-          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
-          <span>Sạch</span>
-        </button>
-        <button class="filter-btn" type="button" data-filter="biet-on" aria-pressed="false">
+        <button class="filter-btn" type="button" data-filter="holaheart" aria-pressed="false">
           <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-          <span>Biết ơn</span>
+          <span>HolaHeart</span>
         </button>
-        <button class="filter-btn" type="button" data-filter="tu-te" aria-pressed="false">
-          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-          <span>Tử tế</span>
+        <button class="filter-btn" type="button" data-filter="holagreen" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+          <span>HolaGreen</span>
         </button>
-        <button class="filter-btn" type="button" data-filter="se-chia" aria-pressed="false">
+        <button class="filter-btn" type="button" data-filter="holaconnect" aria-pressed="false">
           <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Sẻ chia</span>
+          <span>HolaConnect</span>
         </button>
       </div>
       <span class="filter-count" data-filter-count="[data-news-card]" aria-live="polite"></span>
     </div>
 
     <div class="grid-3" data-stagger-group>
+      <!-- CMS:NEWS_LIST:START -->
       {{NEWS_LIST_HTML}}
+      <!-- CMS:NEWS_LIST:END -->
     </div>
 
     <div class="filter-empty" data-filter-empty="[data-news-card]" hidden>
-      <p>Chưa có bài viết nào thuộc nhóm giá trị này.</p>
-      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-news-card]">Xem tất cả bài viết</button>
+      <p>Các bài tường thuật tiếp theo cho mảng này đang được Ban Điều Phối hoàn thiện.</p>
+      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-news-card]">Xem tất cả câu chuyện</button>
+    </div>
+  </div>
+</section>
+
+<section class="section section--mist" id="thu-vien-anh">
+  <div class="container">
+    <div class="section-header" style="margin-bottom: 32px;">
+      <div class="kicker">Triển lãm tư liệu thật · Bấm vào ảnh để phóng to</div>
+      <h2 class="section-title">Khoảnh khắc từ các chương trình đã diễn ra</h2>
+      <p class="section-lead">Toàn bộ ảnh dưới đây đều là tư liệu chụp trực tiếp tại các buổi sinh hoạt và hợp tác thực tế tại Hòa Lạc – Thạch Thất.</p>
+    </div>
+
+    <!-- CMS:D1_ALBUMS:START -->
+    <!-- CMS:D1_ALBUMS:END -->
+
+    <div class="archive-chapter">
+      <div class="archive-chapter-head">
+        <div>
+          <span class="archive-chapter-tag">Chương I · 15/11/2026 · Mây Lang Thang Cafe</span>
+          <h3>HolaHeart: Tình yêu thương của Mẹ trong thời đại AI</h3>
+        </div>
+        <a class="arrow-link" href="/hanh-trinh/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/">Đọc tường thuật buổi gặp →</a>
+      </div>
+      {{GALLERY_HTML}}
+    </div>
+
+    <div class="archive-chapter" id="musicspace-chapter">
+      <div class="archive-chapter-head">
+        <div>
+          <span class="archive-chapter-tag">Chương II · 2025 – 2026 · Chuỗi hợp tác âm nhạc &amp; sẻ chia</span>
+          <h3>HolaHeart × MusicSpace tại Hòa Lạc</h3>
+          <p class="archive-chapter-desc">14 khoảnh khắc tuyển chọn từ chuỗi đêm nhạc mộc và giao lưu kết nối trước khi website HolaRise chính thức ra mắt.</p>
+        </div>
+      </div>
+      {{MUSICSPACE_GALLERY_HTML}}
+    </div>
+
+    <p class="privacy-photo-note">
+      <strong>Quyền riêng tư hình ảnh:</strong> Mọi hình ảnh được đăng tải nhằm lan tỏa giá trị tích cực của cộng đồng. Nếu bạn muốn cập nhật hoặc gỡ bỏ hình ảnh có mình, vui lòng liên hệ trực tiếp Ban Điều Phối qua <a href="mailto:{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</a> hoặc xem <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a>.
+    </p>
+  </div>
+</section>
+
+<section class="section section--compact">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h2>Muốn góp mặt trong những dấu mốc tiếp theo?</h2>
+        <p>Đồng hành cùng HolaRise trong các buổi đối thoại, hành động xanh và kết nối sắp tới tại Hòa Lạc – Thạch Thất.</p>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+        <a class="btn btn--light" href="/tham-gia/" data-magnetic>Tham gia cùng HolaRise</a>
+        <a class="btn btn--ghost-dark" href="/lich-hoat-dong/">Xem lịch hoạt động</a>
+      </div>
     </div>
   </div>
 </section>

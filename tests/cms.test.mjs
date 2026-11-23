@@ -34,10 +34,12 @@ import { onRequestPatch as usersPatch, onRequestDelete as usersDelete } from "..
 import { onRequestGet as settingsGet, onRequestPut as settingsPut } from "../functions/api/admin/settings/index.js";
 import { onRequest as rootMiddleware } from "../functions/_middleware.js";
 import { onRequestGet as ssrHome } from "../functions/index.js";
-import { onRequestGet as ssrWorkshop } from "../functions/workshop/index.js";
+import { onRequestGet as ssrAbout } from "../functions/gioi-thieu/index.js";
+import { onRequestGet as ssrSchedule } from "../functions/lich-hoat-dong/index.js";
 import { onRequestGet as ssrJoin } from "../functions/tham-gia/index.js";
-import { onRequestGet as ssrNewsList } from "../functions/tin-tuc/index.js";
-import { onRequestGet as ssrPostDetail, onRequestHead as ssrPostHead } from "../functions/tin-tuc/[slug].js";
+import { onRequestGet as ssrJourneyList } from "../functions/hanh-trinh/index.js";
+import { onRequestGet as ssrPostDetail, onRequestHead as ssrPostHead } from "../functions/hanh-trinh/[slug].js";
+import { onRequestGet as partnersGet, onRequestPut as partnersPut } from "../functions/api/admin/partners.js";
 import { onRequestHead as mediaHead } from "../functions/api/media/[id].js";
 import { onRequestGet as ssrSitemap } from "../functions/sitemap.xml.js";
 import { callGasWebhook } from "../functions/_lib/gas.js";
@@ -584,7 +586,7 @@ test("SSR Pages Functions inject live D1 events, brand-new articles with OG/JSON
 
   // SSR article detail renders full SEO, Open Graph JPEG URL, JSON-LD & safe HTML
   const postRes = await ssrPostDetail({
-    request: makeReq("/tin-tuc/bai-viet-moi-tuc-thi/"),
+    request: makeReq("/hanh-trinh/bai-viet-moi-tuc-thi/"),
     env,
     params: { slug: "bai-viet-moi-tuc-thi" },
   });
@@ -592,28 +594,31 @@ test("SSR Pages Functions inject live D1 events, brand-new articles with OG/JSON
   const postHtml = await postRes.text();
   assert.ok(!postHtml.includes("__SSR_"), "All __SSR_ placeholders must be replaced");
   assert.ok(postHtml.includes('<meta property="og:image" content="https://holarise.org/api/media/img-cover.jpg">'));
-  assert.ok(postHtml.includes("https://holarise.org/tin-tuc/bai-viet-moi-tuc-thi/"));
+  assert.ok(postHtml.includes("https://holarise.org/hanh-trinh/bai-viet-moi-tuc-thi/"));
   assert.ok(postHtml.includes("<strong>chữ đậm</strong>"));
   assert.ok(postHtml.includes("<h2>Điểm nhấn</h2>"));
   assert.ok(postHtml.includes('"@type": "Article"'));
 
   // Non-existent slug returns 404
   const notFound = await ssrPostDetail({
-    request: makeReq("/tin-tuc/khong-ton-tai/"),
+    request: makeReq("/hanh-trinh/khong-ton-tai/"),
     env,
     params: { slug: "khong-ton-tai" },
   });
   assert.equal(notFound.status, 404);
 
-  // Dynamic sitemap includes newly published post URL
+  // Dynamic sitemap includes newly published post URL & new canonical routes
   const smRes = await ssrSitemap({ request: makeReq("/sitemap.xml"), env });
   assert.equal(smRes.status, 200);
   const smXml = await smRes.text();
-  assert.ok(smXml.includes("https://holarise.org/tin-tuc/bai-viet-moi-tuc-thi/"));
+  assert.ok(smXml.includes("https://holarise.org/hanh-trinh/bai-viet-moi-tuc-thi/"));
+  assert.ok(smXml.includes("https://holarise.org/lich-hoat-dong/"));
+  assert.ok(!smXml.includes("https://holarise.org/workshop/"));
+  assert.ok(!smXml.includes("https://holarise.org/hoat-dong/"));
 
-  // HEAD request on article & SSR on /workshop/ and /tin-tuc/ + bare /_templates block
+  // HEAD request on article & SSR on /lich-hoat-dong/ and /hanh-trinh/ + bare /_templates block
   const headPost = await ssrPostHead({
-    request: makeReq("/tin-tuc/bai-viet-moi-tuc-thi/", { method: "HEAD" }),
+    request: makeReq("/hanh-trinh/bai-viet-moi-tuc-thi/", { method: "HEAD" }),
     env,
     params: { slug: "bai-viet-moi-tuc-thi" },
   });
@@ -626,7 +631,7 @@ test("SSR Pages Functions inject live D1 events, brand-new articles with OG/JSON
   });
   assert.equal(bareBlocked.status, 404);
 
-  const wsRes = await ssrWorkshop({ request: makeReq("/workshop/"), env });
+  const wsRes = await ssrSchedule({ request: makeReq("/lich-hoat-dong/"), env });
   assert.equal(wsRes.status, 200);
   const wsHtml = await wsRes.text();
   assert.ok(wsHtml.includes("Chiến dịch SSR Live Test"));
@@ -654,7 +659,7 @@ test("SSR Pages Functions inject live D1 events, brand-new articles with OG/JSON
         email: "hoang@fpt.edu.vn",
         role: "Tình nguyện viên chiến dịch môi trường",
         organization: "ĐH FPT",
-        note: "[Phong cách: Đi một mình (ghép nhóm) | Hứng thú: Trồng cây xanh | Rủ bởi: Minh Anh] Hẹn gặp Chủ nhật!",
+        note: "[Tâm thế: Đi cùng bạn bè | Hứng thú: Trồng cây xanh | Rủ bởi: Minh Anh] Hẹn gặp cuối tuần!",
       },
     }),
     env,
@@ -670,7 +675,7 @@ test("SSR Pages Functions inject live D1 events, brand-new articles with OG/JSON
   assert.equal(storedJoinReg.activity_title, "Chiến dịch SSR Live Test");
   assert.ok(storedJoinReg.note.includes("Rủ bởi: Minh Anh"));
 
-  const nlRes = await ssrNewsList({ request: makeReq("/tin-tuc/"), env });
+  const nlRes = await ssrJourneyList({ request: makeReq("/hanh-trinh/"), env });
   assert.equal(nlRes.status, 200);
   assert.ok((await nlRes.text()).includes("Bài viết mới xuất bản tức thì"));
 
@@ -683,13 +688,23 @@ test("SSR Pages Functions inject live D1 events, brand-new articles with OG/JSON
     .bind(now, now)
     .run();
   const tokRes = await ssrPostDetail({
-    request: makeReq("/tin-tuc/token-test/"),
+    request: makeReq("/hanh-trinh/token-test/"),
     env,
     params: { slug: "token-test" },
   });
   const tokHtml = await tokRes.text();
   assert.ok(tokHtml.includes("<title>Tiêu đề chứa __SSR_EXTRA_JSON_LD__ an toàn"));
   assert.ok(!tokHtml.includes("<title>Tiêu đề chứa <script"));
+
+  // Auto-past UTC+7 & empty-state hiding: mark all events past or expired in past -> Home & Join hide upcoming, Schedule shows Value-Driven Empty State
+  await db.prepare("UPDATE events SET date = '2020-01-01' WHERE kind = 'upcoming'").run();
+  const emptyHomeHtml = await (await ssrHome({ request: makeReq("/"), env })).text();
+  assert.ok(!emptyHomeHtml.includes('id="lich-hen"'), "Home must hide upcoming section when no upcoming events remain");
+  const emptyJoinHtml = await (await ssrJoin({ request: makeReq("/tham-gia/"), env })).text();
+  assert.ok(!emptyJoinHtml.includes("data-join-events-step"), "Join must hide Step 02 when no upcoming events remain");
+  const emptySchedHtml = await (await ssrSchedule({ request: makeReq("/lich-hoat-dong/"), env })).text();
+  assert.ok(emptySchedHtml.includes("schedule-empty-flagship"), "Schedule must render Value-Driven Empty State");
+  assert.ok(emptySchedHtml.includes("Chiến dịch SSR Live Test"), "Expired event automatically moves to Past list");
 });
 
 test("Security & reliability regressions: rate limits (429), resync, event edit preservation, session revoke on pw reset, GAS bridge, Vietnamese search & HEAD media", async () => {
@@ -875,4 +890,111 @@ test("Security & reliability regressions: rate limits (429), resync, event edit 
     fetchImpl: async () => new Response(JSON.stringify({ ok: false, error: "Sai secret" }), { status: 200 }),
   });
   assert.equal(gasFail.status, "failed");
+});
+
+test("SEO edge middleware: www + legacy route 301 redirects and pages.dev noindex guard", async () => {
+  const wwwRes = await rootMiddleware({
+    request: new Request("https://www.holarise.org/tin-tuc/?ref=fb"),
+    next: async () => new Response("should-not-run", { status: 200 }),
+  });
+  assert.equal(wwwRes.status, 301);
+  assert.equal(wwwRes.headers.get("Location"), "https://holarise.org/hanh-trinh/?ref=fb");
+
+  const legacyRedirects = [
+    ["https://holarise.org/workshop/", "https://holarise.org/lich-hoat-dong/"],
+    ["https://holarise.org/workshop", "https://holarise.org/lich-hoat-dong/"],
+    ["https://holarise.org/hoat-dong/", "https://holarise.org/gioi-thieu/#chuong-trinh"],
+    ["https://holarise.org/tin-tuc/", "https://holarise.org/hanh-trinh/"],
+    ["https://holarise.org/tin-tuc/bai-viet-a/?utm=zalo", "https://holarise.org/hanh-trinh/bai-viet-a/?utm=zalo"],
+  ];
+  for (const [fromUrl, toUrl] of legacyRedirects) {
+    const r = await rootMiddleware({
+      request: new Request(fromUrl),
+      next: async () => new Response("should-not-run", { status: 200 }),
+    });
+    assert.equal(r.status, 301);
+    assert.equal(r.headers.get("Location"), toUrl);
+  }
+
+  const pagesDevRes = await rootMiddleware({
+    request: new Request("https://holarise.pages.dev/"),
+    next: async () => new Response("ok", { status: 200 }),
+  });
+  assert.equal(pagesDevRes.status, 200);
+  assert.equal(pagesDevRes.headers.get("X-Robots-Tag"), "noindex, nofollow");
+
+  const prodRes = await rootMiddleware({
+    request: new Request("https://holarise.org/"),
+    next: async () => new Response("ok", { status: 200 }),
+  });
+  assert.equal(prodRes.status, 200);
+  assert.equal(prodRes.headers.get("X-Robots-Tag"), null);
+});
+
+test("Partners CMS API & SSR strip injection on Home and About", async () => {
+  const db = createMockD1();
+  const assets = {
+    async fetch(req) {
+      const p = new URL(req.url).pathname.replace(/^\/+/, "");
+      const filePath = path.join(ROOT, "dist", p);
+      if (!fs.existsSync(filePath)) return new Response("Not Found", { status: 404 });
+      return new Response(fs.readFileSync(filePath, "utf8"), {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    },
+  };
+  const env = { DB: db, ASSETS: assets };
+
+  const boot = await authBootstrap({
+    request: makeReq("/api/auth/bootstrap", {
+      method: "POST",
+      body: { email: "admin@holarise.org", name: "Admin", password: "StrongPassword123" },
+    }),
+    env,
+  });
+  const cookie = extractSessionCookie(boot);
+
+  // Initially empty -> Home & About hide partners strip
+  const home0 = await (await ssrHome({ request: makeReq("/"), env })).text();
+  const about0 = await (await ssrAbout({ request: makeReq("/gioi-thieu/"), env })).text();
+  assert.ok(!home0.includes('id="doi-tac"'));
+  assert.ok(!about0.includes('id="doi-tac"'));
+
+  // Reject unsafe javascript: website URL
+  const badRes = await partnersPut({
+    request: makeReq("/api/admin/partners", {
+      method: "PUT",
+      cookie,
+      body: { items: [{ name: "Bad Partner", websiteUrl: "javascript:alert(1)" }] },
+    }),
+    env,
+  });
+  assert.equal(badRes.status, 400);
+
+  // Save 1 active + 1 inactive partner
+  const putRes = await partnersPut({
+    request: makeReq("/api/admin/partners", {
+      method: "PUT",
+      cookie,
+      body: {
+        items: [
+          { name: "MusicSpace", role: "Không gian Đồng hành", websiteUrl: "https://musicspace.edu.vn", isActive: true },
+          { name: "Hidden Partner", role: "Nhà trường & CLB", isActive: false },
+        ],
+      },
+    }),
+    env,
+  });
+  assert.equal(putRes.status, 200);
+  const getList = await (await partnersGet({ request: makeReq("/api/admin/partners", { cookie }), env })).json();
+  assert.equal(getList.items.length, 2);
+
+  // Active partner renders on Home & About; inactive stays hidden
+  const home1 = await (await ssrHome({ request: makeReq("/"), env })).text();
+  const about1 = await (await ssrAbout({ request: makeReq("/gioi-thieu/"), env })).text();
+  assert.ok(home1.includes("MusicSpace"));
+  assert.ok(!home1.includes("Hidden Partner"));
+  assert.ok(about1.includes("MusicSpace"));
+  assert.ok(!about1.includes("Hidden Partner"));
 });
