@@ -8,7 +8,7 @@
 
   var prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var isFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-  var SITE_URL = "https://holarise.pages.dev";
+  var SITE_URL = "https://holarise.org";
   var DEFAULT_SCHEDULE = "Ngày đầu của tuần - Chủ nhật";
 
   var joinForm = document.querySelector("[data-join-studio]");

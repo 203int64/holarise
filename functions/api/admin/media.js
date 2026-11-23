@@ -3,7 +3,7 @@ import { errorResponse, jsonResponse, requireAdmin, sniffImageMime } from "../..
 const MAX_UPLOAD_BYTES = 1.5 * 1024 * 1024; // 1.5 MB (client auto-compresses JPEG to ~150 KB)
 
 export async function onRequestPost(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { allowedRoles: ["super_admin", "editor", "media"] });
   if (!auth.ok) return auth.response;
 
   if (!context.env?.MEDIA_KV) {

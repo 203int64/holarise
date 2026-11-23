@@ -1,7 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /media/
 Disallow: /api/
 Disallow: /_templates/
 
-Sitemap: https://holarise.pages.dev/sitemap.xml
+Sitemap: https://holarise.org/sitemap.xml

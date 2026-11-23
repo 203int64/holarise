@@ -11,15 +11,15 @@
  *    - Thực thi với tư cách (Execute as): Tôi (Me)
  *    - Người có quyền truy cập (Who has access): Bất kỳ ai (Anyone)
  *    -> Bấm Triển khai -> Cấp quyền truy cập Google Sheets & Gmail cho chính bạn -> Sao chép URL Web App (dạng https://script.google.com/macros/s/.../exec).
- * 5. Vào https://holarise.pages.dev/admin -> Tab "Đội ngũ & Cài đặt" -> Dán URL Web App + WEBHOOK_SECRET -> Lưu -> Bấm "Gửi thử kiểm tra".
+ * 5. Vào https://holarise.org/admin -> Tab "Đội ngũ & Cài đặt" -> Dán URL Web App + WEBHOOK_SECRET -> Lưu -> Bấm "Gửi thử kiểm tra".
  * ============================================================================
  */
 
 var WEBHOOK_SECRET = "DOI_MA_BI_MAT_TAI_DAY";
 var SHEET_NAME = "Danh sách Đăng ký";
-var CLUB_HOTLINE = "077.777.7777";
-var CLUB_ZALO = "https://zalo.me/0777777777";
-var CLUB_SITE = "https://holarise.pages.dev";
+var CLUB_HOTLINE = "077.777.1948";
+var CLUB_ZALO = "https://zalo.me/0777771948";
+var CLUB_SITE = "https://holarise.org";
 
 function doPost(e) {
   try {

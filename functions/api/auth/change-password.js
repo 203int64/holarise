@@ -8,7 +8,7 @@ import {
 } from "../../_lib/security.js";
 
 export async function onRequestPost(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { allowedRoles: ["super_admin", "editor", "media"] });
   if (!auth.ok) return auth.response;
 
   const parsed = await readJsonBody(context.request, 16 * 1024);

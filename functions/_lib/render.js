@@ -3,7 +3,7 @@
  * Mirrors build.py markup pixel-for-pixel while preventing XSS via strict escaping.
  */
 
-export const SITE_URL = "https://holarise.pages.dev";
+export const SITE_URL = "https://holarise.org";
 export const BRAND_SHORT_NAME = "Cộng đồng HolaRise";
 export const BRAND_FULL_NAME = "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên";
 export const LOGO_MARK_URL = `${SITE_URL}/assets/images/logo-mark.png`;
@@ -359,4 +359,112 @@ export function replaceMarker(html, name, content) {
   const eIdx = html.indexOf(end);
   if (sIdx === -1 || eIdx === -1 || eIdx < sIdx) return html;
   return html.slice(0, sIdx + start.length) + "\n" + content + "\n" + html.slice(eIdx);
+}
+
+const FILTER_LABELS_VI = {
+  sach: "Sạch",
+  "biet-on": "Biết ơn",
+  "tu-te": "Tử tế",
+  "se-chia": "Sẻ chia",
+};
+
+function isSafeHttpsLink(url) {
+  const s = String(url || "").trim();
+  if (!s) return false;
+  try {
+    const parsed = new URL(s);
+    return parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export function renderHorizontalGalleryHtml(photos) {
+  if (!photos || photos.length === 0) return "";
+  const total = photos.length;
+  const pad2 = (n) => (n < 10 ? `0${n}` : String(n));
+  return photos
+    .map((p, idx) => {
+      const caption = p.caption || p.albumTitle || "Khoảnh khắc HolaRise tại Hòa Lạc";
+      const alt = p.alt || caption;
+      const photographer = p.photographer ? ` · Ảnh: ${p.photographer}` : "";
+      return `<button class="horizontal-card" type="button" data-cursor-label="Xem" data-lightbox-src="${escHtml(p.url)}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(caption + photographer)}">
+        <div class="horizontal-frame">
+          <img src="${escHtml(p.url)}" alt="${escHtml(alt)}" width="960" height="600" loading="lazy" decoding="async">
+        </div>
+        <div class="horizontal-caption">
+          <span>${escHtml(caption)}</span>
+          <span class="horizontal-index">${pad2(idx + 1)} / ${pad2(total)}</span>
+        </div>
+      </button>`;
+    })
+    .join("\n      ");
+}
+
+export function renderPublicAlbumsHtml(albumsWithPhotos) {
+  if (!albumsWithPhotos || albumsWithPhotos.length === 0) return "";
+
+  const cardsHtml = albumsWithPhotos
+    .map((album) => {
+      const photos = Array.isArray(album.photos) ? album.photos : [];
+      const filters = Array.isArray(album.filters) ? album.filters : [];
+      const filtersAttr = filters.join(" ");
+      const cover = album.coverUrl || photos[0]?.url || "/assets/images/events/activity-tree-planting.jpg";
+      const safeDrive = isSafeHttpsLink(album.driveUrl) ? album.driveUrl : "";
+
+      const payloadJson = JSON.stringify({
+        title: album.title || "",
+        driveUrl: safeDrive,
+        photos: photos.map((p) => ({
+          src: p.url,
+          alt: p.alt || p.caption || album.title,
+          caption: p.caption || album.title,
+          photographer: p.photographer || "",
+        })),
+      })
+        .replace(/</g, "\\u003c")
+        .replace(/>/g, "\\u003e")
+        .replace(/&/g, "\\u0026");
+
+      const filterTags = filters
+        .map((f) => `<span class="public-album-tag">${escHtml(FILTER_LABELS_VI[f] || f)}</span>`)
+        .join("");
+
+      return `<article class="public-album-card" data-album-card data-category="${escHtml(filtersAttr)}" data-stagger-item>
+        <button class="public-album-cover" type="button" data-album-open data-cursor-label="Mở album" aria-label="Xem ${photos.length} ảnh trong album ${escHtml(album.title)}">
+          <img src="${escHtml(cover)}" alt="${escHtml(album.title)}" width="720" height="480" loading="lazy" decoding="async">
+          <span class="public-album-count">${photos.length} ảnh</span>
+        </button>
+        <div class="public-album-body">
+          ${filterTags ? `<div class="public-album-tags">${filterTags}</div>` : ""}
+          <h3 class="public-album-title">${escHtml(album.title)}</h3>
+          <div class="public-album-meta">${escHtml(album.dateDisplay || album.eventDate || "")}${album.location ? ` · ${escHtml(album.location)}` : ""}</div>
+          ${album.description ? `<p class="public-album-desc">${escHtml(album.description)}</p>` : ""}
+          <div class="public-album-actions">
+            <button class="btn btn--primary btn--sm" type="button" data-album-open>Xem ${photos.length} ảnh</button>
+            ${safeDrive ? `<a class="btn btn--outline btn--sm" href="${escHtml(safeDrive)}" target="_blank" rel="noopener noreferrer">Ảnh gốc (Drive) ↗</a>` : ""}
+          </div>
+        </div>
+        <script type="application/json" class="album-photos-data">${payloadJson}</script>
+      </article>`;
+    })
+    .join("\n      ");
+
+  return `<div class="filter-bar-row">
+      <div class="filter-bar" data-filter-group="[data-album-card]" role="group" aria-label="Lọc album ảnh theo bộ lọc 4 chữ">
+        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Tất cả Album</button>
+        <button class="filter-btn" type="button" data-filter="sach" aria-pressed="false"><span>Sạch</span></button>
+        <button class="filter-btn" type="button" data-filter="biet-on" aria-pressed="false"><span>Biết ơn</span></button>
+        <button class="filter-btn" type="button" data-filter="tu-te" aria-pressed="false"><span>Tử tế</span></button>
+        <button class="filter-btn" type="button" data-filter="se-chia" aria-pressed="false"><span>Sẻ chia</span></button>
+      </div>
+      <span class="filter-count" data-filter-count="[data-album-card]" aria-live="polite"></span>
+    </div>
+    <div class="public-albums-grid" data-stagger-group>
+      ${cardsHtml}
+    </div>
+    <div class="filter-empty" data-filter-empty="[data-album-card]" hidden>
+      <p>Chưa có album ảnh nào thuộc nhóm giá trị này.</p>
+      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-album-card]">Xem tất cả Album</button>
+    </div>`;
 }

@@ -231,7 +231,10 @@ export async function getSessionUser(db, request) {
   return row || null;
 }
 
-export async function requireAdmin(context, { superAdminOnly = false } = {}) {
+export async function requireAdmin(
+  context,
+  { superAdminOnly = false, allowedRoles = null } = {}
+) {
   const { request, env } = context;
   if (!env?.DB) {
     return { ok: false, response: errorResponse(503, "DB_UNAVAILABLE", "Cơ sở dữ liệu D1 chưa được kết nối.") };
@@ -243,8 +246,16 @@ export async function requireAdmin(context, { superAdminOnly = false } = {}) {
   if (!user) {
     return { ok: false, response: errorResponse(401, "UNAUTHORIZED", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.") };
   }
-  if (superAdminOnly && user.role !== "super_admin") {
-    return { ok: false, response: errorResponse(403, "FORBIDDEN", "Chỉ Quản trị viên chính (Super Admin) mới được thực hiện thao tác này.") };
+  const roles = Array.isArray(allowedRoles) && allowedRoles.length > 0
+    ? allowedRoles
+    : superAdminOnly
+      ? ["super_admin"]
+      : ["super_admin", "editor"];
+  if (!roles.includes(user.role)) {
+    const msg = superAdminOnly
+      ? "Chỉ Quản trị viên chính (Super Admin) mới được thực hiện thao tác này."
+      : "Tài khoản của bạn không có quyền truy cập khu vực này.";
+    return { ok: false, response: errorResponse(403, "FORBIDDEN", msg) };
   }
   return { ok: true, user };
 }

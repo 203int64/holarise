@@ -392,6 +392,10 @@
   }
 
   function enterAdminShell(user) {
+    if (user.role === "media") {
+      window.location.replace("/media/");
+      return;
+    }
     state.user = user;
     $("#boot-loader").hidden = true;
     $("#auth-screen").hidden = true;
@@ -765,7 +769,7 @@
         (u) => `<div class="user-row">
           <div>
             <strong>${esc(u.name)}</strong> ${u.id === state.user?.id ? '<span class="badge badge--new">Bạn</span>' : ""}
-            <span class="cell-sub">${esc(u.email)} · ${u.role === "super_admin" ? "Quản trị chính" : "Điều phối / Biên tập"} · ${u.is_active ? "Đang hoạt động" : "Đã khóa"}</span>
+            <span class="cell-sub">${esc(u.email)} · ${u.role === "super_admin" ? "Quản trị chính" : u.role === "media" ? "Ban Hình Ảnh (/media)" : "Điều phối / Biên tập"} · ${u.is_active ? "Đang hoạt động" : "Đã khóa"}</span>
           </div>
           ${
             u.id !== state.user?.id

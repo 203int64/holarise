@@ -15,7 +15,7 @@ export async function onRequestPost(context) {
     return errorResponse(503, "DB_UNAVAILABLE", "Hệ thống đang bảo trì. Vui lòng liên hệ qua Zalo hoặc Email.");
   }
 
-  // Allow same-origin requests (public forms on holarise.pages.dev)
+  // Allow same-origin requests (public forms on holarise.org and preview origins)
   if (!verifyCsrfOrigin(request)) {
     return errorResponse(403, "CSRF_BLOCKED", "Nguồn gửi biểu mẫu không hợp lệ.");
   }
@@ -44,7 +44,7 @@ export async function onRequestPost(context) {
     return errorResponse(
       429,
       "RATE_LIMITED",
-      "Bạn đã gửi nhiều đơn đăng ký liên tiếp. Vui lòng thử lại sau ít phút hoặc liên hệ Zalo 077.777.7777.",
+      "Bạn đã gửi nhiều đơn đăng ký liên tiếp. Vui lòng thử lại sau ít phút hoặc liên hệ Zalo 077.777.1948.",
       null,
       { "Retry-After": String(rl.retryAfterSec) }
     );

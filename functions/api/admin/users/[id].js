@@ -21,7 +21,7 @@ export async function onRequestPatch(context) {
   const isActive =
     parsed.data.is_active !== undefined ? (parsed.data.is_active ? 1 : 0) : target.is_active;
   const role =
-    parsed.data.role === "super_admin" || parsed.data.role === "editor"
+    parsed.data.role === "super_admin" || parsed.data.role === "editor" || parsed.data.role === "media"
       ? parsed.data.role
       : target.role;
   const name = parsed.data.name !== undefined ? cleanStr(parsed.data.name, 100) || target.name : target.name;

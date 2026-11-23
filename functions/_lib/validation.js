@@ -82,6 +82,23 @@ export function isSafeGasWebhookUrl(url) {
   }
 }
 
+export function isSafeExternalHttpsUrl(url) {
+  const s = cleanStr(url, 600);
+  if (!s) return true; // empty = optional
+  try {
+    const parsed = new URL(s);
+    return parsed.protocol === "https:" && Boolean(parsed.hostname) && !/[\r\n"'<>]/.test(s);
+  } catch {
+    return false;
+  }
+}
+
+export function extractMediaKeyFromUrl(url) {
+  const s = cleanStr(url, 500);
+  const m = s.match(/^\/api\/media\/([a-zA-Z0-9._-]{6,96})$/);
+  return m ? m[1] : "";
+}
+
 export function formatIsoDateVi(isoDate, withWeekday = false) {
   const s = cleanStr(isoDate, 30);
   if (!ISO_DATE_RE.test(s)) return s;
@@ -391,4 +408,100 @@ export function buildRegistrationsCsv(rows) {
     );
   }
   return "\uFEFF" + lines.join("\r\n") + "\r\n";
+}
+
+export function validateAlbumInput(body) {
+  const fields = {};
+  const title = cleanStr(body.title, 180);
+  if (title.length < 3) fields.title = "Tên album cần ít nhất 3 ký tự.";
+
+  const slug = body.slug ? slugifyVi(body.slug) : slugifyVi(title);
+  if (!slug || slug.length < 2) fields.slug = "Đường dẫn (slug) album không hợp lệ.";
+
+  const description = cleanStr(body.description, 500);
+  const eventDate = cleanStr(body.eventDate ?? body.event_date, 20) || new Date().toISOString().slice(0, 10);
+  if (eventDate && !ISO_DATE_RE.test(eventDate)) {
+    fields.eventDate = "Ngày sự kiện phải theo định dạng YYYY-MM-DD.";
+  }
+  const dateDisplay =
+    cleanStr(body.dateDisplay ?? body.date_display, 40) ||
+    (ISO_DATE_RE.test(eventDate) ? formatIsoDateVi(eventDate, false) : eventDate);
+  const location = cleanStr(body.location, 140) || "Hòa Lạc, Hà Nội";
+  const filters = normalizeFilters(body.filters);
+
+  const driveUrl = cleanStr(body.driveUrl ?? body.drive_url, 600);
+  if (driveUrl && !isSafeExternalHttpsUrl(driveUrl)) {
+    fields.driveUrl = "Liên kết ảnh gốc (Google Drive/Photos) phải bắt đầu bằng https://.";
+  }
+
+  const coverUrl = cleanStr(body.coverUrl ?? body.cover_url, 500);
+  if (coverUrl && !isSafeMediaUrl(coverUrl)) {
+    fields.coverUrl = "Đường dẫn ảnh bìa album không hợp lệ.";
+  }
+
+  const status = cleanStr(body.status, 20) || "published";
+  if (!VALID_POST_STATUSES.has(status)) {
+    fields.status = "Trạng thái album chỉ nhận 'published' hoặc 'draft'.";
+  }
+
+  const sortOrder = Number.isFinite(Number(body.sortOrder ?? body.sort_order))
+    ? Math.trunc(Number(body.sortOrder ?? body.sort_order))
+    : 0;
+
+  if (Object.keys(fields).length > 0) {
+    return { ok: false, fields };
+  }
+
+  return {
+    ok: true,
+    value: {
+      slug,
+      title,
+      description,
+      event_date: eventDate,
+      date_display: dateDisplay,
+      location,
+      filters,
+      drive_url: driveUrl,
+      cover_url: coverUrl,
+      status,
+      sort_order: sortOrder,
+    },
+  };
+}
+
+export function validatePhotoInput(body) {
+  const fields = {};
+  const url = cleanStr(body.url, 500);
+  if (!url || !isSafeMediaUrl(url)) {
+    fields.url = "Đường dẫn ảnh không hợp lệ.";
+  }
+  const rawKey = cleanStr(body.mediaKey ?? body.media_key, 100);
+  const mediaKey = rawKey && /^[a-zA-Z0-9._-]{6,96}$/.test(rawKey)
+    ? rawKey
+    : extractMediaKeyFromUrl(url);
+  const caption = cleanStr(body.caption, 300);
+  const alt = cleanStr(body.alt, 240) || caption || "Khoảnh khắc hoạt động cộng đồng HolaRise";
+  const photographer = cleanStr(body.photographer, 100);
+  const isFeaturedHome = body.isFeaturedHome ?? body.is_featured_home ? 1 : 0;
+  const sortOrder = Number.isFinite(Number(body.sortOrder ?? body.sort_order))
+    ? Math.trunc(Number(body.sortOrder ?? body.sort_order))
+    : 0;
+
+  if (Object.keys(fields).length > 0) {
+    return { ok: false, fields };
+  }
+
+  return {
+    ok: true,
+    value: {
+      url,
+      media_key: mediaKey,
+      caption,
+      alt,
+      photographer,
+      is_featured_home: isFeaturedHome,
+      sort_order: sortOrder,
+    },
+  };
 }

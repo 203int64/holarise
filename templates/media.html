@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cổng Ban Hình Ảnh | HolaRise Media</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#FFFFFF">
+  <link rel="icon" type="image/png" href="/assets/images/logo-mark.png">
+  <link rel="stylesheet" href="/assets/css/admin.css?v={{CACHE_BUST}}">
+  <link rel="stylesheet" href="/assets/css/media.css?v={{CACHE_BUST}}">
+</head>
+<body>
+  <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- AUTH SCREEN -->
+  <section class="auth-screen" id="auth-screen" hidden>
+    <div class="auth-card">
+      <div class="auth-brand">
+        <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="42" height="42">
+        <div>
+          <span class="auth-kicker">HolaRise · Ban Hình Ảnh</span>
+          <h1>Cổng Cập Nhật Hình Ảnh</h1>
+        </div>
+      </div>
+
+      <p class="auth-lead">Đăng nhập bằng tài khoản Ban Hình Ảnh hoặc Ban Điều Phối để tạo Album và tải ảnh sự kiện lên website.</p>
+
+      <form id="login-form" class="admin-form" novalidate>
+        <div class="field">
+          <label for="login-email">Email đăng nhập</label>
+          <input id="login-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="media@holarise.org">
+        </div>
+        <div class="field">
+          <label for="login-password">Mật khẩu</label>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">
+        </div>
+        <div class="form-alert" id="login-alert" role="alert" hidden></div>
+        <button class="btn btn--primary btn--full" type="submit" id="login-submit">Đăng nhập vào kho ảnh</button>
+      </form>
+
+      <div class="auth-footer">
+        <a href="/hoat-dong/#thu-vien-anh">← Xem thư viện ảnh công khai</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- INITIAL LOADING SKELETON -->
+  <div class="boot-loader" id="boot-loader" aria-label="Đang tải cổng Ban Hình Ảnh">
+    <div class="skeleton-card">
+      <div class="sk sk-title"></div>
+      <div class="sk sk-line"></div>
+      <div class="sk sk-line sk-short"></div>
+    </div>
+  </div>
+
+  <!-- MAIN MEDIA SHELL -->
+  <div class="media-shell" id="media-shell" hidden>
+    <header class="media-topbar">
+      <div class="media-topbar-inner">
+        <a class="media-brand" href="/media/" id="brand-home-link">
+          <img src="/assets/images/logo-mark.png" alt="HR" width="34" height="34">
+          <div>
+            <strong>HolaRise Media</strong>
+            <span>Cổng Ban Hình Ảnh</span>
+          </div>
+        </a>
+
+        <div class="media-topbar-actions">
+          <span class="media-user-chip" id="topbar-user-chip">—</span>
+          <a class="btn btn--ghost btn--sm" id="link-admin-cms" href="/admin/" hidden>Quản trị CMS</a>
+          <a class="btn btn--outline btn--sm" href="/hoat-dong/#thu-vien-anh" target="_blank" rel="noopener">Xem thư viện ↗</a>
+          <button class="btn btn--ghost btn--sm" type="button" id="btn-open-pw">Đổi mật khẩu</button>
+          <button class="btn btn--ghost btn--sm" type="button" id="btn-logout">Đăng xuất</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="media-main">
+      <!-- VIEW 1: ALBUMS LIST -->
+      <section id="view-albums">
+        <div class="media-page-head">
+          <div>
+            <h1>Album Hình Ảnh Sự Kiện</h1>
+            <p class="media-subtitle">Ảnh tải lên sẽ tự nén nhẹ (~150 KB) và xuất bản tức thì ra trang <strong>Hoạt động</strong>. Ảnh được ghim sao sẽ xuất hiện ở dải ảnh <strong>Trang chủ</strong>.</p>
+          </div>
+          <div class="media-head-actions">
+            <button class="btn btn--primary" type="button" id="btn-new-album">+ Tạo Album mới</button>
+          </div>
+        </div>
+
+        <div class="media-stats-bar" id="media-stats-bar">
+          <div class="media-stat">
+            <span class="media-stat-label">Tổng Album</span>
+            <strong class="media-stat-value" id="stat-albums">—</strong>
+          </div>
+          <div class="media-stat">
+            <span class="media-stat-label">Tổng số ảnh</span>
+            <strong class="media-stat-value" id="stat-photos">—</strong>
+          </div>
+          <div class="media-stat">
+            <span class="media-stat-label">Đang ghim Trang chủ</span>
+            <strong class="media-stat-value" id="stat-featured">—</strong>
+          </div>
+        </div>
+
+        <div class="media-toolbar">
+          <div class="filter-chips" role="group" aria-label="Lọc trạng thái album">
+            <button class="chip is-active" type="button" data-album-status="">Tất cả</button>
+            <button class="chip" type="button" data-album-status="published">Công khai</button>
+            <button class="chip" type="button" data-album-status="draft">Bản nháp</button>
+          </div>
+          <div class="media-search-wrap">
+            <input type="search" id="album-search" placeholder="Tìm theo tên album hoặc địa điểm..." aria-label="Tìm kiếm album">
+          </div>
+        </div>
+
+        <div class="form-alert" id="albums-error" role="alert" hidden></div>
+
+        <div class="albums-grid" id="albums-grid" aria-live="polite"></div>
+      </section>
+
+      <!-- VIEW 2: ALBUM WORKSPACE -->
+      <section id="view-workspace" hidden>
+        <div class="workspace-breadcrumb">
+          <button class="btn btn--ghost btn--sm" type="button" id="btn-back-albums">← Quay lại danh sách Album</button>
+        </div>
+
+        <div class="workspace-header-card">
+          <div class="workspace-header-info">
+            <div class="workspace-badges" id="ws-badges"></div>
+            <h1 id="ws-title">—</h1>
+            <p class="workspace-meta" id="ws-meta">—</p>
+            <p class="workspace-desc" id="ws-desc" hidden></p>
+            <div class="workspace-drive-row" id="ws-drive-row" hidden>
+              <a class="btn btn--outline btn--sm" id="ws-drive-link" href="https://drive.google.com" target="_blank" rel="noopener noreferrer">Mở thư mục ảnh gốc (Google Drive) ↗</a>
+            </div>
+          </div>
+          <div class="workspace-header-actions">
+            <button class="btn btn--outline btn--sm" type="button" id="btn-edit-album">Sửa thông tin Album</button>
+            <button class="btn btn--danger-ghost btn--sm" type="button" id="btn-delete-album">Xóa Album</button>
+          </div>
+        </div>
+
+        <!-- MULTI-UPLOAD DROPZONE -->
+        <section class="upload-zone-card" aria-label="Tải nhiều ảnh vào album">
+          <div class="upload-zone-head">
+            <div>
+              <h2>Tải ảnh lên Album</h2>
+              <p>Chọn hoặc kéo-thả nhiều ảnh cùng lúc (tối đa 30 ảnh/lượt). Hệ thống tự nén JPEG tối ưu 1280px trước khi lưu.</p>
+            </div>
+            <div class="upload-defaults">
+              <label for="default-photographer">Nhiếp ảnh gia mặc định</label>
+              <input id="default-photographer" type="text" placeholder="Ví dụ: Ban Hình Ảnh HolaRise" maxlength="100">
+            </div>
+          </div>
+
+          <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Chọn hoặc kéo thả ảnh từ máy tính hoặc điện thoại">
+            <input type="file" id="multi-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/*" multiple hidden>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <strong>Kéo thả ảnh vào đây hoặc bấm để chọn nhiều ảnh</strong>
+            <span>Hỗ trợ JPEG, PNG, WebP · Tối đa 30 ảnh/lượt · Tự nén nhẹ để tải nhanh trên 4G</span>
+          </div>
+
+          <div class="upload-queue" id="upload-queue" hidden>
+            <div class="upload-queue-head">
+              <strong id="upload-queue-summary">Đang xử lý...</strong>
+              <div class="upload-queue-actions">
+                <button class="btn btn--outline btn--sm" type="button" id="btn-retry-failed" hidden>Thử lại ảnh lỗi</button>
+                <button class="btn btn--ghost btn--sm" type="button" id="btn-clear-queue" hidden>Ẩn danh sách</button>
+              </div>
+            </div>
+            <div class="upload-queue-list" id="upload-queue-list"></div>
+          </div>
+        </section>
+
+        <!-- PHOTOS GRID -->
+        <section class="photos-section">
+          <div class="photos-section-head">
+            <h2 id="ws-photos-heading">Danh sách ảnh trong Album</h2>
+            <span class="photos-hint">Gạt <strong>Ghim Trang chủ</strong> để đưa ảnh đẹp nhất ra dải ảnh ở Trang chủ.</span>
+          </div>
+          <div class="photos-grid" id="ws-photos-grid" aria-live="polite"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <!-- DIALOG: CREATE / EDIT ALBUM -->
+  <dialog class="cms-dialog" id="album-dialog" closedby="any" aria-labelledby="album-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="album-dialog-title">Tạo Album mới</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <form class="admin-form dialog-body" id="album-form" novalidate>
+        <input type="hidden" name="id" id="af-id">
+        <div class="field">
+          <label for="af-title">Tên Album sự kiện <span aria-hidden="true">*</span></label>
+          <input id="af-title" name="title" type="text" required minlength="3" maxlength="180" placeholder="Ví dụ: Ra quân Làm sạch Hồ Tân Xã — 11/2026">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="af-date">Ngày sự kiện</label>
+            <input id="af-date" name="eventDate" type="date">
+          </div>
+          <div class="field">
+            <label for="af-status">Trạng thái hiển thị</label>
+            <select id="af-status" name="status">
+              <option value="published">Công khai (Hiển thị trên web)</option>
+              <option value="draft">Bản nháp (Chỉ nội bộ thấy)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="af-location">Địa điểm</label>
+          <input id="af-location" name="location" type="text" maxlength="140" placeholder="Ví dụ: Hồ Tân Xã, Hòa Lạc">
+        </div>
+        <div class="field">
+          <span class="field-label">Bộ lọc 4 giá trị HolaRise</span>
+          <div class="check-grid">
+            <label class="check-pill"><input type="checkbox" name="filters" value="sach"><span>Sạch</span></label>
+            <label class="check-pill"><input type="checkbox" name="filters" value="biet-on"><span>Biết ơn</span></label>
+            <label class="check-pill"><input type="checkbox" name="filters" value="tu-te"><span>Tử tế</span></label>
+            <label class="check-pill"><input type="checkbox" name="filters" value="se-chia"><span>Sẻ chia</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="af-drive">Link Google Drive / Google Photos ảnh gốc (tùy chọn)</label>
+          <input id="af-drive" name="driveUrl" type="url" maxlength="600" placeholder="https://drive.google.com/drive/folders/...">
+          <span class="field-help">Dán link công khai để tình nguyện viên tải ảnh chất lượng gốc.</span>
+        </div>
+        <div class="field">
+          <label for="af-desc">Mô tả ngắn về Album</label>
+          <textarea id="af-desc" name="description" rows="3" maxlength="500" placeholder="Tóm tắt 1–2 câu về buổi hoạt động..."></textarea>
+        </div>
+        <div class="form-alert" id="album-form-alert" role="alert" hidden></div>
+        <div class="dialog-foot">
+          <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
+          <button class="btn btn--primary" type="submit" id="album-form-submit">Lưu Album</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- DIALOG: EDIT PHOTO METADATA -->
+  <dialog class="cms-dialog" id="photo-dialog" closedby="any" aria-labelledby="photo-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="photo-dialog-title">Sửa thông tin ảnh</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <form class="admin-form dialog-body" id="photo-form" novalidate>
+        <input type="hidden" name="id" id="pf-id">
+        <div class="photo-dialog-preview">
+          <img id="pf-preview" src="/assets/images/logo-mark.png" alt="Xem trước ảnh">
+        </div>
+        <div class="field">
+          <label for="pf-caption">Chú thích hiển thị dưới ảnh</label>
+          <textarea id="pf-caption" name="caption" rows="2" maxlength="300" placeholder="Ví dụ: Các bạn sinh viên cùng phân loại rác nhựa ven hồ Tân Xã."></textarea>
+        </div>
+        <div class="field">
+          <label for="pf-photographer">Nhiếp ảnh gia / Nguồn ảnh</label>
+          <input id="pf-photographer" name="photographer" type="text" maxlength="100" placeholder="Ví dụ: Ban Hình Ảnh HolaRise">
+        </div>
+        <div class="field">
+          <label class="check-pill">
+            <input type="checkbox" id="pf-featured" name="isFeaturedHome">
+            <span>Ghim ảnh này lên dải ảnh nổi bật ở Trang chủ</span>
+          </label>
+        </div>
+        <div class="form-alert" id="photo-form-alert" role="alert" hidden></div>
+        <div class="dialog-foot">
+          <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
+          <button class="btn btn--primary" type="submit" id="photo-form-submit">Lưu thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- DIALOG: CHANGE PASSWORD -->
+  <dialog class="cms-dialog" id="pw-dialog" closedby="any" aria-labelledby="pw-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="pw-dialog-title">Đổi mật khẩu tài khoản</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <form class="admin-form dialog-body" id="pw-form" novalidate>
+        <div class="field">
+          <label for="pw-current">Mật khẩu hiện tại</label>
+          <input id="pw-current" name="currentPassword" type="password" autocomplete="current-password" required>
+        </div>
+        <div class="field">
+          <label for="pw-new">Mật khẩu mới (tối thiểu 8 ký tự)</label>
+          <input id="pw-new" name="newPassword" type="password" autocomplete="new-password" required minlength="8">
+        </div>
+        <div class="form-alert" id="pw-form-alert" role="alert" hidden></div>
+        <div class="dialog-foot">
+          <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
+          <button class="btn btn--primary" type="submit">Cập nhật mật khẩu</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script src="/assets/js/media-portal.js?v={{CACHE_BUST}}" defer></script>
+</body>
+</html>

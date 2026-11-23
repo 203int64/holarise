@@ -44,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=b57cf101cc">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=96c76fc53b">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -56,12 +56,12 @@
     "HolaRise – Hoa Lac Youth Empowerment Community"
   ],
   "slogan": "Together We Rise, Together We Serve.",
-  "url": "https://holarise.pages.dev",
-  "logo": "https://holarise.pages.dev/assets/images/logo-mark.png",
-  "image": "https://holarise.pages.dev/assets/images/og-cover.jpg?v=2",
+  "url": "https://holarise.org",
+  "logo": "https://holarise.org/assets/images/logo-mark.png",
+  "image": "https://holarise.org/assets/images/og-cover.jpg?v=3",
   "description": "HolaRise kết nối thanh niên, sinh viên Hòa Lạc làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng.",
   "email": "phungsu@holarise.org",
-  "telephone": "077.777.7777",
+  "telephone": "077.777.1948",
   "areaServed": {
     "@type": "Place",
     "name": "Hòa Lạc, Hà Nội, Việt Nam"
@@ -150,7 +150,7 @@
         </button>
         <div class="mobile-drawer-meta">
           <span>Tân Xã, Hòa Lạc, Hà Nội</span>
-          <span>077.777.7777</span>
+          <span>077.777.1948</span>
         </div>
       </div>
     </div>
@@ -271,7 +271,7 @@
           <h2 class="footer-heading">Liên hệ tại Hòa Lạc</h2>
           <ul class="footer-links">
             <li>Văn phòng: Tân Xã, Hòa Lạc, Hà Nội</li>
-            <li><a href="tel:0777777777">077.777.7777</a></li>
+            <li><a href="tel:0777771948">077.777.1948</a></li>
             <li><a href="mailto:phungsu@holarise.org">phungsu@holarise.org</a></li>
             <li>Thời gian hoạt động: Ngày đầu của tuần - Chủ nhật</li>
           </ul>
@@ -279,8 +279,12 @@
       </div>
 
       <div class="footer-bottom">
-        <span>© 2026 Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise) · Tân Xã, Hòa Lạc, Hà Nội</span>
-        <span>Hotline/Zalo: 077.777.7777 · phungsu@holarise.org</span>
+        <span>© 2026 Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise)</span>
+        <span class="footer-bottom-meta">
+          <a href="/">holarise.org</a>
+          <span aria-hidden="true">·</span>
+          <a href="/chinh-sach/">Bảo mật &amp; Quy tắc</a>
+        </span>
       </div>
     </div>
   </footer>
@@ -298,7 +302,7 @@
         <div class="modal-ticket-meta" id="modal-event-meta"></div>
       </div>
 
-      <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register" data-endpoint="/api/registrations" data-phone="077.777.7777" data-phone-raw="0777777777" data-zalo="https://zalo.me/0777777777" novalidate>
+      <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register" data-endpoint="/api/registrations" data-phone="077.777.1948" data-phone-raw="0777771948" data-zalo="https://zalo.me/0777771948" novalidate>
         <input type="hidden" name="source" value="event_modal">
         <input type="hidden" name="activity" id="modal-event-input" value="">
         <input type="hidden" name="eventId" id="modal-event-id" value="">
@@ -401,7 +405,11 @@
       </div>
       <div class="lightbox-bar">
         <div class="lightbox-caption" id="lightbox-caption"></div>
-        <span class="lightbox-counter" id="lightbox-counter" aria-live="polite"></span>
+        <div class="lightbox-bar-right">
+          <a class="lightbox-action-link" id="lightbox-download" href="/assets/images/logo-mark.png" download hidden>Tải ảnh</a>
+          <a class="lightbox-action-link" id="lightbox-drive" href="https://drive.google.com" target="_blank" rel="noopener noreferrer" hidden>Ảnh gốc (Drive) ↗</a>
+          <span class="lightbox-counter" id="lightbox-counter" aria-live="polite"></span>
+        </div>
       </div>
     </div>
   </dialog>
@@ -496,11 +504,11 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/vendor/gsap.min.js?v=b57cf101cc" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=b57cf101cc" defer></script>
-  <script src="/assets/js/motion.js?v=b57cf101cc" defer></script>
-  <script src="/assets/js/main.js?v=b57cf101cc" defer></script>
-  <script src="/assets/js/join-pass.js?v=b57cf101cc" defer></script>
-  <script src="/assets/js/pwa.js?v=b57cf101cc" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=96c76fc53b" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=96c76fc53b" defer></script>
+  <script src="/assets/js/motion.js?v=96c76fc53b" defer></script>
+  <script src="/assets/js/main.js?v=96c76fc53b" defer></script>
+  <script src="/assets/js/join-pass.js?v=96c76fc53b" defer></script>
+  <script src="/assets/js/pwa.js?v=96c76fc53b" defer></script>
 </body>
 </html>

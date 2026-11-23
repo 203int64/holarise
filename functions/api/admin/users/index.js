@@ -21,7 +21,10 @@ export async function onRequestPost(context) {
 
   const email = cleanStr(parsed.data.email, 160).toLowerCase();
   const name = cleanStr(parsed.data.name, 100);
-  const role = parsed.data.role === "super_admin" ? "super_admin" : "editor";
+  const role =
+    parsed.data.role === "super_admin" || parsed.data.role === "media"
+      ? parsed.data.role
+      : "editor";
   const password = String(parsed.data.password || "");
 
   const fields = {};

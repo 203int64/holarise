@@ -2,10 +2,10 @@
 
 > Kết nối thanh niên, sinh viên và học sinh tại Hòa Lạc cùng làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng (HolaConnect).
 
-- Website: https://holarise.pages.dev
+- Website: https://holarise.org
 - Khu vực hoạt động: Hòa Lạc, Hà Nội
 - Thời gian hoạt động: Ngày đầu của tuần - Chủ nhật · Văn phòng / Điểm hẹn: Tân Xã, Hòa Lạc, Hà Nội
-- Liên hệ: phungsu@holarise.org | Hotline/Zalo: 077.777.7777
+- Liên hệ: phungsu@holarise.org | Hotline/Zalo: 077.777.1948
 - Chi phí tham gia: 100% miễn phí cho học sinh, sinh viên và thanh niên tại Hòa Lạc.
 
 ## Số liệu tác động (Single Source of Truth)
@@ -15,12 +15,12 @@
 - 1.250 kg Rác thu gom (Phân loại tái chế)
 
 ## Các trang chính
-- [Trang chủ](https://holarise.pages.dev/): Tổng quan 3 trụ cột hoạt động, số liệu và lịch hẹn gần nhất.
-- [Giới thiệu & Sứ mệnh](https://holarise.pages.dev/gioi-thieu/): Sứ mệnh, tầm nhìn, 4 giá trị cốt lõi, nguyên tắc minh bạch và 5 UN SDGs.
-- [Hoạt động & Chiến dịch](https://holarise.pages.dev/hoat-dong/): Chi tiết HolaGreen, HolaHeart, HolaConnect và các chiến dịch tại Hòa Lạc.
-- [Lịch Workshop & Sự kiện](https://holarise.pages.dev/workshop/): Lịch đăng ký giữ chỗ miễn phí hàng tuần.
-- [Tin tức & Nhật ký](https://holarise.pages.dev/tin-tuc/): Báo cáo kết quả công khai từng chiến dịch và workshop.
-- [Đăng ký tham gia](https://holarise.pages.dev/tham-gia/): Biểu mẫu đăng ký tình nguyện viên và kết nối hợp tác.
+- [Trang chủ](https://holarise.org/): Tổng quan 3 trụ cột hoạt động, số liệu và lịch hẹn gần nhất.
+- [Giới thiệu & Sứ mệnh](https://holarise.org/gioi-thieu/): Sứ mệnh, tầm nhìn, 4 giá trị cốt lõi, nguyên tắc minh bạch và 5 UN SDGs.
+- [Hoạt động & Chiến dịch](https://holarise.org/hoat-dong/): Chi tiết HolaGreen, HolaHeart, HolaConnect và các chiến dịch tại Hòa Lạc.
+- [Lịch Workshop & Sự kiện](https://holarise.org/workshop/): Lịch đăng ký giữ chỗ miễn phí hàng tuần.
+- [Tin tức & Nhật ký](https://holarise.org/tin-tuc/): Báo cáo kết quả công khai từng chiến dịch và workshop.
+- [Đăng ký tham gia](https://holarise.org/tham-gia/): Biểu mẫu đăng ký tình nguyện viên và kết nối hợp tác.
 
 ## Ba chương trình trọng tâm
 - **HolaGreen (Làm Sạch & Giữ Màu Xanh Hòa Lạc)**: Thu gom, phân loại rác nhựa tại các tuyến đường, hồ nước Hòa Lạc và trồng thêm cây xanh bản địa mỗi sáng cuối tuần. [1.250 kg rác thu gom]
@@ -35,12 +35,12 @@
 - CN, 27/12/2026 (07:00 – 09:30): Dự Án Mầm Cây #03: Ươm Xanh Những Cung Đường — Đường trục chính Tân Xã, Hòa Lạc (Miễn phí (Cung cấp xẻng & cây giống), Mở đăng ký)
 
 ## Nhật ký hoạt động mới nhất
-- [Mầm Cây Thanh Niên: Phủ xanh 180 cây bóng mát Hòa Lạc](https://holarise.pages.dev/tin-tuc/du-an-mam-cay-thanh-nien-180-cay-xanh-hoa-lac/): 180 cây bàng Đài Loan và muồng hoàng yến đã được các bạn trẻ vun trồng dọc tuyến đường liên thôn tại Tân Xã, tạo bóng mát lâu dài. (15/11/2026)
-- [Cuối Tuần Xanh #18 Hồ Tân Xã: Thu gom 180 kg rác](https://holarise.pages.dev/tin-tuc/chien-dich-lam-sach-ven-ho-tan-xa-mua-thu-2026/): 52 thanh niên, sinh viên và học sinh đã cùng làm sạch 2km ven hồ Tân Xã và phân loại 180 kg rác trong sáng Chủ Nhật. (08/11/2026)
-- [Workshop HolaGreen #15: Tái chế thủy tinh & Sen đá bàn học](https://holarise.pages.dev/tin-tuc/workshop-tai-che-thuy-tinh-song-giam-nhua-hoa-lac/): 85 chai lọ thủy tinh bỏ đi được sinh viên Hòa Lạc biến thành những chậu sen đá xanh mướt trang trí góc học tập. (01/11/2026)
-- [Workshop HolaHeart #14: Lòng biết ơn gia đình](https://holarise.pages.dev/tin-tuc/workshop-gieo-mam-tu-te-lan-toa-loi-song-tich-cuc/): 38 bạn trẻ tại Hòa Lạc cùng lắng nghe câu chuyện về lòng biết ơn cha mẹ – thầy cô và tự tay làm thiệp lá khô gửi người thân. (25/10/2026)
-- [Vòng Tròn Lắng Nghe: Chữa lành và kết nối bạn trẻ xa nhà](https://holarise.pages.dev/tin-tuc/chuoi-workshop-lang-nghe-va-ket-noi-ban-dong-hanh/): Buổi gặp gỡ ngoài trời giúp 45 bạn sinh viên mới lên Hòa Lạc tìm thấy sự đồng điệu, giải tỏa áp lực xa nhà. (18/10/2026)
-- [HolaConnect: Trao 152 sách cho thiếu nhi Hòa Lạc](https://holarise.pages.dev/tin-tuc/nhip-cau-yeu-thuong-trao-tu-sach-thach-that/): 152 cuốn sách thiếu nhi và quà học tập do sinh viên Hòa Lạc đóng góp đã được trao tận tay các em nhỏ tại Tân Xã. (04/10/2026)
-- [Cẩm nang Cuối Tuần Xanh: Đi một mình có bỡ ngỡ không?](https://holarise.pages.dev/tin-tuc/cam-nang-di-cuoi-tuan-xanh-lan-dau-cho-sinh-vien/): Hướng dẫn chi tiết từ trang phục, cách di chuyển đến quy trình ghép nhóm nhỏ cho người trẻ lần đầu tham gia Cuối Tuần Xanh. (20/09/2026)
-- [Ngày Hội Sách & Tuổi Thơ: 200 cuốn sách tìm bạn đọc nhỏ](https://holarise.pages.dev/tin-tuc/ngay-hoi-sach-va-tuoi-tho-nha-van-hoa-thach-that/): Buổi giao lưu đọc sách kết hợp vẽ tranh bảo vệ thiên nhiên thu hút hơn 40 em nhỏ cùng phụ huynh tại Thạch Thất. (06/09/2026)
-- [Vườn Ươm Mầm Xanh: 300 bầu cây sẵn sàng phủ bóng](https://holarise.pages.dev/tin-tuc/hanh-trinh-uom-mam-xanh-tu-vuon-cay-giong-hoa-lac/): Giai đoạn chuẩn bị giống cây bản địa và đất mùn hữu cơ đã hoàn tất, hướng tới chiến dịch phủ xanh các tuyến đường vào cuối năm. (23/08/2026)
+- [Mầm Cây Thanh Niên: Phủ xanh 180 cây bóng mát Hòa Lạc](https://holarise.org/tin-tuc/du-an-mam-cay-thanh-nien-180-cay-xanh-hoa-lac/): 180 cây bàng Đài Loan và muồng hoàng yến đã được các bạn trẻ vun trồng dọc tuyến đường liên thôn tại Tân Xã, tạo bóng mát lâu dài. (15/11/2026)
+- [Cuối Tuần Xanh #18 Hồ Tân Xã: Thu gom 180 kg rác](https://holarise.org/tin-tuc/chien-dich-lam-sach-ven-ho-tan-xa-mua-thu-2026/): 52 thanh niên, sinh viên và học sinh đã cùng làm sạch 2km ven hồ Tân Xã và phân loại 180 kg rác trong sáng Chủ Nhật. (08/11/2026)
+- [Workshop HolaGreen #15: Tái chế thủy tinh & Sen đá bàn học](https://holarise.org/tin-tuc/workshop-tai-che-thuy-tinh-song-giam-nhua-hoa-lac/): 85 chai lọ thủy tinh bỏ đi được sinh viên Hòa Lạc biến thành những chậu sen đá xanh mướt trang trí góc học tập. (01/11/2026)
+- [Workshop HolaHeart #14: Lòng biết ơn gia đình](https://holarise.org/tin-tuc/workshop-gieo-mam-tu-te-lan-toa-loi-song-tich-cuc/): 38 bạn trẻ tại Hòa Lạc cùng lắng nghe câu chuyện về lòng biết ơn cha mẹ – thầy cô và tự tay làm thiệp lá khô gửi người thân. (25/10/2026)
+- [Vòng Tròn Lắng Nghe: Chữa lành và kết nối bạn trẻ xa nhà](https://holarise.org/tin-tuc/chuoi-workshop-lang-nghe-va-ket-noi-ban-dong-hanh/): Buổi gặp gỡ ngoài trời giúp 45 bạn sinh viên mới lên Hòa Lạc tìm thấy sự đồng điệu, giải tỏa áp lực xa nhà. (18/10/2026)
+- [HolaConnect: Trao 152 sách cho thiếu nhi Hòa Lạc](https://holarise.org/tin-tuc/nhip-cau-yeu-thuong-trao-tu-sach-thach-that/): 152 cuốn sách thiếu nhi và quà học tập do sinh viên Hòa Lạc đóng góp đã được trao tận tay các em nhỏ tại Tân Xã. (04/10/2026)
+- [Cẩm nang Cuối Tuần Xanh: Đi một mình có bỡ ngỡ không?](https://holarise.org/tin-tuc/cam-nang-di-cuoi-tuan-xanh-lan-dau-cho-sinh-vien/): Hướng dẫn chi tiết từ trang phục, cách di chuyển đến quy trình ghép nhóm nhỏ cho người trẻ lần đầu tham gia Cuối Tuần Xanh. (20/09/2026)
+- [Ngày Hội Sách & Tuổi Thơ: 200 cuốn sách tìm bạn đọc nhỏ](https://holarise.org/tin-tuc/ngay-hoi-sach-va-tuoi-tho-nha-van-hoa-thach-that/): Buổi giao lưu đọc sách kết hợp vẽ tranh bảo vệ thiên nhiên thu hút hơn 40 em nhỏ cùng phụ huynh tại Thạch Thất. (06/09/2026)
+- [Vườn Ươm Mầm Xanh: 300 bầu cây sẵn sàng phủ bóng](https://holarise.org/tin-tuc/hanh-trinh-uom-mam-xanh-tu-vuon-cay-giong-hoa-lac/): Giai đoạn chuẩn bị giống cây bản địa và đất mùn hữu cơ đã hoàn tất, hướng tới chiến dịch phủ xanh các tuyến đường vào cuối năm. (23/08/2026)

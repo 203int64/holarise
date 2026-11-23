@@ -9,21 +9,21 @@
     "subtitle": "Kết nối thanh niên, sinh viên và học sinh tại Hòa Lạc cùng làm sạch môi trường (HolaGreen), tham gia workshop giá trị sống (HolaHeart) và phụng sự cộng đồng (HolaConnect).",
     "foundedYear": 2025,
     "location": "Hòa Lạc, Hà Nội",
-    "siteUrl": "https://holarise.pages.dev",
+    "siteUrl": "https://holarise.org",
     "language": "vi",
     "locale": "vi_VN",
-    "ogImage": "/assets/images/og-cover.jpg?v=2",
+    "ogImage": "/assets/images/og-cover.jpg?v=3",
     "logoLight": "/assets/images/logo-holarise.png",
     "logoDark": "/assets/images/logo-holarise.png",
     "logoMark": "/assets/images/logo-mark.png"
   },
   "contact": {
     "email": "phungsu@holarise.org",
-    "phoneDisplay": "077.777.7777",
+    "phoneDisplay": "077.777.1948",
     "address": "Tân Xã, Hòa Lạc, Hà Nội",
     "meetingTime": "Ngày đầu của tuần - Chủ nhật",
     "facebook": "https://facebook.com",
-    "zalo": "https://zalo.me/0777777777",
+    "zalo": "https://zalo.me/0777771948",
     "youtube": "https://youtube.com",
     "instagram": "https://instagram.com",
     "formEndpoint": "/api/registrations"
@@ -184,7 +184,7 @@
     },
     {
       "question": "Trường học hoặc CLB muốn phối hợp tổ chức thì liên hệ đâu?",
-      "answer": "Quý trường và các CLB có thể liên hệ trực tiếp qua Hotline/Zalo 077.777.7777 hoặc email phungsu@holarise.org."
+      "answer": "Quý trường và các CLB có thể liên hệ trực tiếp qua Hotline/Zalo 077.777.1948 hoặc email phungsu@holarise.org."
     },
     {
       "question": "Nếu trời mưa hoặc có việc đột xuất muốn đổi lịch thì sao?",

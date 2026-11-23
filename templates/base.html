@@ -176,8 +176,12 @@
       </div>
 
       <div class="footer-bottom">
-        <span>© {{CURRENT_YEAR}} {{BRAND_FULL_NAME}} (HolaRise) · {{CONTACT_ADDRESS}}</span>
-        <span>Hotline/Zalo: {{CONTACT_PHONE}} · {{CONTACT_EMAIL}}</span>
+        <span>© {{CURRENT_YEAR}} {{BRAND_FULL_NAME}} (HolaRise)</span>
+        <span class="footer-bottom-meta">
+          <a href="/">holarise.org</a>
+          <span aria-hidden="true">·</span>
+          <a href="/chinh-sach/">Bảo mật &amp; Quy tắc</a>
+        </span>
       </div>
     </div>
   </footer>
@@ -298,7 +302,11 @@
       </div>
       <div class="lightbox-bar">
         <div class="lightbox-caption" id="lightbox-caption"></div>
-        <span class="lightbox-counter" id="lightbox-counter" aria-live="polite"></span>
+        <div class="lightbox-bar-right">
+          <a class="lightbox-action-link" id="lightbox-download" href="/assets/images/logo-mark.png" download hidden>Tải ảnh</a>
+          <a class="lightbox-action-link" id="lightbox-drive" href="https://drive.google.com" target="_blank" rel="noopener noreferrer" hidden>Ảnh gốc (Drive) ↗</a>
+          <span class="lightbox-counter" id="lightbox-counter" aria-live="polite"></span>
+        </div>
       </div>
     </div>
   </dialog>

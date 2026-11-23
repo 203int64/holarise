@@ -109,7 +109,7 @@ function createMockKV() {
   };
 }
 
-function makeReq(urlPath, { method = "GET", body, cookie, origin = "https://holarise.pages.dev", ip = "1.2.3.4", headers = {} } = {}) {
+function makeReq(urlPath, { method = "GET", body, cookie, origin = "https://holarise.org", ip = "1.2.3.4", headers = {} } = {}) {
   const h = new Headers({
     Origin: origin,
     "CF-Connecting-IP": ip,
@@ -123,7 +123,7 @@ function makeReq(urlPath, { method = "GET", body, cookie, origin = "https://hola
   } else {
     payload = body;
   }
-  return new Request(`https://holarise.pages.dev${urlPath}`, { method, headers: h, body: payload });
+  return new Request(`https://holarise.org${urlPath}`, { method, headers: h, body: payload });
 }
 
 function extractSessionCookie(res) {
@@ -591,8 +591,8 @@ test("SSR Pages Functions inject live D1 events, brand-new articles with OG/JSON
   assert.equal(postRes.status, 200);
   const postHtml = await postRes.text();
   assert.ok(!postHtml.includes("__SSR_"), "All __SSR_ placeholders must be replaced");
-  assert.ok(postHtml.includes('<meta property="og:image" content="https://holarise.pages.dev/api/media/img-cover.jpg">'));
-  assert.ok(postHtml.includes("https://holarise.pages.dev/tin-tuc/bai-viet-moi-tuc-thi/"));
+  assert.ok(postHtml.includes('<meta property="og:image" content="https://holarise.org/api/media/img-cover.jpg">'));
+  assert.ok(postHtml.includes("https://holarise.org/tin-tuc/bai-viet-moi-tuc-thi/"));
   assert.ok(postHtml.includes("<strong>chữ đậm</strong>"));
   assert.ok(postHtml.includes("<h2>Điểm nhấn</h2>"));
   assert.ok(postHtml.includes('"@type": "Article"'));
@@ -609,7 +609,7 @@ test("SSR Pages Functions inject live D1 events, brand-new articles with OG/JSON
   const smRes = await ssrSitemap({ request: makeReq("/sitemap.xml"), env });
   assert.equal(smRes.status, 200);
   const smXml = await smRes.text();
-  assert.ok(smXml.includes("https://holarise.pages.dev/tin-tuc/bai-viet-moi-tuc-thi/"));
+  assert.ok(smXml.includes("https://holarise.org/tin-tuc/bai-viet-moi-tuc-thi/"));
 
   // HEAD request on article & SSR on /workshop/ and /tin-tuc/ + bare /_templates block
   const headPost = await ssrPostHead({

@@ -511,7 +511,7 @@ def render_horizontal_gallery(gallery: list) -> str:
         </div>
         <div class="horizontal-caption">
           <span>{esc(g['caption'])}</span>
-          <span class="horizontal-index">0{idx} / 0{len(gallery)}</span>
+          <span class="horizontal-index">{idx:02d} / {len(gallery):02d}</span>
         </div>
       </button>"""
         )
@@ -527,7 +527,7 @@ def render_gallery(gallery: list) -> str:
         <span class="gallery-caption">{esc(g['caption'])}</span>
       </button>"""
         )
-    return "\n      ".join(items)
+    return '<div class="gallery-grid">\n      ' + "\n      ".join(items) + "\n    </div>"
 
 
 def render_faqs(faqs: list) -> str:
@@ -834,7 +834,7 @@ def collect_precache_urls() -> list:
 
     for html_file in sorted(DIST_DIR.rglob("*.html")):
         rel = html_file.relative_to(DIST_DIR).as_posix()
-        if rel == "404.html" or rel.startswith("admin/") or rel.startswith("_templates/"):
+        if rel == "404.html" or rel.startswith("admin/") or rel.startswith("media/") or rel.startswith("_templates/"):
             continue
         if rel == "index.html":
             urls.add("/")
@@ -963,6 +963,7 @@ self.addEventListener("fetch", (event) => {{
     url.origin === self.location.origin &&
     (url.pathname.startsWith("/api/") ||
       url.pathname.startsWith("/admin") ||
+      url.pathname.startsWith("/media") ||
       url.pathname.startsWith("/_templates/"))
   ) {{
     return;
@@ -1158,6 +1159,10 @@ def generate_cloudflare_headers() -> str:
   Cache-Control: no-store
   X-Robots-Tag: noindex, nofollow
 
+/media/*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow
+
 /api/*
   Cache-Control: no-store
   X-Robots-Tag: noindex, nofollow
@@ -1274,7 +1279,7 @@ def build_site() -> list:
             "PHILOSOPHY_VISION": esc(p["vision"]),
             "STORY_STAGE_HTML": render_story_stage(activities["pillars"]),
             "UPCOMING_WORKSHOPS_HTML": f"<!-- CMS:UPCOMING_WORKSHOPS:START -->\n{render_workshops(workshops['upcoming'])}\n<!-- CMS:UPCOMING_WORKSHOPS:END -->",
-            "HORIZONTAL_GALLERY_HTML": render_horizontal_gallery(activities["gallery"]),
+            "HORIZONTAL_GALLERY_HTML": f"<!-- CMS:HORIZONTAL_GALLERY:START -->\n{render_horizontal_gallery(activities['gallery'])}\n<!-- CMS:HORIZONTAL_GALLERY:END -->",
             "TESTIMONIALS_HTML": render_testimonials(site.get("testimonials", [])),
             "FAQ_HTML": render_faqs(site["faqs"]),
         },
@@ -1341,7 +1346,7 @@ def build_site() -> list:
         {
             "PILLARS_DETAIL_HTML": render_pillars(activities["pillars"], detailed=True),
             "CAMPAIGNS_HTML": render_campaigns(activities["campaigns"]),
-            "GALLERY_HTML": render_gallery(activities["gallery"]),
+            "GALLERY_HTML": f"<!-- CMS:ACTIVITIES_GALLERY:START -->\n{render_gallery(activities['gallery'])}\n<!-- CMS:ACTIVITIES_GALLERY:END -->",
         },
     )
     write_page(
@@ -1620,6 +1625,15 @@ def build_site() -> list:
     admin_out.parent.mkdir(parents=True, exist_ok=True)
     admin_out.write_text(admin_html, encoding="utf-8")
 
+    # 7d. Media Team Portal (/media/index.html — noindex, excluded from sitemap & SW precache)
+    media_html = render_template(
+        load_template("media.html"),
+        {"CACHE_BUST": CURRENT_BUILD_HASH},
+    )
+    media_out = DIST_DIR / "media" / "index.html"
+    media_out.parent.mkdir(parents=True, exist_ok=True)
+    media_out.write_text(media_html, encoding="utf-8")
+
     # 8. Technical SEO & PWA files: sitemap.xml, robots.txt, site.webmanifest, sw.js, _headers
     today = datetime.date.today().isoformat()
     url_entries = "\n".join(
@@ -1641,6 +1655,7 @@ def build_site() -> list:
     robots_txt = f"""User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /media/
 Disallow: /api/
 Disallow: /_templates/
 
@@ -1779,10 +1794,10 @@ def verify_dist() -> list:
         if re.search(r'\bhref="#"', text):
             errors.append(f"[{rel}] Dead placeholder link href=\"#\" found")
 
-        is_admin_page = rel == Path("admin/index.html")
-        if is_admin_page:
+        is_internal_portal = rel in (Path("admin/index.html"), Path("media/index.html"))
+        if is_internal_portal:
             if 'content="noindex, nofollow"' not in text:
-                errors.append(f"[{rel}] Admin page must declare robots noindex, nofollow")
+                errors.append(f"[{rel}] Internal portal page must declare robots noindex, nofollow")
             for attr, target in re.findall(r'\b(href|src)="(/[^"]*)"', text):
                 clean = target.split("#")[0].split("?")[0]
                 if not clean or clean == "/" or clean.startswith("/api/"):
@@ -1809,8 +1824,8 @@ def verify_dist() -> list:
             if required not in text:
                 errors.append(f"[{rel}] Missing SEO/PWA tag: {required}")
 
-        if "https://holarise.pages.dev/" not in text:
-            errors.append(f"[{rel}] Canonical or OG URL does not point to https://holarise.pages.dev/")
+        if "https://holarise.org/" not in text:
+            errors.append(f"[{rel}] Canonical or OG URL does not point to https://holarise.org/")
 
         ld_blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', text, re.S)
         if not ld_blocks:
@@ -1860,6 +1875,8 @@ def verify_dist() -> list:
             errors.append("[sitemap.xml] Offline fallback route must not be included in sitemap.xml")
         if "/admin/" in sm_txt:
             errors.append("[sitemap.xml] Admin route must not be included in sitemap.xml")
+        if "/media/" in sm_txt:
+            errors.append("[sitemap.xml] Media portal route must not be included in sitemap.xml")
         if "/404.html" in sm_txt:
             errors.append("[sitemap.xml] 404 page must not be included in sitemap.xml")
         if "/chinh-sach/" not in sm_txt:
@@ -1953,7 +1970,7 @@ def verify_dist() -> list:
                 total_bytes = 0
                 for u in precache_urls:
                     clean = u.split("?")[0]
-                    if clean.startswith("/admin") or clean == "/404.html" or "admin.css" in clean or "admin.js" in clean:
+                    if clean.startswith("/admin") or clean.startswith("/media") or clean == "/404.html" or "admin.css" in clean or "admin.js" in clean or "media.css" in clean or "media-portal.js" in clean:
                         errors.append(f"[sw.js] Non-precachable route/asset must not be precached: {u}")
                     if clean == "/":
                         p = DIST_DIR / "index.html"

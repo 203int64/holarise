@@ -253,16 +253,28 @@
     });
   });
 
-  /* 5. Lightbox v2 Trigger (Prev/Next + Keyboard Arrows + Touch Swipe + Counter) */
+  /* 5. Lightbox v2 Trigger (Single Photos + Album Viewer + Prev/Next + Keyboard + Touch Swipe) */
   var lightbox = document.getElementById("gallery-lightbox");
   var lightboxImg = document.getElementById("lightbox-img");
   var lightboxCaption = document.getElementById("lightbox-caption");
   var lightboxCounter = document.getElementById("lightbox-counter");
+  var lightboxDownload = document.getElementById("lightbox-download");
+  var lightboxDrive = document.getElementById("lightbox-drive");
   var lightboxPrevBtn = lightbox ? lightbox.querySelector("[data-lightbox-prev]") : null;
   var lightboxNextBtn = lightbox ? lightbox.querySelector("[data-lightbox-next]") : null;
 
   if (lightbox && lightboxImg && lightboxCaption) {
     var galleryTriggers = Array.prototype.slice.call(document.querySelectorAll("[data-lightbox-src]"));
+    var defaultSlides = galleryTriggers.map(function (btn) {
+      return {
+        src: btn.getAttribute("data-lightbox-src") || "",
+        alt: btn.getAttribute("data-lightbox-alt") || "",
+        caption: btn.getAttribute("data-lightbox-caption") || "",
+        photographer: "",
+        driveUrl: "",
+      };
+    });
+    var activeSlides = defaultSlides;
     var activeGalleryIdx = 0;
 
     var formatIdx = function (n) {
@@ -270,13 +282,33 @@
     };
 
     var showGalleryIndex = function (idx) {
-      if (!galleryTriggers.length) return;
-      var total = galleryTriggers.length;
+      if (!activeSlides.length) return;
+      var total = activeSlides.length;
       activeGalleryIdx = ((idx % total) + total) % total;
-      var btn = galleryTriggers[activeGalleryIdx];
-      lightboxImg.src = btn.getAttribute("data-lightbox-src") || "";
-      lightboxImg.alt = btn.getAttribute("data-lightbox-alt") || "";
-      lightboxCaption.textContent = btn.getAttribute("data-lightbox-caption") || "";
+      var item = activeSlides[activeGalleryIdx];
+      lightboxImg.src = item.src || "";
+      lightboxImg.alt = item.alt || "";
+      var captionText = item.caption || "";
+      if (item.photographer) {
+        captionText = captionText ? captionText + " · Ảnh: " + item.photographer : "Ảnh: " + item.photographer;
+      }
+      lightboxCaption.textContent = captionText;
+      if (lightboxDownload) {
+        if (item.src) {
+          lightboxDownload.href = item.src;
+          lightboxDownload.hidden = false;
+        } else {
+          lightboxDownload.hidden = true;
+        }
+      }
+      if (lightboxDrive) {
+        if (item.driveUrl && item.driveUrl.indexOf("https://") === 0) {
+          lightboxDrive.href = item.driveUrl;
+          lightboxDrive.hidden = false;
+        } else {
+          lightboxDrive.hidden = true;
+        }
+      }
       if (lightboxCounter) {
         lightboxCounter.textContent = formatIdx(activeGalleryIdx + 1) + " / " + formatIdx(total);
       }
@@ -287,8 +319,35 @@
 
     galleryTriggers.forEach(function (btn, idx) {
       btn.addEventListener("click", function () {
+        activeSlides = defaultSlides;
         showGalleryIndex(idx);
         openDialog(lightbox);
+      });
+    });
+
+    document.querySelectorAll("[data-album-open]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var card = btn.closest("[data-album-card]");
+        var scriptEl = card ? card.querySelector("script.album-photos-data") : null;
+        if (!scriptEl) return;
+        try {
+          var payload = JSON.parse(scriptEl.textContent || "{}");
+          var photos = Array.isArray(payload.photos) ? payload.photos : [];
+          if (!photos.length) return;
+          activeSlides = photos.map(function (p) {
+            return {
+              src: p.src || "",
+              alt: p.alt || payload.title || "",
+              caption: p.caption || payload.title || "",
+              photographer: p.photographer || "",
+              driveUrl: payload.driveUrl || "",
+            };
+          });
+          showGalleryIndex(0);
+          openDialog(lightbox);
+        } catch (err) {
+          // ignore malformed album JSON
+        }
       });
     });
 
@@ -305,7 +364,7 @@
     }
 
     lightbox.addEventListener("keydown", function (e) {
-      if (!lightbox.open || galleryTriggers.length <= 1) return;
+      if (!lightbox.open || activeSlides.length <= 1) return;
       if (e.key === "ArrowLeft") {
         e.preventDefault();
         showGalleryIndex(activeGalleryIdx - 1);
@@ -329,7 +388,7 @@
     lightbox.addEventListener(
       "touchend",
       function (e) {
-        if (!e.changedTouches || !e.changedTouches.length || galleryTriggers.length <= 1) return;
+        if (!e.changedTouches || !e.changedTouches.length || activeSlides.length <= 1) return;
         var dx = e.changedTouches[0].clientX - lbTouchX;
         var dy = e.changedTouches[0].clientY - lbTouchY;
         if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.2) {
