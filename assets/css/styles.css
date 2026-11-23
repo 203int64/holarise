@@ -6380,4 +6380,227 @@ form.form-grid[hidden] {
   color: rgba(255, 255, 255, 0.78);
 }
 
+/* Magazine Story Chapters (#chuong-trinh on /gioi-thieu/) */
+.pillar-chapters {
+  display: grid;
+  gap: clamp(48px, 6vw, 72px);
+}
+
+.pillar-chapter {
+  --pillar-accent: var(--accent);
+  display: grid;
+  grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+  gap: clamp(28px, 4.5vw, 56px);
+  align-items: center;
+  padding-top: clamp(40px, 5vw, 56px);
+  border-top: 1px solid var(--line);
+  scroll-margin-top: calc(var(--header-height) + 28px);
+}
+
+.pillar-chapter:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.pillar-chapter[data-pillar-theme="sunrise"] {
+  --pillar-accent: var(--sunrise);
+}
+
+.pillar-chapter[data-pillar-theme="emerald"] {
+  --pillar-accent: var(--accent);
+}
+
+.pillar-chapter[data-pillar-theme="obsidian"] {
+  --pillar-accent: var(--ink);
+}
+
+@media (min-width: 961px) {
+  .pillar-chapter--reverse {
+    grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
+  }
+
+  .pillar-chapter--reverse .pillar-collage {
+    order: -1;
+  }
+}
+
+.pillar-chapter-eyebrow {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.pillar-chapter-num {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--pillar-accent);
+}
+
+.pillar-chapter-kicker {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pillar-accent);
+}
+
+.pillar-chapter-copy h3 {
+  margin: 0 0 14px;
+  font-size: clamp(1.48rem, 2.3vw, 1.92rem);
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  line-height: 1.24;
+  color: var(--ink);
+}
+
+.pillar-lead {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.66;
+  color: var(--ink);
+}
+
+.pillar-story {
+  margin: 0 0 22px;
+  font-size: 0.93rem;
+  line-height: 1.72;
+  color: var(--ink-secondary);
+}
+
+.pillar-focus-list {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 14px 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 16px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.pillar-focus-list li {
+  display: grid;
+  gap: 4px;
+}
+
+.pillar-focus-list span {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--pillar-accent);
+}
+
+.pillar-focus-list strong {
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.pillar-chapter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.pillar-collage {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pillar-photo {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.pillar-photo--main {
+  grid-column: 1 / -1;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-lg);
+}
+
+.pillar-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease-expo);
+}
+
+.pillar-photo:hover img,
+.pillar-photo:focus-visible img {
+  transform: scale(1.04);
+}
+
+.pillar-photo:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.pillar-photo-cap {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  padding: 28px 14px 10px;
+  background: linear-gradient(to top, rgba(11, 17, 15, 0.78), rgba(11, 17, 15, 0.22) 65%, transparent);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.28s var(--ease-expo), transform 0.32s var(--ease-expo);
+  pointer-events: none;
+}
+
+.pillar-photo:hover .pillar-photo-cap,
+.pillar-photo:focus-visible .pillar-photo-cap {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 960px) {
+  .pillar-chapter {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding-top: 36px;
+  }
+
+  .pillar-focus-list {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .pillar-focus-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pillar-photo img,
+  .pillar-photo-cap {
+    transition: none;
+  }
+}
+
+
 

@@ -309,12 +309,7 @@ def render_story_stage(pillars: list) -> str:
         )
 
         priority_attr = ' fetchpriority="low" loading="lazy" decoding="async"' if idx > 0 else ' loading="lazy" decoding="async"'
-        if p.get("imageIsIllustration"):
-            image_label = "Minh họa định hướng"
-        elif filter_key == "holaheart":
-            image_label = "Tư liệu HolaHeart · 15/11/2026"
-        else:
-            image_label = f"{p['badge']} · Hòa Lạc – Thạch Thất"
+        image_label = "HolaHeart · 15/11/2026" if filter_key == "holaheart" else f"{p['badge']} · Hòa Lạc – Thạch Thất"
         slides.append(
             f"""<div class="story-slide image-note{active_cls}" data-story-slide="{idx}" tabindex="{0 if idx == 0 else -1}" role="group" aria-label="Chú thích ảnh: {esc(image_label)} · {esc(p['imageAlt'])}">
           <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="960" height="720"{priority_attr}>
@@ -355,66 +350,82 @@ def render_story_stage(pillars: list) -> str:
 
 
 def render_pillars(pillars: list, detailed: bool = False) -> str:
-    cards = []
-    for p in pillars:
-        chips_html = "".join(f'<span class="visual-chip">{esc(h)}</span>' for h in p["highlights"])
+    chapters = []
+    for idx, p in enumerate(pillars, start=1):
         filter_key = p.get("filterKey") or derive_pillar_filter(p.get("badge", ""), [], p.get("id", ""))
         anchor_id = f' id="{esc(p["id"])}"' if detailed else ""
+        reverse_cls = " pillar-chapter--reverse" if idx % 2 == 0 else ""
+        theme_map = {"holaheart": "sunrise", "holagreen": "emerald", "holaconnect": "obsidian"}
+        theme = theme_map.get(filter_key, "emerald")
+
         cta_href = f"/lich-hoat-dong/?nhom={esc(filter_key)}"
         cta_label = f"Xem lịch {p['badge']}"
-        footer_html = (
-            f'<div class="card-footer">'
-            f'<a class="arrow-link" href="{cta_href}">{esc(cta_label)} →</a>'
-            f'<a class="btn btn--outline btn--sm" href="/tham-gia/?chuong-trinh={esc(filter_key)}">Tham gia</a>'
-            f'</div>'
-            if detailed
-            else f'<div class="card-footer"><a class="arrow-link" href="{cta_href}">{esc(cta_label)} →</a></div>'
+
+        highlights_html = "".join(
+            f'<li data-highlight-idx="0{h_idx}"><span>0{h_idx}</span><strong>{esc(h)}</strong></li>'
+            for h_idx, h in enumerate(p.get("highlights", []), start=1)
         )
-        if p.get("imageIsIllustration"):
-            image_label = "Minh họa định hướng"
-        elif filter_key == "holaheart":
-            image_label = "Tư liệu HolaHeart · 15/11/2026"
-        else:
-            image_label = f"{p['badge']} · Hòa Lạc – Thạch Thất"
 
-        illust_html = ""
-        illust_gallery = p.get("illustrativeGallery", []) if detailed else []
-        if illust_gallery:
-            thumbs = []
-            for item in illust_gallery:
-                src = item.get("src", "")
-                alt = item.get("alt", "")
-                cap = item.get("caption") or alt
-                full_cap = f"Minh họa {p['badge']} · {cap}" if cap else f"Minh họa {p['badge']}"
-                thumbs.append(
-                    f"""<button class="illustrative-image" type="button" aria-label="Xem ảnh: {esc(cap)}" data-lightbox-src="{esc(src)}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_cap)}">
-              <img src="{esc(src)}" alt="{esc(alt)}" width="320" height="200" loading="lazy" decoding="async">
-            </button>"""
-                )
-            illust_html = f"""
-        <details class="illustrative-details">
-          <summary>Xem thêm {len(illust_gallery)} khung hình minh họa {esc(p['badge'])}</summary>
-          <p>Ảnh minh họa định hướng hoạt động — bấm vào từng khung hình để phóng to.</p>
-          <div class="illustrative-grid">
-            {"".join(thumbs)}
+        story_text = p.get("story") or ""
+        story_html = f'<p class="pillar-story">{esc(story_text)}</p>' if story_text else ""
+
+        main_caption = p.get("imageCaption") or p["title"]
+        photo_frames = [
+            {
+                "src": p["image"],
+                "alt": p["imageAlt"],
+                "caption": main_caption,
+                "is_main": True,
+            }
+        ]
+        for extra in p.get("storyPhotos", [])[:2]:
+            photo_frames.append(
+                {
+                    "src": extra.get("src", ""),
+                    "alt": extra.get("alt", ""),
+                    "caption": extra.get("caption") or extra.get("alt", ""),
+                    "is_main": False,
+                }
+            )
+
+        collage_buttons = []
+        for frame_idx, frame in enumerate(photo_frames):
+            main_cls = " pillar-photo--main" if frame["is_main"] else ""
+            cap = frame["caption"]
+            full_cap = f"{p['badge']} · {cap}" if p["badge"] not in cap else cap
+            loading_attr = 'loading="lazy" decoding="async"'
+            width_attr = 'width="960" height="600"' if frame["is_main"] else 'width="480" height="300"'
+            collage_buttons.append(
+                f"""<button class="pillar-photo{main_cls}" type="button" aria-label="Xem ảnh: {esc(cap)}" data-lightbox-src="{esc(frame['src'])}" data-lightbox-alt="{esc(frame['alt'])}" data-lightbox-caption="{esc(full_cap)}">
+            <img src="{esc(frame['src'])}" alt="{esc(frame['alt'])}" {width_attr} {loading_attr}>
+            <span class="pillar-photo-cap" aria-hidden="true">{esc(cap)}</span>
+          </button>"""
+            )
+
+        chapters.append(
+            f"""<article class="pillar-chapter{reverse_cls}"{anchor_id} data-pillar-theme="{esc(theme)}" data-reveal>
+        <div class="pillar-chapter-copy">
+          <div class="pillar-chapter-eyebrow">
+            <span class="pillar-chapter-num" aria-hidden="true">0{idx}</span>
+            <span class="pillar-chapter-kicker">{esc(p['badge'])}</span>
           </div>
-        </details>"""
-
-        cards.append(
-            f"""<article class="editorial-card" data-stagger-item{anchor_id}>
-        <div class="plate-media image-note" data-curtain tabindex="0" role="group" aria-label="Chú thích ảnh: {esc(image_label)} · {esc(p['imageAlt'])}">
-          <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
-          {render_image_tooltip(p['imageAlt'], image_label)}
+          <h3>{esc(p['title'])}</h3>
+          <p class="pillar-lead">{esc(p['summary'])}</p>
+          {story_html}
+          <ul class="pillar-focus-list">
+            {highlights_html}
+          </ul>
+          <div class="pillar-chapter-actions">
+            <a class="arrow-link" href="{cta_href}"><span>{esc(cta_label)}</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
+            <a class="btn btn--outline btn--sm" href="/tham-gia/?chuong-trinh={esc(filter_key)}">Tham gia {esc(p['badge'])}</a>
+          </div>
         </div>
-        <div class="card-meta"><span class="cat">{esc(p['badge'])}</span></div>
-        <h3 class="card-title">{esc(p['title'])}</h3>
-        <p class="card-text">{esc(p['summary'])}</p>
-        <div class="visual-chip-row" style="margin-bottom: 18px;">{chips_html}</div>
-        {illust_html}
-        {footer_html}
+        <div class="pillar-collage">
+          {"".join(collage_buttons)}
+        </div>
       </article>"""
         )
-    return "\n      ".join(cards)
+    return "\n      ".join(chapters)
 
 
 ICON_CALENDAR = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
