@@ -91,6 +91,20 @@ def esc(value) -> str:
     return html.escape(str(value), quote=True)
 
 
+def format_inline_pillar_tags(text: str) -> str:
+    """Wrap (HolaHeart), (HolaGreen), (HolaConnect) in interactive pillar tags."""
+    safe = esc(text)
+    pillars = (
+        ("HolaHeart", "/lich-hoat-dong/?nhom=holaheart", "holaheart"),
+        ("HolaGreen", "/lich-hoat-dong/?nhom=holagreen", "holagreen"),
+        ("HolaConnect", "/lich-hoat-dong/?nhom=holaconnect", "holaconnect"),
+    )
+    for name, href, slug in pillars:
+        tag_html = f'<a class="pillar-inline-tag pillar-inline-tag--{slug}" href="{href}">{name}</a>'
+        safe = safe.replace(f"({name})", tag_html)
+    return safe
+
+
 def render_template(template: str, mapping: dict) -> str:
     result = template
     for key, val in mapping.items():
@@ -392,38 +406,20 @@ def render_pillar_ripple_svg(level_num: int) -> str:
 
 def render_pillars(pillars: list, detailed: bool = False) -> str:
     chapters = []
-    total_pillars = len(pillars)
     for idx, p in enumerate(pillars, start=1):
         filter_key = p.get("filterKey") or derive_pillar_filter(p.get("badge", ""), [], p.get("id", ""))
         anchor_id = f' id="{esc(p["id"])}"' if detailed else ""
         reverse_cls = " pillar-chapter--reverse" if idx % 2 == 0 else ""
-        meta = PILLAR_IDENTITY_META.get(
-            filter_key,
-            {
-                "theme": "emerald",
-                "level_num": idx,
-                "level_label": f"Cấp độ 0{idx}",
-                "scale_label": p.get("metricBadge", ""),
-                "icon_svg": PILLAR_IDENTITY_META["holagreen"]["icon_svg"],
-                "connector_next": "",
-            },
-        )
-        theme = meta["theme"]
-        level_num = meta["level_num"]
-        level_segments = "".join(
-            f'<span class="pillar-level-seg{" is-lit" if seg <= level_num else ""}"></span>'
-            for seg in range(1, 4)
-        )
 
         cta_href = f"/lich-hoat-dong/?nhom={esc(filter_key)}"
-        cta_label = f"Xem lịch {p['badge']}"
+        cta_label = f"Xem lịch hoạt động {p['badge']}"
 
         highlights_html = "".join(
-            f'<li data-highlight-idx="0{h_idx}"><span>0{h_idx}</span><strong>{esc(h)}</strong></li>'
-            for h_idx, h in enumerate(p.get("highlights", []), start=1)
+            f"<li>{esc(h)}</li>"
+            for h in p.get("highlights", [])
         )
 
-        story_text = p.get("story") or ""
+        story_text = (p.get("story") or "").strip()
         story_html = f'<p class="pillar-story">{esc(story_text)}</p>' if story_text else ""
 
         main_caption = p.get("imageCaption") or p["title"]
@@ -460,32 +456,21 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
             )
 
         chapters.append(
-            f"""<article class="pillar-chapter{reverse_cls}"{anchor_id} data-pillar-theme="{esc(theme)}" data-reveal>
-        {render_pillar_ripple_svg(level_num)}
+            f"""<article class="pillar-chapter{reverse_cls}"{anchor_id} data-reveal>
         <div class="pillar-chapter-copy">
-          <div class="pillar-level-bar">
-            <span class="pillar-emblem" aria-hidden="true">{meta['icon_svg']}</span>
-            <div class="pillar-level-meta">
-              <span class="pillar-level-label">{esc(meta['level_label'])}</span>
-              <span class="pillar-scale-label">{esc(meta['scale_label'])}</span>
-            </div>
-            <div class="pillar-level-dots" role="img" aria-label="Cấp độ {level_num} trên 3">
-              {level_segments}
-            </div>
-          </div>
           <div class="pillar-chapter-eyebrow">
-            <span class="pillar-chapter-num" aria-hidden="true">0{idx}</span>
+            <span class="pillar-chapter-num">0{idx}</span>
+            <span aria-hidden="true">·</span>
             <span class="pillar-chapter-kicker">{esc(p['badge'])}</span>
           </div>
           <h3>{esc(p['title'])}</h3>
           <p class="pillar-lead">{esc(p['summary'])}</p>
           {story_html}
-          <ul class="pillar-focus-list">
+          <ul class="pillar-focus-list" aria-label="Trọng tâm hoạt động">
             {highlights_html}
           </ul>
           <div class="pillar-chapter-actions">
             <a class="arrow-link" href="{cta_href}"><span>{esc(cta_label)}</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
-            <a class="btn btn--outline btn--sm" href="/tham-gia/?chuong-trinh={esc(filter_key)}">Tham gia {esc(p['badge'])}</a>
           </div>
         </div>
         <div class="pillar-collage">
@@ -493,18 +478,6 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
         </div>
       </article>"""
         )
-
-        if idx < total_pillars and meta.get("connector_next"):
-            chapters.append(
-                f"""<div class="pillar-connector" aria-hidden="true">
-        <span class="pillar-connector-stem"></span>
-        <span class="pillar-connector-pill">
-          <span>{esc(meta['connector_next'])}</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </span>
-        <span class="pillar-connector-stem"></span>
-      </div>"""
-            )
     return "\n      ".join(chapters)
 
 
@@ -743,11 +716,9 @@ def render_faqs(faqs: list) -> str:
 def render_numbered_cards(items: list) -> str:
     cards = []
     for idx, item in enumerate(items, start=1):
-        tag = item.get("tag", "")
-        meta = f"0{idx} · {esc(tag)}" if tag else f"0{idx}"
         cards.append(
             f"""<article class="value-col" data-stagger-item>
-        <span class="value-num">{meta}</span>
+        <span class="value-num">0{idx}</span>
         <h3>{esc(item['title'])}</h3>
         <p>{esc(item['description'])}</p>
       </article>"""
@@ -1038,7 +1009,7 @@ def write_page(
             "OG_IMAGE_URL": esc(og_img_url),
             "BODY_CLASS": esc(body_class),
             "BRAND_FULL_NAME": esc(b["fullName"]),
-            "BRAND_SUBTITLE": esc(b["subtitle"]),
+            "BRAND_SUBTITLE": format_inline_pillar_tags(b["subtitle"]),
             "BRAND_TAGLINE": esc(b["tagline"]),
             "LOGO_DARK": esc(b["logoDark"]),
             "LOGO_LIGHT": esc(b["logoLight"]),
@@ -1471,7 +1442,7 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
 
 ## Các trang chính (Flagship 3+1)
 - [Trang chủ]({abs_url(b['siteUrl'], '/')}): Tuyên ngôn, khoảnh khắc thật và mô hình Tạo Tác Động 3 trụ cột.
-- [Về HolaRise]({abs_url(b['siteUrl'], '/gioi-thieu/')}): Câu chuyện Chapter 01 Hòa Lạc – Thạch Thất, Theory of Change, 3 trụ cột, 4 nguyên tắc minh bạch và 5 UN SDGs.
+- [Về HolaRise]({abs_url(b['siteUrl'], '/gioi-thieu/')}): Câu chuyện Chapter 01 Hòa Lạc – Thạch Thất, Theory of Change, 3 trụ cột, 4 chuẩn mực, 5 nguyên tắc minh bạch và 6 UN SDGs.
 - [Lịch hoạt động]({abs_url(b['siteUrl'], '/lich-hoat-dong/')}): Lịch 1–2 buổi/tuần lọc theo HolaHeart, HolaGreen, HolaConnect.
 - [Hành trình]({abs_url(b['siteUrl'], '/hanh-trinh/')}): Tường thuật sự kiện và triển lãm ảnh thật (HolaHeart 15/11 & HolaHeart × MusicSpace).
 - [Tham gia & Hợp tác]({abs_url(b['siteUrl'], '/tham-gia/')}): Đăng ký Thẻ Gieo Mầm cho người trẻ và cổng kết nối đối tác, nhà trường, CLB.
@@ -1578,12 +1549,12 @@ def build_site() -> list:
         {
             "BRAND_FULL_NAME": esc(b["fullName"]),
             "BRAND_SHORT_NAME": esc(b["shortName"]),
-            "BRAND_SUBTITLE": esc(b["subtitle"]),
+            "BRAND_SUBTITLE": format_inline_pillar_tags(b["subtitle"]),
             "ABOUT_IMAGE": esc(about_media.get("image") or h["image"]),
             "ABOUT_IMAGE_ALT": esc(about_media.get("imageAlt") or h["imageAlt"]),
             "PHILOSOPHY_QUOTE": esc(p["quote"]),
             "PHILOSOPHY_MOTTO": esc(p["motto"]),
-            "PHILOSOPHY_MISSION": esc(p["mission"]),
+            "PHILOSOPHY_MISSION": format_inline_pillar_tags(p["mission"]),
             "PHILOSOPHY_VISION": esc(p["vision"]),
             "PILLARS_DETAIL_HTML": render_pillars(activities["pillars"], detailed=True),
             "CORE_VALUES_HTML": render_numbered_cards(p["coreValues"]),

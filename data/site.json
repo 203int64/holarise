@@ -79,6 +79,12 @@
   },
   "sdgs": [
     {
+      "code": "SDG 3",
+      "title": "Sức khỏe & Tinh thần",
+      "color": "#4C9F38",
+      "description": "Mở không gian workshop an toàn giúp người trẻ giải tỏa áp lực, chăm sóc sức khỏe tinh thần và nuôi dưỡng mối quan hệ lành mạnh."
+    },
+    {
       "code": "SDG 4",
       "title": "Giáo dục chất lượng",
       "color": "#C5192D",
@@ -113,22 +119,27 @@
     {
       "tag": "Phi lợi nhuận",
       "title": "Công khai & Minh bạch chi phí",
-      "description": "HolaRise vận hành theo tinh thần cộng đồng phi lợi nhuận. Mọi khoản đóng góp chi phí địa điểm hoặc vật tư (nếu phát sinh) đều được thông báo rõ trước mỗi buổi."
+      "description": "HolaRise vận hành theo tinh thần cộng đồng phi lợi nhuận. Mọi khoản đóng góp chi phí địa điểm hoặc học cụ (nếu phát sinh) đều được thông báo rõ trước mỗi buổi."
     },
     {
       "tag": "An toàn",
       "title": "Không gian tôn trọng & An toàn",
-      "description": "Không giáo điều, không lôi kéo hay thương mại hóa khóa học ẩn; mọi thành viên được lắng nghe và tự nguyện quyết định mức độ tham gia."
+      "description": "Không giáo điều, không phán xét hay ép buộc; mọi thành viên được lắng nghe bình đẳng và tự nguyện quyết định mức độ tham gia."
+    },
+    {
+      "tag": "Độc lập",
+      "title": "Độc lập & Phi thương mại",
+      "description": "Không lồng ghép bán khóa học ẩn hay thương mại hóa niềm tin cộng đồng; giữ trọn tính độc lập và trong sáng trong mọi hoạt động."
     },
     {
       "tag": "Chân thật",
       "title": "Tư liệu thật · Kết quả thật",
-      "description": "Chỉ công bố hình ảnh, câu chuyện và số liệu có kiểm chứng thực tế; tách bạch rõ ràng giữa tư liệu sự kiện và hình ảnh minh họa."
+      "description": "Chỉ công bố hình ảnh, câu chuyện và số liệu có kiểm chứng thực tế từ các chương trình đã diễn ra tại Hòa Lạc – Thạch Thất."
     },
     {
       "tag": "Riêng tư",
-      "title": "Tôn trọng quyền riêng tư hình ảnh",
-      "description": "Mọi dữ liệu đăng ký được bảo mật tuyệt đối và bất kỳ thành viên nào đều có quyền đề nghị cập nhật hoặc gỡ hình ảnh cá nhân bất kỳ lúc nào."
+      "title": "Tôn trọng quyền riêng tư",
+      "description": "Dữ liệu đăng ký được bảo mật tuyệt đối và mỗi thành viên đều có quyền yêu cầu cập nhật hoặc gỡ hình ảnh cá nhân bất kỳ lúc nào."
     }
   ],
   "testimonials": [],

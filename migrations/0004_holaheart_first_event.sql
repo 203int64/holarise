@@ -96,3 +96,73 @@ ON CONFLICT(id) DO UPDATE SET
   content_json = excluded.content_json,
   status = excluded.status,
   updated_at = excluded.updated_at;
+
+INSERT INTO events (
+  id, kind, type, filters_json, date, date_display, time, location, fee, seats,
+  title, summary, highlights_json, participants, image, image_alt, status,
+  sort_order, created_at, updated_at
+) VALUES (
+  'holaconnect-leo-nui-lam-nghiep-2026-11-26', 'upcoming', 'HolaConnect · Gắn kết & Thể chất',
+  '["holaconnect", "tu-te", "se-chia"]', '2026-11-26', 'Thứ Năm, 26/11/2026', '14:30 – 17:30',
+  'ĐH Lâm Nghiệp (Núi Luốt), Xuân Mai – Hòa Lạc', 'Miễn phí', 'Mở đăng ký · 25 chỗ',
+  'HolaConnect · Chiều Leo Núi & Kết Nối Giữa Rừng Thông',
+  'Tạm rời màn hình máy tính để cùng bạn bè người trẻ Hòa Lạc – Xuân Mai trekking cung đồi rừng thực nghiệm Núi Luốt tại ĐH Lâm Nghiệp, hít thở không khí chiều thu và trò chuyện kết nối trên đỉnh đồi thông.',
+  '["Trekking nhẹ nhàng rừng thông Núi Luốt", "Vòng tròn làm quen & sẻ chia trên đồi", "Rèn luyện sức bền & gắn kết bạn đồng hành"]',
+  '', '/assets/images/events/activity-nature-trail.jpg',
+  'Con đường mòn rợp bóng cây xanh dẫn lên đồi rừng tại buổi chiều leo núi kết nối HolaConnect.',
+  'published', 0, '2026-11-23T16:00:00.000Z', '2026-11-23T16:00:00.000Z'
+)
+ON CONFLICT(id) DO UPDATE SET
+  kind = excluded.kind,
+  type = excluded.type,
+  filters_json = excluded.filters_json,
+  date = excluded.date,
+  date_display = excluded.date_display,
+  time = excluded.time,
+  location = excluded.location,
+  fee = excluded.fee,
+  seats = excluded.seats,
+  title = excluded.title,
+  summary = excluded.summary,
+  highlights_json = excluded.highlights_json,
+  participants = excluded.participants,
+  image = excluded.image,
+  image_alt = excluded.image_alt,
+  status = excluded.status,
+  sort_order = excluded.sort_order,
+  updated_at = excluded.updated_at;
+
+INSERT INTO events (
+  id, kind, type, filters_json, date, date_display, time, location, fee, seats,
+  title, summary, highlights_json, participants, image, image_alt, status,
+  sort_order, created_at, updated_at
+) VALUES (
+  'holaheart-ws-nguoi-tre-cung-ngoi-lai-2026-11-29', 'upcoming', 'HolaHeart · Đối thoại & Nội lực',
+  '["holaheart", "biet-on", "tu-te"]', '2026-11-29', 'Chủ Nhật, 29/11/2026', '20:00 – 21:30',
+  'Mây Lang Thang Cafe, Hòa Lạc', 'Miễn phí', 'Mở đăng ký · 30 chỗ',
+  'Workshop HolaHeart: Người trẻ cùng ngồi lại?!..',
+  'Giữa những deadline dồn dập và nghìn thông báo lướt qua mỗi ngày, đã bao lâu chúng mình chưa thực sự ngồi lại với nhau? Một tối Chủ Nhật không bục giảng tại Mây Lang Thang để người trẻ Hòa Lạc cất điện thoại, gỡ bỏ những câu hỏi lửng lơ và lắng nghe nhau bằng sự chân thành.',
+  '["90 phút đối thoại mộc không phán xét", "Gỡ rối áp lực đồng trang lứa & mất kết nối", "Tìm lại điểm tựa tinh thần cho tuần mới"]',
+  '', '/assets/images/events/holaheart-2026-11-15/04-wide-venue.jpg',
+  'Không gian buổi tối ấm cúng nơi những người trẻ cùng ngồi lại trò chuyện tại Mây Lang Thang Cafe, Hòa Lạc.',
+  'published', 1, '2026-11-23T16:00:00.000Z', '2026-11-23T16:00:00.000Z'
+)
+ON CONFLICT(id) DO UPDATE SET
+  kind = excluded.kind,
+  type = excluded.type,
+  filters_json = excluded.filters_json,
+  date = excluded.date,
+  date_display = excluded.date_display,
+  time = excluded.time,
+  location = excluded.location,
+  fee = excluded.fee,
+  seats = excluded.seats,
+  title = excluded.title,
+  summary = excluded.summary,
+  highlights_json = excluded.highlights_json,
+  participants = excluded.participants,
+  image = excluded.image,
+  image_alt = excluded.image_alt,
+  status = excluded.status,
+  sort_order = excluded.sort_order,
+  updated_at = excluded.updated_at;

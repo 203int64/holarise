@@ -279,21 +279,6 @@
     });
   }
 
-  /* 2D. Pointer-Tracking Radial Spotlight for Theory of Change Expanding Stage */
-  var tocSteps = document.querySelectorAll("[data-toc-step]");
-  if (tocSteps.length && isFinePointer && !prefersReduced) {
-    tocSteps.forEach(function (step) {
-      step.addEventListener("pointermove", function (e) {
-        var rect = step.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
-        var xPct = (((e.clientX - rect.left) / rect.width) * 100).toFixed(2) + "%";
-        var yPct = (((e.clientY - rect.top) / rect.height) * 100).toFixed(2) + "%";
-        step.style.setProperty("--toc-x", xPct);
-        step.style.setProperty("--toc-y", yPct);
-      });
-    });
-  }
-
   if (prefersReduced || !hasGsap) {
     return;
   }

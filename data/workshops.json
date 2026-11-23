@@ -3,7 +3,56 @@
     "title": "Lịch hoạt động tại Hòa Lạc – Thạch Thất",
     "description": "HolaRise duy trì nhịp 1–2 buổi sinh hoạt, đối thoại và hành động cộng đồng mỗi tuần luân phiên giữa HolaHeart, HolaGreen và HolaConnect."
   },
-  "upcoming": [],
+  "upcoming": [
+    {
+      "id": "holaconnect-leo-nui-lam-nghiep-2026-11-26",
+      "type": "HolaConnect · Gắn kết & Thể chất",
+      "filters": [
+        "holaconnect",
+        "tu-te",
+        "se-chia"
+      ],
+      "date": "2026-11-26",
+      "dateDisplay": "Thứ Năm, 26/11/2026",
+      "time": "14:30 – 17:30",
+      "location": "ĐH Lâm Nghiệp (Núi Luốt), Xuân Mai – Hòa Lạc",
+      "fee": "Miễn phí",
+      "seats": "Mở đăng ký · 25 chỗ",
+      "title": "HolaConnect · Chiều Leo Núi & Kết Nối Giữa Rừng Thông",
+      "summary": "Tạm rời màn hình máy tính để cùng bạn bè người trẻ Hòa Lạc – Xuân Mai trekking cung đồi rừng thực nghiệm Núi Luốt tại ĐH Lâm Nghiệp, hít thở không khí chiều thu và trò chuyện kết nối trên đỉnh đồi thông.",
+      "highlights": [
+        "Trekking nhẹ nhàng rừng thông Núi Luốt",
+        "Vòng tròn làm quen & sẻ chia trên đồi",
+        "Rèn luyện sức bền & gắn kết bạn đồng hành"
+      ],
+      "image": "/assets/images/events/activity-nature-trail.jpg",
+      "imageAlt": "Con đường mòn rợp bóng cây xanh dẫn lên đồi rừng tại buổi chiều leo núi kết nối HolaConnect."
+    },
+    {
+      "id": "holaheart-ws-nguoi-tre-cung-ngoi-lai-2026-11-29",
+      "type": "HolaHeart · Đối thoại & Nội lực",
+      "filters": [
+        "holaheart",
+        "biet-on",
+        "tu-te"
+      ],
+      "date": "2026-11-29",
+      "dateDisplay": "Chủ Nhật, 29/11/2026",
+      "time": "20:00 – 21:30",
+      "location": "Mây Lang Thang Cafe, Hòa Lạc",
+      "fee": "Miễn phí",
+      "seats": "Mở đăng ký · 30 chỗ",
+      "title": "Workshop HolaHeart: Người trẻ cùng ngồi lại?!..",
+      "summary": "Giữa những deadline dồn dập và nghìn thông báo lướt qua mỗi ngày, đã bao lâu chúng mình chưa thực sự ngồi lại với nhau? Một tối Chủ Nhật không bục giảng tại Mây Lang Thang để người trẻ Hòa Lạc cất điện thoại, gỡ bỏ những câu hỏi lửng lơ và lắng nghe nhau bằng sự chân thành.",
+      "highlights": [
+        "90 phút đối thoại mộc không phán xét",
+        "Gỡ rối áp lực đồng trang lứa & mất kết nối",
+        "Tìm lại điểm tựa tinh thần cho tuần mới"
+      ],
+      "image": "/assets/images/events/holaheart-2026-11-15/04-wide-venue.jpg",
+      "imageAlt": "Không gian buổi tối ấm cúng nơi những người trẻ cùng ngồi lại trò chuyện tại Mây Lang Thang Cafe, Hòa Lạc."
+    }
+  ],
   "pastTopics": [
     {
       "id": "holaheart-first-event-2026",

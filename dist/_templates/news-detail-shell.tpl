@@ -44,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=e72a271040">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1f655e2655">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -221,7 +221,7 @@
             <img src="/assets/images/logo-holarise.png" alt="HolaRise – Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên" width="104" height="24" loading="lazy" style="height: 22px; width: auto;">
           </a>
           <p style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;">Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên</p>
-          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);">Khởi nguồn từ Hòa Lạc – Thạch Thất, kết nối thế hệ trẻ cùng vun bồi nội lực (HolaHeart), kiến tạo cảnh quan xanh (HolaGreen) và phụng sự cộng đồng (HolaConnect).</p>
+          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);">Khởi nguồn từ Hòa Lạc – Thạch Thất, kết nối thế hệ trẻ cùng vun bồi nội lực <a class="pillar-inline-tag pillar-inline-tag--holaheart" href="/lich-hoat-dong/?nhom=holaheart">HolaHeart</a>, kiến tạo cảnh quan xanh <a class="pillar-inline-tag pillar-inline-tag--holagreen" href="/lich-hoat-dong/?nhom=holagreen">HolaGreen</a> và phụng sự cộng đồng <a class="pillar-inline-tag pillar-inline-tag--holaconnect" href="/lich-hoat-dong/?nhom=holaconnect">HolaConnect</a>.</p>
           <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Together We Rise, Together We Serve. · Chapter 01 · Hòa Lạc – Thạch Thất</p>
         </div>
 
@@ -265,15 +265,6 @@
             <li>Nhịp sinh hoạt: 1–2 hoạt động mỗi tuần tại Hòa Lạc – Thạch Thất</li>
           </ul>
         </div>
-      </div>
-
-      <div class="footer-bottom">
-        <span>© 2026 Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (HolaRise)</span>
-        <span class="footer-bottom-meta">
-          <a href="/">holarise.org</a>
-          <span aria-hidden="true">·</span>
-          <a href="/chinh-sach/">Bảo mật &amp; Quy tắc</a>
-        </span>
       </div>
     </div>
   </footer>
@@ -492,11 +483,11 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/vendor/gsap.min.js?v=e72a271040" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=e72a271040" defer></script>
-  <script src="/assets/js/motion.js?v=e72a271040" defer></script>
-  <script src="/assets/js/main.js?v=e72a271040" defer></script>
-  <script src="/assets/js/join-pass.js?v=e72a271040" defer></script>
-  <script src="/assets/js/pwa.js?v=e72a271040" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=1f655e2655" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=1f655e2655" defer></script>
+  <script src="/assets/js/motion.js?v=1f655e2655" defer></script>
+  <script src="/assets/js/main.js?v=1f655e2655" defer></script>
+  <script src="/assets/js/join-pass.js?v=1f655e2655" defer></script>
+  <script src="/assets/js/pwa.js?v=1f655e2655" defer></script>
 </body>
 </html>
