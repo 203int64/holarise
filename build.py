@@ -309,7 +309,12 @@ def render_story_stage(pillars: list) -> str:
         )
 
         priority_attr = ' fetchpriority="low" loading="lazy" decoding="async"' if idx > 0 else ' loading="lazy" decoding="async"'
-        image_label = "Tư liệu HolaHeart · 15/11/2026" if filter_key == "holaheart" else f"{p['badge']} · Hòa Lạc – Thạch Thất"
+        if p.get("imageIsIllustration"):
+            image_label = "Minh họa định hướng"
+        elif filter_key == "holaheart":
+            image_label = "Tư liệu HolaHeart · 15/11/2026"
+        else:
+            image_label = f"{p['badge']} · Hòa Lạc – Thạch Thất"
         slides.append(
             f"""<div class="story-slide image-note{active_cls}" data-story-slide="{idx}" tabindex="{0 if idx == 0 else -1}" role="group" aria-label="Chú thích ảnh: {esc(image_label)} · {esc(p['imageAlt'])}">
           <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="960" height="720"{priority_attr}>
@@ -365,7 +370,36 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
             if detailed
             else f'<div class="card-footer"><a class="arrow-link" href="{cta_href}">{esc(cta_label)} →</a></div>'
         )
-        image_label = "Tư liệu HolaHeart · 15/11/2026" if filter_key == "holaheart" else f"{p['badge']} · Hòa Lạc – Thạch Thất"
+        if p.get("imageIsIllustration"):
+            image_label = "Minh họa định hướng"
+        elif filter_key == "holaheart":
+            image_label = "Tư liệu HolaHeart · 15/11/2026"
+        else:
+            image_label = f"{p['badge']} · Hòa Lạc – Thạch Thất"
+
+        illust_html = ""
+        illust_gallery = p.get("illustrativeGallery", []) if detailed else []
+        if illust_gallery:
+            thumbs = []
+            for item in illust_gallery:
+                src = item.get("src", "")
+                alt = item.get("alt", "")
+                cap = item.get("caption") or alt
+                full_cap = f"Minh họa {p['badge']} · {cap}" if cap else f"Minh họa {p['badge']}"
+                thumbs.append(
+                    f"""<button class="illustrative-image" type="button" aria-label="Xem ảnh: {esc(cap)}" data-lightbox-src="{esc(src)}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_cap)}">
+              <img src="{esc(src)}" alt="{esc(alt)}" width="320" height="200" loading="lazy" decoding="async">
+            </button>"""
+                )
+            illust_html = f"""
+        <details class="illustrative-details">
+          <summary>Xem thêm {len(illust_gallery)} khung hình minh họa {esc(p['badge'])}</summary>
+          <p>Ảnh minh họa định hướng hoạt động — bấm vào từng khung hình để phóng to.</p>
+          <div class="illustrative-grid">
+            {"".join(thumbs)}
+          </div>
+        </details>"""
+
         cards.append(
             f"""<article class="editorial-card" data-stagger-item{anchor_id}>
         <div class="plate-media image-note" data-curtain tabindex="0" role="group" aria-label="Chú thích ảnh: {esc(image_label)} · {esc(p['imageAlt'])}">
@@ -376,6 +410,7 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
         <h3 class="card-title">{esc(p['title'])}</h3>
         <p class="card-text">{esc(p['summary'])}</p>
         <div class="visual-chip-row" style="margin-bottom: 18px;">{chips_html}</div>
+        {illust_html}
         {footer_html}
       </article>"""
         )
@@ -558,13 +593,13 @@ def render_horizontal_gallery(gallery: list) -> str:
         label = g.get("label") or g.get("sourceLabel") or ""
         full_caption = f"{label} · {caption}" if label and label not in caption else caption
         items.append(
-            f"""<button class="horizontal-card" type="button" aria-label="Xem ảnh: {esc(alt)}" data-lightbox-src="{esc(src)}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}">
+            f"""<button class="horizontal-card" type="button" aria-label="Xem ảnh: {esc(caption)}" data-lightbox-src="{esc(src)}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}">
         <div class="horizontal-frame">
           <img src="{esc(src)}" alt="{esc(alt)}" width="960" height="600" loading="lazy" decoding="async">
-        </div>
-        <div class="horizontal-caption">
-          <span>{esc(caption)}</span>
-          <span class="horizontal-index">{idx:02d} / {total:02d}</span>
+          <div class="horizontal-caption">
+            <span>{esc(caption)}</span>
+            <span class="horizontal-index">{idx:02d} / {total:02d}</span>
+          </div>
         </div>
       </button>"""
         )
