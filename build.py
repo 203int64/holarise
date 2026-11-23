@@ -1446,14 +1446,15 @@ def build_site() -> list:
     sitemap_urls.append(("/", "1.0", "weekly"))
 
     # 2. About page (/gioi-thieu/ — Về HolaRise)
+    about_media = site.get("about", {})
     about_main = render_template(
         load_template("about.html"),
         {
             "BRAND_FULL_NAME": esc(b["fullName"]),
             "BRAND_SHORT_NAME": esc(b["shortName"]),
             "BRAND_SUBTITLE": esc(b["subtitle"]),
-            "HERO_IMAGE": esc(h["image"]),
-            "HERO_IMAGE_ALT": esc(h["imageAlt"]),
+            "ABOUT_IMAGE": esc(about_media.get("image") or h["image"]),
+            "ABOUT_IMAGE_ALT": esc(about_media.get("imageAlt") or h["imageAlt"]),
             "PHILOSOPHY_QUOTE": esc(p["quote"]),
             "PHILOSOPHY_MOTTO": esc(p["motto"]),
             "PHILOSOPHY_MISSION": esc(p["mission"]),

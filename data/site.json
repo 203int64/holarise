@@ -44,8 +44,12 @@
       "label": "Xem hành trình thật",
       "href": "#hanh-trinh-that"
     },
-    "image": "/assets/images/events/holaheart-2026-11-15/05-listening-moment.jpg",
-    "imageAlt": "Những người trẻ tại Hòa Lạc – Thạch Thất lắng nghe và chia sẻ trong buổi đối thoại HolaHeart."
+    "image": "/assets/images/hero-sunrise-youth.jpg",
+    "imageAlt": "Những người trẻ bước đi cùng nhau trong ánh bình minh bên hồ và đồi xanh Hòa Lạc – Thạch Thất."
+  },
+  "about": {
+    "image": "/assets/images/hero-hoalac.jpg",
+    "imageAlt": "Bình minh trong trẻo trên mặt hồ và dãy núi Hòa Lạc – Thạch Thất, nơi khởi nguồn Chapter 01 của Cộng đồng Thanh niên HolaRise."
   },
   "impactMetrics": [],
   "philosophy": {
