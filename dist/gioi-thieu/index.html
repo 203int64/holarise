@@ -44,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=ffe4831490">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=dd2ee51df7">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -223,24 +223,60 @@
       <p class="section-lead">Mọi chương trình của HolaRise vận hành như một vòng tròn nhân quả: chỉ khi người trẻ đủ vững vàng từ bên trong, hành động vì môi trường và cộng đồng mới thực sự bền bỉ.</p>
     </div>
 
-    <div class="toc-flow" data-stagger-group>
-      <article class="toc-step" data-stagger-item>
-        <span class="toc-step-num">01 · GỐC RỄ NỘI LỰC</span>
-        <h3>HolaHeart</h3>
-        <p>Bắt đầu từ việc vun bồi nhân cách, lòng biết ơn và khả năng lắng nghe chân thành qua đối thoại &amp; âm nhạc.</p>
-      </article>
-      <div class="toc-arrow" aria-hidden="true">→</div>
-      <article class="toc-step" data-stagger-item>
-        <span class="toc-step-num">02 · MÔI TRƯỜNG SỐNG</span>
-        <h3>HolaGreen</h3>
-        <p>Chuyển hóa nhận thức thành trách nhiệm cụ thể: giữ xanh cảnh quan, giảm nhựa và trồng cây bản địa khắp Hòa Lạc – Thạch Thất.</p>
-      </article>
-      <div class="toc-arrow" aria-hidden="true">→</div>
-      <article class="toc-step" data-stagger-item>
-        <span class="toc-step-num">03 · PHỤNG SỰ XÃ HỘI</span>
-        <h3>HolaConnect</h3>
-        <p>Đưa tri thức, tủ sách và sự đồng hành bước ra khỏi giảng đường để gắn bó lâu dài cùng cư dân và thế hệ nhỏ tuổi.</p>
-      </article>
+    <div class="toc-stage" data-toc-stage data-stagger-group>
+      <a class="toc-step" href="#holaheart" data-toc-step data-toc-theme="sunrise" data-stagger-item>
+        <div class="toc-step-top">
+          <div class="toc-step-head">
+            <span class="toc-index" aria-hidden="true">01</span>
+            <span class="toc-step-num">01 · Gốc rễ nội lực</span>
+          </div>
+          <span class="toc-node" aria-hidden="true"></span>
+        </div>
+        <div class="toc-step-body">
+          <h3>HolaHeart</h3>
+          <p>Bắt đầu từ việc vun bồi nhân cách, lòng biết ơn và khả năng lắng nghe chân thành qua đối thoại &amp; âm nhạc.</p>
+        </div>
+        <div class="toc-step-footer">
+          <span class="toc-outcome">Tu thân · Nuôi dưỡng nội lực</span>
+          <span class="toc-cta">Khám phá <span class="toc-cta-arrow" aria-hidden="true">→</span></span>
+        </div>
+      </a>
+
+      <a class="toc-step" href="#holagreen" data-toc-step data-toc-theme="emerald" data-stagger-item>
+        <div class="toc-step-top">
+          <div class="toc-step-head">
+            <span class="toc-index" aria-hidden="true">02</span>
+            <span class="toc-step-num">02 · Môi trường sống</span>
+          </div>
+          <span class="toc-node" aria-hidden="true"></span>
+        </div>
+        <div class="toc-step-body">
+          <h3>HolaGreen</h3>
+          <p>Chuyển hóa nhận thức thành trách nhiệm cụ thể: giữ xanh cảnh quan, giảm nhựa và trồng cây bản địa khắp Hòa Lạc – Thạch Thất.</p>
+        </div>
+        <div class="toc-step-footer">
+          <span class="toc-outcome">Hành động xanh · Hòa Lạc</span>
+          <span class="toc-cta">Khám phá <span class="toc-cta-arrow" aria-hidden="true">→</span></span>
+        </div>
+      </a>
+
+      <a class="toc-step" href="#holaconnect" data-toc-step data-toc-theme="pearl" data-stagger-item>
+        <div class="toc-step-top">
+          <div class="toc-step-head">
+            <span class="toc-index" aria-hidden="true">03</span>
+            <span class="toc-step-num">03 · Phụng sự xã hội</span>
+          </div>
+          <span class="toc-node" aria-hidden="true"></span>
+        </div>
+        <div class="toc-step-body">
+          <h3>HolaConnect</h3>
+          <p>Đưa tri thức, tủ sách và sự đồng hành bước ra khỏi giảng đường để gắn bó lâu dài cùng cư dân và thế hệ nhỏ tuổi.</p>
+        </div>
+        <div class="toc-step-footer">
+          <span class="toc-outcome">Phụng sự · Cộng đồng</span>
+          <span class="toc-cta">Khám phá <span class="toc-cta-arrow" aria-hidden="true">→</span></span>
+        </div>
+      </a>
     </div>
   </div>
 </section>
@@ -746,11 +782,11 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/vendor/gsap.min.js?v=ffe4831490" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=ffe4831490" defer></script>
-  <script src="/assets/js/motion.js?v=ffe4831490" defer></script>
-  <script src="/assets/js/main.js?v=ffe4831490" defer></script>
-  <script src="/assets/js/join-pass.js?v=ffe4831490" defer></script>
-  <script src="/assets/js/pwa.js?v=ffe4831490" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=dd2ee51df7" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=dd2ee51df7" defer></script>
+  <script src="/assets/js/motion.js?v=dd2ee51df7" defer></script>
+  <script src="/assets/js/main.js?v=dd2ee51df7" defer></script>
+  <script src="/assets/js/join-pass.js?v=dd2ee51df7" defer></script>
+  <script src="/assets/js/pwa.js?v=dd2ee51df7" defer></script>
 </body>
 </html>
