@@ -88,6 +88,7 @@ export async function onRequestGet({ request, env, params }) {
     __SSR_EVENT_TITLE__: escHtml(matched.title),
     __SSR_EVENT_DATE_DISPLAY__: escHtml(matched.dateDisplay || matched.date),
     __SSR_EVENT_LOCATION__: escHtml(matched.location || "Hòa Lạc, Hà Nội"),
+    __SSR_EVENT_FEE__: escHtml(matched.fee || "Phi lợi nhuận · Minh bạch"),
     __SSR_EVENT_SEATS__: escHtml(matched.seats || "Mở đăng ký"),
     __SSR_EVENT_IMAGE__: escHtml(matched.image),
     __SSR_EVENT_IMAGE_ALT__: escHtml(matched.imageAlt || matched.title),

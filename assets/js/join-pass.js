@@ -35,6 +35,10 @@
   var eventModal = document.getElementById("event-register-modal");
   var modalSuccessEl = document.getElementById("modal-pass-success");
   var modalPassCodeEl = document.getElementById("modal-pass-code");
+  var modalPassGuestEl = document.getElementById("modal-pass-guest");
+  var modalPassTimeEl = document.getElementById("modal-pass-time");
+  var modalPassLocationEl = document.getElementById("modal-pass-location");
+  var modalPassSeatsEl = document.getElementById("modal-pass-seats");
   var modalPassSummaryEl = document.getElementById("modal-pass-summary");
   var modalInviteTarget = document.getElementById("modal-pass-invite-text");
 
@@ -98,14 +102,18 @@
     } catch (_e) {}
   }
 
-  if (wsForm) {
+  if (wsInviteBanner && wsInviteBannerText) {
     try {
       var wsParams = new URLSearchParams(window.location.search);
       var wsRu = cleanParamText(wsParams.get("ru"), 60);
-      if (wsRu && wsInviteBanner && wsInviteBannerText) {
-        wsForm.dataset.invitedBy = wsRu;
+      if (wsRu) {
+        var openRsvpBtn = document.getElementById("ws-open-rsvp-btn");
+        var invitedEventTitle = (openRsvpBtn && openRsvpBtn.getAttribute("data-register-event")) || "buổi gặp gỡ cùng HolaRise";
+        var modalRsvpForm = document.getElementById("modal-rsvp-form");
+        if (modalRsvpForm) modalRsvpForm.dataset.invitedBy = wsRu;
+        if (wsForm) wsForm.dataset.invitedBy = wsRu;
         wsInviteBannerText.textContent =
-          wsRu + " gửi tặng bạn tấm thiệp mời tham dự buổi tối “Cuộc Đời Của Cha” (19h15 Chủ Nhật 29/11 tại Cafe Mây Lang Thang).";
+          wsRu + " mời bạn cùng tham dự “" + invitedEventTitle + "”.";
         wsInviteBanner.hidden = false;
       }
     } catch (_e2) {}
@@ -457,15 +465,20 @@
       var modalForm = eventModal.querySelector("form[data-club-form]");
       if (modalForm) modalForm.hidden = true;
       if (modalPassCodeEl) modalPassCodeEl.textContent = snap.id || "REG-HOLARISE";
+      if (modalPassGuestEl) modalPassGuestEl.textContent = snap.fullName || "Khách mời HolaRise";
+      if (modalPassTimeEl) {
+        var timeDisplay = snap.eventTime || "";
+        var dateDisplay = snap.eventDate || "";
+        modalPassTimeEl.textContent =
+          timeDisplay && dateDisplay && timeDisplay.indexOf(dateDisplay) === -1
+            ? timeDisplay + " · " + dateDisplay
+            : timeDisplay || dateDisplay || "Theo lịch buổi gặp";
+      }
+      if (modalPassLocationEl) modalPassLocationEl.textContent = snap.eventLocation || "Hòa Lạc, Hà Nội";
+      if (modalPassSeatsEl) modalPassSeatsEl.textContent = snap.vibe || "01 chỗ · Đi một mình";
       if (modalPassSummaryEl) {
         modalPassSummaryEl.textContent =
-          "HolaRise đã ghi nhận giữ chỗ của " +
-          (snap.fullName || "bạn") +
-          " cho " +
-          (snap.eventTitle || "hoạt động") +
-          " (mã vé " +
-          (snap.id || "REG-HOLARISE") +
-          "). Hẹn gặp bạn tại buổi gặp gỡ!";
+          "Mời bạn vào Nhóm Zalo buổi gặp để nhận định vị, ghép xe và lưu lịch trước giờ bắt đầu.";
       }
       if (modalInviteTarget) modalInviteTarget.textContent = inviteMsg;
       modalSuccessEl.hidden = false;

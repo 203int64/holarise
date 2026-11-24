@@ -15,10 +15,10 @@
       <div class="invite-meta-facts">
         <time datetime="{{INVITE_START_ISO}}">{{INVITE_TIME_LABEL}}</time>
         <span aria-hidden="true">·</span>
-        <span>{{INVITE_VENUE_NAME}}</span>
+        <span>{{INVITE_VENUE_HTML}}</span>
       </div>
       <div class="invite-meta-links">
-        <a href="#giu-cho">Giữ chỗ tham dự ↓</a>
+        <button class="invite-text-btn invite-text-btn--accent" type="button" data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/su-kien/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Giữ chỗ tham dự</button>
         <span aria-hidden="true">·</span>
         <a href="{{GOOGLE_CAL_URL}}" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
         <span aria-hidden="true">·</span>
@@ -49,156 +49,35 @@
   </div>
 </section>
 
-<section class="section section--mist invite-rsvp-section" id="giu-cho" aria-labelledby="ws-form-heading">
-  <div class="container">
+<section class="section invite-rsvp-section" id="giu-cho" aria-labelledby="ws-rsvp-heading">
+  <div class="container invite-narrow">
     <div class="join-invite-banner" id="ws-invite-banner" hidden role="status" aria-live="polite">
       <span class="join-invite-dot" aria-hidden="true"></span>
       <p class="join-invite-text" id="ws-invite-text"></p>
     </div>
 
-    <div class="invite-rsvp-grid">
-      <div class="invite-form-surface">
-        <div class="kicker">Xác nhận tham dự · {{EVENT_SEATS}}</div>
-        <h2 id="ws-form-heading" class="invite-rsvp-heading">{{EVENT_RSVP_HEADING}}</h2>
-        <p class="invite-rsvp-lead">Để lại tên gọi và số Zalo để chúng mình sắp xếp chỗ ngồi chu đáo tại {{INVITE_VENUE_NAME}} và gửi thông tin trước giờ gặp. Không cần tạo mật khẩu.</p>
-
-        <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="ws-form-heading" data-club-form data-event-studio data-draft-key="ws-{{EVENT_SLUG}}" data-event-slug="{{EVENT_SLUG}}" data-event-image="{{EVENT_IMAGE}}" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-event-url="{{CANONICAL_EVENT_URL}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" novalidate>
-          <input type="hidden" name="source" value="event_modal">
-          <input type="hidden" name="eventId" value="{{EVENT_ID}}">
-          <input type="hidden" name="activity" value="{{EVENT_TITLE}}">
-          <input type="hidden" name="role" value="Tham dự {{EVENT_TITLE}}">
-
-          <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
-            <label for="ws-website">Website</label>
-            <input id="ws-website" name="website" type="text" tabindex="-1" autocomplete="off">
-          </div>
-
-          <fieldset class="invite-fieldset">
-            <legend class="invite-legend">Số chỗ bạn muốn giữ <span aria-hidden="true">*</span></legend>
-            <div class="seat-segmented">
-              <div class="seat-seg-item">
-                <input class="visually-hidden" type="radio" name="seatCount" id="ws-seat-1" value="Đi 1 mình (1 chỗ)" data-seat-short="01 chỗ · Đi một mình" checked>
-                <label class="seat-seg-label" for="ws-seat-1">Đi 1 mình</label>
-              </div>
-              <div class="seat-seg-item">
-                <input class="visually-hidden" type="radio" name="seatCount" id="ws-seat-2" value="Đi cùng 1 bạn (2 chỗ)" data-seat-short="02 chỗ · Đi cùng bạn">
-                <label class="seat-seg-label" for="ws-seat-2">Đi cùng 1 bạn</label>
-              </div>
-              <div class="seat-seg-item">
-                <input class="visually-hidden" type="radio" name="seatCount" id="ws-seat-3" value="Nhóm 3+ người / Gia đình" data-seat-short="Nhóm 3+ chỗ">
-                <label class="seat-seg-label" for="ws-seat-3">Nhóm 3+ người</label>
-              </div>
-            </div>
-          </fieldset>
-
-          <div class="form-grid" data-guest-identity-fields>
-            <div class="form-row-2">
-              <div class="field">
-                <label for="ws-name">Tên gọi của bạn <span aria-hidden="true">*</span></label>
-                <input id="ws-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Minh Khôi" required minlength="2" enterkeyhint="next" data-error="ws-name-error">
-                <div id="ws-name-error" class="field-error">
-                  <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <span data-error-text>Vui lòng nhập tên gọi của bạn (tối thiểu 2 ký tự).</span>
-                </div>
-              </div>
-              <div class="field">
-                <label for="ws-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
-                <input id="ws-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="done" data-error="ws-phone-error">
-                <div id="ws-phone-error" class="field-error">
-                  <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <span data-error-text>Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <details class="rsvp-optional-note">
-            <summary>{{EVENT_NOTE_SUMMARY}}</summary>
-            <div class="field invite-story-field" style="margin-top: 12px;">
-              <div class="note-preset-row" role="group" aria-label="Mẫu lời nhắn nhanh">
-                <button type="button" class="note-preset-chip" data-note-preset="Mình đi một mình lần đầu, mong được đón tiếp.">Đi 1 mình lần đầu</button>
-                <button type="button" class="note-preset-chip" data-note-preset="Mình cần hỗ trợ ghép xe từ khu Hòa Lạc.">Cần ghép xe</button>
-                <button type="button" class="note-preset-chip" data-note-preset="Mình có xe, có thể chở thêm 1 bạn cùng chiều.">Có thể chở thêm bạn</button>
-                <button type="button" class="note-preset-chip" data-note-preset="Mình muốn đến ngồi lắng nghe trọn buổi.">Chỉ muốn ngồi nghe</button>
-              </div>
-              <label for="ws-event-note" class="visually-hidden">Lời nhắn gửi ban tổ chức</label>
-              <textarea id="ws-event-note" name="note" rows="3" maxlength="750" placeholder="{{EVENT_NOTE_PLACEHOLDER}}"></textarea>
-              <div class="invite-check-inline">
-                <input type="checkbox" id="ws-anon-share" name="anonShare" value="yes" checked>
-                <label for="ws-anon-share">Giữ ẩn danh hoàn toàn nếu Ban Điều Phối trích đọc chia sẻ này tại chương trình</label>
-              </div>
-            </div>
-          </details>
-
-          <div class="form-status" role="status" aria-live="polite"></div>
-
-          <div class="form-submit-stack">
-            <div class="form-submit-row">
-              <button class="btn btn--primary" type="submit" id="ws-submit-btn">Xác nhận giữ chỗ tham dự</button>
-              <a class="btn btn--outline" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Vào Nhóm Zalo buổi gặp ↗</a>
-            </div>
-            <p class="form-privacy-note">Thông tin đăng ký được bảo mật theo <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a> · <a href="/tham-gia/#cach-tham-gia">Xem cách tham gia</a>.</p>
-          </div>
-        </form>
+    <div class="invite-rsvp-card">
+      <div class="invite-rsvp-card-top">
+        <span class="kicker">Xác nhận tham dự · {{EVENT_SEATS}}</span>
+        <span class="invite-rsvp-fee">{{EVENT_FEE}}</span>
       </div>
 
-      <aside class="invite-card-col" aria-label="Thiệp xác nhận giữ chỗ">
-        <article class="invite-ticket" data-ws-pass aria-label="Thiệp mời {{EVENT_TITLE}}">
-          <div class="invite-ticket-photo">
-            <img src="{{EVENT_IMAGE}}" alt="{{EVENT_IMAGE_ALT}}" width="640" height="360" loading="lazy" decoding="async">
-          </div>
+      <h2 id="ws-rsvp-heading" class="invite-rsvp-heading">{{EVENT_RSVP_HEADING}}</h2>
 
-          <div class="invite-ticket-body">
-            <div class="invite-ticket-top">
-              <span class="invite-ticket-kicker">{{EVENT_KICKER}}</span>
-              <span class="invite-ticket-status" data-ws-pass-state>Chờ xác nhận</span>
-            </div>
+      <div class="invite-rsvp-facts">
+        <time datetime="{{INVITE_START_ISO}}">{{INVITE_TIME_LABEL}}</time>
+        <span class="invite-rsvp-sep" aria-hidden="true">·</span>
+        <span>{{INVITE_VENUE_HTML}}</span>
+      </div>
 
-            <p class="invite-ticket-guest-label">Kính mời</p>
-            <div class="invite-ticket-guest" data-ws-pass-name>Tên người tham dự</div>
-            <div class="invite-ticket-org" data-ws-pass-org>{{INVITE_VENUE_NAME}}</div>
+      <p class="invite-rsvp-lead">Đi một mình luôn có người đón, không ép phát biểu. Chỉ cần tên gọi và số Zalo để chúng mình chuẩn bị chỗ ngồi và gửi định vị trước giờ gặp.</p>
 
-            <div class="invite-ticket-rule" aria-hidden="true"></div>
+      <div class="invite-rsvp-actions">
+        <button class="btn btn--primary" type="button" id="ws-open-rsvp-btn" data-open-on-hash="giu-cho" data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/su-kien/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Xác nhận tham dự</button>
+        <a class="btn btn--outline" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Vào Nhóm Zalo buổi gặp ↗</a>
+      </div>
 
-            <dl class="invite-ticket-dl">
-              <div>
-                <dt>Thời gian</dt>
-                <dd>{{INVITE_TIME_LABEL}}</dd>
-              </div>
-              <div>
-                <dt>Địa điểm</dt>
-                <dd>{{INVITE_VENUE_NAME}}</dd>
-              </div>
-              <div>
-                <dt>Số chỗ</dt>
-                <dd data-ws-pass-seats>01 chỗ · Đi một mình</dd>
-              </div>
-              <div>
-                <dt>Mã giữ chỗ</dt>
-                <dd class="invite-ticket-code" data-ws-pass-code>—</dd>
-              </div>
-            </dl>
-          </div>
-        </article>
-
-        <div class="invite-ticket-actions" id="ws-pass-actions" hidden>
-          <p class="invite-actions-note">Đã ghi nhận giữ chỗ. Mời bạn vào Nhóm Zalo buổi gặp để nhận định vị, ghép xe và lưu lịch.</p>
-          <span id="ws-pass-invite-text" class="visually-hidden"></span>
-          <div class="pass-actions-buttons">
-            <a class="btn btn--primary btn--sm" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Vào Nhóm Zalo ngay ↗</a>
-            <button type="button" class="btn btn--outline btn--sm" data-pass-download="workshop">Tải thiệp mời (PNG)</button>
-            <button type="button" class="btn btn--outline btn--sm" data-ics-download="workshop" data-ics-title="{{EVENT_TITLE}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-ics-location="{{EVENT_LOCATION}}" data-ics-url="{{CANONICAL_EVENT_URL}}">Lưu lịch (.ics)</button>
-            <button type="button" class="btn btn--outline btn--sm" data-pass-share="workshop">Gửi lời mời</button>
-            <span class="copy-control">
-              <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="ws-pass-invite-text" data-copy-invite>
-                <span>Sao chép link</span>
-              </button>
-              <span class="copy-tip" role="status"></span>
-            </span>
-          </div>
-          <button type="button" class="pass-reset-link" data-pass-new="workshop">Giữ chỗ thêm cho một người bạn</button>
-        </div>
-      </aside>
+      <p class="invite-rsvp-footnote">Giữ chỗ trong 15 giây, không cần tạo mật khẩu · <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a></p>
     </div>
   </div>
 </section>

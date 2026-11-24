@@ -6,27 +6,54 @@
 (function () {
   "use strict";
 
-  /* 1. Sticky / Smart Mobile In-Place Logo Morph (Wordmark <-> HR Badge) */
+  /* 0. Standalone App Mode Detection (iOS Safari navigator.standalone + display-mode: standalone) */
+  var isStandaloneApp =
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+    window.navigator.standalone === true;
+  if (isStandaloneApp) {
+    document.documentElement.classList.add("is-standalone");
+  }
+
+  /* 1. Sticky / Smart Mobile In-Place Logo Morph (Wordmark <-> HR Badge) & Floating Capsule Dock */
   var header = document.querySelector(".site-header");
   var navToggle = document.querySelector("[data-nav-toggle]");
   var mobileDrawer = document.querySelector("[data-mobile-drawer]");
+  var mobileDock = document.querySelector("[data-mobile-dock]");
+  var prefersReducedMotion =
+    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var lastScrollY = window.scrollY || 0;
+  var dockExpanded = 1;
 
-  if (header) {
+  if (header || mobileDock) {
     var scrollRafPending = false;
     var onScroll = function () {
       var currentY = window.scrollY || 0;
       var delta = currentY - lastScrollY;
       var drawerIsOpen = mobileDrawer && mobileDrawer.classList.contains("is-open");
 
-      header.classList.toggle("is-scrolled", currentY > 36);
+      if (header) {
+        header.classList.toggle("is-scrolled", currentY > 36);
 
-      if (window.innerWidth > 820 || drawerIsOpen || currentY <= 18) {
-        header.classList.remove("is-compact-mobile");
-      } else if (delta > 7 && currentY > 76) {
-        header.classList.add("is-compact-mobile");
-      } else if (delta < -7) {
-        header.classList.remove("is-compact-mobile");
+        if (window.innerWidth > 820 || drawerIsOpen || currentY <= 18) {
+          header.classList.remove("is-compact-mobile");
+        } else if (delta > 7 && currentY > 76) {
+          header.classList.add("is-compact-mobile");
+        } else if (delta < -7) {
+          header.classList.remove("is-compact-mobile");
+        }
+      }
+
+      if (mobileDock) {
+        if (currentY <= 8 || prefersReducedMotion || drawerIsOpen) {
+          dockExpanded = 1;
+        } else if (delta > 2 && currentY > 48) {
+          dockExpanded = 0;
+        } else if (delta < -2) {
+          dockExpanded = 1;
+        }
+        var shimmer = prefersReducedMotion ? 0 : Math.abs(((currentY / 420) % 2) - 1);
+        mobileDock.style.setProperty("--k", String(dockExpanded));
+        mobileDock.style.setProperty("--sh", String(shimmer));
       }
 
       lastScrollY = currentY;
@@ -471,11 +498,9 @@
   /* 6. Quick Event Registration Dialog Trigger */
   var eventModal = document.getElementById("event-register-modal");
   var modalKickerDisplay = document.getElementById("modal-kicker");
-  var eventTitleDisplay = document.getElementById("modal-event-title");
-  var eventTypeDisplay = document.getElementById("modal-event-type");
-  var eventMetaDisplay = document.getElementById("modal-event-meta");
-  var eventThumbWrap = document.getElementById("modal-event-thumb");
-  var eventThumbImg = document.getElementById("modal-event-img");
+  var modalHeadingDisplay = document.getElementById("modal-heading");
+  var eventWhenDisplay = document.getElementById("modal-event-when");
+  var eventVenueDisplay = document.getElementById("modal-event-venue");
   var eventDetailLink = document.getElementById("modal-event-detail-link");
   var modalIcsBtn = document.getElementById("modal-ics-btn");
   var modalZaloBtn = document.getElementById("modal-zalo-group-btn");
@@ -491,13 +516,33 @@
     var defaultNotePlaceholder = modalNoteInput ? modalNoteInput.getAttribute("placeholder") || "" : "";
     var defaultModalZalo = modalZaloBtn ? modalZaloBtn.getAttribute("href") || "" : "";
 
+    var extractCleanVenue = function (raw) {
+      var text = String(raw || "").trim();
+      if (!text) return "Hòa Lạc, Hà Nội";
+      var clean = text.split("·")[0].replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
+      return clean || text;
+    };
+
+    var renderFactLines = function (el, primary, secondary) {
+      if (!el) return;
+      el.textContent = "";
+      el.appendChild(document.createTextNode(primary || "—"));
+      if (secondary) {
+        var sub = document.createElement("span");
+        sub.className = "rsvp-fact-sub";
+        sub.textContent = secondary;
+        el.appendChild(sub);
+      }
+    };
+
     var openEventModalFromTrigger = function (btn) {
       var title = btn.getAttribute("data-register-event") || "Hoạt động cộng đồng HolaRise";
       var eventId = btn.getAttribute("data-event-id") || "";
       var eventSlug = btn.getAttribute("data-event-slug") || "";
-      var eventDate = btn.getAttribute("data-event-date") || "Công bố theo từng hoạt động";
+      var eventDate = btn.getAttribute("data-event-date") || "";
       var eventTime = btn.getAttribute("data-event-time") || "";
-      var eventLocation = btn.getAttribute("data-event-location") || "Hòa Lạc – Thạch Thất, Hà Nội";
+      var eventLocation = btn.getAttribute("data-event-location") || "Hòa Lạc, Hà Nội";
+      var venueUrl = btn.getAttribute("data-venue-url") || "";
       var eventFee = btn.getAttribute("data-event-fee") || "Phi lợi nhuận · Minh bạch";
       var eventSeats = btn.getAttribute("data-event-seats") || "";
       var eventType = btn.getAttribute("data-event-type") || "Cộng đồng HolaRise";
@@ -513,31 +558,30 @@
       if (modalKickerDisplay) {
         modalKickerDisplay.textContent = eventSeats ? "Xác nhận tham dự · " + eventSeats : "Xác nhận tham dự";
       }
-      if (eventTitleDisplay) eventTitleDisplay.textContent = title;
-      if (eventTypeDisplay) eventTypeDisplay.textContent = eventType;
-      if (eventMetaDisplay) {
-        var metaItems = [];
-        var hasDateInTime = /\d{1,2}\/\d{1,2}/.test(eventTime);
-        if (eventTime) {
-          metaItems.push(eventTime);
-          if (eventDate && !hasDateInTime && eventTime.indexOf(eventDate) === -1) {
-            metaItems.push(eventDate);
-          }
-        } else if (eventDate) {
-          metaItems.push(eventDate);
+      if (modalHeadingDisplay) modalHeadingDisplay.textContent = title;
+      if (eventWhenDisplay) {
+        var timePrimary = eventTime;
+        var dateSecondary = eventDate;
+        if (eventTime && eventTime.indexOf(",") !== -1) {
+          var parts = eventTime.split(",");
+          timePrimary = parts[0].trim();
+          dateSecondary = parts.slice(1).join(",").trim();
         }
-        if (eventLocation) metaItems.push(eventLocation);
-        if (eventFee) metaItems.push(eventFee);
-        eventMetaDisplay.textContent = metaItems.join(" · ");
+        renderFactLines(eventWhenDisplay, timePrimary || dateSecondary || "Công bố sau", timePrimary ? dateSecondary : "");
       }
-      if (eventThumbWrap && eventThumbImg) {
-        if (eventImage && eventImage.indexOf("/") === 0) {
-          eventThumbImg.src = eventImage;
-          eventThumbImg.alt = title;
-          eventThumbWrap.hidden = false;
+      if (eventVenueDisplay) {
+        var cleanVenue = extractCleanVenue(eventLocation);
+        if (/^https?:\/\//i.test(venueUrl)) {
+          eventVenueDisplay.textContent = "";
+          var venueLink = document.createElement("a");
+          venueLink.className = "rsvp-venue-link";
+          venueLink.href = venueUrl;
+          venueLink.target = "_blank";
+          venueLink.rel = "noopener noreferrer";
+          venueLink.textContent = cleanVenue + " ↗";
+          eventVenueDisplay.appendChild(venueLink);
         } else {
-          eventThumbWrap.hidden = true;
-          eventThumbImg.removeAttribute("src");
+          renderFactLines(eventVenueDisplay, cleanVenue, "");
         }
       }
       if (eventDetailLink) {

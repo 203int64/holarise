@@ -240,10 +240,12 @@ export function renderHeroUpcomingBar(upcoming) {
   return `<div class="upcoming-bar" aria-label="Sự kiện sắp diễn ra">
   <div class="container upcoming-bar-inner">
     <div class="upcoming-bar-info">
-      <span class="upcoming-dot" aria-hidden="true"></span>
-      <span class="upcoming-label">Sắp diễn ra</span>
+      <span class="upcoming-bar-badge"><span class="upcoming-dot" aria-hidden="true"></span><span class="upcoming-label">Sắp diễn ra</span></span>
       ${titleHtml}
-      <span class="upcoming-date">· ${escHtml(ws.dateDisplay)} (${escHtml(ws.time)}) · ${escHtml(ws.fee)}</span>
+      <span class="upcoming-sep" aria-hidden="true">·</span>
+      <span class="upcoming-date">${escHtml(ws.dateDisplay)} (${escHtml(ws.time)})</span>
+      <span class="upcoming-sep" aria-hidden="true">·</span>
+      <span class="upcoming-fee">${escHtml(ws.fee)}</span>
     </div>
     ${actionsHtml}
   </div>

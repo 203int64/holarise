@@ -202,41 +202,55 @@ def build_mobile_nav_links(active_path: str) -> str:
     return "\n        ".join(links)
 
 
-def build_pwa_tabbar_links(active_path: str) -> str:
+def build_mobile_dock(active_path: str) -> str:
+    is_en = active_path == "/en/" or active_path.startswith("/en/")
     items = [
         (
             "/",
-            "Trang chủ",
-            '<path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V20h13V9.5"></path>',
+            "Home" if is_en else "Trang chủ",
+            '<path pathLength="1" d="M3 10.5 12 3l9 7.5"></path><path pathLength="1" d="M5.5 9.5V20h13V9.5"></path>',
         ),
         (
             "/lich-hoat-dong/",
-            "Lịch",
-            '<rect x="3" y="5" width="18" height="16" rx="2.5"></rect><path d="M16 3v4M8 3v4M3 10h18"></path>',
+            "Schedule" if is_en else "Lịch",
+            '<rect pathLength="1" x="3" y="5" width="18" height="16" rx="2.5"></rect><path pathLength="1" d="M16 3v4M8 3v4M3 10h18"></path>',
         ),
         (
             "/hanh-trinh/",
-            "Hành trình",
-            '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5Z"></path><path d="M8 7h8M8 11h8M8 15h5"></path>',
+            "Journey" if is_en else "Hành trình",
+            '<path pathLength="1" d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5Z"></path><path pathLength="1" d="M8 7h8M8 11h8M8 15h5"></path>',
         ),
         (
             "/tham-gia/",
-            "Tham gia",
-            '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>',
+            "Join" if is_en else "Tham gia",
+            '<path pathLength="1" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>',
         ),
     ]
+    active_idx = -1
     links = []
-    for href, label, svg_body in items:
+    for idx, (href, label, svg_body) in enumerate(items):
         is_active = _is_nav_item_active(active_path, href)
-        cls = "pwa-tab is-active" if is_active else "pwa-tab"
-        aria = ' aria-current="page"' if active_path == href else ""
+        if is_active:
+            active_idx = idx
+        cls = "mobile-dock-link is-active" if is_active else "mobile-dock-link"
+        aria = ' aria-current="page"' if is_active else ""
+        stroke_w = "2.05" if is_active else "1.8"
         links.append(
-            f'<a class="{cls}" href="{href}"{aria}>'
-            f'<svg class="pwa-tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{svg_body}</svg>'
-            f'<span class="pwa-tab-label">{esc(label)}</span>'
+            f'<a class="{cls}" href="{href}" aria-label="{esc(label)}"{aria}>'
+            f'<svg class="mobile-dock-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{stroke_w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{svg_body}</svg>'
+            f'<span class="mobile-dock-label" aria-hidden="true">{esc(label)}</span>'
             f"</a>"
         )
-    return "\n      ".join(links)
+    nav_label = "Primary navigation" if is_en else "Điều hướng chính"
+    ind_idx = max(0, active_idx)
+    inner = "\n    ".join(links)
+    return (
+        f'<nav class="mobile-dock" data-mobile-dock data-active="{active_idx}" '
+        f'style="--i: {ind_idx};" aria-label="{nav_label}">\n'
+        f'    <span class="mobile-dock-ind" aria-hidden="true"></span>\n'
+        f'    {inner}\n'
+        f"  </nav>"
+    )
 
 
 def derive_pillar_filter(label: str = "", filters: list = None, fallback_slug: str = "") -> str:
@@ -322,7 +336,7 @@ def render_hero_upcoming_bar(upcoming: list) -> str:
     if event_href:
         actions_html = f"""<div class="upcoming-bar-actions">
       <a class="btn btn--primary btn--sm" href="{esc(event_href)}">Xem thư mời &amp; Giữ chỗ →</a>
-      <button class="btn btn--outline btn--sm" type="button" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}" data-event-href="{esc(event_href)}">Giữ chỗ nhanh</button>
+      <button class="btn btn--outline btn--sm" type="button" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-venue-url="{esc(ws.get('venueUrl', ''))}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}" data-event-href="{esc(event_href)}">Giữ chỗ nhanh</button>
     </div>"""
     else:
         actions_html = f"""<button class="btn btn--outline btn--sm" type="button" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}">Giữ chỗ tham gia</button>"""
@@ -330,10 +344,12 @@ def render_hero_upcoming_bar(upcoming: list) -> str:
     return f"""<div class="upcoming-bar" aria-label="Sự kiện sắp diễn ra">
   <div class="container upcoming-bar-inner">
     <div class="upcoming-bar-info">
-      <span class="upcoming-dot" aria-hidden="true"></span>
-      <span class="upcoming-label">Sắp diễn ra</span>
+      <span class="upcoming-bar-badge"><span class="upcoming-dot" aria-hidden="true"></span><span class="upcoming-label">Sắp diễn ra</span></span>
       {title_html}
-      <span class="upcoming-date">· {esc(ws['dateDisplay'])} ({esc(ws['time'])}) · {esc(ws['fee'])}</span>
+      <span class="upcoming-sep" aria-hidden="true">·</span>
+      <span class="upcoming-date">{esc(ws['dateDisplay'])} ({esc(ws['time'])})</span>
+      <span class="upcoming-sep" aria-hidden="true">·</span>
+      <span class="upcoming-fee">{esc(ws['fee'])}</span>
     </div>
     {actions_html}
   </div>
@@ -1305,7 +1321,7 @@ def write_page(
             "LANG_SWITCH_HREF": esc(lang_switch_href),
             "LANG_SWITCH_LABEL": esc(lang_switch_label),
             "LANG_SWITCH_ARIA": esc(lang_switch_aria),
-            "PWA_TABBAR_LINKS": build_pwa_tabbar_links(url_path),
+            "MOBILE_DOCK": build_mobile_dock(url_path),
             "MAIN_CONTENT": main_content,
             "CONTACT_ADDRESS": esc(c["address"]),
             "CONTACT_EMAIL": esc(c["email"]),
@@ -2008,6 +2024,13 @@ def build_site() -> list:
                 "INVITE_ICS_END": esc(landing["icsEndUtc"]),
                 "INVITE_TIME_LABEL": esc(landing["timeLabel"]),
                 "INVITE_VENUE_NAME": esc(landing["venueName"]),
+                "EVENT_VENUE_URL": esc(ws.get("venueUrl", "")),
+                "INVITE_VENUE_HTML": (
+                    f'<a class="invite-venue-link" href="{esc(ws["venueUrl"])}" target="_blank" rel="noopener noreferrer">{esc(landing["venueName"].split("·")[0].strip())} ↗</a>'
+                    + (f' · {esc("·".join(landing["venueName"].split("·")[1:]).strip())}' if "·" in landing["venueName"] else "")
+                    if ws.get("venueUrl")
+                    else esc(landing["venueName"])
+                ),
                 "LETTER_BODY_HTML": render_invitation_letter_body(landing),
                 "LETTER_SIGNOFF": esc(landing["letterSignoff"]),
                 "GOOGLE_CAL_URL": esc(gcal_url),
@@ -2066,6 +2089,8 @@ def build_site() -> list:
             "INVITE_ICS_END": "__SSR_INVITE_ICS_END__",
             "INVITE_TIME_LABEL": "__SSR_INVITE_TIME_LABEL__",
             "INVITE_VENUE_NAME": "__SSR_INVITE_VENUE_NAME__",
+            "EVENT_VENUE_URL": "",
+            "INVITE_VENUE_HTML": "__SSR_INVITE_VENUE_NAME__",
             "LETTER_BODY_HTML": "__SSR_LETTER_BODY_HTML__",
             "LETTER_SIGNOFF": "Trân trọng mời bạn đồng hành,",
             "GOOGLE_CAL_URL": "__SSR_GOOGLE_CAL_URL__",
