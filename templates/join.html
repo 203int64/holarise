@@ -18,44 +18,63 @@
     </div>
   </div>
 
-  <!-- STEP 1: MINIMAL CENTERED AUTH (Sign Up / Sign In / Partner Link) -->
+  <!-- STEP 1: UNIFIED SINGLE-FLOW AUTH (Continue with Google + Smart Email/Phone) -->
   <div class="container" id="member-guest-view">
     <div class="auth-center-stage">
       <div class="auth-card-surface">
-        <div class="auth-tabs" role="tablist" aria-label="Tài khoản HolaRise">
-          <button class="auth-tab is-active" type="button" role="tab" aria-selected="true" data-join-tab="register">Đăng ký</button>
-          <button class="auth-tab" type="button" role="tab" aria-selected="false" data-join-tab="login">Đăng nhập</button>
-        </div>
+        <!-- MAIN UNIFIED AUTH PANE (Zero Đăng ký / Đăng nhập tabs!) -->
+        <div id="join-pane-auth" data-join-pane="auth">
+          <div class="auth-dialog-brand" style="margin-bottom: 18px; padding-right: 0;">
+            <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="34" height="34">
+            <div>
+              <h2 id="join-member-heading" class="auth-heading" style="font-size: 1.32rem; margin: 0;">Đăng nhập vào HolaRise</h2>
+              <p class="auth-dialog-sub">Dùng Google hoặc Email / SĐT. Nếu là lần đầu, hệ thống sẽ dẫn bạn qua 3 bước lập thông tin.</p>
+            </div>
+          </div>
 
-        <!-- TAB 1: MINIMAL 3-FIELD REGISTER -->
-        <div id="join-pane-register" data-join-pane="register">
-          <h2 id="join-member-heading" class="auth-heading">Tạo tài khoản HolaRise</h2>
-          <p class="auth-lead">Chỉ cần 3 thông tin để bắt đầu. Bạn sẽ hoàn thiện Thẻ Thành Viên ngay ở bước kế tiếp.</p>
+          <div class="form-status" id="join-oauth-alert" role="status" aria-live="polite" style="margin-bottom: 12px;"></div>
 
-          <form class="auth-form" id="member-register-form" aria-labelledby="join-member-heading" novalidate>
-            <div class="auth-field">
-              <label for="m-reg-name">Họ và tên</label>
-              <input id="m-reg-name" name="name" type="text" autocomplete="name" placeholder="Trần Quốc Bảo" required minlength="2" enterkeyhint="next">
+          <a class="auth-google-btn" href="/api/member/auth/google?returnTo=/tham-gia/" data-google-auth-link>
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.54-5.17 3.54-8.87Z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.91l-3.88-3c-1.07.72-2.45 1.16-4.06 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.1A12 12 0 0 0 12 24Z"/>
+              <path fill="#FBBC05" d="M5.28 14.29A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.38-2.29v-3.1H1.29a12 12 0 0 0 0 10.78l3.99-3.1Z"/>
+              <path fill="#EA4335" d="M12 4.75c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.69 1.29 6.61l3.99 3.1C6.23 6.86 8.88 4.75 12 4.75Z"/>
+            </svg>
+            <span>Tiếp tục với Google</span>
+          </a>
+
+          <div class="auth-divider" style="margin: 18px 0;"><span>hoặc dùng Email / SĐT</span></div>
+
+          <form class="auth-form" id="join-unified-auth-form" data-unified-auth aria-labelledby="join-member-heading" novalidate>
+            <div class="auth-identified-pill" data-auth-id-pill hidden>
+              <span data-auth-id-text></span>
+              <button type="button" class="auth-change-btn" data-auth-reset>Thay đổi</button>
             </div>
 
-            <div class="auth-field">
-              <label for="m-reg-id">Email hoặc Số điện thoại</label>
-              <input id="m-reg-id" name="identifier" type="text" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="09xx xxx xxx hoặc tenban@gmail.com" required enterkeyhint="next">
+            <div class="auth-field" data-auth-step="identify">
+              <label for="m-auth-id">Email hoặc Số điện thoại</label>
+              <input id="m-auth-id" name="identifier" type="text" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="09xx xxx xxx hoặc tenban@gmail.com" required enterkeyhint="next">
             </div>
 
-            <div class="auth-field">
-              <label for="m-reg-pw">Mật khẩu <span class="auth-hint-inline">(tối thiểu 6 ký tự)</span></label>
+            <div class="auth-field" data-auth-step="new-only" hidden>
+              <label for="m-auth-name">Họ và tên của bạn</label>
+              <input id="m-auth-name" name="name" type="text" autocomplete="name" minlength="2" placeholder="Trần Quốc Bảo" enterkeyhint="next">
+            </div>
+
+            <div class="auth-field" data-auth-step="password" hidden>
+              <label for="m-auth-pw" data-auth-pw-label>Mật khẩu</label>
               <div class="auth-pw-wrap">
-                <input id="m-reg-pw" name="password" type="password" autocomplete="new-password" minlength="6" required placeholder="Tạo mật khẩu dễ nhớ" enterkeyhint="done">
-                <button type="button" class="auth-pw-eye" data-member-pw-toggle="m-reg-pw" aria-pressed="false" aria-label="Hiện mật khẩu">
+                <input id="m-auth-pw" name="password" type="password" autocomplete="current-password" minlength="6" placeholder="••••••••" enterkeyhint="done">
+                <button type="button" class="auth-pw-eye" data-member-pw-toggle="m-auth-pw" aria-pressed="false" aria-label="Hiện mật khẩu">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                 </button>
               </div>
             </div>
 
-            <div class="form-status" id="m-reg-status" role="status" aria-live="polite"></div>
+            <div class="form-status" data-auth-status role="status" aria-live="polite"></div>
 
-            <button class="auth-submit-btn" type="submit" id="m-reg-submit-btn">Tiếp tục</button>
+            <button class="auth-submit-btn" type="submit" data-auth-submit>Tiếp tục</button>
 
             <div class="auth-footer-links">
               <p class="auth-legal">Bằng việc tiếp tục, bạn đồng ý với <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a> của HolaRise.</p>
@@ -68,37 +87,9 @@
           </form>
         </div>
 
-        <!-- TAB 2: MINIMAL 2-FIELD LOGIN -->
-        <div id="join-pane-login" data-join-pane="login" hidden>
-          <h2 class="auth-heading">Chào mừng trở lại</h2>
-          <p class="auth-lead">Đăng nhập để mở Thẻ Thành Viên Hola, xem lịch giữ chỗ và quản lý lưu bút của bạn.</p>
-
-          <form class="auth-form" id="member-login-form" novalidate>
-            <div class="auth-field">
-              <label for="m-login-id">Email hoặc Số điện thoại</label>
-              <input id="m-login-id" name="identifier" type="text" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="09xx xxx xxx hoặc tenban@gmail.com" required>
-            </div>
-            <div class="auth-field">
-              <label for="m-login-pw">Mật khẩu</label>
-              <div class="auth-pw-wrap">
-                <input id="m-login-pw" name="password" type="password" autocomplete="current-password" minlength="6" required placeholder="••••••••">
-                <button type="button" class="auth-pw-eye" data-member-pw-toggle="m-login-pw" aria-pressed="false" aria-label="Hiện mật khẩu">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                </button>
-              </div>
-            </div>
-            <div class="form-status" id="m-login-status" role="status" aria-live="polite"></div>
-            <button class="auth-submit-btn" type="submit" id="m-login-submit-btn">Đăng nhập</button>
-            <div class="auth-alt-row" style="margin-top: 6px;">
-              <button type="button" class="auth-text-link" data-join-tab="register">Chưa có tài khoản? Đăng ký →</button>
-              <a class="auth-text-link auth-text-link--muted" href="{{CONTACT_ZALO}}" target="_blank" rel="noopener noreferrer">Quên mật khẩu? Nhắn Zalo ↗</a>
-            </div>
-          </form>
-        </div>
-
-        <!-- TAB 3: PARTNER / ORGANIZATION PROPOSAL -->
+        <!-- PARTNER / ORGANIZATION PROPOSAL -->
         <div id="join-pane-partner" data-join-pane="partner" hidden>
-          <button type="button" class="auth-back-link" data-join-tab="register">← Quay lại Đăng ký</button>
+          <button type="button" class="auth-back-link" data-join-tab="auth">← Quay lại Đăng nhập</button>
           <h2 id="join-form-heading" class="auth-heading">Hợp tác Nhà trường, CLB &amp; Không gian</h2>
           <p class="auth-lead">Dành cho đơn vị, câu lạc bộ sinh viên hoặc không gian văn hóa muốn đồng hành minh bạch cùng HolaRise tại Hòa Lạc.</p>
 
@@ -153,6 +144,75 @@
             <button class="auth-submit-btn" type="submit" id="join-submit-btn">Gửi đề xuất hợp tác</button>
           </form>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2A: FIRST-TIME 3-STEP ONBOARDING WIZARD (Shown for new Google / Email sign-ups) -->
+  <div class="container" id="member-onboarding-wizard" hidden>
+    <div class="auth-center-stage">
+      <div class="auth-card-surface">
+        <div class="onboarding-top">
+          <span class="onboarding-step-label" id="ob-step-label">Bước 1 / 3</span>
+          <button type="button" class="auth-text-link auth-text-link--muted" id="ob-skip-btn">Bỏ qua</button>
+        </div>
+        <div class="member-completion-track" style="margin-bottom: 20px;" aria-hidden="true">
+          <span class="member-completion-fill" id="ob-progress-fill" style="width: 33%;"></span>
+        </div>
+
+        <form class="auth-form" id="onboarding-form" novalidate>
+          <!-- Step 1: Pillar -->
+          <div data-ob-step="1">
+            <h2 class="auth-heading">Bạn quan tâm mảng nào nhất tại HolaRise?</h2>
+            <p class="auth-lead">Chọn 1 trụ cột khởi đầu — bạn vẫn có thể tham gia cả 3 hoạt động bất cứ lúc nào.</p>
+            <div class="auth-pillar-strip" style="margin-top: 8px;">
+              <div class="auth-pillar-item">
+                <input class="visually-hidden" type="radio" name="obPillar" id="ob-p-heart" value="holaheart" checked>
+                <label class="auth-pillar-btn" for="ob-p-heart"><span class="auth-pillar-dot" style="background:#B85D3B;"></span><span>HolaHeart</span></label>
+              </div>
+              <div class="auth-pillar-item">
+                <input class="visually-hidden" type="radio" name="obPillar" id="ob-p-green" value="holagreen">
+                <label class="auth-pillar-btn" for="ob-p-green"><span class="auth-pillar-dot" style="background:#145A40;"></span><span>HolaGreen</span></label>
+              </div>
+              <div class="auth-pillar-item">
+                <input class="visually-hidden" type="radio" name="obPillar" id="ob-p-connect" value="holaconnect">
+                <label class="auth-pillar-btn" for="ob-p-connect"><span class="auth-pillar-dot" style="background:#1F4E5F;"></span><span>HolaConnect</span></label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Name & Organization -->
+          <div data-ob-step="2" hidden>
+            <h2 class="auth-heading">Thông tin của bạn tại Hòa Lạc</h2>
+            <p class="auth-lead">Giúp Ban Điều Phối dễ kết nối bạn với nhóm cùng trường hoặc khu vực.</p>
+            <div class="auth-field" style="margin-bottom: 14px;">
+              <label for="ob-name">Tên hiển thị trên Thẻ Thành Viên</label>
+              <input id="ob-name" name="name" type="text" autocomplete="name" minlength="2" required placeholder="Trần Quốc Bảo">
+            </div>
+            <div class="auth-field">
+              <label for="ob-org">Trường / Đơn vị <span class="auth-hint-inline">(tùy chọn)</span></label>
+              <input id="ob-org" name="organization" type="text" autocomplete="organization" placeholder="ĐH FPT, ĐHQGHN, Đã đi làm...">
+            </div>
+          </div>
+
+          <!-- Step 3: Bio & Finish -->
+          <div data-ob-step="3" hidden>
+            <h2 class="auth-heading">Một câu ngắn cho Thẻ Thành Viên</h2>
+            <p class="auth-lead">Bạn có thể đổi ảnh đại diện hoặc sửa lại bất cứ lúc nào sau bước này.</p>
+            <div class="auth-field">
+              <label for="ob-bio">Châm ngôn / Lời giới thiệu ngắn <span class="auth-hint-inline">(tùy chọn)</span></label>
+              <input id="ob-bio" name="bio" type="text" maxlength="160" placeholder="Sống sâu hơn, xanh hơn và kết nối nhiều hơn tại Hòa Lạc.">
+            </div>
+          </div>
+
+          <div class="form-status" id="ob-status" role="status" aria-live="polite"></div>
+
+          <div class="ob-nav-row">
+            <button type="button" class="btn btn--outline btn--sm" id="ob-prev-btn" hidden>← Quay lại</button>
+            <button type="button" class="auth-submit-btn" id="ob-next-btn" style="flex: 1;">Tiếp theo</button>
+            <button type="submit" class="auth-submit-btn" id="ob-finish-btn" style="flex: 1;" hidden>Hoàn tất &amp; Mở Thẻ</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

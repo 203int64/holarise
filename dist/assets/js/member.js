@@ -7,6 +7,8 @@
 
   const state = {
     member: null,
+    googleEnabled: false,
+    needsOnboarding: false,
     dashboard: null,
     guestbook: {
       slug: "",
@@ -191,7 +193,7 @@
       } else {
         headerBtn.classList.remove("is-member-signed-in");
         headerLabel.textContent =
-          document.documentElement.dataset.lang === "en" ? "Join" : "Tham gia";
+          document.documentElement.dataset.lang === "en" ? "Sign in" : "Đăng nhập";
         headerBtn.removeAttribute("aria-label");
       }
     }
@@ -393,91 +395,294 @@
     });
   }
 
+  function initUnifiedAuthForms() {
+    // Keep Google OAuth returnTo synced to current page
+    $$("[data-google-auth-link]").forEach((a) => {
+      const path = window.location.pathname || "/tham-gia/";
+      a.setAttribute("href", `/api/member/auth/google?returnTo=${encodeURIComponent(path)}`);
+    });
+
+    // Show friendly OAuth error if redirected back with ?auth_error=
+    const params = new URLSearchParams(window.location.search);
+    const authErr = params.get("auth_error");
+    if (authErr) {
+      const oauthAlert = $("#join-oauth-alert");
+      const msgMap = {
+        google_not_configured:
+          "Đăng nhập Google chưa được gắn khóa GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET trên Cloudflare Pages. Bạn có thể tiếp tục ngay bằng Email hoặc SĐT bên dưới.",
+        google_cancelled: "Bạn đã hủy đăng nhập Google. Bạn có thể thử lại hoặc dùng Email / SĐT.",
+        google_state_invalid: "Phiên xác thực Google đã hết hạn. Vui lòng thử lại.",
+        account_disabled: "Tài khoản này đang tạm khóa. Vui lòng liên hệ Ban Điều Phối.",
+      };
+      setStatus(oauthAlert, msgMap[authErr] || "Không thể đăng nhập bằng Google lúc này. Vui lòng thử lại.", "error");
+    }
+
+    if (params.get("onboarding") === "1") {
+      state.needsOnboarding = true;
+    }
+
+    $$("[data-unified-auth]").forEach((form) => {
+      let mode = "identify"; // 'identify' | 'login' | 'register'
+      let lockedIdentifier = "";
+
+      const idPill = form.querySelector("[data-auth-id-pill]");
+      const idPillText = form.querySelector("[data-auth-id-text]");
+      const resetBtn = form.querySelector("[data-auth-reset]");
+      const stepIdentify = form.querySelector('[data-auth-step="identify"]');
+      const stepNewOnly = form.querySelector('[data-auth-step="new-only"]');
+      const stepPassword = form.querySelector('[data-auth-step="password"]');
+      const pwLabel = form.querySelector("[data-auth-pw-label]");
+      const idInput = form.querySelector('input[name="identifier"]');
+      const nameInput = form.querySelector('input[name="name"]');
+      const pwInput = form.querySelector('input[name="password"]');
+      const submitBtn = form.querySelector("[data-auth-submit]");
+      const statusEl = form.querySelector("[data-auth-status]");
+
+      function setMode(nextMode) {
+        mode = nextMode;
+        setStatus(statusEl, "");
+        if (mode === "identify") {
+          lockedIdentifier = "";
+          if (idPill) idPill.hidden = true;
+          if (stepIdentify) stepIdentify.hidden = false;
+          if (stepNewOnly) stepNewOnly.hidden = true;
+          if (stepPassword) stepPassword.hidden = true;
+          if (pwInput) {
+            pwInput.value = "";
+            pwInput.required = false;
+          }
+          if (nameInput) nameInput.required = false;
+          if (submitBtn) submitBtn.textContent = "Tiếp tục";
+          idInput?.focus();
+        } else if (mode === "login") {
+          if (idPill) idPill.hidden = false;
+          if (idPillText) idPillText.textContent = lockedIdentifier;
+          if (stepIdentify) stepIdentify.hidden = true;
+          if (stepNewOnly) stepNewOnly.hidden = true;
+          if (stepPassword) stepPassword.hidden = false;
+          if (pwLabel) pwLabel.textContent = "Nhập mật khẩu để đăng nhập";
+          if (pwInput) {
+            pwInput.setAttribute("autocomplete", "current-password");
+            pwInput.placeholder = "••••••••";
+            pwInput.required = true;
+          }
+          if (nameInput) nameInput.required = false;
+          if (submitBtn) submitBtn.textContent = "Đăng nhập";
+          pwInput?.focus();
+        } else if (mode === "register") {
+          if (idPill) idPill.hidden = false;
+          if (idPillText) idPillText.textContent = `${lockedIdentifier} · Tài khoản mới`;
+          if (stepIdentify) stepIdentify.hidden = true;
+          if (stepNewOnly) stepNewOnly.hidden = false;
+          if (stepPassword) stepPassword.hidden = false;
+          if (pwLabel) pwLabel.innerHTML = 'Tạo mật khẩu <span class="auth-hint-inline">(tối thiểu 6 ký tự)</span>';
+          if (pwInput) {
+            pwInput.setAttribute("autocomplete", "new-password");
+            pwInput.placeholder = "Tạo mật khẩu dễ nhớ";
+            pwInput.required = true;
+          }
+          if (nameInput) nameInput.required = true;
+          if (submitBtn) submitBtn.textContent = "Tạo tài khoản & Lập thông tin";
+          nameInput?.focus();
+        }
+      }
+
+      resetBtn?.addEventListener("click", () => setMode("identify"));
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setStatus(statusEl, "");
+
+        if (mode === "identify") {
+          const val = (idInput?.value || "").trim();
+          if (!val) {
+            setStatus(statusEl, "Vui lòng nhập Email hoặc Số điện thoại.", "error");
+            idInput?.focus();
+            return;
+          }
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Đang kiểm tra...";
+          try {
+            const res = await api("/api/member/auth/lookup", {
+              method: "POST",
+              body: { identifier: val },
+            });
+            lockedIdentifier = res.normalized || val;
+            setMode(res.exists ? "login" : "register");
+          } catch (err) {
+            setStatus(statusEl, err.message, "error");
+            submitBtn.textContent = "Tiếp tục";
+          } finally {
+            submitBtn.disabled = false;
+          }
+          return;
+        }
+
+        if (mode === "login") {
+          const pw = pwInput?.value || "";
+          if (!pw) {
+            setStatus(statusEl, "Vui lòng nhập mật khẩu.", "error");
+            pwInput?.focus();
+            return;
+          }
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Đang đăng nhập...";
+          try {
+            const res = await api("/api/member/auth/login", {
+              method: "POST",
+              body: { identifier: lockedIdentifier, password: pw },
+            });
+            state.member = res.member;
+            state.needsOnboarding = false;
+            setMode("identify");
+            form.reset();
+            const dlg = form.closest("dialog");
+            if (dlg && dlg.open) dlg.close();
+            onAuthChanged();
+          } catch (err) {
+            setStatus(statusEl, err.message, "error");
+            submitBtn.textContent = "Đăng nhập";
+          } finally {
+            submitBtn.disabled = false;
+          }
+          return;
+        }
+
+        if (mode === "register") {
+          const name = (nameInput?.value || "").trim();
+          const pw = pwInput?.value || "";
+          if (name.length < 2) {
+            setStatus(statusEl, "Vui lòng nhập họ và tên (tối thiểu 2 ký tự).", "error");
+            nameInput?.focus();
+            return;
+          }
+          if (pw.length < 6) {
+            setStatus(statusEl, "Mật khẩu cần tối thiểu 6 ký tự.", "error");
+            pwInput?.focus();
+            return;
+          }
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Đang tạo tài khoản...";
+          try {
+            const res = await api("/api/member/auth/register", {
+              method: "POST",
+              body: { name, identifier: lockedIdentifier, password: pw, primaryPillar: "holaheart" },
+            });
+            state.member = res.member;
+            state.needsOnboarding = true;
+            setMode("identify");
+            form.reset();
+            const dlg = form.closest("dialog");
+            if (dlg && dlg.open) dlg.close();
+            onAuthChanged();
+          } catch (err) {
+            setStatus(statusEl, err.message, "error");
+            submitBtn.textContent = "Tạo tài khoản & Lập thông tin";
+          } finally {
+            submitBtn.disabled = false;
+          }
+        }
+      });
+    });
+  }
+
   function initMemberAuthModal() {
     const dialog = $("#member-auth-modal");
     if (!dialog) return;
-
-    function switchModalAuthTab(tab) {
-      $$("[data-modal-auth-tab]", dialog).forEach((b) => {
-        const active = b.getAttribute("data-modal-auth-tab") === tab;
-        b.classList.toggle("is-active", active);
-        b.setAttribute("aria-selected", String(active));
-      });
-      const loginForm = $("#modal-member-login-form");
-      const regForm = $("#modal-member-register-form");
-      if (loginForm) loginForm.hidden = tab !== "login";
-      if (regForm) regForm.hidden = tab !== "register";
-    }
-
-    $$("[data-modal-auth-tab]", dialog).forEach((btn) => {
-      btn.addEventListener("click", () => switchModalAuthTab(btn.getAttribute("data-modal-auth-tab")));
-    });
-
     document.addEventListener("click", (e) => {
       const trigger = e.target.closest("[data-open-member-auth]");
       if (!trigger) return;
-      const tab = trigger.getAttribute("data-open-member-auth") || "login";
-      switchModalAuthTab(tab);
       if (typeof dialog.showModal === "function") dialog.showModal();
     });
+  }
 
-    $("#modal-member-login-form")?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const form = e.currentTarget;
-      const btn = form.querySelector('button[type="submit"]');
-      const st = $("#ma-login-status");
-      setStatus(st, "");
-      btn.disabled = true;
-      btn.textContent = "Đang đăng nhập...";
-      try {
-        const res = await api("/api/member/auth/login", {
-          method: "POST",
-          body: {
-            identifier: $("#ma-login-id").value.trim(),
-            password: $("#ma-login-pw").value,
-          },
-        });
-        state.member = res.member;
-        form.reset();
-        dialog.close();
-        onAuthChanged();
-      } catch (err) {
-        setStatus(st, err.message, "error");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Đăng nhập Thẻ Thành Viên";
+  function initOnboardingWizard() {
+    const wizard = $("#member-onboarding-wizard");
+    const form = $("#onboarding-form");
+    if (!wizard || !form) return;
+
+    let step = 1;
+    const total = 3;
+    const labelEl = $("#ob-step-label");
+    const fillEl = $("#ob-progress-fill");
+    const prevBtn = $("#ob-prev-btn");
+    const nextBtn = $("#ob-next-btn");
+    const finishBtn = $("#ob-finish-btn");
+    const skipBtn = $("#ob-skip-btn");
+    const statusEl = $("#ob-status");
+
+    function renderStep() {
+      $$("[data-ob-step]", form).forEach((el) => {
+        el.hidden = Number(el.getAttribute("data-ob-step")) !== step;
+      });
+      if (labelEl) labelEl.textContent = `Bước ${step} / ${total}`;
+      if (fillEl) fillEl.style.width = `${Math.round((step / total) * 100)}%`;
+      if (prevBtn) prevBtn.hidden = step <= 1;
+      if (nextBtn) nextBtn.hidden = step >= total;
+      if (finishBtn) finishBtn.hidden = step < total;
+      setStatus(statusEl, "");
+    }
+
+    function finishOnboardingUi() {
+      state.needsOnboarding = false;
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("onboarding")) {
+        url.searchParams.delete("onboarding");
+        history.replaceState(null, "", url.pathname + url.search);
+      }
+      refreshJoinDashboard();
+    }
+
+    prevBtn?.addEventListener("click", () => {
+      if (step > 1) {
+        step -= 1;
+        renderStep();
       }
     });
 
-    $("#modal-member-register-form")?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const form = e.currentTarget;
-      const btn = form.querySelector('button[type="submit"]');
-      const st = $("#ma-reg-status");
-      setStatus(st, "");
-      btn.disabled = true;
-      btn.textContent = "Đang tạo Thẻ...";
-      try {
-        const res = await api("/api/member/auth/register", {
-          method: "POST",
-          body: {
-            name: $("#ma-reg-name").value.trim(),
-            identifier: $("#ma-reg-id").value.trim(),
-            password: $("#ma-reg-pw").value,
-            primaryPillar: $("#ma-reg-pillar").value,
-          },
-        });
-        state.member = res.member;
-        form.reset();
-        dialog.close();
-        onAuthChanged();
-      } catch (err) {
-        setStatus(st, err.message, "error");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Tạo Thẻ Thành Viên Hola";
+    nextBtn?.addEventListener("click", () => {
+      if (step === 2) {
+        const nm = ($("#ob-name")?.value || "").trim();
+        if (nm.length < 2) {
+          setStatus(statusEl, "Vui lòng nhập tên hiển thị (tối thiểu 2 ký tự).", "error");
+          $("#ob-name")?.focus();
+          return;
+        }
+      }
+      if (step < total) {
+        step += 1;
+        renderStep();
       }
     });
+
+    skipBtn?.addEventListener("click", finishOnboardingUi);
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pillar = form.querySelector('input[name="obPillar"]:checked')?.value || "holaheart";
+      const name = ($("#ob-name")?.value || state.member?.name || "").trim();
+      const organization = ($("#ob-org")?.value || "").trim();
+      const bio = ($("#ob-bio")?.value || "").trim();
+
+      finishBtn.disabled = true;
+      finishBtn.textContent = "Đang hoàn tất...";
+      try {
+        const res = await api("/api/member/profile", {
+          method: "PATCH",
+          body: { name, organization, primaryPillar: pillar, bio },
+        });
+        state.member = res.member;
+        syncHeaderAndRsvp();
+        finishOnboardingUi();
+      } catch (err) {
+        setStatus(statusEl, err.message, "error");
+      } finally {
+        finishBtn.disabled = false;
+        finishBtn.textContent = "Hoàn tất & Mở Thẻ";
+      }
+    });
+
+    renderStep();
   }
 
   /* =========================================================================
@@ -756,16 +961,29 @@
 
   async function refreshJoinDashboard() {
     const guestView = $("#member-guest-view");
+    const onboardingView = $("#member-onboarding-wizard");
     const dashView = $("#member-dashboard-view");
     if (!guestView || !dashView) return;
 
     if (!state.member) {
       dashView.hidden = true;
+      if (onboardingView) onboardingView.hidden = true;
       guestView.hidden = false;
       return;
     }
 
+    if (state.needsOnboarding && onboardingView) {
+      guestView.hidden = true;
+      dashView.hidden = true;
+      onboardingView.hidden = false;
+      if ($("#ob-name") && !$("#ob-name").value) $("#ob-name").value = state.member.name || "";
+      if ($("#ob-org") && !$("#ob-org").value) $("#ob-org").value = state.member.organization || "";
+      if ($("#ob-bio") && !$("#ob-bio").value) $("#ob-bio").value = state.member.bio || "";
+      return;
+    }
+
     guestView.hidden = true;
+    if (onboardingView) onboardingView.hidden = true;
     dashView.hidden = false;
     renderMemberDashboardCard();
 
@@ -1107,13 +1325,16 @@
   async function boot() {
     initPasswordToggles();
     initFeedbackModal();
+    initUnifiedAuthForms();
     initMemberAuthModal();
+    initOnboardingWizard();
     initOneTapModalButton();
     initJoinHub();
     initGuestbookEvents();
 
     try {
       const status = await api("/api/member/auth/status");
+      state.googleEnabled = Boolean(status.googleEnabled);
       state.member = status.authenticated && status.member ? status.member : null;
     } catch (_err) {
       state.member = null;

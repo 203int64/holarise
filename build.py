@@ -2373,6 +2373,8 @@ def verify_dist() -> list:
             clean = target.split("#")[0].split("?")[0]
             if not clean or clean == "/":
                 continue
+            if clean.startswith("/api/"):
+                continue
             target_path = DIST_DIR / clean.lstrip("/")
             if clean.endswith("/"):
                 if not (target_path / "index.html").exists():

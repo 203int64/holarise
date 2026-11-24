@@ -45,7 +45,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=16ad184375">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=32a936642b">
   <script>
     (function () {
       try {
@@ -143,7 +143,7 @@
           <span class="lang-switch-opt" data-lang-opt="en">EN</span>
         </button>
         <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/" data-header-member-btn>
-          <span data-header-member-label data-i18n="nav.join">Tham gia</span>
+          <span data-header-member-label data-i18n="nav.join">Đăng nhập</span>
         </a>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Mở menu điều hướng">
           <span class="nav-toggle-bars" aria-hidden="true">
@@ -809,69 +809,58 @@
     </div>
   </dialog>
 
-  <!-- Native HTML5 <dialog> Đăng Nhập / Tạo Thẻ Thành Viên Hola Nhanh -->
+  <!-- Native HTML5 <dialog> Đăng Nhập Thống Nhất (Google + Email/SĐT 1 Luồng) -->
   <dialog class="club-dialog club-dialog--auth" id="member-auth-modal" closedby="any" aria-labelledby="member-auth-heading">
     <div class="dialog-inner auth-dialog-inner">
       <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
       <div class="auth-dialog-brand">
         <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="32" height="32">
         <div>
-          <h2 id="member-auth-heading" class="auth-dialog-title">Thẻ Thành Viên Hola</h2>
-          <p class="auth-dialog-sub">Đăng nhập để giữ chỗ 1 chạm và viết lưu bút cộng đồng.</p>
+          <h2 id="member-auth-heading" class="auth-dialog-title">Đăng nhập vào HolaRise</h2>
+          <p class="auth-dialog-sub">Tiếp tục với Google hoặc Email / SĐT. Nếu bạn chưa có tài khoản, hệ thống sẽ tự mở bước lập thông tin.</p>
         </div>
       </div>
 
-      <div class="auth-tabs" role="tablist" aria-label="Chọn chế độ tài khoản">
-        <button class="auth-tab is-active" type="button" role="tab" aria-selected="true" data-modal-auth-tab="login">Đăng nhập</button>
-        <button class="auth-tab" type="button" role="tab" aria-selected="false" data-modal-auth-tab="register">Tạo Thẻ mới</button>
-      </div>
+      <a class="auth-google-btn" href="/api/member/auth/google" data-google-auth-link>
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.54-5.17 3.54-8.87Z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.91l-3.88-3c-1.07.72-2.45 1.16-4.06 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.1A12 12 0 0 0 12 24Z"/>
+          <path fill="#FBBC05" d="M5.28 14.29A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.38-2.29v-3.1H1.29a12 12 0 0 0 0 10.78l3.99-3.1Z"/>
+          <path fill="#EA4335" d="M12 4.75c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.69 1.29 6.61l3.99 3.1C6.23 6.86 8.88 4.75 12 4.75Z"/>
+        </svg>
+        <span>Tiếp tục với Google</span>
+      </a>
 
-      <form class="auth-form" id="modal-member-login-form" novalidate>
-        <div class="auth-field">
-          <label for="ma-login-id">Email hoặc Số điện thoại</label>
-          <input id="ma-login-id" name="identifier" type="text" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="09xx xxx xxx hoặc tenban@gmail.com" required>
+      <div class="auth-divider" style="margin: 16px 0;"><span>hoặc dùng Email / SĐT</span></div>
+
+      <form class="auth-form" id="modal-unified-auth-form" data-unified-auth novalidate>
+        <div class="auth-identified-pill" data-auth-id-pill hidden>
+          <span data-auth-id-text></span>
+          <button type="button" class="auth-change-btn" data-auth-reset>Thay đổi</button>
         </div>
-        <div class="auth-field">
-          <label for="ma-login-pw">Mật khẩu</label>
+
+        <div class="auth-field" data-auth-step="identify">
+          <label for="ma-id">Email hoặc Số điện thoại</label>
+          <input id="ma-id" name="identifier" type="text" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="09xx xxx xxx hoặc tenban@gmail.com" required>
+        </div>
+
+        <div class="auth-field" data-auth-step="new-only" hidden>
+          <label for="ma-name">Họ và tên của bạn</label>
+          <input id="ma-name" name="name" type="text" autocomplete="name" minlength="2" placeholder="Nguyễn Minh Anh">
+        </div>
+
+        <div class="auth-field" data-auth-step="password" hidden>
+          <label for="ma-pw" data-auth-pw-label>Mật khẩu</label>
           <div class="auth-pw-wrap">
-            <input id="ma-login-pw" name="password" type="password" autocomplete="current-password" minlength="6" required placeholder="••••••••">
-            <button type="button" class="auth-pw-eye" data-member-pw-toggle="ma-login-pw" aria-pressed="false" aria-label="Hiện mật khẩu">
+            <input id="ma-pw" name="password" type="password" autocomplete="current-password" minlength="6" placeholder="••••••••">
+            <button type="button" class="auth-pw-eye" data-member-pw-toggle="ma-pw" aria-pressed="false" aria-label="Hiện mật khẩu">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
         </div>
-        <div class="form-status" id="ma-login-status" role="status" aria-live="polite"></div>
-        <button class="auth-submit-btn" type="submit">Tiếp tục</button>
-      </form>
 
-      <form class="auth-form" id="modal-member-register-form" novalidate hidden>
-        <div class="auth-field">
-          <label for="ma-reg-name">Họ và tên</label>
-          <input id="ma-reg-name" name="name" type="text" autocomplete="name" minlength="2" required placeholder="Nguyễn Minh Anh">
-        </div>
-        <div class="auth-field">
-          <label for="ma-reg-id">Email hoặc Số điện thoại</label>
-          <input id="ma-reg-id" name="identifier" type="text" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="09xx xxx xxx hoặc tenban@gmail.com" required>
-        </div>
-        <div class="auth-field">
-          <label for="ma-reg-pw">Mật khẩu <span class="auth-hint-inline">(tối thiểu 6 ký tự)</span></label>
-          <div class="auth-pw-wrap">
-            <input id="ma-reg-pw" name="password" type="password" autocomplete="new-password" minlength="6" required placeholder="Tạo mật khẩu dễ nhớ">
-            <button type="button" class="auth-pw-eye" data-member-pw-toggle="ma-reg-pw" aria-pressed="false" aria-label="Hiện mật khẩu">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="auth-field">
-          <label for="ma-reg-pillar">Trụ cột quan tâm</label>
-          <select id="ma-reg-pillar" name="primaryPillar">
-            <option value="holaheart">HolaHeart · Nội lực &amp; Lắng nghe</option>
-            <option value="holagreen">HolaGreen · Sinh thái &amp; Cảnh quan</option>
-            <option value="holaconnect">HolaConnect · Tri thức &amp; Phụng sự</option>
-          </select>
-        </div>
-        <div class="form-status" id="ma-reg-status" role="status" aria-live="polite"></div>
-        <button class="auth-submit-btn" type="submit">Tạo Thẻ Thành Viên</button>
+        <div class="form-status" data-auth-status role="status" aria-live="polite"></div>
+        <button class="auth-submit-btn" type="submit" data-auth-submit>Tiếp tục</button>
       </form>
     </div>
   </dialog>
@@ -1044,13 +1033,13 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/i18n.js?v=16ad184375" defer></script>
-  <script src="/assets/vendor/gsap.min.js?v=16ad184375" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=16ad184375" defer></script>
-  <script src="/assets/js/motion.js?v=16ad184375" defer></script>
-  <script src="/assets/js/main.js?v=16ad184375" defer></script>
-  <script src="/assets/js/join-pass.js?v=16ad184375" defer></script>
-  <script src="/assets/js/member.js?v=16ad184375" defer></script>
-  <script src="/assets/js/pwa.js?v=16ad184375" defer></script>
+  <script src="/assets/js/i18n.js?v=32a936642b" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=32a936642b" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=32a936642b" defer></script>
+  <script src="/assets/js/motion.js?v=32a936642b" defer></script>
+  <script src="/assets/js/main.js?v=32a936642b" defer></script>
+  <script src="/assets/js/join-pass.js?v=32a936642b" defer></script>
+  <script src="/assets/js/member.js?v=32a936642b" defer></script>
+  <script src="/assets/js/pwa.js?v=32a936642b" defer></script>
 </body>
 </html>
