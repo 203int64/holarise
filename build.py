@@ -1971,19 +1971,6 @@ def build_site() -> list:
             "letterSignoff": "Trân trọng mời bạn đồng hành,",
         }
 
-    def render_first_timer_box(ws: dict, landing: dict) -> str:
-        zalo_url = landing.get("zaloGroup") or ws.get("zaloGroup") or default_zalo_group
-        return f"""<div class="info-panel info-panel--strip" style="margin-top: 22px; padding: 18px 20px;">
-      <div class="info-box">
-        <h3 style="font-size: 0.92rem; margin-bottom: 8px;">Dành cho bạn tham dự lần đầu</h3>
-        <ul class="clean-list" style="margin: 0; font-size: 0.88rem;">
-          <li><strong>Đi một mình vẫn hoàn toàn thoải mái:</strong> Luôn có người điều phối đón bạn từ lúc tới; bạn có thể chỉ ngồi lắng nghe mà không bị thúc ép phát biểu.</li>
-          <li><strong>Chi phí rõ ràng:</strong> {esc(ws.get('fee', 'Miễn phí tham dự'))}.</li>
-          <li><strong>Di chuyển &amp; Ghép xe:</strong> Tham gia <a href="{esc(zalo_url)}" target="_blank" rel="noopener noreferrer" style="color: var(--accent); font-weight: 500;">Nhóm Zalo buổi gặp ↗</a> ngay sau khi giữ chỗ để nhận định vị, ghép xe và nhắc giờ G.</li>
-        </ul>
-      </div>
-    </div>"""
-
     for ws in workshops.get("upcoming", []):
         base_landing = build_default_landing(ws)
         custom_landing = ws.get("landing") if isinstance(ws.get("landing"), dict) else {}
@@ -2010,7 +1997,6 @@ def build_site() -> list:
                 "EVENT_IMAGE": esc(ws["image"]),
                 "EVENT_IMAGE_ALT": esc(ws["imageAlt"]),
                 "EVENT_ZALO_GROUP": esc(ev_zalo),
-                "EVENT_FIRST_TIMER_HTML": render_first_timer_box(ws, landing),
                 "EVENT_HOST_SIGNATURE": esc(landing.get("hostSignature") or f"{ws.get('type', 'HolaRise').split('·')[0].strip()} · {b['shortName']}"),
                 "EVENT_RSVP_HEADING": esc(landing.get("rsvpHeading") or f"Giữ chỗ cho {ws['dateDisplay']}"),
                 "EVENT_NOTE_SUMMARY": esc(landing.get("noteSummary") or "+ Gửi đôi dòng chia sẻ hoặc lời nhắn cho người điều phối (tùy chọn)"),
@@ -2069,7 +2055,6 @@ def build_site() -> list:
             "EVENT_IMAGE": "__SSR_EVENT_IMAGE__",
             "EVENT_IMAGE_ALT": "__SSR_EVENT_IMAGE_ALT__",
             "EVENT_ZALO_GROUP": "__SSR_EVENT_ZALO_GROUP__",
-            "EVENT_FIRST_TIMER_HTML": "__SSR_EVENT_FIRST_TIMER_HTML__",
             "EVENT_HOST_SIGNATURE": "__SSR_EVENT_HOST_SIGNATURE__",
             "EVENT_RSVP_HEADING": "__SSR_EVENT_RSVP_HEADING__",
             "EVENT_NOTE_SUMMARY": "+ Gửi đôi dòng chia sẻ hoặc lời nhắn cho người điều phối (tùy chọn)",

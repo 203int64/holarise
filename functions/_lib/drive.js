@@ -159,7 +159,7 @@ function concatUint8Arrays(parts) {
  */
 export async function uploadImageToDrive(
   env,
-  { bytes, mimeType, filename, category = "khac", subfolder = "", fetchImpl = fetch }
+  { bytes, mimeType, filename, category = "khac", subfolder = "", description = "", fetchImpl = fetch }
 ) {
   const cfg = getDriveConfig(env);
   const accessToken = await getDriveAccessToken(env, fetchImpl);
@@ -178,6 +178,9 @@ export async function uploadImageToDrive(
     name: sanitizeDriveName(filename, `holarise-${Date.now()}.jpg`),
     mimeType,
   };
+  if (description) {
+    metadata.description = String(description).slice(0, 500);
+  }
   if (parentId) {
     metadata.parents = [parentId];
   }

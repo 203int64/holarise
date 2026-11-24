@@ -26,20 +26,53 @@
         </div>
       </div>
 
-      <p class="auth-lead">Đăng nhập bằng tài khoản Ban Hình Ảnh hoặc Ban Điều Phối để tạo Album và tải ảnh sự kiện lên website.</p>
+      <p class="auth-lead">Đăng nhập bằng <strong>Sinh trắc học (Face ID / Touch ID)</strong> hoặc xác thực <strong>Mã cổng đội ngũ + Hồ sơ người đăng chuẩn chỉ</strong> để tải ảnh gốc lên Google Drive HolaRise.</p>
 
-      <form id="login-form" class="admin-form" novalidate>
+      <button class="btn btn--primary btn--full" type="button" id="btn-biometric-login" style="margin-bottom: 14px;">
+        Đăng nhập bằng Sinh trắc học (Face ID / Touch ID)
+      </button>
+      <div class="form-alert" id="biometric-alert" role="alert" hidden></div>
+
+      <form id="media-gate-form" class="admin-form" novalidate style="margin-top: 10px; padding-top: 14px; border-top: 1px solid var(--border, #e5ded3);">
         <div class="field">
-          <label for="login-email">Email đăng nhập</label>
-          <input id="login-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="media@holarise.org">
+          <label for="mg-name">Họ và tên đầy đủ người đăng <span aria-hidden="true">*</span></label>
+          <input id="mg-name" name="fullName" type="text" autocomplete="name" required minlength="3" placeholder="Ví dụ: Nguyễn Minh Anh">
         </div>
         <div class="field">
-          <label for="login-password">Mật khẩu</label>
-          <input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">
+          <label for="mg-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
+          <input id="mg-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="09xxxxxxxx">
         </div>
-        <div class="form-alert" id="login-alert" role="alert" hidden></div>
-        <button class="btn btn--primary btn--full" type="submit" id="login-submit">Đăng nhập vào kho ảnh</button>
+        <div class="field">
+          <label for="mg-dept">Ban / Vai trò phụ trách <span aria-hidden="true">*</span></label>
+          <input id="mg-dept" name="department" type="text" required minlength="2" placeholder="Ví dụ: Ban Hình Ảnh · HolaHeart">
+        </div>
+        <div class="field">
+          <label for="mg-email">Email liên hệ <span aria-hidden="true">*</span></label>
+          <input id="mg-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="tenban@holarise.org">
+        </div>
+        <div class="field">
+          <label for="mg-pin">Mã cổng đội ngũ <span aria-hidden="true">*</span></label>
+          <input id="mg-pin" name="pin" type="password" inputmode="numeric" autocomplete="one-time-code" required placeholder="Nhập mã cổng nội bộ">
+        </div>
+        <div class="form-alert" id="mg-alert" role="alert" hidden></div>
+        <button class="btn btn--outline btn--full" type="submit" id="mg-submit">Xác thực &amp; Kích hoạt Sinh trắc học</button>
       </form>
+
+      <details style="margin-top: 14px;">
+        <summary style="cursor: pointer; font-size: 0.85rem; color: var(--ink-muted, #64748b);">Đăng nhập bằng Email &amp; Mật khẩu Quản trị</summary>
+        <form id="login-form" class="admin-form" novalidate style="margin-top: 10px;">
+          <div class="field">
+            <label for="login-email">Email đăng nhập</label>
+            <input id="login-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="media@holarise.org">
+          </div>
+          <div class="field">
+            <label for="login-password">Mật khẩu</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">
+          </div>
+          <div class="form-alert" id="login-alert" role="alert" hidden></div>
+          <button class="btn btn--outline btn--full" type="submit" id="login-submit">Đăng nhập vào kho ảnh</button>
+        </form>
+      </details>
 
       <div class="auth-footer">
         <a href="/hanh-trinh/#thu-vien-anh">← Xem Hành trình &amp; Thư viện ảnh công khai</a>
@@ -70,6 +103,7 @@
 
         <div class="media-topbar-actions">
           <span class="media-user-chip" id="topbar-user-chip">—</span>
+          <button class="btn btn--outline btn--sm" type="button" id="btn-setup-passkey" hidden>Gắn Face ID / Vân tay</button>
           <a class="btn btn--ghost btn--sm" id="link-admin-cms" href="/admin/" hidden>Quản trị CMS</a>
           <a class="btn btn--outline btn--sm" href="/hanh-trinh/#thu-vien-anh" target="_blank" rel="noopener">Xem thư viện ↗</a>
           <button class="btn btn--ghost btn--sm" type="button" id="btn-open-pw">Đổi mật khẩu</button>
@@ -309,6 +343,7 @@
     </div>
   </dialog>
 
+  <script src="/assets/js/passkey-client.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/media-portal.js?v={{CACHE_BUST}}" defer></script>
 </body>
 </html>

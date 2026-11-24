@@ -172,11 +172,16 @@
     $("#auth-screen").hidden = true;
     $("#media-shell").hidden = false;
 
-    const roleLabel = ROLE_LABELS[user.role] || user.role;
-    $("#topbar-user-chip").textContent = `${user.name} · ${roleLabel}`;
+    const roleLabel = user.department || ROLE_LABELS[user.role] || user.role;
+    $("#topbar-user-chip").textContent = `${user.name} · ${roleLabel}${user.phone ? ` · ${user.phone}` : ""}`;
     $("#link-admin-cms").hidden = !(user.role === "super_admin" || user.role === "editor");
+    const passkeyBtn = $("#btn-setup-passkey");
+    if (passkeyBtn) {
+      passkeyBtn.hidden = Boolean(user.hasPasskey) || !window.HolaPasskey?.isSupported?.();
+    }
 
-    const savedPhotographer = localStorage.getItem("holarise_media_photographer") || "Ban Hình Ảnh HolaRise";
+    const savedPhotographer =
+      user.name || localStorage.getItem("holarise_media_photographer") || "Ban Hình Ảnh HolaRise";
     if ($("#default-photographer")) $("#default-photographer").value = savedPhotographer;
 
     await loadAlbums();
@@ -591,6 +596,86 @@
      ========================================================================= */
   function bindEvents() {
     // Login
+    $("#btn-biometric-login")?.addEventListener("click", async () => {
+      const btn = $("#btn-biometric-login");
+      const alertEl = $("#biometric-alert");
+      showAlert(alertEl, "");
+      if (!window.HolaPasskey?.isSupported?.()) {
+        showAlert(alertEl, "Thiết bị hoặc trình duyệt này chưa hỗ trợ sinh trắc học. Vui lòng dùng Mã cổng đội ngũ bên dưới.");
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = "Đang xác thực sinh trắc học...";
+      try {
+        const res = await window.HolaPasskey.loginWithPasskey($("#mg-email")?.value?.trim() || "");
+        toast(`Chào mừng ${res.user.name}!`, "success");
+        await enterMediaShell(res.user);
+      } catch (err) {
+        showAlert(alertEl, err.message || "Không thể đăng nhập bằng sinh trắc học.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Đăng nhập bằng Sinh trắc học (Face ID / Touch ID)";
+      }
+    });
+
+    $("#media-gate-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const alertEl = $("#mg-alert");
+      const btn = $("#mg-submit");
+      showAlert(alertEl, "");
+      btn.disabled = true;
+      btn.textContent = "Đang xác thực hồ sơ...";
+      try {
+        const res = await apiFetch("/api/auth/media-gate", {
+          method: "POST",
+          json: {
+            fullName: $("#mg-name").value.trim(),
+            phone: $("#mg-phone").value.trim(),
+            department: $("#mg-dept").value.trim(),
+            email: $("#mg-email").value.trim(),
+            pin: $("#mg-pin").value.trim(),
+          },
+        });
+        $("#mg-pin").value = "";
+        toast(`Đã xác thực người đăng: ${res.user.name}!`, "success");
+        if (res.requiresPasskeySetup && window.HolaPasskey?.isSupported?.()) {
+          try {
+            await window.HolaPasskey.registerPasskey();
+            res.user.hasPasskey = true;
+            toast("Đã kích hoạt Sinh trắc học (Face ID / Touch ID) thành công!", "success");
+          } catch {
+            toast("Bạn có thể bấm “Gắn Face ID / Vân tay” trên thanh công cụ bất cứ lúc nào.", "info");
+          }
+        }
+        await enterMediaShell(res.user);
+      } catch (err) {
+        const detail = err?.data?.error?.fields
+          ? Object.values(err.data.error.fields).join(" ")
+          : err.message;
+        showAlert(alertEl, detail || "Xác thực thất bại.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Xác thực & Kích hoạt Sinh trắc học";
+      }
+    });
+
+    $("#btn-setup-passkey")?.addEventListener("click", async () => {
+      const btn = $("#btn-setup-passkey");
+      btn.disabled = true;
+      btn.textContent = "Đang kích hoạt...";
+      try {
+        await window.HolaPasskey.registerPasskey();
+        if (state.user) state.user.hasPasskey = true;
+        btn.hidden = true;
+        toast("Đã gắn Face ID / Touch ID cho thiết bị này!", "success");
+      } catch (err) {
+        toast(err.message || "Chưa thể gắn sinh trắc học.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Gắn Face ID / Vân tay";
+      }
+    });
+
     $("#login-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const alertEl = $("#login-alert");

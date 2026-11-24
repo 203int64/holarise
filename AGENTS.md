@@ -89,9 +89,9 @@ Mọi tính năng hoặc trang mới phải vượt qua **cả 3 phép thử ph�
 
 ---
 
-## 5. Khung Kỹ Thuật `0đ/tháng`, Bẫy Ngầm Repo & Cổng Nghiệm Thu
+## 5. Khung Kỹ Thuật, Bẫy Ngầm Repo & Cổng Nghiệm Thu
 
-- **Tech Stack cố định:** Python 3 stdlib duy nhất qua `build.py` (`data/*.json` + `templates/*.html` + `assets/` → `dist/`), Cloudflare Pages Functions (`functions/`), cơ sở dữ liệu **Cloudflare D1 (`DB`, `migrations/`)**, lưu trữ ảnh hiển thị web (`<= 1280px`) trên **Workers KV (`MEDIA_KV`)**, đồng bộ ngoài qua Google Apps Script (`functions/_lib/gas.js`). Cấm cài thêm framework/bundler ngoài; tại mỗi thời điểm chỉ giữ tối đa `1` bản kế hoạch đang chạy (`docs/ACTIVE-PLAN.md`), tài liệu cũ lưu vào `docs/_archive/`.
+- **Tech Stack & Thư viện ngoài:** Python 3 stdlib qua `build.py` (`data/*.json` + `templates/*.html` + `assets/` → `dist/`), Cloudflare Pages Functions (`functions/`), cơ sở dữ liệu **Cloudflare D1 (`DB`, `migrations/`)**, lưu trữ ảnh hiển thị web (`<= 1280px`) trên **Workers KV (`MEDIA_KV`)**, đồng bộ ngoài qua Google Apps Script (`functions/_lib/gas.js`). Được phép thêm thư viện ngoài gọn nhẹ (ưu tiên tự host tại `assets/vendor/` và nạp trễ *lazy-load* khi không cần ngay lúc mở trang) nếu mang lại giá trị trải nghiệm rõ rệt mà chuẩn gốc trình duyệt chưa đáp ứng được; tại mỗi thời điểm chỉ giữ tối đa `1` bản kế hoạch đang chạy (`docs/ACTIVE-PLAN.md`), tài liệu cũ lưu vào `docs/_archive/`.
 - **Bẫy Kỹ thuật Ngầm & Vùng Cấm Sửa Tay (Repo Gotchas):**
   1. **Cấm sửa tay `dist/*`:** `dist/` là đầu ra sinh tự động nhưng được commit lên Git để phục vụ Cloudflare Pages; mọi thay đổi ở `data/`, `templates/`, `assets/` bắt buộc chạy lại `python3 build.py --check` để đồng bộ `dist/`.
   2. **Bảo toàn điểm neo Edge SSR:** Cấm xóa hoặc đổi tên các cặp comment `<!-- CMS:...:START -->` / `<!-- CMS:...:END -->` trong `templates/*.html` khi chưa cập nhật khớp với `functions/_lib/render.js`.

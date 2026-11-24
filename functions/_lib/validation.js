@@ -345,6 +345,22 @@ export function validateRegistrationInput(body) {
     fields.note = "Vui lòng chia sẻ nội dung đóng góp ít nhất 8 ký tự để Ban Điều Phối nắm rõ ý của bạn.";
   }
 
+  let diagnostics = "";
+  let screenshotDataUrl = "";
+  if (isFeedback) {
+    diagnostics = cleanStr(body.diagnostics, 900);
+    const rawShot = typeof body.screenshotDataUrl === "string" ? body.screenshotDataUrl.trim() : "";
+    if (rawShot) {
+      if (rawShot.length > 720000) {
+        fields.screenshotDataUrl = "Ảnh màn hình đính kèm vượt quá giới hạn dung lượng cho phép.";
+      } else if (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(rawShot)) {
+        fields.screenshotDataUrl = "Định dạng ảnh đính kèm không hợp lệ (chỉ hỗ trợ JPEG, PNG, WebP).";
+      } else {
+        screenshotDataUrl = rawShot;
+      }
+    }
+  }
+
   if (Object.keys(fields).length > 0) {
     return { ok: false, fields };
   }
@@ -354,6 +370,7 @@ export function validateRegistrationInput(body) {
     honeypot: false,
     value: {
       source,
+      is_feedback: isFeedback,
       event_id: eventId,
       activity_title: activityTitle || role || "Đăng ký tham gia cộng đồng HolaRise",
       full_name: fullName,
@@ -362,6 +379,8 @@ export function validateRegistrationInput(body) {
       role,
       organization,
       note,
+      diagnostics,
+      screenshot_data_url: screenshotDataUrl,
     },
   };
 }

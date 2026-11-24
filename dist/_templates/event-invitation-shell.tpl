@@ -47,7 +47,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=d6acdb095e">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1e7f7b2451">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -178,8 +178,6 @@
         <time datetime="__SSR_INVITE_START_ISO__">__SSR_INVITE_TIME_LABEL__</time>
         <span aria-hidden="true">·</span>
         <span>__SSR_INVITE_VENUE_NAME__</span>
-        <span aria-hidden="true">·</span>
-        <span>__SSR_EVENT_FEE__</span>
       </div>
       <div class="invite-meta-links">
         <a href="#giu-cho">Giữ chỗ tham dự ↓</a>
@@ -191,8 +189,6 @@
         <a href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a>
       </div>
     </div>
-
-    __SSR_EVENT_FIRST_TIMER_HTML__
   </div>
 </section>
 
@@ -303,7 +299,7 @@
               <button class="btn btn--primary" type="submit" id="ws-submit-btn">Xác nhận giữ chỗ tham dự</button>
               <a class="btn btn--outline" href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Vào Nhóm Zalo buổi gặp ↗</a>
             </div>
-            <p class="form-privacy-note">__SSR_EVENT_FEE__. Thông tin đăng ký được bảo mật theo <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a>.</p>
+            <p class="form-privacy-note">Thông tin đăng ký được bảo mật theo <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a> · <a href="/tham-gia/#cach-tham-gia">Xem cách tham gia</a>.</p>
           </div>
         </form>
       </div>
@@ -378,9 +374,9 @@
           <a class="footer-logo-row" href="/" aria-label="HolaRise – Cộng đồng Thanh niên Hòa Lạc">
             <img src="/assets/images/logo-holarise.png" alt="HolaRise – Cộng đồng Thanh niên Hòa Lạc" width="104" height="24" loading="lazy" style="height: 22px; width: auto;">
           </a>
-          <p style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;" data-i18n="brand.fullName">HolaRise – Cộng đồng Thanh niên Hòa Lạc</p>
-          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);" data-i18n="brand.subtitle">Khởi nguồn từ những buổi sớm trên sườn đồi Hòa Lạc, HolaRise đồng hành cùng người trẻ rèn sự tĩnh tại bên trong <a class="pillar-inline-tag pillar-inline-tag--holaheart" href="/lich-hoat-dong/?nhom=holaheart">HolaHeart</a>, giữ xanh cảnh quan tự nhiên <a class="pillar-inline-tag pillar-inline-tag--holagreen" href="/lich-hoat-dong/?nhom=holagreen">HolaGreen</a> và mang tri thức phụng sự cộng đồng <a class="pillar-inline-tag pillar-inline-tag--holaconnect" href="/lich-hoat-dong/?nhom=holaconnect">HolaConnect</a>.</p>
-          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Hola · Together We Rise, Together We Serve.</p>
+          <p class="footer-web-only" style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;" data-i18n="brand.fullName">HolaRise – Cộng đồng Thanh niên Hòa Lạc</p>
+          <p class="footer-web-only" style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);" data-i18n="brand.subtitle">Khởi nguồn từ những buổi sớm trên sườn đồi Hòa Lạc, HolaRise đồng hành cùng người trẻ rèn sự tĩnh tại bên trong <a class="pillar-inline-tag pillar-inline-tag--holaheart" href="/lich-hoat-dong/?nhom=holaheart">HolaHeart</a>, giữ xanh cảnh quan tự nhiên <a class="pillar-inline-tag pillar-inline-tag--holagreen" href="/lich-hoat-dong/?nhom=holagreen">HolaGreen</a> và mang tri thức phụng sự cộng đồng <a class="pillar-inline-tag pillar-inline-tag--holaconnect" href="/lich-hoat-dong/?nhom=holaconnect">HolaConnect</a>.</p>
+          <p class="footer-web-only" style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Hola · Together We Rise, Together We Serve.</p>
         </div>
 
         <div>
@@ -427,7 +423,8 @@
 
       <div class="footer-bottom">
         <div class="footer-bottom-left">
-          <a class="footer-domain-link" href="/">holarise.org</a>
+          <a class="footer-domain-link footer-web-only" href="/">holarise.org</a>
+          <a class="footer-domain-link footer-app-only" href="/">HolaRise.org – Cộng đồng Thanh niên Hòa Lạc</a>
           <span class="footer-web-only" aria-hidden="true">·</span>
           <span class="footer-web-only" data-i18n="footer.copyright">© 2026 HolaRise – Cộng đồng Thanh niên Hòa Lạc</span>
         </div>
@@ -681,10 +678,10 @@
     </svg>
   </button>
 
-  <script src="/assets/vendor/gsap.min.js?v=d6acdb095e" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=d6acdb095e" defer></script>
-  <script src="/assets/js/motion.js?v=d6acdb095e" defer></script>
-  <script src="/assets/js/main.js?v=d6acdb095e" defer></script>
-  <script src="/assets/js/join-pass.js?v=d6acdb095e" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=1e7f7b2451" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=1e7f7b2451" defer></script>
+  <script src="/assets/js/motion.js?v=1e7f7b2451" defer></script>
+  <script src="/assets/js/main.js?v=1e7f7b2451" defer></script>
+  <script src="/assets/js/join-pass.js?v=1e7f7b2451" defer></script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+import { getAdminUserProfile } from "../../_lib/admin-passkey-schema.js";
 import {
   isDriveConfigured,
   normalizeDriveCategory,
@@ -90,6 +91,12 @@ export async function onRequestPost(context) {
 
   const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const fallbackName = `holarise-${stamp}-${crypto.randomUUID().slice(0, 8)}.${detected.ext}`;
+  const uploaderProfile = context.env?.DB
+    ? await getAdminUserProfile(context.env.DB, auth.user.id).catch(() => null)
+    : null;
+  const uploaderLabel = uploaderProfile
+    ? `${uploaderProfile.name}${uploaderProfile.department ? ` (${uploaderProfile.department})` : ""} · ${uploaderProfile.phone || uploaderProfile.email}`
+    : `${auth.user.name || auth.user.email} (${auth.user.role})`;
 
   if (useDrive) {
     try {
@@ -99,8 +106,9 @@ export async function onRequestPost(context) {
         filename: originalFilename || fallbackName,
         category,
         subfolder,
+        description: `Người đăng: ${uploaderLabel} · Email: ${auth.user.email} · Tải lên lúc: ${new Date().toISOString()}`,
       });
-      return jsonResponse({ ok: true, ...uploaded }, 201);
+      return jsonResponse({ ok: true, ...uploaded, uploadedBy: uploaderLabel }, 201);
     } catch (err) {
       return errorResponse(
         502,

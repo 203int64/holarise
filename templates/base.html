@@ -129,9 +129,9 @@
           <a class="footer-logo-row" href="/" aria-label="{{BRAND_FULL_NAME}}">
             <img src="{{LOGO_LIGHT}}" alt="{{BRAND_FULL_NAME}}" width="104" height="24" loading="lazy" style="height: 22px; width: auto;">
           </a>
-          <p style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;" data-i18n="brand.fullName">{{BRAND_FULL_NAME}}</p>
-          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);" data-i18n="brand.subtitle">{{BRAND_SUBTITLE}}</p>
-          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Hola · {{BRAND_TAGLINE}}</p>
+          <p class="footer-web-only" style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;" data-i18n="brand.fullName">{{BRAND_FULL_NAME}}</p>
+          <p class="footer-web-only" style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);" data-i18n="brand.subtitle">{{BRAND_SUBTITLE}}</p>
+          <p class="footer-web-only" style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Hola · {{BRAND_TAGLINE}}</p>
         </div>
 
         <div>
@@ -178,7 +178,8 @@
 
       <div class="footer-bottom">
         <div class="footer-bottom-left">
-          <a class="footer-domain-link" href="/">holarise.org</a>
+          <a class="footer-domain-link footer-web-only" href="/">holarise.org</a>
+          <a class="footer-domain-link footer-app-only" href="/">HolaRise.org – Cộng đồng Thanh niên Hòa Lạc</a>
           <span class="footer-web-only" aria-hidden="true">·</span>
           <span class="footer-web-only" data-i18n="footer.copyright">© 2026 {{BRAND_FULL_NAME}}</span>
         </div>
@@ -354,6 +355,7 @@
       </div>
 
       <form class="auth-form" id="feedback-form" novalidate>
+        <input class="visually-hidden" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <fieldset class="auth-fieldset">
           <legend class="auth-label">Bạn muốn gửi nội dung gì?</legend>
           <div class="feedback-kind-grid" role="radiogroup">
@@ -378,7 +380,34 @@
 
         <div class="auth-field">
           <label for="fb-note">Chia sẻ chi tiết của bạn <span aria-hidden="true">*</span></label>
-          <textarea id="fb-note" name="note" rows="4" minlength="8" maxlength="1000" required placeholder="Mô tả ý tưởng, cảm nhận hoặc lỗi bạn gặp phải (nếu là lỗi, hãy cho biết trang bạn đang mở)..."></textarea>
+          <textarea id="fb-note" name="note" rows="4" minlength="8" maxlength="1000" required placeholder="Mô tả ý tưởng, cảm nhận hoặc lỗi bạn gặp phải..."></textarea>
+        </div>
+
+        <div class="fb-shot-box" id="fb-shot-box">
+          <div class="fb-shot-head">
+            <span class="fb-shot-label">Ảnh màn hình đính kèm <span class="auth-hint-inline">(tùy chọn)</span></span>
+            <span class="fb-shot-state" id="fb-shot-state" aria-live="polite"></span>
+          </div>
+          <div class="fb-shot-preview" id="fb-shot-preview" hidden>
+            <img id="fb-shot-img" alt="Ảnh màn hình trang đang xem">
+          </div>
+          <div class="fb-shot-actions">
+            <button type="button" class="fb-shot-btn" id="fb-capture-btn">Chụp màn hình này</button>
+            <label class="fb-shot-btn" for="fb-file-input">Chọn ảnh từ máy</label>
+            <input class="visually-hidden" type="file" id="fb-file-input" accept="image/jpeg,image/png,image/webp">
+            <button type="button" class="fb-shot-btn fb-shot-btn--danger" id="fb-shot-clear" hidden>Gỡ ảnh</button>
+          </div>
+          <p class="fb-shot-hint">Hệ thống tự che ô nhập liệu cá nhân trước khi chụp. Bạn cũng có thể dán ảnh (Ctrl+V). Ảnh chỉ Ban Điều Phối xem được và tự xóa sau 30 ngày.</p>
+        </div>
+
+        <details class="fb-diag-details" id="fb-diag-details">
+          <summary>Ngữ cảnh kỹ thuật tự động đọc</summary>
+          <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
+        </details>
+
+        <div class="fb-shake-row" id="fb-shake-row" hidden>
+          <span class="fb-shake-text" id="fb-shake-text">Lắc điện thoại để tự đọc màn hình và báo lỗi nhanh</span>
+          <button type="button" class="fb-shot-btn" id="fb-shake-toggle">Bật lắc máy</button>
         </div>
 
         <div class="auth-row-2">

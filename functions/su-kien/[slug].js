@@ -76,17 +76,6 @@ export async function onRequestGet({ request, env, params }) {
     `<p class="invite-closing">Mời bạn giữ chỗ trước để chúng mình sắp xếp chu đáo và gửi định vị chi tiết trong Nhóm Zalo buổi gặp.</p>`
   );
 
-  const firstTimerHtml = `<div class="info-panel info-panel--strip" style="margin-top: 22px; padding: 18px 20px;">
-      <div class="info-box">
-        <h3 style="font-size: 0.92rem; margin-bottom: 8px;">Dành cho bạn tham dự lần đầu</h3>
-        <ul class="clean-list" style="margin: 0; font-size: 0.88rem;">
-          <li><strong>Đi một mình vẫn hoàn toàn thoải mái:</strong> Luôn có người điều phối đón bạn từ lúc tới; bạn có thể chỉ ngồi lắng nghe mà không bị thúc ép phát biểu.</li>
-          <li><strong>Chi phí rõ ràng:</strong> ${escHtml(matched.fee || "Miễn phí tham dự")}.</li>
-          <li><strong>Di chuyển &amp; Ghép xe:</strong> Tham gia <a href="${escHtml(DEFAULT_ZALO_GROUP)}" target="_blank" rel="noopener noreferrer" style="color: var(--accent); font-weight: 500;">Nhóm Zalo buổi gặp ↗</a> ngay sau khi giữ chỗ để nhận định vị, ghép xe và nhắc giờ G.</li>
-        </ul>
-      </div>
-    </div>`;
-
   const replacements = {
     __SSR_PAGE_TITLE__: escHtml(`Thư mời ${matched.title} | HolaRise`),
     __SSR_PAGE_DESCRIPTION__: escHtml(matched.summary || matched.title),
@@ -99,12 +88,10 @@ export async function onRequestGet({ request, env, params }) {
     __SSR_EVENT_TITLE__: escHtml(matched.title),
     __SSR_EVENT_DATE_DISPLAY__: escHtml(matched.dateDisplay || matched.date),
     __SSR_EVENT_LOCATION__: escHtml(matched.location || "Hòa Lạc, Hà Nội"),
-    __SSR_EVENT_FEE__: escHtml(matched.fee || "Miễn phí tham dự"),
     __SSR_EVENT_SEATS__: escHtml(matched.seats || "Mở đăng ký"),
     __SSR_EVENT_IMAGE__: escHtml(matched.image),
     __SSR_EVENT_IMAGE_ALT__: escHtml(matched.imageAlt || matched.title),
     __SSR_EVENT_ZALO_GROUP__: escHtml(DEFAULT_ZALO_GROUP),
-    __SSR_EVENT_FIRST_TIMER_HTML__: firstTimerHtml,
     __SSR_EVENT_HOST_SIGNATURE__: escHtml(`${(matched.type || "HolaRise").split("·")[0].trim()} · ${BRAND_SHORT_NAME}`),
     __SSR_EVENT_RSVP_HEADING__: escHtml(`Giữ chỗ cho ${matched.dateDisplay || matched.date}`),
     __SSR_INVITE_HEADLINE__: escHtml(matched.title),

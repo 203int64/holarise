@@ -6,8 +6,28 @@ import {
   getSessionMember,
   jsonResponse,
   readJsonBody,
+  sniffImageMime,
   verifyCsrfOrigin,
 } from "../_lib/security.js";
+
+const MAX_BUG_SCREENSHOT_BYTES = 512 * 1024; // 512 KB binary cap
+const BUG_SCREENSHOT_TTL_SEC = 60 * 60 * 24 * 30; // 30 days auto-expiry
+
+function decodeBase64DataUrl(dataUrl) {
+  const commaIdx = dataUrl.indexOf(",");
+  if (commaIdx < 0) return null;
+  const b64 = dataUrl.slice(commaIdx + 1);
+  try {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i += 1) {
+      bytes[i] = bin.charCodeAt(i);
+    }
+    return bytes;
+  } catch {
+    return null;
+  }
+}
 import { cleanStr, validateRegistrationInput } from "../_lib/validation.js";
 
 export async function createEventRegistrationForMember(context, member, eventPayload, ipHash = "member") {
@@ -112,7 +132,7 @@ export async function onRequestPost(context) {
     return errorResponse(403, "CSRF_BLOCKED", "Nguồn gửi biểu mẫu không hợp lệ.");
   }
 
-  const parsed = await readJsonBody(request, 32 * 1024);
+  const parsed = await readJsonBody(request, 768 * 1024);
   if (!parsed.ok) return parsed.response;
 
   const sessionMember = await getSessionMember(env.DB, request);
@@ -191,6 +211,36 @@ export async function onRequestPost(context) {
   const now = new Date().toISOString();
   const id = `REG-${now.slice(2, 10).replace(/-/g, "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
 
+  let screenshotPath = "";
+  if (v.is_feedback && v.screenshot_data_url && env?.MEDIA_KV) {
+    const bytes = decodeBase64DataUrl(v.screenshot_data_url);
+    if (bytes && bytes.length > 0 && bytes.length <= MAX_BUG_SCREENSHOT_BYTES) {
+      const sniffed = sniffImageMime(bytes);
+      if (sniffed) {
+        const shotId = `bug-${now.slice(2, 10).replace(/-/g, "")}-${crypto.randomUUID().slice(0, 8)}.${sniffed.ext}`;
+        await env.MEDIA_KV.put(`bugshot:${shotId}`, bytes.buffer, {
+          expirationTtl: BUG_SCREENSHOT_TTL_SEC,
+          metadata: {
+            contentType: sniffed.mime,
+            regId: id,
+            createdAt: now,
+          },
+        }).catch(() => null);
+        screenshotPath = `/api/admin/bug-screenshot/${shotId}`;
+      }
+    }
+  }
+
+  let finalNote = v.note;
+  if (v.is_feedback) {
+    const extraParts = [];
+    if (screenshotPath) extraParts.push(`[Ảnh màn hình lỗi (Admin)]: ${screenshotPath}`);
+    if (v.diagnostics) extraParts.push(`[Ngữ cảnh kỹ thuật]: ${v.diagnostics}`);
+    if (extraParts.length > 0) {
+      finalNote = `${v.note}\n\n${extraParts.join("\n")}`;
+    }
+  }
+
   const record = {
     id,
     member_id: sessionMember ? sessionMember.id : "",
@@ -202,7 +252,7 @@ export async function onRequestPost(context) {
     email: v.email,
     role: v.role,
     organization: v.organization,
-    note: v.note,
+    note: finalNote,
     status: "new",
     admin_note: "",
     sync_status: "pending",
@@ -291,6 +341,7 @@ export async function onRequestPost(context) {
       duplicate: false,
       memberCode: sessionMember ? sessionMember.member_code : "",
       emailSentHint: Boolean(record.email),
+      screenshotSaved: Boolean(screenshotPath),
       message: confirmationMessage,
     },
     201

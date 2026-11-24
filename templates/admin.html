@@ -55,6 +55,7 @@
 
         <div class="form-alert" id="login-alert" role="alert" hidden></div>
         <button class="btn btn--primary btn--full" type="submit">Đăng nhập vào CMS</button>
+        <button class="btn btn--outline btn--full" type="button" id="btn-admin-biometric-login" style="margin-top: 8px;">Đăng nhập bằng Sinh trắc học (Face ID / Touch ID)</button>
       </form>
 
       <!-- First-Time Bootstrap Super Admin Form -->
@@ -986,6 +987,7 @@
     </div>
   </dialog>
 
+  <script src="/assets/js/passkey-client.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/admin.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/admin-studio.js?v={{CACHE_BUST}}" defer></script>
 </body>
