@@ -498,6 +498,24 @@ export async function ensureMemberSchema(db) {
       PRIMARY KEY (reflection_id, actor_key),
       FOREIGN KEY (reflection_id) REFERENCES activity_reflections(id) ON DELETE CASCADE
     )`,
+    `CREATE TABLE IF NOT EXISTS member_passkeys (
+      credential_id TEXT PRIMARY KEY,
+      member_id TEXT NOT NULL,
+      public_key_spki TEXT NOT NULL,
+      algorithm INTEGER NOT NULL DEFAULT -7,
+      sign_count INTEGER NOT NULL DEFAULT 0,
+      device_label TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      last_used_at TEXT NOT NULL DEFAULT '',
+      FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS passkey_challenges (
+      challenge TEXT PRIMARY KEY,
+      member_id TEXT NOT NULL DEFAULT '',
+      kind TEXT NOT NULL CHECK(kind IN ('register', 'login')),
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    )`,
   ];
   for (const sql of stmts) {
     await db.prepare(sql).run().catch(() => {});

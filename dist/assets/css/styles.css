@@ -8396,3 +8396,10 @@ a:focus-visible,
 [hidden] {
   display: none !important;
 }
+
+
+.auth-provider-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

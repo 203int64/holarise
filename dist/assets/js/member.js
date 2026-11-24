@@ -591,6 +591,195 @@
     });
   }
 
+  function b64uEncode(buf) {
+    const bytes = new Uint8Array(buf);
+    let bin = "";
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  }
+
+  function b64uDecode(str) {
+    const clean = String(str || "").replace(/-/g, "+").replace(/_/g, "/");
+    const pad = clean.length % 4 === 0 ? "" : "=".repeat(4 - (clean.length % 4));
+    const bin = atob(clean + pad);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  function detectDeviceLabel() {
+    const ua = navigator.userAgent || "";
+    if (/iPhone/i.test(ua)) return "iPhone · Face ID / Touch ID";
+    if (/iPad/i.test(ua)) return "iPad · Passkey";
+    if (/Macintosh|Mac OS/i.test(ua)) return "Mac · Touch ID";
+    if (/Android/i.test(ua)) return "Android · Passkey";
+    if (/Windows/i.test(ua)) return "Windows Hello";
+    return "Passkey thiết bị";
+  }
+
+  function initPasskeyAuth() {
+    const supported = Boolean(window.PublicKeyCredential && navigator.credentials);
+    if (!supported) {
+      $$("[data-passkey-login]").forEach((btn) => {
+        btn.hidden = true;
+      });
+      return;
+    }
+
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-passkey-login]");
+      if (!btn) return;
+      const container = btn.closest(".auth-card-surface, .auth-dialog-inner") || document;
+      const statusEl =
+        container.querySelector("[data-auth-status]") ||
+        container.querySelector("#join-oauth-alert");
+      setStatus(statusEl, "");
+
+      const origHtml = btn.innerHTML;
+      btn.disabled = true;
+      try {
+        const optRes = await api("/api/member/auth/passkey/login-options", { method: "POST" });
+        const opts = optRes.options;
+        const cred = await navigator.credentials.get({
+          publicKey: {
+            challenge: b64uDecode(opts.challenge),
+            rpId: opts.rpId,
+            timeout: opts.timeout || 60000,
+            userVerification: opts.userVerification || "preferred",
+          },
+        });
+        if (!cred || !cred.response) throw new Error("Đã hủy xác thực Passkey.");
+
+        const verifyRes = await api("/api/member/auth/passkey/login-verify", {
+          method: "POST",
+          body: {
+            id: cred.id,
+            challenge: opts.challenge,
+            clientDataJSON: b64uEncode(cred.response.clientDataJSON),
+            authenticatorData: b64uEncode(cred.response.authenticatorData),
+            signature: b64uEncode(cred.response.signature),
+          },
+        });
+        state.member = verifyRes.member;
+        state.needsOnboarding = false;
+        const dlg = btn.closest("dialog");
+        if (dlg && dlg.open) dlg.close();
+        onAuthChanged();
+      } catch (err) {
+        if (err && err.name === "NotAllowedError") {
+          setStatus(statusEl, "Bạn đã hủy đăng nhập bằng Passkey.", "error");
+        } else {
+          setStatus(statusEl, err.message || "Không thể đăng nhập bằng Passkey lúc này.", "error");
+        }
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+      }
+    });
+
+    $("#btn-add-passkey")?.addEventListener("click", async () => {
+      const btn = $("#btn-add-passkey");
+      const st = $("#passkey-dash-status");
+      setStatus(st, "");
+      btn.disabled = true;
+      btn.textContent = "Đang xác thực...";
+      try {
+        const optRes = await api("/api/member/auth/passkey/register-options", { method: "POST" });
+        const opts = optRes.options;
+        const cred = await navigator.credentials.create({
+          publicKey: {
+            challenge: b64uDecode(opts.challenge),
+            rp: opts.rp,
+            user: {
+              id: b64uDecode(opts.user.id),
+              name: opts.user.name,
+              displayName: opts.user.displayName,
+            },
+            pubKeyCredParams: opts.pubKeyCredParams,
+            timeout: opts.timeout || 60000,
+            attestation: opts.attestation || "none",
+            excludeCredentials: (opts.excludeCredentials || []).map((c) => ({
+              type: c.type,
+              id: b64uDecode(c.id),
+            })),
+            authenticatorSelection: opts.authenticatorSelection,
+          },
+        });
+        if (!cred || !cred.response) throw new Error("Không tạo được Passkey.");
+        if (typeof cred.response.getPublicKey !== "function" || typeof cred.response.getAuthenticatorData !== "function") {
+          throw new Error("Trình duyệt này chưa hỗ trợ chuẩn WebAuthn Level 2.");
+        }
+        const pubKeyBuf = cred.response.getPublicKey();
+        const authDataBuf = cred.response.getAuthenticatorData();
+        const alg = typeof cred.response.getPublicKeyAlgorithm === "function"
+          ? cred.response.getPublicKeyAlgorithm()
+          : -7;
+
+        await api("/api/member/auth/passkey/register-verify", {
+          method: "POST",
+          body: {
+            id: cred.id,
+            challenge: opts.challenge,
+            clientDataJSON: b64uEncode(cred.response.clientDataJSON),
+            authenticatorData: b64uEncode(authDataBuf),
+            publicKey: b64uEncode(pubKeyBuf),
+            algorithm: alg,
+            deviceLabel: detectDeviceLabel(),
+          },
+        });
+        setStatus(st, "Đã thêm Passkey thành công! Lần sau bạn có thể đăng nhập trong 1 chạm.", "success");
+        loadMemberPasskeys();
+      } catch (err) {
+        if (err && err.name === "NotAllowedError") {
+          setStatus(st, "Bạn đã hủy thêm Passkey.", "error");
+        } else {
+          setStatus(st, err.message || "Không thể thêm Passkey trên thiết bị này.", "error");
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "+ Thêm Passkey";
+      }
+    });
+
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-delete-passkey]");
+      if (!btn) return;
+      const id = btn.getAttribute("data-delete-passkey");
+      if (!id || !window.confirm("Gỡ Passkey này khỏi tài khoản?")) return;
+      try {
+        await api(`/api/member/auth/passkey?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+        loadMemberPasskeys();
+      } catch (err) {
+        setStatus($("#passkey-dash-status"), err.message, "error");
+      }
+    });
+  }
+
+  async function loadMemberPasskeys() {
+    const box = $("#member-passkeys-list");
+    if (!box || !state.member) return;
+    try {
+      const res = await api("/api/member/auth/passkey");
+      const items = res.items || [];
+      if (!items.length) {
+        box.innerHTML =
+          '<p class="member-empty-hint">Chưa có Passkey nào. Bấm <strong>+ Thêm Passkey</strong> để bật đăng nhập 1 chạm bằng Face ID / vân tay.</p>';
+        return;
+      }
+      box.innerHTML = items
+        .map(
+          (pk) => `<div class="member-list-item">
+            <div>
+              <strong>${esc(pk.deviceLabel)}</strong>
+              <span class="member-list-meta">Tạo ngày ${esc(formatDateVi(pk.createdAt))}${pk.lastUsedAt ? ` · Dùng gần nhất ${esc(formatDateVi(pk.lastUsedAt))}` : ""}</span>
+            </div>
+            <button type="button" class="auth-change-btn" data-delete-passkey="${esc(pk.id)}">Gỡ</button>
+          </div>`
+        )
+        .join("");
+    } catch (_err) {}
+  }
+
   function initMemberAuthModal() {
     const dialog = $("#member-auth-modal");
     if (!dialog) return;
@@ -991,6 +1180,7 @@
     if (onboardingView) onboardingView.hidden = true;
     dashView.hidden = false;
     renderMemberDashboardCard();
+    loadMemberPasskeys();
 
     try {
       const data = await api("/api/member/dashboard");
@@ -1331,6 +1521,7 @@
     initPasswordToggles();
     initFeedbackModal();
     initUnifiedAuthForms();
+    initPasskeyAuth();
     initMemberAuthModal();
     initOnboardingWizard();
     initOneTapModalButton();
