@@ -13,6 +13,7 @@ import re
 import shutil
 import struct
 import sys
+from functools import lru_cache
 from pathlib import Path
 from urllib.parse import urlencode, urlparse
 
@@ -89,6 +90,36 @@ def load_template(name: str) -> str:
 
 def esc(value) -> str:
     return html.escape(str(value), quote=True)
+
+
+@lru_cache(maxsize=1)
+def image_widths() -> dict:
+    # The same JSON-shaped data is imported as a JS module by Pages Functions.
+    module = (DATA_DIR / "image-widths.js").read_text(encoding="utf-8").strip()
+    return json.loads(module.removeprefix("export default ").removesuffix(";"))
+
+
+def image_variant(src: str, width: int) -> str:
+    stem = src.removeprefix("/assets/images/").rsplit(".", 1)[0]
+    return f"/assets/images/web/{stem}-{width}.webp"
+
+
+def full_image_url(src: str) -> str:
+    widths = image_widths().get(src)
+    return image_variant(src, widths[-1]) if widths else src
+
+
+def image_attrs(src: str, sizes: str) -> str:
+    attrs = f'src="{esc(src)}"'
+    widths = image_widths().get(src)
+    if not widths:
+        return attrs
+    srcset = ", ".join(f"{image_variant(src, width)} {width}w" for width in widths)
+    return f'{attrs} srcset="{esc(srcset)}" sizes="{esc(sizes)}"'
+
+
+def srcset_urls(srcset: str) -> list:
+    return [candidate.split()[0] for candidate in srcset.split(",") if candidate.strip()]
 
 
 def format_inline_pillar_tags(text: str) -> str:
@@ -370,7 +401,7 @@ def render_story_stage(pillars: list) -> str:
         slides.append(
             f"""<div class="story-slide image-note{active_cls}" data-story-slide="{idx}" data-pillar="{esc(filter_key)}" tabindex="{0 if idx == 0 else -1}" role="group" aria-label="{esc(image_label)} · {esc(p['imageAlt'])}">
           <!-- CMS:PILLAR_SLIDE_{idx}:START -->
-          <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="960" height="720"{priority_attr}>{orient_chip}
+          <img {image_attrs(p['image'], '(max-width: 1023px) calc(100vw - 40px), 620px')} alt="{esc(p['imageAlt'])}" width="960" height="720"{priority_attr}>{orient_chip}
           <!-- CMS:PILLAR_SLIDE_{idx}:END -->
           {render_image_tooltip(p['imageAlt'], image_label)}
           <div class="story-slide-scrim" aria-hidden="true"></div>
@@ -498,14 +529,18 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
             full_cap = f"{p['badge']} · {cap}" if p["badge"] not in cap else cap
             loading_attr = 'loading="lazy" decoding="async"'
             width_attr = 'width="960" height="600"' if frame["is_main"] else 'width="480" height="300"'
+            photo_sizes = (
+                "(max-width: 960px) calc(100vw - 40px), 620px" if frame["is_main"]
+                else "(max-width: 960px) calc((100vw - 52px) / 2), 300px"
+            )
             if frame["is_main"]:
                 img_block = f"""<!-- CMS:PILLAR_MAIN_{filter_key.upper()}:START -->
-            <img src="{esc(frame['src'])}" alt="{esc(frame['alt'])}" {width_attr} {loading_attr}>{orient_chip}
+            <img {image_attrs(frame['src'], photo_sizes)} alt="{esc(frame['alt'])}" {width_attr} {loading_attr}>{orient_chip}
             <!-- CMS:PILLAR_MAIN_{filter_key.upper()}:END -->"""
             else:
-                img_block = f'<img src="{esc(frame["src"])}" alt="{esc(frame["alt"])}" {width_attr} {loading_attr}>'
+                img_block = f'<img {image_attrs(frame["src"], photo_sizes)} alt="{esc(frame["alt"])}" {width_attr} {loading_attr}>'
             collage_buttons.append(
-                f"""<button class="pillar-photo{main_cls}" type="button" aria-label="Xem ảnh: {esc(cap)}" data-lightbox-src="{esc(frame['src'])}" data-lightbox-alt="{esc(frame['alt'])}" data-lightbox-caption="{esc(full_cap)}">
+                f"""<button class="pillar-photo{main_cls}" type="button" aria-label="Xem ảnh: {esc(cap)}" data-lightbox-src="{esc(full_image_url(frame['src']))}" data-lightbox-alt="{esc(frame['alt'])}" data-lightbox-caption="{esc(full_cap)}">
             {img_block}
             <span class="pillar-photo-cap" aria-hidden="true">{esc(cap)}</span>
           </button>"""
@@ -560,7 +595,7 @@ def render_workshops(upcoming: list) -> str:
         event_href = resolve_event_href(ws)
         title_en_attr = f' data-title-en="{esc(ws["titleEn"])}"' if ws.get("titleEn") else ""
         summary_en_attr = f' data-summary-en="{esc(ws["summaryEn"])}"' if ws.get("summaryEn") else ""
-        media_inner = f"""<img src="{esc(ws['image'])}" alt="{esc(ws['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
+        media_inner = f"""<img {image_attrs(ws['image'], '(max-width: 820px) 84vw, 420px')} alt="{esc(ws['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
           <div class="event-card-badges">
             <span class="glass-badge">{esc(ws['dateDisplay'])}</span>
             <span class="glass-badge glass-badge--accent">{esc(ws['fee'])}</span>
@@ -725,7 +760,7 @@ def render_news_cards(articles: list, filterable: bool = False) -> str:
         cards.append(
             f"""<article class="editorial-card" data-stagger-item{attr}>
         <a class="plate-media" data-curtain href="{href}" aria-label="{esc(a['title'])}">
-          <img src="{esc(a['image'])}" alt="{esc(a['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
+          <img {image_attrs(a['image'], '(max-width: 640px) calc(100vw - 40px), 420px')} alt="{esc(a['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
         </a>
         <div class="card-meta">
           <span class="cat">{esc(a['category'])}</span>
@@ -752,9 +787,9 @@ def render_horizontal_gallery(gallery: list) -> str:
         label = g.get("label") or g.get("sourceLabel") or ""
         full_caption = f"{label} · {caption}" if label and label not in caption else caption
         items.append(
-            f"""<button class="horizontal-card" type="button" aria-label="Xem ảnh: {esc(caption)}" data-lightbox-src="{esc(src)}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}" data-card-index="{idx:02d} / {total:02d}">
+            f"""<button class="horizontal-card" type="button" aria-label="Xem ảnh: {esc(caption)}" data-lightbox-src="{esc(full_image_url(src))}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}" data-card-index="{idx:02d} / {total:02d}">
         <div class="horizontal-frame">
-          <img src="{esc(src)}" alt="{esc(alt)}" width="960" height="600" loading="lazy" decoding="async">
+          <img {image_attrs(src, '(max-width: 640px) 82vw, 620px')} alt="{esc(alt)}" width="960" height="600" loading="lazy" decoding="async">
           <div class="horizontal-caption">
             <span>{esc(caption)}</span>
             <span class="horizontal-index">{idx:02d} / {total:02d}</span>
@@ -767,15 +802,17 @@ def render_horizontal_gallery(gallery: list) -> str:
 
 def render_gallery(gallery: list, default_label: str = "Tư liệu HolaRise") -> str:
     items = []
-    for g in gallery:
+    for index, g in enumerate(gallery):
         src = g.get("src") or g.get("url") or ""
+        desktop_sizes = "(min-width: 1280px) 820px, 64vw" if index == 0 else "(min-width: 1280px) 400px, 32vw"
+        sizes = f"(max-width: 820px) calc(100vw - 40px), {desktop_sizes}"
         label = g.get("label") or g.get("sourceLabel") or default_label
         caption = g.get("caption") or g.get("alt") or label
         alt = g.get("alt") or caption
         full_caption = f"{label} · {caption}" if label and label not in caption else caption
         items.append(
-            f"""<button class="gallery-item image-note" type="button" aria-label="Xem ảnh: {esc(alt)}" data-lightbox-src="{esc(src)}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}">
-        <img src="{esc(src)}" alt="{esc(alt)}" width="720" height="480" loading="lazy" decoding="async">
+            f"""<button class="gallery-item image-note" type="button" aria-label="Xem ảnh: {esc(alt)}" data-lightbox-src="{esc(full_image_url(src))}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}">
+        <img {image_attrs(src, sizes)} alt="{esc(alt)}" width="720" height="480" loading="lazy" decoding="async">
         {render_image_tooltip(caption, label)}
       </button>"""
         )
@@ -926,7 +963,7 @@ def render_past_workshops(past_list: list) -> str:
         meta_parts = [item.get("time", ""), item.get("location", ""), item.get("participants", "")]
         meta = " · ".join(esc(part) for part in meta_parts if part)
         rows.append(
-            f"""<div class="past-item" data-stagger-item data-hover-photo="{esc(photo)}" data-hover-alt="{esc(alt)}">
+            f"""<div class="past-item" data-stagger-item data-hover-photo="{esc(full_image_url(photo))}" data-hover-alt="{esc(alt)}">
         <span class="past-item-date">{esc(item['date'])}</span>
         <h3 class="past-item-title">{title}</h3>
         <span class="past-item-meta">{meta}</span>
@@ -1182,6 +1219,7 @@ def write_page(
             "CANONICAL_URL": esc(canonical),
             "OG_TYPE": esc(og_type),
             "OG_IMAGE_URL": esc(og_img_url),
+            "OG_IMAGE_ALT": esc(title if og_image else b.get("ogImageAlt", title)),
             "BODY_CLASS": esc(body_class),
             "BRAND_FULL_NAME": esc(b["fullName"]),
             "BRAND_SHORT_NAME": esc(b["shortName"]),
@@ -1212,9 +1250,9 @@ def write_page(
     out_path.write_text(rendered, encoding="utf-8")
 
 
-def collect_precache_urls() -> list:
+def collect_precache_urls(*hero_srcsets: str) -> list:
     """Collect canonical routes and versioned core assets actually used by generated pages."""
-    urls = set()
+    urls = {url for srcset in hero_srcsets for url in srcset_urls(srcset)}
     excluded_prefixes = (
         "/assets/images/events/",
         "/assets/images/illustrations/",
@@ -1222,6 +1260,7 @@ def collect_precache_urls() -> list:
         "/assets/images/pwa/screenshot-",
         "/assets/images/og-cover.jpg",
         "/assets/images/hero-holarise-",
+        "/assets/images/holarise-binh-minh-og.jpg",
     )
 
     for html_file in sorted(DIST_DIR.rglob("*.html")):
@@ -1234,13 +1273,14 @@ def collect_precache_urls() -> list:
             urls.add("/" + rel[: -len("index.html")])
 
         text = html_file.read_text(encoding="utf-8")
-        for target in re.findall(r'\b(?:href|src)="(/assets/[^"]+)"', text):
+        for target in re.findall(r'\s(?:href|src)="(/assets/[^"]+)"', text):
             target_no_hash = target.split("#")[0]
             clean = target_no_hash.split("?")[0]
             if any(clean.startswith(prefix) for prefix in excluded_prefixes):
                 continue
             if (DIST_DIR / clean.lstrip("/")).is_file():
                 urls.add(target_no_hash)
+                urls.update(image_variant(clean, width) for width in image_widths().get(clean, ()))
 
     for extra in (
         "/site.webmanifest",
@@ -1675,7 +1715,13 @@ def build_site() -> list:
         if h.get("imageIsIllustration")
         else ""
     )
-    hero_media_html = f'<img class="hero-card-img" src="{esc(h["image"])}" alt="{esc(h["imageAlt"])}" width="1376" height="768" fetchpriority="high" decoding="async" data-cinema-img>{hero_orient_chip}'
+    hero_srcset = f' srcset="{esc(h["imageSrcset"])}" sizes="(min-width: 1280px) 1240px, calc(100vw - 40px)"' if h.get("imageSrcset") else ""
+    hero_mobile_src = (
+        f'<source media="(max-width: 640px)" type="image/webp" srcset="{esc(h["mobileImageSrcset"])}" sizes="calc(100vw - 40px)" width="1024" height="1536">'
+        if h.get("mobileImageSrcset")
+        else ""
+    )
+    hero_media_html = f'<picture class="hero-card-picture">{hero_mobile_src}<img class="hero-card-img" src="{esc(h["image"])}"{hero_srcset} alt="{esc(h["imageAlt"])}" width="1671" height="941" fetchpriority="high" decoding="async" data-cinema-img></picture>{hero_orient_chip}'
 
     home_main = render_template(
         load_template("home.html"),
@@ -1741,7 +1787,7 @@ def build_site() -> list:
         if about_media.get("imageIsIllustration")
         else ""
     )
-    about_media_html = f'<img src="{esc(about_img_src)}" alt="{esc(about_img_alt)}" width="1280" height="714" fetchpriority="high" decoding="async">{about_orient_chip}'
+    about_media_html = f'<img {image_attrs(about_img_src, "(min-width: 1280px) 1240px, calc(100vw - 40px)")} alt="{esc(about_img_alt)}" width="1280" height="714" fetchpriority="high" decoding="async">{about_orient_chip}'
 
     about_main = render_template(
         load_template("about.html"),
@@ -1900,7 +1946,9 @@ def build_site() -> list:
                 "ARTICLE_DATE_DISPLAY": esc(article["dateDisplay"]),
                 "ARTICLE_READ_TIME": esc(article["readTime"]),
                 "ARTICLE_AUTHOR": esc(article["author"]),
-                "ARTICLE_IMAGE": esc(article["image"]),
+                "ARTICLE_IMAGE_ATTRS": image_attrs(
+                    article["image"], "(min-width: 1280px) 1240px, calc(100vw - 40px)"
+                ),
                 "ARTICLE_IMAGE_ALT": esc(article["imageAlt"]),
                 "ARTICLE_PARAGRAPHS": paragraphs,
                 "RELATED_NEWS_HTML": render_news_cards(related, filterable=False),
@@ -1955,7 +2003,7 @@ def build_site() -> list:
             "ARTICLE_DATE_DISPLAY": "__SSR_ARTICLE_DATE_DISPLAY__",
             "ARTICLE_READ_TIME": "__SSR_ARTICLE_READ_TIME__",
             "ARTICLE_AUTHOR": "__SSR_ARTICLE_AUTHOR__",
-            "ARTICLE_IMAGE": "__SSR_ARTICLE_IMAGE__",
+            "ARTICLE_IMAGE_ATTRS": "__SSR_ARTICLE_IMAGE_ATTRS__",
             "ARTICLE_IMAGE_ALT": "__SSR_ARTICLE_IMAGE_ALT__",
             "ARTICLE_PARAGRAPHS": "__SSR_ARTICLE_BODY__",
             "RELATED_NEWS_HTML": "__SSR_RELATED_NEWS__",
@@ -2245,7 +2293,7 @@ Sitemap: {abs_url(b['siteUrl'], '/sitemap.xml')}
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
-    precache_urls = collect_precache_urls()
+    precache_urls = collect_precache_urls(h["imageSrcset"], h["mobileImageSrcset"])
     (DIST_DIR / "sw.js").write_text(
         generate_service_worker(CURRENT_BUILD_HASH, precache_urls), encoding="utf-8"
     )
@@ -2332,6 +2380,11 @@ def verify_dist() -> list:
             elif not target_path.exists():
                 errors.append(f"[{rel}] Missing asset {attr}=\"{target}\"")
 
+        for srcset in re.findall(r'<(?:img|source)\b[^>]*\ssrcset="([^"]+)"', text):
+            for url in srcset_urls(srcset):
+                if url.startswith("/assets/") and not (DIST_DIR / url.lstrip("/")).is_file():
+                    errors.append(f"[{rel}] Missing image variant: {url}")
+
         for img_tag in re.findall(r"<img\b[^>]*>", text):
             if re.search(r'\bsrc=""', img_tag):
                 errors.append(f"[{rel}] Empty img src attribute: {img_tag[:80]}")
@@ -2339,6 +2392,11 @@ def verify_dist() -> list:
                 continue
             if 'alt=""' in img_tag or "alt=" not in img_tag:
                 errors.append(f"[{rel}] Image missing descriptive alt: {img_tag[:80]}")
+
+    og_url = load_json("site.json")["brand"]["ogImage"]
+    og_cover = DIST_DIR / urlparse(og_url).path.lstrip("/")
+    if not og_cover.is_file() or read_jpeg_dimensions(og_cover) != (1200, 630):
+        errors.append(f"Default sharing image must be a 1200×630 JPEG: {og_url}")
 
     for required_file in ["sitemap.xml", "robots.txt", "llms.txt", "404.html", "chinh-sach/index.html", "site.webmanifest", "sw.js", "_headers", "offline/index.html"]:
         if not (DIST_DIR / required_file).exists():

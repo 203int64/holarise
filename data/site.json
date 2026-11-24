@@ -11,7 +11,8 @@
     "siteUrl": "https://holarise.org",
     "language": "vi",
     "locale": "vi_VN",
-    "ogImage": "/assets/images/og-cover.jpg?v=5",
+    "ogImage": "/assets/images/holarise-binh-minh-og.jpg",
+    "ogImageAlt": "Nhóm HolaRise đi trên sườn đồi lúc bình minh, dưới dòng chữ Together We Rise, Together We Serve.",
     "logoLight": "/assets/images/logo-holarise.png",
     "logoDark": "/assets/images/logo-holarise.png",
     "logoMark": "/assets/images/logo-mark.png"
@@ -44,8 +45,10 @@
       "label": "Xem hành trình",
       "href": "#hanh-trinh-that"
     },
-    "image": "/assets/images/hero-holarise-binh-minh.webp",
-    "imageAlt": "Những người trẻ HolaRise cùng ngồi bên nhau đón bình minh trên đồi nhìn xuống mặt hồ Hòa Lạc.",
+    "image": "/assets/images/holarise-binh-minh-1671.webp",
+    "imageSrcset": "/assets/images/holarise-binh-minh-768.webp 768w, /assets/images/holarise-binh-minh-1200.webp 1200w, /assets/images/holarise-binh-minh-1671.webp 1671w",
+    "mobileImageSrcset": "/assets/images/holarise-binh-minh-doc-512.webp 512w, /assets/images/holarise-binh-minh-doc-768.webp 768w, /assets/images/holarise-binh-minh-doc-1024.webp 1024w",
+    "imageAlt": "Những người trẻ HolaRise cùng đón bình minh trên sườn đồi Hòa Lạc.",
     "imageIsIllustration": true
   },
   "about": {

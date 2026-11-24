@@ -3,6 +3,7 @@
  * Mirrors build.py markup pixel-for-pixel while preventing XSS via strict escaping.
  */
 
+import imageWidths from "../../data/image-widths.js";
 import { isSafeExternalHttpsUrl, isSafeMediaUrl } from "./validation.js";
 
 export const SITE_URL = "https://holarise.org";
@@ -35,6 +36,24 @@ export function escHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#x27;");
+}
+
+function imageVariant(src, width) {
+  const stem = src.slice("/assets/images/".length, src.lastIndexOf("."));
+  return `/assets/images/web/${stem}-${width}.webp`;
+}
+
+function fullImageUrl(src) {
+  const widths = Object.hasOwn(imageWidths, src) && imageWidths[src];
+  return widths ? imageVariant(src, widths.at(-1)) : src;
+}
+
+export function imageAttrs(src, sizes) {
+  const attrs = `src="${escHtml(src)}"`;
+  const widths = Object.hasOwn(imageWidths, src) && imageWidths[src];
+  if (!widths) return attrs;
+  const srcset = widths.map((width) => `${imageVariant(src, width)} ${width}w`).join(", ");
+  return `${attrs} srcset="${escHtml(srcset)}" sizes="${escHtml(sizes)}"`;
 }
 
 export function absUrl(path) {
@@ -213,7 +232,7 @@ export function renderWorkshopsHtml(upcoming) {
       const eventHref = resolveEventHref(ws);
       const titleEnAttr = ws.titleEn ? ` data-title-en="${escHtml(ws.titleEn)}"` : "";
       const summaryEnAttr = ws.summaryEn ? ` data-summary-en="${escHtml(ws.summaryEn)}"` : "";
-      const mediaInner = `<img src="${escHtml(ws.image)}" alt="${escHtml(ws.imageAlt || ws.title)}" width="640" height="420" loading="lazy" decoding="async">
+      const mediaInner = `<img ${imageAttrs(ws.image, "(max-width: 820px) 84vw, 420px")} alt="${escHtml(ws.imageAlt || ws.title)}" width="640" height="420" loading="lazy" decoding="async">
           <div class="event-card-badges">
             <span class="glass-badge">${escHtml(ws.dateDisplay)}</span>
             <span class="glass-badge glass-badge--accent">${escHtml(ws.fee)}</span>
@@ -362,7 +381,7 @@ export function renderPastWorkshopsHtml(pastList) {
         .filter(Boolean)
         .map(escHtml)
         .join(" · ");
-      return `<div class="past-item" data-stagger-item data-hover-photo="${escHtml(photo)}" data-hover-alt="${escHtml(alt)}">
+      return `<div class="past-item" data-stagger-item data-hover-photo="${escHtml(fullImageUrl(photo))}" data-hover-alt="${escHtml(alt)}">
         <span class="past-item-date">${escHtml(item.dateDisplay || item.date)}</span>
         <h3 class="past-item-title">${href ? `<a class="past-item-title-link" href="${escHtml(href)}">${escHtml(item.title)}</a>` : escHtml(item.title)}</h3>
         <span class="past-item-meta">${meta}</span>
@@ -387,7 +406,7 @@ export function renderNewsCardsHtml(articles, filterable = false) {
       const href = `/hanh-trinh/${escHtml(a.slug)}/`;
       return `<article class="editorial-card" data-stagger-item${attr}>
         <a class="plate-media" data-curtain href="${href}" aria-label="${escHtml(a.title)}">
-          <img src="${escHtml(a.image)}" alt="${escHtml(a.imageAlt || a.title)}" width="640" height="420" loading="lazy" decoding="async">
+          <img ${imageAttrs(a.image, "(max-width: 640px) calc(100vw - 40px), 420px")} alt="${escHtml(a.imageAlt || a.title)}" width="640" height="420" loading="lazy" decoding="async">
         </a>
         <div class="card-meta">
           <span class="cat">${escHtml(a.category)}</span>
@@ -580,9 +599,9 @@ export function renderHorizontalGalleryHtml(photos) {
       const caption = p.caption || p.albumTitle || "Khoảnh khắc Hola tại Hòa Lạc";
       const alt = p.alt || caption;
       const photographer = p.photographer ? ` · Ảnh: ${p.photographer}` : "";
-      return `<button class="horizontal-card" type="button" data-lightbox-src="${escHtml(p.url)}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(caption + photographer)}">
+      return `<button class="horizontal-card" type="button" data-lightbox-src="${escHtml(fullImageUrl(p.url))}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(caption + photographer)}">
         <div class="horizontal-frame">
-          <img src="${escHtml(p.url)}" alt="${escHtml(alt)}" width="960" height="600" loading="lazy" decoding="async">
+          <img ${imageAttrs(p.url, "(max-width: 640px) 82vw, 620px")} alt="${escHtml(alt)}" width="960" height="600" loading="lazy" decoding="async">
           <div class="horizontal-caption">
             <span>${escHtml(caption)}</span>
             <span class="horizontal-index">${pad2(idx + 1)} / ${pad2(total)}</span>
@@ -608,7 +627,7 @@ export function renderPublicAlbumsHtml(albumsWithPhotos) {
       const payloadJson = JSON.stringify({
         title: album.title || "",
         photos: photos.map((p) => ({
-          src: p.url,
+          src: fullImageUrl(p.url),
           alt: p.alt || p.caption || album.title,
           caption: p.caption || album.title,
           photographer: p.photographer || "",
@@ -624,7 +643,7 @@ export function renderPublicAlbumsHtml(albumsWithPhotos) {
 
       return `<article class="public-album-card" data-album-card data-pillar="${escHtml(pillar)}" data-category="${escHtml(filtersAttr)}" data-stagger-item>
         <button class="public-album-cover" type="button" data-album-open aria-label="Xem ${photos.length} ảnh trong album ${escHtml(album.title)}">
-          <img src="${escHtml(cover)}" alt="${escHtml(album.title)}" width="720" height="480" loading="lazy" decoding="async">
+          <img ${imageAttrs(cover, "(max-width: 640px) calc(100vw - 40px), 420px")} alt="${escHtml(album.title)}" width="720" height="480" loading="lazy" decoding="async">
           <span class="public-album-count">${photos.length} ảnh</span>
         </button>
         <div class="public-album-body">

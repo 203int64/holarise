@@ -1359,23 +1359,19 @@ html.has-motion .scrub-word {
   position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  min-height: min(78svh, 690px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   background: var(--obsidian);
   box-shadow: 0 24px 60px rgba(11, 17, 15, 0.14);
   will-change: transform;
 }
 
+.hero-card-picture {
+  display: block;
+}
+
 .hero-card-img {
-  position: absolute;
-  inset: -6% 0;
+  display: block;
   width: 100%;
-  height: 112%;
-  object-fit: cover;
-  object-position: center 35%;
-  will-change: transform;
+  height: auto;
 }
 
 .hero-card-scrim {
@@ -1383,39 +1379,25 @@ html.has-motion .scrub-word {
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(10, 20, 16, 0.34) 0%,
-    rgba(10, 20, 16, 0.14) 36%,
-    rgba(10, 20, 16, 0.72) 74%,
-    rgba(10, 20, 16, 0.92) 100%
+    transparent 44%,
+    rgba(10, 20, 16, 0.42) 67%,
+    rgba(10, 20, 16, 0.93) 100%
   );
   pointer-events: none;
 }
 
-.hero-card-top {
-  position: relative;
-  z-index: 2;
-  padding: 24px 28px 0;
-}
-
-.hero-glass-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 14px;
-  border-radius: 999px;
-  background: rgba(14, 24, 19, 0.56);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: rgba(255, 255, 255, 0.94);
+.hero-location {
+  display: block;
+  margin-bottom: 8px;
+  color: #c2ead3;
   font-size: 0.76rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  will-change: transform;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .hero-card-bottom {
-  position: relative;
+  position: absolute;
+  inset: auto 0 0;
   z-index: 2;
   padding: 36px 36px 34px;
   display: flex;
@@ -1427,7 +1409,23 @@ html.has-motion .scrub-word {
 }
 
 .hero-card-copy {
+  flex: 1 1 460px;
   max-width: 680px;
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .hero-card-scrim {
+    display: none;
+  }
+
+  .hero-card-bottom {
+    position: relative;
+  }
+
+  .hero-card-copy {
+    flex-basis: auto;
+  }
 }
 
 .hero-display-title {
@@ -1438,6 +1436,12 @@ html.has-motion .scrub-word {
   letter-spacing: -0.035em;
   color: #ffffff;
   text-wrap: balance;
+}
+
+@media (min-width: 641px) {
+  .hero-display-title .split-line-mask + .split-line-mask .split-line-inner::first-letter {
+    text-transform: uppercase;
+  }
 }
 
 .hero-display-title .accent-word {
@@ -4071,12 +4075,7 @@ dialog.club-dialog[open]:where(:not([data-closing]))::backdrop {
   }
 
   .hero-card {
-    min-height: min(74svh, 580px);
     border-radius: var(--radius-lg);
-  }
-
-  .hero-card-top {
-    padding: 16px 16px 0;
   }
 
   .hero-card-bottom {
@@ -4170,6 +4169,34 @@ dialog.club-dialog[open]:where(:not([data-closing]))::backdrop {
   .filter-btn {
     padding: 0 0 10px;
     font-size: 0.86rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-card-img {
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+  }
+
+  .hero-card-scrim {
+    display: block;
+    background: linear-gradient(to bottom, transparent 58%, rgba(11, 17, 15, 0.68) 100%);
+  }
+
+  .hero-card-bottom {
+    position: absolute;
+    padding: 0 clamp(20px, 6vw, 36px) clamp(24px, 7vw, 44px);
+  }
+
+  .hero-display-title {
+    margin: 0;
+    font-size: clamp(1.55rem, 7.2vw, 2.5rem);
+  }
+
+  .hero-location,
+  .hero-display-lead,
+  .hero-card-actions {
+    display: none;
   }
 }
 
