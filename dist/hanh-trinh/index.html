@@ -47,7 +47,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1e7f7b2451">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1c1c73ae46">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -638,6 +638,7 @@
       </div>
 
       <form class="auth-form" id="feedback-form" novalidate>
+        <input class="visually-hidden" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <fieldset class="auth-fieldset">
           <legend class="auth-label">Bạn muốn gửi nội dung gì?</legend>
           <div class="feedback-kind-grid" role="radiogroup">
@@ -662,7 +663,34 @@
 
         <div class="auth-field">
           <label for="fb-note">Chia sẻ chi tiết của bạn <span aria-hidden="true">*</span></label>
-          <textarea id="fb-note" name="note" rows="4" minlength="8" maxlength="1000" required placeholder="Mô tả ý tưởng, cảm nhận hoặc lỗi bạn gặp phải (nếu là lỗi, hãy cho biết trang bạn đang mở)..."></textarea>
+          <textarea id="fb-note" name="note" rows="4" minlength="8" maxlength="1000" required placeholder="Mô tả ý tưởng, cảm nhận hoặc lỗi bạn gặp phải..."></textarea>
+        </div>
+
+        <div class="fb-shot-box" id="fb-shot-box">
+          <div class="fb-shot-head">
+            <span class="fb-shot-label">Ảnh màn hình đính kèm <span class="auth-hint-inline">(tùy chọn)</span></span>
+            <span class="fb-shot-state" id="fb-shot-state" aria-live="polite"></span>
+          </div>
+          <div class="fb-shot-preview" id="fb-shot-preview" hidden>
+            <img id="fb-shot-img" alt="Ảnh màn hình trang đang xem">
+          </div>
+          <div class="fb-shot-actions">
+            <button type="button" class="fb-shot-btn" id="fb-capture-btn">Chụp màn hình này</button>
+            <label class="fb-shot-btn" for="fb-file-input">Chọn ảnh từ máy</label>
+            <input class="visually-hidden" type="file" id="fb-file-input" accept="image/jpeg,image/png,image/webp">
+            <button type="button" class="fb-shot-btn fb-shot-btn--danger" id="fb-shot-clear" hidden>Gỡ ảnh</button>
+          </div>
+          <p class="fb-shot-hint">Hệ thống tự che ô nhập liệu cá nhân trước khi chụp. Bạn cũng có thể dán ảnh (Ctrl+V). Ảnh chỉ Ban Điều Phối xem được và tự xóa sau 30 ngày.</p>
+        </div>
+
+        <details class="fb-diag-details" id="fb-diag-details">
+          <summary>Ngữ cảnh kỹ thuật tự động đọc</summary>
+          <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
+        </details>
+
+        <div class="fb-shake-row" id="fb-shake-row" hidden>
+          <span class="fb-shake-text" id="fb-shake-text">Lắc điện thoại để tự đọc màn hình và báo lỗi nhanh</span>
+          <button type="button" class="fb-shot-btn" id="fb-shake-toggle">Bật lắc máy</button>
         </div>
 
         <div class="auth-row-2">
@@ -716,10 +744,10 @@
     </svg>
   </button>
 
-  <script src="/assets/vendor/gsap.min.js?v=1e7f7b2451" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=1e7f7b2451" defer></script>
-  <script src="/assets/js/motion.js?v=1e7f7b2451" defer></script>
-  <script src="/assets/js/main.js?v=1e7f7b2451" defer></script>
-  <script src="/assets/js/join-pass.js?v=1e7f7b2451" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=1c1c73ae46" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=1c1c73ae46" defer></script>
+  <script src="/assets/js/motion.js?v=1c1c73ae46" defer></script>
+  <script src="/assets/js/main.js?v=1c1c73ae46" defer></script>
+  <script src="/assets/js/join-pass.js?v=1c1c73ae46" defer></script>
 </body>
 </html>

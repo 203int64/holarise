@@ -197,3 +197,114 @@ test("Public proxy /api/media/drive/:id validates IDs, sets immutable CDN cache 
     globalThis.fetch = prevFetch;
   }
 });
+
+import { DatabaseSync } from "node:sqlite";
+import fs from "node:fs";
+import { onRequestPost as mediaGatePost } from "../functions/api/auth/media-gate.js";
+import { onRequestPost as passkeyLoginOptionsPost } from "../functions/api/auth/passkey/login-options.js";
+
+function createMockD1() {
+  const sqlite = new DatabaseSync(":memory:");
+  sqlite.exec(fs.readFileSync(new URL("../migrations/0001_init.sql", import.meta.url), "utf8"));
+  sqlite.exec(fs.readFileSync(new URL("../migrations/0003_media_portal.sql", import.meta.url), "utf8"));
+  return {
+    prepare(sql) {
+      const stmt = sqlite.prepare(sql);
+      return {
+        _params: [],
+        bind(...args) {
+          this._params = args;
+          return this;
+        },
+        async first() {
+          return stmt.get(...this._params) ?? null;
+        },
+        async all() {
+          return { results: stmt.all(...this._params) };
+        },
+        async run() {
+          const info = stmt.run(...this._params);
+          return { success: true, meta: { changes: info.changes } };
+        },
+      };
+    },
+  };
+}
+
+test("Media Gate enforces secret PIN, verified uploader profile, and WebAuthn passkey login challenge", async () => {
+  const db = createMockD1();
+  const env = { DB: db, MEDIA_ACCESS_PIN: "9999" };
+
+  // 1. Wrong PIN rejected with 401
+  const badPinRes = await mediaGatePost({
+    request: new Request("https://holarise.org/api/auth/media-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({
+        pin: "0000",
+        fullName: "Nguyễn Minh Anh",
+        phone: "0912345678",
+        department: "Ban Hình Ảnh",
+        email: "anh@holarise.org",
+      }),
+    }),
+    env,
+  });
+  assert.equal(badPinRes.status, 401);
+
+  // 2. Incomplete profile rejected with 400
+  const badProfileRes = await mediaGatePost({
+    request: new Request("https://holarise.org/api/auth/media-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({
+        pin: "9999",
+        fullName: "Anh",
+        phone: "123",
+        department: "",
+        email: "not-an-email",
+      }),
+    }),
+    env,
+  });
+  assert.equal(badProfileRes.status, 400);
+
+  // 3. Valid PIN + verified profile creates media user, returns Set-Cookie & prompts Passkey setup
+  const okRes = await mediaGatePost({
+    request: new Request("https://holarise.org/api/auth/media-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({
+        pin: "9999",
+        fullName: "Nguyễn Minh Anh",
+        phone: "0912345678",
+        department: "Ban Hình Ảnh",
+        email: "anh@holarise.org",
+      }),
+    }),
+    env,
+  });
+  assert.equal(okRes.status, 200);
+  const okData = await okRes.json();
+  assert.equal(okData.ok, true);
+  assert.equal(okData.user.name, "Nguyễn Minh Anh");
+  assert.equal(okData.user.phone, "0912345678");
+  assert.equal(okData.user.department, "Ban Hình Ảnh");
+  assert.equal(okData.user.role, "media");
+  assert.equal(okData.requiresPasskeySetup, true);
+  assert.match(okRes.headers.get("Set-Cookie") || "", /holarise_session=/);
+
+  // 4. Passkey login options returns challenge + rpId
+  const optRes = await passkeyLoginOptionsPost({
+    request: new Request("https://holarise.org/api/auth/passkey/login-options", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({ email: "anh@holarise.org" }),
+    }),
+    env,
+  });
+  assert.equal(optRes.status, 200);
+  const optData = await optRes.json();
+  assert.equal(optData.options.rpId, "holarise.org");
+  assert.ok(optData.options.challenge.length >= 32);
+});

@@ -354,66 +354,6 @@
     });
   }
 
-  function initFeedbackModal() {
-    const dialog = $("#feedback-modal");
-    if (!dialog) return;
-
-    document.addEventListener("click", (e) => {
-      const trigger = e.target.closest("[data-open-feedback-modal]");
-      if (!trigger) return;
-      const st = $("#fb-status");
-      setStatus(st, "");
-      if (state.member) {
-        if ($("#fb-name") && !$("#fb-name").value) $("#fb-name").value = state.member.name || "";
-        if ($("#fb-contact") && !$("#fb-contact").value) {
-          $("#fb-contact").value = state.member.phone || state.member.email || "";
-        }
-      }
-      if (typeof dialog.showModal === "function") dialog.showModal();
-    });
-
-    $("#feedback-form")?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const form = e.currentTarget;
-      const btn = $("#fb-submit-btn");
-      const st = $("#fb-status");
-      setStatus(st, "");
-
-      const checkedKind = form.querySelector('input[name="feedbackKind"]:checked');
-      const kind = checkedKind ? checkedKind.value : "Góp ý cộng đồng";
-      const note = ($("#fb-note")?.value || "").trim();
-      if (note.length < 8) {
-        setStatus(st, "Vui lòng chia sẻ ít nhất 8 ký tự để Ban Điều Phối nắm rõ ý của bạn.", "error");
-        $("#fb-note")?.focus();
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = "Đang gửi đóng góp...";
-      try {
-        await api("/api/registrations", {
-          method: "POST",
-          body: {
-            source: "feedback",
-            activity: `Đóng góp · ${kind}`,
-            role: kind,
-            fullName: ($("#fb-name")?.value || "").trim() || "Thành viên đóng góp",
-            phone: ($("#fb-contact")?.value || "").trim(),
-            organization: window.location.pathname || "/",
-            note,
-          },
-        });
-        form.reset();
-        setStatus(st, "Cảm ơn bạn thật nhiều! Đóng góp của bạn đã được chuyển tới Ban Điều Phối HolaRise.", "success");
-      } catch (err) {
-        setStatus(st, err.message, "error");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Gửi đóng góp tới Ban Điều Phối";
-      }
-    });
-  }
-
   function initUnifiedAuthForms() {
     // Keep Google OAuth returnTo synced to current page
     $$("[data-google-auth-link]").forEach((a) => {
@@ -1538,7 +1478,6 @@
 
   async function boot() {
     initPasswordToggles();
-    initFeedbackModal();
     initUnifiedAuthForms();
     initPasskeyAuth();
     initMemberAuthModal();

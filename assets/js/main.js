@@ -1379,4 +1379,531 @@
       textarea.focus();
     }
   });
+
+  /* -----------------------------------------------------------------------
+   * Feedback Modal, Auto Screen Diagnostics, Lazy Viewport Capture & Shake
+   * ----------------------------------------------------------------------- */
+  (function initFeedbackAndShakeReport() {
+    var dialog = document.getElementById("feedback-modal");
+    var form = document.getElementById("feedback-form");
+    if (!dialog || !form) return;
+
+    var noteEl = document.getElementById("fb-note");
+    var nameEl = document.getElementById("fb-name");
+    var contactEl = document.getElementById("fb-contact");
+    var statusEl = document.getElementById("fb-status");
+    var submitBtn = document.getElementById("fb-submit-btn");
+    var shotStateEl = document.getElementById("fb-shot-state");
+    var shotPreviewEl = document.getElementById("fb-shot-preview");
+    var shotImgEl = document.getElementById("fb-shot-img");
+    var captureBtn = document.getElementById("fb-capture-btn");
+    var fileInputEl = document.getElementById("fb-file-input");
+    var clearBtn = document.getElementById("fb-shot-clear");
+    var diagPreviewEl = document.getElementById("fb-diag-preview");
+    var shakeRowEl = document.getElementById("fb-shake-row");
+    var shakeTextEl = document.getElementById("fb-shake-text");
+    var shakeToggleBtn = document.getElementById("fb-shake-toggle");
+
+    var recentErrors = [];
+    var currentShotDataUrl = "";
+    var currentDiagnostics = "";
+    var modernScreenshotPromise = null;
+    var captureInFlight = false;
+    var SHAKE_OFF_KEY = "holarise_shake_off";
+
+    function pushRuntimeError(msg) {
+      var clean = String(msg || "").replace(/\s+/g, " ").trim().slice(0, 140);
+      if (!clean) return;
+      recentErrors.push(clean);
+      if (recentErrors.length > 5) recentErrors.shift();
+    }
+
+    window.addEventListener("error", function (ev) {
+      var loc = ev && ev.filename ? " (" + ev.filename.split("/").pop() + ":" + (ev.lineno || 0) + ")" : "";
+      pushRuntimeError((ev && ev.message ? ev.message : "Script error") + loc);
+    });
+
+    window.addEventListener("unhandledrejection", function (ev) {
+      var reason = ev && ev.reason;
+      var msg = reason && reason.message ? reason.message : String(reason || "Unhandled promise rejection");
+      pushRuntimeError("Promise: " + msg);
+    });
+
+    function detectClientEnv() {
+      var ua = navigator.userAgent || "";
+      var browser = "Browser";
+      if (/Zalo/i.test(ua)) browser = "Zalo WebView";
+      else if (/FBAN|FBAV|Messenger/i.test(ua)) browser = "Messenger/FB WebView";
+      else if (/Edg/i.test(ua)) browser = "Edge";
+      else if (/Chrome|CriOS/i.test(ua)) browser = "Chrome";
+      else if (/Safari/i.test(ua)) browser = "Safari";
+      else if (/Firefox|FxiOS/i.test(ua)) browser = "Firefox";
+
+      var os = "Desktop";
+      if (/iPhone|iPad|iPod/i.test(ua)) os = "iOS";
+      else if (/Android/i.test(ua)) os = "Android";
+      return browser + " / " + os;
+    }
+
+    function findVisibleSectionTitle() {
+      var headings = document.querySelectorAll("main h1, main h2, section h2");
+      var best = "";
+      var bestDist = Infinity;
+      for (var i = 0; i < headings.length; i += 1) {
+        var rect = headings[i].getBoundingClientRect();
+        if (rect.height === 0) continue;
+        var dist = Math.abs(rect.top - 96);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = (headings[i].textContent || "").replace(/\s+/g, " ").trim().slice(0, 80);
+        }
+      }
+      return best;
+    }
+
+    function collectDiagnosticsText() {
+      var docH = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      var scrollPct = Math.min(100, Math.max(0, Math.round((window.scrollY / docH) * 100)));
+      var lines = [
+        "Trang: " + (window.location.pathname || "/") + (window.location.search || ""),
+        "Khung hình: " + window.innerWidth + "x" + window.innerHeight + " (cuộn " + scrollPct + "%)",
+        "Môi trường: " + detectClientEnv(),
+      ];
+      var sec = findVisibleSectionTitle();
+      if (sec) lines.push("Vùng đang xem: " + sec);
+      if (recentErrors.length > 0) {
+        lines.push("Lỗi JS gần nhất: " + recentErrors.join(" | "));
+      } else {
+        lines.push("Lỗi JS gần nhất: Không ghi nhận");
+      }
+      return lines.join("\n").slice(0, 880);
+    }
+
+    function setFeedbackStatus(msg, type) {
+      if (!statusEl) return;
+      statusEl.textContent = msg || "";
+      statusEl.className = "form-status" + (type ? " is-" + type : "");
+    }
+
+    function setScreenshotPreview(dataUrl, label) {
+      currentShotDataUrl = dataUrl || "";
+      if (shotImgEl && shotPreviewEl && clearBtn) {
+        if (currentShotDataUrl) {
+          shotImgEl.src = currentShotDataUrl;
+          shotPreviewEl.hidden = false;
+          clearBtn.hidden = false;
+        } else {
+          shotImgEl.removeAttribute("src");
+          shotPreviewEl.hidden = true;
+          clearBtn.hidden = true;
+        }
+      }
+      if (shotStateEl) {
+        shotStateEl.textContent = label || "";
+      }
+    }
+
+    function loadModernScreenshot() {
+      if (window.modernScreenshot && typeof window.modernScreenshot.domToCanvas === "function") {
+        return Promise.resolve(window.modernScreenshot);
+      }
+      if (modernScreenshotPromise) return modernScreenshotPromise;
+      modernScreenshotPromise = new Promise(function (resolve, reject) {
+        var s = document.createElement("script");
+        s.src = "/assets/vendor/modern-screenshot.min.js";
+        s.async = true;
+        s.onload = function () {
+          if (window.modernScreenshot && typeof window.modernScreenshot.domToCanvas === "function") {
+            resolve(window.modernScreenshot);
+          } else {
+            reject(new Error("modernScreenshot unavailable"));
+          }
+        };
+        s.onerror = function () {
+          modernScreenshotPromise = null;
+          reject(new Error("Failed to load screenshot library"));
+        };
+        document.head.appendChild(s);
+      });
+      return modernScreenshotPromise;
+    }
+
+    function resizeCanvasToJpeg(sourceCanvas, maxWidth, quality) {
+      var w = sourceCanvas.width || 1;
+      var h = sourceCanvas.height || 1;
+      var ratio = w > maxWidth ? maxWidth / w : 1;
+      var out = document.createElement("canvas");
+      out.width = Math.max(1, Math.round(w * ratio));
+      out.height = Math.max(1, Math.round(h * ratio));
+      var ctx = out.getContext("2d");
+      if (!ctx) return "";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, out.width, out.height);
+      ctx.drawImage(sourceCanvas, 0, 0, out.width, out.height);
+      return out.toDataURL("image/jpeg", quality || 0.72);
+    }
+
+    function compressImageBlob(blob) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onerror = function () { reject(new Error("Không đọc được tệp ảnh.")); };
+        reader.onload = function () {
+          var img = new Image();
+          img.onerror = function () { reject(new Error("Tệp không phải ảnh hợp lệ.")); };
+          img.onload = function () {
+            var maxW = 960;
+            var ratio = img.width > maxW ? maxW / img.width : 1;
+            var canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(img.width * ratio));
+            canvas.height = Math.max(1, Math.round(img.height * ratio));
+            var ctx = canvas.getContext("2d");
+            if (!ctx) {
+              reject(new Error("Trình duyệt không hỗ trợ xử lý ảnh."));
+              return;
+            }
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            var dataUrl = canvas.toDataURL("image/jpeg", 0.74);
+            if (dataUrl.length > 700000) {
+              dataUrl = canvas.toDataURL("image/jpeg", 0.52);
+            }
+            resolve(dataUrl);
+          };
+          img.src = String(reader.result || "");
+        };
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function captureViewportScreenshot() {
+      if (captureInFlight) return Promise.resolve();
+      captureInFlight = true;
+      if (shotStateEl) shotStateEl.textContent = "Đang đọc khung hình...";
+
+      var vw = Math.max(320, window.innerWidth || 390);
+      var vh = Math.max(320, window.innerHeight || 720);
+      var sx = window.scrollX || window.pageXOffset || 0;
+      var sy = window.scrollY || window.pageYOffset || 0;
+
+      // Temporarily mask sensitive text inputs outside feedback modal before DOM capture
+      var maskedNodes = [];
+      var inputs = document.querySelectorAll("input, textarea");
+      for (var i = 0; i < inputs.length; i += 1) {
+        var el = inputs[i];
+        if (dialog.contains(el)) continue;
+        if (el.type === "hidden" || el.type === "checkbox" || el.type === "radio") continue;
+        if (el.value) {
+          maskedNodes.push({ el: el, color: el.style.color, shadow: el.style.textShadow });
+          el.style.color = "transparent";
+          el.style.textShadow = "0 0 6px rgba(15,23,20,0.45)";
+        }
+      }
+
+      function restoreMasked() {
+        for (var j = 0; j < maskedNodes.length; j += 1) {
+          maskedNodes[j].el.style.color = maskedNodes[j].color;
+          maskedNodes[j].el.style.textShadow = maskedNodes[j].shadow;
+        }
+      }
+
+      var timeoutPromise = new Promise(function (_, reject) {
+        setTimeout(function () { reject(new Error("capture_timeout")); }, 2800);
+      });
+
+      return Promise.race([
+        loadModernScreenshot().then(function (lib) {
+          return lib.domToCanvas(document.body, {
+            width: vw,
+            height: vh,
+            scale: Math.min(window.devicePixelRatio || 1, 1.25),
+            backgroundColor: "#ffffff",
+            style: {
+              transform: "translate(" + (-sx) + "px, " + (-sy) + "px)",
+              transformOrigin: "top left",
+              width: document.documentElement.scrollWidth + "px",
+              height: document.documentElement.scrollHeight + "px",
+            },
+            filter: function (node) {
+              if (!node || node.nodeType !== 1) return true;
+              if (node.id === "feedback-modal" || node.id === "orbital-top-btn") return false;
+              if (node.tagName === "DIALOG" && node.hasAttribute("open")) return false;
+              return true;
+            },
+          });
+        }),
+        timeoutPromise,
+      ])
+        .then(function (canvas) {
+          restoreMasked();
+          var dataUrl = resizeCanvasToJpeg(canvas, 960, 0.72);
+          if (dataUrl && dataUrl.length <= 700000) {
+            var kb = Math.max(1, Math.round((dataUrl.length * 0.75) / 1024));
+            setScreenshotPreview(dataUrl, "Đã chụp (~" + kb + " KB)");
+          } else {
+            setScreenshotPreview("", "Ảnh quá lớn, hãy chọn ảnh từ máy.");
+          }
+        })
+        .catch(function () {
+          restoreMasked();
+          if (shotStateEl) {
+            shotStateEl.textContent = "Chưa tự chụp được, bạn có thể chọn hoặc dán ảnh.";
+          }
+        })
+        .finally(function () {
+          captureInFlight = false;
+        });
+    }
+
+    function openFeedbackDialog(opts) {
+      var options = opts || {};
+      setFeedbackStatus("", "");
+      currentDiagnostics = collectDiagnosticsText();
+      if (diagPreviewEl) diagPreviewEl.textContent = currentDiagnostics;
+
+      if (options.bugMode) {
+        var bugRadio = form.querySelector('input[name="feedbackKind"][value="Báo lỗi kỹ thuật"]');
+        if (bugRadio) bugRadio.checked = true;
+      }
+
+      if (typeof dialog.showModal === "function" && !dialog.open) {
+        dialog.showModal();
+      }
+      if (options.autoCapture) {
+        captureViewportScreenshot();
+      }
+    }
+
+    document.addEventListener("click", function (e) {
+      var trigger = e.target.closest("[data-open-feedback-modal]");
+      if (!trigger) return;
+      openFeedbackDialog({ bugMode: false, autoCapture: false });
+    });
+
+    if (captureBtn) {
+      captureBtn.addEventListener("click", function () {
+        captureViewportScreenshot();
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", function () {
+        setScreenshotPreview("", "");
+        if (fileInputEl) fileInputEl.value = "";
+      });
+    }
+
+    if (fileInputEl) {
+      fileInputEl.addEventListener("change", function () {
+        var file = fileInputEl.files && fileInputEl.files[0];
+        if (!file) return;
+        if (shotStateEl) shotStateEl.textContent = "Đang nén ảnh...";
+        compressImageBlob(file)
+          .then(function (dataUrl) {
+            var kb = Math.max(1, Math.round((dataUrl.length * 0.75) / 1024));
+            setScreenshotPreview(dataUrl, "Đã chọn ảnh (~" + kb + " KB)");
+          })
+          .catch(function (err) {
+            setScreenshotPreview("", err.message || "Không thể đọc ảnh này.");
+          });
+      });
+    }
+
+    document.addEventListener("paste", function (e) {
+      if (!dialog.open) return;
+      var items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      for (var i = 0; i < items.length; i += 1) {
+        if (items[i].type && items[i].type.indexOf("image/") === 0) {
+          var blob = items[i].getAsFile();
+          if (!blob) return;
+          e.preventDefault();
+          if (shotStateEl) shotStateEl.textContent = "Đang xử lý ảnh vừa dán...";
+          compressImageBlob(blob)
+            .then(function (dataUrl) {
+              var kb = Math.max(1, Math.round((dataUrl.length * 0.75) / 1024));
+              setScreenshotPreview(dataUrl, "Đã dán ảnh (~" + kb + " KB)");
+            })
+            .catch(function (err) {
+              setScreenshotPreview("", err.message || "Không thể dán ảnh này.");
+            });
+          return;
+        }
+      }
+    });
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      setFeedbackStatus("", "");
+
+      var checkedKind = form.querySelector('input[name="feedbackKind"]:checked');
+      var kind = checkedKind ? checkedKind.value : "Góp ý cộng đồng";
+      var note = (noteEl && noteEl.value ? noteEl.value : "").trim();
+      if (note.length < 8) {
+        setFeedbackStatus("Vui lòng chia sẻ ít nhất 8 ký tự để Ban Điều Phối nắm rõ ý của bạn.", "error");
+        if (noteEl) noteEl.focus();
+        return;
+      }
+
+      var hp = form.querySelector('input[name="website"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Đang gửi đóng góp...";
+      }
+      try {
+        var res = await fetch("/api/registrations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            source: "feedback",
+            website: hp ? hp.value : "",
+            activity: "Đóng góp · " + kind,
+            role: kind,
+            fullName: (nameEl && nameEl.value ? nameEl.value : "").trim() || "Thành viên đóng góp",
+            phone: (contactEl && contactEl.value ? contactEl.value : "").trim(),
+            organization: window.location.pathname || "/",
+            note: note,
+            diagnostics: currentDiagnostics || collectDiagnosticsText(),
+            screenshotDataUrl: currentShotDataUrl || "",
+          }),
+        });
+        var data = await res.json().catch(function () { return {}; });
+        if (!res.ok || data.ok === false) {
+          throw new Error(data.message || "Chưa gửi được đóng góp lúc này. Vui lòng thử lại.");
+        }
+        form.reset();
+        setScreenshotPreview("", "");
+        setFeedbackStatus(
+          "Cảm ơn bạn đã gửi phản hồi. Ban Điều Phối HolaRise đã tiếp nhận đầy đủ thông tin.",
+          "success"
+        );
+      } catch (err) {
+        setFeedbackStatus(err && err.message ? err.message : "Đã có lỗi xảy ra khi gửi.", "error");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Gửi đóng góp tới Ban Điều Phối";
+        }
+      }
+    });
+
+    // Shake-to-report detector (zero-lag 100ms throttle, 2-peak debounce, 30s cooldown)
+    var hasMotion = typeof window.DeviceMotionEvent !== "undefined";
+    var needsIosPermission = hasMotion && typeof window.DeviceMotionEvent.requestPermission === "function";
+    var shakeAttached = false;
+    var shakeEnabled = false;
+    var lastSampleTs = 0;
+    var lastAx = null;
+    var lastAy = null;
+    var lastAz = null;
+    var peakCount = 0;
+    var firstPeakTs = 0;
+    var lastTriggerTs = 0;
+
+    function onDeviceMotion(ev) {
+      if (!shakeEnabled || dialog.open) return;
+      var now = Date.now();
+      if (now - lastSampleTs < 100) return;
+      lastSampleTs = now;
+
+      if (now - lastTriggerTs < 30000) return;
+      var active = document.activeElement;
+      if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) return;
+      if (document.querySelector("dialog[open]")) return;
+
+      var acc = ev.accelerationIncludingGravity || ev.acceleration;
+      if (!acc || (acc.x == null && acc.y == null && acc.z == null)) return;
+      var ax = acc.x || 0;
+      var ay = acc.y || 0;
+      var az = acc.z || 0;
+
+      if (lastAx !== null) {
+        var delta = Math.abs(ax - lastAx) + Math.abs(ay - lastAy) + Math.abs(az - lastAz);
+        if (delta > 22) {
+          if (now - firstPeakTs > 900) {
+            peakCount = 1;
+            firstPeakTs = now;
+          } else {
+            peakCount += 1;
+          }
+          if (peakCount >= 2) {
+            peakCount = 0;
+            lastTriggerTs = now;
+            openFeedbackDialog({ bugMode: true, autoCapture: true });
+          }
+        }
+      }
+      lastAx = ax;
+      lastAy = ay;
+      lastAz = az;
+    }
+
+    function updateShakeUi() {
+      if (!shakeRowEl || !shakeToggleBtn || !shakeTextEl) return;
+      if (!hasMotion) {
+        shakeRowEl.hidden = true;
+        return;
+      }
+      shakeRowEl.hidden = false;
+      if (shakeEnabled) {
+        shakeTextEl.textContent = "Đang bật: lắc điện thoại để tự đọc màn hình và báo lỗi";
+        shakeToggleBtn.textContent = "Tắt lắc máy";
+      } else {
+        shakeTextEl.textContent = "Lắc điện thoại để tự đọc màn hình và báo lỗi nhanh";
+        shakeToggleBtn.textContent = "Bật lắc máy";
+      }
+    }
+
+    function enableShake() {
+      if (!shakeAttached) {
+        window.addEventListener("devicemotion", onDeviceMotion, { passive: true });
+        shakeAttached = true;
+      }
+      shakeEnabled = true;
+      try { localStorage.removeItem(SHAKE_OFF_KEY); } catch (_) {}
+      updateShakeUi();
+    }
+
+    function disableShake() {
+      shakeEnabled = false;
+      try { localStorage.setItem(SHAKE_OFF_KEY, "1"); } catch (_) {}
+      updateShakeUi();
+    }
+
+    if (hasMotion) {
+      var optedOut = false;
+      try { optedOut = localStorage.getItem(SHAKE_OFF_KEY) === "1"; } catch (_) {}
+      if (!needsIosPermission && !optedOut) {
+        enableShake();
+      } else {
+        updateShakeUi();
+      }
+    }
+
+    if (shakeToggleBtn) {
+      shakeToggleBtn.addEventListener("click", function () {
+        if (shakeEnabled) {
+          disableShake();
+          return;
+        }
+        if (needsIosPermission) {
+          window.DeviceMotionEvent.requestPermission()
+            .then(function (state) {
+              if (state === "granted") {
+                enableShake();
+              } else if (shakeTextEl) {
+                shakeTextEl.textContent = "Trình duyệt chưa cấp quyền cảm biến chuyển động.";
+              }
+            })
+            .catch(function () {
+              if (shakeTextEl) {
+                shakeTextEl.textContent = "Thiết bị này không hỗ trợ bật cảm biến lắc.";
+              }
+            });
+        } else {
+          enableShake();
+        }
+      });
+    }
+  })();
 })();

@@ -1121,6 +1121,28 @@
     });
 
     // Login form
+    $("#btn-admin-biometric-login")?.addEventListener("click", async () => {
+      const btn = $("#btn-admin-biometric-login");
+      const alertEl = $("#login-alert");
+      showAlert(alertEl, "");
+      if (!window.HolaPasskey?.isSupported?.()) {
+        showAlert(alertEl, "Thiết bị hoặc trình duyệt này chưa hỗ trợ sinh trắc học.");
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = "Đang xác thực sinh trắc học...";
+      try {
+        const res = await window.HolaPasskey.loginWithPasskey($("#login-email")?.value?.trim() || "");
+        toast(`Chào mừng trở lại, ${res.user.name}!`, "success");
+        enterAdminShell(res.user);
+      } catch (err) {
+        showAlert(alertEl, err.message || "Đăng nhập sinh trắc học thất bại.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Đăng nhập bằng Sinh trắc học (Face ID / Touch ID)";
+      }
+    });
+
     $("#login-form")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const form = e.currentTarget;
