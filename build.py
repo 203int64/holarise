@@ -2027,9 +2027,8 @@ def build_site() -> list:
                 "EVENT_VENUE_URL": esc(ws.get("venueUrl", "")),
                 "INVITE_VENUE_HTML": (
                     f'<a class="invite-venue-link" href="{esc(ws["venueUrl"])}" target="_blank" rel="noopener noreferrer">{esc(landing["venueName"].split("·")[0].strip())} ↗</a>'
-                    + (f' · {esc("·".join(landing["venueName"].split("·")[1:]).strip())}' if "·" in landing["venueName"] else "")
                     if ws.get("venueUrl")
-                    else esc(landing["venueName"])
+                    else esc(landing["venueName"].split("·")[0].strip())
                 ),
                 "LETTER_BODY_HTML": render_invitation_letter_body(landing),
                 "LETTER_SIGNOFF": esc(landing["letterSignoff"]),
