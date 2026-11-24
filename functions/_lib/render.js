@@ -3,9 +3,8 @@
  * Mirrors build.py markup pixel-for-pixel while preventing XSS via strict escaping.
  */
 
+import imageWidths from "../../data/image-widths.js";
 import { isSafeExternalHttpsUrl, isSafeMediaUrl } from "./validation.js";
-
-import imageWidths from "../../data/image-widths.json" with { type: "json" };
 
 export const SITE_URL = "https://holarise.org";
 export const BRAND_SHORT_NAME = "Cộng đồng HolaRise";

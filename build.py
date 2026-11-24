@@ -94,7 +94,9 @@ def esc(value) -> str:
 
 @lru_cache(maxsize=1)
 def image_widths() -> dict:
-    return load_json("image-widths.json")
+    # The same JSON-shaped data is imported as a JS module by Pages Functions.
+    module = (DATA_DIR / "image-widths.js").read_text(encoding="utf-8").strip()
+    return json.loads(module.removeprefix("export default ").removesuffix(";"))
 
 
 def image_variant(src: str, width: int) -> str:

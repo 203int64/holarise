@@ -1,4 +1,4 @@
-{
+export default {
   "/assets/images/activity-community.jpg": [640,1200],
   "/assets/images/activity-environment.jpg": [640,1200],
   "/assets/images/activity-workshop.jpg": [640,1024],
@@ -55,4 +55,4 @@
   "/assets/images/musicspace-archive/25-IMG_0305.jpg": [640,960,1600],
   "/assets/images/musicspace-archive/27-IMG_6670.jpg": [640,960,1600],
   "/assets/images/musicspace-archive/29-IMG_7858.jpg": [426]
-}
+};
