@@ -2,6 +2,7 @@ import {
   buildMemberSessionCookie,
   checkRateLimit,
   createMemberSession,
+  ensureMemberSchema,
   errorResponse,
   getClientIpHash,
   hashPassword,
@@ -51,6 +52,8 @@ export async function onRequestPost(context) {
       { "Retry-After": String(rl.retryAfterSec) }
     );
   }
+
+  await ensureMemberSchema(env.DB);
 
   const memberRow =
     idInfo.kind === "email"

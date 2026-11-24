@@ -505,61 +505,24 @@
       btn.addEventListener("click", () => switchJoinTab(btn.getAttribute("data-join-tab")));
     });
 
-    // Live Member Pass preview while filling #member-register-form
+    // Step 1 minimal 3-field register form on /tham-gia/
     const regForm = $("#member-register-form");
-    const previewPass = guestView.querySelector("[data-sunrise-pass]");
-    function syncRegPreview() {
-      if (!regForm || !previewPass) return;
-      const checkedPillar = regForm.querySelector('input[name="primaryPillar"]:checked');
-      const pillarKey = checkedPillar ? checkedPillar.value : "holaheart";
-      const meta = PILLAR_META[pillarKey] || PILLAR_META.holaheart;
-      const nameVal = ($("#m-reg-name")?.value || "").trim();
-      const orgVal = ($("#m-reg-org")?.value || "").trim();
-      const checkedEvent = regForm.querySelector('input[name="eventChoice"]:checked');
-      const evTitle = checkedEvent ? checkedEvent.getAttribute("data-event-title") || "" : "";
-
-      previewPass.setAttribute("data-pass-theme", meta.theme);
-      const badgeEl = previewPass.querySelector("[data-pass-badge]");
-      const nameEl = previewPass.querySelector("[data-pass-name]");
-      const orgEl = previewPass.querySelector("[data-pass-org]");
-      const greetEl = previewPass.querySelector("[data-pass-greeting]");
-      const evEl = previewPass.querySelector("[data-pass-event]");
-      if (badgeEl) badgeEl.textContent = meta.badge;
-      if (nameEl) nameEl.textContent = nameVal || "Tên của bạn";
-      if (orgEl) orgEl.textContent = orgVal || "Cộng đồng Hòa Lạc";
-      if (greetEl) greetEl.textContent = meta.greeting;
-      if (evEl) evEl.textContent = evTitle || "Nhịp tuần Hòa Lạc";
-    }
-
     if (regForm) {
-      syncRegPreview();
-      regForm.addEventListener("input", syncRegPreview);
-      regForm.addEventListener("change", syncRegPreview);
-
       regForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = $("#m-reg-submit-btn");
         const st = $("#m-reg-status");
         setStatus(st, "");
 
-        const checkedPillar = regForm.querySelector('input[name="primaryPillar"]:checked');
-        const checkedEvent = regForm.querySelector('input[name="eventChoice"]:checked');
         const body = {
-          name: $("#m-reg-name").value.trim(),
-          identifier: $("#m-reg-id").value.trim(),
-          password: $("#m-reg-pw").value,
-          organization: $("#m-reg-org").value.trim(),
-          primaryPillar: checkedPillar ? checkedPillar.value : "holaheart",
+          name: ($("#m-reg-name")?.value || "").trim(),
+          identifier: ($("#m-reg-id")?.value || "").trim(),
+          password: $("#m-reg-pw")?.value || "",
+          primaryPillar: "holaheart",
         };
-        if (checkedEvent && checkedEvent.value) {
-          body.autoRegisterEvent = {
-            eventId: checkedEvent.value,
-            activity: checkedEvent.getAttribute("data-event-title") || "Hoạt động HolaRise",
-          };
-        }
 
         btn.disabled = true;
-        btn.textContent = "Đang khởi tạo Thẻ...";
+        btn.textContent = "Đang tạo tài khoản...";
         try {
           const res = await api("/api/member/auth/register", { method: "POST", body });
           state.member = res.member;
@@ -569,10 +532,72 @@
           setStatus(st, err.message, "error");
         } finally {
           btn.disabled = false;
-          btn.textContent = "Tạo Thẻ Thành Viên Hola";
+          btn.textContent = "Tiếp tục";
         }
       });
     }
+
+    // Live-sync Member Pass preview while editing Step 2 profile form
+    const profForm = $("#member-profile-form");
+    if (profForm) {
+      const livePreview = () => {
+        if (!state.member) return;
+        const pKey = ($("#prof-pillar")?.value || state.member.primaryPillar || "holaheart");
+        const pillar = PILLAR_META[pKey] || PILLAR_META.holaheart;
+        const card = $("#member-live-pass");
+        if (card) card.setAttribute("data-pass-theme", pillar.theme);
+        if ($("#dash-pass-badge")) $("#dash-pass-badge").textContent = pillar.badge;
+        if ($("#dash-pass-pillar")) $("#dash-pass-pillar").textContent = pillar.label;
+        if ($("#dash-pass-name")) $("#dash-pass-name").textContent = ($("#prof-name")?.value || "").trim() || state.member.name;
+        if ($("#dash-pass-org")) $("#dash-pass-org").textContent = ($("#prof-org")?.value || "").trim() || "Cộng đồng Hòa Lạc";
+        if ($("#dash-pass-bio")) {
+          $("#dash-pass-bio").textContent =
+            ($("#prof-bio")?.value || "").trim() ||
+            "Cùng nhau kiến tạo những cuối tuần tử tế, sâu sắc và kết nối tại Hòa Lạc.";
+        }
+      };
+      profForm.addEventListener("input", livePreview);
+      profForm.addEventListener("change", livePreview);
+    }
+
+    // Step 2: 1-Tap booking for selected event inside dashboard
+    $("#btn-dash-book-event")?.addEventListener("click", async () => {
+      if (!state.member) return;
+      const box = $("#member-quick-events-box");
+      const checked = box?.querySelector('input[type="radio"][name="eventChoice"]:checked');
+      const st = $("#dash-event-book-status");
+      if (!checked) {
+        setStatus(st, "Vui lòng chọn một hoạt động ở trên trước khi bấm giữ chỗ.", "error");
+        return;
+      }
+      const btn = $("#btn-dash-book-event");
+      btn.disabled = true;
+      btn.textContent = "Đang giữ chỗ...";
+      setStatus(st, "");
+      try {
+        const title = checked.getAttribute("data-event-title") || "Hoạt động HolaRise";
+        await api("/api/registrations", {
+          method: "POST",
+          body: {
+            source: "event_modal",
+            eventId: checked.value,
+            activity: title,
+            fullName: state.member.name,
+            phone: state.member.phone || "",
+            email: state.member.email || "",
+            organization: state.member.organization || "",
+            note: `Đăng ký 1 chạm bằng Thẻ ${state.member.memberCode}`,
+          },
+        });
+        setStatus(st, `Đã giữ chỗ thành công cho “${title}”!`, "success");
+        refreshJoinDashboard();
+      } catch (err) {
+        setStatus(st, err.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Giữ chỗ 1 chạm cho hoạt động đã chọn";
+      }
+    });
 
     // Login form on /tham-gia/
     $("#member-login-form")?.addEventListener("submit", async (e) => {
@@ -709,6 +734,24 @@
     if ($("#prof-org")) $("#prof-org").value = m.organization || "";
     if ($("#prof-pillar")) $("#prof-pillar").value = m.primaryPillar || "holaheart";
     if ($("#prof-bio")) $("#prof-bio").value = m.bio || "";
+
+    // Update Step 2 Pass Completion Progress
+    let pct = 40;
+    const missing = [];
+    if (m.avatarUrl) pct += 20;
+    else missing.push("ảnh đại diện");
+    if (m.organization) pct += 20;
+    else missing.push("trường/đơn vị");
+    if (m.bio) pct += 20;
+    else missing.push("châm ngôn");
+    if ($("#dash-completion-pct")) $("#dash-completion-pct").textContent = `${pct}%`;
+    if ($("#dash-completion-fill")) $("#dash-completion-fill").style.width = `${pct}%`;
+    if ($("#dash-completion-hint")) {
+      $("#dash-completion-hint").textContent =
+        pct >= 100
+          ? "Thẻ Thành Viên của bạn đã hoàn thiện 100% — sẵn sàng tải PNG và check-in."
+          : `Bổ sung ${missing.join(", ")} để hoàn thiện 100% Thẻ Thành Viên.`;
+    }
   }
 
   async function refreshJoinDashboard() {

@@ -431,3 +431,76 @@ export function sniffImageMime(bytes) {
   }
   return null;
 }
+
+
+/**
+ * Self-healing schema guard: ensures v8 Member & Guestbook tables exist on D1
+ * even if migration 0006 has not been manually executed yet on production.
+ */
+let memberSchemaEnsured = false;
+export async function ensureMemberSchema(db) {
+  if (!db || memberSchemaEnsured) return;
+  try {
+    await db.prepare("SELECT 1 FROM members LIMIT 1").first();
+    memberSchemaEnsured = true;
+    return;
+  } catch (_missing) {
+    // Table does not exist yet — create idempotently
+  }
+  const stmts = [
+    `CREATE TABLE IF NOT EXISTS members (
+      id TEXT PRIMARY KEY,
+      member_code TEXT NOT NULL UNIQUE,
+      email TEXT UNIQUE,
+      phone_norm TEXT UNIQUE,
+      phone_display TEXT NOT NULL DEFAULT '',
+      name TEXT NOT NULL,
+      organization TEXT NOT NULL DEFAULT '',
+      pillar_choice TEXT NOT NULL DEFAULT 'holaheart' CHECK(pillar_choice IN ('holaheart','holagreen','holaconnect')),
+      avatar_url TEXT NOT NULL DEFAULT '',
+      avatar_media_key TEXT NOT NULL DEFAULT '',
+      bio TEXT NOT NULL DEFAULT '',
+      password_hash TEXT NOT NULL,
+      password_salt TEXT NOT NULL,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      last_login_at TEXT NOT NULL DEFAULT ''
+    )`,
+    `CREATE TABLE IF NOT EXISTS member_sessions (
+      token_hash TEXT PRIMARY KEY,
+      member_id TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS activity_reflections (
+      id TEXT PRIMARY KEY,
+      activity_slug TEXT NOT NULL,
+      member_id TEXT NOT NULL,
+      participant_role TEXT NOT NULL DEFAULT 'member' CHECK(participant_role IN ('member','volunteer','speaker')),
+      pull_quote TEXT NOT NULL DEFAULT '',
+      content TEXT NOT NULL,
+      photo_url TEXT NOT NULL DEFAULT '',
+      photo_media_key TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
+      hearts_count INTEGER NOT NULL DEFAULT 0,
+      admin_note TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      UNIQUE(activity_slug, member_id),
+      FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS reflection_hearts (
+      reflection_id TEXT NOT NULL,
+      actor_key TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      PRIMARY KEY (reflection_id, actor_key),
+      FOREIGN KEY (reflection_id) REFERENCES activity_reflections(id) ON DELETE CASCADE
+    )`,
+  ];
+  for (const sql of stmts) {
+    await db.prepare(sql).run().catch(() => {});
+  }
+  memberSchemaEnsured = true;
+}

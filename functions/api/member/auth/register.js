@@ -2,6 +2,7 @@ import {
   buildMemberSessionCookie,
   checkRateLimit,
   createMemberSession,
+  ensureMemberSchema,
   errorResponse,
   generateMemberCode,
   getClientIpHash,
@@ -48,6 +49,8 @@ export async function onRequestPost(context) {
 
   const v = validated.value;
   const idInfo = v.identifier;
+
+  await ensureMemberSchema(env.DB);
 
   // Check duplicate Email or Phone
   const existing =

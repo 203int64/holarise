@@ -1953,7 +1953,7 @@ a.quick-pill:hover {
   left: 22%;
   right: 22%;
   bottom: 4px;
-  border-bottom: 2px solid var(--sunrise);
+  border-bottom: 2px solid var(--pillar-accent);
   border-radius: 2px;
   pointer-events: none;
 }
@@ -1981,13 +1981,14 @@ a.quick-pill:hover {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--pillar-accent);
   font-variant-numeric: tabular-nums;
   margin-bottom: 8px;
 }
 
 .story-panel h3 {
   margin: 0 0 12px;
+  font-family: var(--font-serif);
   font-size: clamp(1.45rem, 2.3vw, 2.05rem);
   font-weight: 500;
   line-height: 1.22;
@@ -6390,14 +6391,15 @@ form.form-grid[hidden] {
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--pillar-accent);
   font-variant-numeric: tabular-nums;
 }
 
 .pillar-chapter-copy h3 {
   margin: 0 0 16px;
+  font-family: var(--font-serif);
   font-size: clamp(1.5rem, 2.3vw, 2rem);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: -0.025em;
   line-height: 1.24;
   color: var(--ink);
@@ -6447,7 +6449,7 @@ form.form-grid[hidden] {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--pillar-accent);
   flex-shrink: 0;
 }
 
@@ -6497,7 +6499,7 @@ form.form-grid[hidden] {
 }
 
 .pillar-photo:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--pillar-accent);
   outline-offset: 3px;
 }
 
@@ -6631,12 +6633,18 @@ form.form-grid[hidden] {
     line-height: 1;
   }
 
-  .pillar-chapter.is-mobile-open .mobile-fold-indicator,
   [data-mobile-fold].is-mobile-open .mobile-fold-indicator {
     transform: rotate(45deg);
     background: var(--accent-soft);
     border-color: var(--accent);
     color: var(--accent);
+  }
+
+  .pillar-chapter.is-mobile-open .mobile-fold-indicator {
+    transform: rotate(45deg);
+    background: var(--pillar-tint);
+    border-color: var(--pillar-accent);
+    color: var(--pillar-accent);
   }
 
   .pillar-chapter:not(.is-mobile-open) .pillar-chapter-fold,
@@ -7079,12 +7087,6 @@ form.form-grid[hidden] {
 .pillar-chapter[data-pillar] {
   border-top: 1.5px solid var(--pillar-border);
   padding-top: 32px;
-}
-
-.pillar-chapter[data-pillar="holaheart"] h3,
-.story-panel[data-pillar="holaheart"] h3 {
-  font-family: var(--font-serif);
-  font-weight: 500;
 }
 
 .filter-btn[data-pillar].is-active {
@@ -8268,4 +8270,48 @@ a:focus-visible,
   .auth-pillar-strip {
     grid-template-columns: 1fr;
   }
+}
+
+
+/* Centered Step 1 Auth Stage & Step 2 Member Pass Completion Meter */
+.auth-center-stage {
+  max-width: 448px;
+  margin: 0 auto;
+}
+.member-completion-bar {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+}
+.member-completion-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--ink-secondary);
+  margin-bottom: 8px;
+}
+.member-completion-top strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.member-completion-track {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--surface);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.member-completion-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--ink);
+  transition: width 0.35s var(--ease-expo);
+}
+.member-completion-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
 }
