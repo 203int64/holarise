@@ -442,10 +442,12 @@ export async function ensureMemberSchema(db) {
   if (!db || memberSchemaEnsured) return;
   try {
     await db.prepare("SELECT 1 FROM members LIMIT 1").first();
+    await db.prepare("SELECT 1 FROM member_passkeys LIMIT 1").first();
+    await db.prepare("SELECT 1 FROM passkey_challenges LIMIT 1").first();
     memberSchemaEnsured = true;
     return;
   } catch (_missing) {
-    // Table does not exist yet — create idempotently
+    // One or more tables do not exist yet — create all idempotently
   }
   const stmts = [
     `CREATE TABLE IF NOT EXISTS members (
