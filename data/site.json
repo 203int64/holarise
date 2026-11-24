@@ -12,7 +12,7 @@
     "language": "vi",
     "locale": "vi_VN",
     "ogImage": "/assets/images/holarise-binh-minh-og.jpg",
-    "ogImageAlt": "Nhóm HolaRise đi trên sườn đồi lúc bình minh, dưới dòng chữ Together We Rise, Together We Serve.",
+    "ogImageAlt": "Các bạn trẻ HolaRise cùng đón bình minh trên sườn đồi Hòa Lạc.",
     "logoLight": "/assets/images/logo-holarise.png",
     "logoDark": "/assets/images/logo-holarise.png",
     "logoMark": "/assets/images/logo-mark.png"
@@ -182,8 +182,8 @@
     }
   ],
   "seo": {
-    "defaultTitle": "HolaRise | Cộng đồng Thanh niên Hòa Lạc · Together We Rise, Together We Serve",
-    "defaultDescription": "HolaRise kết nối người trẻ tại Hòa Lạc qua 3 trụ cột: HolaHeart (nội lực & lắng nghe), HolaGreen (sinh thái cảnh quan) và HolaConnect (tri thức & phụng sự).",
+    "defaultTitle": "HolaRise | Cộng đồng người trẻ tại Hòa Lạc",
+    "defaultDescription": "Cộng đồng sinh viên & người trẻ Hòa Lạc cùng tổ chức buổi trò chuyện lắng nghe (HolaHeart), giữ sạch cảnh quan (HolaGreen) và dựng tủ sách cộng đồng (HolaConnect).",
     "keywords": "HolaRise, Hola Hòa Lạc, Cộng đồng Thanh niên Hòa Lạc, HolaHeart, HolaGreen, HolaConnect, tình nguyện sinh viên Hòa Lạc, workshop Hòa Lạc",
     "googleSiteVerification": "",
     "bingSiteVerification": "",

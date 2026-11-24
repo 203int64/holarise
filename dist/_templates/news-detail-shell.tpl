@@ -38,14 +38,13 @@
   <meta name="twitter:description" content="__SSR_PAGE_DESCRIPTION__">
   <meta name="twitter:image" content="__SSR_OG_IMAGE_URL__">
   <meta name="twitter:image:alt" content="__SSR_PAGE_TITLE__">
-  <meta name="twitter:image:alt" content="__SSR_PAGE_TITLE__">
 
   <!-- Vietnamese-native Editorial Typography: Be Vietnam Pro (UI/Display) + Lora (Manifesto/Quotes) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=c460998853">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=50d8804cfb">
   <script>
     (function () {
       try {
@@ -72,7 +71,7 @@
   "url": "https://holarise.org",
   "logo": "https://holarise.org/assets/images/logo-mark.png",
   "image": "https://holarise.org/assets/images/holarise-binh-minh-og.jpg",
-  "description": "HolaRise kết nối người trẻ tại Hòa Lạc qua 3 trụ cột: HolaHeart (nội lực & lắng nghe), HolaGreen (sinh thái cảnh quan) và HolaConnect (tri thức & phụng sự).",
+  "description": "Cộng đồng sinh viên & người trẻ Hòa Lạc cùng tổ chức buổi trò chuyện lắng nghe (HolaHeart), giữ sạch cảnh quan (HolaGreen) và dựng tủ sách cộng đồng (HolaConnect).",
   "email": "phungsu@holarise.org",
   "telephone": "077.777.1948",
   "areaServed": {
@@ -720,13 +719,13 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/i18n.js?v=c460998853" defer></script>
-  <script src="/assets/vendor/gsap.min.js?v=c460998853" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=c460998853" defer></script>
-  <script src="/assets/js/motion.js?v=c460998853" defer></script>
-  <script src="/assets/js/main.js?v=c460998853" defer></script>
-  <script src="/assets/js/join-pass.js?v=c460998853" defer></script>
-  <script src="/assets/js/member.js?v=c460998853" defer></script>
-  <script src="/assets/js/pwa.js?v=c460998853" defer></script>
+  <script src="/assets/js/i18n.js?v=50d8804cfb" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=50d8804cfb" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=50d8804cfb" defer></script>
+  <script src="/assets/js/motion.js?v=50d8804cfb" defer></script>
+  <script src="/assets/js/main.js?v=50d8804cfb" defer></script>
+  <script src="/assets/js/join-pass.js?v=50d8804cfb" defer></script>
+  <script src="/assets/js/member.js?v=50d8804cfb" defer></script>
+  <script src="/assets/js/pwa.js?v=50d8804cfb" defer></script>
 </body>
 </html>
