@@ -106,47 +106,35 @@
           <div class="form-grid" data-guest-identity-fields>
             <div class="form-row-2">
               <div class="field">
-                <label for="ws-name">Họ và tên <span aria-hidden="true">*</span></label>
-                <input id="ws-name" name="fullName" type="text" autocomplete="name" placeholder="Nguyễn Minh Khôi" required minlength="2" enterkeyhint="next" data-error="ws-name-error">
+                <label for="ws-name">Tên gọi của bạn <span aria-hidden="true">*</span></label>
+                <input id="ws-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Minh Khôi" required minlength="2" enterkeyhint="next" data-error="ws-name-error">
                 <div id="ws-name-error" class="field-error">
                   <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <span data-error-text>Lỗi: Vui lòng nhập họ và tên của bạn (tối thiểu 2 ký tự).</span>
+                  <span data-error-text>Vui lòng nhập tên gọi của bạn (tối thiểu 2 ký tự).</span>
                 </div>
               </div>
               <div class="field">
                 <label for="ws-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
-                <input id="ws-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="next" data-error="ws-phone-error">
+                <input id="ws-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="done" data-error="ws-phone-error">
                 <div id="ws-phone-error" class="field-error">
                   <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <span data-error-text>Lỗi: Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-row-2">
-              <div class="field">
-                <label for="ws-org">Trường / Đơn vị (không bắt buộc)</label>
-                <input id="ws-org" name="organization" type="text" autocomplete="organization" placeholder="ĐH FPT, ĐHQGHN, Đã đi làm..." enterkeyhint="next">
-              </div>
-              <div class="field">
-                <label for="ws-email">Email (không bắt buộc)</label>
-                <input id="ws-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" enterkeyhint="next" data-error="ws-email-error">
-                <div id="ws-email-error" class="field-error">
-                  <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <span data-error-text>Lỗi: Email chưa đúng định dạng (ví dụ: tenban@gmail.com), hoặc bạn có thể để trống.</span>
+                  <span data-error-text>Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="field invite-story-field">
-            <label for="ws-father-note">Đôi dòng về Cha bạn muốn gửi trước buổi tối (không bắt buộc)</label>
-            <textarea id="ws-father-note" name="note" rows="3" maxlength="750" placeholder="Một điều bạn luôn muốn nói với Cha, hoặc để trống nếu bạn chỉ muốn đến ngồi lắng nghe..."></textarea>
-            <div class="invite-check-inline">
-              <input type="checkbox" id="ws-anon-share" name="anonShare" value="yes" checked>
-              <label for="ws-anon-share">Cho phép Ban Điều Phối đọc ẩn danh chia sẻ này trong chương trình</label>
+          <details class="rsvp-optional-note">
+            <summary>+ Gửi đôi dòng tâm sự về Cha cho BTC (tùy chọn)</summary>
+            <div class="field invite-story-field" style="margin-top: 12px;">
+              <label for="ws-father-note" class="visually-hidden">Đôi dòng về Cha</label>
+              <textarea id="ws-father-note" name="note" rows="3" maxlength="750" placeholder="Một điều bạn luôn muốn nói với Cha, hoặc để trống nếu chỉ muốn đến ngồi lắng nghe..."></textarea>
+              <div class="invite-check-inline">
+                <input type="checkbox" id="ws-anon-share" name="anonShare" value="yes" checked>
+                <label for="ws-anon-share">Cho phép Ban Điều Phối đọc ẩn danh chia sẻ này trong chương trình</label>
+              </div>
             </div>
-          </div>
+          </details>
 
           <div class="form-status" role="status" aria-live="polite"></div>
 

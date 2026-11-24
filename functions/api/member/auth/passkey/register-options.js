@@ -13,7 +13,7 @@ export async function onRequestPost(context) {
   if (!verifyCsrfOrigin(request)) return errorResponse(403, "CSRF_BLOCKED", "Nguồn yêu cầu không hợp lệ.");
 
   const auth = await requireMember(context);
-  if (auth.error) return auth.error;
+  if (!auth.ok) return auth.response;
   const member = auth.member;
 
   await ensureMemberSchema(env.DB);

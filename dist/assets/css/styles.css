@@ -8419,3 +8419,22 @@ a:focus-visible,
   font-size: 0.84rem;
   color: var(--ink-secondary);
 }
+
+
+.rsvp-optional-note {
+  border-top: 1px dashed var(--line);
+  padding-top: 12px;
+}
+.rsvp-optional-note summary {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  list-style: none;
+}
+.rsvp-optional-note summary::-webkit-details-marker {
+  display: none;
+}
+.rsvp-optional-note summary:hover {
+  color: var(--ink);
+}

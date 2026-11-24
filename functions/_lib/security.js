@@ -440,14 +440,26 @@ export function sniffImageMime(bytes) {
 let memberSchemaEnsured = false;
 export async function ensureMemberSchema(db) {
   if (!db || memberSchemaEnsured) return;
+  let allGood = true;
   try {
-    await db.prepare("SELECT 1 FROM members LIMIT 1").first();
-    await db.prepare("SELECT 1 FROM member_passkeys LIMIT 1").first();
-    await db.prepare("SELECT 1 FROM passkey_challenges LIMIT 1").first();
+    await db.prepare("SELECT id FROM members LIMIT 1").first();
+    await db.prepare("SELECT id FROM member_sessions LIMIT 1").first();
+    await db.prepare("SELECT credential_id FROM member_passkeys LIMIT 1").first();
+    await db.prepare("SELECT challenge FROM passkey_challenges LIMIT 1").first();
+  } catch (_missing) {
+    allGood = false;
+  }
+  if (allGood) {
     memberSchemaEnsured = true;
     return;
-  } catch (_missing) {
-    // One or more tables do not exist yet — create all idempotently
+  }
+  // If member_sessions was created with wrong column name (token_hash instead of id), recreate it cleanly
+  try {
+    await db.prepare("SELECT id FROM member_sessions LIMIT 1").first();
+  } catch (err) {
+    if (String(err?.message || "").includes("no such column")) {
+      await db.prepare("DROP TABLE IF EXISTS member_sessions").run().catch(() => {});
+    }
   }
   const stmts = [
     `CREATE TABLE IF NOT EXISTS members (
@@ -470,7 +482,7 @@ export async function ensureMemberSchema(db) {
       last_login_at TEXT NOT NULL DEFAULT ''
     )`,
     `CREATE TABLE IF NOT EXISTS member_sessions (
-      token_hash TEXT PRIMARY KEY,
+      id TEXT PRIMARY KEY,
       member_id TEXT NOT NULL,
       expires_at TEXT NOT NULL,
       created_at TEXT NOT NULL,

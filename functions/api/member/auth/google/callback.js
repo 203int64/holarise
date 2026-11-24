@@ -27,7 +27,7 @@ function redirectWithError(origin, returnTo, code) {
  */
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
-  const cookies = parseCookies(request.headers.get("Cookie") || "");
+  const cookies = parseCookies(request);
   let stored = null;
   try {
     stored = cookies.holarise_oauth_state ? JSON.parse(decodeURIComponent(cookies.holarise_oauth_state)) : null;

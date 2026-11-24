@@ -11,7 +11,7 @@ export async function onRequestGet(context) {
   if (!env?.DB) return errorResponse(503, "DB_UNAVAILABLE", "Hệ thống đang bảo trì.");
 
   const auth = await requireMember(context);
-  if (auth.error) return auth.error;
+  if (!auth.ok) return auth.response;
 
   await ensureMemberSchema(env.DB);
   const res = await env.DB.prepare(
@@ -37,7 +37,7 @@ export async function onRequestDelete(context) {
   if (!verifyCsrfOrigin(request)) return errorResponse(403, "CSRF_BLOCKED", "Nguồn yêu cầu không hợp lệ.");
 
   const auth = await requireMember(context);
-  if (auth.error) return auth.error;
+  if (!auth.ok) return auth.response;
 
   const id = new URL(request.url).searchParams.get("id") || "";
   if (!id) return errorResponse(400, "MISSING_ID", "Thiếu mã Passkey cần gỡ.");
