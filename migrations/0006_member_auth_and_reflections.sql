@@ -201,3 +201,34 @@ CREATE TABLE IF NOT EXISTS reflection_hearts (
   PRIMARY KEY (reflection_id, actor_key),
   FOREIGN KEY (reflection_id) REFERENCES activity_reflections(id) ON DELETE CASCADE
 );
+
+
+-- 7. Seed 2nd upcoming schedule into D1 so both schedules appear live and can be edited in /admin/
+INSERT OR IGNORE INTO events (
+  id, kind, type, filters_json, date, date_display, time, location, fee, seats,
+  title, title_en, summary, summary_en, highlights_json, participants,
+  image, image_alt, status, sort_order, created_at, updated_at
+) VALUES (
+  'holaconnect-leo-nui-lam-nghiep-2026-11-26',
+  'upcoming',
+  'HolaConnect · Gắn kết & Thể chất',
+  '["holaconnect","tu-te","se-chia"]',
+  '2026-11-26',
+  'Thứ Năm, 26/11/2026',
+  '14:30 – 17:30',
+  'Núi Luốt – ĐH Lâm Nghiệp (Xuân Mai)',
+  'Miễn phí',
+  'Mở đăng ký · 25 chỗ',
+  'HolaConnect · Chiều Leo Núi & Kết Nối Giữa Rừng Thông',
+  'HolaConnect · Pine Hill Trek & Afternoon Circle',
+  'Tạm rời màn hình máy tính để cùng bạn bè người trẻ Hòa Lạc trekking cung đồi rừng thông Núi Luốt, hít thở không khí chiều thu và trò chuyện kết nối.',
+  'Step away from screens for a refreshing afternoon trek up Nui Luot pine hill and an open connection circle with fellow youth.',
+  '["Trekking nhẹ nhàng rừng thông Núi Luốt","Vòng tròn làm quen & sẻ chia trên đồi","Rèn luyện sức bền & gắn kết bạn đồng hành"]',
+  '',
+  '/assets/images/illustrations/holagreen/G03.jpg',
+  'Ảnh định hướng hoạt động dã ngoại và gắn kết thiên nhiên của người trẻ HolaRise.',
+  'published',
+  2,
+  '2026-11-24T00:00:00.000Z',
+  '2026-11-24T00:00:00.000Z'
+);

@@ -636,6 +636,7 @@
               <p class="item-excerpt">${esc(ev.summary || ev.participants || ev.location)}</p>
             </div>
             <div class="item-actions">
+              <button class="btn btn--ghost btn--sm" type="button" data-dup-event="${esc(ev.id)}">Nhân bản</button>
               <button class="btn btn--outline btn--sm" type="button" data-edit-event="${esc(ev.id)}">Sửa</button>
               <button class="btn btn--danger-ghost btn--sm" type="button" data-delete-event="${esc(ev.id)}">Xóa</button>
             </div>
@@ -1204,6 +1205,55 @@
       }
     });
 
+    // Event quick-fill presets (HolaHeart / HolaGreen / HolaConnect)
+    const EVENT_PRESETS = {
+      holaheart: {
+        type: "HolaHeart · Giá trị sống",
+        time: "19:15 – 21:15",
+        location: "Quán Cafe Mây Lang Thang, Hòa Lạc",
+        fee: "Miễn phí · Tự túc đồ uống",
+        seats: "Mở đăng ký · 30 chỗ",
+        image: "/assets/images/events/holaheart-2026-11-15/06-group-dialogue.jpg",
+        filters: ["biet-on", "tu-te"],
+      },
+      holagreen: {
+        type: "HolaGreen · Sinh thái",
+        time: "07:00 – 09:30",
+        location: "Hồ Tân Xã, Hòa Lạc",
+        fee: "Miễn phí",
+        seats: "Mở đăng ký · 25 chỗ",
+        image: "/assets/images/illustrations/holagreen/G03.jpg",
+        filters: ["sach"],
+      },
+      holaconnect: {
+        type: "HolaConnect · Phụng sự",
+        time: "14:30 – 17:30",
+        location: "Hòa Lạc – Xuân Mai",
+        fee: "Miễn phí",
+        seats: "Mở đăng ký · 25 chỗ",
+        image: "/assets/images/illustrations/holaconnect/C04.jpg",
+        filters: ["se-chia", "tu-te"],
+      },
+    };
+    $$("[data-ev-preset]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const p = EVENT_PRESETS[btn.getAttribute("data-ev-preset")];
+        if (!p) return;
+        $("#ev-type").value = p.type;
+        $("#ev-time").value = p.time;
+        $("#ev-location").value = p.location;
+        $("#ev-fee").value = p.fee;
+        $("#ev-seats").value = p.seats;
+        $("#ev-image").value = p.image;
+        $("#ev-image-preview").src = p.image;
+        const set = new Set(p.filters);
+        $$('input[name="filters"]', $("#event-form")).forEach((cb) => {
+          cb.checked = set.has(cb.value);
+        });
+        toast("Đã điền sẵn mẫu khung giờ & địa điểm!", "success");
+      });
+    });
+
     // Event creation & update
     $("#btn-new-event")?.addEventListener("click", () => openEventDialog(null));
     $("#event-form")?.addEventListener("submit", async (e) => {
@@ -1527,8 +1577,17 @@
 
     // Delegated click handler for dynamic rows & retry/empty buttons
     document.addEventListener("click", async (e) => {
-      const btn = e.target.closest("button[data-open-reg], button[data-edit-event], button[data-delete-event], button[data-edit-post], button[data-delete-post], button[data-toggle-partner], button[data-edit-partner], button[data-delete-partner], button[data-toggle-user], button[data-delete-user], button[data-mod-ref], button[data-delete-ref], button[data-toggle-member], button[data-reset-member-pw], button[data-delete-member], button[data-retry], button[data-empty-cta]");
+      const btn = e.target.closest("button[data-open-reg], button[data-dup-event], button[data-edit-event], button[data-delete-event], button[data-edit-post], button[data-delete-post], button[data-toggle-partner], button[data-edit-partner], button[data-delete-partner], button[data-toggle-user], button[data-delete-user], button[data-mod-ref], button[data-delete-ref], button[data-toggle-member], button[data-reset-member-pw], button[data-delete-member], button[data-retry], button[data-empty-cta]");
       if (!btn) return;
+
+      if (btn.dataset.dupEvent) {
+        const ev = state.events.find((x) => x.id === btn.dataset.dupEvent);
+        if (ev) {
+          openEventDialog({ ...ev, id: "", title: `${ev.title} (Mới)` });
+          $("#event-dialog-title").textContent = "Nhân bản lịch sự kiện";
+        }
+        return;
+      }
 
       if (btn.dataset.modRef) {
         const id = btn.dataset.modRef;

@@ -300,9 +300,14 @@ export function validateRegistrationInput(body) {
     return { ok: true, honeypot: true };
   }
 
+  const sourceRaw = cleanStr(body.source, 30);
+  const isFeedback = sourceRaw === "feedback";
   const fields = {};
-  const fullName = cleanStr(body.fullName || body.full_name, 120);
-  if (fullName.length < 2) {
+
+  let fullName = cleanStr(body.fullName || body.full_name, 120);
+  if (isFeedback) {
+    if (!fullName) fullName = "Thành viên đóng góp";
+  } else if (fullName.length < 2) {
     fields.fullName = "Vui lòng nhập họ và tên (tối thiểu 2 ký tự).";
   }
 
@@ -319,7 +324,9 @@ export function validateRegistrationInput(body) {
   }
 
   const digitCount = phone.replace(/\D/g, "").length;
-  if (digitCount < 8 && !isValidEmail(phone)) {
+  if (isFeedback) {
+    if (!phone) phone = email || "Ẩn danh";
+  } else if (digitCount < 8 && !isValidEmail(phone)) {
     fields.phone = "Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).";
   }
 
@@ -327,7 +334,6 @@ export function validateRegistrationInput(body) {
     fields.email = "Email không đúng định dạng (ví dụ: tenban@gmail.com).";
   }
 
-  const sourceRaw = cleanStr(body.source, 30);
   const activityTitle = cleanStr(body.activity || body.activityTitle || body.activity_title, 220);
   const source =
     sourceRaw === "event_modal" || (!sourceRaw && activityTitle) ? "event_modal" : "join_page";
@@ -335,6 +341,9 @@ export function validateRegistrationInput(body) {
   const role = cleanStr(body.role, 160);
   const organization = cleanStr(body.organization, 160);
   const note = cleanStr(body.note, 1000);
+  if (isFeedback && note.length < 8) {
+    fields.note = "Vui lòng chia sẻ nội dung đóng góp ít nhất 8 ký tự để Ban Điều Phối nắm rõ ý của bạn.";
+  }
 
   if (Object.keys(fields).length > 0) {
     return { ok: false, fields };

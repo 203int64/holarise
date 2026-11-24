@@ -45,7 +45,7 @@
     "home.pillars.kicker": "Impact Model",
     "home.pillars.title": "From Inner Strength to Community Service",
     "home.pillars.lead":
-      "Three connected pillars: inner reflection (HolaHeart) → local ecology (HolaGreen) → shared learning & care (HolaConnect).",
+      "A lasting community begins with inner stillness, grows with the land it calls home, and blooms through quiet service.",
     "home.pillars.more": "Read our philosophy",
 
     "pillar.holaheart.title": "Inner Strength, Listening & Life Values",
@@ -180,6 +180,7 @@
     "footer.copyright":
       "© 2026 HolaRise Youth Community. Non-profit community initiative.",
     "footer.privacy": "Privacy & Rules",
+    "footer.contribute": "Contribute",
     "footer.memberPass": "Hola Member Pass",
 
     "join.hero.title": "Hola Member Hub & Collaboration",

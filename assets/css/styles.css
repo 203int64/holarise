@@ -7768,3 +7768,504 @@ body.nav-open .pwa-offline-bar {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ==========================================================================
+   v8.1 Polish: Eliminate Click/Tap Focus Outlines, Standalone App Footer &
+   International Quiet-Luxury Auth + Feedback Modal
+   ========================================================================== */
+
+/* 1. Suppress ugly click/tap outline rings while preserving keyboard :focus-visible */
+button,
+a,
+input,
+select,
+textarea,
+[tabindex],
+summary,
+label {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* 2. Minimal Footer Colophon (holarise.org left · Đóng góp right) & Standalone PWA Mode */
+.footer-bottom-left {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-domain-link {
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.footer-domain-link:hover {
+  color: var(--accent);
+}
+
+.footer-feedback-trigger {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 4px 0;
+  font: inherit;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: color 0.2s var(--ease-expo);
+}
+
+.footer-feedback-trigger:hover {
+  color: var(--accent);
+}
+
+@media (display-mode: standalone) {
+  .site-footer {
+    padding: 36px 0 calc(28px + env(safe-area-inset-bottom));
+  }
+  .site-footer .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-bottom: 24px;
+  }
+  .site-footer .footer-grid > :not(.footer-brand) {
+    display: none !important;
+  }
+  .site-footer .footer-web-only {
+    display: none !important;
+  }
+  .site-footer .footer-bottom {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+  }
+}
+
+/* 3. International Quiet-Luxury Auth Card & Dialog (Linear / Apple / Notion Craft) */
+.club-dialog--auth {
+  width: min(460px, calc(100vw - 28px));
+}
+
+.auth-dialog-inner {
+  padding: 28px 28px 26px;
+}
+
+.auth-dialog-brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-right: 28px;
+}
+
+.auth-dialog-brand img {
+  border-radius: 8px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.auth-dialog-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.auth-dialog-sub {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+}
+
+.auth-card-surface {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px 30px 30px;
+  box-shadow: 0 1px 2px rgba(14, 21, 18, 0.03);
+}
+
+.auth-tabs {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+}
+
+.auth-tab {
+  position: relative;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0 0 12px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+.auth-tab:hover {
+  color: var(--ink);
+}
+
+.auth-tab.is-active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.auth-tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 2px 2px 0 0;
+}
+
+.auth-heading {
+  margin: 0 0 6px;
+  font-size: 1.42rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+
+.auth-lead {
+  margin: 0 0 22px;
+  font-size: 0.88rem;
+  line-height: 1.58;
+  color: var(--ink-secondary);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-row-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.auth-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-label,
+.auth-field label {
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+
+.auth-hint-inline {
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-field input,
+.auth-field select,
+.auth-field textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 13px;
+  border-radius: 10px;
+  border: 1px solid #d9dfdc;
+  background: #fafafa;
+  color: var(--ink);
+  font-size: 0.94rem;
+  line-height: 1.45;
+  transition: border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.auth-field textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.auth-field input:hover,
+.auth-field select:hover,
+.auth-field textarea:hover {
+  border-color: #bfc8c3;
+}
+
+.auth-field input:focus,
+.auth-field select:focus,
+.auth-field textarea:focus {
+  background: #ffffff;
+  border-color: var(--ink);
+  outline: none;
+  box-shadow: none;
+}
+
+.auth-pw-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-pw-wrap input {
+  padding-right: 44px;
+}
+
+.auth-pw-eye {
+  position: absolute;
+  right: 6px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.auth-pw-eye:hover {
+  color: var(--ink);
+  background: rgba(14, 21, 18, 0.05);
+}
+
+.auth-pw-eye.is-showing {
+  color: var(--ink);
+}
+
+/* Compact 3-Column Pillar Selector Strip */
+.auth-pillar-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.auth-pillar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid #d9dfdc;
+  background: #fafafa;
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: border-color 0.16s ease, background-color 0.16s ease, color 0.16s ease;
+}
+
+.auth-pillar-btn:hover {
+  border-color: #bfc8c3;
+  color: var(--ink);
+}
+
+.auth-pillar-item input:checked + .auth-pillar-btn {
+  border-color: var(--ink);
+  background: #ffffff;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.auth-pillar-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Primary Obsidian Submit Button */
+.auth-submit-btn {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #ffffff;
+  font-size: 0.94rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: opacity 0.18s ease, transform 0.18s var(--ease-expo);
+}
+
+.auth-submit-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.auth-submit-btn:active:not(:disabled) {
+  transform: scale(0.992);
+}
+
+.auth-submit-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.auth-footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.auth-legal {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.auth-legal a {
+  color: var(--ink-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-divider {
+  position: relative;
+  text-align: center;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+}
+
+.auth-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--line);
+}
+
+.auth-divider span {
+  position: relative;
+  padding: 0 10px;
+  background: #ffffff;
+}
+
+.auth-alt-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.auth-text-link,
+.auth-back-link {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 2px 0;
+  font: inherit;
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.16s ease;
+}
+
+.auth-text-link:hover,
+.auth-back-link:hover {
+  color: var(--accent);
+}
+
+.auth-text-link--muted {
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+.auth-back-link {
+  margin-bottom: 14px;
+  color: var(--ink-secondary);
+}
+
+/* Feedback Category Selector Grid */
+.feedback-kind-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.feedback-kind-opt {
+  cursor: pointer;
+}
+
+.feedback-kind-opt span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid #d9dfdc;
+  background: #fafafa;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  text-align: center;
+  transition: border-color 0.16s ease, background-color 0.16s ease, color 0.16s ease;
+}
+
+.feedback-kind-opt input:checked + span {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .auth-card-surface {
+    padding: 22px 18px 24px;
+  }
+  .auth-row-2 {
+    grid-template-columns: 1fr;
+  }
+  .auth-pillar-strip {
+    grid-template-columns: 1fr;
+  }
+}
