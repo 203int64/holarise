@@ -473,7 +473,7 @@
           if (idPill) idPill.hidden = false;
           if (idPillText) idPillText.textContent = `${lockedIdentifier} · Tài khoản mới`;
           if (stepIdentify) stepIdentify.hidden = true;
-          if (stepNewOnly) stepNewOnly.hidden = false;
+          if (stepNewOnly) stepNewOnly.hidden = true;
           if (stepPassword) stepPassword.hidden = false;
           if (pwLabel) pwLabel.innerHTML = 'Tạo mật khẩu <span class="auth-hint-inline">(tối thiểu 6 ký tự)</span>';
           if (pwInput) {
@@ -481,9 +481,8 @@
             pwInput.placeholder = "Tạo mật khẩu dễ nhớ";
             pwInput.required = true;
           }
-          if (nameInput) nameInput.required = true;
-          if (submitBtn) submitBtn.textContent = "Tạo tài khoản & Lập thông tin";
-          nameInput?.focus();
+          if (submitBtn) submitBtn.textContent = "Tiếp tục";
+          pwInput?.focus();
         }
       }
 
@@ -549,24 +548,26 @@
         }
 
         if (mode === "register") {
-          const name = (nameInput?.value || "").trim();
           const pw = pwInput?.value || "";
-          if (name.length < 2) {
-            setStatus(statusEl, "Vui lòng nhập họ và tên (tối thiểu 2 ký tự).", "error");
-            nameInput?.focus();
-            return;
-          }
           if (pw.length < 6) {
             setStatus(statusEl, "Mật khẩu cần tối thiểu 6 ký tự.", "error");
             pwInput?.focus();
             return;
           }
+          const fallbackName = lockedIdentifier.includes("@")
+            ? lockedIdentifier.split("@")[0].slice(0, 60)
+            : "Thành viên Hola";
           submitBtn.disabled = true;
-          submitBtn.textContent = "Đang tạo tài khoản...";
+          submitBtn.textContent = "Đang khởi tạo...";
           try {
             const res = await api("/api/member/auth/register", {
               method: "POST",
-              body: { name, identifier: lockedIdentifier, password: pw, primaryPillar: "holaheart" },
+              body: {
+                name: fallbackName.length >= 2 ? fallbackName : "Thành viên Hola",
+                identifier: lockedIdentifier,
+                password: pw,
+                primaryPillar: "holaheart",
+              },
             });
             state.member = res.member;
             state.needsOnboarding = true;
@@ -574,10 +575,14 @@
             form.reset();
             const dlg = form.closest("dialog");
             if (dlg && dlg.open) dlg.close();
+            if (window.location.pathname !== "/tham-gia/") {
+              window.location.href = "/tham-gia/?onboarding=1";
+              return;
+            }
             onAuthChanged();
           } catch (err) {
             setStatus(statusEl, err.message, "error");
-            submitBtn.textContent = "Tạo tài khoản & Lập thông tin";
+            submitBtn.textContent = "Tiếp tục";
           } finally {
             submitBtn.disabled = false;
           }

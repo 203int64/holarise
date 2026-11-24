@@ -8390,3 +8390,9 @@ a:focus-visible,
   gap: 10px;
   margin-top: 6px;
 }
+
+
+/* Guarantee HTML [hidden] always wins over display:flex / display:grid */
+[hidden] {
+  display: none !important;
+}
