@@ -47,7 +47,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1c1c73ae46">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=0326796028">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -422,8 +422,18 @@
           <button class="footer-feedback-trigger" type="button" data-open-feedback-modal data-i18n="footer.contribute">Đóng góp</button>
         </div>
       </div>
+      <p class="footer-shake-tip footer-web-only">Gặp lỗi hiển thị? Lắc điện thoại hoặc bấm <button class="footer-shake-tip-link" type="button" data-open-feedback-modal data-feedback-bug="1">Báo lỗi nhanh</button> để tự đọc màn hình và gửi góp ý.</p>
     </div>
   </footer>
+
+  <!-- One-time Mobile Shake-to-Report Guide Toast (hidden by default; controlled via localStorage) -->
+  <div class="shake-guide-toast" id="shake-guide-toast" role="status" aria-live="polite" hidden>
+    <p class="shake-guide-text" id="shake-guide-text">Mẹo nhỏ: Lắc nhẹ điện thoại khi gặp lỗi để tự đọc màn hình và báo nhanh.</p>
+    <div class="shake-guide-actions">
+      <button type="button" class="shake-guide-cta" id="shake-guide-cta">Thử ngay</button>
+      <button type="button" class="shake-guide-close" id="shake-guide-close" aria-label="Đóng hướng dẫn">×</button>
+    </div>
+  </div>
 
   <!-- Native HTML5 <dialog> Đăng Ký Nhanh Workshop / Chiến Dịch -->
   <dialog class="club-dialog" id="event-register-modal" closedby="any" aria-labelledby="modal-heading">
@@ -694,10 +704,10 @@
     </svg>
   </button>
 
-  <script src="/assets/vendor/gsap.min.js?v=1c1c73ae46" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=1c1c73ae46" defer></script>
-  <script src="/assets/js/motion.js?v=1c1c73ae46" defer></script>
-  <script src="/assets/js/main.js?v=1c1c73ae46" defer></script>
-  <script src="/assets/js/join-pass.js?v=1c1c73ae46" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=0326796028" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=0326796028" defer></script>
+  <script src="/assets/js/motion.js?v=0326796028" defer></script>
+  <script src="/assets/js/main.js?v=0326796028" defer></script>
+  <script src="/assets/js/join-pass.js?v=0326796028" defer></script>
 </body>
 </html>

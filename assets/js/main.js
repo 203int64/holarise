@@ -1677,7 +1677,8 @@
     document.addEventListener("click", function (e) {
       var trigger = e.target.closest("[data-open-feedback-modal]");
       if (!trigger) return;
-      openFeedbackDialog({ bugMode: false, autoCapture: false });
+      var isBugQuick = trigger.getAttribute("data-feedback-bug") === "1";
+      openFeedbackDialog({ bugMode: isBugQuick, autoCapture: isBugQuick });
     });
 
     if (captureBtn) {
@@ -1904,6 +1905,77 @@
           enableShake();
         }
       });
+    }
+
+    // One-time mobile guide toast (skipped on /su-kien/* to keep event invitations calm)
+    var toastEl = document.getElementById("shake-guide-toast");
+    var toastTextEl = document.getElementById("shake-guide-text");
+    var toastCtaBtn = document.getElementById("shake-guide-cta");
+    var toastCloseBtn = document.getElementById("shake-guide-close");
+    var SHAKE_TIP_SEEN_KEY = "holarise_shake_tip_seen";
+    var isMobileViewport = window.matchMedia && window.matchMedia("(max-width: 900px)").matches;
+    var isEventInvitationPage = (window.location.pathname || "").indexOf("/su-kien/") === 0;
+
+    function dismissShakeToast() {
+      if (toastEl) toastEl.hidden = true;
+      try { localStorage.setItem(SHAKE_TIP_SEEN_KEY, "1"); } catch (_) {}
+    }
+
+    if (toastEl && hasMotion && isMobileViewport && !isEventInvitationPage) {
+      var tipSeen = false;
+      try { tipSeen = localStorage.getItem(SHAKE_TIP_SEEN_KEY) === "1"; } catch (_) {}
+      if (!tipSeen) {
+        if (needsIosPermission && !shakeEnabled) {
+          if (toastTextEl) {
+            toastTextEl.textContent = "Mẹo nhỏ: Bật lắc điện thoại để tự đọc màn hình và báo lỗi nhanh bất cứ lúc nào.";
+          }
+          if (toastCtaBtn) toastCtaBtn.textContent = "Bật lắc máy";
+        } else {
+          if (toastTextEl) {
+            toastTextEl.textContent = "Mẹo nhỏ: Lắc nhẹ điện thoại khi gặp lỗi để tự đọc màn hình và báo nhanh.";
+          }
+          if (toastCtaBtn) toastCtaBtn.textContent = "Thử ngay";
+        }
+
+        var autoHideTimer = null;
+        setTimeout(function () {
+          if (dialog.open || document.querySelector("dialog[open]")) return;
+          toastEl.hidden = false;
+          autoHideTimer = setTimeout(dismissShakeToast, 9000);
+        }, 3500);
+
+        if (toastCloseBtn) {
+          toastCloseBtn.addEventListener("click", function () {
+            if (autoHideTimer) clearTimeout(autoHideTimer);
+            dismissShakeToast();
+          });
+        }
+
+        if (toastCtaBtn) {
+          toastCtaBtn.addEventListener("click", function () {
+            if (autoHideTimer) clearTimeout(autoHideTimer);
+            if (needsIosPermission && !shakeEnabled) {
+              window.DeviceMotionEvent.requestPermission()
+                .then(function (state) {
+                  if (state === "granted") {
+                    enableShake();
+                    if (toastTextEl) toastTextEl.textContent = "Đã bật. Giờ bạn có thể lắc máy bất cứ lúc nào để báo lỗi.";
+                    if (toastCtaBtn) toastCtaBtn.hidden = true;
+                    setTimeout(dismissShakeToast, 2600);
+                  } else {
+                    dismissShakeToast();
+                  }
+                })
+                .catch(function () {
+                  dismissShakeToast();
+                });
+            } else {
+              dismissShakeToast();
+              openFeedbackDialog({ bugMode: true, autoCapture: true });
+            }
+          });
+        }
+      }
     }
   })();
 })();

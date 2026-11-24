@@ -8479,6 +8479,111 @@ a:focus-visible,
   line-height: 1.35;
 }
 
+/* Footer Shake-to-Report Tip & One-Time Mobile Toast */
+.footer-shake-tip {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(15, 23, 20, 0.1);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.footer-shake-tip-link {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.footer-shake-tip-link:hover {
+  color: var(--accent);
+}
+
+.shake-guide-toast {
+  position: fixed;
+  left: 14px;
+  right: 14px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 95;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(18, 28, 24, 0.94);
+  color: #f7faf8;
+  box-shadow: 0 14px 36px rgba(10, 18, 15, 0.24);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  animation: shakeToastIn 0.24s ease-out;
+}
+
+.shake-guide-toast[hidden] {
+  display: none;
+}
+
+.shake-guide-text {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: rgba(247, 250, 248, 0.92);
+}
+
+.shake-guide-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.shake-guide-cta {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 11px;
+  background: #ffffff;
+  color: #121c18;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.shake-guide-close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: rgba(247, 250, 248, 0.72);
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+.shake-guide-close:hover {
+  color: #ffffff;
+}
+
+@keyframes shakeToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 640px) {
   .auth-card-surface {
     padding: 22px 18px 24px;
