@@ -45,73 +45,61 @@
 
     <div style="margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
       <a class="arrow-link" href="/hanh-trinh/">← Quay lại Hành trình HolaRise</a>
-      <a class="btn btn--primary" href="/tham-gia/" data-magnetic>Tạo Thẻ Thành Viên Hola</a>
+      <a class="btn btn--primary" href="/tham-gia/" data-magnetic>Tham gia chặng tiếp theo</a>
     </div>
 
-    <!-- Editorial Activity Guestbook (Moderated Member Reflections) -->
+    <!-- Open Passwordless Participant Reflections -->
     <section class="guestbook-section" id="activity-guestbook" data-guestbook-slug="{{ARTICLE_SLUG}}" aria-labelledby="guestbook-heading">
       <div class="guestbook-head">
         <div>
-          <div class="kicker" data-i18n="guestbook.kicker">Lưu bút người tham dự</div>
-          <h2 id="guestbook-heading" class="guestbook-title" data-i18n="guestbook.title">Cảm nhận &amp; Khoảnh khắc đọng lại</h2>
+          <div class="kicker">Cảm nhận người tham dự</div>
+          <h2 id="guestbook-heading" class="guestbook-title">Những điều đọng lại sau buổi gặp</h2>
         </div>
         <span class="guestbook-count-pill" id="guestbook-count-pill">Đang tải...</span>
       </div>
 
-      <!-- Guest CTA (when not logged in) -->
-      <div class="guestbook-auth-bar" id="guestbook-auth-bar">
-        <div class="guestbook-auth-copy">
-          <strong data-i18n="guestbook.authTitle">Bạn đã góp mặt trong hoạt động này?</strong>
-          <p data-i18n="guestbook.authDesc">Đăng nhập Thẻ Thành Viên Hola để gửi lưu bút, trích dẫn tâm đắc và 1 ảnh kỷ niệm lên trang.</p>
-        </div>
-        <button class="btn btn--primary btn--sm" type="button" data-open-member-auth="login" data-i18n="guestbook.authBtn">Đăng nhập để viết lưu bút</button>
-      </div>
+      <div class="guestbook-composer-wrap" id="public-reflection-wrap">
+        <form class="form-grid guestbook-form" id="public-reflection-form" novalidate>
+          <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
+            <label for="pr-website">Website</label>
+            <input id="pr-website" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
 
-      <!-- Member Composer (when logged in) -->
-      <div class="guestbook-composer-wrap" id="guestbook-composer-wrap" hidden>
-        <div class="guestbook-mine-status" id="guestbook-mine-status" hidden></div>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="pr-name">Tên của bạn <span aria-hidden="true">*</span></label>
+              <input id="pr-name" name="authorName" type="text" autocomplete="name" required minlength="2" maxlength="120" placeholder="Ví dụ: Minh Anh (hoặc Ẩn danh)">
+            </div>
+            <div class="field">
+              <label for="pr-org">Trường / Đơn vị (tùy chọn)</label>
+              <input id="pr-org" name="authorOrg" type="text" maxlength="160" placeholder="ĐH FPT, ĐHQGHN, Đã đi làm...">
+            </div>
+          </div>
 
-        <form class="form-grid guestbook-form" id="guestbook-form" novalidate>
-          <div class="guestbook-composer-top">
-            <div class="guestbook-author-badge" id="guestbook-composer-author"></div>
-            <div class="field" style="min-width: 210px;">
-              <label for="gb-role">Vai trò của bạn</label>
-              <select id="gb-role" name="participantRole">
-                <option value="Thành viên">Thành viên tham dự</option>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="pr-role">Vai trò tại buổi gặp</label>
+              <select id="pr-role" name="participantRole">
+                <option value="Thành viên tham dự">Người tham dự</option>
                 <option value="Tình nguyện viên">Tình nguyện viên</option>
                 <option value="Diễn giả · Khách mời">Diễn giả · Khách mời</option>
               </select>
             </div>
-          </div>
-
-          <div class="field">
-            <label for="gb-quote">Câu tâm đắc nhất (tùy chọn · tối đa 140 ký tự)</label>
-            <input id="gb-quote" name="pullQuote" type="text" maxlength="140" placeholder="Một câu nói hoặc khoảnh khắc khiến bạn nhớ mãi...">
-          </div>
-
-          <div class="field">
-            <label for="gb-content">Lời cảm nhận của bạn <span aria-hidden="true">*</span></label>
-            <textarea id="gb-content" name="content" rows="4" minlength="12" maxlength="1500" required placeholder="Chia sẻ trải nghiệm, điều bạn học được hoặc cảm xúc của bạn sau buổi gặp mặt tại Hòa Lạc..."></textarea>
-          </div>
-
-          <div class="field">
-            <label for="gb-photo-file">Gửi kèm 1 ảnh kỷ niệm (tùy chọn · tự động nén gọn)</label>
-            <div class="gb-photo-uploader">
-              <img id="gb-photo-preview" class="gb-photo-preview" src="/assets/images/logo-mark.png" alt="Xem trước ảnh kỷ niệm lưu bút" hidden>
-              <div class="gb-photo-controls">
-                <input id="gb-photo-file" type="file" accept="image/*">
-                <input type="hidden" id="gb-photo-url" name="photoUrl" value="">
-                <span class="gb-photo-meta" id="gb-photo-meta">Chọn 1 ảnh chụp từ buổi hoạt động (JPEG/PNG/WebP).</span>
-                <button type="button" class="btn btn--outline btn--sm" id="gb-photo-clear" hidden>Gỡ ảnh</button>
-              </div>
+            <div class="field">
+              <label for="pr-quote">Một câu tâm đắc nhất (tùy chọn)</label>
+              <input id="pr-quote" name="pullQuote" type="text" maxlength="180" placeholder="Một khoảnh khắc hoặc câu nói bạn nhớ nhất...">
             </div>
           </div>
 
-          <div class="form-status" id="gb-form-status" role="status" aria-live="polite"></div>
+          <div class="field">
+            <label for="pr-content">Cảm nhận của bạn <span aria-hidden="true">*</span></label>
+            <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="Gửi lại vài dòng trải nghiệm của bạn — không cần tạo tài khoản hay đăng nhập..."></textarea>
+          </div>
+
+          <div class="form-status" id="pr-status" role="status" aria-live="polite"></div>
 
           <div class="gb-form-actions">
-            <button class="btn btn--primary btn--sm" type="submit" id="gb-submit-btn">Gửi lưu bút chờ duyệt</button>
-            <button class="btn btn--outline btn--sm" type="button" id="gb-delete-btn" hidden>Xóa lưu bút của tôi</button>
+            <button class="btn btn--primary btn--sm" type="submit" id="pr-submit-btn">Gửi cảm nhận</button>
           </div>
         </form>
       </div>

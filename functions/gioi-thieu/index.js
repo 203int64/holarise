@@ -2,6 +2,8 @@ import {
   applySiteVisualsSsr,
   parsePartnersJson,
   renderPartnersStripHtml,
+  renderPublicTeamHtml,
+  renderPublicTestimonialsHtml,
   replaceMarker,
 } from "../_lib/render.js";
 
@@ -12,13 +14,31 @@ export async function onRequestGet({ request, env }) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
 
-  const [assetRes, partnersRow, visualsRow] = await Promise.all([
+  const [assetRes, partnersRow, visualsRow, teamRes, testimonialsRes] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
     env.DB.prepare("SELECT value FROM settings WHERE key = 'partners_json'")
       .first()
       .catch(() => null),
     env.DB.prepare("SELECT value FROM settings WHERE key = 'site_visuals_json'")
       .first()
+      .catch(() => null),
+    env.DB.prepare(
+      `SELECT name, role_title, organization, bio, avatar_url
+       FROM members
+       WHERE is_active = 1 AND is_public_team = 1
+       ORDER BY created_at ASC
+       LIMIT 24`
+    )
+      .all()
+      .catch(() => null),
+    env.DB.prepare(
+      `SELECT author_name, author_role, author_org, pull_quote, content, photo_url
+       FROM community_testimonials
+       WHERE status = 'approved' AND is_featured_home = 1
+       ORDER BY created_at DESC
+       LIMIT 6`
+    )
+      .all()
       .catch(() => null),
   ]);
 
@@ -33,6 +53,12 @@ export async function onRequestGet({ request, env }) {
   }
   if (visualsRow?.value) {
     html = applySiteVisualsSsr(html, visualsRow.value);
+  }
+  if (teamRes?.results?.length) {
+    html = replaceMarker(html, "PUBLIC_TEAM", renderPublicTeamHtml(teamRes.results));
+  }
+  if (testimonialsRes?.results?.length) {
+    html = replaceMarker(html, "TESTIMONIALS", renderPublicTestimonialsHtml(testimonialsRes.results));
   }
 
   const headers = new Headers(assetRes.headers);

@@ -506,13 +506,11 @@
           }
         }
         if (modalIcsBtn) {
-          if (eventId === "holaheart-cuoc-doi-cua-cha-2026-11-29") {
+          if (eventHref && eventHref.indexOf("/su-kien/") === 0) {
             modalIcsBtn.hidden = false;
             modalIcsBtn.setAttribute("data-ics-title", title);
-            modalIcsBtn.setAttribute("data-ics-start", "20261129T121500Z");
-            modalIcsBtn.setAttribute("data-ics-end", "20261129T143000Z");
             modalIcsBtn.setAttribute("data-ics-location", eventLocation);
-            modalIcsBtn.setAttribute("data-ics-url", "https://holarise.org/su-kien/cuoc-doi-cua-cha/");
+            modalIcsBtn.setAttribute("data-ics-url", window.location.origin + eventHref);
           } else {
             modalIcsBtn.hidden = true;
           }
@@ -943,7 +941,7 @@
       });
       payload.submittedAt = new Date().toISOString();
 
-      var isFatherStudio = form.hasAttribute("data-father-studio");
+      var isEventStudio = form.hasAttribute("data-event-studio") || form.hasAttribute("data-father-studio");
       var checkedRoleRadio = form.querySelector('input[type="radio"][name="role"]:checked');
       var checkedEventRadio = form.querySelector('input[type="radio"][name="eventChoice"]:checked');
       var checkedSeatRadio = form.querySelector('input[type="radio"][name="seatCount"]:checked');
@@ -976,26 +974,33 @@
         var pv = btn.getAttribute("data-partner-chip");
         if (pv) partnerValues.push(pv);
       });
-      var isPartnerMode = Boolean(checkedRoleRadio && checkedRoleRadio.getAttribute("data-mode") === "partner");
+      var pillarValues = [];
+      form.querySelectorAll('[data-pillar-chip][aria-pressed="true"]').forEach(function (btn) {
+        var pv = btn.getAttribute("data-pillar-chip");
+        if (pv) pillarValues.push(pv);
+      });
+      var isPartnerMode = form.getAttribute("data-join-mode") === "partner" || Boolean(checkedRoleRadio && checkedRoleRadio.getAttribute("data-mode") === "partner");
       var modalContainer = form.closest("#event-register-modal");
       var invitedBy = form.dataset.invitedBy || "";
       var rawNote = (payload.note || "").trim();
       var metaParts = [];
 
-      if (isFatherStudio) {
+      if (isEventStudio) {
         if (seatValue) metaParts.push("Số chỗ: " + seatValue);
         if (rawNote) {
           metaParts.push(
             anonCheckInput && anonCheckInput.checked
-              ? "Tâm sự về Cha: Cho phép đọc ẩn danh"
-              : "Tâm sự về Cha: Chỉ gửi riêng BTC"
+              ? "Chia sẻ: Giữ ẩn danh khi trích đọc"
+              : "Chia sẻ: Chỉ gửi riêng BTC"
           );
         }
-      } else if (modalContainer) {
+      } else if (modalContainer || form.id === "join-rsvp-form") {
+        if (pillarValues.length) metaParts.push("Mảng quan tâm: " + pillarValues.join(", "));
         if (vibeValue) metaParts.push("Số chỗ: " + vibeValue);
       } else if (isPartnerMode) {
         if (partnerValues.length) metaParts.push("Hợp tác: " + partnerValues.join(", "));
       } else {
+        if (pillarValues.length) metaParts.push("Mảng quan tâm: " + pillarValues.join(", "));
         if (vibeValue) metaParts.push("Tâm thế: " + vibeValue);
         if (skillValues.length) metaParts.push("Hứng thú: " + skillValues.join(", "));
       }
@@ -1006,33 +1011,34 @@
       }
 
       var resolvedEventId = (payload.eventId || "").trim();
-      var isFatherEvent = isFatherStudio || resolvedEventId === "holaheart-cuoc-doi-cua-cha-2026-11-29";
+      var resolvedEventSlug = form.getAttribute("data-event-slug") || "";
+      var resolvedEventImage = form.getAttribute("data-event-image") || "";
       var resolvedEventUrl =
         form.getAttribute("data-event-url") ||
         (modalContainer && modalContainer.dataset.eventHref) ||
-        (isFatherEvent ? "/su-kien/cuoc-doi-cua-cha/" : "");
+        (resolvedEventSlug ? "/su-kien/" + resolvedEventSlug + "/" : "");
 
       var passSnapshot = {
         id: "",
         source: payload.source || "join_page",
-        formKind: isFatherStudio ? "workshop" : modalContainer ? "modal" : "join",
-        isFatherWorkshop: isFatherEvent,
+        formKind: isEventStudio ? "workshop" : modalContainer ? "modal" : "join",
+        isFatherWorkshop: isEventStudio,
+        eventSlug: resolvedEventSlug,
+        eventImage: resolvedEventImage,
         eventUrl: resolvedEventUrl,
         fullName: nameVal,
         phone: ((phoneEl || {}).value || "").trim(),
         organization: (payload.organization || "").trim(),
         role: (payload.role || "").trim(),
-        badge: isFatherEvent
-          ? "WORKSHOP · CUỘC ĐỜI CỦA CHA"
+        badge: isEventStudio
+          ? (payload.activity || "Cộng đồng HolaRise").toUpperCase()
           : (checkedRoleRadio && checkedRoleRadio.getAttribute("data-badge")) ||
             (modalContainer && modalContainer.dataset.eventType) ||
             "Cộng đồng HolaRise",
-        theme: isFatherEvent
+        theme: isEventStudio
           ? "father-sunset"
           : (checkedRoleRadio && checkedRoleRadio.getAttribute("data-theme")) || "emerald",
-        greeting: isFatherEvent
-          ? "Cha có thể không nói nhiều, nhưng cả cuộc đời Cha chính là minh chứng cho tình yêu ấy."
-          : (checkedRoleRadio && checkedRoleRadio.getAttribute("data-greeting")) || "",
+        greeting: (checkedRoleRadio && checkedRoleRadio.getAttribute("data-greeting")) || "",
         eventId: resolvedEventId,
         eventTitle:
           (payload.activity || "").trim() ||
@@ -1157,5 +1163,220 @@
           resetBtn();
         });
     });
+  });
+
+  /* 9. Clean 2-tab Hub Switcher & Post-RSVP Zalo Confirmation on /tham-gia/ */
+  var joinTabs = Array.from(document.querySelectorAll("[data-join-tab]"));
+  var joinPanes = Array.from(document.querySelectorAll("[data-join-pane]"));
+  if (joinTabs.length && joinPanes.length) {
+    function activateJoinTab(key) {
+      joinTabs.forEach(function (tab) {
+        var active = tab.getAttribute("data-join-tab") === key;
+        tab.classList.toggle("is-active", active);
+        tab.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      joinPanes.forEach(function (pane) {
+        pane.hidden = pane.getAttribute("data-join-pane") !== key;
+      });
+    }
+    joinTabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        activateJoinTab(tab.getAttribute("data-join-tab") || "rsvp");
+      });
+    });
+    var params = new URLSearchParams(window.location.search);
+    if (params.get("chuong-trinh") === "hoptac" || params.get("tab") === "partner") {
+      activateJoinTab("partner");
+    }
+  }
+
+  document.addEventListener("holarise:registration-success", function (ev) {
+    var detail = ev.detail || {};
+    if (!detail.form || detail.form.id !== "join-rsvp-form") return;
+    var box = document.getElementById("join-rsvp-success");
+    var codeEl = document.getElementById("join-rsvp-code");
+    var sumEl = document.getElementById("join-rsvp-summary");
+    if (codeEl) codeEl.textContent = detail.id || "HOLA";
+    if (sumEl) {
+      var snap = detail.snapshot || {};
+      sumEl.textContent =
+        "Đã giữ chỗ cho " + (snap.fullName || "bạn") +
+        (snap.activity ? " tại " + snap.activity : "") +
+        ". Mời bạn vào Nhóm Zalo để nhận định vị, ghép xe và lịch nhắc trước giờ gặp.";
+    }
+    if (box) {
+      box.hidden = false;
+      box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  });
+
+  /* 10. Passwordless Participant Reflections on /hanh-trinh/<slug>/ */
+  var gbSection = document.getElementById("activity-guestbook");
+  if (gbSection) {
+    var gbSlug = gbSection.getAttribute("data-guestbook-slug") || "";
+    var gbList = document.getElementById("guestbook-list");
+    var gbCount = document.getElementById("guestbook-count-pill");
+    var prForm = document.getElementById("public-reflection-form");
+    var prStatus = document.getElementById("pr-status");
+    var prBtn = document.getElementById("pr-submit-btn");
+
+    function escTxt(s) {
+      return String(s || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function loadPublicReflections() {
+      if (!gbSlug || !gbList) return;
+      fetch("/api/reflections?slug=" + encodeURIComponent(gbSlug))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var items = (data && data.items) || [];
+          if (gbCount) {
+            gbCount.textContent = items.length ? items.length + " cảm nhận" : "Chưa có cảm nhận";
+          }
+          if (!items.length) {
+            gbList.innerHTML = '<p class="member-empty-hint">Mời bạn là người đầu tiên chia sẻ cảm nhận sau buổi gặp này.</p>';
+            return;
+          }
+          gbList.innerHTML = items
+            .map(function (it) {
+              var quoteHtml = it.pullQuote ? '<blockquote class="gb-pull-quote">“' + escTxt(it.pullQuote) + '”</blockquote>' : "";
+              var photoHtml = it.photoUrl
+                ? '<figure class="gb-card-photo"><img src="' + escTxt(it.photoUrl) + '" alt="Ảnh kỷ niệm từ ' + escTxt(it.authorName) + '" loading="lazy"></figure>'
+                : "";
+              var meta = [it.participantRole, it.authorOrg].filter(Boolean).join(" · ");
+              return (
+                '<article class="gb-card">' +
+                photoHtml +
+                quoteHtml +
+                '<p class="gb-content">' + escTxt(it.content) + "</p>" +
+                '<div class="gb-meta"><strong>' + escTxt(it.authorName) + "</strong>" +
+                (meta ? "<span>" + escTxt(meta) + "</span>" : "") +
+                "</div></article>"
+              );
+            })
+            .join("");
+        })
+        .catch(function () {
+          if (gbCount) gbCount.textContent = "Cảm nhận cộng đồng";
+        });
+    }
+
+    loadPublicReflections();
+
+    if (prForm) {
+      prForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (prStatus) {
+          prStatus.className = "form-status";
+          prStatus.textContent = "";
+        }
+        var fd = new FormData(prForm);
+        var payload = {
+          activitySlug: gbSlug,
+          authorName: String(fd.get("authorName") || "").trim(),
+          authorOrg: String(fd.get("authorOrg") || "").trim(),
+          participantRole: String(fd.get("participantRole") || "").trim(),
+          pullQuote: String(fd.get("pullQuote") || "").trim(),
+          content: String(fd.get("content") || "").trim(),
+          website: String(fd.get("website") || "").trim(),
+        };
+        if (payload.authorName.length < 2 || payload.content.length < 12) {
+          if (prStatus) {
+            prStatus.className = "form-status is-error";
+            prStatus.textContent = "Vui lòng nhập tên (ít nhất 2 ký tự) và cảm nhận (ít nhất 12 ký tự).";
+          }
+          return;
+        }
+        if (prBtn) {
+          prBtn.disabled = true;
+          prBtn.textContent = "Đang gửi...";
+        }
+        fetch("/api/reflections", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+          .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+          .then(function (res) {
+            if (!res.ok) throw new Error((res.data && res.data.message) || "Không thể gửi cảm nhận lúc này.");
+            prForm.reset();
+            if (prStatus) {
+              prStatus.className = "form-status is-success";
+              prStatus.textContent = (res.data && res.data.message) || "Đã gửi cảm nhận tới Ban Điều Phối duyệt hiển thị.";
+            }
+          })
+          .catch(function (err) {
+            if (prStatus) {
+              prStatus.className = "form-status is-error";
+              prStatus.textContent = err.message || "Có lỗi xảy ra, vui lòng thử lại.";
+            }
+          })
+          .finally(function () {
+            if (prBtn) {
+              prBtn.disabled = false;
+              prBtn.textContent = "Gửi cảm nhận";
+            }
+          });
+      });
+    }
+  }
+
+  /* -----------------------------------------------------------------------
+   * 15. Multi-Select Pillar Cards & 1-Tap Note Presets
+   * ----------------------------------------------------------------------- */
+  function syncSelectAllButton(scope) {
+    var selectAllBtn = scope.querySelector("[data-pillar-select-all]");
+    if (!selectAllBtn) return;
+    var chips = Array.prototype.slice.call(scope.querySelectorAll("[data-pillar-chip]"));
+    var allOn = chips.length > 0 && chips.every(function (c) { return c.getAttribute("aria-pressed") === "true"; });
+    selectAllBtn.setAttribute("aria-pressed", allOn ? "true" : "false");
+    selectAllBtn.classList.toggle("is-active", allOn);
+    selectAllBtn.textContent = allOn ? "Bỏ chọn cả 3" : "Chọn cả 3";
+  }
+
+  document.addEventListener("click", function (e) {
+    var pillarChip = e.target.closest("[data-pillar-chip]");
+    if (pillarChip) {
+      var next = pillarChip.getAttribute("aria-pressed") !== "true";
+      pillarChip.setAttribute("aria-pressed", next ? "true" : "false");
+      pillarChip.classList.toggle("is-selected", next);
+      var scope = pillarChip.closest(".field") || document;
+      syncSelectAllButton(scope);
+      return;
+    }
+
+    var selectAllBtn = e.target.closest("[data-pillar-select-all]");
+    if (selectAllBtn) {
+      var field = selectAllBtn.closest(".field") || document;
+      var chips = field.querySelectorAll("[data-pillar-chip]");
+      var nextAll = selectAllBtn.getAttribute("aria-pressed") !== "true";
+      chips.forEach(function (c) {
+        c.setAttribute("aria-pressed", nextAll ? "true" : "false");
+        c.classList.toggle("is-selected", nextAll);
+      });
+      syncSelectAllButton(field);
+      return;
+    }
+
+    var notePreset = e.target.closest("[data-note-preset]");
+    if (notePreset) {
+      var text = notePreset.getAttribute("data-note-preset") || "";
+      var container = notePreset.closest(".field") || notePreset.closest("form");
+      var textarea = container ? container.querySelector('textarea[name="note"]') : null;
+      if (!textarea || !text) return;
+      var current = textarea.value.trim();
+      if (current.indexOf(text) !== -1) {
+        notePreset.classList.remove("is-selected");
+        textarea.value = current.replace(text, "").replace(/\s{2,}/g, " ").trim();
+      } else {
+        notePreset.classList.add("is-selected");
+        textarea.value = current ? current + " " + text : text;
+      }
+      textarea.focus();
+    }
   });
 })();

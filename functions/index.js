@@ -6,6 +6,7 @@ import {
   renderHomeUpcomingSectionHtml,
   renderHorizontalGalleryHtml,
   renderPartnersStripHtml,
+  renderPublicTestimonialsHtml,
   replaceMarker,
   splitEventsByDate,
 } from "./_lib/render.js";
@@ -17,7 +18,7 @@ export async function onRequestGet({ request, env }) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
 
-  const [assetRes, eventsRes, featuredRes, partnersRow, visualsRow] = await Promise.all([
+  const [assetRes, eventsRes, featuredRes, partnersRow, visualsRow, testimonialsRes] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
     env.DB.prepare(
       "SELECT * FROM events WHERE status = 'published' ORDER BY sort_order ASC, date ASC, created_at DESC LIMIT 60"
@@ -40,6 +41,15 @@ export async function onRequestGet({ request, env }) {
     env.DB.prepare("SELECT value FROM settings WHERE key = 'site_visuals_json'")
       .first()
       .catch(() => null),
+    env.DB.prepare(
+      `SELECT author_name, author_role, author_org, pull_quote, content, photo_url
+       FROM community_testimonials
+       WHERE status = 'approved' AND is_featured_home = 1
+       ORDER BY created_at DESC
+       LIMIT 6`
+    )
+      .all()
+      .catch(() => null),
   ]);
 
   if (!assetRes.ok || !eventsRes) {
@@ -58,6 +68,9 @@ export async function onRequestGet({ request, env }) {
   }
   if (visualsRow?.value) {
     html = applySiteVisualsSsr(html, visualsRow.value);
+  }
+  if (testimonialsRes?.results?.length) {
+    html = replaceMarker(html, "TESTIMONIALS", renderPublicTestimonialsHtml(testimonialsRes.results));
   }
 
   let homePhotos = (featuredRes?.results || []).map((r) => ({

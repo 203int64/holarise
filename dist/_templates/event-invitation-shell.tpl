@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>__SSR_PAGE_TITLE__</title>
+  <meta name="description" content="__SSR_PAGE_DESCRIPTION__">
+  <meta name="keywords" content="HolaRise, Cộng đồng Thanh niên Hòa Lạc, HolaHeart, HolaGreen, HolaConnect, tình nguyện sinh viên Hòa Lạc, workshop Hòa Lạc, cộng đồng người trẻ phi lợi nhuận">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#FFFFFF">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HolaRise">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="canonical" href="__SSR_CANONICAL_URL__">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/images/favicon-48.png" type="image/png" sizes="48x48">
+  <link rel="icon" href="/assets/images/favicon-96.png" type="image/png" sizes="96x96">
+  <link rel="icon" href="/assets/images/pwa/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" sizes="180x180">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <!-- Open Graph / Facebook / Zalo / Messenger -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:site_name" content="HolaRise – Cộng đồng Thanh niên Hòa Lạc">
+  <meta property="og:title" content="__SSR_PAGE_TITLE__">
+  <meta property="og:description" content="__SSR_PAGE_DESCRIPTION__">
+  <meta property="og:url" content="__SSR_CANONICAL_URL__">
+  <meta property="og:image" content="__SSR_OG_IMAGE_URL__">
+  <meta property="og:image:secure_url" content="__SSR_OG_IMAGE_URL__">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="__SSR_PAGE_TITLE__">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="__SSR_PAGE_TITLE__">
+  <meta name="twitter:description" content="__SSR_PAGE_DESCRIPTION__">
+  <meta name="twitter:image" content="__SSR_OG_IMAGE_URL__">
+  <meta name="twitter:image:alt" content="__SSR_PAGE_TITLE__">
+
+  <!-- Vietnamese-native Editorial Typography: Be Vietnam Pro (UI/Display) + Lora (Manifesto/Quotes) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
+
+  <link rel="stylesheet" href="/assets/css/styles.css?v=d6acdb095e">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NGO",
+  "name": "HolaRise – Cộng đồng Thanh niên Hòa Lạc",
+  "alternateName": [
+    "HolaRise",
+    "Cộng đồng HolaRise",
+    "Cộng đồng Thanh niên Hòa Lạc",
+    "HolaRise – Youth Community & Social Impact Initiative"
+  ],
+  "slogan": "Together We Rise, Together We Serve.",
+  "url": "https://holarise.org",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "https://holarise.org/assets/images/pwa/icon-512.png",
+    "width": 512,
+    "height": 512
+  },
+  "image": "https://holarise.org/assets/images/holarise-binh-minh-og.jpg",
+  "description": "HolaRise – Cộng đồng Thanh niên Hòa Lạc phi lợi nhuận kết nối người trẻ qua 3 trụ cột: HolaHeart (tĩnh tại), HolaGreen (sinh thái) và HolaConnect (tri thức).",
+  "email": "phungsu@holarise.org",
+  "telephone": "077.777.1948",
+  "areaServed": {
+    "@type": "Place",
+    "name": "Hòa Lạc, Hà Nội, Việt Nam"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Tân Xã, Hòa Lạc",
+    "addressLocality": "Hòa Lạc",
+    "addressRegion": "Hà Nội",
+    "addressCountry": "VN"
+  }
+}
+</script>
+  __SSR_EXTRA_JSON_LD__
+</head>
+<body class="is-father-invite">
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+  <div class="float-preview" id="float-preview" aria-hidden="true">
+    <img id="float-preview-img" alt="">
+  </div>
+  <a class="skip-link" href="#main-content">Chuyển tới nội dung chính</a>
+
+  <header class="site-header" data-site-header>
+    <div class="container header-inner">
+      <a class="brand-link" href="/" data-brand-morph aria-label="HolaRise – Cộng đồng Thanh niên Hòa Lạc – Trang chủ">
+        <span class="brand-morph-stage" aria-hidden="true">
+          <span class="brand-morph-bg"></span>
+          <span class="brand-glyph-canvas">
+            <img class="brand-part brand-part--h" src="/assets/images/logo-part-h.png" alt="" width="95" height="117">
+            <img class="brand-part brand-part--ola" src="/assets/images/logo-part-ola.png" alt="" width="178" height="117">
+            <img class="brand-part brand-part--r" src="/assets/images/logo-part-r.png" alt="" width="122" height="117">
+            <img class="brand-part brand-part--ise" src="/assets/images/logo-part-ise.png" alt="" width="166" height="117">
+          </span>
+        </span>
+      </a>
+
+      <nav class="main-nav" data-main-nav aria-label="Điều hướng chính">
+        <a class="nav-link" href="/gioi-thieu/" data-i18n="nav.about">Về HolaRise</a>
+        <a class="nav-link is-active" href="/lich-hoat-dong/" data-i18n="nav.schedule">Lịch hoạt động</a>
+        <a class="nav-link" href="/hanh-trinh/" data-i18n="nav.journey">Hành trình</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="lang-switch" href="/en/" aria-label="Switch to English International Profile">
+          <span class="lang-switch-opt">EN</span>
+        </a>
+        <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/">
+          <span>Tham gia</span>
+        </a>
+        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Mở menu điều hướng">
+          <span class="nav-toggle-bars" aria-hidden="true">
+            <span></span>
+            <span></span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Full-Screen Mobile Editorial Glass Menu -->
+  <div class="mobile-drawer" id="mobile-drawer" data-mobile-drawer aria-hidden="true">
+    <div class="mobile-drawer-inner">
+      <nav class="mobile-drawer-nav" aria-label="Menu di động">
+        <a class="drawer-link" href="/" style="--i: 0;"><span class="drawer-link-num">01</span><span class="drawer-link-label" data-i18n="nav.home">Trang chủ</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
+        <a class="drawer-link" href="/gioi-thieu/" style="--i: 1;"><span class="drawer-link-num">02</span><span class="drawer-link-label" data-i18n="nav.about">Về HolaRise</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
+        <a class="drawer-link is-active" href="/lich-hoat-dong/" style="--i: 2;"><span class="drawer-link-num">03</span><span class="drawer-link-label" data-i18n="nav.schedule">Lịch hoạt động</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
+        <a class="drawer-link" href="/hanh-trinh/" style="--i: 3;"><span class="drawer-link-num">04</span><span class="drawer-link-label" data-i18n="nav.journey">Hành trình</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
+      </nav>
+      <div class="mobile-drawer-footer">
+        <a class="btn btn--primary" href="/tham-gia/" style="width: 100%; justify-content: space-between; padding: 15px 22px;">
+          <span data-i18n="nav.memberStudio">Giữ chỗ &amp; Đồng hành</span>
+          <span aria-hidden="true">→</span>
+        </a>
+        <button class="btn btn--outline pwa-install-drawer-btn" type="button" data-pwa-install hidden>
+          <span data-i18n="pwa.installApp">Cài ứng dụng HolaRise về máy</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12"></path>
+            <path d="m7 10 5 5 5-5"></path>
+            <path d="M5 21h14"></path>
+          </svg>
+        </button>
+        <div class="mobile-drawer-meta">
+          <span><a href="tel:0777771948" style="color: var(--ink); font-weight: 500; text-decoration: none;">Hotline / Zalo: 077.777.1948</a></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main id="main-content">
+    <section class="page-hero invite-hero">
+  <div class="container invite-narrow">
+    <nav class="breadcrumb" aria-label="Đường dẫn trang">
+      <a href="/">Trang chủ</a>
+      <span aria-hidden="true">/</span>
+      <a href="/lich-hoat-dong/">Lịch hoạt động</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Thư mời</span>
+    </nav>
+
+    <div class="kicker" style="margin-top: 18px;">__SSR_EVENT_KICKER__</div>
+    <h1 class="invite-title">__SSR_INVITE_HEADLINE__</h1>
+
+    <div class="invite-meta-bar">
+      <div class="invite-meta-facts">
+        <time datetime="__SSR_INVITE_START_ISO__">__SSR_INVITE_TIME_LABEL__</time>
+        <span aria-hidden="true">·</span>
+        <span>__SSR_INVITE_VENUE_NAME__</span>
+        <span aria-hidden="true">·</span>
+        <span>__SSR_EVENT_FEE__</span>
+      </div>
+      <div class="invite-meta-links">
+        <a href="#giu-cho">Giữ chỗ tham dự ↓</a>
+        <span aria-hidden="true">·</span>
+        <a href="__SSR_GOOGLE_CAL_URL__" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
+        <span aria-hidden="true">·</span>
+        <button class="invite-text-btn" type="button" data-ics-download="workshop" data-ics-title="__SSR_EVENT_TITLE__" data-ics-start="__SSR_INVITE_ICS_START__" data-ics-end="__SSR_INVITE_ICS_END__" data-ics-location="__SSR_EVENT_LOCATION__" data-ics-url="__SSR_CANONICAL_URL__">Lưu lịch (.ics)</button>
+        <span aria-hidden="true">·</span>
+        <a href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a>
+      </div>
+    </div>
+
+    __SSR_EVENT_FIRST_TIMER_HTML__
+  </div>
+</section>
+
+<section class="section invite-letter-section" aria-label="Nội dung thư mời">
+  <div class="container invite-narrow">
+    <figure class="invite-poster-figure">
+      <button class="invite-poster-btn" type="button" aria-label="Xem ảnh lớn __SSR_EVENT_TITLE__" data-lightbox-src="__SSR_EVENT_IMAGE__" data-lightbox-alt="__SSR_EVENT_IMAGE_ALT__" data-lightbox-caption="__SSR_EVENT_TITLE__ · __SSR_INVITE_TIME_LABEL__ tại __SSR_INVITE_VENUE_NAME__">
+        <img src="__SSR_EVENT_IMAGE__" alt="__SSR_EVENT_IMAGE_ALT__" width="1024" height="576" fetchpriority="high" decoding="async">
+      </button>
+    </figure>
+
+    <article class="invite-prose">
+      __SSR_LETTER_BODY_HTML__
+
+      <div class="invite-signature">
+        <p class="invite-signoff">Trân trọng mời bạn đồng hành,</p>
+        <p class="invite-host">__SSR_EVENT_HOST_SIGNATURE__</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section section--mist invite-rsvp-section" id="giu-cho" aria-labelledby="ws-form-heading">
+  <div class="container">
+    <div class="join-invite-banner" id="ws-invite-banner" hidden role="status" aria-live="polite">
+      <span class="join-invite-dot" aria-hidden="true"></span>
+      <p class="join-invite-text" id="ws-invite-text"></p>
+    </div>
+
+    <div class="invite-rsvp-grid">
+      <div class="invite-form-surface">
+        <div class="kicker">Xác nhận tham dự · __SSR_EVENT_SEATS__</div>
+        <h2 id="ws-form-heading" class="invite-rsvp-heading">__SSR_EVENT_RSVP_HEADING__</h2>
+        <p class="invite-rsvp-lead">Để lại tên gọi và số Zalo để chúng mình sắp xếp chỗ ngồi chu đáo tại __SSR_INVITE_VENUE_NAME__ và gửi thông tin trước giờ gặp. Không cần tạo mật khẩu.</p>
+
+        <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="ws-form-heading" data-club-form data-event-studio data-draft-key="ws-__SSR_EVENT_SLUG__" data-event-slug="__SSR_EVENT_SLUG__" data-event-image="__SSR_EVENT_IMAGE__" data-endpoint="/api/registrations" data-phone="077.777.1948" data-phone-raw="0777771948" data-zalo="https://zalo.me/0777771948" data-zalo-group="__SSR_EVENT_ZALO_GROUP__" data-event-url="__SSR_CANONICAL_URL__" data-ics-start="__SSR_INVITE_ICS_START__" data-ics-end="__SSR_INVITE_ICS_END__" data-event-date="__SSR_EVENT_DATE_DISPLAY__" data-event-time="__SSR_INVITE_TIME_LABEL__" data-event-location="__SSR_EVENT_LOCATION__" novalidate>
+          <input type="hidden" name="source" value="event_modal">
+          <input type="hidden" name="eventId" value="__SSR_EVENT_ID__">
+          <input type="hidden" name="activity" value="__SSR_EVENT_TITLE__">
+          <input type="hidden" name="role" value="Tham dự __SSR_EVENT_TITLE__">
+
+          <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
+            <label for="ws-website">Website</label>
+            <input id="ws-website" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
+          <fieldset class="invite-fieldset">
+            <legend class="invite-legend">Số chỗ bạn muốn giữ <span aria-hidden="true">*</span></legend>
+            <div class="seat-segmented">
+              <div class="seat-seg-item">
+                <input class="visually-hidden" type="radio" name="seatCount" id="ws-seat-1" value="Đi 1 mình (1 chỗ)" data-seat-short="01 chỗ · Đi một mình" checked>
+                <label class="seat-seg-label" for="ws-seat-1">Đi 1 mình</label>
+              </div>
+              <div class="seat-seg-item">
+                <input class="visually-hidden" type="radio" name="seatCount" id="ws-seat-2" value="Đi cùng 1 bạn (2 chỗ)" data-seat-short="02 chỗ · Đi cùng bạn">
+                <label class="seat-seg-label" for="ws-seat-2">Đi cùng 1 bạn</label>
+              </div>
+              <div class="seat-seg-item">
+                <input class="visually-hidden" type="radio" name="seatCount" id="ws-seat-3" value="Nhóm 3+ người / Gia đình" data-seat-short="Nhóm 3+ chỗ">
+                <label class="seat-seg-label" for="ws-seat-3">Nhóm 3+ người</label>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="form-grid" data-guest-identity-fields>
+            <div class="form-row-2">
+              <div class="field">
+                <label for="ws-name">Tên gọi của bạn <span aria-hidden="true">*</span></label>
+                <input id="ws-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Minh Khôi" required minlength="2" enterkeyhint="next" data-error="ws-name-error">
+                <div id="ws-name-error" class="field-error">
+                  <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span data-error-text>Vui lòng nhập tên gọi của bạn (tối thiểu 2 ký tự).</span>
+                </div>
+              </div>
+              <div class="field">
+                <label for="ws-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
+                <input id="ws-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="done" data-error="ws-phone-error">
+                <div id="ws-phone-error" class="field-error">
+                  <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span data-error-text>Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <details class="rsvp-optional-note">
+            <summary>+ Gửi đôi dòng chia sẻ hoặc lời nhắn cho người điều phối (tùy chọn)</summary>
+            <div class="field invite-story-field" style="margin-top: 12px;">
+              <div class="note-preset-row" role="group" aria-label="Mẫu lời nhắn nhanh">
+                <button type="button" class="note-preset-chip" data-note-preset="Mình đi một mình lần đầu, mong được đón tiếp.">Đi 1 mình lần đầu</button>
+                <button type="button" class="note-preset-chip" data-note-preset="Mình cần hỗ trợ ghép xe từ khu Hòa Lạc.">Cần ghép xe</button>
+                <button type="button" class="note-preset-chip" data-note-preset="Mình có xe, có thể chở thêm 1 bạn cùng chiều.">Có thể chở thêm bạn</button>
+                <button type="button" class="note-preset-chip" data-note-preset="Mình muốn đến ngồi lắng nghe trọn buổi.">Chỉ muốn ngồi nghe</button>
+              </div>
+              <label for="ws-event-note" class="visually-hidden">Lời nhắn gửi ban tổ chức</label>
+              <textarea id="ws-event-note" name="note" rows="3" maxlength="750" placeholder="Điều bạn muốn chia sẻ trước buổi gặp, hoặc để trống nếu chỉ muốn đến lắng nghe..."></textarea>
+              <div class="invite-check-inline">
+                <input type="checkbox" id="ws-anon-share" name="anonShare" value="yes" checked>
+                <label for="ws-anon-share">Giữ ẩn danh hoàn toàn nếu Ban Điều Phối trích đọc chia sẻ này tại chương trình</label>
+              </div>
+            </div>
+          </details>
+
+          <div class="form-status" role="status" aria-live="polite"></div>
+
+          <div class="form-submit-stack">
+            <div class="form-submit-row">
+              <button class="btn btn--primary" type="submit" id="ws-submit-btn">Xác nhận giữ chỗ tham dự</button>
+              <a class="btn btn--outline" href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Vào Nhóm Zalo buổi gặp ↗</a>
+            </div>
+            <p class="form-privacy-note">__SSR_EVENT_FEE__. Thông tin đăng ký được bảo mật theo <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a>.</p>
+          </div>
+        </form>
+      </div>
+
+      <aside class="invite-card-col" aria-label="Thiệp xác nhận giữ chỗ">
+        <article class="invite-ticket" data-ws-pass aria-label="Thiệp mời __SSR_EVENT_TITLE__">
+          <div class="invite-ticket-photo">
+            <img src="__SSR_EVENT_IMAGE__" alt="__SSR_EVENT_IMAGE_ALT__" width="640" height="360" loading="lazy" decoding="async">
+          </div>
+
+          <div class="invite-ticket-body">
+            <div class="invite-ticket-top">
+              <span class="invite-ticket-kicker">__SSR_EVENT_KICKER__</span>
+              <span class="invite-ticket-status" data-ws-pass-state>Chờ xác nhận</span>
+            </div>
+
+            <p class="invite-ticket-guest-label">Kính mời</p>
+            <div class="invite-ticket-guest" data-ws-pass-name>Tên người tham dự</div>
+            <div class="invite-ticket-org" data-ws-pass-org>__SSR_INVITE_VENUE_NAME__</div>
+
+            <div class="invite-ticket-rule" aria-hidden="true"></div>
+
+            <dl class="invite-ticket-dl">
+              <div>
+                <dt>Thời gian</dt>
+                <dd>__SSR_INVITE_TIME_LABEL__</dd>
+              </div>
+              <div>
+                <dt>Địa điểm</dt>
+                <dd>__SSR_INVITE_VENUE_NAME__</dd>
+              </div>
+              <div>
+                <dt>Số chỗ</dt>
+                <dd data-ws-pass-seats>01 chỗ · Đi một mình</dd>
+              </div>
+              <div>
+                <dt>Mã giữ chỗ</dt>
+                <dd class="invite-ticket-code" data-ws-pass-code>—</dd>
+              </div>
+            </dl>
+          </div>
+        </article>
+
+        <div class="invite-ticket-actions" id="ws-pass-actions" hidden>
+          <p class="invite-actions-note">Đã ghi nhận giữ chỗ. Mời bạn vào Nhóm Zalo buổi gặp để nhận định vị, ghép xe và lưu lịch.</p>
+          <span id="ws-pass-invite-text" class="visually-hidden"></span>
+          <div class="pass-actions-buttons">
+            <a class="btn btn--primary btn--sm" href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Vào Nhóm Zalo ngay ↗</a>
+            <button type="button" class="btn btn--outline btn--sm" data-pass-download="workshop">Tải thiệp mời (PNG)</button>
+            <button type="button" class="btn btn--outline btn--sm" data-ics-download="workshop" data-ics-title="__SSR_EVENT_TITLE__" data-ics-start="__SSR_INVITE_ICS_START__" data-ics-end="__SSR_INVITE_ICS_END__" data-ics-location="__SSR_EVENT_LOCATION__" data-ics-url="__SSR_CANONICAL_URL__">Lưu lịch (.ics)</button>
+            <button type="button" class="btn btn--outline btn--sm" data-pass-share="workshop">Gửi lời mời</button>
+            <span class="copy-control">
+              <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="ws-pass-invite-text" data-copy-invite>
+                <span>Sao chép link</span>
+              </button>
+              <span class="copy-tip" role="status"></span>
+            </span>
+          </div>
+          <button type="button" class="pass-reset-link" data-pass-new="workshop">Giữ chỗ thêm cho một người bạn</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="footer-logo-row" href="/" aria-label="HolaRise – Cộng đồng Thanh niên Hòa Lạc">
+            <img src="/assets/images/logo-holarise.png" alt="HolaRise – Cộng đồng Thanh niên Hòa Lạc" width="104" height="24" loading="lazy" style="height: 22px; width: auto;">
+          </a>
+          <p style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;" data-i18n="brand.fullName">HolaRise – Cộng đồng Thanh niên Hòa Lạc</p>
+          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);" data-i18n="brand.subtitle">Khởi nguồn từ những buổi sớm trên sườn đồi Hòa Lạc, HolaRise đồng hành cùng người trẻ rèn sự tĩnh tại bên trong <a class="pillar-inline-tag pillar-inline-tag--holaheart" href="/lich-hoat-dong/?nhom=holaheart">HolaHeart</a>, giữ xanh cảnh quan tự nhiên <a class="pillar-inline-tag pillar-inline-tag--holagreen" href="/lich-hoat-dong/?nhom=holagreen">HolaGreen</a> và mang tri thức phụng sự cộng đồng <a class="pillar-inline-tag pillar-inline-tag--holaconnect" href="/lich-hoat-dong/?nhom=holaconnect">HolaConnect</a>.</p>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Hola · Together We Rise, Together We Serve.</p>
+        </div>
+
+        <div>
+          <h2 class="footer-heading" data-i18n="footer.explore">Khám phá</h2>
+          <ul class="footer-links">
+            <li><a href="/" data-i18n="nav.home">Trang chủ</a></li>
+            <li><a href="/gioi-thieu/" data-i18n="nav.about">Về HolaRise</a></li>
+            <li><a href="/lich-hoat-dong/" data-i18n="nav.schedule">Lịch hoạt động</a></li>
+            <li><a href="/hanh-trinh/" data-i18n="nav.journey">Hành trình</a></li>
+            <li><a href="/chinh-sach/" data-i18n="footer.transparency">Chuẩn mực Minh bạch &amp; An toàn</a></li>
+            <li>
+              <button class="pwa-install-footer-btn" type="button" data-pwa-install hidden>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 3v12"></path>
+                  <path d="m7 10 5 5 5-5"></path>
+                  <path d="M5 21h14"></path>
+                </svg>
+                <span data-i18n="pwa.installShort">Cài ứng dụng về máy</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="footer-heading" data-i18n="footer.pillars">3 Trụ cột</h2>
+          <ul class="footer-links">
+            <li><a href="/lich-hoat-dong/?nhom=holaheart" data-i18n="footer.pHeart">HolaHeart · Nội lực &amp; Lắng nghe</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holagreen" data-i18n="footer.pGreen">HolaGreen · Sinh thái &amp; Cảnh quan</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holaconnect" data-i18n="footer.pConnect">HolaConnect · Tri thức &amp; Phụng sự</a></li>
+            <li><a href="/tham-gia/" data-i18n="footer.pJoin">Thẻ Thành Viên &amp; Hợp tác</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="footer-heading" data-i18n="footer.contact">Văn phòng &amp; Liên hệ</h2>
+          <ul class="footer-links">
+            <li><span data-i18n="footer.officeLabel">Văn phòng:</span> Tân Xã – Hòa Lạc – Thạch Thất, Hà Nội</li>
+            <li><a href="tel:0777771948">077.777.1948</a></li>
+            <li><a href="mailto:phungsu@holarise.org">phungsu@holarise.org</a></li>
+            <li>Sinh hoạt định kỳ theo lịch công bố</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="footer-bottom-left">
+          <a class="footer-domain-link" href="/">holarise.org</a>
+          <span class="footer-web-only" aria-hidden="true">·</span>
+          <span class="footer-web-only" data-i18n="footer.copyright">© 2026 HolaRise – Cộng đồng Thanh niên Hòa Lạc</span>
+        </div>
+        <div class="footer-bottom-meta">
+          <a class="footer-web-only" href="/chinh-sach/" data-i18n="footer.privacy">Bảo mật &amp; Quy tắc</a>
+          <span class="footer-web-only" aria-hidden="true">·</span>
+          <button class="footer-feedback-trigger" type="button" data-open-feedback-modal data-i18n="footer.contribute">Đóng góp</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Native HTML5 <dialog> Đăng Ký Nhanh Workshop / Chiến Dịch -->
+  <dialog class="club-dialog" id="event-register-modal" closedby="any" aria-labelledby="modal-heading">
+    <div class="dialog-inner">
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
+      <span class="kicker" id="modal-kicker" style="margin-bottom: 8px;">Đăng ký giữ chỗ nhanh</span>
+      <h2 id="modal-heading" style="margin: 0 0 12px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Giữ chỗ tham dự hoạt động</h2>
+
+      <div class="modal-event-ticket">
+        <span class="modal-ticket-type" id="modal-event-type">Thông tin hoạt động</span>
+        <p class="modal-ticket-title" id="modal-event-title"></p>
+        <div class="modal-ticket-meta" id="modal-event-meta"></div>
+        <a class="modal-ticket-detail-link" id="modal-event-detail-link" href="/lich-hoat-dong/" hidden>Đọc trọn vẹn lá thư mời &amp; thông tin chi tiết →</a>
+      </div>
+
+      <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register" data-endpoint="/api/registrations" data-phone="077.777.1948" data-phone-raw="0777771948" data-zalo="https://zalo.me/0777771948" data-zalo-group="https://zalo.me/g/7fock88aizzrdkmr9ggf" novalidate>
+        <input type="hidden" name="source" value="event_modal">
+        <input type="hidden" name="activity" id="modal-event-input" value="">
+        <input type="hidden" name="eventId" id="modal-event-id" value="">
+        <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
+          <label for="modal-website">Website</label>
+          <input id="modal-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <div class="form-grid" data-guest-identity-fields>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="modal-name">Tên gọi của bạn <span aria-hidden="true">*</span></label>
+              <input id="modal-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Minh Anh" required minlength="2" enterkeyhint="next" data-error="modal-name-error">
+              <div id="modal-name-error" class="field-error">
+                <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span data-error-text>Vui lòng nhập tên gọi của bạn (tối thiểu 2 ký tự).</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="modal-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
+              <input id="modal-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="done" data-error="modal-phone-error">
+              <div id="modal-phone-error" class="field-error">
+                <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span data-error-text>Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label-text">Số chỗ giữ</span>
+          <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Số chỗ bạn muốn giữ">
+            <button type="button" class="quick-chip is-selected" data-vibe-chip="Đi 1 mình (1 chỗ)" aria-pressed="true">Đi 1 mình (1 chỗ)</button>
+            <button type="button" class="quick-chip" data-vibe-chip="Đi cùng 1 bạn (2 chỗ)" aria-pressed="false">Đi cùng 1 bạn (2 chỗ)</button>
+            <button type="button" class="quick-chip" data-vibe-chip="Nhóm 3+ người" aria-pressed="false">Nhóm 3+ người</button>
+          </div>
+        </div>
+        <details class="rsvp-optional-note">
+          <summary>+ Ghi chú cho BTC (tùy chọn)</summary>
+          <div class="field" style="margin-top: 10px;">
+            <div class="note-preset-row" role="group" aria-label="Mẫu lời nhắn nhanh">
+              <button type="button" class="note-preset-chip" data-note-preset="Mình đi một mình lần đầu, mong được đón tiếp.">Đi 1 mình lần đầu</button>
+              <button type="button" class="note-preset-chip" data-note-preset="Mình cần hỗ trợ ghép xe từ khu Hòa Lạc.">Cần ghép xe</button>
+              <button type="button" class="note-preset-chip" data-note-preset="Mình có xe, có thể chở thêm 1 bạn.">Có thể chở thêm bạn</button>
+              <button type="button" class="note-preset-chip" data-note-preset="Mình muốn đến ngồi lắng nghe trọn buổi.">Chỉ muốn ngồi nghe</button>
+            </div>
+            <label for="modal-note" id="modal-note-label" class="visually-hidden">Lời nhắn cho BTC</label>
+            <textarea id="modal-note" name="note" rows="2" placeholder="Chọn nhanh gợi ý ở trên hoặc viết ghi chú riêng..."></textarea>
+          </div>
+        </details>
+        <div class="form-status" role="status" aria-live="polite"></div>
+        <button class="btn btn--primary" type="submit" id="modal-submit-btn">Xác nhận giữ chỗ tham dự</button>
+        <p class="form-privacy-note">Thông tin dùng để Ban Điều Phối sắp xếp chỗ ngồi và gửi nhắc lịch. Chi phí (nếu có) được công khai minh bạch trên thẻ sự kiện. Xem <a href="/chinh-sach/">Chính sách bảo mật</a>.</p>
+      </form>
+
+      <datalist id="holarise-org-presets">
+        <!-- Khu vực Hòa Lạc, Thạch Thất, Quốc Oai, Sơn Tây, Xuân Mai -->
+        <option value="Đại học FPT Hà Nội (Hòa Lạc)"></option>
+        <option value="Đại học Quốc gia Hà Nội – Cơ sở Hòa Lạc (ĐHQGHN)"></option>
+        <option value="Trường Đại học Việt Nhật (VJU – Hòa Lạc)"></option>
+        <option value="Trường Đại học Công nghệ – ĐHQGHN (UET)"></option>
+        <option value="Trường Đại học Khoa học Tự nhiên – ĐHQGHN (HUS)"></option>
+        <option value="Trường Đại học Giáo dục – ĐHQGHN (UEd)"></option>
+        <option value="Trường Đại học Luật – ĐHQGHN (UL)"></option>
+        <option value="Trường Đại học Y Dược – ĐHQGHN (UMP)"></option>
+        <option value="Trường Quốc tế – ĐHQGHN (VNU-IS)"></option>
+        <option value="Trường Quản trị và Kinh doanh – ĐHQGHN (HSB)"></option>
+        <option value="Trường Đại học Lâm Nghiệp (Xuân Mai)"></option>
+        <option value="Đại học Công nghiệp Việt – Hung (Sơn Tây)"></option>
+        <option value="Học viện Viettel (Hòa Lạc)"></option>
+        <option value="Trường Sĩ quan Chính trị (Hòa Lạc)"></option>
+        <option value="Trường Sĩ quan Lục quân 1 (Sơn Tây)"></option>
+        <option value="THPT FPT Hà Nội (Hòa Lạc)"></option>
+        <option value="THPT Thạch Thất"></option>
+        <option value="THPT Hai Bà Trưng – Thạch Thất"></option>
+        <option value="THPT Phan Huy Chú – Thạch Thất"></option>
+        <option value="THPT Sơn Tây"></option>
+        <option value="THPT Quốc Oai"></option>
+        <option value="THPT Xuân Mai"></option>
+        <option value="THPT Chương Mỹ A"></option>
+        <!-- Khu CNC Hòa Lạc & Doanh nghiệp / Viện nghiên cứu -->
+        <option value="Khu Công nghệ cao Hòa Lạc (HHTP)"></option>
+        <option value="FPT Software Hòa Lạc (F-Ville)"></option>
+        <option value="Viettel High Tech (Khu CNC Hòa Lạc)"></option>
+        <option value="VNPT Technology (Khu CNC Hòa Lạc)"></option>
+        <option value="Hanwha Aero Engines (Khu CNC Hòa Lạc)"></option>
+        <option value="Nidec Vietnam (Khu CNC Hòa Lạc)"></option>
+        <option value="Viện Khoa học &amp; Công nghệ Việt Nam – Hàn Quốc (VKIST)"></option>
+        <option value="Trung tâm Đổi mới sáng tạo Quốc gia (NIC Hòa Lạc)"></option>
+        <option value="Tập đoàn Phenikaa / Trường Đại học Phenikaa"></option>
+        <!-- Đại học & Học viện lớn khu vực Hà Nội (bán kính 60km) -->
+        <option value="Đại học Bách khoa Hà Nội (HUST)"></option>
+        <option value="Đại học Kinh tế Quốc dân (NEU)"></option>
+        <option value="Trường Đại học Ngoại thương (FTU)"></option>
+        <option value="Học viện Công nghệ Bưu chính Viễn thông (PTIT)"></option>
+        <option value="Học viện Báo chí và Tuyên truyền (AJC)"></option>
+        <option value="Học viện Ngoại giao (DAV)"></option>
+        <option value="Học viện Tài chính (AOF)"></option>
+        <option value="Học viện Ngân hàng (BA)"></option>
+        <option value="Trường Đại học Sư phạm Hà Nội (HNUE)"></option>
+        <option value="Trường Đại học Thương mại (TMU)"></option>
+        <option value="Trường Đại học Công nghiệp Hà Nội (HaUI)"></option>
+        <option value="Trường Đại học Kiến trúc Hà Nội (HAU)"></option>
+        <option value="Trường Đại học Giao thông Vận tải (UTC)"></option>
+        <option value="Trường Đại học Hà Nội (HANU)"></option>
+        <option value="Trường Đại học Thăng Long"></option>
+        <option value="Người đi làm / Tự do"></option>
+      </datalist>
+
+      <div class="modal-pass-success" id="modal-pass-success" hidden>
+        <div class="modal-pass-badge">
+          <span class="live-status-dot" aria-hidden="true"></span>
+          <span>ĐÃ GHI NHẬN GIỮ CHỖ</span>
+        </div>
+        <div class="modal-pass-code-row">
+          <span>Mã vé giữ chỗ:</span>
+          <strong class="pass-code" id="modal-pass-code"></strong>
+        </div>
+        <p class="modal-pass-summary" id="modal-pass-summary"></p>
+        <span id="modal-pass-invite-text" class="visually-hidden"></span>
+        <div class="pass-actions-buttons">
+          <a class="btn btn--primary btn--sm" href="https://zalo.me/g/7fock88aizzrdkmr9ggf" target="_blank" rel="noopener noreferrer" id="modal-zalo-group-btn">Vào Nhóm Zalo buổi gặp ↗</a>
+          <button type="button" class="btn btn--outline btn--sm" data-pass-download="modal">Tải Thiệp Vé (PNG)</button>
+          <button type="button" class="btn btn--outline btn--sm" data-ics-download="modal" id="modal-ics-btn" hidden>Lưu lịch (.ics)</button>
+          <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Rủ bạn đi cùng</button>
+          <span class="copy-control">
+            <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
+              <span>Sao chép lời mời</span>
+            </button>
+            <span class="copy-tip" role="status"></span>
+          </span>
+        </div>
+        <button type="button" class="pass-reset-link" data-pass-new="modal">Đăng ký thêm cho người đi cùng</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Native HTML5 <dialog> Đóng góp · Gửi Đề xuất, Phản hồi & Báo lỗi -->
+  <dialog class="club-dialog club-dialog--auth" id="feedback-modal" closedby="any" aria-labelledby="feedback-modal-heading">
+    <div class="dialog-inner auth-dialog-inner">
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
+      <div class="auth-dialog-brand">
+        <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="32" height="32">
+        <div>
+          <h2 id="feedback-modal-heading" class="auth-dialog-title">Đóng góp cùng HolaRise</h2>
+          <p class="auth-dialog-sub">Mọi đề xuất hoạt động mới, góp ý trải nghiệm hay báo lỗi kỹ thuật đều giúp cộng đồng ngày một chỉn chu và trọn vẹn hơn.</p>
+        </div>
+      </div>
+
+      <form class="auth-form" id="feedback-form" novalidate>
+        <fieldset class="auth-fieldset">
+          <legend class="auth-label">Bạn muốn gửi nội dung gì?</legend>
+          <div class="feedback-kind-grid" role="radiogroup">
+            <label class="feedback-kind-opt">
+              <input class="visually-hidden" type="radio" name="feedbackKind" value="Đề xuất ý tưởng / hoạt động" checked>
+              <span>Đề xuất hoạt động</span>
+            </label>
+            <label class="feedback-kind-opt">
+              <input class="visually-hidden" type="radio" name="feedbackKind" value="Phản hồi trải nghiệm">
+              <span>Phản hồi trải nghiệm</span>
+            </label>
+            <label class="feedback-kind-opt">
+              <input class="visually-hidden" type="radio" name="feedbackKind" value="Báo lỗi kỹ thuật">
+              <span>Báo lỗi kỹ thuật</span>
+            </label>
+            <label class="feedback-kind-opt">
+              <input class="visually-hidden" type="radio" name="feedbackKind" value="Góp ý khác">
+              <span>Góp ý khác</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="auth-field">
+          <label for="fb-note">Chia sẻ chi tiết của bạn <span aria-hidden="true">*</span></label>
+          <textarea id="fb-note" name="note" rows="4" minlength="8" maxlength="1000" required placeholder="Mô tả ý tưởng, cảm nhận hoặc lỗi bạn gặp phải (nếu là lỗi, hãy cho biết trang bạn đang mở)..."></textarea>
+        </div>
+
+        <div class="auth-row-2">
+          <div class="auth-field">
+            <label for="fb-name">Tên của bạn <span class="auth-hint-inline">(tùy chọn)</span></label>
+            <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Có thể bỏ trống nếu ẩn danh">
+          </div>
+          <div class="auth-field">
+            <label for="fb-contact">Email / Zalo <span class="auth-hint-inline">(tùy chọn)</span></label>
+            <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Để BĐP phản hồi lại bạn">
+          </div>
+        </div>
+
+        <div class="form-status" id="fb-status" role="status" aria-live="polite"></div>
+        <button class="auth-submit-btn" type="submit" id="fb-submit-btn">Gửi đóng góp tới Ban Điều Phối</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Native HTML5 <dialog> Lightbox Xem Ảnh Sự Kiện (Prev/Next + Keyboard + Touch Swipe) -->
+  <dialog class="club-dialog club-dialog--lightbox" id="gallery-lightbox" closedby="any" aria-label="Xem ảnh sự kiện">
+    <div class="lightbox-stage">
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng ảnh">×</button>
+      <div class="lightbox-media-wrap">
+        <button class="lightbox-nav lightbox-nav--prev" type="button" data-lightbox-prev aria-label="Ảnh trước">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <img id="lightbox-img" alt="">
+        <button class="lightbox-nav lightbox-nav--next" type="button" data-lightbox-next aria-label="Ảnh tiếp theo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="lightbox-bar">
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+        <div class="lightbox-bar-right">
+          <span class="lightbox-counter" id="lightbox-counter" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Desktop Orbital Reading Progress & Back-to-Top Ring (Desktop >= 1024px only) -->
+  <button class="orbital-top-btn" id="orbital-top-btn" type="button" aria-label="Cuộn lên đầu trang">
+    <svg class="orbital-ring" viewBox="0 0 44 44" aria-hidden="true">
+      <circle class="orbital-ring-track" cx="22" cy="22" r="19"></circle>
+      <circle class="orbital-ring-fill" cx="22" cy="22" r="19"></circle>
+    </svg>
+    <svg class="orbital-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 19V5"></path>
+      <path d="m5 12 7-7 7 7"></path>
+    </svg>
+  </button>
+
+  <script src="/assets/vendor/gsap.min.js?v=d6acdb095e" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=d6acdb095e" defer></script>
+  <script src="/assets/js/motion.js?v=d6acdb095e" defer></script>
+  <script src="/assets/js/main.js?v=d6acdb095e" defer></script>
+  <script src="/assets/js/join-pass.js?v=d6acdb095e" defer></script>
+</body>
+</html>

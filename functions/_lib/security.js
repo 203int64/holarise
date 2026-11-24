@@ -266,14 +266,38 @@ export async function requireAdmin(
   return { ok: true, user };
 }
 
-export function generateMemberCode(year = 2026) {
-  const bytes = new Uint8Array(4);
-  crypto.getRandomValues(bytes);
-  let suffix = "";
-  for (let i = 0; i < 4; i++) {
-    suffix += MEMBER_CODE_ALPHABET[bytes[i] % MEMBER_CODE_ALPHABET.length];
+export function formatVnDateYYMMDD(nowDate = new Date()) {
+  const vn = new Date(nowDate.getTime() + 7 * 60 * 60 * 1000);
+  const yy = String(vn.getUTCFullYear()).slice(-2);
+  const mm = String(vn.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(vn.getUTCDate()).padStart(2, "0");
+  return `${yy}${mm}${dd}`;
+}
+
+export function generateMemberCode(nowDateOrYear = new Date(), seq = 1) {
+  const dateObj = nowDateOrYear instanceof Date ? nowDateOrYear : new Date();
+  const yymmdd = formatVnDateYYMMDD(dateObj);
+  const safeSeq = Math.max(1, Number(seq) || 1);
+  return `HR-${yymmdd}-${safeSeq}`;
+}
+
+export async function generateSequentialMemberCode(db, nowDate = new Date(), offset = 0) {
+  const yymmdd = formatVnDateYYMMDD(nowDate);
+  const prefix = `HR-${yymmdd}-`;
+  let maxSeq = 0;
+  if (db) {
+    const rows = await db
+      .prepare("SELECT member_code FROM members WHERE member_code LIKE ?")
+      .bind(`${prefix}%`)
+      .all()
+      .catch(() => ({ results: [] }));
+    for (const r of rows?.results || []) {
+      const tail = String(r.member_code || "").slice(prefix.length);
+      const n = Number.parseInt(tail, 10);
+      if (Number.isFinite(n) && n > maxSeq) maxSeq = n;
+    }
   }
-  return `HOLA-${year}-${suffix}`;
+  return `${prefix}${maxSeq + 1 + Math.max(0, Number(offset) || 0)}`;
 }
 
 export function buildMemberSessionCookie(token, request, clear = false) {

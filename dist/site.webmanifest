@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên",
+  "name": "HolaRise – Cộng đồng Thanh niên Hòa Lạc",
   "short_name": "HolaRise",
-  "description": "Khởi nguồn từ Hòa Lạc, kết nối thế hệ trẻ cùng vun bồi nội lực (HolaHeart), giữ xanh cảnh quan (HolaGreen) và phụng sự cộng đồng (HolaConnect).",
+  "description": "Khởi nguồn từ những buổi sớm trên sườn đồi Hòa Lạc, HolaRise đồng hành cùng người trẻ rèn sự tĩnh tại bên trong (HolaHeart), giữ xanh cảnh quan tự nhiên (HolaGreen) và mang tri thức phụng sự cộng đồng (HolaConnect).",
   "lang": "vi-VN",
   "dir": "ltr",
   "start_url": "/?source=pwa",

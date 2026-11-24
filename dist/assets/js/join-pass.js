@@ -38,7 +38,7 @@
   var modalPassSummaryEl = document.getElementById("modal-pass-summary");
   var modalInviteTarget = document.getElementById("modal-pass-invite-text");
 
-  var wsForm = document.querySelector("[data-father-studio]");
+  var wsForm = document.querySelector("[data-event-studio], [data-father-studio]");
   var wsPassEl = document.querySelector("[data-ws-pass]");
   var wsActionsEl = document.getElementById("ws-pass-actions");
   var wsInviteTarget = document.getElementById("ws-pass-invite-text");
@@ -633,9 +633,10 @@
   }
 
   function downloadFatherInvitePng(snapshot) {
+    var posterSrc = (snapshot && snapshot.eventImage) || "/assets/images/og-cover.jpg";
     Promise.all([
       waitForFonts(),
-      loadSameOriginLogo("/assets/images/events/cuoc-doi-cua-cha-poster.jpg"),
+      loadSameOriginLogo(posterSrc),
     ]).then(function (assets) {
       var posterImg = assets[1];
       var canvas = document.createElement("canvas");
@@ -745,9 +746,12 @@
 
       ctx.fillStyle = "#5F6B64";
       ctx.font = '400 20px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText("HolaHeart · Cộng đồng Thanh niên HolaRise", padX, footY);
+      ctx.fillText("Cộng đồng HolaRise", padX, footY);
       ctx.textAlign = "right";
-      ctx.fillText("holarise.org/su-kien/cuoc-doi-cua-cha", cardX + cardW - 56, footY);
+      var cleanUrlLabel = String((snapshot && snapshot.eventUrl) || "holarise.org/lich-hoat-dong/")
+        .replace(/^https?:\/\//, "")
+        .replace(/\/$/, "");
+      ctx.fillText(cleanUrlLabel.indexOf("holarise.org") === 0 ? cleanUrlLabel : "holarise.org" + cleanUrlLabel, cardX + cardW - 56, footY);
       ctx.textAlign = "left";
 
       ctx.restore();
@@ -758,8 +762,9 @@
       ctx.lineWidth = 2;
       ctx.stroke();
 
+      var slugPart = String((snapshot && snapshot.eventSlug) || "su-kien").toLowerCase().replace(/[^a-z0-9-]+/g, "-");
       var fileName =
-        "thiep-moi-cuoc-doi-cua-cha-" +
+        "thiep-moi-" + slugPart + "-" +
         String(snapshot.id || "holarise").toLowerCase().replace(/[^a-z0-9-]+/g, "-") +
         ".png";
 
@@ -1320,28 +1325,36 @@
 
   document.querySelectorAll("[data-ics-download]").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var title = btn.getAttribute("data-ics-title") || 'Workshop "Cuộc Đời Của Cha" · HolaHeart';
-      var startUtc = btn.getAttribute("data-ics-start") || "20261129T121500Z";
-      var endUtc = btn.getAttribute("data-ics-end") || "20261129T143000Z";
-      var location = btn.getAttribute("data-ics-location") || "Quán Cafe Mây Lang Thang, Hòa Lạc";
-      var url = btn.getAttribute("data-ics-url") || "https://holarise.org/su-kien/cuoc-doi-cua-cha/";
+      var title = btn.getAttribute("data-ics-title") || "Hoạt động Cộng đồng HolaRise";
+      var startUtc = btn.getAttribute("data-ics-start") || "";
+      var endUtc = btn.getAttribute("data-ics-end") || "";
+      var location = btn.getAttribute("data-ics-location") || "Hòa Lạc, Hà Nội";
+      var url = btn.getAttribute("data-ics-url") || window.location.href;
+      if (!startUtc || !endUtc) {
+        var now = new Date();
+        var fallbackStart = new Date(now.getTime() + 86400000);
+        var fallbackEnd = new Date(fallbackStart.getTime() + 7200000);
+        startUtc = fallbackStart.toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
+        endUtc = fallbackEnd.toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
+      }
       var mode = btn.getAttribute("data-ics-download") || "workshop";
       var snap = confirmedSnapshots[mode];
       var codeNote = snap && snap.id ? "Mã vé giữ chỗ: " + snap.id + "\n" : "";
       var description =
         codeNote +
-        "Lắng nghe – Tri ân – Yêu thương. Tham dự miễn phí (tự túc đồ uống tại quán).\nThư mời chi tiết: " +
+        "Hoạt động cộng đồng phi lợi nhuận HolaRise.\nThư mời chi tiết: " +
         url;
 
       var stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
+      var uidSlug = String((snap && snap.eventSlug) || title).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 48);
       var icsLines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//HolaRise//HolaHeart Workshop//VI",
+        "PRODID:-//HolaRise//Community Event//VI",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
         "BEGIN:VEVENT",
-        "UID:holaheart-cuoc-doi-cua-cha-20261129@holarise.org",
+        "UID:" + uidSlug + "-" + startUtc.slice(0, 8) + "@holarise.org",
         "DTSTAMP:" + stamp,
         "DTSTART:" + startUtc,
         "DTEND:" + endUtc,
@@ -1352,7 +1365,7 @@
         "BEGIN:VALARM",
         "TRIGGER:-PT2H",
         "ACTION:DISPLAY",
-        "DESCRIPTION:" + escapeIcsText("Nhắc lịch 19h15 tối nay: " + title),
+        "DESCRIPTION:" + escapeIcsText("Nhắc lịch trước 2 giờ: " + title),
         "END:VALARM",
         "END:VEVENT",
         "END:VCALENDAR",
@@ -1362,7 +1375,7 @@
       var objUrl = URL.createObjectURL(blob);
       var a = document.createElement("a");
       a.href = objUrl;
-      a.download = "cuoc-doi-cua-cha-29-11-2026.ics";
+      a.download = "holarise-" + uidSlug + ".ics";
       document.body.appendChild(a);
       a.click();
       a.remove();

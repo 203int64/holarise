@@ -5,15 +5,15 @@
       "filterKey": "holaheart",
       "badge": "HolaHeart",
       "shortTab": "01 · HolaHeart",
-      "title": "Nội lực, Lắng nghe & Giá trị sống",
-      "summary": "Giữa nhịp học tập và công nghệ dồn dập tại Hòa Lạc, HolaHeart mở ra những buổi đối thoại gần gũi và đêm nhạc mộc để người trẻ lắng lại, nuôi dưỡng lòng biết ơn, chăm sóc sức khỏe tinh thần và kết nối chân thành.",
+      "title": "Tĩnh tại, Lắng nghe & Gia đình",
+      "summary": "Dưới ánh đèn vàng ấm và tiếng đàn mộc, HolaHeart mở ra những vòng tròn lắng nghe đồng đẳng để người trẻ tạm đặt màn hình xuống, soi chiếu lại tình thân gia đình và tìm sự vững vàng từ bên trong.",
       "image": "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg",
-      "imageAlt": "Không gian đối thoại và lắng nghe tại sự kiện HolaHeart ở Hòa Lạc.",
+      "imageAlt": "Không gian đối thoại và lắng nghe tại sự kiện HolaHeart ngày 15/11/2026 ở Hòa Lạc.",
       "imageCaption": "Vòng tròn đối thoại · HolaHeart",
       "story": "",
       "highlights": [
-        "Đối thoại giá trị sống",
-        "Gia đình & Sự thấu cảm",
+        "Vòng tròn lắng nghe đồng đẳng",
+        "Gia đình & Lòng biết ơn",
         "Đêm nhạc mộc kết nối"
       ],
       "metricBadge": "",
@@ -27,12 +27,12 @@
         {
           "src": "/assets/images/events/holaheart-2026-11-15/04-wide-venue.jpg",
           "alt": "Toàn cảnh buổi gặp mặt HolaHeart tại Mây Lang Thang Cafe, Hòa Lạc.",
-          "caption": "Không gian gặp gỡ · Hòa Lạc"
+          "caption": "Không gian gặp gỡ · 15/11/2026"
         },
         {
           "src": "/assets/images/events/holaheart-2026-11-15/05-listening-moment.jpg",
           "alt": "Người trẻ chăm chú lắng nghe trong buổi đối thoại HolaHeart ngày 15/11/2026.",
-          "caption": "Khoảnh khắc lắng nghe · 15/11"
+          "caption": "Khoảnh khắc lắng nghe · 15/11/2026"
         }
       ]
     },
@@ -42,35 +42,24 @@
       "badge": "HolaGreen",
       "shortTab": "02 · HolaGreen",
       "title": "Sinh thái & Cảnh quan Bền vững",
-      "summary": "Trưởng thành bắt đầu từ sự trân trọng mảnh đất mình sống mỗi ngày. HolaGreen kết nối các nhóm bạn trẻ giữ sạch tuyến cảnh quan ven hồ, giảm nhựa dùng một lần và ươm mảng xanh bản địa tại Hòa Lạc.",
-      "image": "/assets/images/illustrations/holagreen/G03.jpg",
-      "imageAlt": "Ảnh định hướng hoạt động HolaGreen gìn giữ cảnh quan ven hồ tại Hòa Lạc.",
-      "imageCaption": "Giữ sạch tuyến cảnh quan ven hồ",
+      "summary": "Trưởng thành bắt đầu từ sự trân trọng mảnh đất dưới chân. HolaGreen đang chuẩn bị khởi động các buổi giữ sạch tuyến đường bộ công cộng an toàn quanh khu đại học, phân loại rác tại nguồn và ươm mảng xanh bản địa.",
+      "image": "/assets/images/hero-holarise-binh-minh.webp",
+      "imageAlt": "Khung cảnh bình minh sườn đồi — nhánh HolaGreen đang chuẩn bị khởi động buổi đầu tiên.",
+      "imageCaption": "Đang chuẩn bị khởi động",
       "story": "",
       "highlights": [
-        "Giữ sạch cảnh quan Hòa Lạc",
-        "Phân loại & Giảm nhựa",
-        "Ươm cây xanh bản địa"
+        "Giữ sạch tuyến đường công cộng an toàn",
+        "Phân loại & Giảm nhựa dùng một lần",
+        "Ươm mảng xanh bản địa"
       ],
-      "metricBadge": "",
+      "metricBadge": "Sắp khởi động",
       "sdgs": [
         "SDG 11",
         "SDG 13",
         "SDG 15"
       ],
       "imageIsIllustration": true,
-      "storyPhotos": [
-        {
-          "src": "/assets/images/illustrations/holagreen/G08.jpg",
-          "alt": "Ảnh định hướng tình nguyện viên thu gom và phân loại rác ven hồ Hòa Lạc.",
-          "caption": "Phân loại rác tại nguồn"
-        },
-        {
-          "src": "/assets/images/illustrations/holagreen/G06.jpg",
-          "alt": "Ảnh định hướng hoàn tất buổi làm sạch cảnh quan lúc chiều muộn tại Hòa Lạc.",
-          "caption": "Tuyến ven hồ chiều muộn"
-        }
-      ]
+      "storyPhotos": []
     },
     {
       "id": "holaconnect",
@@ -78,35 +67,24 @@
       "badge": "HolaConnect",
       "shortTab": "03 · HolaConnect",
       "title": "Tri thức & Phụng sự Cộng đồng",
-      "summary": "Đưa tri thức và sự đồng hành bước ra khỏi giảng đường để gắn bó bền bỉ cùng đời sống quanh Hòa Lạc. HolaConnect vun đắp tủ sách thiếu nhi, duy trì giờ đọc cuối tuần và các buổi dã ngoại rèn luyện sức bền.",
-      "image": "/assets/images/illustrations/holaconnect/C04.jpg",
-      "imageAlt": "Ảnh định hướng thành viên HolaConnect trao tặng sách thiếu nhi cho cộng đồng.",
-      "imageCaption": "Tủ sách & Văn hóa đọc cộng đồng",
+      "summary": "Đưa tri thức và bước chân người trẻ rời khỏi giảng đường để đồng hành bền bỉ cùng đời sống quanh mình: từ những buổi đi bộ dưới tán thông rèn sức bền đến hành trình xây dựng tủ sách thiếu nhi cộng đồng.",
+      "image": "/assets/images/hero-holarise-binh-minh.webp",
+      "imageAlt": "Khung cảnh sườn đồi buổi sớm — nhánh HolaConnect mở đầu với chặng đi bộ Núi Luốt ngày 26/11/2026.",
+      "imageCaption": "Khởi động · 26/11/2026",
       "story": "",
       "highlights": [
-        "Tủ sách & Văn hóa đọc",
-        "Đồng hành cùng thiếu nhi",
-        "Dã ngoại & Gắn kết thể chất"
+        "Dã ngoại dưới tán thông & Gắn kết",
+        "Tủ sách thiếu nhi cộng đồng",
+        "Đồng hành cùng nhà trường & địa phương"
       ],
-      "metricBadge": "",
+      "metricBadge": "Đang mở đăng ký",
       "sdgs": [
         "SDG 4",
         "SDG 11",
         "SDG 17"
       ],
       "imageIsIllustration": true,
-      "storyPhotos": [
-        {
-          "src": "/assets/images/illustrations/holaconnect/C03.jpg",
-          "alt": "Ảnh định hướng vòng tròn trò chuyện và kết nối ngoài trời tại Hòa Lạc.",
-          "caption": "Vòng tròn kết nối ngoài trời"
-        },
-        {
-          "src": "/assets/images/illustrations/holaconnect/C06.jpg",
-          "alt": "Ảnh định hướng chuẩn bị tủ sách cho lớp học cộng đồng.",
-          "caption": "Chuẩn bị học cụ & sách"
-        }
-      ]
+      "storyPhotos": []
     }
   ],
   "campaigns": [],
@@ -119,14 +97,14 @@
     },
     {
       "src": "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg",
-      "alt": "Diễn giả chia sẻ cùng các bạn trẻ và gia đình tại Mây Lang Thang Cafe, Hòa Lạc.",
-      "caption": "Chia sẻ giữa vòng tròn · Hòa Lạc",
+      "alt": "Người dẫn chuyện chia sẻ cùng các bạn trẻ tại Mây Lang Thang Cafe, Hòa Lạc.",
+      "caption": "Chia sẻ giữa vòng tròn · 15/11/2026",
       "label": "HolaHeart · 15/11/2026"
     },
     {
       "src": "/assets/images/events/holaheart-2026-11-15/02-conversation.jpg",
-      "alt": "Các thành viên trao đổi cởi mở giữa không gian xanh tại Hòa Lạc.",
-      "caption": "Trò chuyện ngoài trời · Hòa Lạc",
+      "alt": "Các bạn trẻ trò chuyện cởi mở giữa không gian xanh tại Hòa Lạc.",
+      "caption": "Trò chuyện ngoài trời · 15/11/2026",
       "label": "HolaHeart · 15/11/2026"
     },
     {
@@ -137,26 +115,26 @@
     },
     {
       "src": "/assets/images/events/holaheart-2026-11-15/06-app-activity.jpg",
-      "alt": "Người tham dự tương tác ghi lại suy nghĩ cá nhân trong chương trình.",
-      "caption": "Tương tác & Suy ngẫm",
+      "alt": "Người tham dự ghi lại những suy ngẫm cá nhân trong chương trình.",
+      "caption": "Ghi lại điều muốn nói · 15/11/2026",
       "label": "HolaHeart · 15/11/2026"
     },
     {
       "src": "/assets/images/events/holaheart-2026-11-15/03-group-women.jpg",
-      "alt": "Các thành viên nữ lưu lại nụ cười sau buổi đối thoại HolaHeart.",
+      "alt": "Nụ cười của các bạn nữ tham dự sau buổi đối thoại HolaHeart.",
       "caption": "Nụ cười sau buổi đối thoại",
       "label": "HolaHeart · 15/11/2026"
     },
     {
       "src": "/assets/images/events/holaheart-2026-11-15/01-group-men.jpg",
-      "alt": "Nhóm bạn trẻ chụp ảnh lưu niệm cuối chương trình HolaHeart.",
-      "caption": "Nhóm bạn trẻ tham dự · 15/11",
+      "alt": "Nhóm bạn trẻ lưu lại khoảnh khắc cuối chương trình HolaHeart.",
+      "caption": "Khoảnh khắc cuối buổi · 15/11/2026",
       "label": "HolaHeart · 15/11/2026"
     },
     {
       "src": "/assets/images/events/holaheart-2026-11-15/08-pair-at-event.jpg",
       "alt": "Hai thành viên lưu lại khoảnh khắc kết nối tại sự kiện HolaHeart.",
-      "caption": "Khoảnh khắc kết nối cuối buổi",
+      "caption": "Kết nối cuối buổi · 15/11/2026",
       "label": "HolaHeart · 15/11/2026"
     }
   ]

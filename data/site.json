@@ -2,17 +2,17 @@
   "brand": {
     "brandName": "HolaRise",
     "shortName": "Cộng đồng HolaRise",
-    "fullName": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên",
-    "englishName": "HolaRise – Hoa Lac Youth Empowerment Community",
+    "fullName": "HolaRise – Cộng đồng Thanh niên Hòa Lạc",
+    "englishName": "HolaRise – Youth Community & Social Impact Initiative",
     "tagline": "Together We Rise, Together We Serve.",
     "motto": "Hola · Together We Rise, Together We Serve.",
-    "subtitle": "Khởi nguồn từ Hòa Lạc, kết nối thế hệ trẻ cùng vun bồi nội lực (HolaHeart), giữ xanh cảnh quan (HolaGreen) và phụng sự cộng đồng (HolaConnect).",
-    "location": "Hòa Lạc, Hà Nội",
+    "subtitle": "Khởi nguồn từ những buổi sớm trên sườn đồi Hòa Lạc, HolaRise đồng hành cùng người trẻ rèn sự tĩnh tại bên trong (HolaHeart), giữ xanh cảnh quan tự nhiên (HolaGreen) và mang tri thức phụng sự cộng đồng (HolaConnect).",
+    "location": "Khởi nguồn từ Hòa Lạc, Hà Nội",
     "siteUrl": "https://holarise.org",
     "language": "vi",
     "locale": "vi_VN",
     "ogImage": "/assets/images/holarise-binh-minh-og.jpg",
-    "ogImageAlt": "Các bạn trẻ HolaRise cùng đón bình minh trên sườn đồi Hòa Lạc.",
+    "ogImageAlt": "Những người trẻ HolaRise đón ánh bình minh trên sườn đồi, dưới dòng chữ Together We Rise, Together We Serve.",
     "logoLight": "/assets/images/logo-holarise.png",
     "logoDark": "/assets/images/logo-holarise.png",
     "logoMark": "/assets/images/logo-mark.png"
@@ -21,19 +21,20 @@
     "email": "phungsu@holarise.org",
     "phoneDisplay": "077.777.1948",
     "address": "Tân Xã – Hòa Lạc – Thạch Thất, Hà Nội",
-    "meetingTime": "1–2 hoạt động mỗi tuần tại Hòa Lạc",
+    "meetingTime": "Sinh hoạt định kỳ theo lịch công bố",
     "facebook": "",
     "zalo": "https://zalo.me/0777771948",
+    "zaloGroup": "https://zalo.me/g/7fock88aizzrdkmr9ggf",
     "youtube": "",
     "instagram": "",
     "formEndpoint": "/api/registrations"
   },
   "hero": {
     "badge": "Hola · Together We Rise, Together We Serve",
-    "headline": "Sống sâu từ bên trong,\nHành động vì Hòa Lạc.",
-    "description": "Khởi nguồn từ Hòa Lạc, HolaRise kết nối những người trẻ chọn lắng nghe sâu hơn, giữ xanh mảnh đất mình sống và bền bỉ sẻ chia cùng cộng đồng.",
+    "headline": "Tĩnh tại bên trong,\nHành động từ Hòa Lạc.",
+    "description": "Khởi nguồn từ những buổi sớm trên sườn đồi Hòa Lạc, HolaRise kết nối những người trẻ chọn sống có gốc rễ: lắng lại để thấu hiểu gia đình và chính mình (HolaHeart), giữ sạch từng tán cây, mặt nước nơi mình gắn bó (HolaGreen), và đem tri thức bồi đắp cho thế hệ tiếp nối (HolaConnect).",
     "quickPills": [
-      "HolaHeart · Nội lực",
+      "HolaHeart · Tĩnh tại",
       "HolaGreen · Sinh thái",
       "HolaConnect · Phụng sự"
     ],
@@ -48,37 +49,37 @@
     "image": "/assets/images/holarise-binh-minh-1671.webp",
     "imageSrcset": "/assets/images/holarise-binh-minh-768.webp 768w, /assets/images/holarise-binh-minh-1200.webp 1200w, /assets/images/holarise-binh-minh-1671.webp 1671w",
     "mobileImageSrcset": "/assets/images/holarise-binh-minh-doc-512.webp 512w, /assets/images/holarise-binh-minh-doc-768.webp 768w, /assets/images/holarise-binh-minh-doc-1024.webp 1024w",
-    "imageAlt": "Những người trẻ HolaRise cùng đón bình minh trên sườn đồi Hòa Lạc.",
+    "imageAlt": "Những người trẻ HolaRise đón ánh bình minh trên sườn đồi Hòa Lạc.",
     "imageIsIllustration": true
   },
   "about": {
     "image": "/assets/images/hero-holarise-binh-minh.webp",
-    "imageAlt": "Bình minh trên đồi và mặt hồ Hòa Lạc — nơi khởi nguồn hành trình của cộng đồng người trẻ HolaRise.",
+    "imageAlt": "Ánh bình minh trên sườn đồi và mặt nước phẳng lặng — biểu tượng khởi nguồn của HolaRise.",
     "imageIsIllustration": true
   },
   "impactMetrics": [],
   "philosophy": {
-    "quote": "Mọi thay đổi bền vững đều bắt đầu từ bên trong — khi người trẻ biết vun bồi nhân cách, giữ xanh mảnh đất mình sống và kiên trì sẻ chia từ Hòa Lạc vươn xa.",
-    "quoteAuthor": "Cộng đồng Thanh niên Hòa Lạc (HolaRise)",
-    "mission": "Đồng hành cùng người trẻ tại Hòa Lạc rèn luyện nội lực (HolaHeart), giữ gìn cảnh quan sinh thái (HolaGreen) và phụng sự đời sống cộng đồng (HolaConnect).",
-    "vision": "Kiến tạo một cộng đồng người trẻ bản lĩnh, tử tế và minh bạch — bắt rễ sâu tại Hòa Lạc trước khi lan tỏa mô hình phụng sự ra nhiều vùng đất mới.",
+    "quote": "Mọi thay đổi bền vững đều khởi đi từ sự tĩnh tại bên trong — khi người trẻ biết giữ gốc rễ gia đình, trân trọng mảnh đất dưới chân và bền bỉ sẻ chia trên mọi chặng đường trưởng thành.",
+    "quoteAuthor": "Cộng đồng HolaRise",
+    "mission": "Đồng hành cùng thế hệ trẻ rèn sự vững vàng nội tâm (HolaHeart), gìn giữ môi trường tự nhiên (HolaGreen) và sẻ chia tri thức tới cộng đồng (HolaConnect) — bắt đầu từ Hòa Lạc để mang giá trị tử tế đi xa hơn.",
+    "vision": "Xây dựng một mạng lưới người trẻ đĩnh đạc, minh bạch và sống có chiều sâu — nơi Hòa Lạc là cái nôi thực chứng đầu tiên trước khi lan tỏa tự nhiên theo bước chân người trẻ tới nhiều vùng đất mới.",
     "motto": "Hola · Together We Rise, Together We Serve",
     "coreValues": [
       {
-        "title": "Chân thành & Lắng nghe",
-        "description": "Mở không gian đối thoại bình đẳng, không phán xét để người trẻ lắng nghe chính mình và thấu hiểu nhau."
+        "title": "Lắng nghe & Đồng đẳng",
+        "description": "Mỗi cuộc gặp là một vòng tròn ngang tầm mắt: bạn có thể cất lời sẻ chia hoặc chỉ ngồi lắng nghe trọn buổi mà không chịu bất kỳ áp lực nào."
       },
       {
-        "title": "Biết ơn & Nhân cách",
-        "description": "Lấy lòng biết ơn gia đình, thầy cô và mảnh đất mình gắn bó làm gốc rễ cho sự trưởng thành."
+        "title": "Gốc rễ & Lòng biết ơn",
+        "description": "Bắt đầu hành trình trưởng thành từ sự trân trọng gia đình, thầy cô và thiên nhiên nơi mình đang sống, học tập."
       },
       {
-        "title": "Việc nhỏ · Dấu ấn sâu",
-        "description": "Không phô trương hình thức; bền bỉ làm trọn vẹn từng buổi sinh hoạt từ khuôn viên đại học đến đời sống Hòa Lạc."
+        "title": "Việc nhỏ · Dấu ấn bền",
+        "description": "Tiết chế hình thức; làm trọn vẹn từng buổi đối thoại, từng tuyến đường sạch và từng kệ sách được trao tận tay."
       },
       {
-        "title": "Minh bạch & Kiên định",
-        "description": "Công khai lịch trình, chi phí (nếu phát sinh) và hồ sơ tổng kết sau mỗi chương trình."
+        "title": "Minh bạch & Đối soát",
+        "description": "Công khai lịch trình, chi phí thực tế bằng con số rõ ràng và đối soát kết quả bàn giao sau mỗi chiến dịch."
       }
     ]
   },
@@ -87,64 +88,64 @@
       "code": "SDG 3",
       "title": "Sức khỏe & Tinh thần",
       "color": "#4C9F38",
-      "description": "Nuôi dưỡng không gian đối thoại an toàn giúp người trẻ cân bằng áp lực học tập và chăm sóc đời sống tinh thần."
+      "description": "Duy trì các vòng tròn lắng nghe đồng đẳng giúp người trẻ giải tỏa áp lực học tập và chăm sóc đời sống tinh thần lành mạnh."
     },
     {
       "code": "SDG 4",
       "title": "Giáo dục chất lượng",
       "color": "#C5192D",
-      "description": "Phát triển các chuyên đề giá trị sống, kỹ năng tự học và tủ sách cộng đồng tại Hòa Lạc."
+      "description": "Xây dựng các chuyên đề kỹ năng sống thiết thực, văn hóa đọc và tủ sách thiếu nhi tại cộng đồng địa phương."
     },
     {
       "code": "SDG 11",
       "title": "Cộng đồng bền vững",
       "color": "#FD9D24",
-      "description": "Kết nối sinh viên các trường đại học cùng cư dân địa phương xây dựng nếp sống văn minh, ấm áp."
+      "description": "Kết nối sinh viên, người trẻ đi làm cùng cư dân bản địa xây dựng nếp sống văn minh, ấm áp và gắn kết."
     },
     {
       "code": "SDG 13",
       "title": "Hành động vì khí hậu",
       "color": "#3F7E44",
-      "description": "Thúc đẩy thói quen giảm nhựa dùng một lần và phân loại rác tái chế ngay tại nguồn."
+      "description": "Khuyến khích thói quen giảm nhựa dùng một lần và phân loại rác tái chế ngay tại nơi học tập, sinh sống."
     },
     {
       "code": "SDG 15",
       "title": "Hệ sinh thái trên cạn",
       "color": "#56C02B",
-      "description": "Giữ sạch các tuyến cảnh quan ven hồ và chăm sóc mảng xanh bản địa quanh khu vực Hòa Lạc."
+      "description": "Giữ sạch các tuyến đường bộ công cộng, không gian xanh và ươm trồng cây bản địa an toàn, bền vững."
     },
     {
       "code": "SDG 17",
       "title": "Kết nối đồng hành",
       "color": "#19486A",
-      "description": "Phối hợp minh bạch cùng nhà trường, câu lạc bộ sinh viên, không gian văn hóa và tổ chức xã hội."
+      "description": "Phối hợp minh bạch cùng nhà trường, câu lạc bộ sinh viên, không gian văn hóa và các tổ chức xã hội."
     }
   ],
   "principles": [
     {
       "tag": "Phi lợi nhuận",
-      "title": "Công khai & Minh bạch chi phí",
-      "description": "Hola vận hành phi lợi nhuận. Mọi khoản đóng góp chi phí đồ uống hoặc học cụ (nếu có) đều thông báo rõ trên thẻ sự kiện trước khi bạn giữ chỗ."
+      "title": "Minh bạch chi phí từng con số",
+      "description": "HolaRise vận hành phi lợi nhuận. Mọi khoản tự túc đồ uống tại quán hoặc học cụ (nếu có) đều ghi rõ bằng con số trước khi bạn giữ chỗ."
     },
     {
-      "tag": "An toàn",
-      "title": "Không gian tôn trọng & Tự nguyện",
-      "description": "Không giáo điều, không phán xét hay ép buộc; mọi thành viên được lắng nghe bình đẳng."
+      "tag": "Đồng đẳng",
+      "title": "Tôn trọng sự tự nguyện",
+      "description": "Các vòng tròn HolaHeart là không gian lắng nghe đồng đẳng, không phải trị liệu tâm lý lâm sàng; mọi người tham dự đều bình đẳng và tự do chọn mức độ chia sẻ."
     },
     {
       "tag": "Độc lập",
-      "title": "Độc lập & Phi thương mại",
-      "description": "Không lồng ghép bán khóa học ẩn hay thương mại hóa niềm tin của người trẻ."
+      "title": "Thuần khiết phi thương mại",
+      "description": "HolaRise ưu tiên đồng hành bằng không gian, sách, hiện vật; không thu quỹ tự phát và không lồng ghép hoạt động bán hàng dưới mọi hình thức."
     },
     {
-      "tag": "Minh bạch",
-      "title": "Hồ sơ kiểm chứng · Định hướng rõ ràng",
-      "description": "Bài tổng kết và lưu bút sau sự kiện ghi nhận từ chương trình đã diễn ra; các nhánh mới gắn nhãn ảnh định hướng rõ ràng cho đến khi cập nhật tư liệu thực tế."
+      "tag": "Trung thực",
+      "title": "Tư liệu kiểm chứng rõ ràng",
+      "description": "Chỉ công bố số liệu và hình ảnh ghi nhận từ hoạt động đã diễn ra; các nhánh đang chuẩn bị khởi động luôn được ghi rõ trạng thái."
     },
     {
       "tag": "Riêng tư",
-      "title": "Bảo vệ quyền riêng tư hình ảnh",
-      "description": "Không mở tải ảnh gốc đại trà; mỗi thành viên luôn có quyền yêu cầu cập nhật hoặc gỡ hình ảnh cá nhân bất kỳ lúc nào."
+      "title": "Bảo vệ phẩm giá & dữ liệu cá nhân",
+      "description": "Tôn trọng tuyệt đối quyền riêng tư hình ảnh của người tham dự và trẻ em; chỉ thu thập thông tin tối thiểu phục vụ điều phối buổi gặp."
     }
   ],
   "testimonials": [],
@@ -161,30 +162,30 @@
   ],
   "faqs": [
     {
-      "question": "HolaRise hoạt động ở đâu và dành cho ai?",
-      "answer": "HolaRise khởi nguồn tại Hòa Lạc, chào đón sinh viên các trường đại học, học sinh và người trẻ đang học tập, làm việc quanh khu vực Hòa Lạc. Hoạt động xoay quanh 3 trụ cột liên kết: HolaHeart (nội lực), HolaGreen (sinh thái) và HolaConnect (phụng sự)."
+      "question": "HolaRise dành cho ai và hoạt động ở đâu?",
+      "answer": "HolaRise khởi nguồn từ Hòa Lạc, chào đón sinh viên các trường đại học, thanh niên đi làm và những người trẻ yêu lối sống có chiều sâu. Dù bắt đầu từ Hòa Lạc, hệ giá trị và mạng lưới kết nối của HolaRise đồng hành cùng bạn trên mọi chặng đường trưởng thành."
     },
     {
-      "question": "Làm sao để tham gia hoặc giữ chỗ một buổi hoạt động?",
-      "answer": "Bạn chỉ cần tạo Thẻ Thành Viên Hola trong 10 giây tại trang Tham gia (bằng Email hoặc Số điện thoại) để giữ chỗ sự kiện chỉ với 1 chạm và viết lưu bút sau mỗi chương trình."
+      "question": "Làm sao để giữ chỗ tham gia một buổi gặp?",
+      "answer": "Bạn chỉ cần chọn buổi muốn tham dự tại trang Lịch hoạt động hoặc Tham gia, điền tên gọi và số Zalo trong 15 giây (không cần tạo tài khoản hay mật khẩu), sau đó vào Nhóm Zalo buổi gặp để nhận định vị và ghép xe."
     },
     {
-      "question": "Tham gia các buổi của Hola có mất phí không?",
-      "answer": "Đa số hoạt động hoàn toàn miễn phí. Nếu buổi gặp tổ chức tại quán cà phê hoặc có học cụ thực hành tự túc, thông tin luôn được ghi rõ ngay trên thẻ sự kiện."
+      "question": "Đi một mình lần đầu có ngại không?",
+      "answer": "Hơn một nửa số bạn đến với HolaRise lần đầu đều đi một mình. Luôn có người điều phối đón bạn từ cửa, và bạn hoàn toàn có thể chỉ ngồi lắng nghe trọn buổi mà không bị thúc ép phát biểu."
     },
     {
-      "question": "Nhà trường, CLB hoặc không gian muốn đồng tổ chức thì kết nối thế nào?",
-      "answer": "Quý đơn vị có thể chọn mục Đề xuất Hợp tác ngay tại trang Tham gia, gửi email về phungsu@holarise.org hoặc nhắn Zalo 077.777.1948."
+      "question": "Tham gia các hoạt động của HolaRise có mất phí không?",
+      "answer": "Vé tham dự hoàn toàn miễn phí. Với những buổi tổ chức tại quán cà phê, bạn tự chọn đồ uống của riêng mình tại quán (khoảng 35.000đ – 50.000đ); mọi chi phí nếu phát sinh đều ghi rõ trên thư mời."
     },
     {
-      "question": "Tôi có thể xem lại hình ảnh và viết cảm nhận sau sự kiện ở đâu?",
-      "answer": "Trang Hành trình lưu trữ toàn bộ bài tường thuật và khoảnh khắc của từng chương trình. Thành viên đã đăng nhập có thể gửi lưu bút cảm nhận kèm 1 ảnh kỷ niệm ngay dưới mỗi hoạt động."
+      "question": "Nhà trường, CLB hoặc không gian muốn đồng tổ chức thì liên hệ thế nào?",
+      "answer": "Quý đơn vị có thể gửi đề xuất tại mục Hợp tác Tổ chức trên trang Tham gia, gửi email về phungsu@holarise.org hoặc nhắn trực tiếp Zalo điều phối 077.777.1948."
     }
   ],
   "seo": {
-    "defaultTitle": "HolaRise | Cộng đồng người trẻ tại Hòa Lạc",
-    "defaultDescription": "Cộng đồng sinh viên & người trẻ Hòa Lạc cùng tổ chức buổi trò chuyện lắng nghe (HolaHeart), giữ sạch cảnh quan (HolaGreen) và dựng tủ sách cộng đồng (HolaConnect).",
-    "keywords": "HolaRise, Hola Hòa Lạc, Cộng đồng Thanh niên Hòa Lạc, HolaHeart, HolaGreen, HolaConnect, tình nguyện sinh viên Hòa Lạc, workshop Hòa Lạc",
+    "defaultTitle": "HolaRise – Cộng đồng Thanh niên Hòa Lạc",
+    "defaultDescription": "HolaRise – Cộng đồng Thanh niên Hòa Lạc phi lợi nhuận kết nối người trẻ qua 3 trụ cột: HolaHeart (tĩnh tại), HolaGreen (sinh thái) và HolaConnect (tri thức).",
+    "keywords": "HolaRise, Cộng đồng Thanh niên Hòa Lạc, HolaHeart, HolaGreen, HolaConnect, tình nguyện sinh viên Hòa Lạc, workshop Hòa Lạc, cộng đồng người trẻ phi lợi nhuận",
     "googleSiteVerification": "",
     "bingSiteVerification": "",
     "indexNowKey": "9a6a41c8a275d9ed39b1a0e4b1df32e1"

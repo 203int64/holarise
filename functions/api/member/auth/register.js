@@ -4,7 +4,7 @@ import {
   createMemberSession,
   ensureMemberSchema,
   errorResponse,
-  generateMemberCode,
+  generateSequentialMemberCode,
   getClientIpHash,
   hashPassword,
   jsonResponse,
@@ -70,13 +70,14 @@ export async function onRequestPost(context) {
   }
 
   const { hash, salt } = await hashPassword(v.password);
-  const now = new Date().toISOString();
+  const nowDate = new Date();
+  const now = nowDate.toISOString();
   const memberId = `mbr-${crypto.randomUUID()}`;
 
   let memberCode = "";
   let inserted = false;
   for (let attempt = 0; attempt < 8; attempt++) {
-    memberCode = generateMemberCode(new Date().getUTCFullYear());
+    memberCode = await generateSequentialMemberCode(env.DB, nowDate, attempt);
     try {
       await env.DB.prepare(
         `INSERT INTO members

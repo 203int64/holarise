@@ -2,9 +2,6 @@ name = "holarise"
 compatibility_date = "2026-11-21"
 pages_build_output_dir = "dist"
 
-[vars]
-GOOGLE_CLIENT_ID = "872701692899-kbrf5sunn348ojlg68t3a7fam4ilcdvi.apps.googleusercontent.com"
-
 [[d1_databases]]
 binding = "DB"
 database_name = "holarise-db"

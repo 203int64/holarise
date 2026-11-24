@@ -939,7 +939,8 @@
     var cursorPillText = cursorPill ? cursorPill.querySelector("[data-cursor-pill-text]") : null;
     var totalDeskCards = hCards.length || 1;
 
-    if (hSection && hTrack) {
+    /* Scroll-jacking disabled per AGENTS.md Tầng 1: native CSS scroll-snap handles smooth horizontal gallery on both desktop & mobile */
+    if (false && hSection && hTrack) {
       var getMaxShift = function () {
         return Math.max(0, hTrack.scrollWidth - window.innerWidth + 96);
       };

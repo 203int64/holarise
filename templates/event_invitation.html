@@ -8,14 +8,14 @@
       <span aria-current="page">Thư mời</span>
     </nav>
 
-    <div class="kicker" style="margin-top: 18px;">HolaHeart · Thư mời tham dự</div>
+    <div class="kicker" style="margin-top: 18px;">{{EVENT_KICKER}}</div>
     <h1 class="invite-title">{{INVITE_HEADLINE}}</h1>
 
     <div class="invite-meta-bar">
       <div class="invite-meta-facts">
         <time datetime="{{INVITE_START_ISO}}">{{INVITE_TIME_LABEL}}</time>
         <span aria-hidden="true">·</span>
-        <span>{{INVITE_VENUE_NAME}}, Hòa Lạc</span>
+        <span>{{INVITE_VENUE_NAME}}</span>
         <span aria-hidden="true">·</span>
         <span>{{EVENT_FEE}}</span>
       </div>
@@ -25,8 +25,12 @@
         <a href="{{GOOGLE_CAL_URL}}" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
         <span aria-hidden="true">·</span>
         <button class="invite-text-btn" type="button" data-ics-download="workshop" data-ics-title="{{EVENT_TITLE}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-ics-location="{{EVENT_LOCATION}}" data-ics-url="{{CANONICAL_EVENT_URL}}">Lưu lịch (.ics)</button>
+        <span aria-hidden="true">·</span>
+        <a href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a>
       </div>
     </div>
+
+    {{EVENT_FIRST_TIMER_HTML}}
   </div>
 </section>
 
@@ -43,7 +47,7 @@
 
       <div class="invite-signature">
         <p class="invite-signoff">{{LETTER_SIGNOFF}}</p>
-        <p class="invite-host">HolaHeart · {{BRAND_SHORT_NAME}}</p>
+        <p class="invite-host">{{EVENT_HOST_SIGNATURE}}</p>
       </div>
     </article>
   </div>
@@ -59,26 +63,14 @@
     <div class="invite-rsvp-grid">
       <div class="invite-form-surface">
         <div class="kicker">Xác nhận tham dự · {{EVENT_SEATS}}</div>
-        <h2 id="ws-form-heading" class="invite-rsvp-heading">Đăng ký giữ chỗ buổi tối 29/11</h2>
-        <p class="invite-rsvp-lead">Để lại thông tin để Ban Điều Phối sắp xếp chỗ ngồi ấm cúng tại {{INVITE_VENUE_NAME}} và gửi thiệp xác nhận mang tên bạn.</p>
+        <h2 id="ws-form-heading" class="invite-rsvp-heading">{{EVENT_RSVP_HEADING}}</h2>
+        <p class="invite-rsvp-lead">Để lại tên gọi và số Zalo để chúng mình sắp xếp chỗ ngồi chu đáo tại {{INVITE_VENUE_NAME}} và gửi thông tin trước giờ gặp. Không cần tạo mật khẩu.</p>
 
-        <div class="modal-member-bar" id="ws-member-rsvp-bar" hidden>
-          <div class="modal-member-bar-copy">
-            <strong id="ws-member-bar-title">Đang giữ chỗ bằng tài khoản HolaRise</strong>
-            <span id="ws-member-bar-sub">Thông tin đã tự động đồng bộ — chỉ cần chọn số chỗ và xác nhận.</span>
-          </div>
-        </div>
-
-        <div class="rsvp-guest-signin-bar" data-rsvp-guest-prompt>
-          <span>Đăng nhập bằng Google / Passkey để giữ chỗ trong 1 chạm và lưu lịch sử.</span>
-          <button type="button" class="btn btn--outline btn--sm" data-open-member-auth>Đăng nhập</button>
-        </div>
-
-        <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="ws-form-heading" data-club-form data-father-studio data-draft-key="ws-cuoc-doi-cua-cha" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" data-event-url="{{CANONICAL_EVENT_URL}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" novalidate>
+        <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="ws-form-heading" data-club-form data-event-studio data-draft-key="ws-{{EVENT_SLUG}}" data-event-slug="{{EVENT_SLUG}}" data-event-image="{{EVENT_IMAGE}}" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-event-url="{{CANONICAL_EVENT_URL}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" novalidate>
           <input type="hidden" name="source" value="event_modal">
           <input type="hidden" name="eventId" value="{{EVENT_ID}}">
           <input type="hidden" name="activity" value="{{EVENT_TITLE}}">
-          <input type="hidden" name="role" value="Tham dự Workshop Cuộc Đời Của Cha">
+          <input type="hidden" name="role" value="Tham dự {{EVENT_TITLE}}">
 
           <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
             <label for="ws-website">Website</label>
@@ -125,13 +117,19 @@
           </div>
 
           <details class="rsvp-optional-note">
-            <summary>+ Gửi đôi dòng tâm sự về Cha cho BTC (tùy chọn)</summary>
+            <summary>{{EVENT_NOTE_SUMMARY}}</summary>
             <div class="field invite-story-field" style="margin-top: 12px;">
-              <label for="ws-father-note" class="visually-hidden">Đôi dòng về Cha</label>
-              <textarea id="ws-father-note" name="note" rows="3" maxlength="750" placeholder="Một điều bạn luôn muốn nói với Cha, hoặc để trống nếu chỉ muốn đến ngồi lắng nghe..."></textarea>
+              <div class="note-preset-row" role="group" aria-label="Mẫu lời nhắn nhanh">
+                <button type="button" class="note-preset-chip" data-note-preset="Mình đi một mình lần đầu, mong được đón tiếp.">Đi 1 mình lần đầu</button>
+                <button type="button" class="note-preset-chip" data-note-preset="Mình cần hỗ trợ ghép xe từ khu Hòa Lạc.">Cần ghép xe</button>
+                <button type="button" class="note-preset-chip" data-note-preset="Mình có xe, có thể chở thêm 1 bạn cùng chiều.">Có thể chở thêm bạn</button>
+                <button type="button" class="note-preset-chip" data-note-preset="Mình muốn đến ngồi lắng nghe trọn buổi.">Chỉ muốn ngồi nghe</button>
+              </div>
+              <label for="ws-event-note" class="visually-hidden">Lời nhắn gửi ban tổ chức</label>
+              <textarea id="ws-event-note" name="note" rows="3" maxlength="750" placeholder="{{EVENT_NOTE_PLACEHOLDER}}"></textarea>
               <div class="invite-check-inline">
                 <input type="checkbox" id="ws-anon-share" name="anonShare" value="yes" checked>
-                <label for="ws-anon-share">Cho phép Ban Điều Phối đọc ẩn danh chia sẻ này trong chương trình</label>
+                <label for="ws-anon-share">Giữ ẩn danh hoàn toàn nếu Ban Điều Phối trích đọc chia sẻ này tại chương trình</label>
               </div>
             </div>
           </details>
@@ -141,7 +139,7 @@
           <div class="form-submit-stack">
             <div class="form-submit-row">
               <button class="btn btn--primary" type="submit" id="ws-submit-btn">Xác nhận giữ chỗ tham dự</button>
-              <a class="btn btn--outline" href="{{CONTACT_ZALO}}" target="_blank" rel="noopener noreferrer">Nhắn Zalo BTC ↗</a>
+              <a class="btn btn--outline" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Vào Nhóm Zalo buổi gặp ↗</a>
             </div>
             <p class="form-privacy-note">{{EVENT_FEE}}. Thông tin đăng ký được bảo mật theo <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a>.</p>
           </div>
@@ -149,27 +147,27 @@
       </div>
 
       <aside class="invite-card-col" aria-label="Thiệp xác nhận giữ chỗ">
-        <article class="invite-ticket" data-ws-pass aria-label="Thiệp mời Workshop Cuộc Đời Của Cha">
+        <article class="invite-ticket" data-ws-pass aria-label="Thiệp mời {{EVENT_TITLE}}">
           <div class="invite-ticket-photo">
             <img src="{{EVENT_IMAGE}}" alt="{{EVENT_IMAGE_ALT}}" width="640" height="360" loading="lazy" decoding="async">
           </div>
 
           <div class="invite-ticket-body">
             <div class="invite-ticket-top">
-              <span class="invite-ticket-kicker">HolaHeart · Thiệp mời</span>
+              <span class="invite-ticket-kicker">{{EVENT_KICKER}}</span>
               <span class="invite-ticket-status" data-ws-pass-state>Chờ xác nhận</span>
             </div>
 
             <p class="invite-ticket-guest-label">Kính mời</p>
             <div class="invite-ticket-guest" data-ws-pass-name>Tên người tham dự</div>
-            <div class="invite-ticket-org" data-ws-pass-org>Hòa Lạc</div>
+            <div class="invite-ticket-org" data-ws-pass-org>{{INVITE_VENUE_NAME}}</div>
 
             <div class="invite-ticket-rule" aria-hidden="true"></div>
 
             <dl class="invite-ticket-dl">
               <div>
                 <dt>Thời gian</dt>
-                <dd>19h15 · CN 29/11/2026</dd>
+                <dd>{{INVITE_TIME_LABEL}}</dd>
               </div>
               <div>
                 <dt>Địa điểm</dt>
@@ -188,10 +186,11 @@
         </article>
 
         <div class="invite-ticket-actions" id="ws-pass-actions" hidden>
-          <p class="invite-actions-note">Đã ghi nhận giữ chỗ. Bạn có thể lưu thiệp ảnh về máy hoặc gửi link mời bạn bè đi cùng.</p>
+          <p class="invite-actions-note">Đã ghi nhận giữ chỗ. Mời bạn vào Nhóm Zalo buổi gặp để nhận định vị, ghép xe và lưu lịch.</p>
           <span id="ws-pass-invite-text" class="visually-hidden"></span>
           <div class="pass-actions-buttons">
-            <button type="button" class="btn btn--primary btn--sm" data-pass-download="workshop">Tải thiệp mời (PNG)</button>
+            <a class="btn btn--primary btn--sm" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Vào Nhóm Zalo ngay ↗</a>
+            <button type="button" class="btn btn--outline btn--sm" data-pass-download="workshop">Tải thiệp mời (PNG)</button>
             <button type="button" class="btn btn--outline btn--sm" data-ics-download="workshop" data-ics-title="{{EVENT_TITLE}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-ics-location="{{EVENT_LOCATION}}" data-ics-url="{{CANONICAL_EVENT_URL}}">Lưu lịch (.ics)</button>
             <button type="button" class="btn btn--outline btn--sm" data-pass-share="workshop">Gửi lời mời</button>
             <span class="copy-control">

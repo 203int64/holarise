@@ -7,12 +7,14 @@
   <meta name="description" content="Trang quản trị bài viết, lịch sự kiện và danh sách đăng ký của Cộng đồng Thanh niên Hòa Lạc - HolaRise.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#FFFFFF">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/images/favicon-48.png" type="image/png" sizes="48x48">
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" sizes="180x180">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=51baace728">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=d6acdb095e">
 </head>
 <body>
   <a class="skip-link" href="#admin-main">Chuyển tới khu vực quản trị</a>
@@ -133,8 +135,12 @@
         </button>
         <button class="nav-item" type="button" data-tab="community">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>Lưu bút &amp; Thành viên</span>
+          <span>Cảm nhận &amp; Thành viên</span>
           <span class="nav-badge" id="badge-pending-refs" hidden>0</span>
+        </button>
+        <button class="nav-item" type="button" id="btn-jump-visuals">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Sửa Ảnh Giao diện</span>
         </button>
         <button class="nav-item" type="button" data-tab="settings">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -265,10 +271,12 @@
       <section class="tab-panel" id="panel-community" data-panel="community" hidden>
         <div class="page-head">
           <div>
-            <h1>Lưu bút &amp; Thành viên Hola</h1>
-            <p class="page-sub">Duyệt cảm nhận &amp; ảnh kỷ niệm dưới các bài Hành trình, và quản lý danh sách Thẻ Thành Viên Hola.</p>
+            <h1>Cảm nhận &amp; Thành viên HolaRise</h1>
+            <p class="page-sub">Nhập mới hoặc duyệt cảm nhận người tham gia (hiển thị trên Hành trình &amp; Trang chủ), và quản lý Thành viên / Đội ngũ Điều phối.</p>
           </div>
           <div class="page-actions">
+            <button class="btn btn--primary" type="button" id="btn-new-reflection">+ Nhập cảm nhận</button>
+            <button class="btn btn--primary" type="button" id="btn-new-member">+ Thêm thành viên</button>
             <button class="btn btn--outline" type="button" id="btn-refresh-community">Làm mới</button>
           </div>
         </div>
@@ -802,6 +810,183 @@
     </div>
   </dialog>
 
-  <script src="/assets/js/admin.js?v=51baace728" defer></script>
+  <!-- DIALOG 6: IMAGE CROPPER & ROTATOR (NATIVE CANVAS) -->
+  <dialog class="cms-dialog cms-dialog--wide" id="image-crop-dialog" closedby="any" aria-labelledby="crop-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="crop-dialog-title">Cắt khung &amp; Căn tâm điểm ảnh</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <div class="dialog-body">
+        <div class="btn-row" style="margin-bottom: 12px; flex-wrap: wrap;" role="group" aria-label="Tỷ lệ khung hình">
+          <button class="btn btn--sm btn--primary" type="button" data-crop-ratio="1.7778">16:9 (Bìa sự kiện / Hero)</button>
+          <button class="btn btn--sm btn--outline" type="button" data-crop-ratio="1.3333">4:3 (Ảnh hoạt động)</button>
+          <button class="btn btn--sm btn--outline" type="button" data-crop-ratio="1">1:1 (Chân dung / Logo)</button>
+          <button class="btn btn--sm btn--outline" type="button" data-crop-ratio="0">Giữ nguyên tỷ lệ gốc</button>
+          <button class="btn btn--sm btn--outline" type="button" id="crop-rotate-btn">↻ Xoay 90°</button>
+        </div>
+        <div style="background:#111;border-radius:12px;overflow:hidden;display:grid;place-items:center;max-height:52vh;touch-action:none;cursor:grab;">
+          <canvas id="crop-canvas" width="960" height="540" style="max-width:100%;max-height:52vh;display:block;"></canvas>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
+          <label for="crop-zoom" style="font-size:0.85rem;font-weight:500;white-space:nowrap;">Phóng to / Thu nhỏ:</label>
+          <input id="crop-zoom" type="range" min="1" max="3" step="0.05" value="1" style="flex:1;">
+          <span id="crop-hint" style="font-size:0.8rem;color:#5f6b64;">Kéo ảnh để căn mặt người vào giữa khung</span>
+        </div>
+        <div class="form-alert" id="crop-alert" role="alert" hidden style="margin-top:10px;"></div>
+      </div>
+      <div class="dialog-foot">
+        <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
+        <button class="btn btn--primary" type="button" id="crop-confirm-btn">Cắt &amp; Tải ảnh lên</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 7: MEMBER & CORE TEAM EDITOR -->
+  <dialog class="cms-dialog" id="member-dialog" closedby="any" aria-labelledby="member-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="member-dialog-title">Thêm thành viên / Đội ngũ</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <form class="admin-form dialog-body" id="member-editor-form" novalidate>
+        <input type="hidden" id="mem-id" name="id">
+        <div class="form-row-2">
+          <div class="field">
+            <label for="mem-name">Họ và tên <span aria-hidden="true">*</span></label>
+            <input id="mem-name" name="name" type="text" required minlength="2" placeholder="Ví dụ: Nguyễn Minh Khôi">
+          </div>
+          <div class="field">
+            <label for="mem-role-title">Vai trò / Chức danh</label>
+            <input id="mem-role-title" name="roleTitle" type="text" placeholder="Sáng lập, Điều phối HolaHeart, Tình nguyện viên...">
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="mem-phone">Số điện thoại / Zalo (chỉ lưu nội bộ)</label>
+            <input id="mem-phone" name="phone" type="tel" placeholder="09xx xxx xxx">
+          </div>
+          <div class="field">
+            <label for="mem-email">Email (chỉ lưu nội bộ)</label>
+            <input id="mem-email" name="email" type="email" placeholder="tenban@gmail.com">
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="mem-org">Trường / Đơn vị</label>
+            <input id="mem-org" name="organization" type="text" placeholder="ĐH FPT, ĐHQGHN, KCNC Hòa Lạc...">
+          </div>
+          <div class="field">
+            <label for="mem-pillar">Trụ cột gắn bó</label>
+            <select id="mem-pillar" name="pillarChoice">
+              <option value="holaheart">HolaHeart</option>
+              <option value="holagreen">HolaGreen</option>
+              <option value="holaconnect">HolaConnect</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="mem-bio">Giới thiệu ngắn (hiển thị công khai nếu bật Đội ngũ Điều phối)</label>
+          <textarea id="mem-bio" name="bio" rows="2" maxlength="300" placeholder="1–2 câu ngắn gọn về vai trò và hành trình đồng hành..."></textarea>
+        </div>
+        <div class="field">
+          <label for="mem-avatar-file">Ảnh chân dung (tùy chọn · hỗ trợ cắt khung 1:1)</label>
+          <div class="uploader-box">
+            <img id="mem-avatar-preview" class="uploader-preview" src="/assets/images/logo-mark.png" alt="Xem trước ảnh chân dung">
+            <div class="uploader-controls">
+              <input id="mem-avatar-file" type="file" accept="image/*" class="file-input" data-upload-target="mem-avatar" data-preview-target="mem-avatar-preview" data-meta-target="mem-avatar-meta" data-default-ratio="1">
+              <div class="upload-meta" id="mem-avatar-meta">Chọn ảnh chân dung để căn khung 1:1.</div>
+              <input id="mem-avatar" name="avatarUrl" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="/api/media/... hoặc để trống">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="check-chip"><input type="checkbox" id="mem-public-team" name="isPublicTeam"><span>Hiển thị công khai trong Đội ngũ Điều phối tại trang Giới thiệu (SĐT &amp; Email luôn giữ kín)</span></label>
+        </div>
+        <div class="field">
+          <label for="mem-notes">Ghi chú nội bộ (chỉ Ban Điều Phối thấy)</label>
+          <textarea id="mem-notes" name="notes" rows="2" maxlength="500" placeholder="Ví dụ: Đã tham dự buổi 15/11, hỗ trợ chụp ảnh..."></textarea>
+        </div>
+        <div class="form-alert" id="member-editor-alert" role="alert" hidden></div>
+        <div class="dialog-foot">
+          <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
+          <button class="btn btn--primary" type="submit">Lưu thành viên</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 8: PARTICIPANT TESTIMONIAL / REFLECTION EDITOR -->
+  <dialog class="cms-dialog" id="reflection-dialog" closedby="any" aria-labelledby="reflection-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="reflection-dialog-title">Nhập cảm nhận từ người tham gia</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <form class="admin-form dialog-body" id="reflection-editor-form" novalidate>
+        <input type="hidden" id="ref-id" name="id">
+        <div class="form-row-2">
+          <div class="field">
+            <label for="ref-author">Tên người chia sẻ <span aria-hidden="true">*</span></label>
+            <input id="ref-author" name="authorName" type="text" required minlength="2" placeholder="Ví dụ: Trần Thảo Nhi (hoặc Ẩn danh)">
+          </div>
+          <div class="field">
+            <label for="ref-role">Vai trò</label>
+            <input id="ref-role" name="participantRole" type="text" value="Thành viên tham dự" placeholder="Thành viên tham dự, Tình nguyện viên, Diễn giả...">
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="ref-org">Trường / Đơn vị / Buổi tham gia</label>
+            <input id="ref-org" name="authorOrg" type="text" placeholder="SV ĐH FPT · Buổi 15/11">
+          </div>
+          <div class="field">
+            <label for="ref-slug">Gắn với bài Hành trình (slug — tùy chọn)</label>
+            <input id="ref-slug" name="activitySlug" type="text" placeholder="tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart">
+          </div>
+        </div>
+        <div class="field">
+          <label for="ref-quote">Câu trích dẫn đắt nhất (tùy chọn)</label>
+          <input id="ref-quote" name="pullQuote" type="text" maxlength="180" placeholder="Một câu ngắn đọng lại sau buổi gặp...">
+        </div>
+        <div class="field">
+          <label for="ref-content">Nội dung cảm nhận <span aria-hidden="true">*</span></label>
+          <textarea id="ref-content" name="content" rows="4" required minlength="10" maxlength="1500" placeholder="Nhập lời cảm nhận thật của người tham dự..."></textarea>
+        </div>
+        <div class="field">
+          <label for="ref-photo-file">Ảnh kỷ niệm đi kèm (tùy chọn · cắt khung 4:3)</label>
+          <div class="uploader-box">
+            <img id="ref-photo-preview" class="uploader-preview" src="/assets/images/logo-mark.png" alt="Xem trước ảnh cảm nhận">
+            <div class="uploader-controls">
+              <input id="ref-photo-file" type="file" accept="image/*" class="file-input" data-upload-target="ref-photo" data-preview-target="ref-photo-preview" data-meta-target="ref-photo-meta" data-default-ratio="1.3333">
+              <div class="upload-meta" id="ref-photo-meta">Chọn 1 ảnh kỷ niệm (nếu có).</div>
+              <input id="ref-photo" name="photoUrl" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="/api/media/... hoặc để trống">
+            </div>
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="ref-status">Trạng thái hiển thị</label>
+            <select id="ref-status" name="status">
+              <option value="approved">Hiển thị công khai ngay</option>
+              <option value="pending">Lưu chờ duyệt</option>
+              <option value="rejected">Ẩn</option>
+            </select>
+          </div>
+          <div class="field" style="display:flex;align-items:flex-end;">
+            <label class="check-chip"><input type="checkbox" id="ref-featured" name="isFeaturedHome" checked><span>Ghim ra mục Tiếng nói người tham dự (Trang chủ &amp; Giới thiệu)</span></label>
+          </div>
+        </div>
+        <div class="form-alert" id="reflection-editor-alert" role="alert" hidden></div>
+        <div class="dialog-foot">
+          <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
+          <button class="btn btn--primary" type="submit">Lưu cảm nhận</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script src="/assets/js/admin.js?v=d6acdb095e" defer></script>
+  <script src="/assets/js/admin-studio.js?v=d6acdb095e" defer></script>
 </body>
 </html>

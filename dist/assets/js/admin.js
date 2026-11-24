@@ -318,9 +318,33 @@
     return Math.max(1, Math.round(bytes / 1024)) + " KB";
   }
 
+  let cachedMediaStorage = null;
+  async function getMediaStorageInfo() {
+    if (cachedMediaStorage) return cachedMediaStorage;
+    try {
+      const info = await api("/api/admin/media", { method: "GET" });
+      cachedMediaStorage = {
+        driveConfigured: Boolean(info?.driveConfigured),
+        storage: info?.storage || "media_kv",
+      };
+    } catch {
+      cachedMediaStorage = { driveConfigured: false, storage: "media_kv" };
+    }
+    return cachedMediaStorage;
+  }
+
+  function detectUploadCategory(targetId) {
+    const id = String(targetId || "").toLowerCase();
+    if (id.includes("ev-") || id.includes("event")) return "su-kien";
+    if (id.includes("post-")) return "bai-viet";
+    if (id.includes("partner") || id.includes("vis-")) return "giao-dien";
+    return "khac";
+  }
+
   function initImageUploaders() {
     $$("[data-upload-target]").forEach((fileInput) => {
-      const urlInput = document.getElementById(fileInput.getAttribute("data-upload-target"));
+      const targetId = fileInput.getAttribute("data-upload-target");
+      const urlInput = document.getElementById(targetId);
       const previewImg = document.getElementById(fileInput.getAttribute("data-preview-target"));
       const metaEl = document.getElementById(fileInput.getAttribute("data-meta-target"));
 
@@ -334,20 +358,37 @@
       fileInput.addEventListener("change", async () => {
         const file = fileInput.files && fileInput.files[0];
         if (!file) return;
-        if (metaEl) metaEl.textContent = "Đang nén & tải ảnh lên...";
         fileInput.disabled = true;
 
         try {
-          const { blob, width, height } = await compressImageToJpeg(file);
+          const storageInfo = await getMediaStorageInfo();
           const form = new FormData();
-          form.append("file", blob, "upload.jpg");
+          form.append("category", detectUploadCategory(targetId));
+
+          if (storageInfo.driveConfigured) {
+            if (metaEl) metaEl.textContent = "Đang tải ảnh gốc lên Google Drive...";
+            form.append("file", file, file.name || "upload.jpg");
+          } else {
+            if (metaEl) metaEl.textContent = "Đang nén & tải ảnh lên...";
+            const { blob } = await compressImageToJpeg(file);
+            form.append("file", blob, "upload.jpg");
+          }
+
           const data = await api("/api/admin/media", { method: "POST", body: form });
           if (urlInput) urlInput.value = data.url;
           if (previewImg) previewImg.src = data.url;
           if (metaEl) {
-            metaEl.textContent = `Đã tải lên: ${formatKb(file.size)} → ${formatKb(data.size)} (${width}×${height} JPEG)`;
+            metaEl.textContent =
+              data.storage === "google_drive"
+                ? `Đã lưu ảnh gốc lên Google Drive (${formatKb(data.size)} · không nén)`
+                : `Đã tải lên: ${formatKb(file.size)} → ${formatKb(data.size)}`;
           }
-          toast("Đã tải ảnh lên thành công.", "success");
+          toast(
+            data.storage === "google_drive"
+              ? "Đã lưu ảnh gốc không nén lên Google Drive."
+              : "Đã tải ảnh lên thành công.",
+            "success"
+          );
         } catch (err) {
           if (metaEl) metaEl.textContent = `Lỗi tải ảnh: ${err.message}`;
           toast(err.message, "error");
@@ -853,6 +894,7 @@
               <span class="cell-sub"><code>${esc(m.memberCode)}</code> · ${esc(m.phone || m.email || "—")} · ${esc(m.organization || "Hòa Lạc")} · ${esc(m.primaryPillar)}</span>
             </div>
             <div class="item-actions">
+              <a class="btn btn--outline btn--sm" href="/tv/${encodeURIComponent(m.memberCode)}" target="_blank" rel="noopener noreferrer">Thẻ &amp; QR ↗</a>
               <button class="btn btn--outline btn--sm" type="button" data-toggle-member="${esc(m.id)}" data-active="${m.isActive ? "1" : "0"}">${m.isActive ? "Khóa" : "Mở khóa"}</button>
               <button class="btn btn--outline btn--sm" type="button" data-reset-member-pw="${esc(m.id)}">Đổi MK tạm</button>
               <button class="btn btn--danger-ghost btn--sm" type="button" data-delete-member="${esc(m.id)}">Xóa</button>
@@ -1526,16 +1568,27 @@
       const metaEl = document.getElementById(`vis-meta-${slot}`);
       const urlEl = document.getElementById(`vis-url-${slot}`);
       const prevEl = document.getElementById(`vis-prev-${slot}`);
-      if (metaEl) metaEl.textContent = "Đang nén & tải ảnh lên...";
+      if (metaEl) metaEl.textContent = "Đang tải ảnh lên...";
       input.disabled = true;
       try {
-        const { blob, width, height } = await compressImageToJpeg(file, 1600, 0.84);
+        const storageInfo = await getMediaStorageInfo();
         const fd = new FormData();
-        fd.append("file", blob, `visual-${slot}.jpg`);
+        fd.append("category", "giao-dien");
+        if (storageInfo.driveConfigured) {
+          fd.append("file", file, file.name || `visual-${slot}.jpg`);
+        } else {
+          const { blob } = await compressImageToJpeg(file, 1600, 0.84);
+          fd.append("file", blob, `visual-${slot}.jpg`);
+        }
         const up = await api("/api/admin/media", { method: "POST", body: fd });
         if (urlEl) urlEl.value = up.url;
         if (prevEl) prevEl.src = up.url;
-        if (metaEl) metaEl.textContent = `Đã tải lên (${width}×${height}). Bấm “Lưu hình ảnh giao diện” để áp dụng.`;
+        if (metaEl) {
+          metaEl.textContent =
+            up.storage === "google_drive"
+              ? `Đã lưu ảnh gốc lên Google Drive (${formatKb(up.size)}). Bấm “Lưu hình ảnh giao diện” để áp dụng.`
+              : `Đã tải lên (${formatKb(up.size)}). Bấm “Lưu hình ảnh giao diện” để áp dụng.`;
+        }
         toast("Đã tải ảnh lên — nhớ bấm Lưu để xuất bản!", "success");
       } catch (err) {
         if (metaEl) metaEl.textContent = `Lỗi: ${err.message}`;

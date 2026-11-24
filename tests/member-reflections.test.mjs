@@ -5,6 +5,9 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
 import { parseMemberIdentifier, validateReflectionInput } from "../functions/_lib/validation.js";
+import { generateQrSvg } from "../functions/_lib/qr.js";
+import { onRequestGet as memberPassGet } from "../functions/tv/[code].js";
+import { onRequestPost as adminMemberCreate } from "../functions/api/admin/members/index.js";
 import { onRequestPost as authBootstrap } from "../functions/api/auth/bootstrap.js";
 import { onRequestPost as memberRegister } from "../functions/api/member/auth/register.js";
 import { onRequestPost as memberLogin } from "../functions/api/member/auth/login.js";
@@ -210,7 +213,7 @@ test("Unified Member Auth (Email & Phone), Strict Admin Isolation, Avatar Upload
   assert.equal(regRes.status, 201);
   const regBody = await regRes.json();
   assert.equal(regBody.ok, true);
-  assert.match(regBody.member.memberCode, /^HOLA-2026-[A-Z0-9]{4}$/);
+  assert.match(regBody.member.memberCode, /^HR-\d{6}-\d+$/);
   assert.ok(regBody.autoRegistration?.id);
   const member1Cookie = extractCookie(regRes, "holarise_member_session");
   assert.ok(member1Cookie.startsWith("holarise_member_session="));
@@ -597,4 +600,89 @@ test("Editorial Guestbook Lifecycle (Create -> Pending -> Admin Approve -> Heart
     params: { id: targetMemberId },
   });
   assert.equal(delMemberRes.status, 200);
+});
+
+test("HR-YYMMDD-STT sequential member codes, QR SVG & /tv/[code] privacy-safe achievement page", async () => {
+  const DB = createFullMockD1();
+  const MEDIA_KV = createMockKV();
+  const env = { DB, MEDIA_KV };
+  const bootRes = await authBootstrap({
+    request: makeReq("/api/auth/bootstrap", {
+      method: "POST",
+      body: { email: "admin@holarise.org", name: "Admin Hola", password: "AdminStrongPassword123!" },
+    }),
+    env,
+  });
+  assert.equal(bootRes.status, 201);
+  const adminCookie = extractCookie(bootRes, "holarise_session");
+
+  // Create 2 sequential members via Admin API
+  const m1Res = await adminMemberCreate({
+    request: makeReq("/api/admin/members", {
+      method: "POST",
+      cookie: adminCookie,
+      body: {
+        name: "Phạm Thu Hà",
+        phone: "0981 222 333",
+        email: "thuha.secret@example.com",
+        organization: "Đại học FPT Hà Nội (Hòa Lạc)",
+        pillarChoice: "holaheart",
+        roleTitle: "Thành viên đồng hành",
+        notes: "Ghi chú nội bộ tuyệt mật không được lộ",
+      },
+    }),
+    env,
+  });
+  assert.equal(m1Res.status, 201);
+  const m1 = (await m1Res.json()).item;
+  assert.match(m1.memberCode, /^HR-\d{6}-1$/);
+
+  const m2Res = await adminMemberCreate({
+    request: makeReq("/api/admin/members", {
+      method: "POST",
+      cookie: adminCookie,
+      body: {
+        name: "Lê Quang Huy",
+        phone: "0982 444 555",
+        organization: "Đại học Quốc gia Hà Nội – Cơ sở Hòa Lạc (ĐHQGHN)",
+        pillarChoice: "holaconnect",
+      },
+    }),
+    env,
+  });
+  assert.equal(m2Res.status, 201);
+  const m2 = (await m2Res.json()).item;
+  assert.match(m2.memberCode, /^HR-\d{6}-2$/);
+
+  // Verify QR SVG generator produces valid crisp SVG
+  const svg = generateQrSvg(`https://holarise.org/tv/${m1.memberCode}`);
+  assert.ok(svg.startsWith("<svg "));
+  assert.ok(svg.includes("<path d=\"M"));
+  assert.ok(svg.endsWith("</svg>"));
+
+  // Verify /tv/[code] SSR renders public achievement card + QR and NEVER leaks PII
+  const tvRes = await memberPassGet({
+    request: makeReq(`/tv/${m1.memberCode}`),
+    params: { code: m1.memberCode },
+    env,
+  });
+  assert.equal(tvRes.status, 200);
+  const tvHtml = await tvRes.text();
+  assert.ok(tvHtml.includes("Phạm Thu Hà"));
+  assert.ok(tvHtml.includes(m1.memberCode));
+  assert.ok(tvHtml.includes("Đại học FPT Hà Nội (Hòa Lạc)"));
+  assert.ok(tvHtml.includes("<svg xmlns=\"http://www.w3.org/2000/svg\""));
+  // Strict Nghị định 13 privacy checks
+  assert.ok(!tvHtml.includes("0981 222 333"));
+  assert.ok(!tvHtml.includes("0981222333"));
+  assert.ok(!tvHtml.includes("thuha.secret@example.com"));
+  assert.ok(!tvHtml.includes("Ghi chú nội bộ tuyệt mật"));
+
+  // Unknown member code returns 404
+  const notFoundRes = await memberPassGet({
+    request: makeReq("/tv/HR-990101-99"),
+    params: { code: "HR-990101-99" },
+    env,
+  });
+  assert.equal(notFoundRes.status, 404);
 });

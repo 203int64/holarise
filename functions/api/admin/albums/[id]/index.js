@@ -1,3 +1,4 @@
+import { trashDriveFile } from "../../../../_lib/drive.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../../_lib/security.js";
 import { validateAlbumInput } from "../../../../_lib/validation.js";
 import { serializeAlbumRow } from "../index.js";
@@ -167,9 +168,14 @@ export async function onRequestDelete(context) {
   await context.env.DB.prepare("DELETE FROM media_albums WHERE id = ?").bind(id).run();
 
   const keys = (photoRows || []).map((r) => r.media_key).filter(Boolean);
-  if (context.env?.MEDIA_KV && keys.length > 0) {
-    await Promise.allSettled(keys.map((k) => context.env.MEDIA_KV.delete(`media:${k}`)));
+  const driveIds = keys.filter((k) => k.startsWith("drive:")).map((k) => k.slice(6));
+  const kvKeys = keys.filter((k) => !k.startsWith("drive:"));
+  if (context.env?.MEDIA_KV && kvKeys.length > 0) {
+    await Promise.allSettled(kvKeys.map((k) => context.env.MEDIA_KV.delete(`media:${k}`)));
+  }
+  if (driveIds.length > 0) {
+    await Promise.allSettled(driveIds.map((fileId) => trashDriveFile(context.env, fileId)));
   }
 
-  return jsonResponse({ ok: true, id, deletedKvKeys: keys.length });
+  return jsonResponse({ ok: true, id, deletedKvKeys: kvKeys.length, trashedDriveFiles: driveIds.length });
 }

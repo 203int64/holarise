@@ -286,9 +286,17 @@ def render_hero_quick_pills(pills: list) -> str:
     return "\n          ".join(rendered)
 
 
-EVENT_DEDICATED_ROUTES = {
-    "holaheart-cuoc-doi-cua-cha-2026-11-29": "/su-kien/cuoc-doi-cua-cha/",
-}
+def resolve_event_slug(ws: dict) -> str:
+    if not isinstance(ws, dict):
+        return ""
+    landing = ws.get("landing")
+    if isinstance(landing, dict) and str(landing.get("slug") or "").strip():
+        return str(landing["slug"]).strip().strip("/")
+    raw_href = str(ws.get("href") or "").strip()
+    if raw_href.startswith("/su-kien/"):
+        return raw_href[len("/su-kien/"):].strip("/")
+    ev_id = str(ws.get("id") or "").strip().lower()
+    return re.sub(r"[^a-z0-9-]+", "-", ev_id).strip("-")
 
 
 def resolve_event_href(ws: dict) -> str:
@@ -297,7 +305,8 @@ def resolve_event_href(ws: dict) -> str:
     raw = str(ws.get("href") or "").strip()
     if raw.startswith("/") and not raw.startswith("//"):
         return raw
-    return EVENT_DEDICATED_ROUTES.get(ws.get("id", ""), "")
+    slug = resolve_event_slug(ws)
+    return f"/su-kien/{slug}/" if slug else ""
 
 
 def render_hero_upcoming_bar(upcoming: list) -> str:
@@ -584,6 +593,55 @@ ICON_PIN = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="
 ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>'
 
 
+def compact_date_pill(date_display: str) -> str:
+    raw = (date_display or "").strip()
+    if not raw:
+        return ""
+    day_map = {
+        "chủ nhật": "CN",
+        "thứ hai": "T2",
+        "thứ ba": "T3",
+        "thứ tư": "T4",
+        "thứ năm": "T5",
+        "thứ sáu": "T6",
+        "thứ bảy": "T7",
+    }
+    lower = raw.lower()
+    m_date = re.search(r"(\d{1,2}/\d{1,2})(?:/\d{2,4})?", raw)
+    short_date = m_date.group(1) if m_date else raw
+    for full_day, short_day in day_map.items():
+        if full_day in lower:
+            return f"{short_day} · {short_date}"
+    return short_date
+
+
+def compact_pillar_label(type_str: str) -> str:
+    raw = (type_str or "").strip()
+    if not raw:
+        return "HolaRise"
+    return raw.split("·", 1)[0].strip() or raw
+
+
+def compact_fee_label(fee_str: str) -> str:
+    raw = (fee_str or "").strip()
+    if not raw:
+        return "Miễn phí"
+    head = raw.split("·", 1)[0].strip()
+    if "miễn phí" in head.lower():
+        return "Miễn phí"
+    if "0đ" in head.lower():
+        return "Vé 0đ"
+    return head[:20]
+
+
+def compact_seats_label(seats_str: str) -> str:
+    raw = (seats_str or "").strip()
+    m = re.search(r"(\d+)", raw)
+    if m:
+        return f"{m.group(1)} chỗ"
+    return raw[:16]
+
+
 def render_workshops(upcoming: list) -> str:
     if not upcoming:
         return ""
@@ -595,22 +653,26 @@ def render_workshops(upcoming: list) -> str:
         event_href = resolve_event_href(ws)
         title_en_attr = f' data-title-en="{esc(ws["titleEn"])}"' if ws.get("titleEn") else ""
         summary_en_attr = f' data-summary-en="{esc(ws["summaryEn"])}"' if ws.get("summaryEn") else ""
+        date_pill = compact_date_pill(ws.get("dateDisplay", ""))
+        pillar_label = compact_pillar_label(ws.get("type", ""))
+        fee_label = compact_fee_label(ws.get("fee", ""))
+        seats_label = compact_seats_label(ws.get("seats", ""))
+        meta_right = " · ".join(p for p in [fee_label, seats_label] if p)
+
         media_inner = f"""<img {image_attrs(ws['image'], '(max-width: 820px) 84vw, 420px')} alt="{esc(ws['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
           <div class="event-card-badges">
-            <span class="glass-badge">{esc(ws['dateDisplay'])}</span>
-            <span class="glass-badge glass-badge--accent">{esc(ws['fee'])}</span>
+            <span class="glass-badge">{esc(date_pill)}</span>
           </div>"""
         if event_href:
             media_html = f"""<a class="event-card-media event-card-media--link" data-curtain href="{esc(event_href)}" aria-label="{esc(ws['title'])}">
           {media_inner}
         </a>"""
             title_html = f'<h3 class="card-title"><a href="{esc(event_href)}"{title_en_attr}>{esc(ws["title"])}</a></h3>'
-            footer_html = f"""<div class="card-footer card-footer--dual">
-            <a class="btn btn--primary btn--sm" href="{esc(event_href)}">
+            footer_html = f"""<div class="card-footer">
+            <a class="btn btn--primary btn--sm event-card-cta" href="{esc(event_href)}">
               <span data-i18n="cta.viewInvite">Xem thư mời &amp; Giữ chỗ</span>
               <span aria-hidden="true">→</span>
             </a>
-            <button class="btn btn--outline btn--sm" type="button" data-i18n="cta.quickBook" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}" data-event-href="{esc(event_href)}">Giữ chỗ nhanh</button>
           </div>"""
         else:
             media_html = f"""<div class="event-card-media" data-curtain>
@@ -618,7 +680,7 @@ def render_workshops(upcoming: list) -> str:
         </div>"""
             title_html = f'<h3 class="card-title"{title_en_attr}>{esc(ws["title"])}</h3>'
             footer_html = f"""<div class="card-footer">
-            <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}">
+            <button class="btn btn--primary btn--sm event-card-cta" type="button" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}">
               <span data-i18n="cta.reserveSeat">Giữ chỗ tham dự</span>
               <span aria-hidden="true">→</span>
             </button>
@@ -628,16 +690,15 @@ def render_workshops(upcoming: list) -> str:
             f"""<article class="event-card" data-stagger-item{cat_attr}>
         {media_html}
         <div class="event-card-body">
-          <div class="card-meta">
-            <span class="cat">{esc(ws['type'])}</span>
-            <span>·</span>
-            <span>{esc(ws['seats'])}</span>
+          <div class="event-card-eyebrow">
+            <span class="cat">{esc(pillar_label)}</span>
+            <span class="event-card-meta-pill">{esc(meta_right)}</span>
           </div>
           {title_html}
           <p class="card-text"{summary_en_attr}>{esc(ws['summary'])}</p>
           <div class="event-info-inline">
-            <span>{ICON_CALENDAR} {esc(ws['time'])}</span>
-            <span>{ICON_PIN} {esc(ws['location'])}</span>
+            <span class="event-info-row">{ICON_CALENDAR} <span>{esc(ws['time'])}</span></span>
+            <span class="event-info-row">{ICON_PIN} <span>{esc(ws['location'])}</span></span>
           </div>
           {footer_html}
         </div>
@@ -1045,11 +1106,17 @@ def organization_schema(site: dict) -> dict:
         "alternateName": [
             b.get("brandName", "HolaRise"),
             b["shortName"],
-            b.get("englishName", "HolaRise – Hoa Lac Youth Empowerment Community"),
+            "Cộng đồng Thanh niên Hòa Lạc",
+            b.get("englishName", "HolaRise – Youth Community & Social Impact Initiative"),
         ],
         "slogan": b["tagline"],
         "url": b["siteUrl"],
-        "logo": abs_url(b["siteUrl"], b.get("logoMark", b["logoDark"])),
+        "logo": {
+            "@type": "ImageObject",
+            "url": abs_url(b["siteUrl"], "/assets/images/pwa/icon-512.png"),
+            "width": 512,
+            "height": 512,
+        },
         "image": abs_url(b["siteUrl"], b["ogImage"]),
         "description": site["seo"]["defaultDescription"],
         "email": c["email"],
@@ -1208,6 +1275,11 @@ def write_page(
     if b_verify:
         verification_tags.append(f'\n  <meta name="msvalidate.01" content="{esc(b_verify)}">')
 
+    is_en_page = url_path.startswith("/en/")
+    lang_switch_href = "/" if is_en_page else "/en/"
+    lang_switch_label = "VN" if is_en_page else "EN"
+    lang_switch_aria = "Chuyển sang tiếng Việt" if is_en_page else "Switch to English International Profile"
+
     rendered = render_template(
         base_tpl,
         {
@@ -1230,6 +1302,9 @@ def write_page(
             "LOGO_MARK": esc(b.get("logoMark", "/assets/images/logo-mark.png")),
             "NAV_LINKS": build_nav_links(url_path),
             "MOBILE_NAV_LINKS": build_mobile_nav_links(url_path),
+            "LANG_SWITCH_HREF": esc(lang_switch_href),
+            "LANG_SWITCH_LABEL": esc(lang_switch_label),
+            "LANG_SWITCH_ARIA": esc(lang_switch_aria),
             "PWA_TABBAR_LINKS": build_pwa_tabbar_links(url_path),
             "MAIN_CONTENT": main_content,
             "CONTACT_ADDRESS": esc(c["address"]),
@@ -1237,6 +1312,7 @@ def write_page(
             "CONTACT_PHONE": esc(c["phoneDisplay"]),
             "CONTACT_PHONE_RAW": esc(phone_raw),
             "CONTACT_ZALO": esc(c.get("zalo", "")),
+            "CONTACT_ZALO_GROUP": esc(c.get("zaloGroup") or c.get("zalo", "")),
             "CONTACT_MEETING": esc(c["meetingTime"]),
             "FORM_ENDPOINT": esc(c.get("formEndpoint", "")),
             "CURRENT_YEAR": str(datetime.date.today().year),
@@ -1552,6 +1628,10 @@ def generate_cloudflare_headers() -> str:
   Content-Type: application/manifest+json; charset=utf-8
   Cache-Control: public, max-age=3600, must-revalidate
 
+/favicon.ico
+  Content-Type: image/x-icon
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
 /llms.txt
   Content-Type: text/plain; charset=utf-8
   Cache-Control: public, max-age=3600, must-revalidate
@@ -1697,6 +1777,9 @@ def build_site() -> list:
         shutil.rmtree(DIST_DIR)
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     shutil.copytree(ASSETS_DIR, DIST_DIR / "assets")
+    favicon_ico_src = ASSETS_DIR / "images" / "favicon.ico"
+    if favicon_ico_src.is_file():
+        shutil.copy2(favicon_ico_src, DIST_DIR / "favicon.ico")
 
     base_tpl = load_template("base.html")
     b = site["brand"]
@@ -1753,11 +1836,12 @@ def build_site() -> list:
         {
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "name": b.get("brandName", "HolaRise"),
+            "name": b["fullName"],
             "alternateName": [
+                b.get("brandName", "HolaRise"),
                 b["shortName"],
-                b["fullName"],
-                b.get("englishName", "HolaRise – Hoa Lac Youth Empowerment Community"),
+                "Cộng đồng Thanh niên Hòa Lạc",
+                b.get("englishName", "HolaRise – Youth Community & Social Impact Initiative"),
             ],
             "url": abs_url(b["siteUrl"], "/"),
             "inLanguage": "vi-VN",
@@ -1845,22 +1929,79 @@ def build_site() -> list:
     )
     sitemap_urls.append(("/lich-hoat-dong/", "0.9", "weekly"))
 
-    # 3b. Dedicated Editorial Event Invitation Pages (/su-kien/<slug>/)
+    # 3b. Dynamic Editorial Event Invitation Pages (/su-kien/<slug>/) for EVERY upcoming event
     invite_tpl = load_template("event_invitation.html")
     invite_phone_raw = re.sub(r"[^0-9+]", "", site["contact"]["phoneDisplay"])
+    default_zalo_group = site["contact"].get("zaloGroup") or site["contact"].get("zalo", "")
+
+    def build_default_landing(ws: dict) -> dict:
+        slug = resolve_event_slug(ws)
+        raw_date = str(ws.get("date") or "2026-11-29").strip()
+        raw_time = str(ws.get("time") or "19:00").strip()
+        m_start = re.search(r"(\d{1,2})[:h](\d{2})", raw_time)
+        hh, mm = (int(m_start.group(1)), int(m_start.group(2))) if m_start else (19, 0)
+        start_iso = f"{raw_date}T{hh:02d}:{mm:02d}:00+07:00"
+        end_hh = min(23, hh + 2)
+        end_iso = f"{raw_date}T{end_hh:02d}:{mm:02d}:00+07:00"
+        ymd = raw_date.replace("-", "")
+        utc_start_h = max(0, hh - 7)
+        utc_end_h = max(0, end_hh - 7)
+        ics_start = f"{ymd}T{utc_start_h:02d}{mm:02d}00Z"
+        ics_end = f"{ymd}T{utc_end_h:02d}{mm:02d}00Z"
+        highlights = ws.get("highlights") or []
+        paragraphs = [ws.get("summary") or ""]
+        if highlights:
+            paragraphs.append("Điểm nhấn buổi gặp: " + " · ".join(highlights) + ".")
+        return {
+            "slug": slug,
+            "urlPath": f"/su-kien/{slug}/",
+            "ogImage": ws.get("image") or b["ogImage"],
+            "seoTitle": f"Thư mời {ws['title']} | {b['brandName']}",
+            "seoDescription": ws.get("summary") or b["subtitle"],
+            "headline": ws["title"],
+            "startIso": start_iso,
+            "endIso": end_iso,
+            "icsStartUtc": ics_start,
+            "icsEndUtc": ics_end,
+            "timeLabel": f"{ws.get('time', '')}, {ws.get('dateDisplay', '')}".strip(", "),
+            "venueName": ws.get("location") or "Hòa Lạc",
+            "letterParagraphs": [p for p in paragraphs if p],
+            "letterPullQuote": "",
+            "letterClosing": "Mời bạn giữ chỗ trước để chúng mình sắp xếp chu đáo và gửi định vị chi tiết trong Nhóm Zalo buổi gặp.",
+            "letterSignoff": "Trân trọng mời bạn đồng hành,",
+        }
+
+    def render_first_timer_box(ws: dict, landing: dict) -> str:
+        zalo_url = landing.get("zaloGroup") or ws.get("zaloGroup") or default_zalo_group
+        return f"""<div class="info-panel info-panel--strip" style="margin-top: 22px; padding: 18px 20px;">
+      <div class="info-box">
+        <h3 style="font-size: 0.92rem; margin-bottom: 8px;">Dành cho bạn tham dự lần đầu</h3>
+        <ul class="clean-list" style="margin: 0; font-size: 0.88rem;">
+          <li><strong>Đi một mình vẫn hoàn toàn thoải mái:</strong> Luôn có người điều phối đón bạn từ lúc tới; bạn có thể chỉ ngồi lắng nghe mà không bị thúc ép phát biểu.</li>
+          <li><strong>Chi phí rõ ràng:</strong> {esc(ws.get('fee', 'Miễn phí tham dự'))}.</li>
+          <li><strong>Di chuyển &amp; Ghép xe:</strong> Tham gia <a href="{esc(zalo_url)}" target="_blank" rel="noopener noreferrer" style="color: var(--accent); font-weight: 500;">Nhóm Zalo buổi gặp ↗</a> ngay sau khi giữ chỗ để nhận định vị, ghép xe và nhắc giờ G.</li>
+        </ul>
+      </div>
+    </div>"""
+
     for ws in workshops.get("upcoming", []):
-        landing = ws.get("landing")
-        if not isinstance(landing, dict):
-            continue
+        base_landing = build_default_landing(ws)
+        custom_landing = ws.get("landing") if isinstance(ws.get("landing"), dict) else {}
+        landing = {**base_landing, **custom_landing}
         slug = landing["slug"]
+        if not slug:
+            continue
         url_path = landing.get("urlPath") or f"/su-kien/{slug}/"
         canonical_ev_url = abs_url(b["siteUrl"], url_path)
         gcal_url = build_google_calendar_url(ws, landing, canonical_ev_url)
+        ev_zalo = landing.get("zaloGroup") or ws.get("zaloGroup") or default_zalo_group
         invite_main = render_template(
             invite_tpl,
             {
                 "BRAND_SHORT_NAME": esc(b["shortName"]),
                 "EVENT_ID": esc(ws["id"]),
+                "EVENT_SLUG": esc(slug),
+                "EVENT_KICKER": esc(ws.get("type") or "HolaRise · Thư mời tham dự"),
                 "EVENT_TITLE": esc(ws["title"]),
                 "EVENT_DATE_DISPLAY": esc(ws["dateDisplay"]),
                 "EVENT_LOCATION": esc(ws["location"]),
@@ -1868,6 +2009,12 @@ def build_site() -> list:
                 "EVENT_SEATS": esc(ws["seats"]),
                 "EVENT_IMAGE": esc(ws["image"]),
                 "EVENT_IMAGE_ALT": esc(ws["imageAlt"]),
+                "EVENT_ZALO_GROUP": esc(ev_zalo),
+                "EVENT_FIRST_TIMER_HTML": render_first_timer_box(ws, landing),
+                "EVENT_HOST_SIGNATURE": esc(landing.get("hostSignature") or f"{ws.get('type', 'HolaRise').split('·')[0].strip()} · {b['shortName']}"),
+                "EVENT_RSVP_HEADING": esc(landing.get("rsvpHeading") or f"Giữ chỗ cho {ws['dateDisplay']}"),
+                "EVENT_NOTE_SUMMARY": esc(landing.get("noteSummary") or "+ Gửi đôi dòng chia sẻ hoặc lời nhắn cho người điều phối (tùy chọn)"),
+                "EVENT_NOTE_PLACEHOLDER": esc(landing.get("notePlaceholder") or "Điều bạn muốn chia sẻ trước buổi gặp, hoặc để trống nếu chỉ muốn đến lắng nghe..."),
                 "INVITE_HEADLINE": esc(landing["headline"]),
                 "INVITE_START_ISO": esc(landing["startIso"]),
                 "INVITE_END_ISO": esc(landing["endIso"]),
@@ -1905,6 +2052,67 @@ def build_site() -> list:
             body_class="is-father-invite",
         )
         sitemap_urls.append((url_path, "0.9", "weekly"))
+
+    # 3c. SSR shell template for dynamic CMS Event Invitations (/su-kien/<any-slug>/)
+    ssr_invite_main = render_template(
+        invite_tpl,
+        {
+            "BRAND_SHORT_NAME": esc(b["shortName"]),
+            "EVENT_ID": "__SSR_EVENT_ID__",
+            "EVENT_SLUG": "__SSR_EVENT_SLUG__",
+            "EVENT_KICKER": "__SSR_EVENT_KICKER__",
+            "EVENT_TITLE": "__SSR_EVENT_TITLE__",
+            "EVENT_DATE_DISPLAY": "__SSR_EVENT_DATE_DISPLAY__",
+            "EVENT_LOCATION": "__SSR_EVENT_LOCATION__",
+            "EVENT_FEE": "__SSR_EVENT_FEE__",
+            "EVENT_SEATS": "__SSR_EVENT_SEATS__",
+            "EVENT_IMAGE": "__SSR_EVENT_IMAGE__",
+            "EVENT_IMAGE_ALT": "__SSR_EVENT_IMAGE_ALT__",
+            "EVENT_ZALO_GROUP": "__SSR_EVENT_ZALO_GROUP__",
+            "EVENT_FIRST_TIMER_HTML": "__SSR_EVENT_FIRST_TIMER_HTML__",
+            "EVENT_HOST_SIGNATURE": "__SSR_EVENT_HOST_SIGNATURE__",
+            "EVENT_RSVP_HEADING": "__SSR_EVENT_RSVP_HEADING__",
+            "EVENT_NOTE_SUMMARY": "+ Gửi đôi dòng chia sẻ hoặc lời nhắn cho người điều phối (tùy chọn)",
+            "EVENT_NOTE_PLACEHOLDER": "Điều bạn muốn chia sẻ trước buổi gặp, hoặc để trống nếu chỉ muốn đến lắng nghe...",
+            "INVITE_HEADLINE": "__SSR_INVITE_HEADLINE__",
+            "INVITE_START_ISO": "__SSR_INVITE_START_ISO__",
+            "INVITE_END_ISO": "__SSR_INVITE_END_ISO__",
+            "INVITE_ICS_START": "__SSR_INVITE_ICS_START__",
+            "INVITE_ICS_END": "__SSR_INVITE_ICS_END__",
+            "INVITE_TIME_LABEL": "__SSR_INVITE_TIME_LABEL__",
+            "INVITE_VENUE_NAME": "__SSR_INVITE_VENUE_NAME__",
+            "LETTER_BODY_HTML": "__SSR_LETTER_BODY_HTML__",
+            "LETTER_SIGNOFF": "Trân trọng mời bạn đồng hành,",
+            "GOOGLE_CAL_URL": "__SSR_GOOGLE_CAL_URL__",
+            "CANONICAL_EVENT_URL": "__SSR_CANONICAL_URL__",
+            "FORM_ENDPOINT": esc(site["contact"].get("formEndpoint", "")),
+            "CONTACT_PHONE": esc(site["contact"]["phoneDisplay"]),
+            "CONTACT_PHONE_RAW": esc(invite_phone_raw),
+            "CONTACT_ZALO": esc(site["contact"].get("zalo", "")),
+        },
+    )
+    write_page(
+        base_tpl,
+        site,
+        "_templates/event-invitation-shell.tpl",
+        "/su-kien/__SSR_SLUG__/",
+        "__SSR_PAGE_TITLE__",
+        "__SSR_PAGE_DESCRIPTION__",
+        ssr_invite_main,
+        [org_ld],
+        og_image="/__SSR_OG_IMAGE_PATH__",
+        body_class="is-father-invite",
+    )
+    ev_shell_path = DIST_DIR / "_templates" / "event-invitation-shell.tpl"
+    ev_shell_txt = ev_shell_path.read_text(encoding="utf-8")
+    ev_shell_txt = ev_shell_txt.replace(
+        abs_url(b["siteUrl"], "/__SSR_OG_IMAGE_PATH__"), "__SSR_OG_IMAGE_URL__"
+    ).replace(
+        abs_url(b["siteUrl"], "/su-kien/__SSR_SLUG__/"), "__SSR_CANONICAL_URL__"
+    ).replace(
+        "</head>", "  __SSR_EXTRA_JSON_LD__\n</head>", 1
+    )
+    ev_shell_path.write_text(ev_shell_txt, encoding="utf-8")
 
     # 4. Journey & Photo Archive page (/hanh-trinh/)
     c = site["contact"]
@@ -1966,7 +2174,12 @@ def build_site() -> list:
             "publisher": {
                 "@type": "Organization",
                 "name": b["fullName"],
-                "logo": {"@type": "ImageObject", "url": abs_url(b["siteUrl"], b.get("logoMark", b["logoDark"]))},
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": abs_url(b["siteUrl"], "/assets/images/pwa/icon-512.png"),
+                    "width": 512,
+                    "height": 512,
+                },
             },
             "mainEntityOfPage": abs_url(b["siteUrl"], slug_path),
         }
@@ -2045,6 +2258,7 @@ def build_site() -> list:
             "CONTACT_PHONE": esc(c["phoneDisplay"]),
             "CONTACT_PHONE_RAW": esc(join_phone_raw),
             "CONTACT_ZALO": esc(c.get("zalo", "")),
+            "CONTACT_ZALO_GROUP": esc(c.get("zaloGroup") or c.get("zalo", "")),
             "JOIN_EVENTS_SECTION_HTML": render_join_events_section(workshops["upcoming"]),
             "FAQ_HTML": render_faqs(site["faqs"]),
         },
@@ -2054,8 +2268,8 @@ def build_site() -> list:
         site,
         "tham-gia/index.html",
         "/tham-gia/",
-        f"Tham gia & Thẻ Thành Viên Hola | {b['brandName']}",
-        f"Tạo Thẻ Thành Viên Hola trong 10 giây, giữ chỗ sự kiện 1 chạm hoặc gửi đề xuất hợp tác cùng {b['shortName']} tại Hòa Lạc.",
+        f"Tham gia & Đồng hành | {b['brandName']} – Cộng đồng Thanh niên Hòa Lạc",
+        f"Giữ chỗ tham dự hoạt động trong 15 giây không cần mật khẩu hoặc gửi đề xuất hợp tác cùng {b['fullName']}.",
         join_main,
         [
             org_ld,
@@ -2064,6 +2278,31 @@ def build_site() -> list:
         ],
     )
     sitemap_urls.append(("/tham-gia/", "0.9", "monthly"))
+
+    # 6b. Standalone 100% English International Profile (/en/)
+    en_main = render_template(
+        load_template("en_profile.html"),
+        {
+            "CONTACT_EMAIL": esc(c["email"]),
+            "CONTACT_PHONE": esc(c["phoneDisplay"]),
+        },
+    )
+    write_page(
+        base_tpl,
+        site,
+        "en/index.html",
+        "/en/",
+        "HolaRise — Non-Profit Youth Community & Social Impact Profile",
+        "Originating in Hoa Lac, Hanoi, HolaRise is an independent non-profit youth community uniting young people through HolaHeart, HolaGreen, and HolaConnect aligned with UN SDGs.",
+        en_main,
+        [org_ld],
+    )
+    en_out = DIST_DIR / "en" / "index.html"
+    en_out.write_text(
+        en_out.read_text(encoding="utf-8").replace('<html lang="vi">', '<html lang="en">', 1),
+        encoding="utf-8",
+    )
+    sitemap_urls.append(("/en/", "0.8", "monthly"))
 
     # 7a-2. Privacy Policy & Community Rules (/chinh-sach/)
     privacy_main = render_template(
@@ -2400,7 +2639,7 @@ def verify_dist() -> list:
     if not og_cover.is_file() or read_jpeg_dimensions(og_cover) != (1200, 630):
         errors.append(f"Default sharing image must be a 1200×630 JPEG: {og_url}")
 
-    for required_file in ["sitemap.xml", "robots.txt", "llms.txt", "404.html", "chinh-sach/index.html", "site.webmanifest", "sw.js", "_headers", "offline/index.html"]:
+    for required_file in ["favicon.ico", "sitemap.xml", "robots.txt", "llms.txt", "404.html", "chinh-sach/index.html", "site.webmanifest", "sw.js", "_headers", "offline/index.html"]:
         if not (DIST_DIR / required_file).exists():
             errors.append(f"Missing technical SEO/PWA file: {required_file}")
 
@@ -2585,17 +2824,16 @@ def main():
         errors = verify_dist()
         copy_warnings = audit_public_copy()
         if copy_warnings:
-            print(f"[COPY-WARN] Found {len(copy_warnings)} legacy copy violation(s) against AGENTS.md Tầng 2:")
+            print(f"[COPY-FAIL] Found {len(copy_warnings)} public copy violation(s) against AGENTS.md Tầng 2:")
             for cw in copy_warnings:
                 print("  -", cw)
-            if args.strict_copy:
-                errors.extend(f"[COPY] {cw}" for cw in copy_warnings)
+            errors.extend(f"[COPY] {cw}" for cw in copy_warnings)
         if errors:
             print("Verification FAILED:")
             for err in errors:
                 print("  -", err)
             sys.exit(1)
-        print("Verification PASSED: All HTML pages, SEO tags, JSON-LD schemas, alt texts, and internal links are valid.")
+        print("Verification PASSED: All HTML pages, SEO tags, JSON-LD schemas, alt texts, internal links, and AGENTS.md copy gates are valid.")
 
 
 if __name__ == "__main__":

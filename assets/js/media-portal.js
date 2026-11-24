@@ -29,7 +29,22 @@
     photos: [],
     uploadQueue: [],
     uploading: false,
+    mediaStorage: null,
   };
+
+  async function resolveMediaStorage() {
+    if (state.mediaStorage) return state.mediaStorage;
+    try {
+      const info = await apiFetch("/api/admin/media", { method: "GET" });
+      state.mediaStorage = {
+        driveConfigured: Boolean(info?.driveConfigured),
+        storage: info?.storage || "media_kv",
+      };
+    } catch {
+      state.mediaStorage = { driveConfigured: false, storage: "media_kv" };
+    }
+    return state.mediaStorage;
+  }
 
   function esc(v) {
     return String(v ?? "")
@@ -454,17 +469,26 @@
     }
 
     try {
-      item.status = "compressing";
+      const storageInfo = await resolveMediaStorage();
+      let uploadPayload = item.file;
+      let uploadFilename = item.name || "photo.jpg";
+
+      if (!storageInfo.driveConfigured) {
+        item.status = "compressing";
+        item.error = "";
+        renderUploadQueue();
+        uploadPayload = await compressImageFile(item.file, 1280, 0.82);
+        uploadFilename = item.name.replace(/\.[^.]+$/, "") + ".jpg";
+      }
+
+      item.status = "uploading";
       item.error = "";
       renderUploadQueue();
 
-      const blob = await compressImageFile(item.file, 1280, 0.82);
-
-      item.status = "uploading";
-      renderUploadQueue();
-
       const fd = new FormData();
-      fd.append("file", blob, item.name.replace(/\.[^.]+$/, "") + ".jpg");
+      fd.append("file", uploadPayload, uploadFilename);
+      fd.append("category", "album");
+      fd.append("subfolder", state.activeAlbum.slug || state.activeAlbum.title || "");
       const uploaded = await apiFetch("/api/admin/media", { method: "POST", body: fd });
 
       const attached = await apiFetch(`/api/admin/albums/${encodeURIComponent(albumId)}/photos`, {

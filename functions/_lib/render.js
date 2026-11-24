@@ -8,8 +8,8 @@ import { isSafeExternalHttpsUrl, isSafeMediaUrl } from "./validation.js";
 
 export const SITE_URL = "https://holarise.org";
 export const BRAND_SHORT_NAME = "Cộng đồng HolaRise";
-export const BRAND_FULL_NAME = "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên";
-export const LOGO_MARK_URL = `${SITE_URL}/assets/images/logo-mark.png`;
+export const BRAND_FULL_NAME = "HolaRise – Cộng đồng Thanh niên Hòa Lạc";
+export const LOGO_MARK_URL = `${SITE_URL}/assets/images/pwa/icon-512.png`;
 
 const ICON_CALENDAR =
   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
@@ -18,15 +18,45 @@ const ICON_PIN =
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-const EVENT_DEDICATED_ROUTES = {
-  "holaheart-cuoc-doi-cua-cha-2026-11-29": "/su-kien/cuoc-doi-cua-cha/",
-};
+export function resolveEventSlug(ws) {
+  if (!ws) return "";
+  const rawHref = String(ws.href || "").trim();
+  if (rawHref.startsWith("/su-kien/")) {
+    return rawHref.slice("/su-kien/".length).replace(/^\/+|\/+$/g, "");
+  }
+  const explicitSlug = String(ws.slug || "").trim().replace(/^\/+|\/+$/g, "");
+  if (explicitSlug) return explicitSlug;
+  const id = String(ws.id || "").trim().toLowerCase();
+  if (id === "holaheart-cuoc-doi-cua-cha-2026-11-29") return "cuoc-doi-cua-cha";
+  return id.replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+}
 
 export function resolveEventHref(ws) {
   if (!ws) return "";
   const raw = String(ws.href || "").trim();
   if (raw.startsWith("/") && !raw.startsWith("//")) return raw;
-  return EVENT_DEDICATED_ROUTES[ws.id] || "";
+  const slug = resolveEventSlug(ws);
+  return slug ? `/su-kien/${slug}/` : "";
+}
+
+export function buildEventIsoTimes(dateStr, timeStr) {
+  const date = ISO_DATE_RE.test(String(dateStr || "").trim()) ? String(dateStr).trim() : "";
+  if (!date) return { startIso: "", endIso: "", icsStart: "", icsEnd: "" };
+  const m = String(timeStr || "").match(/(\d{1,2})[:h](\d{2})/);
+  if (!m) return { startIso: date, endIso: "", icsStart: "", icsEnd: "" };
+  const hh = Math.min(23, Math.max(0, Number(m[1])));
+  const mm = Math.min(59, Math.max(0, Number(m[2])));
+  const endMatch = String(timeStr || "").match(/[–-]\s*(\d{1,2})[:h](\d{2})/);
+  const endHh = endMatch ? Math.min(23, Math.max(hh, Number(endMatch[1]))) : Math.min(23, hh + 2);
+  const endMm = endMatch ? Math.min(59, Math.max(0, Number(endMatch[2]))) : mm;
+  const pad = (n) => String(n).padStart(2, "0");
+  const ymd = date.replace(/-/g, "");
+  return {
+    startIso: `${date}T${pad(hh)}:${pad(mm)}:00+07:00`,
+    endIso: `${date}T${pad(endHh)}:${pad(endMm)}:00+07:00`,
+    icsStart: `${ymd}T${pad(Math.max(0, hh - 7))}${pad(mm)}00Z`,
+    icsEnd: `${ymd}T${pad(Math.max(0, endHh - 7))}${pad(endMm)}00Z`,
+  };
 }
 
 export function escHtml(value) {
@@ -220,6 +250,51 @@ export function renderHeroUpcomingBar(upcoming) {
 </div>`;
 }
 
+function compactDatePill(dateDisplay) {
+  const raw = String(dateDisplay || "").trim();
+  if (!raw) return "";
+  const dayMap = [
+    ["chủ nhật", "CN"],
+    ["thứ hai", "T2"],
+    ["thứ ba", "T3"],
+    ["thứ tư", "T4"],
+    ["thứ năm", "T5"],
+    ["thứ sáu", "T6"],
+    ["thứ bảy", "T7"],
+  ];
+  const lower = raw.toLowerCase();
+  const match = raw.match(/(\d{1,2}\/\d{1,2})(?:\/\d{2,4})?/);
+  const shortDate = match ? match[1] : raw;
+  for (const [fullDay, shortDay] of dayMap) {
+    if (lower.includes(fullDay)) {
+      return `${shortDay} · ${shortDate}`;
+    }
+  }
+  return shortDate;
+}
+
+function compactPillarLabel(typeStr) {
+  const raw = String(typeStr || "").trim();
+  if (!raw) return "HolaRise";
+  return raw.split("·")[0].trim() || raw;
+}
+
+function compactFeeLabel(feeStr) {
+  const raw = String(feeStr || "").trim();
+  if (!raw) return "Miễn phí";
+  const head = raw.split("·")[0].trim();
+  if (head.toLowerCase().includes("miễn phí")) return "Miễn phí";
+  if (head.toLowerCase().includes("0đ")) return "Vé 0đ";
+  return head.slice(0, 20);
+}
+
+function compactSeatsLabel(seatsStr) {
+  const raw = String(seatsStr || "").trim();
+  const m = raw.match(/(\d+)/);
+  if (m) return `${m[1]} chỗ`;
+  return raw.slice(0, 16);
+}
+
 export function renderWorkshopsHtml(upcoming) {
   if (!upcoming || upcoming.length === 0) {
     return "";
@@ -232,10 +307,15 @@ export function renderWorkshopsHtml(upcoming) {
       const eventHref = resolveEventHref(ws);
       const titleEnAttr = ws.titleEn ? ` data-title-en="${escHtml(ws.titleEn)}"` : "";
       const summaryEnAttr = ws.summaryEn ? ` data-summary-en="${escHtml(ws.summaryEn)}"` : "";
+      const datePill = compactDatePill(ws.dateDisplay);
+      const pillarLabel = compactPillarLabel(ws.type);
+      const feeLabel = compactFeeLabel(ws.fee);
+      const seatsLabel = compactSeatsLabel(ws.seats);
+      const metaRight = [feeLabel, seatsLabel].filter(Boolean).join(" · ");
+
       const mediaInner = `<img ${imageAttrs(ws.image, "(max-width: 820px) 84vw, 420px")} alt="${escHtml(ws.imageAlt || ws.title)}" width="640" height="420" loading="lazy" decoding="async">
           <div class="event-card-badges">
-            <span class="glass-badge">${escHtml(ws.dateDisplay)}</span>
-            <span class="glass-badge glass-badge--accent">${escHtml(ws.fee)}</span>
+            <span class="glass-badge">${escHtml(datePill)}</span>
           </div>`;
       const mediaHtml = eventHref
         ? `<a class="event-card-media event-card-media--link" data-curtain href="${escHtml(eventHref)}" aria-label="${escHtml(ws.title)}">
@@ -248,15 +328,14 @@ export function renderWorkshopsHtml(upcoming) {
         ? `<h3 class="card-title"><a href="${escHtml(eventHref)}"${titleEnAttr}>${escHtml(ws.title)}</a></h3>`
         : `<h3 class="card-title"${titleEnAttr}>${escHtml(ws.title)}</h3>`;
       const footerHtml = eventHref
-        ? `<div class="card-footer card-footer--dual">
-            <a class="btn btn--primary btn--sm" href="${escHtml(eventHref)}">
+        ? `<div class="card-footer">
+            <a class="btn btn--primary btn--sm event-card-cta" href="${escHtml(eventHref)}">
               <span data-i18n="cta.viewInvite">Xem thư mời &amp; Giữ chỗ</span>
               <span aria-hidden="true">→</span>
             </a>
-            <button class="btn btn--outline btn--sm" type="button" data-i18n="cta.quickBook" data-register-event="${escHtml(ws.title)}" data-event-id="${escHtml(ws.id)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-fee="${escHtml(ws.fee)}" data-event-type="${escHtml(ws.type)}" data-event-href="${escHtml(eventHref)}">Giữ chỗ nhanh</button>
           </div>`
         : `<div class="card-footer">
-            <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="${escHtml(ws.title)}" data-event-id="${escHtml(ws.id)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-fee="${escHtml(ws.fee)}" data-event-type="${escHtml(ws.type)}">
+            <button class="btn btn--primary btn--sm event-card-cta" type="button" data-register-event="${escHtml(ws.title)}" data-event-id="${escHtml(ws.id)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-fee="${escHtml(ws.fee)}" data-event-type="${escHtml(ws.type)}">
               <span data-i18n="cta.reserveSeat">Giữ chỗ tham dự</span>
               <span aria-hidden="true">→</span>
             </button>
@@ -265,16 +344,15 @@ export function renderWorkshopsHtml(upcoming) {
       return `<article class="event-card" data-stagger-item${catAttr}>
         ${mediaHtml}
         <div class="event-card-body">
-          <div class="card-meta">
-            <span class="cat">${escHtml(ws.type)}</span>
-            <span>·</span>
-            <span>${escHtml(ws.seats)}</span>
+          <div class="event-card-eyebrow">
+            <span class="cat">${escHtml(pillarLabel)}</span>
+            <span class="event-card-meta-pill">${escHtml(metaRight)}</span>
           </div>
           ${titleHtml}
           <p class="card-text"${summaryEnAttr}>${escHtml(ws.summary)}</p>
           <div class="event-info-inline">
-            <span>${ICON_CALENDAR} ${escHtml(ws.time)}</span>
-            <span>${ICON_PIN} ${escHtml(ws.location)}</span>
+            <span class="event-info-row">${ICON_CALENDAR} <span>${escHtml(ws.time)}</span></span>
+            <span class="event-info-row">${ICON_PIN} <span>${escHtml(ws.location)}</span></span>
           </div>
           ${footerHtml}
         </div>
@@ -503,7 +581,7 @@ export function buildArticleSchemas(article) {
     publisher: {
       "@type": "Organization",
       name: BRAND_FULL_NAME,
-      logo: { "@type": "ImageObject", url: LOGO_MARK_URL },
+      logo: { "@type": "ImageObject", url: LOGO_MARK_URL, width: 512, height: 512 },
     },
     mainEntityOfPage: absUrl(slugPath),
   };
@@ -523,11 +601,12 @@ export function buildEventsJsonLd(upcoming) {
   return (upcoming || [])
     .map((ws) => {
       const eventHref = resolveEventHref(ws);
+      const times = buildEventIsoTimes(ws.date, ws.time);
       const schemaObj = {
         "@context": "https://schema.org",
         "@type": "Event",
         name: ws.title,
-        startDate: ws.id === "holaheart-cuoc-doi-cua-cha-2026-11-29" ? "2026-11-29T19:15:00+07:00" : ws.date,
+        startDate: times.startIso || ws.date,
         eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
         eventStatus: "https://schema.org/EventScheduled",
         isAccessibleForFree: true,
@@ -549,8 +628,8 @@ export function buildEventsJsonLd(upcoming) {
           url: SITE_URL,
         },
       };
-      if (ws.id === "holaheart-cuoc-doi-cua-cha-2026-11-29") {
-        schemaObj.endDate = "2026-11-29T21:30:00+07:00";
+      if (times.endIso) {
+        schemaObj.endDate = times.endIso;
       }
       if (eventHref) {
         schemaObj.url = absUrl(eventHref);
@@ -761,4 +840,75 @@ export function applySiteVisualsSsr(html, rawVisualsJson) {
     );
   }
   return out;
+}
+
+export function renderPublicTestimonialsHtml(rows) {
+  const list = (rows || []).filter((r) => r && r.content);
+  if (list.length === 0) return "";
+  const cards = list
+    .map((r) => {
+      const quote = r.pull_quote || r.content;
+      const meta = [r.author_role, r.author_org].filter(Boolean).join(" · ");
+      const photoHtml =
+        r.photo_url && isSafeMediaUrl(r.photo_url)
+          ? `<figure style="margin:0 0 14px;border-radius:10px;overflow:hidden;"><img src="${escHtml(r.photo_url)}" alt="Kỷ niệm từ ${escHtml(r.author_name)}" loading="lazy" style="width:100%;height:180px;object-fit:cover;display:block;"></figure>`
+          : "";
+      return `<article class="testimonial-card">
+        ${photoHtml}
+        <p class="testimonial-quote">“${escHtml(quote)}”</p>
+        <div class="testimonial-author">
+          <strong>${escHtml(r.author_name)}</strong>
+          ${meta ? `<span>${escHtml(meta)}</span>` : ""}
+        </div>
+      </article>`;
+    })
+    .join("\n      ");
+
+  return `<section class="section section--mist" aria-label="Cảm nhận người tham dự">
+  <div class="container">
+    <div class="section-header" style="margin-bottom: 28px;">
+      <div class="kicker">Tiếng nói từ các buổi gặp</div>
+      <h2 class="section-title">Cảm nhận của người đồng hành</h2>
+    </div>
+    <div class="grid-3">
+      ${cards}
+    </div>
+  </div>
+</section>`;
+}
+
+export function renderPublicTeamHtml(rows) {
+  const list = (rows || []).filter((m) => m && m.name);
+  if (list.length === 0) return "";
+  const cards = list
+    .map((m) => {
+      const avatarHtml =
+        m.avatar_url && isSafeMediaUrl(m.avatar_url)
+          ? `<img src="${escHtml(m.avatar_url)}" alt="Chân dung ${escHtml(m.name)}" width="72" height="72" loading="lazy" style="width:68px;height:68px;border-radius:50%;object-fit:cover;">`
+          : `<span style="width:68px;height:68px;border-radius:50%;background:var(--accent-soft, #eef2ef);color:var(--ink);display:grid;place-items:center;font-weight:600;font-size:1.1rem;">${escHtml(String(m.name).trim().slice(0, 2).toUpperCase())}</span>`;
+      const meta = [m.role_title, m.organization].filter(Boolean).join(" · ");
+      return `<article class="value-col" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          ${avatarHtml}
+          <div>
+            <h3 style="margin:0 0 2px;font-size:1.02rem;">${escHtml(m.name)}</h3>
+            ${meta ? `<div style="font-size:0.84rem;color:var(--accent);font-weight:500;">${escHtml(meta)}</div>` : ""}
+          </div>
+        </div>
+        ${m.bio ? `<p style="margin:0;color:var(--ink-secondary);font-size:0.9rem;line-height:1.6;">${escHtml(m.bio)}</p>` : ""}
+      </article>`;
+    })
+    .join("\n      ");
+
+  return `<section class="section" id="doi-ngu" aria-label="Đội ngũ điều phối HolaRise">
+  <div class="container">
+    <div class="section-header" style="margin-bottom: 28px;">
+      <div class="kicker">Con người đứng sau</div>
+      <h2 class="section-title">Đội ngũ Điều phối &amp; Người dẫn dắt</h2>
+    </div>
+    <div class="grid-3">
+      ${cards}
+    </div>
+  </div>
+</section>`;
 }

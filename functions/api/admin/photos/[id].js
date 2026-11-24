@@ -1,3 +1,4 @@
+import { trashDriveFile } from "../../../_lib/drive.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
 import { cleanStr } from "../../../_lib/validation.js";
 import { serializePhotoRow } from "../albums/[id]/index.js";
@@ -84,8 +85,12 @@ export async function onRequestDelete(context) {
 
   await context.env.DB.prepare("DELETE FROM media_photos WHERE id = ?").bind(id).run();
 
-  if (existing.media_key && context.env?.MEDIA_KV) {
-    await context.env.MEDIA_KV.delete(`media:${existing.media_key}`).catch(() => {});
+  if (existing.media_key) {
+    if (existing.media_key.startsWith("drive:")) {
+      await trashDriveFile(context.env, existing.media_key.slice(6)).catch(() => {});
+    } else if (context.env?.MEDIA_KV) {
+      await context.env.MEDIA_KV.delete(`media:${existing.media_key}`).catch(() => {});
+    }
   }
 
   // If this photo was the album's cover, fallback to the next available photo
