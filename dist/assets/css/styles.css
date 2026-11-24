@@ -4588,12 +4588,15 @@ dialog.club-dialog[open]:where(:not([data-closing]))::backdrop {
 /* Form Offline & Draft States */
 .form-status.is-draft {
   display: block;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  color: var(--ink-secondary);
-  font-size: 0.85rem;
+  padding: 2px 0 2px 12px;
+  border: 0;
+  border-left: 2px solid var(--accent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.45;
 }
 
 .form-status.is-offline {
@@ -6916,35 +6919,91 @@ form.form-grid[hidden] {
 .invite-signoff { margin: 0 0 4px !important; font-family: var(--font-serif); font-style: italic; }
 .invite-host { margin: 0 !important; font-size: 0.9rem; color: var(--ink-secondary); }
 
-/* RSVP */
-.invite-rsvp-section { scroll-margin-top: calc(var(--header-height) + 16px); }
-
-.invite-rsvp-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-  gap: 48px;
-  align-items: start;
+/* RSVP Strip (Editorial Invitation Footer) */
+.invite-text-btn--accent {
+  color: var(--accent) !important;
+  font-weight: 600 !important;
 }
 
-.invite-form-surface {
-  min-width: 0;
-  padding: clamp(24px, 4vw, 40px);
+.invite-rsvp-section {
+  padding-top: 8px;
+  padding-bottom: clamp(56px, 8vw, 88px);
+  scroll-margin-top: calc(var(--header-height) + 16px);
+}
+
+.invite-rsvp-card {
+  padding: clamp(24px, 4vw, 36px);
   border-radius: var(--radius-lg);
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--line);
 }
 
-.invite-rsvp-heading {
-  margin: 4px 0 8px;
-  font-size: clamp(1.4rem, 2.2vw, 1.7rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+.invite-rsvp-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
 }
 
-.invite-rsvp-lead { margin: 0 0 20px; font-size: 0.95rem; line-height: 1.6; color: var(--ink-secondary); }
+.invite-rsvp-fee {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+.invite-rsvp-heading {
+  margin: 8px 0 6px;
+  font-family: var(--font-serif);
+  font-size: clamp(1.45rem, 2.4vw, 1.8rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.invite-rsvp-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+.invite-rsvp-facts .invite-rsvp-sep { display: none; }
+
+.invite-rsvp-lead {
+  margin: 0 0 22px;
+  max-width: 56ch;
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+}
+
+.invite-rsvp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.invite-rsvp-footnote {
+  margin: 14px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+.invite-rsvp-footnote a {
+  color: var(--ink-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.invite-rsvp-footnote a:hover { color: var(--accent); }
 
 .invite-fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
-.invite-legend { padding: 0; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500; color: var(--ink); }
+.invite-legend { padding: 0; margin-bottom: 8px; font-size: 0.86rem; font-weight: 500; color: var(--ink-secondary); }
 
 /* Segmented control: three plain options, one hairline container */
 .seat-segmented {
@@ -6957,7 +7016,7 @@ form.form-grid[hidden] {
   background: var(--surface);
 }
 
-.seat-seg-item { min-width: 0; position: relative; }
+.seat-seg-item { min-width: 0; position: relative; display: flex; }
 
 .seat-seg-item input.visually-hidden,
 .role-option input.visually-hidden,
@@ -6977,15 +7036,18 @@ form.form-grid[hidden] {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 8px 10px;
+  width: 100%;
+  height: 100%;
+  min-height: 40px;
+  padding: 7px 8px;
   border-radius: calc(var(--radius-md) - 4px);
-  font-size: 0.92rem;
+  font-size: 0.86rem;
   font-weight: 500;
+  line-height: 1.25;
   color: var(--ink-secondary);
   text-align: center;
   cursor: pointer;
-  transition: background-color 0.2s var(--ease-expo), color 0.2s var(--ease-expo);
+  transition: background-color 0.2s var(--ease-expo), color 0.2s var(--ease-expo), box-shadow 0.2s var(--ease-expo);
 }
 
 .seat-seg-label:hover { color: var(--ink); }
@@ -6993,7 +7055,7 @@ form.form-grid[hidden] {
   background: var(--bg);
   color: var(--ink);
   font-weight: 600;
-  box-shadow: 0 1px 2px rgba(11, 17, 15, 0.08), 0 0 0 1px var(--line);
+  box-shadow: 0 1px 3px rgba(11, 17, 15, 0.08), 0 0 0 1px var(--line);
 }
 .seat-seg-item input:focus-visible + .seat-seg-label { outline: 2px solid var(--accent); outline-offset: 1px; }
 
@@ -7011,74 +7073,263 @@ form.form-grid[hidden] {
   flex-shrink: 0;
   accent-color: var(--accent);
 }
-.invite-check-inline label { margin: 0; font-size: 0.88rem; font-weight: 400; line-height: 1.5; color: var(--ink-secondary); cursor: pointer; }
+.invite-check-inline label { margin: 0; font-size: 0.84rem; font-weight: 400; line-height: 1.5; color: var(--ink-secondary); cursor: pointer; }
 
-/* Invitation card: the real poster + plain facts. No stamps, no barcode, no glow. */
-.invite-card-col { min-width: 0; position: sticky; top: calc(var(--header-height) + 24px); }
+/* Shared RSVP Modal Dialog (.club-dialog--rsvp) */
+dialog.club-dialog--rsvp {
+  width: min(calc(100% - 28px), 520px);
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  box-shadow: 0 32px 72px rgba(11, 17, 15, 0.24), 0 4px 16px rgba(11, 17, 15, 0.08);
+}
 
-.invite-ticket {
-  border-radius: var(--radius-lg);
+.rsvp-dialog-inner {
+  padding: clamp(22px, 4vw, 30px);
+}
+
+.rsvp-modal-head {
+  padding-right: 40px;
+  margin-bottom: 16px;
+}
+
+.rsvp-modal-kicker {
+  margin-bottom: 6px;
+}
+
+.rsvp-modal-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.32rem, 2.6vw, 1.56rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.rsvp-event-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.rsvp-event-thumb {
+  flex: 0 0 84px;
+  height: 56px;
+  margin-top: 2px;
+  border-radius: 8px;
   overflow: hidden;
   background: var(--bg);
   border: 1px solid var(--line);
 }
-
-.invite-ticket-photo { aspect-ratio: 16 / 9; background: var(--surface); }
-.invite-ticket-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
-
-.invite-ticket-body { padding: 20px 22px 22px; }
-
-.invite-ticket-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  font-size: 0.78rem;
+.rsvp-event-thumb[hidden] { display: none !important; }
+.rsvp-event-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-.invite-ticket-kicker { font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); }
-.invite-ticket-status { color: var(--ink-muted); }
-.invite-ticket.is-confirmed .invite-ticket-status { color: var(--accent); font-weight: 600; }
 
-.invite-ticket-guest-label { margin: 0; font-family: var(--font-serif); font-style: italic; font-size: 0.95rem; color: var(--ink-secondary); }
-.invite-ticket-guest {
+.rsvp-event-info { min-width: 0; flex: 1 1 auto; }
+
+.rsvp-event-type {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.rsvp-event-title {
+  margin: 0;
+  font-size: 0.94rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.rsvp-event-meta {
+  margin-top: 3px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink-secondary);
+}
+
+.rsvp-event-detail-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+.rsvp-event-detail-link[hidden] { display: none !important; }
+.rsvp-event-detail-link:hover { text-decoration: underline; }
+
+.rsvp-modal-form {
+  gap: 16px;
+}
+
+.rsvp-submit-block {
+  display: grid;
+  gap: 10px;
   margin-top: 2px;
-  font-size: 1.5rem;
+}
+
+.rsvp-submit-btn {
+  width: 100%;
+  justify-content: center;
+  min-height: 46px;
+}
+
+.rsvp-trust-note {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--ink-muted);
+}
+.rsvp-trust-note a {
+  color: var(--ink-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Confirmed Pass inside RSVP Dialog */
+.rsvp-confirmed {
+  display: grid;
+  gap: 18px;
+}
+.rsvp-confirmed[hidden] { display: none !important; }
+
+.rsvp-confirmed-card {
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.rsvp-confirmed-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.rsvp-confirmed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.rsvp-confirmed-code {
+  font-size: 0.84rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+
+.rsvp-confirmed-guest-label {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--ink-secondary);
+}
+
+.rsvp-confirmed-guest {
+  margin-top: 2px;
+  font-size: 1.35rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.25;
+  color: var(--ink);
   overflow-wrap: anywhere;
 }
-.invite-ticket-org { margin-top: 2px; font-size: 0.9rem; color: var(--ink-secondary); }
 
-.invite-ticket-rule { height: 1px; margin: 18px 0; background: var(--line); }
-
-.invite-ticket-dl {
+.rsvp-confirmed-dl {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px 16px;
-  margin: 0;
+  gap: 12px 16px;
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
 }
-.invite-ticket-dl dt { font-size: 0.74rem; font-weight: 500; color: var(--ink-muted); }
-.invite-ticket-dl dd { margin: 2px 0 0; font-size: 0.92rem; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
-.invite-ticket-code { letter-spacing: 0.02em; }
+.rsvp-confirmed-dl dt {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+.rsvp-confirmed-dl dd {
+  margin: 2px 0 0;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
 
-.invite-ticket-actions { margin-top: 16px; }
-.invite-actions-note { margin: 0 0 12px; font-size: 0.9rem; line-height: 1.55; color: var(--ink-secondary); }
+.rsvp-confirmed-note {
+  margin: 14px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+}
 
-@media (max-width: 960px) {
-  .invite-rsvp-grid { grid-template-columns: 1fr; gap: 28px; }
-  .invite-card-col { position: static; }
+.rsvp-confirmed-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.rsvp-secondary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.rsvp-secondary-actions > .btn,
+.rsvp-secondary-actions > .copy-control {
+  flex: 1 1 auto;
+}
+.rsvp-secondary-actions > .btn,
+.rsvp-secondary-actions > .copy-control > .btn {
+  width: 100%;
+  justify-content: center;
 }
 
 @media (max-width: 640px) {
   .invite-poster-figure { margin-bottom: 32px; }
   .invite-prose { font-size: 1.02rem; }
+  .invite-rsvp-actions .btn { width: 100%; justify-content: center; }
   .card-footer--dual { grid-template-columns: 1fr; }
   .card-footer--dual .btn { width: 100%; justify-content: center; }
   .upcoming-bar-actions { width: 100%; }
   .upcoming-bar-actions .btn { flex: 1 1 auto; justify-content: center; }
-  .seat-seg-label { font-size: 0.86rem; padding: 8px 6px; }
+  .seat-seg-label { font-size: 0.82rem; padding: 6px 6px; min-height: 38px; }
+  .rsvp-dialog-inner { padding: 20px 18px; }
+  .rsvp-modal-head { margin-bottom: 12px; }
+  .rsvp-event-card { padding: 10px 12px; margin-bottom: 14px; }
+  .rsvp-event-thumb { flex-basis: 68px; height: 48px; }
+  .rsvp-modal-form { gap: 12px; }
+  .rsvp-confirmed-dl { grid-template-columns: 1fr; gap: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -7272,9 +7523,9 @@ form.form-grid[hidden] {
 
 @media (max-width: 768px) {
   .hero-card .visual-orientation-chip {
-    top: auto;
-    bottom: 14px;
+    top: 14px;
     right: 14px;
+    bottom: auto;
   }
 }
 
@@ -7332,8 +7583,8 @@ body.nav-open .pwa-offline-bar {
    v8 Phase 4: Unified Member Hub, Member Pass Dashboard, 1-Tap RSVP & Guestbook
    ========================================================================== */
 .member-mode-tabs {
-  display: inline-flex;
-  flex-wrap: wrap;
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   padding: 4px;
   margin-bottom: 22px;
@@ -7350,6 +7601,8 @@ body.nav-open .pwa-offline-bar {
   color: var(--ink-secondary);
   font-size: 0.86rem;
   font-weight: 500;
+  white-space: nowrap;
+  text-align: center;
   cursor: pointer;
   transition: background-color 0.2s var(--ease-expo), color 0.2s var(--ease-expo);
 }
@@ -8882,5 +9135,222 @@ a:focus-visible,
 @media (max-width: 680px) {
   .pillar-choice-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Responsive Layout Balance & Anti-Orphan Wrapping System
+   ========================================================================== */
+.cta-band-actions,
+.hero-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.upcoming-bar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.upcoming-sep {
+  color: var(--ink-muted);
+  opacity: 0.65;
+}
+
+.upcoming-fee {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 961px) {
+  .upcoming-bar-inner {
+    flex-wrap: nowrap;
+    gap: 24px;
+  }
+
+  .upcoming-bar-info {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 4px 10px;
+  }
+
+  .upcoming-bar-actions {
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Full-width balanced button stacks on mobile (eliminates ragged right dead space) */
+  .form-submit-row,
+  .cta-band-actions,
+  .hero-inline-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .form-submit-row .btn,
+  .cta-band-actions .btn,
+  .hero-inline-actions .btn {
+    width: 100%;
+    min-height: 48px;
+    justify-content: center;
+  }
+
+  /* 50/50 single-row pill tabs on /tham-gia/ */
+  .member-mode-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 4px;
+  }
+
+  .member-mode-tab {
+    padding: 0 10px;
+    font-size: 0.82rem;
+    min-height: 40px;
+  }
+
+  /* Keep 3-segment seat selector single-line and uniform height */
+  .seat-seg-label {
+    font-size: 0.78rem;
+    padding: 8px 4px;
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+
+  /* Full-width stacked seat chips on /tham-gia/ & modal */
+  .quick-chip-row--compact {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .quick-chip-row--compact .quick-chip {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  /* Symmetric 2x2 quick-note preset grid */
+  .note-preset-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .note-preset-chip {
+    width: 100%;
+    min-height: 36px;
+    padding: 6px 8px;
+    text-align: center;
+    line-height: 1.25;
+  }
+
+  /* Clean mobile invite meta bar without dangling dot separators */
+  .invite-meta-facts {
+    display: grid;
+    gap: 4px;
+  }
+
+  .invite-meta-facts > span[aria-hidden="true"],
+  .invite-meta-links > span[aria-hidden="true"] {
+    display: none;
+  }
+
+  .invite-meta-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+    align-items: center;
+  }
+
+  .invite-meta-links a,
+  .invite-text-btn {
+    justify-self: start;
+  }
+
+  /* Balanced post-RSVP pass action grid: full-width primary + 2-col secondary */
+  .pass-actions-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .pass-actions-buttons .btn--primary {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .pass-actions-buttons .btn--outline,
+  .pass-actions-buttons .copy-control,
+  .pass-actions-buttons .copy-control .btn {
+    width: 100%;
+    min-height: 40px;
+    justify-content: center;
+  }
+
+  /* Single-row scrollable filter bar (eliminates 3+1 orphan wrap) */
+  .filter-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: 14px;
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.82rem;
+    padding: 0 0 10px;
+  }
+
+  /* Clean vertical upcoming strip without orphan dot separators */
+  .upcoming-bar-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .upcoming-sep {
+    display: none;
+  }
+
+  .upcoming-bar-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .upcoming-bar-actions .btn {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .seat-seg-label {
+    font-size: 0.72rem;
+    padding: 8px 2px;
   }
 }

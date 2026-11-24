@@ -470,79 +470,156 @@
 
   /* 6. Quick Event Registration Dialog Trigger */
   var eventModal = document.getElementById("event-register-modal");
+  var modalKickerDisplay = document.getElementById("modal-kicker");
   var eventTitleDisplay = document.getElementById("modal-event-title");
   var eventTypeDisplay = document.getElementById("modal-event-type");
   var eventMetaDisplay = document.getElementById("modal-event-meta");
+  var eventThumbWrap = document.getElementById("modal-event-thumb");
+  var eventThumbImg = document.getElementById("modal-event-img");
   var eventDetailLink = document.getElementById("modal-event-detail-link");
   var modalIcsBtn = document.getElementById("modal-ics-btn");
+  var modalZaloBtn = document.getElementById("modal-zalo-group-btn");
+  var modalNoteSummary = document.getElementById("modal-note-summary");
+  var modalNoteInput = document.getElementById("modal-note");
+  var modalNoteDetails = document.getElementById("modal-note-details");
+  var modalAnonWrap = document.getElementById("modal-anon-wrap");
   var eventInputHidden = document.getElementById("modal-event-input");
   var eventIdHidden = document.getElementById("modal-event-id");
 
   if (eventModal) {
+    var defaultNoteSummary = modalNoteSummary ? modalNoteSummary.textContent : "+ Ghi chú cho người điều phối (tùy chọn)";
+    var defaultNotePlaceholder = modalNoteInput ? modalNoteInput.getAttribute("placeholder") || "" : "";
+    var defaultModalZalo = modalZaloBtn ? modalZaloBtn.getAttribute("href") || "" : "";
+
+    var openEventModalFromTrigger = function (btn) {
+      var title = btn.getAttribute("data-register-event") || "Hoạt động cộng đồng HolaRise";
+      var eventId = btn.getAttribute("data-event-id") || "";
+      var eventSlug = btn.getAttribute("data-event-slug") || "";
+      var eventDate = btn.getAttribute("data-event-date") || "Công bố theo từng hoạt động";
+      var eventTime = btn.getAttribute("data-event-time") || "";
+      var eventLocation = btn.getAttribute("data-event-location") || "Hòa Lạc – Thạch Thất, Hà Nội";
+      var eventFee = btn.getAttribute("data-event-fee") || "Phi lợi nhuận · Minh bạch";
+      var eventSeats = btn.getAttribute("data-event-seats") || "";
+      var eventType = btn.getAttribute("data-event-type") || "Cộng đồng HolaRise";
+      var eventHref = btn.getAttribute("data-event-href") || "";
+      var eventImage = btn.getAttribute("data-event-image") || "";
+      var eventZalo = btn.getAttribute("data-zalo-group") || defaultModalZalo;
+      var icsStart = btn.getAttribute("data-ics-start") || "";
+      var icsEnd = btn.getAttribute("data-ics-end") || "";
+      var noteSummary = btn.getAttribute("data-note-summary") || defaultNoteSummary;
+      var notePlaceholder = btn.getAttribute("data-note-placeholder") || defaultNotePlaceholder;
+      var allowAnonShare = btn.getAttribute("data-anon-share") === "true";
+
+      if (modalKickerDisplay) {
+        modalKickerDisplay.textContent = eventSeats ? "Xác nhận tham dự · " + eventSeats : "Xác nhận tham dự";
+      }
+      if (eventTitleDisplay) eventTitleDisplay.textContent = title;
+      if (eventTypeDisplay) eventTypeDisplay.textContent = eventType;
+      if (eventMetaDisplay) {
+        var metaItems = [];
+        var hasDateInTime = /\d{1,2}\/\d{1,2}/.test(eventTime);
+        if (eventTime) {
+          metaItems.push(eventTime);
+          if (eventDate && !hasDateInTime && eventTime.indexOf(eventDate) === -1) {
+            metaItems.push(eventDate);
+          }
+        } else if (eventDate) {
+          metaItems.push(eventDate);
+        }
+        if (eventLocation) metaItems.push(eventLocation);
+        if (eventFee) metaItems.push(eventFee);
+        eventMetaDisplay.textContent = metaItems.join(" · ");
+      }
+      if (eventThumbWrap && eventThumbImg) {
+        if (eventImage && eventImage.indexOf("/") === 0) {
+          eventThumbImg.src = eventImage;
+          eventThumbImg.alt = title;
+          eventThumbWrap.hidden = false;
+        } else {
+          eventThumbWrap.hidden = true;
+          eventThumbImg.removeAttribute("src");
+        }
+      }
+      if (eventDetailLink) {
+        var currentPath = (window.location.pathname || "/").replace(/\/+$/, "/");
+        var normalizedHref = eventHref ? eventHref.replace(/\/+$/, "/") : "";
+        if (eventHref && eventHref.indexOf("/") === 0 && normalizedHref !== currentPath) {
+          eventDetailLink.href = eventHref;
+          eventDetailLink.hidden = false;
+        } else {
+          eventDetailLink.hidden = true;
+        }
+      }
+      if (modalIcsBtn) {
+        if (icsStart || (eventHref && eventHref.indexOf("/su-kien/") === 0)) {
+          modalIcsBtn.hidden = false;
+          modalIcsBtn.setAttribute("data-ics-title", title);
+          modalIcsBtn.setAttribute("data-ics-location", eventLocation);
+          modalIcsBtn.setAttribute("data-ics-url", eventHref ? window.location.origin + eventHref : window.location.href);
+          if (icsStart) modalIcsBtn.setAttribute("data-ics-start", icsStart);
+          else modalIcsBtn.removeAttribute("data-ics-start");
+          if (icsEnd) modalIcsBtn.setAttribute("data-ics-end", icsEnd);
+          else modalIcsBtn.removeAttribute("data-ics-end");
+        } else {
+          modalIcsBtn.hidden = true;
+        }
+      }
+      if (modalZaloBtn && eventZalo) {
+        modalZaloBtn.href = eventZalo;
+      }
+      if (modalNoteSummary) modalNoteSummary.textContent = noteSummary;
+      if (modalNoteInput) modalNoteInput.setAttribute("placeholder", notePlaceholder);
+      if (modalNoteDetails) modalNoteDetails.open = false;
+      if (modalAnonWrap) modalAnonWrap.hidden = !allowAnonShare;
+
+      if (eventInputHidden) eventInputHidden.value = title;
+      if (eventIdHidden) eventIdHidden.value = eventId;
+
+      eventModal.dataset.eventTitle = title;
+      eventModal.dataset.eventId = eventId;
+      eventModal.dataset.eventSlug = eventSlug;
+      eventModal.dataset.eventDate = eventDate;
+      eventModal.dataset.eventTime = eventTime;
+      eventModal.dataset.eventLocation = eventLocation;
+      eventModal.dataset.eventFee = eventFee;
+      eventModal.dataset.eventType = eventType;
+      eventModal.dataset.eventHref = eventHref;
+      eventModal.dataset.eventImage = eventImage;
+      eventModal.dataset.zaloGroup = eventZalo;
+
+      var modalForm = eventModal.querySelector("form[data-club-form]");
+      var modalSuccess = document.getElementById("modal-pass-success");
+      if (modalForm) {
+        modalForm.hidden = false;
+        if (eventZalo) modalForm.setAttribute("data-zalo-group", eventZalo);
+      }
+      if (modalSuccess) modalSuccess.hidden = true;
+
+      var statusEl = eventModal.querySelector(".form-status");
+      if (statusEl) {
+        statusEl.className = "form-status";
+        statusEl.textContent = "";
+      }
+      eventModal.querySelectorAll('[aria-invalid="true"]').forEach(function (field) {
+        setFieldErrorState(field, "", false);
+      });
+      openDialog(eventModal);
+    };
+
     document.querySelectorAll("[data-register-event]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        var title = btn.getAttribute("data-register-event") || "Hoạt động cộng đồng HolaRise";
-        var eventId = btn.getAttribute("data-event-id") || "";
-        var eventDate = btn.getAttribute("data-event-date") || "Công bố theo từng hoạt động";
-        var eventTime = btn.getAttribute("data-event-time") || "";
-        var eventLocation = btn.getAttribute("data-event-location") || "Hòa Lạc – Thạch Thất, Hà Nội";
-        var eventFee = btn.getAttribute("data-event-fee") || "Phi lợi nhuận · Minh bạch";
-        var eventType = btn.getAttribute("data-event-type") || "Cộng đồng HolaRise";
-        var eventHref = btn.getAttribute("data-event-href") || "";
-
-        if (eventTitleDisplay) eventTitleDisplay.textContent = title;
-        if (eventTypeDisplay) eventTypeDisplay.textContent = eventType;
-        if (eventMetaDisplay) {
-          eventMetaDisplay.textContent = [eventDate, eventTime, eventLocation, eventFee]
-            .filter(Boolean)
-            .join(" · ");
-        }
-        if (eventDetailLink) {
-          if (eventHref && eventHref.indexOf("/") === 0) {
-            eventDetailLink.href = eventHref;
-            eventDetailLink.hidden = false;
-          } else {
-            eventDetailLink.hidden = true;
-          }
-        }
-        if (modalIcsBtn) {
-          if (eventHref && eventHref.indexOf("/su-kien/") === 0) {
-            modalIcsBtn.hidden = false;
-            modalIcsBtn.setAttribute("data-ics-title", title);
-            modalIcsBtn.setAttribute("data-ics-location", eventLocation);
-            modalIcsBtn.setAttribute("data-ics-url", window.location.origin + eventHref);
-          } else {
-            modalIcsBtn.hidden = true;
-          }
-        }
-        if (eventInputHidden) eventInputHidden.value = title;
-        if (eventIdHidden) eventIdHidden.value = eventId;
-
-        eventModal.dataset.eventTitle = title;
-        eventModal.dataset.eventId = eventId;
-        eventModal.dataset.eventDate = eventDate;
-        eventModal.dataset.eventTime = eventTime;
-        eventModal.dataset.eventLocation = eventLocation;
-        eventModal.dataset.eventFee = eventFee;
-        eventModal.dataset.eventType = eventType;
-        eventModal.dataset.eventHref = eventHref;
-
-        var modalForm = eventModal.querySelector("form[data-club-form]");
-        var modalSuccess = document.getElementById("modal-pass-success");
-        if (modalForm) modalForm.hidden = false;
-        if (modalSuccess) modalSuccess.hidden = true;
-
-        var statusEl = eventModal.querySelector(".form-status");
-        if (statusEl) {
-          statusEl.className = "form-status";
-          statusEl.textContent = "";
-        }
-        eventModal.querySelectorAll('[aria-invalid="true"]').forEach(function (field) {
-          setFieldErrorState(field, "", false);
-        });
-        openDialog(eventModal);
+        openEventModalFromTrigger(btn);
       });
     });
+
+    if (window.location.hash === "#giu-cho") {
+      var hashTrigger = document.querySelector('[data-open-on-hash="giu-cho"]');
+      if (hashTrigger) {
+        setTimeout(function () {
+          openEventModalFromTrigger(hashTrigger);
+        }, 120);
+      }
+    }
   }
 
   /* 7. Registration & Contact Form Submission + Local Offline Drafts + Accessible Inline Validation */
@@ -996,7 +1073,15 @@
         }
       } else if (modalContainer || form.id === "join-rsvp-form") {
         if (pillarValues.length) metaParts.push("Mảng quan tâm: " + pillarValues.join(", "));
-        if (vibeValue) metaParts.push("Số chỗ: " + vibeValue);
+        if (seatValue || vibeValue) metaParts.push("Số chỗ: " + (seatValue || vibeValue));
+        var anonWrap = modalContainer ? modalContainer.querySelector("#modal-anon-wrap") : null;
+        if (rawNote && anonCheckInput && anonWrap && !anonWrap.hidden) {
+          metaParts.push(
+            anonCheckInput.checked
+              ? "Chia sẻ: Giữ ẩn danh khi trích đọc"
+              : "Chia sẻ: Chỉ gửi riêng BTC"
+          );
+        }
       } else if (isPartnerMode) {
         if (partnerValues.length) metaParts.push("Hợp tác: " + partnerValues.join(", "));
       } else {
@@ -1011,8 +1096,14 @@
       }
 
       var resolvedEventId = (payload.eventId || "").trim();
-      var resolvedEventSlug = form.getAttribute("data-event-slug") || "";
-      var resolvedEventImage = form.getAttribute("data-event-image") || "";
+      var resolvedEventSlug =
+        form.getAttribute("data-event-slug") ||
+        (modalContainer && modalContainer.dataset.eventSlug) ||
+        "";
+      var resolvedEventImage =
+        form.getAttribute("data-event-image") ||
+        (modalContainer && modalContainer.dataset.eventImage) ||
+        "";
       var resolvedEventUrl =
         form.getAttribute("data-event-url") ||
         (modalContainer && modalContainer.dataset.eventHref) ||
@@ -1059,11 +1150,10 @@
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-location")) ||
           (modalContainer && modalContainer.dataset.eventLocation) ||
           "Hòa Lạc – Thạch Thất, Hà Nội",
-        vibe: isFatherStudio
-          ? seatShort || seatValue || "01 chỗ · Đi một mình"
-          : isPartnerMode
-            ? partnerValues[0] || "Hợp tác tổ chức"
-            : vibeValue || "Đi 1 mình (1 chỗ)",
+        vibe:
+          seatShort ||
+          seatValue ||
+          (isPartnerMode ? partnerValues[0] || "Hợp tác tổ chức" : vibeValue || "01 chỗ · Đi một mình"),
         skills: skillValues,
         isPartner: isPartnerMode,
       };
@@ -1788,55 +1878,83 @@
       }
     });
 
-    // Shake-to-report detector (zero-lag 100ms throttle, 2-peak debounce, 30s cooldown)
+    // Shake-to-report detector (45ms throttle, dual linear/delta detection, 8s cooldown)
     var hasMotion = typeof window.DeviceMotionEvent !== "undefined";
     var needsIosPermission = hasMotion && typeof window.DeviceMotionEvent.requestPermission === "function";
+    var SHAKE_IOS_GRANTED_KEY = "holarise_shake_ios_granted";
     var shakeAttached = false;
     var shakeEnabled = false;
+    var motionSignalSeen = false;
     var lastSampleTs = 0;
     var lastAx = null;
     var lastAy = null;
     var lastAz = null;
     var peakCount = 0;
     var firstPeakTs = 0;
+    var lastPeakTs = 0;
     var lastTriggerTs = 0;
 
     function onDeviceMotion(ev) {
-      if (!shakeEnabled || dialog.open) return;
+      if (!shakeEnabled) return;
+      var accG = ev.accelerationIncludingGravity;
+      var accL = ev.acceleration;
+      var hasG = Boolean(accG && (accG.x != null || accG.y != null || accG.z != null));
+      var hasL = Boolean(accL && (accL.x != null || accL.y != null || accL.z != null));
+      if (!hasG && !hasL) return;
+
+      motionSignalSeen = true;
+      if (dialog.open) return;
+
       var now = Date.now();
-      if (now - lastSampleTs < 100) return;
+      if (now - lastSampleTs < 45) return;
       lastSampleTs = now;
 
-      if (now - lastTriggerTs < 30000) return;
+      if (now - lastTriggerTs < 8000) return;
       var active = document.activeElement;
       if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) return;
       if (document.querySelector("dialog[open]")) return;
 
-      var acc = ev.accelerationIncludingGravity || ev.acceleration;
-      if (!acc || (acc.x == null && acc.y == null && acc.z == null)) return;
-      var ax = acc.x || 0;
-      var ay = acc.y || 0;
-      var az = acc.z || 0;
-
-      if (lastAx !== null) {
-        var delta = Math.abs(ax - lastAx) + Math.abs(ay - lastAy) + Math.abs(az - lastAz);
-        if (delta > 22) {
-          if (now - firstPeakTs > 900) {
-            peakCount = 1;
-            firstPeakTs = now;
-          } else {
-            peakCount += 1;
-          }
-          if (peakCount >= 2) {
-            peakCount = 0;
-            lastTriggerTs = now;
-            openFeedbackDialog({ bugMode: true, autoCapture: true });
-          }
+      var triggeredPeak = false;
+      if (hasL) {
+        var lx = accL.x || 0;
+        var ly = accL.y || 0;
+        var lz = accL.z || 0;
+        var linearMag = Math.sqrt(lx * lx + ly * ly + lz * lz);
+        if (linearMag >= 11.5) {
+          triggeredPeak = true;
         }
       }
-      lastAx = ax;
-      lastAy = ay;
-      lastAz = az;
+
+      if (hasG) {
+        var gx = accG.x || 0;
+        var gy = accG.y || 0;
+        var gz = accG.z || 0;
+        if (lastAx !== null) {
+          var delta = Math.abs(gx - lastAx) + Math.abs(gy - lastAy) + Math.abs(gz - lastAz);
+          if (delta >= 13.5) {
+            triggeredPeak = true;
+          }
+        }
+        lastAx = gx;
+        lastAy = gy;
+        lastAz = gz;
+      }
+
+      if (triggeredPeak) {
+        if (now - firstPeakTs > 1200) {
+          peakCount = 1;
+          firstPeakTs = now;
+          lastPeakTs = now;
+        } else if (now - lastPeakTs >= 110) {
+          peakCount += 1;
+          lastPeakTs = now;
+        }
+        if (peakCount >= 2) {
+          peakCount = 0;
+          lastTriggerTs = now;
+          openFeedbackDialog({ bugMode: true, autoCapture: true });
+        }
+      }
     }
 
     function updateShakeUi() {
@@ -1846,8 +1964,14 @@
         return;
       }
       shakeRowEl.hidden = false;
+      if (!window.isSecureContext) {
+        shakeTextEl.textContent = "Cảm biến lắc chỉ chạy trên HTTPS (holarise.org).";
+        shakeToggleBtn.hidden = true;
+        return;
+      }
+      shakeToggleBtn.hidden = false;
       if (shakeEnabled) {
-        shakeTextEl.textContent = "Đang bật: lắc điện thoại để tự đọc màn hình và báo lỗi";
+        shakeTextEl.textContent = "Đang bật: đóng cửa sổ rồi lắc nhẹ điện thoại 2 nhịp để báo lỗi";
         shakeToggleBtn.textContent = "Tắt lắc máy";
       } else {
         shakeTextEl.textContent = "Lắc điện thoại để tự đọc màn hình và báo lỗi nhanh";
@@ -1855,7 +1979,16 @@
       }
     }
 
-    function enableShake() {
+    function verifyMotionSignalSoon() {
+      setTimeout(function () {
+        if (shakeEnabled && !motionSignalSeen && shakeTextEl) {
+          shakeTextEl.textContent =
+            "Trình duyệt này chưa gửi tín hiệu cảm biến lắc — bạn dùng nút Báo lỗi nhanh ở cuối trang nhé.";
+        }
+      }, 1500);
+    }
+
+    function enableShake(fromUserTap) {
       if (!shakeAttached) {
         window.addEventListener("devicemotion", onDeviceMotion, { passive: true });
         shakeAttached = true;
@@ -1863,22 +1996,32 @@
       shakeEnabled = true;
       try { localStorage.removeItem(SHAKE_OFF_KEY); } catch (_) {}
       updateShakeUi();
+      if (fromUserTap) verifyMotionSignalSoon();
     }
 
     function disableShake() {
       shakeEnabled = false;
-      try { localStorage.setItem(SHAKE_OFF_KEY, "1"); } catch (_) {}
+      try {
+        localStorage.setItem(SHAKE_OFF_KEY, "1");
+        localStorage.removeItem(SHAKE_IOS_GRANTED_KEY);
+      } catch (_) {}
       updateShakeUi();
     }
 
-    if (hasMotion) {
+    if (hasMotion && window.isSecureContext) {
       var optedOut = false;
-      try { optedOut = localStorage.getItem(SHAKE_OFF_KEY) === "1"; } catch (_) {}
-      if (!needsIosPermission && !optedOut) {
-        enableShake();
+      var iosPreviouslyGranted = false;
+      try {
+        optedOut = localStorage.getItem(SHAKE_OFF_KEY) === "1";
+        iosPreviouslyGranted = localStorage.getItem(SHAKE_IOS_GRANTED_KEY) === "1";
+      } catch (_) {}
+      if ((!needsIosPermission || iosPreviouslyGranted) && !optedOut) {
+        enableShake(false);
       } else {
         updateShakeUi();
       }
+    } else {
+      updateShakeUi();
     }
 
     if (shakeToggleBtn) {
@@ -1891,7 +2034,8 @@
           window.DeviceMotionEvent.requestPermission()
             .then(function (state) {
               if (state === "granted") {
-                enableShake();
+                try { localStorage.setItem(SHAKE_IOS_GRANTED_KEY, "1"); } catch (_) {}
+                enableShake(true);
               } else if (shakeTextEl) {
                 shakeTextEl.textContent = "Trình duyệt chưa cấp quyền cảm biến chuyển động.";
               }
@@ -1902,7 +2046,7 @@
               }
             });
         } else {
-          enableShake();
+          enableShake(true);
         }
       });
     }
@@ -1958,7 +2102,8 @@
               window.DeviceMotionEvent.requestPermission()
                 .then(function (state) {
                   if (state === "granted") {
-                    enableShake();
+                    try { localStorage.setItem(SHAKE_IOS_GRANTED_KEY, "1"); } catch (_) {}
+                    enableShake(true);
                     if (toastTextEl) toastTextEl.textContent = "Đã bật. Giờ bạn có thể lắc máy bất cứ lúc nào để báo lỗi.";
                     if (toastCtaBtn) toastCtaBtn.hidden = true;
                     setTimeout(dismissShakeToast, 2600);
