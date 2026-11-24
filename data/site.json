@@ -11,7 +11,8 @@
     "siteUrl": "https://holarise.org",
     "language": "vi",
     "locale": "vi_VN",
-    "ogImage": "/assets/images/og-cover.jpg?v=4",
+    "ogImage": "/assets/images/holarise-binh-minh-og.jpg",
+    "ogImageAlt": "Nhóm HolaRise đi trên sườn đồi lúc bình minh, dưới dòng chữ Together We Rise, Together We Serve.",
     "logoLight": "/assets/images/logo-holarise.png",
     "logoDark": "/assets/images/logo-holarise.png",
     "logoMark": "/assets/images/logo-mark.png"
@@ -28,7 +29,7 @@
     "formEndpoint": "/api/registrations"
   },
   "hero": {
-    "badge": "Chapter 01 · Hòa Lạc – Thạch Thất · Together We Rise, Together We Serve",
+    "badge": "Chapter 01 · Hòa Lạc – Thạch Thất",
     "headline": "Từ nội lực tử tế, Vươn mình phụng sự cộng đồng.",
     "description": "Khởi nguồn từ cái nôi tri thức trẻ Hòa Lạc – Thạch Thất, HolaRise kết nối những người trẻ chọn sống sâu hơn, hành động xanh hơn và bền bỉ lan tỏa giá trị thật đến cộng đồng.",
     "quickPills": [
@@ -44,8 +45,9 @@
       "label": "Xem hành trình thật",
       "href": "#hanh-trinh-that"
     },
-    "image": "/assets/images/hero-sunrise-youth.jpg",
-    "imageAlt": "Những người trẻ bước đi cùng nhau trong ánh bình minh bên hồ và đồi xanh Hòa Lạc – Thạch Thất."
+    "image": "/assets/images/holarise-binh-minh-1671.webp",
+    "imageSrcset": "/assets/images/holarise-binh-minh-768.webp 768w, /assets/images/holarise-binh-minh-1200.webp 1200w, /assets/images/holarise-binh-minh-1671.webp 1671w",
+    "imageAlt": "Nhóm HolaRise đi trên sườn đồi lúc bình minh, dưới dòng chữ Together We Rise, Together We Serve."
   },
   "about": {
     "image": "/assets/images/hero-hoalac.jpg",

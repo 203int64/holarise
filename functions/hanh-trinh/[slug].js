@@ -3,6 +3,7 @@ import {
   BRAND_SHORT_NAME,
   buildArticleSchemas,
   escHtml,
+  imageAttrs,
   renderNewsCardsHtml,
   renderSafeArticleBody,
   serializePostRow,
@@ -79,7 +80,9 @@ export async function onRequestGet({ request, env, params }) {
     __SSR_ARTICLE_DATE_DISPLAY__: escHtml(article.dateDisplay),
     __SSR_ARTICLE_READ_TIME__: escHtml(article.readTime),
     __SSR_ARTICLE_AUTHOR__: escHtml(article.author),
-    __SSR_ARTICLE_IMAGE__: escHtml(article.image),
+    __SSR_ARTICLE_IMAGE_ATTRS__: imageAttrs(
+      article.image, "(min-width: 1280px) 1240px, calc(100vw - 40px)"
+    ),
     __SSR_ARTICLE_IMAGE_ALT__: escHtml(article.imageAlt || article.title),
     __SSR_ARTICLE_BODY__: renderSafeArticleBody(article.content),
     __SSR_RELATED_NEWS__: renderNewsCardsHtml(related, false),

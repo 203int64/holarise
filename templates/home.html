@@ -1,19 +1,13 @@
-<!-- PART 1: Full-Bleed Visual Editorial Hero Card (Real Human Moment) -->
+<!-- PART 1: Home hero -->
 <section class="hero-stage" aria-label="Giới thiệu Cộng đồng HolaRise">
   <div class="container">
     <div class="hero-card" data-hero-card>
-      <img class="hero-card-img" src="{{HERO_IMAGE}}" alt="{{HERO_IMAGE_ALT}}" width="1376" height="768" fetchpriority="high" decoding="async" data-cinema-img>
+      <img class="hero-card-img" src="{{HERO_IMAGE}}" srcset="{{HERO_IMAGE_SRCSET}}" sizes="(min-width: 1280px) 1240px, calc(100vw - 40px)" alt="{{HERO_IMAGE_ALT}}" width="1671" height="941" fetchpriority="high" decoding="async">
       <div class="hero-card-scrim" aria-hidden="true"></div>
-
-      <div class="hero-card-top" data-hero-stagger>
-        <span class="hero-glass-tag">
-          <span class="live-status-dot" aria-hidden="true"></span>
-          <span>{{HERO_BADGE}}</span>
-        </span>
-      </div>
 
       <div class="hero-card-bottom">
         <div class="hero-card-copy">
+          <span class="hero-location" data-hero-stagger>{{HERO_BADGE}}</span>
           <h1 class="hero-display-title">
             {{HERO_HEADLINE_LINES}}
           </h1>

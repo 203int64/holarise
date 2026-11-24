@@ -304,14 +304,12 @@
     });
   });
 
-  /* 4. Chapter 1: Immersive Hero Card Entrance + Desktop Depth & Mouse Parallax */
+  /* 4. Home hero card entrance and scroll motion */
   var heroCard = document.querySelector("[data-hero-card]");
   if (heroCard) {
     var heroLines = heroCard.querySelectorAll(".split-line-inner");
     var heroFadeEls = heroCard.querySelectorAll("[data-hero-stagger]");
     var heroBottom = heroCard.querySelector(".hero-card-bottom");
-    var heroTag = heroCard.querySelector(".hero-glass-tag");
-    var cinemaImg = heroCard.querySelector("[data-cinema-img]");
 
     var heroTl = gsap.timeline({ defaults: { ease: "power4.out" } });
     heroTl.fromTo(
@@ -320,9 +318,6 @@
       { clipPath: "inset(0% 0% 0% 0% round 26px)", scale: 1, opacity: 1, duration: 0.95, clearProps: "clipPath" },
       0
     );
-    if (cinemaImg) {
-      heroTl.fromTo(cinemaImg, { scale: 1.2 }, { scale: 1.05, duration: 1.25 }, 0);
-    }
     if (heroLines.length) {
       heroTl.from(heroLines, { yPercent: 112, duration: 0.9, stagger: 0.09 }, 0.14);
     }
@@ -333,24 +328,6 @@
     var heroMm = gsap.matchMedia();
 
     heroMm.add("(max-width: 1023px)", function () {
-      if (cinemaImg) {
-        gsap.fromTo(
-          cinemaImg,
-          { yPercent: -5 },
-          {
-            yPercent: 9,
-            ease: "none",
-            scrollTrigger: {
-              trigger: heroCard,
-              start: "top top",
-              end: "bottom top",
-              scrub: 0.35,
-              invalidateOnRefresh: true
-            }
-          }
-        );
-      }
-
       gsap.to(heroCard, {
         scale: 0.965,
         ease: "none",
@@ -380,25 +357,6 @@
         }
       );
 
-      if (cinemaImg) {
-        gsap.fromTo(
-          cinemaImg,
-          { yPercent: -8, scale: 1.05 },
-          {
-            yPercent: 16,
-            scale: 1.18,
-            ease: "none",
-            scrollTrigger: {
-              trigger: heroCard,
-              start: "top top",
-              end: "bottom top",
-              scrub: 0.45,
-              invalidateOnRefresh: true
-            }
-          }
-        );
-      }
-
       if (heroBottom) {
         gsap.fromTo(
           heroBottom,
@@ -416,35 +374,6 @@
             }
           }
         );
-      }
-
-      if (isFinePointer && cinemaImg) {
-        var imgX = gsap.quickTo(cinemaImg, "x", { duration: 0.55, ease: "power3.out" });
-        var imgY = gsap.quickTo(cinemaImg, "y", { duration: 0.55, ease: "power3.out" });
-        var tagX = heroTag ? gsap.quickTo(heroTag, "x", { duration: 0.45, ease: "power3.out" }) : null;
-        var tagY = heroTag ? gsap.quickTo(heroTag, "y", { duration: 0.45, ease: "power3.out" }) : null;
-
-        heroCard.addEventListener("pointermove", function (e) {
-          var rect = heroCard.getBoundingClientRect();
-          if (!rect.width || !rect.height) return;
-          var nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-          var ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-          imgX(-nx * 14);
-          imgY(-ny * 10);
-          if (tagX && tagY) {
-            tagX(nx * 7);
-            tagY(ny * 5);
-          }
-        });
-
-        heroCard.addEventListener("pointerleave", function () {
-          imgX(0);
-          imgY(0);
-          if (tagX && tagY) {
-            tagX(0);
-            tagY(0);
-          }
-        });
       }
     });
   }
