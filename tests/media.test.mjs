@@ -352,7 +352,8 @@ test("RBAC + Full Media Portal CRUD + KV cleanup on delete + SSR /hoat-dong/ & /
   const actHtml = await actRes.text();
   assert.ok(actHtml.includes("Ra quân Hồ Tân Xã &lt;script&gt;alert(1)&lt;/script&gt;"));
   assert.ok(!actHtml.includes("<script>alert(1)</script>"));
-  assert.ok(actHtml.includes("https://drive.google.com/drive/folders/holarise-tan-xa"));
+  // Public gallery strictly hides external Google Drive download links for member privacy (BP-03)
+  assert.ok(!actHtml.includes("https://drive.google.com/drive/folders/holarise-tan-xa"));
   assert.ok(!actHtml.includes("Album Nháp Nội Bộ"));
   assert.ok(actHtml.includes("HolaHeart × MusicSpace"));
 

@@ -2,7 +2,18 @@
  * Boundary validation, Vietnamese slugification, date formatting, and safe CSV export.
  */
 
-export const VALID_FILTERS = new Set(["sach", "biet-on", "tu-te", "se-chia"]);
+export const VALID_FILTERS = new Set([
+  "holaheart",
+  "holagreen",
+  "holaconnect",
+  "sach",
+  "biet-on",
+  "tu-te",
+  "se-chia",
+]);
+export const VALID_PILLAR_CHOICES = new Set(["holaheart", "holagreen", "holaconnect"]);
+export const VALID_PARTICIPANT_ROLES = new Set(["member", "volunteer", "speaker"]);
+export const VALID_REFLECTION_STATUSES = new Set(["pending", "approved", "rejected"]);
 export const VALID_REG_STATUSES = new Set(["new", "contacted", "attended", "cancelled"]);
 export const VALID_POST_STATUSES = new Set(["published", "draft"]);
 export const VALID_EVENT_KINDS = new Set(["upcoming", "past"]);
@@ -230,6 +241,9 @@ export function validateEventInput(body) {
     fields.summary = "Mô tả ngắn cho sự kiện sắp tới cần ít nhất 8 ký tự.";
   }
 
+  const titleEn = cleanStr(body.titleEn ?? body.title_en, 200);
+  const summaryEn = cleanStr(body.summaryEn ?? body.summary_en, 360);
+
   const highlights = Array.isArray(body.highlights)
     ? body.highlights.map((h) => cleanStr(h, 80)).filter(Boolean).slice(0, 6)
     : cleanStr(body.highlights, 400)
@@ -267,7 +281,9 @@ export function validateEventInput(body) {
       fee,
       seats,
       title,
+      title_en: titleEn,
       summary,
+      summary_en: summaryEn,
       highlights,
       participants,
       image,
@@ -502,6 +518,278 @@ export function validatePhotoInput(body) {
       photographer,
       is_featured_home: isFeaturedHome,
       sort_order: sortOrder,
+    },
+  };
+}
+
+export function normalizePhone(raw) {
+  const s = cleanStr(raw, 40);
+  if (!s) return { ok: false, phoneNorm: "", phoneDisplay: "" };
+  const hasPlus = s.trim().startsWith("+");
+  let digits = s.replace(/\D/g, "");
+  if (digits.length < 8 || digits.length > 15) {
+    return { ok: false, phoneNorm: "", phoneDisplay: "" };
+  }
+  // Canonicalize Vietnamese mobile numbers (+849... / 849... -> 09...)
+  if ((hasPlus || digits.length === 11) && digits.startsWith("84") && digits.length >= 10 && digits.length <= 11) {
+    digits = "0" + digits.slice(2);
+  }
+  const display =
+    digits.length === 10 && digits.startsWith("0")
+      ? `${digits.slice(0, 4)}.${digits.slice(4, 7)}.${digits.slice(7)}`
+      : hasPlus && !digits.startsWith("0")
+        ? `+${digits}`
+        : digits;
+  return { ok: true, phoneNorm: digits, phoneDisplay: display };
+}
+
+export function parseMemberIdentifier(raw) {
+  const trimmed = cleanStr(raw, 160);
+  if (!trimmed) {
+    return {
+      ok: false,
+      error: "Vui lòng nhập Email hoặc Số điện thoại của bạn.",
+    };
+  }
+  if (trimmed.includes("@")) {
+    const lower = trimmed.toLowerCase();
+    if (!isValidEmail(lower)) {
+      return {
+        ok: false,
+        error: "Email chưa đúng định dạng (ví dụ: tenban@gmail.com).",
+      };
+    }
+    return {
+      ok: true,
+      kind: "email",
+      email: lower,
+      phoneNorm: null,
+      phoneDisplay: "",
+    };
+  }
+  const phone = normalizePhone(trimmed);
+  if (!phone.ok) {
+    return {
+      ok: false,
+      error: "Vui lòng nhập Email hợp lệ hoặc Số điện thoại (tối thiểu 8 chữ số).",
+    };
+  }
+  return {
+    ok: true,
+    kind: "phone",
+    email: null,
+    phoneNorm: phone.phoneNorm,
+    phoneDisplay: phone.phoneDisplay,
+  };
+}
+
+export function validateMemberRegisterInput(body) {
+  if (cleanStr(body.website || body._hp, 100) !== "") {
+    return { ok: true, honeypot: true };
+  }
+  const fields = {};
+  const name = cleanStr(body.name || body.fullName || body.full_name, 100);
+  if (name.length < 2) {
+    fields.name = "Vui lòng nhập họ và tên của bạn (tối thiểu 2 ký tự).";
+  }
+
+  const rawId = body.identifier ?? body.emailOrPhone ?? body.email ?? body.phone ?? "";
+  const parsedId = parseMemberIdentifier(rawId);
+  if (!parsedId.ok) {
+    fields.identifier = parsedId.error;
+  }
+
+  const password = typeof body.password === "string" ? body.password : "";
+  if (password.length < 6 || password.length > 128) {
+    fields.password = "Mật khẩu cần từ 6 đến 128 ký tự.";
+  }
+
+  const organization = cleanStr(body.organization, 160);
+  const rawPillar = cleanStr(body.pillarChoice ?? body.pillar_choice, 32).toLowerCase() || "holaheart";
+  const pillarChoice = VALID_PILLAR_CHOICES.has(rawPillar) ? rawPillar : "holaheart";
+
+  let autoRegisterEvent = null;
+  if (body.autoRegisterEvent && typeof body.autoRegisterEvent === "object") {
+    const evId = cleanStr(body.autoRegisterEvent.eventId || body.autoRegisterEvent.event_id, 120);
+    const actTitle = cleanStr(
+      body.autoRegisterEvent.activityTitle || body.autoRegisterEvent.activity,
+      220
+    );
+    const note = cleanStr(body.autoRegisterEvent.note, 800);
+    const role = cleanStr(body.autoRegisterEvent.role, 160);
+    if (evId || actTitle) {
+      autoRegisterEvent = {
+        event_id: evId,
+        activity_title: actTitle || "Đăng ký tham dự sự kiện Hola",
+        role,
+        note,
+      };
+    }
+  }
+
+  if (Object.keys(fields).length > 0) {
+    return { ok: false, fields };
+  }
+
+  return {
+    ok: true,
+    honeypot: false,
+    value: {
+      name,
+      identifier: parsedId,
+      password,
+      organization,
+      pillar_choice: pillarChoice,
+      auto_register_event: autoRegisterEvent,
+    },
+  };
+}
+
+export function validateMemberProfileInput(body) {
+  const fields = {};
+  const out = {};
+
+  if (body.name !== undefined) {
+    const name = cleanStr(body.name, 100);
+    if (name.length < 2) fields.name = "Họ và tên cần tối thiểu 2 ký tự.";
+    else out.name = name;
+  }
+
+  if (body.organization !== undefined) {
+    out.organization = cleanStr(body.organization, 160);
+  }
+
+  if (body.pillarChoice !== undefined || body.pillar_choice !== undefined) {
+    const p = cleanStr(body.pillarChoice ?? body.pillar_choice, 32).toLowerCase();
+    if (!VALID_PILLAR_CHOICES.has(p)) {
+      fields.pillarChoice = "Trụ cột quan tâm không hợp lệ.";
+    } else {
+      out.pillar_choice = p;
+    }
+  }
+
+  if (body.avatarUrl !== undefined || body.avatar_url !== undefined) {
+    const av = cleanStr(body.avatarUrl ?? body.avatar_url, 500);
+    if (av && !isSafeMediaUrl(av)) {
+      fields.avatarUrl = "Đường dẫn ảnh đại diện không hợp lệ.";
+    } else {
+      out.avatar_url = av;
+      out.avatar_media_key = av ? extractMediaKeyFromUrl(av) : "";
+    }
+  }
+
+  if (body.newPassword !== undefined && String(body.newPassword).length > 0) {
+    const cur = typeof body.currentPassword === "string" ? body.currentPassword : "";
+    const next = String(body.newPassword);
+    if (!cur) {
+      fields.currentPassword = "Vui lòng nhập mật khẩu hiện tại để đổi mật khẩu mới.";
+    }
+    if (next.length < 6 || next.length > 128) {
+      fields.newPassword = "Mật khẩu mới cần từ 6 đến 128 ký tự.";
+    }
+    out.current_password = cur;
+    out.new_password = next;
+  }
+
+  if (Object.keys(fields).length > 0) {
+    return { ok: false, fields };
+  }
+  return { ok: true, value: out };
+}
+
+export function validateReflectionInput(body, { requireSlug = true } = {}) {
+  const fields = {};
+  const rawSlug = cleanStr(body.activitySlug ?? body.activity_slug, 140);
+  const activitySlug = rawSlug ? slugifyVi(rawSlug) : "";
+  if (requireSlug && (!activitySlug || activitySlug.length < 2)) {
+    fields.activitySlug = "Không xác định được hoạt động cần lưu bút.";
+  }
+
+  const rawRole = cleanStr(body.participantRole ?? body.participant_role, 32).toLowerCase() || "member";
+  const participantRole = VALID_PARTICIPANT_ROLES.has(rawRole) ? rawRole : "member";
+
+  const pullQuote = cleanStr(body.pullQuote ?? body.pull_quote, 140);
+  const content = cleanStr(body.content, 1500);
+  if (content.length < 12) {
+    fields.content = "Lời cảm nhận cần ít nhất 12 ký tự để chia sẻ trọn vẹn ý nghĩa.";
+  }
+
+  const photoUrl = cleanStr(body.photoUrl ?? body.photo_url, 500);
+  if (photoUrl && !isSafeMediaUrl(photoUrl)) {
+    fields.photoUrl = "Đường dẫn ảnh kỷ niệm không hợp lệ.";
+  }
+  const photoMediaKey = photoUrl ? extractMediaKeyFromUrl(photoUrl) : "";
+
+  if (Object.keys(fields).length > 0) {
+    return { ok: false, fields };
+  }
+
+  return {
+    ok: true,
+    value: {
+      activity_slug: activitySlug,
+      participant_role: participantRole,
+      pull_quote: pullQuote,
+      content,
+      photo_url: photoUrl,
+      photo_media_key: photoMediaKey,
+    },
+  };
+}
+
+export function validateSiteVisualsInput(body, current = {}) {
+  const fields = {};
+  const checkImg = (raw, fieldKey) => {
+    const val = cleanStr(raw, 500);
+    if (val && !isSafeMediaUrl(val)) {
+      fields[fieldKey] = "Đường dẫn hình ảnh không hợp lệ.";
+    }
+    return val;
+  };
+
+  const heroImage =
+    body.heroImage !== undefined ? checkImg(body.heroImage, "heroImage") : cleanStr(current.heroImage, 500);
+  const heroImageAlt =
+    body.heroImageAlt !== undefined ? cleanStr(body.heroImageAlt, 240) : cleanStr(current.heroImageAlt, 240);
+  const heroIsIllustration =
+    body.heroIsIllustration !== undefined ? Boolean(body.heroIsIllustration) : Boolean(current.heroIsIllustration);
+
+  const aboutImage =
+    body.aboutImage !== undefined ? checkImg(body.aboutImage, "aboutImage") : cleanStr(current.aboutImage, 500);
+  const aboutImageAlt =
+    body.aboutImageAlt !== undefined ? cleanStr(body.aboutImageAlt, 240) : cleanStr(current.aboutImageAlt, 240);
+  const aboutIsIllustration =
+    body.aboutIsIllustration !== undefined ? Boolean(body.aboutIsIllustration) : Boolean(current.aboutIsIllustration);
+
+  const curPillars = current.pillars && typeof current.pillars === "object" ? current.pillars : {};
+  const inPillars = body.pillars && typeof body.pillars === "object" ? body.pillars : {};
+  const pillars = {};
+
+  for (const key of ["holaheart", "holagreen", "holaconnect"]) {
+    const c = curPillars[key] && typeof curPillars[key] === "object" ? curPillars[key] : {};
+    const p = inPillars[key] && typeof inPillars[key] === "object" ? inPillars[key] : {};
+    pillars[key] = {
+      image: p.image !== undefined ? checkImg(p.image, `pillars.${key}.image`) : cleanStr(c.image, 500),
+      imageAlt: p.imageAlt !== undefined ? cleanStr(p.imageAlt, 240) : cleanStr(c.imageAlt, 240),
+      isIllustration:
+        p.isIllustration !== undefined ? Boolean(p.isIllustration) : Boolean(c.isIllustration),
+    };
+  }
+
+  if (Object.keys(fields).length > 0) {
+    return { ok: false, fields };
+  }
+
+  return {
+    ok: true,
+    value: {
+      heroImage,
+      heroImageAlt,
+      heroIsIllustration,
+      aboutImage,
+      aboutImageAlt,
+      aboutIsIllustration,
+      pillars,
     },
   };
 }

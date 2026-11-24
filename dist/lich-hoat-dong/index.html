@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Lịch hoạt động Hòa Lạc – Thạch Thất | HolaRise</title>
-  <meta name="description" content="Cập nhật lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc – Thạch Thất của Cộng đồng HolaRise trên 3 trụ cột: HolaHeart, HolaGreen và HolaConnect.">
-  <meta name="keywords" content="HolaRise, Cộng đồng Thanh niên Hòa Lạc, Thạch Thất, HolaHeart, HolaGreen, HolaConnect, tình nguyện sinh viên Hòa Lạc, thiện nguyện Thạch Thất, workshop giá trị sống">
+  <title>Lịch hoạt động tại Hòa Lạc | HolaRise</title>
+  <meta name="description" content="Cập nhật lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc của Cộng đồng HolaRise trên 3 trụ cột: HolaHeart, HolaGreen và HolaConnect.">
+  <meta name="keywords" content="HolaRise, Hola Hòa Lạc, Cộng đồng Thanh niên Hòa Lạc, HolaHeart, HolaGreen, HolaConnect, tình nguyện sinh viên Hòa Lạc, workshop Hòa Lạc">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#FFFFFF">
   <meta name="mobile-web-app-capable" content="yes">
@@ -22,29 +22,41 @@
   <meta property="og:type" content="website">
   <meta property="og:locale" content="vi_VN">
   <meta property="og:site_name" content="Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên">
-  <meta property="og:title" content="Lịch hoạt động Hòa Lạc – Thạch Thất | HolaRise">
-  <meta property="og:description" content="Cập nhật lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc – Thạch Thất của Cộng đồng HolaRise trên 3 trụ cột: HolaHeart, HolaGreen và HolaConnect.">
+  <meta property="og:title" content="Lịch hoạt động tại Hòa Lạc | HolaRise">
+  <meta property="og:description" content="Cập nhật lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc của Cộng đồng HolaRise trên 3 trụ cột: HolaHeart, HolaGreen và HolaConnect.">
   <meta property="og:url" content="https://holarise.org/lich-hoat-dong/">
-  <meta property="og:image" content="https://holarise.org/assets/images/og-cover.jpg?v=4">
-  <meta property="og:image:secure_url" content="https://holarise.org/assets/images/og-cover.jpg?v=4">
+  <meta property="og:image" content="https://holarise.org/assets/images/og-cover.jpg?v=5">
+  <meta property="og:image:secure_url" content="https://holarise.org/assets/images/og-cover.jpg?v=5">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Lịch hoạt động Hòa Lạc – Thạch Thất | HolaRise">
+  <meta property="og:image:alt" content="Lịch hoạt động tại Hòa Lạc | HolaRise">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Lịch hoạt động Hòa Lạc – Thạch Thất | HolaRise">
-  <meta name="twitter:description" content="Cập nhật lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc – Thạch Thất của Cộng đồng HolaRise trên 3 trụ cột: HolaHeart, HolaGreen và HolaConnect.">
-  <meta name="twitter:image" content="https://holarise.org/assets/images/og-cover.jpg?v=4">
-  <meta name="twitter:image:alt" content="Lịch hoạt động Hòa Lạc – Thạch Thất | HolaRise">
+  <meta name="twitter:title" content="Lịch hoạt động tại Hòa Lạc | HolaRise">
+  <meta name="twitter:description" content="Cập nhật lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc của Cộng đồng HolaRise trên 3 trụ cột: HolaHeart, HolaGreen và HolaConnect.">
+  <meta name="twitter:image" content="https://holarise.org/assets/images/og-cover.jpg?v=5">
+  <meta name="twitter:image:alt" content="Lịch hoạt động tại Hòa Lạc | HolaRise">
 
   <!-- Vietnamese-native Editorial Typography: Be Vietnam Pro (UI/Display) + Lora (Manifesto/Quotes) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1f655e2655">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=7247851b09">
+  <script>
+    (function () {
+      try {
+        var q = new URLSearchParams(window.location.search).get("lang");
+        var saved = q || localStorage.getItem("holarise_lang") || "vi";
+        var lang = saved === "en" ? "en" : "vi";
+        document.documentElement.dataset.lang = lang;
+        document.documentElement.lang = lang;
+        if (q === "en" || q === "vi") localStorage.setItem("holarise_lang", lang);
+      } catch (_e) {}
+    })();
+  </script>
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -58,8 +70,8 @@
   "slogan": "Together We Rise, Together We Serve.",
   "url": "https://holarise.org",
   "logo": "https://holarise.org/assets/images/logo-mark.png",
-  "image": "https://holarise.org/assets/images/og-cover.jpg?v=4",
-  "description": "HolaRise khởi nguồn từ Hòa Lạc – Thạch Thất, kết nối người trẻ qua 3 trụ cột: HolaHeart (giá trị sống), HolaGreen (sinh thái bền vững) và HolaConnect (phụng sự cộng đồng).",
+  "image": "https://holarise.org/assets/images/og-cover.jpg?v=5",
+  "description": "HolaRise kết nối người trẻ tại Hòa Lạc qua 3 trụ cột: HolaHeart (nội lực & lắng nghe), HolaGreen (sinh thái cảnh quan) và HolaConnect (tri thức & phụng sự).",
   "email": "phungsu@holarise.org",
   "telephone": "077.777.1948",
   "areaServed": {
@@ -100,18 +112,18 @@
 {
   "@context": "https://schema.org",
   "@type": "Event",
-  "name": "HolaConnect · Chiều Leo Núi & Kết Nối Giữa Rừng Thông",
-  "startDate": "2026-11-26",
+  "name": "Workshop \"Cuộc Đời Của Cha\"",
+  "startDate": "2026-11-29T19:15:00+07:00",
   "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
   "eventStatus": "https://schema.org/EventScheduled",
   "isAccessibleForFree": true,
   "image": [
-    "https://holarise.org/assets/images/events/activity-nature-trail.jpg"
+    "https://holarise.org/assets/images/events/cuoc-doi-cua-cha-og.jpg"
   ],
-  "description": "Tạm rời màn hình máy tính để cùng bạn bè người trẻ Hòa Lạc – Xuân Mai trekking cung đồi rừng thực nghiệm Núi Luốt tại ĐH Lâm Nghiệp, hít thở không khí chiều thu và trò chuyện kết nối trên đỉnh đồi thông.",
+  "description": "Có những tình yêu chẳng bao giờ nói thành lời. Dành một buổi tối Chủ Nhật đặc biệt tại Hòa Lạc để lắng nghe, cảm nhận và nhìn lại bóng lưng âm thầm của Cha.",
   "location": {
     "@type": "Place",
-    "name": "ĐH Lâm Nghiệp (Núi Luốt), Xuân Mai – Hòa Lạc",
+    "name": "Quán Cafe Mây Lang Thang, Hòa Lạc",
     "address": {
       "@type": "PostalAddress",
       "addressLocality": "Hòa Lạc, Thạch Thất",
@@ -123,25 +135,27 @@
     "@type": "NGO",
     "name": "Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên",
     "url": "https://holarise.org"
-  }
+  },
+  "endDate": "2026-11-29T21:30:00+07:00",
+  "url": "https://holarise.org/su-kien/cuoc-doi-cua-cha/"
 }
 </script>
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Event",
-  "name": "Workshop HolaHeart: Người trẻ cùng ngồi lại?!..",
-  "startDate": "2026-11-29",
+  "name": "HolaConnect · Chiều Leo Núi & Kết Nối Giữa Rừng Thông",
+  "startDate": "2026-11-26",
   "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
   "eventStatus": "https://schema.org/EventScheduled",
   "isAccessibleForFree": true,
   "image": [
-    "https://holarise.org/assets/images/events/holaheart-2026-11-15/04-wide-venue.jpg"
+    "https://holarise.org/assets/images/illustrations/holagreen/G03.jpg"
   ],
-  "description": "Giữa những deadline dồn dập và nghìn thông báo lướt qua mỗi ngày, đã bao lâu chúng mình chưa thực sự ngồi lại với nhau? Một tối Chủ Nhật không bục giảng tại Mây Lang Thang để người trẻ Hòa Lạc cất điện thoại, gỡ bỏ những câu hỏi lửng lơ và lắng nghe nhau bằng sự chân thành.",
+  "description": "Tạm rời màn hình máy tính để cùng bạn bè người trẻ Hòa Lạc trekking cung đồi rừng thông Núi Luốt, hít thở không khí chiều thu và trò chuyện kết nối.",
   "location": {
     "@type": "Place",
-    "name": "Mây Lang Thang Cafe, Hòa Lạc",
+    "name": "Núi Luốt – ĐH Lâm Nghiệp (Xuân Mai)",
     "address": {
       "@type": "PostalAddress",
       "addressLocality": "Hòa Lạc, Thạch Thất",
@@ -180,13 +194,20 @@
       </a>
 
       <nav class="main-nav" data-main-nav aria-label="Điều hướng chính">
-        <a class="nav-link" href="/gioi-thieu/">Về HolaRise</a>
-        <a class="nav-link is-active" href="/lich-hoat-dong/" aria-current="page">Lịch hoạt động</a>
-        <a class="nav-link" href="/hanh-trinh/">Hành trình</a>
+        <a class="nav-link" href="/gioi-thieu/" data-i18n="nav.about">Về HolaRise</a>
+        <a class="nav-link is-active" href="/lich-hoat-dong/" data-i18n="nav.schedule" aria-current="page">Lịch hoạt động</a>
+        <a class="nav-link" href="/hanh-trinh/" data-i18n="nav.journey">Hành trình</a>
       </nav>
 
       <div class="header-actions">
-        <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/">Tham gia</a>
+        <button class="lang-switch" type="button" data-lang-toggle aria-label="Chuyển ngôn ngữ Việt / Anh">
+          <span class="lang-switch-opt" data-lang-opt="vi">VI</span>
+          <span class="lang-switch-sep" aria-hidden="true">/</span>
+          <span class="lang-switch-opt" data-lang-opt="en">EN</span>
+        </button>
+        <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/" data-header-member-btn>
+          <span data-header-member-label data-i18n="nav.join">Tham gia</span>
+        </a>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Mở menu điều hướng">
           <span class="nav-toggle-bars" aria-hidden="true">
             <span></span>
@@ -201,18 +222,18 @@
   <div class="mobile-drawer" id="mobile-drawer" data-mobile-drawer aria-hidden="true">
     <div class="mobile-drawer-inner">
       <nav class="mobile-drawer-nav" aria-label="Menu di động">
-        <a class="drawer-link" href="/" style="--i: 0;"><span class="drawer-link-num">01</span><span class="drawer-link-label">Trang chủ</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
-        <a class="drawer-link" href="/gioi-thieu/" style="--i: 1;"><span class="drawer-link-num">02</span><span class="drawer-link-label">Về HolaRise</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
-        <a class="drawer-link is-active" href="/lich-hoat-dong/" style="--i: 2;" aria-current="page"><span class="drawer-link-num">03</span><span class="drawer-link-label">Lịch hoạt động</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
-        <a class="drawer-link" href="/hanh-trinh/" style="--i: 3;"><span class="drawer-link-num">04</span><span class="drawer-link-label">Hành trình &amp; Kho ảnh</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
+        <a class="drawer-link" href="/" style="--i: 0;"><span class="drawer-link-num">01</span><span class="drawer-link-label" data-i18n="nav.home">Trang chủ</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
+        <a class="drawer-link" href="/gioi-thieu/" style="--i: 1;"><span class="drawer-link-num">02</span><span class="drawer-link-label" data-i18n="nav.about">Về HolaRise</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
+        <a class="drawer-link is-active" href="/lich-hoat-dong/" style="--i: 2;" aria-current="page"><span class="drawer-link-num">03</span><span class="drawer-link-label" data-i18n="nav.schedule">Lịch hoạt động</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
+        <a class="drawer-link" href="/hanh-trinh/" style="--i: 3;"><span class="drawer-link-num">04</span><span class="drawer-link-label" data-i18n="nav.journey">Hành trình</span><span class="drawer-link-arrow" aria-hidden="true">→</span></a>
       </nav>
       <div class="mobile-drawer-footer">
-        <a class="btn btn--primary" href="/tham-gia/" style="width: 100%; justify-content: space-between; padding: 15px 22px;">
-          <span>Đăng ký tham gia hoạt động</span>
+        <a class="btn btn--primary" href="/tham-gia/" data-drawer-member-btn style="width: 100%; justify-content: space-between; padding: 15px 22px;">
+          <span data-drawer-member-label data-i18n="nav.memberStudio">Tham gia &amp; Thẻ Thành Viên</span>
           <span aria-hidden="true">→</span>
         </a>
         <button class="btn btn--outline pwa-install-drawer-btn" type="button" data-pwa-install hidden>
-          <span>Cài ứng dụng HolaRise về máy</span>
+          <span data-i18n="pwa.installApp">Cài ứng dụng HolaRise về máy</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 3v12"></path>
             <path d="m7 10 5 5 5-5"></path>
@@ -220,8 +241,12 @@
           </svg>
         </button>
         <div class="mobile-drawer-meta">
-          <span>Hòa Lạc – Thạch Thất, Hà Nội</span>
-          <span>077.777.1948</span>
+          <span><a href="tel:0777771948" style="color: var(--ink); font-weight: 500; text-decoration: none;">Hotline / Zalo: 077.777.1948</a></span>
+          <button class="lang-switch lang-switch--drawer" type="button" data-lang-toggle aria-label="Switch language VI / EN">
+            <span class="lang-switch-opt" data-lang-opt="vi">Tiếng Việt</span>
+            <span class="lang-switch-sep" aria-hidden="true">·</span>
+            <span class="lang-switch-opt" data-lang-opt="en">English</span>
+          </button>
         </div>
       </div>
     </div>
@@ -231,12 +256,12 @@
     <section class="page-hero">
   <div class="container">
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
-      <a href="/">Trang chủ</a>
+      <a href="/" data-i18n="nav.home">Trang chủ</a>
       <span aria-hidden="true">/</span>
-      <span aria-current="page">Lịch hoạt động</span>
+      <span aria-current="page" data-i18n="nav.schedule">Lịch hoạt động</span>
     </nav>
-    <h1>Lịch hoạt động tại Hòa Lạc – Thạch Thất</h1>
-    <p>HolaRise duy trì nhịp 1–2 buổi sinh hoạt, đối thoại và hành động cộng đồng mỗi tuần luân phiên giữa HolaHeart, HolaGreen và HolaConnect.</p>
+    <h1 data-i18n="schedule.hero.title">Lịch hoạt động tại Hòa Lạc</h1>
+    <p data-i18n="schedule.hero.desc">Hola duy trì nhịp 1–2 buổi đối thoại, sinh thái và kết nối cộng đồng mỗi tuần luân phiên giữa HolaHeart, HolaGreen và HolaConnect.</p>
   </div>
 </section>
 
@@ -244,25 +269,25 @@
   <div class="container">
     <div class="section-header--split" style="margin-bottom: 24px;">
       <div>
-        <div class="kicker">Nhịp tuần · 1–2 hoạt động/tuần</div>
-        <h2 class="section-title" style="margin-bottom: 6px;">Các buổi sinh hoạt &amp; đối thoại sắp mở</h2>
-        <p class="section-lead">Lọc theo 3 mảng hoạt động để chọn buổi phù hợp với lịch học tập và làm việc của bạn.</p>
+        <div class="kicker" data-i18n="schedule.kicker">Nhịp tuần · 1–2 hoạt động/tuần</div>
+        <h2 class="section-title" style="margin-bottom: 6px;" data-i18n="schedule.title">Các buổi sinh hoạt &amp; đối thoại sắp mở</h2>
+        <p class="section-lead" data-i18n="schedule.lead">Lọc theo 3 trụ cột để chọn buổi phù hợp với lịch học tập và làm việc của bạn tại Hòa Lạc.</p>
       </div>
-      <a class="arrow-link" href="/tham-gia/">Nhận thông báo khi mở lịch mới →</a>
+      <a class="arrow-link" href="/tham-gia/" data-i18n="schedule.memberLink">Tạo Thẻ Thành Viên giữ chỗ 1 chạm →</a>
     </div>
 
     <div class="filter-bar-row">
       <div class="filter-bar" data-filter-group="[data-workshop-card]" role="group" aria-label="Lọc lịch theo 3 trụ cột">
-        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Tất cả</button>
-        <button class="filter-btn" type="button" data-filter="holaheart" aria-pressed="false">
+        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true" data-i18n="filter.all">Tất cả</button>
+        <button class="filter-btn" type="button" data-filter="holaheart" data-pillar="holaheart" aria-pressed="false">
           <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
           <span>HolaHeart</span>
         </button>
-        <button class="filter-btn" type="button" data-filter="holagreen" aria-pressed="false">
+        <button class="filter-btn" type="button" data-filter="holagreen" data-pillar="holagreen" aria-pressed="false">
           <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
           <span>HolaGreen</span>
         </button>
-        <button class="filter-btn" type="button" data-filter="holaconnect" aria-pressed="false">
+        <button class="filter-btn" type="button" data-filter="holaconnect" data-pillar="holaconnect" aria-pressed="false">
           <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <span>HolaConnect</span>
         </button>
@@ -272,9 +297,38 @@
 
     <!-- CMS:SCHEDULE_UPCOMING:START -->
     <div class="grid-3" data-stagger-group>
-      <article class="event-card" data-stagger-item data-workshop-card data-category="holaconnect tu-te se-chia">
+      <article class="event-card" data-stagger-item data-workshop-card data-pillar="holaheart" data-category="holaheart biet-on tu-te">
+        <a class="event-card-media event-card-media--link" data-curtain href="/su-kien/cuoc-doi-cua-cha/" aria-label="Workshop &quot;Cuộc Đời Của Cha&quot;">
+          <img src="/assets/images/events/cuoc-doi-cua-cha-poster.jpg" alt="Poster Workshop Cuộc Đời Của Cha — hình ảnh người cha khoác vai con ngồi ngắm hoàng hôn ấm áp bên mặt hồ yên bình." width="640" height="420" loading="lazy" decoding="async">
+          <div class="event-card-badges">
+            <span class="glass-badge">Chủ Nhật, 29/11/2026</span>
+            <span class="glass-badge glass-badge--accent">Miễn phí tham dự · Tự túc đồ uống</span>
+          </div>
+        </a>
+        <div class="event-card-body">
+          <div class="card-meta">
+            <span class="cat">HolaHeart · Lắng nghe – Tri ân – Yêu thương</span>
+            <span>·</span>
+            <span>Mở đăng ký · 35 chỗ ấm cúng</span>
+          </div>
+          <h3 class="card-title"><a href="/su-kien/cuoc-doi-cua-cha/" data-title-en="Workshop &quot;My Father&#x27;s Life&quot;">Workshop &quot;Cuộc Đời Của Cha&quot;</a></h3>
+          <p class="card-text" data-summary-en="Some love is never spoken aloud. Spend a quiet Sunday evening in Hoa Lac listening, reflecting, and honoring our fathers&#x27; silent devotion.">Có những tình yêu chẳng bao giờ nói thành lời. Dành một buổi tối Chủ Nhật đặc biệt tại Hòa Lạc để lắng nghe, cảm nhận và nhìn lại bóng lưng âm thầm của Cha.</p>
+          <div class="event-info-inline">
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 19:15</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Quán Cafe Mây Lang Thang, Hòa Lạc</span>
+          </div>
+          <div class="card-footer card-footer--dual">
+            <a class="btn btn--primary btn--sm" href="/su-kien/cuoc-doi-cua-cha/">
+              <span data-i18n="cta.viewInvite">Xem thư mời &amp; Giữ chỗ</span>
+              <span aria-hidden="true">→</span>
+            </a>
+            <button class="btn btn--outline btn--sm" type="button" data-i18n="cta.quickBook" data-register-event="Workshop &quot;Cuộc Đời Của Cha&quot;" data-event-id="holaheart-cuoc-doi-cua-cha-2026-11-29" data-event-date="Chủ Nhật, 29/11/2026" data-event-time="19:15" data-event-location="Quán Cafe Mây Lang Thang, Hòa Lạc" data-event-fee="Miễn phí tham dự · Tự túc đồ uống" data-event-type="HolaHeart · Lắng nghe – Tri ân – Yêu thương" data-event-href="/su-kien/cuoc-doi-cua-cha/">Giữ chỗ nhanh</button>
+          </div>
+        </div>
+      </article>
+      <article class="event-card" data-stagger-item data-workshop-card data-pillar="holaconnect" data-category="holaconnect tu-te se-chia">
         <div class="event-card-media" data-curtain>
-          <img src="/assets/images/events/activity-nature-trail.jpg" alt="Con đường mòn rợp bóng cây xanh dẫn lên đồi rừng tại buổi chiều leo núi kết nối HolaConnect." width="640" height="420" loading="lazy" decoding="async">
+          <img src="/assets/images/illustrations/holagreen/G03.jpg" alt="Ảnh định hướng hoạt động dã ngoại và gắn kết thiên nhiên của người trẻ HolaRise." width="640" height="420" loading="lazy" decoding="async">
           <div class="event-card-badges">
             <span class="glass-badge">Thứ Năm, 26/11/2026</span>
             <span class="glass-badge glass-badge--accent">Miễn phí</span>
@@ -286,43 +340,15 @@
             <span>·</span>
             <span>Mở đăng ký · 25 chỗ</span>
           </div>
-          <h3 class="card-title">HolaConnect · Chiều Leo Núi &amp; Kết Nối Giữa Rừng Thông</h3>
-          <p class="card-text">Tạm rời màn hình máy tính để cùng bạn bè người trẻ Hòa Lạc – Xuân Mai trekking cung đồi rừng thực nghiệm Núi Luốt tại ĐH Lâm Nghiệp, hít thở không khí chiều thu và trò chuyện kết nối trên đỉnh đồi thông.</p>
+          <h3 class="card-title" data-title-en="HolaConnect · Pine Hill Trek &amp; Afternoon Circle">HolaConnect · Chiều Leo Núi &amp; Kết Nối Giữa Rừng Thông</h3>
+          <p class="card-text" data-summary-en="Step away from screens for a refreshing afternoon trek up Nui Luot pine hill and an open connection circle with fellow youth.">Tạm rời màn hình máy tính để cùng bạn bè người trẻ Hòa Lạc trekking cung đồi rừng thông Núi Luốt, hít thở không khí chiều thu và trò chuyện kết nối.</p>
           <div class="event-info-inline">
             <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 14:30 – 17:30</span>
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ĐH Lâm Nghiệp (Núi Luốt), Xuân Mai – Hòa Lạc</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Núi Luốt – ĐH Lâm Nghiệp (Xuân Mai)</span>
           </div>
           <div class="card-footer">
-            <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="HolaConnect · Chiều Leo Núi &amp; Kết Nối Giữa Rừng Thông" data-event-id="holaconnect-leo-nui-lam-nghiep-2026-11-26" data-event-date="Thứ Năm, 26/11/2026" data-event-time="14:30 – 17:30" data-event-location="ĐH Lâm Nghiệp (Núi Luốt), Xuân Mai – Hòa Lạc" data-event-fee="Miễn phí" data-event-type="HolaConnect · Gắn kết &amp; Thể chất">
-              <span>Đăng ký tham gia</span>
-              <span aria-hidden="true">→</span>
-            </button>
-          </div>
-        </div>
-      </article>
-      <article class="event-card" data-stagger-item data-workshop-card data-category="holaheart biet-on tu-te">
-        <div class="event-card-media" data-curtain>
-          <img src="/assets/images/events/holaheart-2026-11-15/04-wide-venue.jpg" alt="Không gian buổi tối ấm cúng nơi những người trẻ cùng ngồi lại trò chuyện tại Mây Lang Thang Cafe, Hòa Lạc." width="640" height="420" loading="lazy" decoding="async">
-          <div class="event-card-badges">
-            <span class="glass-badge">Chủ Nhật, 29/11/2026</span>
-            <span class="glass-badge glass-badge--accent">Miễn phí</span>
-          </div>
-        </div>
-        <div class="event-card-body">
-          <div class="card-meta">
-            <span class="cat">HolaHeart · Đối thoại &amp; Nội lực</span>
-            <span>·</span>
-            <span>Mở đăng ký · 30 chỗ</span>
-          </div>
-          <h3 class="card-title">Workshop HolaHeart: Người trẻ cùng ngồi lại?!..</h3>
-          <p class="card-text">Giữa những deadline dồn dập và nghìn thông báo lướt qua mỗi ngày, đã bao lâu chúng mình chưa thực sự ngồi lại với nhau? Một tối Chủ Nhật không bục giảng tại Mây Lang Thang để người trẻ Hòa Lạc cất điện thoại, gỡ bỏ những câu hỏi lửng lơ và lắng nghe nhau bằng sự chân thành.</p>
-          <div class="event-info-inline">
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 20:00 – 21:30</span>
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Mây Lang Thang Cafe, Hòa Lạc</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="Workshop HolaHeart: Người trẻ cùng ngồi lại?!.." data-event-id="holaheart-ws-nguoi-tre-cung-ngoi-lai-2026-11-29" data-event-date="Chủ Nhật, 29/11/2026" data-event-time="20:00 – 21:30" data-event-location="Mây Lang Thang Cafe, Hòa Lạc" data-event-fee="Miễn phí" data-event-type="HolaHeart · Đối thoại &amp; Nội lực">
-              <span>Đăng ký tham gia</span>
+            <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="HolaConnect · Chiều Leo Núi &amp; Kết Nối Giữa Rừng Thông" data-event-id="holaconnect-leo-nui-lam-nghiep-2026-11-26" data-event-date="Thứ Năm, 26/11/2026" data-event-time="14:30 – 17:30" data-event-location="Núi Luốt – ĐH Lâm Nghiệp (Xuân Mai)" data-event-fee="Miễn phí" data-event-type="HolaConnect · Gắn kết &amp; Thể chất">
+              <span data-i18n="cta.reserveSeat">Giữ chỗ tham dự</span>
               <span aria-hidden="true">→</span>
             </button>
           </div>
@@ -330,8 +356,8 @@
       </article>
     </div>
     <div class="filter-empty" data-filter-empty="[data-workshop-card]" hidden>
-      <p>Hiện chưa có buổi sắp tới nào thuộc nhóm này trong tuần.</p>
-      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-workshop-card]">Xem tất cả lịch hoạt động</button>
+      <p data-i18n="schedule.filterEmpty">Hiện chưa có buổi sắp tới nào thuộc nhóm này trong tuần.</p>
+      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-workshop-card]" data-i18n="schedule.filterReset">Xem tất cả lịch hoạt động</button>
     </div>
     <!-- CMS:SCHEDULE_UPCOMING:END -->
   </div>
@@ -341,11 +367,11 @@
   <div class="container">
     <div class="section-header--split" style="margin-bottom: 28px;">
       <div>
-        <div class="kicker">Dấu mốc thực tế</div>
-        <h2 class="section-title" style="margin-bottom: 6px;">Những chương trình đã tổ chức</h2>
-        <p class="section-lead">Các buổi gặp gỡ, đêm nhạc và đối thoại đã diễn ra được lưu trữ đầy đủ hình ảnh thật tại Hành trình HolaRise.</p>
+        <div class="kicker" data-i18n="schedule.past.kicker">Dấu mốc đã qua</div>
+        <h2 class="section-title" style="margin-bottom: 6px;" data-i18n="schedule.past.title">Những chương trình đã tổ chức</h2>
+        <p class="section-lead" data-i18n="schedule.past.lead">Các buổi gặp gỡ, đêm nhạc và đối thoại đã diễn ra kèm lưu bút cảm nhận của thành viên tại Hành trình.</p>
       </div>
-      <a class="arrow-link" href="/hanh-trinh/">Xem toàn bộ Hành trình &amp; Kho ảnh →</a>
+      <a class="arrow-link" href="/hanh-trinh/" data-i18n="schedule.past.link">Xem Hành trình &amp; Lưu bút →</a>
     </div>
 
     <div class="past-list" data-stagger-group>
@@ -353,13 +379,13 @@
       <div class="past-item" data-stagger-item data-hover-photo="/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg" data-hover-alt="Diễn giả cầm micro chia sẻ tại sự kiện HolaHeart ngày 15/11/2026.">
         <span class="past-item-date">15/11/2026</span>
         <h3 class="past-item-title"><a class="past-item-title-link" href="/hanh-trinh/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/">HolaHeart · Tình yêu thương của Mẹ trong thời đại AI</a></h3>
-        <span class="past-item-meta">14:00–16:50 · Mây Lang Thang Cafe, Hòa Lạc · Xem tường thuật &amp; album 8 ảnh thật</span>
+        <span class="past-item-meta">14:00–16:50 · Mây Lang Thang Cafe, Hòa Lạc · Xem tường thuật &amp; viết lưu bút</span>
         <span class="past-item-arrow" aria-hidden="true">↗</span>
       </div>
       <div class="past-item" data-stagger-item data-hover-photo="/assets/images/musicspace-archive/15-671661990_1333975782086922_4394124200415584759_n.jpg" data-hover-alt="Vòng tròn chia sẻ ngoài trời trong chuỗi HolaHeart × MusicSpace tại Hòa Lạc.">
         <span class="past-item-date">2025 – 2026</span>
-        <h3 class="past-item-title"><a class="past-item-title-link" href="/hanh-trinh/#musicspace-chapter">Chuỗi Âm nhạc &amp; Workshop · HolaHeart × MusicSpace</a></h3>
-        <span class="past-item-meta">Định kỳ buổi tối · Hòa Lạc – Thạch Thất · Xem 14 khoảnh khắc tuyển chọn</span>
+        <h3 class="past-item-title"><a class="past-item-title-link" href="/hanh-trinh/chuoi-am-nhac-ket-noi-holaheart-musicspace/">Chuỗi Đêm Nhạc Mộc &amp; Đối Thoại · HolaHeart × MusicSpace</a></h3>
+        <span class="past-item-meta">Định kỳ buổi tối · Hòa Lạc · Xem câu chuyện &amp; viết lưu bút</span>
         <span class="past-item-arrow" aria-hidden="true">↗</span>
       </div>
       <!-- CMS:PAST_WORKSHOPS:END -->
@@ -371,12 +397,12 @@
   <div class="container">
     <div class="cta-band">
       <div>
-        <h2>Muốn đồng tổ chức một buổi tại trường hoặc không gian của bạn?</h2>
-        <p>HolaRise sẵn sàng phối hợp cùng các CLB sinh viên, trường học và quán không gian văn hóa tại Hòa Lạc – Thạch Thất.</p>
+        <h2 data-i18n="schedule.partner.title">Muốn đồng tổ chức một buổi tại trường hoặc không gian của bạn?</h2>
+        <p data-i18n="schedule.partner.desc">Hola sẵn sàng phối hợp cùng các CLB sinh viên, nhà trường và không gian văn hóa tại Hòa Lạc.</p>
       </div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px;">
-        <a class="btn btn--light" href="/tham-gia/?chuong-trinh=hoptac" data-magnetic>Đề xuất hợp tác</a>
-        <a class="btn btn--ghost-dark" href="/gioi-thieu/#mo-hinh-tac-dong">Tìm hiểu 3 trụ cột</a>
+        <a class="btn btn--light" href="/tham-gia/?chuong-trinh=hoptac" data-magnetic data-i18n="schedule.partner.cta">Đề xuất hợp tác</a>
+        <a class="btn btn--ghost-dark" href="/gioi-thieu/#mo-hinh-tac-dong" data-i18n="schedule.empty.secondary">Tìm hiểu 3 trụ cột</a>
       </div>
     </div>
   </div>
@@ -391,19 +417,19 @@
           <a class="footer-logo-row" href="/" aria-label="Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên">
             <img src="/assets/images/logo-holarise.png" alt="HolaRise – Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên" width="104" height="24" loading="lazy" style="height: 22px; width: auto;">
           </a>
-          <p style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;">Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên</p>
-          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);">Khởi nguồn từ Hòa Lạc – Thạch Thất, kết nối thế hệ trẻ cùng vun bồi nội lực <a class="pillar-inline-tag pillar-inline-tag--holaheart" href="/lich-hoat-dong/?nhom=holaheart">HolaHeart</a>, kiến tạo cảnh quan xanh <a class="pillar-inline-tag pillar-inline-tag--holagreen" href="/lich-hoat-dong/?nhom=holagreen">HolaGreen</a> và phụng sự cộng đồng <a class="pillar-inline-tag pillar-inline-tag--holaconnect" href="/lich-hoat-dong/?nhom=holaconnect">HolaConnect</a>.</p>
-          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Together We Rise, Together We Serve. · Chapter 01 · Hòa Lạc – Thạch Thất</p>
+          <p style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;" data-i18n="brand.fullName">Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên</p>
+          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);" data-i18n="brand.subtitle">Khởi nguồn từ Hòa Lạc, kết nối thế hệ trẻ cùng vun bồi nội lực <a class="pillar-inline-tag pillar-inline-tag--holaheart" href="/lich-hoat-dong/?nhom=holaheart">HolaHeart</a>, giữ xanh cảnh quan <a class="pillar-inline-tag pillar-inline-tag--holagreen" href="/lich-hoat-dong/?nhom=holagreen">HolaGreen</a> và phụng sự cộng đồng <a class="pillar-inline-tag pillar-inline-tag--holaconnect" href="/lich-hoat-dong/?nhom=holaconnect">HolaConnect</a>.</p>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Hola · Together We Rise, Together We Serve.</p>
         </div>
 
         <div>
-          <h2 class="footer-heading">Khám phá</h2>
+          <h2 class="footer-heading" data-i18n="footer.explore">Khám phá</h2>
           <ul class="footer-links">
-            <li><a href="/">Trang chủ</a></li>
-            <li><a href="/gioi-thieu/">Về HolaRise</a></li>
-            <li><a href="/lich-hoat-dong/">Lịch hoạt động</a></li>
-            <li><a href="/hanh-trinh/">Hành trình &amp; Kho ảnh</a></li>
-            <li><a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a></li>
+            <li><a href="/" data-i18n="nav.home">Trang chủ</a></li>
+            <li><a href="/gioi-thieu/" data-i18n="nav.about">Về HolaRise</a></li>
+            <li><a href="/lich-hoat-dong/" data-i18n="nav.schedule">Lịch hoạt động</a></li>
+            <li><a href="/hanh-trinh/" data-i18n="nav.journey">Hành trình</a></li>
+            <li><a href="/chinh-sach/" data-i18n="footer.transparency">Chuẩn mực Minh bạch &amp; An toàn</a></li>
             <li>
               <button class="pwa-install-footer-btn" type="button" data-pwa-install hidden>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -411,30 +437,39 @@
                   <path d="m7 10 5 5 5-5"></path>
                   <path d="M5 21h14"></path>
                 </svg>
-                <span>Cài ứng dụng về máy</span>
+                <span data-i18n="pwa.installShort">Cài ứng dụng về máy</span>
               </button>
             </li>
           </ul>
         </div>
 
         <div>
-          <h2 class="footer-heading">3 Trụ cột</h2>
+          <h2 class="footer-heading" data-i18n="footer.pillars">3 Trụ cột</h2>
           <ul class="footer-links">
-            <li><a href="/lich-hoat-dong/?nhom=holaheart">HolaHeart · Nội lực &amp; Lắng nghe</a></li>
-            <li><a href="/lich-hoat-dong/?nhom=holagreen">HolaGreen · Sinh thái &amp; Cảnh quan</a></li>
-            <li><a href="/lich-hoat-dong/?nhom=holaconnect">HolaConnect · Phụng sự &amp; Kết nối</a></li>
-            <li><a href="/tham-gia/">Tham gia &amp; Hợp tác</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holaheart" data-i18n="footer.pHeart">HolaHeart · Nội lực &amp; Lắng nghe</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holagreen" data-i18n="footer.pGreen">HolaGreen · Sinh thái &amp; Cảnh quan</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holaconnect" data-i18n="footer.pConnect">HolaConnect · Tri thức &amp; Phụng sự</a></li>
+            <li><a href="/tham-gia/" data-i18n="footer.pJoin">Thẻ Thành Viên &amp; Hợp tác</a></li>
           </ul>
         </div>
 
         <div>
-          <h2 class="footer-heading">Liên hệ · Chapter 01</h2>
+          <h2 class="footer-heading" data-i18n="footer.contact">Văn phòng &amp; Liên hệ</h2>
           <ul class="footer-links">
-            <li>Địa bàn: Hòa Lạc – Thạch Thất, Hà Nội</li>
+            <li><span data-i18n="footer.officeLabel">Văn phòng:</span> Tân Xã – Hòa Lạc – Thạch Thất, Hà Nội</li>
             <li><a href="tel:0777771948">077.777.1948</a></li>
             <li><a href="mailto:phungsu@holarise.org">phungsu@holarise.org</a></li>
-            <li>Nhịp sinh hoạt: 1–2 hoạt động mỗi tuần tại Hòa Lạc – Thạch Thất</li>
+            <li>1–2 hoạt động mỗi tuần tại Hòa Lạc</li>
           </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span data-i18n="footer.copyright">© 2026 Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên (Cộng đồng HolaRise). Cộng đồng phi lợi nhuận.</span>
+        <div class="footer-bottom-meta">
+          <a href="/chinh-sach/" data-i18n="footer.privacy">Bảo mật &amp; Quy tắc</a>
+          <span aria-hidden="true">·</span>
+          <a href="/tham-gia/" data-i18n="footer.memberPass">Thẻ Thành Viên Hola</a>
         </div>
       </div>
     </div>
@@ -444,13 +479,22 @@
   <dialog class="club-dialog" id="event-register-modal" closedby="any" aria-labelledby="modal-heading">
     <div class="dialog-inner">
       <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
-      <span class="kicker" style="margin-bottom: 8px;">Gửi thông tin quan tâm</span>
-      <h2 id="modal-heading" style="margin: 0 0 12px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Trao đổi về hoạt động HolaRise</h2>
+      <span class="kicker" id="modal-kicker" style="margin-bottom: 8px;">Đăng ký giữ chỗ nhanh</span>
+      <h2 id="modal-heading" style="margin: 0 0 12px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Giữ chỗ tham dự hoạt động</h2>
 
       <div class="modal-event-ticket">
         <span class="modal-ticket-type" id="modal-event-type">Thông tin hoạt động</span>
         <p class="modal-ticket-title" id="modal-event-title"></p>
         <div class="modal-ticket-meta" id="modal-event-meta"></div>
+        <a class="modal-ticket-detail-link" id="modal-event-detail-link" href="/lich-hoat-dong/" hidden>Đọc trọn vẹn lá thư mời &amp; thông tin chi tiết →</a>
+      </div>
+
+      <div class="modal-member-bar" id="modal-member-rsvp-bar" hidden>
+        <div class="modal-member-bar-copy">
+          <strong id="modal-member-bar-title">Đang giữ chỗ bằng Thẻ Thành Viên</strong>
+          <span id="modal-member-bar-sub">Thông tin đã điền sẵn từ hồ sơ Hola của bạn.</span>
+        </div>
+        <button class="btn btn--primary btn--sm" type="button" id="modal-member-onetap-btn">Giữ chỗ 1 chạm</button>
       </div>
 
       <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register" data-endpoint="/api/registrations" data-phone="077.777.1948" data-phone-raw="0777771948" data-zalo="https://zalo.me/0777771948" novalidate>
@@ -480,7 +524,7 @@
             </div>
           </div>
           <div class="field">
-          <label for="modal-email">Email (không bắt buộc)</label>
+            <label for="modal-email">Email (không bắt buộc)</label>
             <input id="modal-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" enterkeyhint="next" data-error="modal-email-error">
             <div id="modal-email-error" class="field-error">
               <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -494,41 +538,42 @@
           <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Chọn nhanh đơn vị">
             <button type="button" class="quick-chip" data-org-chip="ĐH FPT" aria-pressed="false">ĐH FPT</button>
             <button type="button" class="quick-chip" data-org-chip="ĐHQGHN (VNU)" aria-pressed="false">ĐHQGHN</button>
-            <button type="button" class="quick-chip" data-org-chip="THPT Hòa Lạc" aria-pressed="false">THPT Hòa Lạc</button>
+            <button type="button" class="quick-chip" data-org-chip="THPT Thạch Thất" aria-pressed="false">THPT Thạch Thất</button>
             <button type="button" class="quick-chip" data-org-chip="Đã đi làm" aria-pressed="false">Đi làm</button>
           </div>
         </div>
         <div class="field">
-          <span class="field-label-text">Cách bạn muốn đồng hành</span>
-          <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Cách bạn muốn đồng hành">
-            <button type="button" class="quick-chip is-selected" data-vibe-chip="Quan tâm tìm hiểu" aria-pressed="true">Muốn tìm hiểu trước</button>
-            <button type="button" class="quick-chip" data-vibe-chip="Đi cùng bạn bè" aria-pressed="false">Có thể đi cùng bạn</button>
-            <button type="button" class="quick-chip" data-vibe-chip="Lần đầu tham gia" aria-pressed="false">Lần đầu tìm hiểu</button>
+          <span class="field-label-text">Số chỗ giữ</span>
+          <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Số chỗ bạn muốn giữ">
+            <button type="button" class="quick-chip is-selected" data-vibe-chip="Đi 1 mình (1 chỗ)" aria-pressed="true">Đi 1 mình (1 chỗ)</button>
+            <button type="button" class="quick-chip" data-vibe-chip="Đi cùng 1 bạn (2 chỗ)" aria-pressed="false">Đi cùng 1 bạn (2 chỗ)</button>
+            <button type="button" class="quick-chip" data-vibe-chip="Nhóm 3+ người" aria-pressed="false">Nhóm 3+ người</button>
           </div>
         </div>
         <div class="field">
-          <label for="modal-note">Lời nhắn (không bắt buộc)</label>
-          <textarea id="modal-note" name="note" rows="2" placeholder="Bạn muốn hỏi thêm điều gì về HolaRise?"></textarea>
+          <label for="modal-note" id="modal-note-label">Lời nhắn hoặc câu chuyện muốn gửi BTC (không bắt buộc)</label>
+          <textarea id="modal-note" name="note" rows="2" placeholder="Ghi chú thêm hoặc đôi dòng tâm sự (nếu có)..."></textarea>
         </div>
         <div class="form-status" role="status" aria-live="polite"></div>
-        <button class="btn btn--primary" type="submit">Gửi thông tin quan tâm</button>
-        <p class="form-privacy-note">Đây chưa phải đăng ký cho một sự kiện cụ thể. Chi phí, nếu có, sẽ được ghi trong thông báo từng hoạt động. Xem <a href="/chinh-sach/">Chính sách bảo mật</a>.</p>
+        <button class="btn btn--primary" type="submit" id="modal-submit-btn">Xác nhận giữ chỗ tham dự</button>
+        <p class="form-privacy-note">Thông tin dùng để Ban Điều Phối sắp xếp chỗ ngồi và gửi nhắc lịch. Chi phí (nếu có) được công khai minh bạch trên thẻ sự kiện. Xem <a href="/chinh-sach/">Chính sách bảo mật</a>.</p>
       </form>
 
       <div class="modal-pass-success" id="modal-pass-success" hidden>
         <div class="modal-pass-badge">
           <span class="live-status-dot" aria-hidden="true"></span>
-          <span>ĐÃ GHI NHẬN THÔNG TIN</span>
+          <span>ĐÃ GHI NHẬN GIỮ CHỖ</span>
         </div>
         <div class="modal-pass-code-row">
-          <span>Mã thông tin:</span>
+          <span>Mã vé giữ chỗ:</span>
           <strong class="pass-code" id="modal-pass-code"></strong>
         </div>
         <p class="modal-pass-summary" id="modal-pass-summary"></p>
         <span id="modal-pass-invite-text" class="visually-hidden"></span>
         <div class="pass-actions-buttons">
-          <button type="button" class="btn btn--primary btn--sm" data-pass-download="modal">Tải phiếu (PNG)</button>
-          <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Chia sẻ thông tin HolaRise</button>
+          <button type="button" class="btn btn--primary btn--sm" data-pass-download="modal">Tải Thiệp Vé (PNG)</button>
+          <button type="button" class="btn btn--outline btn--sm" data-ics-download="modal" id="modal-ics-btn" hidden>Lưu lịch (.ics)</button>
+          <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Rủ bạn đi cùng</button>
           <span class="copy-control">
             <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
               <span>Sao chép lời mời</span>
@@ -536,8 +581,66 @@
             <span class="copy-tip" role="status"></span>
           </span>
         </div>
-        <button type="button" class="pass-reset-link" data-pass-new="modal">Đăng ký thêm</button>
+        <button type="button" class="pass-reset-link" data-pass-new="modal">Đăng ký thêm cho người đi cùng</button>
       </div>
+    </div>
+  </dialog>
+
+  <!-- Native HTML5 <dialog> Đăng Nhập / Tạo Thẻ Thành Viên Hola Nhanh -->
+  <dialog class="club-dialog" id="member-auth-modal" closedby="any" aria-labelledby="member-auth-heading">
+    <div class="dialog-inner">
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
+      <span class="kicker" style="margin-bottom: 8px;">Thẻ Thành Viên Hola</span>
+      <h2 id="member-auth-heading" style="margin: 0 0 14px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Đăng nhập hoặc Tạo Thẻ Thành Viên</h2>
+
+      <div class="member-mode-tabs" role="tablist" aria-label="Chọn chế độ tài khoản">
+        <button class="member-mode-tab is-active" type="button" role="tab" aria-selected="true" data-modal-auth-tab="login">Đăng nhập</button>
+        <button class="member-mode-tab" type="button" role="tab" aria-selected="false" data-modal-auth-tab="register">Tạo Thẻ mới (10 giây)</button>
+      </div>
+
+      <form class="form-grid" id="modal-member-login-form" novalidate>
+        <div class="field">
+          <label for="ma-login-id">Email hoặc Số điện thoại <span aria-hidden="true">*</span></label>
+          <input id="ma-login-id" name="identifier" type="text" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="09xx xxx xxx hoặc tenban@gmail.com" required>
+        </div>
+        <div class="field">
+          <label for="ma-login-pw">Mật khẩu <span aria-hidden="true">*</span></label>
+          <div class="member-pw-wrap">
+            <input id="ma-login-pw" name="password" type="password" autocomplete="current-password" minlength="6" required placeholder="Nhập mật khẩu của bạn">
+            <button type="button" class="member-pw-toggle" data-member-pw-toggle="ma-login-pw" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
+          </div>
+        </div>
+        <div class="form-status" id="ma-login-status" role="status" aria-live="polite"></div>
+        <button class="btn btn--primary" type="submit">Đăng nhập Thẻ Thành Viên</button>
+      </form>
+
+      <form class="form-grid" id="modal-member-register-form" novalidate hidden>
+        <div class="field">
+          <label for="ma-reg-name">Họ và tên <span aria-hidden="true">*</span></label>
+          <input id="ma-reg-name" name="name" type="text" autocomplete="name" minlength="2" required placeholder="Ví dụ: Nguyễn Minh Anh">
+        </div>
+        <div class="field">
+          <label for="ma-reg-id">Email hoặc Số điện thoại <span aria-hidden="true">*</span></label>
+          <input id="ma-reg-id" name="identifier" type="text" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="09xx xxx xxx hoặc tenban@gmail.com" required>
+        </div>
+        <div class="field">
+          <label for="ma-reg-pw">Mật khẩu (tối thiểu 6 ký tự) <span aria-hidden="true">*</span></label>
+          <div class="member-pw-wrap">
+            <input id="ma-reg-pw" name="password" type="password" autocomplete="new-password" minlength="6" required placeholder="Tạo mật khẩu dễ nhớ">
+            <button type="button" class="member-pw-toggle" data-member-pw-toggle="ma-reg-pw" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="ma-reg-pillar">Trụ cột bạn quan tâm nhất</label>
+          <select id="ma-reg-pillar" name="primaryPillar">
+            <option value="holaheart">HolaHeart · Nội lực &amp; Lắng nghe</option>
+            <option value="holagreen">HolaGreen · Sinh thái &amp; Cảnh quan</option>
+            <option value="holaconnect">HolaConnect · Tri thức &amp; Phụng sự</option>
+          </select>
+        </div>
+        <div class="form-status" id="ma-reg-status" role="status" aria-live="polite"></div>
+        <button class="btn btn--primary" type="submit">Tạo Thẻ Thành Viên Hola</button>
+      </form>
     </div>
   </dialog>
 
@@ -557,8 +660,6 @@
       <div class="lightbox-bar">
         <div class="lightbox-caption" id="lightbox-caption"></div>
         <div class="lightbox-bar-right">
-          <a class="lightbox-action-link" id="lightbox-download" href="/assets/images/logo-mark.png" download hidden>Tải ảnh</a>
-          <a class="lightbox-action-link" id="lightbox-drive" href="https://drive.google.com" target="_blank" rel="noopener noreferrer" hidden>Ảnh gốc (Drive) ↗</a>
           <span class="lightbox-counter" id="lightbox-counter" aria-live="polite"></span>
         </div>
       </div>
@@ -585,7 +686,7 @@
       <div data-pwa-guide="ios">
         <span class="kicker" style="margin-bottom: 8px;">Cài đặt trên iPhone / iPad</span>
         <h2 id="pwa-dialog-title-ios" class="pwa-dialog-title">Thêm HolaRise vào Màn hình chính</h2>
-        <p class="pwa-dialog-lead">Mở nhanh như ứng dụng gốc, theo dõi lịch hoạt động và hành trình cộng đồng mượt mà tại Hòa Lạc – Thạch Thất.</p>
+        <p class="pwa-dialog-lead">Mở nhanh như ứng dụng gốc, theo dõi lịch hoạt động và hành trình cộng đồng mượt mà tại Hòa Lạc.</p>
         <ol class="pwa-steps">
           <li class="pwa-step">
             <span class="pwa-step-num" aria-hidden="true">1</span>
@@ -654,11 +755,13 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/vendor/gsap.min.js?v=1f655e2655" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=1f655e2655" defer></script>
-  <script src="/assets/js/motion.js?v=1f655e2655" defer></script>
-  <script src="/assets/js/main.js?v=1f655e2655" defer></script>
-  <script src="/assets/js/join-pass.js?v=1f655e2655" defer></script>
-  <script src="/assets/js/pwa.js?v=1f655e2655" defer></script>
+  <script src="/assets/js/i18n.js?v=7247851b09" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=7247851b09" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=7247851b09" defer></script>
+  <script src="/assets/js/motion.js?v=7247851b09" defer></script>
+  <script src="/assets/js/main.js?v=7247851b09" defer></script>
+  <script src="/assets/js/join-pass.js?v=7247851b09" defer></script>
+  <script src="/assets/js/member.js?v=7247851b09" defer></script>
+  <script src="/assets/js/pwa.js?v=7247851b09" defer></script>
 </body>
 </html>

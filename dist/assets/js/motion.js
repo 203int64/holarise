@@ -1,10 +1,10 @@
 /**
- * HolaRise – Cộng đồng Thanh niên Hòa Lạc - Cùng Vươn Lên | Native-Scroll Motion Engine
- * ZERO scroll-hijacking:
- * - Native CSS position:sticky Split-Scroll + Mechanical Odometer (01 -> 03)
- * - Editorial Hero Split-Line Reveal + Scale-to-Fullbleed Cinema Frame
- * - Opposing Kinetic Scroll-Driven Band
- * - Obsidian Manifesto Word-by-Word Illumination
+ * HolaRise – Hòa Lạc | v8 Awwwards Editorial Motion Engine
+ * - Desktop Velvety Wheel Inertia synced 1:1 with GSAP Ticker & ScrollTrigger (0% idle CPU, native modal/anchor safe)
+ * - Cross-Document Directional View Transitions (`pagereveal` progressive enhancement)
+ * - 3-Pillar Story Stage Clip-Path Curtain Wipes + 90/10 Tonal Aura Shift (`holaheart` -> `holagreen` -> `holaconnect`)
+ * - 340vh Horizontal Exhibition Runway + Active Center Focus + Contextual Cursor Pill (`pointer: fine`)
+ * - Hero Optical Depth + Velocity-Reactive Kinetic Band + Obsidian Word-by-Word Illumination + 3D Member Pass Tilt
  */
 (function () {
   "use strict";
@@ -14,9 +14,45 @@
   var isFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   var desktopMq = window.matchMedia("(min-width: 1024px)");
 
+  /* 0. Cross-Document Directional View Transitions (modern-web-guidance: cross-document-transitions) */
+  if (!prefersReduced && "onpagereveal" in window) {
+    var ROUTE_ORDER = {
+      "/": 0,
+      "/gioi-thieu/": 1,
+      "/lich-hoat-dong/": 2,
+      "/hanh-trinh/": 3,
+      "/tham-gia/": 4,
+      "/chinh-sach/": 5,
+    };
+    var rankPath = function (pathname) {
+      var p = String(pathname || "/");
+      if (ROUTE_ORDER[p] !== undefined) return ROUTE_ORDER[p];
+      if (p.indexOf("/su-kien/") === 0) return 2.5;
+      if (p.indexOf("/hanh-trinh/") === 0) return 3.5;
+      return 4;
+    };
+    window.addEventListener("pagereveal", function (e) {
+      if (!e.viewTransition || !window.navigation || !window.navigation.activation) return;
+      try {
+        var fromEntry = window.navigation.activation.from;
+        var toEntry = window.navigation.activation.entry;
+        if (!fromEntry || !toEntry || !fromEntry.url || !toEntry.url) return;
+        var fromPath = new URL(fromEntry.url).pathname;
+        var toPath = new URL(toEntry.url).pathname;
+        if (fromPath === toPath) return;
+        var dir = rankPath(toPath) >= rankPath(fromPath) ? "forward" : "back";
+        e.viewTransition.types.add(dir);
+      } catch (_err) {}
+    });
+  }
+
   /* 1. Native CSS Scroll Progress fallback ONLY when animation-timeline: scroll() is unsupported */
   var progressBar = document.getElementById("scroll-progress");
-  if (progressBar && !prefersReduced && !(window.CSS && CSS.supports("animation-timeline", "scroll()"))) {
+  if (
+    progressBar &&
+    !prefersReduced &&
+    !(window.CSS && CSS.supports && CSS.supports("(animation-timeline: scroll()) and (animation-range: 0% 100%)"))
+  ) {
     var progressRafPending = false;
     var updateProgress = function () {
       var scrollable = document.documentElement.scrollHeight - window.innerHeight;
@@ -38,7 +74,8 @@
     updateProgress();
   }
 
-  /* 2. Story Stage + Glider Pill Tabs + Touch/Trackpad Horizontal Swipe (Zero Scroll Traps!) */
+  /* 2. 3-Pillar Story Stage + Tonal Aura Shift + Curtain Wipe + Swipe */
+  var storySection = document.querySelector("[data-story-section]");
   var storyStage = document.querySelector("[data-story-stage]");
   var storyTablist = storyStage ? storyStage.querySelector("[data-story-tablist]") : null;
   var storyGlider = storyStage ? storyStage.querySelector("[data-story-glider]") : null;
@@ -46,22 +83,14 @@
   var storyPanels = storyStage ? Array.prototype.slice.call(storyStage.querySelectorAll("[data-story-panel]")) : [];
   var storySlides = storyStage ? Array.prototype.slice.call(storyStage.querySelectorAll("[data-story-slide]")) : [];
   var odometerDrum = storyStage ? storyStage.querySelector("[data-odometer-drum]") : null;
-  var desktopMediaFrame = storyStage ? storyStage.querySelector(".story-media-frame--desktop") : null;
   var activeStoryIndex = 0;
 
-  function setTabProgress(activeIndex, localProgress) {
-    storyTabs.forEach(function (tab, i) {
-      var p = i < activeIndex ? 1 : i === activeIndex ? localProgress : 0;
-      tab.style.setProperty("--tab-progress", p.toFixed(3));
-    });
-  }
-
-  function setStoryStep(index, localProgress, force) {
+  function setStoryStep(index, animateWipe, force) {
     if (!storyPanels.length) return;
     var clamped = Math.max(0, Math.min(index, storyPanels.length - 1));
     if (!force && storyStage.classList.contains("is-enhanced") && clamped === activeStoryIndex) return;
-    var pct = typeof localProgress === "number" ? Math.max(0.2, Math.min(1, localProgress)) : 1;
-    setTabProgress(clamped, pct);
+    var prevIdx = activeStoryIndex;
+    var dir = clamped >= prevIdx ? 1 : -1;
 
     if (storyTablist) {
       storyTablist.style.setProperty("--active-idx", String(clamped));
@@ -69,14 +98,18 @@
     if (storyGlider) {
       storyGlider.style.setProperty("--active-idx", String(clamped));
     }
-
     if (odometerDrum) {
       var stepPct = (clamped * 100) / storyPanels.length;
       odometerDrum.style.transform = "translateY(-" + stepPct.toFixed(4) + "%)";
     }
 
-    if (desktopMediaFrame) {
-      desktopMediaFrame.setAttribute("data-cursor-label", "0" + (clamped + 1) + " · 0" + storyPanels.length);
+    var activeTab = storyTabs[clamped];
+    var pillarKey = (activeTab && activeTab.getAttribute("data-pillar")) || "holaheart";
+    if (storySection) {
+      storySection.setAttribute("data-pillar", pillarKey);
+    }
+    if (storyStage) {
+      storyStage.setAttribute("data-pillar", pillarKey);
     }
 
     activeStoryIndex = clamped;
@@ -87,24 +120,59 @@
       tab.setAttribute("aria-selected", String(on));
       tab.setAttribute("tabindex", on ? "0" : "-1");
     });
+
     storyPanels.forEach(function (panel, i) {
-      panel.classList.toggle("is-active", i === clamped);
+      var on = i === clamped;
+      panel.classList.toggle("is-active", on);
+      if (on && animateWipe && hasGsap && !prefersReduced) {
+        window.gsap.fromTo(
+          panel,
+          { y: dir * 14, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.56, ease: "power3.out", overwrite: "auto" }
+        );
+      }
     });
+
     storySlides.forEach(function (slide) {
       var slideIdx = parseInt(slide.getAttribute("data-story-slide"), 10);
       var isActiveSlide = slideIdx === clamped;
+      var wasActive = slideIdx === prevIdx && prevIdx !== clamped;
       slide.classList.toggle("is-active", isActiveSlide);
+      slide.classList.toggle("is-prev", wasActive);
       slide.setAttribute("tabindex", isActiveSlide ? "0" : "-1");
+
+      if (isActiveSlide && animateWipe && hasGsap && !prefersReduced) {
+        var img = slide.querySelector("img");
+        var startClip = dir > 0 ? "inset(100% 0% 0% 0%)" : "inset(0% 0% 100% 0%)";
+        window.gsap.fromTo(
+          slide,
+          { clipPath: startClip, opacity: 1 },
+          {
+            clipPath: "inset(0% 0% 0% 0%)",
+            duration: 0.78,
+            ease: "power4.out",
+            clearProps: "clipPath",
+            overwrite: "auto",
+          }
+        );
+        if (img) {
+          window.gsap.fromTo(
+            img,
+            { scale: 1.13 },
+            { scale: 1, duration: 1.05, ease: "power3.out", overwrite: "auto" }
+          );
+        }
+      }
     });
   }
 
   if (storyStage && storyPanels.length) {
-    setStoryStep(0, 1, true);
+    setStoryStep(0, false, true);
     storyStage.classList.add("is-enhanced");
 
     storyTabs.forEach(function (tab, idx) {
       tab.addEventListener("click", function () {
-        setStoryStep(idx, 1);
+        setStoryStep(idx, true, false);
       });
       tab.addEventListener("keydown", function (e) {
         var nextIdx = null;
@@ -114,7 +182,7 @@
         else if (e.key === "End") nextIdx = storyTabs.length - 1;
         if (nextIdx !== null) {
           e.preventDefault();
-          setStoryStep(nextIdx, 1);
+          setStoryStep(nextIdx, true, false);
           storyTabs[nextIdx].focus();
         }
       });
@@ -140,16 +208,16 @@
         var dy = e.changedTouches[0].clientY - touchStartY;
         if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.25) {
           if (dx < 0 && activeStoryIndex < storyPanels.length - 1) {
-            setStoryStep(activeStoryIndex + 1, 1);
+            setStoryStep(activeStoryIndex + 1, true, false);
           } else if (dx > 0 && activeStoryIndex > 0) {
-            setStoryStep(activeStoryIndex - 1, 1);
+            setStoryStep(activeStoryIndex - 1, true, false);
           }
         }
       },
       { passive: true }
     );
 
-    /* Horizontal two-finger trackpad swipe support (vertical scroll passes straight through) */
+    /* Horizontal two-finger trackpad swipe support */
     var lastWheelSwitch = 0;
     storyStage.addEventListener(
       "wheel",
@@ -159,10 +227,10 @@
           if (now - lastWheelSwitch < 480) return;
           if (e.deltaX > 0 && activeStoryIndex < storyPanels.length - 1) {
             lastWheelSwitch = now;
-            setStoryStep(activeStoryIndex + 1, 1);
+            setStoryStep(activeStoryIndex + 1, true, false);
           } else if (e.deltaX < 0 && activeStoryIndex > 0) {
             lastWheelSwitch = now;
-            setStoryStep(activeStoryIndex - 1, 1);
+            setStoryStep(activeStoryIndex - 1, true, false);
           }
         }
       },
@@ -170,7 +238,7 @@
     );
   }
 
-  /* 2B. Mobile Horizontal Photo Exhibition Sync (Desktop uses sticky runway ScrollTrigger) */
+  /* 2B. Mobile Horizontal Photo Exhibition Sync */
   var hSectionEl = document.querySelector("[data-horizontal-section]");
   var hWrap = document.querySelector(".horizontal-track-wrap");
   var hFillMobile = document.querySelector("[data-exhibition-fill]");
@@ -178,10 +246,13 @@
   var hPrevBtn = document.querySelector("[data-exhibition-prev]");
   var hNextBtn = document.querySelector("[data-exhibition-next]");
   if (hWrap && hFillMobile) {
-    var totalGalleryCards = hWrap.querySelectorAll(".horizontal-card").length || 1;
+    var getTotalGalleryCards = function () {
+      return hWrap.querySelectorAll(".horizontal-card").length || 1;
+    };
     var galleryRafPending = false;
     var updateMobileGalleryProgress = function () {
       if (desktopMq.matches && hasGsap && !prefersReduced) return;
+      var totalGalleryCards = getTotalGalleryCards();
       var maxScroll = Math.max(1, hWrap.scrollWidth - hWrap.clientWidth);
       var prog = Math.min(1, Math.max(0, hWrap.scrollLeft / maxScroll));
       var pct = Math.max(1 / totalGalleryCards, prog);
@@ -210,6 +281,7 @@
     updateMobileGalleryProgress();
 
     var stepGallery = function (dir) {
+      var totalGalleryCards = getTotalGalleryCards();
       if (desktopMq.matches && hasGsap && !prefersReduced && hSectionEl) {
         var rect = hSectionEl.getBoundingClientRect();
         var sectionTop = window.scrollY + rect.top;
@@ -218,10 +290,12 @@
         var curIdx = Math.round(curProg * (totalGalleryCards - 1));
         var nextIdx = Math.max(0, Math.min(totalGalleryCards - 1, curIdx + dir));
         var targetProg = totalGalleryCards > 1 ? nextIdx / (totalGalleryCards - 1) : 0;
-        window.scrollTo({
-          top: sectionTop + targetProg * runway,
-          behavior: "smooth"
-        });
+        var targetTop = sectionTop + targetProg * runway;
+        if (window.HolaSmoothScroll && window.HolaSmoothScroll.scrollTo) {
+          window.HolaSmoothScroll.scrollTo(targetTop);
+        } else {
+          window.scrollTo({ top: targetTop, behavior: "smooth" });
+        }
         return;
       }
       var card = hWrap.querySelector(".horizontal-card");
@@ -241,9 +315,9 @@
     }
   }
 
-  /* 2C. Desktop Orbital Reading Progress + Back-to-Top Ring (Zero work on Mobile < 1024px) */
+  /* 2C. Desktop Orbital Reading Progress + Back-to-Top Ring */
   var orbitalBtn = document.getElementById("orbital-top-btn");
-  if (orbitalBtn && window.matchMedia("(min-width: 1024px)").matches) {
+  if (orbitalBtn && desktopMq.matches) {
     var orbitalFill = orbitalBtn.querySelector(".orbital-ring-fill");
     var circumference = 2 * Math.PI * 19;
     if (orbitalFill) {
@@ -275,7 +349,11 @@
     syncOrbital();
 
     orbitalBtn.addEventListener("click", function () {
-      window.scrollTo({ top: 0, behavior: prefersReduced ? "auto" : "smooth" });
+      if (window.HolaSmoothScroll && window.HolaSmoothScroll.scrollTo && !prefersReduced) {
+        window.HolaSmoothScroll.scrollTo(0);
+      } else {
+        window.scrollTo({ top: 0, behavior: prefersReduced ? "auto" : "smooth" });
+      }
     });
   }
 
@@ -287,8 +365,122 @@
   var gsap = window.gsap;
   var ScrollTrigger = window.ScrollTrigger;
   gsap.registerPlugin(ScrollTrigger);
+  gsap.ticker.lagSmoothing(0);
 
-  /* 3. Clean Fade-Up Kicker Badges (No garbled Vietnamese scramble letters) */
+  /* 2D. Zero-Dependency Desktop Velvety Wheel Inertia Engine (0% Idle CPU, Modal & Trackpad Safe) */
+  if (isFinePointer) {
+    var smoothLocked = false;
+    var smoothRunning = false;
+    var currentScrollY = window.scrollY || 0;
+    var targetScrollY = currentScrollY;
+
+    var getMaxScrollY = function () {
+      return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    };
+
+    var hasScrollableAncestor = function (node, dy) {
+      var el = node && node.nodeType === 1 ? node : null;
+      while (el && el !== document.body && el !== document.documentElement) {
+        if (el.tagName === "DIALOG" || el.tagName === "TEXTAREA" || el.tagName === "SELECT") {
+          return true;
+        }
+        var st = window.getComputedStyle(el);
+        var oy = st.overflowY;
+        if ((oy === "auto" || oy === "scroll") && el.scrollHeight > el.clientHeight + 2) {
+          if ((dy < 0 && el.scrollTop > 0) || (dy > 0 && el.scrollTop + el.clientHeight < el.scrollHeight)) {
+            return true;
+          }
+        }
+        el = el.parentElement;
+      }
+      return false;
+    };
+
+    var onSmoothTick = function () {
+      if (smoothLocked || !desktopMq.matches) {
+        gsap.ticker.remove(onSmoothTick);
+        smoothRunning = false;
+        return;
+      }
+      var ratio = gsap.ticker.deltaRatio ? gsap.ticker.deltaRatio(60) : 1;
+      var alpha = 1 - Math.pow(0.865, Math.min(2.5, Math.max(0.5, ratio)));
+      var diff = targetScrollY - currentScrollY;
+      if (Math.abs(diff) < 0.45) {
+        currentScrollY = targetScrollY;
+        window.scrollTo(0, Math.round(currentScrollY));
+        ScrollTrigger.update();
+        gsap.ticker.remove(onSmoothTick);
+        smoothRunning = false;
+        return;
+      }
+      currentScrollY += diff * alpha;
+      window.scrollTo(0, currentScrollY);
+      ScrollTrigger.update();
+    };
+
+    var startSmoothTick = function () {
+      if (!smoothRunning) {
+        smoothRunning = true;
+        gsap.ticker.add(onSmoothTick);
+      }
+    };
+
+    window.addEventListener(
+      "wheel",
+      function (e) {
+        if (smoothLocked || !desktopMq.matches || e.defaultPrevented || e.ctrlKey || e.metaKey) return;
+        if (document.querySelector("dialog[open]")) return;
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+        if (hasScrollableAncestor(e.target, e.deltaY)) return;
+
+        // Only smooth discrete/stepped wheel deltas; let native high-frequency trackpad momentum pass if tiny
+        var rawDelta = e.deltaMode === 1 ? e.deltaY * 36 : e.deltaMode === 2 ? e.deltaY * window.innerHeight * 0.85 : e.deltaY;
+        if (e.deltaMode === 0 && Math.abs(rawDelta) < 18 && !smoothRunning) {
+          return;
+        }
+
+        e.preventDefault();
+        if (!smoothRunning) {
+          currentScrollY = window.scrollY || 0;
+          targetScrollY = currentScrollY;
+        }
+        var clampedStep = Math.max(-240, Math.min(240, rawDelta * 0.94));
+        targetScrollY = Math.max(0, Math.min(getMaxScrollY(), targetScrollY + clampedStep));
+        startSmoothTick();
+      },
+      { passive: false }
+    );
+
+    window.addEventListener(
+      "scroll",
+      function () {
+        if (!smoothRunning) {
+          currentScrollY = window.scrollY || 0;
+          targetScrollY = currentScrollY;
+        }
+      },
+      { passive: true }
+    );
+
+    window.HolaSmoothScroll = {
+      setLocked: function (locked) {
+        smoothLocked = Boolean(locked);
+        if (smoothLocked && smoothRunning) {
+          gsap.ticker.remove(onSmoothTick);
+          smoothRunning = false;
+        }
+        currentScrollY = window.scrollY || 0;
+        targetScrollY = currentScrollY;
+      },
+      scrollTo: function (destY) {
+        currentScrollY = window.scrollY || 0;
+        targetScrollY = Math.max(0, Math.min(getMaxScrollY(), Number(destY) || 0));
+        startSmoothTick();
+      },
+    };
+  }
+
+  /* 3. Clean Fade-Up Kicker Badges */
   document.querySelectorAll(".kicker").forEach(function (kicker) {
     gsap.from(kicker, {
       y: 12,
@@ -299,12 +491,12 @@
       scrollTrigger: {
         trigger: kicker,
         start: "top 92%",
-        once: true
-      }
+        once: true,
+      },
     });
   });
 
-  /* 4. Chapter 1: Immersive Hero Card Entrance + Desktop Depth & Mouse Parallax */
+  /* 4. Chapter 1: Immersive Hero Card Entrance + Multi-Layer Optical Depth */
   var heroCard = document.querySelector("[data-hero-card]");
   if (heroCard) {
     var heroLines = heroCard.querySelectorAll(".split-line-inner");
@@ -316,18 +508,18 @@
     var heroTl = gsap.timeline({ defaults: { ease: "power4.out" } });
     heroTl.fromTo(
       heroCard,
-      { clipPath: "inset(4% 2% 4% 2% round 34px)", scale: 0.96, opacity: 0 },
-      { clipPath: "inset(0% 0% 0% 0% round 26px)", scale: 1, opacity: 1, duration: 0.95, clearProps: "clipPath" },
+      { clipPath: "inset(4% 2% 4% 2% round 34px)", scale: 0.965, opacity: 0 },
+      { clipPath: "inset(0% 0% 0% 0% round 26px)", scale: 1, opacity: 1, duration: 0.98, clearProps: "clipPath" },
       0
     );
     if (cinemaImg) {
-      heroTl.fromTo(cinemaImg, { scale: 1.2 }, { scale: 1.05, duration: 1.25 }, 0);
+      heroTl.fromTo(cinemaImg, { scale: 1.18 }, { scale: 1.04, duration: 1.3 }, 0);
     }
     if (heroLines.length) {
-      heroTl.from(heroLines, { yPercent: 112, duration: 0.9, stagger: 0.09 }, 0.14);
+      heroTl.from(heroLines, { yPercent: 112, duration: 0.92, stagger: 0.09 }, 0.14);
     }
     if (heroFadeEls.length) {
-      heroTl.from(heroFadeEls, { y: 18, opacity: 0, duration: 0.72, stagger: 0.08 }, 0.24);
+      heroTl.from(heroFadeEls, { y: 18, opacity: 0, duration: 0.74, stagger: 0.08 }, 0.24);
     }
 
     var heroMm = gsap.matchMedia();
@@ -336,7 +528,7 @@
       if (cinemaImg) {
         gsap.fromTo(
           cinemaImg,
-          { yPercent: -5 },
+          { yPercent: -4 },
           {
             yPercent: 9,
             ease: "none",
@@ -344,22 +536,21 @@
               trigger: heroCard,
               start: "top top",
               end: "bottom top",
-              scrub: 0.35,
-              invalidateOnRefresh: true
-            }
+              scrub: 0.4,
+              invalidateOnRefresh: true,
+            },
           }
         );
       }
-
       gsap.to(heroCard, {
-        scale: 0.965,
+        scale: 0.968,
         ease: "none",
         scrollTrigger: {
           trigger: heroCard,
           start: "top 15%",
           end: "bottom top",
-          scrub: 0.4
-        }
+          scrub: 0.4,
+        },
       });
     });
 
@@ -368,33 +559,33 @@
         heroCard,
         { scale: 1 },
         {
-          scale: 0.92,
+          scale: 0.935,
           ease: "none",
           scrollTrigger: {
             trigger: heroCard,
             start: "top top",
             end: "bottom top",
-            scrub: 0.45,
-            invalidateOnRefresh: true
-          }
+            scrub: 0.5,
+            invalidateOnRefresh: true,
+          },
         }
       );
 
       if (cinemaImg) {
         gsap.fromTo(
           cinemaImg,
-          { yPercent: -8, scale: 1.05 },
+          { yPercent: -6, scale: 1.04 },
           {
-            yPercent: 16,
-            scale: 1.18,
+            yPercent: 15,
+            scale: 1.16,
             ease: "none",
             scrollTrigger: {
               trigger: heroCard,
               start: "top top",
               end: "bottom top",
-              scrub: 0.45,
-              invalidateOnRefresh: true
-            }
+              scrub: 0.5,
+              invalidateOnRefresh: true,
+            },
           }
         );
       }
@@ -404,16 +595,16 @@
           heroBottom,
           { y: 0, opacity: 1 },
           {
-            y: -56,
-            opacity: 0.2,
+            y: -48,
+            opacity: 0.22,
             ease: "none",
             scrollTrigger: {
               trigger: heroCard,
               start: "top top",
               end: "bottom top",
-              scrub: 0.45,
-              invalidateOnRefresh: true
-            }
+              scrub: 0.5,
+              invalidateOnRefresh: true,
+            },
           }
         );
       }
@@ -449,26 +640,23 @@
     });
   }
 
-  /* 4B. Smooth Scroll Reveal for Section Headers & Editorial Blocks (Mobile & Desktop) */
+  /* 4B. Smooth Scroll Reveal for Section Headers & Editorial Blocks */
   document.querySelectorAll("[data-reveal]").forEach(function (el) {
     gsap.from(el, {
-      y: 28,
+      y: 26,
       opacity: 0,
-      duration: 0.8,
+      duration: 0.82,
       ease: "power3.out",
       clearProps: "transform",
       scrollTrigger: {
         trigger: el,
         start: "top 90%",
-        once: true
-      }
+        once: true,
+      },
     });
   });
 
-  /* 5. Opposing Kinetic Scroll-Driven Typography Band v2
-     - Mobile (< 1024px): Native CSS animation-timeline: view() runs on compositor thread (zero JS overhead).
-       Only falls back to GSAP when view() is unsupported.
-     - Desktop (>= 1024px): GSAP ScrollTrigger drives opposing horizontal glide + scroll-velocity skew! */
+  /* 5. Opposing Kinetic Scroll-Driven Typography Band v2 */
   var kineticBand = document.querySelector("[data-kinetic-band]");
   var kineticLines = document.querySelectorAll("[data-kinetic-dir]");
   var supportsViewTimeline = Boolean(
@@ -484,23 +672,23 @@
         var dir = parseFloat(line.getAttribute("data-kinetic-dir")) || 1;
         gsap.fromTo(
           line,
-          { x: 0, xPercent: dir > 0 ? -28 : 2 },
+          { x: 0, xPercent: dir > 0 ? -26 : 2 },
           {
             x: 0,
-            xPercent: dir > 0 ? 2 : -28,
+            xPercent: dir > 0 ? 2 : -26,
             ease: "none",
             scrollTrigger: {
               trigger: kineticBand || line,
               start: "top bottom",
               end: "bottom top",
-              scrub: 0.55,
-              invalidateOnRefresh: true
-            }
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+            },
           }
         );
         skewSetters.push({
           dir: dir,
-          set: gsap.quickTo(line, "skewX", { duration: 0.55, ease: "power3.out" })
+          set: gsap.quickTo(line, "skewX", { duration: 0.5, ease: "power3.out" }),
         });
       });
 
@@ -511,7 +699,7 @@
         end: "bottom top",
         onUpdate: function (self) {
           var velocity = self.getVelocity();
-          var clamped = Math.max(-8, Math.min(8, velocity / 240));
+          var clamped = Math.max(-7, Math.min(7, velocity / 260));
           skewSetters.forEach(function (item) {
             item.set(clamped * (item.dir > 0 ? -1 : 1));
           });
@@ -521,7 +709,7 @@
               item.set(0);
             });
           }, 140);
-        }
+        },
       });
     });
 
@@ -540,8 +728,8 @@
                 trigger: kineticBand || line,
                 start: "top bottom",
                 end: "bottom top",
-                scrub: 0.35
-              }
+                scrub: 0.35,
+              },
             }
           );
         });
@@ -561,8 +749,8 @@
         scrollTrigger: {
           trigger: line,
           start: "top 88%",
-          once: true
-        }
+          once: true,
+        },
       }
     );
   });
@@ -583,13 +771,13 @@
           ease: "power3.out",
           onUpdate: function () {
             el.textContent = Math.round(obj.val).toLocaleString("vi-VN");
-          }
+          },
         });
-      }
+      },
     });
   });
 
-  /* 8. Obsidian Manifesto Word-by-Word Kinetic Lift, Blur-Reveal & Ambient Light Sweep */
+  /* 8. Obsidian Manifesto Word-by-Word Kinetic Lift & Ambient Light Sweep */
   var manifestoEl = document.querySelector("[data-scrub-words]");
   var manifestoGlow = document.querySelector("[data-manifesto-glow]");
   if (manifestoEl) {
@@ -598,23 +786,20 @@
     var sunriseWords = {
       "vươn": true,
       "xa": true,
-      "tử": true,
-      "tế": true,
       "nhân": true,
       "cách": true,
       "sẻ": true,
       "chia": true,
       "bên": true,
-      "trong": true
+      "trong": true,
     };
     var emeraldWords = {
+      "hola": true,
       "hòa": true,
       "lạc": true,
-      "thạch": true,
-      "thất": true,
       "xanh": true,
-      "cộng": true,
-      "đồng": true
+      "bền": true,
+      "vững": true,
     };
     var frag = document.createDocumentFragment();
     words.forEach(function (w, idx) {
@@ -648,8 +833,8 @@
           trigger: manifestoEl,
           start: "top 85%",
           end: "bottom 48%",
-          scrub: 0.35
-        }
+          scrub: 0.35,
+        },
       });
     });
 
@@ -661,10 +846,10 @@
         ease: "power1.out",
         scrollTrigger: {
           trigger: manifestoEl,
-          start: "top 72%",
+          start: "top 74%",
           end: "bottom 42%",
-          scrub: 0.55
-        }
+          scrub: 0.6,
+        },
       });
 
       if (manifestoGlow) {
@@ -679,8 +864,8 @@
               trigger: manifestoGlow.closest(".manifesto-section") || manifestoEl,
               start: "top bottom",
               end: "bottom top",
-              scrub: 0.8
-            }
+              scrub: 0.85,
+            },
           }
         );
       }
@@ -692,23 +877,23 @@
     var img = wrap.querySelector("img");
     gsap.fromTo(
       wrap,
-      { clipPath: "inset(16% 3% 16% 3% round 22px)" },
+      { clipPath: "inset(14% 3% 14% 3% round 22px)" },
       {
         clipPath: "inset(0% 0% 0% 0% round 16px)",
-        duration: 0.96,
+        duration: 0.98,
         ease: "power4.out",
         clearProps: "clipPath",
         scrollTrigger: {
           trigger: wrap,
           start: "top 88%",
-          once: true
-        }
+          once: true,
+        },
       }
     );
     if (img) {
       gsap.fromTo(
         img,
-        { scale: 1.2 },
+        { scale: 1.18 },
         {
           scale: 1,
           duration: 1.15,
@@ -716,8 +901,8 @@
           scrollTrigger: {
             trigger: wrap,
             start: "top 88%",
-            once: true
-          }
+            once: true,
+          },
         }
       );
     }
@@ -730,37 +915,57 @@
     gsap.from(items, {
       y: 22,
       opacity: 0,
-      duration: 0.72,
+      duration: 0.74,
       stagger: 0.065,
       ease: "power3.out",
       clearProps: "transform",
       scrollTrigger: {
         trigger: group,
         start: "top 88%",
-        once: true
-      }
+        once: true,
+      },
     });
   });
 
-  /* 11. Desktop Horizontal Exhibition Runway & Tactile Physics (ZERO pin:true traps!) */
+  /* 11. Desktop 340vh Exhibition Runway + Active Center Focus + Contextual Cursor Pill + 3D Pass Tilt */
   var mm = gsap.matchMedia();
 
   mm.add("(min-width: 1024px)", function () {
-    /* True Scroll-Driven Horizontal Gallery Runway (CSS sticky stage + GSAP travel) */
     var hSection = document.querySelector("[data-horizontal-section]");
     var hTrack = document.querySelector("[data-horizontal-track]");
     var hCards = hTrack ? Array.prototype.slice.call(hTrack.querySelectorAll(".horizontal-card")) : [];
     var hImages = hTrack ? Array.prototype.slice.call(hTrack.querySelectorAll(".horizontal-frame img")) : [];
+    var cursorPill = document.getElementById("exhibition-cursor-pill");
+    var cursorPillText = cursorPill ? cursorPill.querySelector("[data-cursor-pill-text]") : null;
     var totalDeskCards = hCards.length || 1;
 
     if (hSection && hTrack) {
       var getMaxShift = function () {
-        return Math.max(0, hTrack.scrollWidth - window.innerWidth + 80);
+        return Math.max(0, hTrack.scrollWidth - window.innerWidth + 96);
       };
+
+      var syncRunwayHeight = function () {
+        var shift = getMaxShift();
+        var idealPx = Math.max(window.innerHeight * 3.35, shift * 1.15 + window.innerHeight);
+        var cappedPx = Math.min(window.innerHeight * 4.0, idealPx);
+        hSection.style.height = Math.round(cappedPx) + "px";
+      };
+      syncRunwayHeight();
+      ScrollTrigger.addEventListener("refreshInit", syncRunwayHeight);
+
       var cardSkewSetters = hCards.map(function (c) {
-        return gsap.quickTo(c, "skewX", { duration: 0.42, ease: "power3.out" });
+        return gsap.quickTo(c, "skewX", { duration: 0.45, ease: "power3.out" });
       });
       var cardSkewReset = null;
+
+      var updateCenterCard = function (progress) {
+        var focusFloat = progress * (totalDeskCards - 1);
+        hCards.forEach(function (card, idx) {
+          var dist = Math.abs(idx - focusFloat);
+          card.classList.toggle("is-center-card", dist < 0.58);
+        });
+      };
+      updateCenterCard(0);
 
       gsap.fromTo(
         hTrack,
@@ -774,7 +979,7 @@
             trigger: hSection,
             start: "top top",
             end: "bottom bottom",
-            scrub: 0.65,
+            scrub: 0.72,
             invalidateOnRefresh: true,
             onUpdate: function (self) {
               if (hFillMobile) {
@@ -790,7 +995,9 @@
               if (hPrevBtn) hPrevBtn.disabled = self.progress <= 0.02;
               if (hNextBtn) hNextBtn.disabled = self.progress >= 0.98;
 
-              var skew = Math.max(-3.5, Math.min(3.5, -(self.getVelocity() / 520)));
+              updateCenterCard(self.progress);
+
+              var skew = Math.max(-3, Math.min(3, -(self.getVelocity() / 560)));
               cardSkewSetters.forEach(function (set) {
                 set(skew);
               });
@@ -799,135 +1006,174 @@
                 cardSkewSetters.forEach(function (set) {
                   set(0);
                 });
-              }, 130);
-            }
-          }
+              }, 140);
+            },
+          },
         }
       );
 
       if (hImages.length) {
         gsap.fromTo(
           hImages,
-          { xPercent: -6 },
+          { xPercent: -9 },
           {
-            xPercent: 6,
+            xPercent: 9,
             ease: "none",
             scrollTrigger: {
               trigger: hSection,
               start: "top top",
               end: "bottom bottom",
-              scrub: 0.65,
-              invalidateOnRefresh: true
-            }
+              scrub: 0.72,
+              invalidateOnRefresh: true,
+            },
           }
         );
       }
-    }
 
-    /* Fine-Pointer Interactive Magic */
-    if (isFinePointer) {
-      /* Desktop Pointer Hairline Spotlight on Architectural Cards (Zero Mobile Cost) */
-      document
-        .querySelectorAll(".metric-item, .event-card, .value-col, .sdg-col, .editorial-card")
-        .forEach(function (card) {
-          card.setAttribute("data-spotlight", "");
-          card.addEventListener("pointermove", function (e) {
-            var rect = card.getBoundingClientRect();
-            if (!rect.width || !rect.height) return;
-            var x = e.clientX - rect.left;
-            var y = e.clientY - rect.top;
-            card.style.setProperty("--mx", x.toFixed(1) + "px");
-            card.style.setProperty("--my", y.toFixed(1) + "px");
-          });
-        });
+      /* Contextual Cursor Pill over Horizontal Exhibition Cards (pointer: fine only) */
+      if (isFinePointer && cursorPill) {
+        var pillX = gsap.quickTo(cursorPill, "x", { duration: 0.22, ease: "power3.out" });
+        var pillY = gsap.quickTo(cursorPill, "y", { duration: 0.22, ease: "power3.out" });
 
-      /* Optical Glass Specular Glare + Pronounced 3D Perspective Tilt on Photo Plates */
-      document
-        .querySelectorAll(".plate-media, .event-card-media, .horizontal-frame")
-        .forEach(function (plate) {
-          var rX = gsap.quickTo(plate, "rotateX", { duration: 0.28, ease: "power3.out" });
-          var rY = gsap.quickTo(plate, "rotateY", { duration: 0.28, ease: "power3.out" });
-          gsap.set(plate, { transformPerspective: 900 });
-
-          plate.addEventListener("pointerenter", function () {
-            plate.style.setProperty("--glare-opacity", "1");
-          });
-
-          plate.addEventListener("pointermove", function (e) {
-            var rect = plate.getBoundingClientRect();
-            if (!rect.width || !rect.height) return;
-            var xPct = ((e.clientX - rect.left) / rect.width) * 100;
-            var yPct = ((e.clientY - rect.top) / rect.height) * 100;
-            plate.style.setProperty("--glare-x", xPct.toFixed(1) + "%");
-            plate.style.setProperty("--glare-y", yPct.toFixed(1) + "%");
-            rY(((xPct - 50) / 50) * 5.5);
-            rX(((50 - yPct) / 50) * 5.5);
-          });
-
-          plate.addEventListener("pointerleave", function () {
-            plate.style.setProperty("--glare-opacity", "0");
-            rX(0);
-            rY(0);
-          });
-        });
-
-      /* Floating Spring Photo Preview on Blueprint Rows */
-      var floatBox = document.getElementById("float-preview");
-      var floatImg = document.getElementById("float-preview-img");
-      if (floatBox && floatImg) {
-        var fx = gsap.quickTo(floatBox, "x", { duration: 0.32, ease: "power3.out" });
-        var fy = gsap.quickTo(floatBox, "y", { duration: 0.32, ease: "power3.out" });
-        var frot = gsap.quickTo(floatBox, "rotation", { duration: 0.4, ease: "power3.out" });
-        var lastX = 0;
-
-        document.querySelectorAll("[data-hover-photo]").forEach(function (row) {
-          row.addEventListener("pointerenter", function (e) {
-            var src = row.getAttribute("data-hover-photo");
-            var alt = row.getAttribute("data-hover-alt") || "";
-            if (src && floatImg.getAttribute("src") !== src) {
-              floatImg.src = src;
-              floatImg.alt = alt;
+        hCards.forEach(function (card, idx) {
+          card.addEventListener("pointerenter", function (e) {
+            var lang = document.documentElement.getAttribute("data-lang") || "vi";
+            var prefix = lang === "en" ? "VIEW" : "XEM ẢNH";
+            var badgeIdx =
+              card.getAttribute("data-card-index") ||
+              (idx + 1 < 10 ? "0" + (idx + 1) : String(idx + 1)) +
+                " / " +
+                (totalDeskCards < 10 ? "0" + totalDeskCards : String(totalDeskCards));
+            if (cursorPillText) {
+              cursorPillText.textContent = prefix + " · " + badgeIdx;
             }
-            lastX = e.clientX;
-            fx(e.clientX + 26);
-            fy(e.clientY - 120);
-            floatBox.classList.add("is-visible");
-            gsap.to(floatBox, { scale: 1, duration: 0.32, ease: "power3.out" });
+            pillX(e.clientX + 16);
+            pillY(e.clientY + 16);
+            cursorPill.classList.add("is-visible");
           });
 
-          row.addEventListener("pointermove", function (e) {
-            var dx = e.clientX - lastX;
-            lastX = e.clientX;
-            var tilt = Math.max(-4.5, Math.min(4.5, dx * 0.3));
-            fx(e.clientX + 26);
-            fy(e.clientY - 120);
-            frot(tilt);
+          card.addEventListener("pointermove", function (e) {
+            pillX(e.clientX + 16);
+            pillY(e.clientY + 16);
           });
 
-          row.addEventListener("pointerleave", function () {
-            floatBox.classList.remove("is-visible");
-            frot(0);
-            gsap.to(floatBox, { scale: 0.86, duration: 0.22, ease: "power2.out" });
+          card.addEventListener("pointerleave", function () {
+            cursorPill.classList.remove("is-visible");
           });
         });
       }
 
-      /* Elastic Feather-Light Magnetic Pull on Primary CTA Buttons */
-      document.querySelectorAll("[data-magnetic]").forEach(function (btn) {
-        btn.addEventListener("mousemove", function (e) {
-          var rect = btn.getBoundingClientRect();
-          var x = (e.clientX - rect.left - rect.width / 2) * 0.22;
-          var y = (e.clientY - rect.top - rect.height / 2) * 0.22;
-          gsap.to(btn, { x: x, y: y, duration: 0.24, ease: "power3.out" });
-        });
-        btn.addEventListener("mouseleave", function () {
-          gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.55)" });
-        });
-      });
+      return function () {
+        ScrollTrigger.removeEventListener("refreshInit", syncRunwayHeight);
+        hSection.style.height = "";
+      };
     }
   });
 
-  /* Recalculate ScrollTrigger geometry cleanly once Be Vietnam Pro & Lora finish loading */
+  mm.add("(min-width: 1024px)", function () {
+    if (!isFinePointer) return;
+
+    /* Desktop Pointer Hairline Spotlight on Architectural Cards */
+    document
+      .querySelectorAll(".metric-item, .event-card, .value-col, .sdg-col, .editorial-card")
+      .forEach(function (card) {
+        card.setAttribute("data-spotlight", "");
+        card.addEventListener("pointermove", function (e) {
+          var rect = card.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+          var x = e.clientX - rect.left;
+          var y = e.clientY - rect.top;
+          card.style.setProperty("--mx", x.toFixed(1) + "px");
+          card.style.setProperty("--my", y.toFixed(1) + "px");
+        });
+      });
+
+    /* Optical Specular Glare + Subtle 3D Perspective Tilt on Photo Plates & Hola Member Pass */
+    document
+      .querySelectorAll(".plate-media, .event-card-media, .horizontal-frame, [data-sunrise-pass], [data-ws-pass]")
+      .forEach(function (plate) {
+        var maxDeg = plate.hasAttribute("data-sunrise-pass") || plate.hasAttribute("data-ws-pass") ? 6.5 : 4.5;
+        var rX = gsap.quickTo(plate, "rotateX", { duration: 0.32, ease: "power3.out" });
+        var rY = gsap.quickTo(plate, "rotateY", { duration: 0.32, ease: "power3.out" });
+        gsap.set(plate, { transformPerspective: 960 });
+
+        plate.addEventListener("pointerenter", function () {
+          plate.style.setProperty("--glare-opacity", "1");
+        });
+
+        plate.addEventListener("pointermove", function (e) {
+          var rect = plate.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+          var xPct = ((e.clientX - rect.left) / rect.width) * 100;
+          var yPct = ((e.clientY - rect.top) / rect.height) * 100;
+          plate.style.setProperty("--glare-x", xPct.toFixed(1) + "%");
+          plate.style.setProperty("--glare-y", yPct.toFixed(1) + "%");
+          rY(((xPct - 50) / 50) * maxDeg);
+          rX(((50 - yPct) / 50) * maxDeg);
+        });
+
+        plate.addEventListener("pointerleave", function () {
+          plate.style.setProperty("--glare-opacity", "0");
+          rX(0);
+          rY(0);
+        });
+      });
+
+    /* Floating Spring Photo Preview on Past Gathering Rows */
+    var floatBox = document.getElementById("float-preview");
+    var floatImg = document.getElementById("float-preview-img");
+    if (floatBox && floatImg) {
+      var fx = gsap.quickTo(floatBox, "x", { duration: 0.32, ease: "power3.out" });
+      var fy = gsap.quickTo(floatBox, "y", { duration: 0.32, ease: "power3.out" });
+      var frot = gsap.quickTo(floatBox, "rotation", { duration: 0.4, ease: "power3.out" });
+      var lastX = 0;
+
+      document.querySelectorAll("[data-hover-photo]").forEach(function (row) {
+        row.addEventListener("pointerenter", function (e) {
+          var src = row.getAttribute("data-hover-photo");
+          var alt = row.getAttribute("data-hover-alt") || "";
+          if (src && floatImg.getAttribute("src") !== src) {
+            floatImg.src = src;
+            floatImg.alt = alt;
+          }
+          lastX = e.clientX;
+          fx(e.clientX + 26);
+          fy(e.clientY - 120);
+          floatBox.classList.add("is-visible");
+          gsap.to(floatBox, { scale: 1, duration: 0.32, ease: "power3.out" });
+        });
+
+        row.addEventListener("pointermove", function (e) {
+          var dx = e.clientX - lastX;
+          lastX = e.clientX;
+          var tilt = Math.max(-4.5, Math.min(4.5, dx * 0.3));
+          fx(e.clientX + 26);
+          fy(e.clientY - 120);
+          frot(tilt);
+        });
+
+        row.addEventListener("pointerleave", function () {
+          floatBox.classList.remove("is-visible");
+          frot(0);
+          gsap.to(floatBox, { scale: 0.86, duration: 0.22, ease: "power2.out" });
+        });
+      });
+    }
+
+    /* Tactile Feather-Light Magnetic Pull on Primary CTA Buttons */
+    document.querySelectorAll("[data-magnetic]").forEach(function (btn) {
+      btn.addEventListener("mousemove", function (e) {
+        var rect = btn.getBoundingClientRect();
+        var x = Math.max(-9, Math.min(9, (e.clientX - rect.left - rect.width / 2) * 0.22));
+        var y = Math.max(-7, Math.min(7, (e.clientY - rect.top - rect.height / 2) * 0.22));
+        gsap.to(btn, { x: x, y: y, duration: 0.24, ease: "power3.out" });
+      });
+      btn.addEventListener("mouseleave", function () {
+        gsap.to(btn, { x: 0, y: 0, duration: 0.46, ease: "power3.out" });
+      });
+    });
+  });
+
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(function () {
       ScrollTrigger.refresh();

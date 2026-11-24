@@ -4,8 +4,14 @@
  */
 
 export const SESSION_COOKIE_NAME = "holarise_session";
-const SESSION_TTL_SECONDS = 60 * 60 * 24 * 14; // 14 days
+export const MEMBER_SESSION_COOKIE_NAME = "holarise_member_session";
+export const READER_ID_COOKIE_NAME = "holarise_reader_id";
+
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 14; // 14 days (Admin/Media)
+const MEMBER_SESSION_TTL_SECONDS = 60 * 60 * 24 * 60; // 60 days (Community Member)
+const READER_ID_TTL_SECONDS = 60 * 60 * 24 * 365; // 365 days (Heart reaction actor)
 const PBKDF2_ITERATIONS = 100000;
+const MEMBER_CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 
 const enc = new TextEncoder();
 
@@ -258,6 +264,134 @@ export async function requireAdmin(
     return { ok: false, response: errorResponse(403, "FORBIDDEN", msg) };
   }
   return { ok: true, user };
+}
+
+export function generateMemberCode(year = 2026) {
+  const bytes = new Uint8Array(4);
+  crypto.getRandomValues(bytes);
+  let suffix = "";
+  for (let i = 0; i < 4; i++) {
+    suffix += MEMBER_CODE_ALPHABET[bytes[i] % MEMBER_CODE_ALPHABET.length];
+  }
+  return `HOLA-${year}-${suffix}`;
+}
+
+export function buildMemberSessionCookie(token, request, clear = false) {
+  const isHttps = new URL(request.url).protocol === "https:";
+  const attrs = [
+    `${MEMBER_SESSION_COOKIE_NAME}=${clear ? "" : encodeURIComponent(token)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    clear ? "Max-Age=0" : `Max-Age=${MEMBER_SESSION_TTL_SECONDS}`,
+  ];
+  if (isHttps) attrs.push("Secure");
+  return attrs.join("; ");
+}
+
+export function buildReaderIdCookie(readerId, request) {
+  const isHttps = new URL(request.url).protocol === "https:";
+  const attrs = [
+    `${READER_ID_COOKIE_NAME}=${encodeURIComponent(readerId)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${READER_ID_TTL_SECONDS}`,
+  ];
+  if (isHttps) attrs.push("Secure");
+  return attrs.join("; ");
+}
+
+export function serializePublicMember(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    memberCode: row.member_code,
+    name: row.name,
+    email: row.email || "",
+    phoneDisplay: row.phone_display || "",
+    organization: row.organization || "",
+    pillarChoice: row.pillar_choice || "holaheart",
+    avatarUrl: row.avatar_url || "",
+    isActive: Number(row.is_active ?? 1) === 1,
+    createdAt: row.created_at,
+    lastLoginAt: row.last_login_at || null,
+  };
+}
+
+export async function createMemberSession(db, memberId) {
+  const rawToken = randomTokenHex(32);
+  const hashedId = await sha256Hex(rawToken);
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + MEMBER_SESSION_TTL_SECONDS * 1000).toISOString();
+  await db
+    .prepare("INSERT INTO member_sessions (id, member_id, expires_at, created_at) VALUES (?, ?, ?, ?)")
+    .bind(hashedId, memberId, expiresAt, now.toISOString())
+    .run();
+  return { rawToken, expiresAt };
+}
+
+export async function getSessionMember(db, request) {
+  if (!db) return null;
+  const cookies = parseCookies(request);
+  const rawToken = cookies[MEMBER_SESSION_COOKIE_NAME];
+  if (!rawToken) return null;
+  const hashedId = await sha256Hex(rawToken);
+  const nowIso = new Date().toISOString();
+  try {
+    const row = await db
+      .prepare(
+        `SELECT m.id, m.member_code, m.email, m.phone_norm, m.phone_display, m.name,
+                m.organization, m.pillar_choice, m.avatar_url, m.avatar_media_key,
+                m.is_active, m.created_at, m.updated_at, m.last_login_at,
+                s.id AS session_id
+         FROM member_sessions s
+         JOIN members m ON m.id = s.member_id
+         WHERE s.id = ? AND s.expires_at > ? AND m.is_active = 1`
+      )
+      .bind(hashedId, nowIso)
+      .first();
+    return row || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function requireMember(context) {
+  const { request, env } = context;
+  if (!env?.DB) {
+    return { ok: false, response: errorResponse(503, "DB_UNAVAILABLE", "Cơ sở dữ liệu D1 chưa được kết nối.") };
+  }
+  if (!verifyCsrfOrigin(request)) {
+    return { ok: false, response: errorResponse(403, "CSRF_BLOCKED", "Nguồn yêu cầu không hợp lệ (CSRF guard).") };
+  }
+  const member = await getSessionMember(env.DB, request);
+  if (!member) {
+    return {
+      ok: false,
+      response: errorResponse(401, "MEMBER_UNAUTHORIZED", "Vui lòng đăng nhập tài khoản Thành viên Hola để tiếp tục."),
+    };
+  }
+  return { ok: true, member };
+}
+
+export async function resolveHeartActor(context) {
+  const { request, env } = context;
+  const member = env?.DB ? await getSessionMember(env.DB, request) : null;
+  if (member) {
+    return { actorKey: `mbr:${member.id}`, setCookie: null, isNewReader: false };
+  }
+  const cookies = parseCookies(request);
+  const existing = String(cookies[READER_ID_COOKIE_NAME] || "").trim();
+  if (/^[a-f0-9]{24,64}$/.test(existing)) {
+    return { actorKey: `rdr:${existing}`, setCookie: null, isNewReader: false };
+  }
+  const fresh = randomTokenHex(16);
+  return {
+    actorKey: `rdr:${fresh}`,
+    setCookie: buildReaderIdCookie(fresh, request),
+    isNewReader: true,
+  };
 }
 
 /**

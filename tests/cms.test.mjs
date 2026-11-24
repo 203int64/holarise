@@ -955,10 +955,10 @@ test("Partners CMS API & SSR strip injection on Home and About", async () => {
   });
   const cookie = extractSessionCookie(boot);
 
-  // Initially empty -> Home & About hide partners strip
+  // Initially unconfigured in D1 -> Home preserves static partners fallback from dist/, About has no partners strip
   const home0 = await (await ssrHome({ request: makeReq("/"), env })).text();
   const about0 = await (await ssrAbout({ request: makeReq("/gioi-thieu/"), env })).text();
-  assert.ok(!home0.includes('id="doi-tac"'));
+  assert.ok(home0.includes('id="doi-tac"'));
   assert.ok(!about0.includes('id="doi-tac"'));
 
   // Reject unsafe javascript: website URL
@@ -972,6 +972,19 @@ test("Partners CMS API & SSR strip injection on Home and About", async () => {
   });
   assert.equal(badRes.status, 400);
 
+  // Explicitly saving empty list in CMS hides partners strip on Home
+  const emptyRes = await partnersPut({
+    request: makeReq("/api/admin/partners", {
+      method: "PUT",
+      cookie,
+      body: { items: [] },
+    }),
+    env,
+  });
+  assert.equal(emptyRes.status, 200);
+  const homeEmpty = await (await ssrHome({ request: makeReq("/"), env })).text();
+  assert.ok(!homeEmpty.includes('id="doi-tac"'));
+
   // Save 1 active + 1 inactive partner
   const putRes = await partnersPut({
     request: makeReq("/api/admin/partners", {
@@ -979,7 +992,7 @@ test("Partners CMS API & SSR strip injection on Home and About", async () => {
       cookie,
       body: {
         items: [
-          { name: "MusicSpace", role: "Không gian Đồng hành", websiteUrl: "https://musicspace.edu.vn", isActive: true },
+          { name: "MusicSpace", role: "Không gian Đồng hành", logoUrl: "/assets/images/logo-musicspace.png", websiteUrl: "https://musicspace.edu.vn", isActive: true },
           { name: "Hidden Partner", role: "Nhà trường & CLB", isActive: false },
         ],
       },
@@ -990,11 +1003,111 @@ test("Partners CMS API & SSR strip injection on Home and About", async () => {
   const getList = await (await partnersGet({ request: makeReq("/api/admin/partners", { cookie }), env })).json();
   assert.equal(getList.items.length, 2);
 
-  // Active partner renders on Home & About; inactive stays hidden
+  // Active partner renders on Home; inactive stays hidden
   const home1 = await (await ssrHome({ request: makeReq("/"), env })).text();
-  const about1 = await (await ssrAbout({ request: makeReq("/gioi-thieu/"), env })).text();
   assert.ok(home1.includes("MusicSpace"));
+  assert.ok(home1.includes("https://musicspace.edu.vn"));
   assert.ok(!home1.includes("Hidden Partner"));
-  assert.ok(about1.includes("MusicSpace"));
-  assert.ok(!about1.includes("Hidden Partner"));
+});
+
+test("Workshop 'Cuộc Đời Của Cha' migration 0005, SSR links, sitemap & seat reservation flow", async () => {
+  const db = new DatabaseSync(":memory:");
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0001_init.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0002_seed.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0004_holaheart_first_event.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0005_cuoc_doi_cua_cha_event.sql"), "utf8"));
+  // Re-run 0005 to verify strict idempotency
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0005_cuoc_doi_cua_cha_event.sql"), "utf8"));
+
+  class Stmt {
+    constructor(sql, bound = []) {
+      this.sql = sql;
+      this.bound = bound;
+    }
+    bind(...args) {
+      return new Stmt(this.sql, args);
+    }
+    async first() {
+      return db.prepare(this.sql).get(...this.bound) ?? null;
+    }
+    async all() {
+      return { results: db.prepare(this.sql).all(...this.bound) };
+    }
+    async run() {
+      const info = db.prepare(this.sql).run(...this.bound);
+      return { success: true, meta: { changes: Number(info.changes || 0) } };
+    }
+  }
+  const d1 = { prepare: (sql) => new Stmt(sql) };
+  const assets = {
+    async fetch(req) {
+      const p = new URL(req.url).pathname.replace(/^\/+/, "");
+      const filePath = path.join(ROOT, "dist", p);
+      if (!fs.existsSync(filePath)) return new Response("Not Found", { status: 404 });
+      return new Response(fs.readFileSync(filePath, "utf8"), {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    },
+  };
+  const env = { DB: d1, ASSETS: assets };
+
+  // 1. Placeholder Sunday event is draft; "Cuộc Đời Của Cha" is #1 on Home, Schedule & Join
+  const homeHtml = await (await ssrHome({ request: makeReq("/"), env })).text();
+  assert.ok(homeHtml.includes("Cuộc Đời Của Cha"));
+  assert.ok(homeHtml.includes('href="/su-kien/cuoc-doi-cua-cha/"'));
+  assert.ok(homeHtml.includes('data-event-href="/su-kien/cuoc-doi-cua-cha/"'));
+  assert.ok(!homeHtml.includes("Người trẻ cùng ngồi lại"));
+  assert.ok(homeHtml.includes("Chiều Leo Núi"));
+
+  const schedHtml = await (await ssrSchedule({ request: makeReq("/lich-hoat-dong/"), env })).text();
+  assert.ok(schedHtml.includes("Cuộc Đời Của Cha"));
+  assert.ok(schedHtml.includes("19:15"));
+  assert.ok(schedHtml.includes("Quán Cafe Mây Lang Thang, Hòa Lạc"));
+  assert.ok(!schedHtml.includes("Người trẻ cùng ngồi lại"));
+
+  const joinHtml = await (await ssrJoin({ request: makeReq("/tham-gia/"), env })).text();
+  assert.ok(joinHtml.includes('id="join-ev-holaheart-cuoc-doi-cua-cha-2026-11-29"'));
+
+  // 2. Sitemap SSR includes dedicated invitation URL
+  const smXml = await (await ssrSitemap({ request: makeReq("/sitemap.xml"), env })).text();
+  assert.ok(smXml.includes("https://holarise.org/su-kien/cuoc-doi-cua-cha/"));
+
+  // 3. Dedicated static page exists in dist/ with custom OG 1200x630 & Event JSON-LD
+  const inviteStaticPath = path.join(ROOT, "dist/su-kien/cuoc-doi-cua-cha/index.html");
+  assert.ok(fs.existsSync(inviteStaticPath), "Static /su-kien/cuoc-doi-cua-cha/index.html must exist");
+  const inviteHtml = fs.readFileSync(inviteStaticPath, "utf8");
+  assert.ok(inviteHtml.includes("https://holarise.org/assets/images/events/cuoc-doi-cua-cha-og.jpg"));
+  assert.ok(inviteHtml.includes("Có những tình yêu chẳng bao giờ nói thành lời."));
+  assert.ok(inviteHtml.includes("2026-11-29T19:15:00+07:00"));
+
+  // 4. Seat reservation payload from Workshop Studio stores cleanly & returns seat confirmation
+  const regRes = await publicRegister({
+    request: makeReq("/api/registrations", {
+      method: "POST",
+      ip: "4.4.4.4",
+      body: {
+        source: "event_modal",
+        eventId: "holaheart-cuoc-doi-cua-cha-2026-11-29",
+        activity: 'Workshop "Cuộc Đời Của Cha"',
+        role: "Tham dự Workshop Cuộc Đời Của Cha",
+        fullName: "Nguyễn Hoàng Nam",
+        phone: "0988 123 456",
+        email: "nam.nh@fpt.edu.vn",
+        organization: "ĐH FPT",
+        note: "[Số chỗ: Đi cùng 1 bạn (2 chỗ) | Tâm sự về Cha: Cho phép đọc ẩn danh | Rủ bởi: Minh Anh] Con cảm ơn Cha vì tất cả những năm tháng thầm lặng.",
+      },
+    }),
+    env,
+  });
+  assert.equal(regRes.status, 201);
+  const regJson = await regRes.json();
+  assert.ok(regJson.id.startsWith("REG-"));
+  assert.ok(regJson.message.includes("đã ghi nhận giữ chỗ"));
+  assert.ok(!regJson.message.includes("chưa phải xác nhận"));
+
+  const row = await d1.prepare("SELECT * FROM registrations WHERE id = ?").bind(regJson.id).first();
+  assert.equal(row.event_id, "holaheart-cuoc-doi-cua-cha-2026-11-29");
+  assert.ok(row.note.includes("Số chỗ: Đi cùng 1 bạn (2 chỗ)"));
+  assert.ok(row.note.includes("Tâm sự về Cha: Cho phép đọc ẩn danh"));
 });

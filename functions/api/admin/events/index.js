@@ -45,34 +45,71 @@ export async function onRequestPost(context) {
   const id = `${baseSlug}-${crypto.randomUUID().slice(0, 6)}`;
   const now = new Date().toISOString();
 
-  await context.env.DB.prepare(
-    `INSERT INTO events
-     (id, kind, type, filters_json, date, date_display, time, location, fee, seats, title, summary, highlights_json, participants, image, image_alt, status, sort_order, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  )
-    .bind(
-      id,
-      v.kind,
-      v.type,
-      JSON.stringify(v.filters),
-      v.date,
-      v.date_display,
-      v.time,
-      v.location,
-      v.fee,
-      v.seats,
-      v.title,
-      v.summary,
-      JSON.stringify(v.highlights),
-      v.participants,
-      v.image,
-      v.image_alt,
-      v.status,
-      v.sort_order,
-      now,
-      now
+  try {
+    await context.env.DB.prepare(
+      `INSERT INTO events
+       (id, kind, type, filters_json, date, date_display, time, location, fee, seats, title, title_en, summary, summary_en, highlights_json, participants, image, image_alt, status, sort_order, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-    .run();
+      .bind(
+        id,
+        v.kind,
+        v.type,
+        JSON.stringify(v.filters),
+        v.date,
+        v.date_display,
+        v.time,
+        v.location,
+        v.fee,
+        v.seats,
+        v.title,
+        v.title_en,
+        v.summary,
+        v.summary_en,
+        JSON.stringify(v.highlights),
+        v.participants,
+        v.image,
+        v.image_alt,
+        v.status,
+        v.sort_order,
+        now,
+        now
+      )
+      .run();
+  } catch (err) {
+    if (String(err?.message || "").includes("title_en")) {
+      await context.env.DB.prepare(
+        `INSERT INTO events
+         (id, kind, type, filters_json, date, date_display, time, location, fee, seats, title, summary, highlights_json, participants, image, image_alt, status, sort_order, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      )
+        .bind(
+          id,
+          v.kind,
+          v.type,
+          JSON.stringify(v.filters),
+          v.date,
+          v.date_display,
+          v.time,
+          v.location,
+          v.fee,
+          v.seats,
+          v.title,
+          v.summary,
+          JSON.stringify(v.highlights),
+          v.participants,
+          v.image,
+          v.image_alt,
+          v.status,
+          v.sort_order,
+          now,
+          now
+        )
+        .run();
+    } else {
+      throw err;
+    }
+  }
 
   const created = await context.env.DB.prepare("SELECT * FROM events WHERE id = ?").bind(id).first();
   return jsonResponse({ ok: true, item: serializeEventRow(created) }, 201);

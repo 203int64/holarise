@@ -1,0 +1,216 @@
+<section class="page-hero invite-hero">
+  <div class="container invite-narrow">
+    <nav class="breadcrumb" aria-label="Đường dẫn trang">
+      <a href="/">Trang chủ</a>
+      <span aria-hidden="true">/</span>
+      <a href="/lich-hoat-dong/">Lịch hoạt động</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Thư mời</span>
+    </nav>
+
+    <div class="kicker" style="margin-top: 18px;">HolaHeart · Thư mời tham dự</div>
+    <h1 class="invite-title">{{INVITE_HEADLINE}}</h1>
+
+    <div class="invite-meta-bar">
+      <div class="invite-meta-facts">
+        <time datetime="{{INVITE_START_ISO}}">{{INVITE_TIME_LABEL}}</time>
+        <span aria-hidden="true">·</span>
+        <span>{{INVITE_VENUE_NAME}}, Hòa Lạc</span>
+        <span aria-hidden="true">·</span>
+        <span>{{EVENT_FEE}}</span>
+      </div>
+      <div class="invite-meta-links">
+        <a href="#giu-cho">Giữ chỗ tham dự ↓</a>
+        <span aria-hidden="true">·</span>
+        <a href="{{GOOGLE_CAL_URL}}" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
+        <span aria-hidden="true">·</span>
+        <button class="invite-text-btn" type="button" data-ics-download="workshop" data-ics-title="{{EVENT_TITLE}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-ics-location="{{EVENT_LOCATION}}" data-ics-url="{{CANONICAL_EVENT_URL}}">Lưu lịch (.ics)</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section invite-letter-section" aria-label="Nội dung thư mời">
+  <div class="container invite-narrow">
+    <figure class="invite-poster-figure">
+      <button class="invite-poster-btn" type="button" aria-label="Xem ảnh lớn {{EVENT_TITLE}}" data-lightbox-src="{{EVENT_IMAGE}}" data-lightbox-alt="{{EVENT_IMAGE_ALT}}" data-lightbox-caption="{{EVENT_TITLE}} · {{INVITE_TIME_LABEL}} tại {{INVITE_VENUE_NAME}}">
+        <img src="{{EVENT_IMAGE}}" alt="{{EVENT_IMAGE_ALT}}" width="1024" height="576" fetchpriority="high" decoding="async">
+      </button>
+    </figure>
+
+    <article class="invite-prose">
+      {{LETTER_BODY_HTML}}
+
+      <div class="invite-signature">
+        <p class="invite-signoff">{{LETTER_SIGNOFF}}</p>
+        <p class="invite-host">HolaHeart · {{BRAND_SHORT_NAME}}</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section section--mist invite-rsvp-section" id="giu-cho" aria-labelledby="ws-form-heading">
+  <div class="container">
+    <div class="join-invite-banner" id="ws-invite-banner" hidden role="status" aria-live="polite">
+      <span class="join-invite-dot" aria-hidden="true"></span>
+      <p class="join-invite-text" id="ws-invite-text"></p>
+    </div>
+
+    <div class="invite-rsvp-grid">
+      <div class="invite-form-surface">
+        <div class="kicker">Xác nhận tham dự · {{EVENT_SEATS}}</div>
+        <h2 id="ws-form-heading" class="invite-rsvp-heading">Đăng ký giữ chỗ buổi tối 29/11</h2>
+        <p class="invite-rsvp-lead">Để lại thông tin để Ban Điều Phối sắp xếp chỗ ngồi ấm cúng tại {{INVITE_VENUE_NAME}} và gửi thiệp xác nhận mang tên bạn.</p>
+
+        <div class="modal-member-bar" id="ws-member-rsvp-bar" hidden>
+          <div class="modal-member-bar-copy">
+            <strong id="ws-member-bar-title">Đang dùng Thẻ Thành Viên Hola</strong>
+            <span id="ws-member-bar-sub">Thông tin đã điền sẵn — chỉ cần chọn số chỗ và xác nhận.</span>
+          </div>
+        </div>
+
+        <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="ws-form-heading" data-club-form data-father-studio data-draft-key="ws-cuoc-doi-cua-cha" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" data-event-url="{{CANONICAL_EVENT_URL}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" novalidate>
+          <input type="hidden" name="source" value="event_modal">
+          <input type="hidden" name="eventId" value="{{EVENT_ID}}">
+          <input type="hidden" name="activity" value="{{EVENT_TITLE}}">
+          <input type="hidden" name="role" value="Tham dự Workshop Cuộc Đời Của Cha">
+
+          <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
+            <label for="ws-website">Website</label>
+            <input id="ws-website" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
+          <p class="form-required-note">Các mục có dấu <span aria-hidden="true">*</span> là bắt buộc.</p>
+
+          <fieldset class="invite-fieldset">
+            <legend class="invite-legend">Số chỗ bạn muốn giữ <span aria-hidden="true">*</span></legend>
+            <div class="seat-segmented">
+              <div class="seat-seg-item">
+                <input class="visually-hidden" type="radio" name="seatCount" id="ws-seat-1" value="Đi 1 mình (1 chỗ)" data-seat-short="01 chỗ · Đi một mình" checked>
+                <label class="seat-seg-label" for="ws-seat-1">Đi 1 mình</label>
+              </div>
+              <div class="seat-seg-item">
+                <input class="visually-hidden" type="radio" name="seatCount" id="ws-seat-2" value="Đi cùng 1 bạn (2 chỗ)" data-seat-short="02 chỗ · Đi cùng bạn">
+                <label class="seat-seg-label" for="ws-seat-2">Đi cùng 1 bạn</label>
+              </div>
+              <div class="seat-seg-item">
+                <input class="visually-hidden" type="radio" name="seatCount" id="ws-seat-3" value="Nhóm 3+ người / Gia đình" data-seat-short="Nhóm 3+ chỗ">
+                <label class="seat-seg-label" for="ws-seat-3">Nhóm 3+ người</label>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="ws-name">Họ và tên <span aria-hidden="true">*</span></label>
+              <input id="ws-name" name="fullName" type="text" autocomplete="name" placeholder="Nguyễn Minh Khôi" required minlength="2" enterkeyhint="next" data-error="ws-name-error">
+              <div id="ws-name-error" class="field-error">
+                <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span data-error-text>Lỗi: Vui lòng nhập họ và tên của bạn (tối thiểu 2 ký tự).</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="ws-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
+              <input id="ws-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="next" data-error="ws-phone-error">
+              <div id="ws-phone-error" class="field-error">
+                <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span data-error-text>Lỗi: Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="ws-org">Trường / Đơn vị (không bắt buộc)</label>
+              <input id="ws-org" name="organization" type="text" autocomplete="organization" placeholder="ĐH FPT, ĐHQGHN, Đã đi làm..." enterkeyhint="next">
+            </div>
+            <div class="field">
+              <label for="ws-email">Email (không bắt buộc)</label>
+              <input id="ws-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" enterkeyhint="next" data-error="ws-email-error">
+              <div id="ws-email-error" class="field-error">
+                <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span data-error-text>Lỗi: Email chưa đúng định dạng (ví dụ: tenban@gmail.com), hoặc bạn có thể để trống.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field invite-story-field">
+            <label for="ws-father-note">Đôi dòng về Cha bạn muốn gửi trước buổi tối (không bắt buộc)</label>
+            <textarea id="ws-father-note" name="note" rows="3" maxlength="750" placeholder="Một điều bạn luôn muốn nói với Cha, hoặc để trống nếu bạn chỉ muốn đến ngồi lắng nghe..."></textarea>
+            <div class="invite-check-inline">
+              <input type="checkbox" id="ws-anon-share" name="anonShare" value="yes" checked>
+              <label for="ws-anon-share">Cho phép Ban Điều Phối đọc ẩn danh chia sẻ này trong chương trình</label>
+            </div>
+          </div>
+
+          <div class="form-status" role="status" aria-live="polite"></div>
+
+          <div class="form-submit-stack">
+            <div class="form-submit-row">
+              <button class="btn btn--primary" type="submit" id="ws-submit-btn">Xác nhận giữ chỗ tham dự</button>
+              <a class="btn btn--outline" href="{{CONTACT_ZALO}}" target="_blank" rel="noopener noreferrer">Nhắn Zalo BTC ↗</a>
+            </div>
+            <p class="form-privacy-note">{{EVENT_FEE}}. Thông tin đăng ký được bảo mật theo <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a>.</p>
+          </div>
+        </form>
+      </div>
+
+      <aside class="invite-card-col" aria-label="Thiệp xác nhận giữ chỗ">
+        <article class="invite-ticket" data-ws-pass aria-label="Thiệp mời Workshop Cuộc Đời Của Cha">
+          <div class="invite-ticket-photo">
+            <img src="{{EVENT_IMAGE}}" alt="{{EVENT_IMAGE_ALT}}" width="640" height="360" loading="lazy" decoding="async">
+          </div>
+
+          <div class="invite-ticket-body">
+            <div class="invite-ticket-top">
+              <span class="invite-ticket-kicker">HolaHeart · Thiệp mời</span>
+              <span class="invite-ticket-status" data-ws-pass-state>Chờ xác nhận</span>
+            </div>
+
+            <p class="invite-ticket-guest-label">Kính mời</p>
+            <div class="invite-ticket-guest" data-ws-pass-name>Tên người tham dự</div>
+            <div class="invite-ticket-org" data-ws-pass-org>Hòa Lạc</div>
+
+            <div class="invite-ticket-rule" aria-hidden="true"></div>
+
+            <dl class="invite-ticket-dl">
+              <div>
+                <dt>Thời gian</dt>
+                <dd>19h15 · CN 29/11/2026</dd>
+              </div>
+              <div>
+                <dt>Địa điểm</dt>
+                <dd>{{INVITE_VENUE_NAME}}</dd>
+              </div>
+              <div>
+                <dt>Số chỗ</dt>
+                <dd data-ws-pass-seats>01 chỗ · Đi một mình</dd>
+              </div>
+              <div>
+                <dt>Mã giữ chỗ</dt>
+                <dd class="invite-ticket-code" data-ws-pass-code>—</dd>
+              </div>
+            </dl>
+          </div>
+        </article>
+
+        <div class="invite-ticket-actions" id="ws-pass-actions" hidden>
+          <p class="invite-actions-note">Đã ghi nhận giữ chỗ. Bạn có thể lưu thiệp ảnh về máy hoặc gửi link mời bạn bè đi cùng.</p>
+          <span id="ws-pass-invite-text" class="visually-hidden"></span>
+          <div class="pass-actions-buttons">
+            <button type="button" class="btn btn--primary btn--sm" data-pass-download="workshop">Tải thiệp mời (PNG)</button>
+            <button type="button" class="btn btn--outline btn--sm" data-ics-download="workshop" data-ics-title="{{EVENT_TITLE}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-ics-location="{{EVENT_LOCATION}}" data-ics-url="{{CANONICAL_EVENT_URL}}">Lưu lịch (.ics)</button>
+            <button type="button" class="btn btn--outline btn--sm" data-pass-share="workshop">Gửi lời mời</button>
+            <span class="copy-control">
+              <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="ws-pass-invite-text" data-copy-invite>
+                <span>Sao chép link</span>
+              </button>
+              <span class="copy-tip" role="status"></span>
+            </span>
+          </div>
+          <button type="button" class="pass-reset-link" data-pass-new="workshop">Giữ chỗ thêm cho một người bạn</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>

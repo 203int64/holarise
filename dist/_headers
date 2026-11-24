@@ -33,6 +33,9 @@
 /lich-hoat-dong/*
   Cache-Control: public, max-age=0, must-revalidate
 
+/su-kien/*
+  Cache-Control: public, max-age=0, must-revalidate
+
 /hanh-trinh/*
   Cache-Control: public, max-age=0, must-revalidate
 

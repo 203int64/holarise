@@ -1,0 +1,600 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
+
+import { parseMemberIdentifier, validateReflectionInput } from "../functions/_lib/validation.js";
+import { onRequestPost as authBootstrap } from "../functions/api/auth/bootstrap.js";
+import { onRequestPost as memberRegister } from "../functions/api/member/auth/register.js";
+import { onRequestPost as memberLogin } from "../functions/api/member/auth/login.js";
+import { onRequestPost as memberLogout } from "../functions/api/member/auth/logout.js";
+import { onRequestGet as memberStatus } from "../functions/api/member/auth/status.js";
+import { onRequestGet as memberDashboard } from "../functions/api/member/dashboard.js";
+import { onRequestPatch as memberProfilePatch } from "../functions/api/member/profile.js";
+import { onRequestPost as memberMediaUpload } from "../functions/api/member/media.js";
+import { onRequestPost as publicRegister } from "../functions/api/registrations.js";
+import {
+  onRequestGet as reflectionsGet,
+  onRequestPost as reflectionsCreate,
+} from "../functions/api/reflections/index.js";
+import {
+  onRequestPatch as reflectionPatch,
+  onRequestDelete as reflectionDelete,
+} from "../functions/api/reflections/[id].js";
+import { onRequestPost as reflectionHeart } from "../functions/api/reflections/[id]/heart.js";
+import { onRequestGet as adminReflectionsList } from "../functions/api/admin/reflections/index.js";
+import {
+  onRequestPatch as adminReflectionPatch,
+  onRequestDelete as adminReflectionDelete,
+} from "../functions/api/admin/reflections/[id].js";
+import { onRequestGet as adminMembersList } from "../functions/api/admin/members/index.js";
+import {
+  onRequestPatch as adminMemberPatch,
+  onRequestDelete as adminMemberDelete,
+} from "../functions/api/admin/members/[id].js";
+import {
+  onRequestGet as adminVisualsGet,
+  onRequestPut as adminVisualsPut,
+} from "../functions/api/admin/visuals.js";
+
+const ROOT = path.resolve(new URL("..", import.meta.url).pathname);
+
+function createFullMockD1() {
+  const db = new DatabaseSync(":memory:");
+  for (const file of [
+    "migrations/0001_init.sql",
+    "migrations/0002_seed.sql",
+    "migrations/0003_media_portal.sql",
+    "migrations/0004_holaheart_first_event.sql",
+    "migrations/0005_cuoc_doi_cua_cha_event.sql",
+    "migrations/0006_member_auth_and_reflections.sql",
+  ]) {
+    db.exec(fs.readFileSync(path.join(ROOT, file), "utf8"));
+  }
+
+  class Stmt {
+    constructor(sql, bound = []) {
+      this.sql = sql;
+      this.bound = bound;
+    }
+    bind(...args) {
+      return new Stmt(this.sql, args);
+    }
+    async first() {
+      return db.prepare(this.sql).get(...this.bound) ?? null;
+    }
+    async all() {
+      return { results: db.prepare(this.sql).all(...this.bound) };
+    }
+    async run() {
+      const info = db.prepare(this.sql).run(...this.bound);
+      return { success: true, meta: { changes: Number(info.changes || 0) } };
+    }
+  }
+
+  return {
+    rawDb: db,
+    prepare(sql) {
+      return new Stmt(sql);
+    },
+    async batch(stmts) {
+      const out = [];
+      db.exec("BEGIN");
+      try {
+        for (const st of stmts) {
+          out.push(await st.run());
+        }
+        db.exec("COMMIT");
+      } catch (e) {
+        db.exec("ROLLBACK");
+        throw e;
+      }
+      return out;
+    },
+  };
+}
+
+function createMockKV() {
+  const store = new Map();
+  return {
+    store,
+    async put(key, value, opts = {}) {
+      const buf = value instanceof ArrayBuffer ? new Uint8Array(value.slice(0)) : new Uint8Array(value);
+      store.set(key, { value: buf.buffer, metadata: opts.metadata || null });
+    },
+    async getWithMetadata(key) {
+      const hit = store.get(key);
+      return hit ? { value: hit.value, metadata: hit.metadata } : { value: null, metadata: null };
+    },
+    async delete(key) {
+      store.delete(key);
+    },
+  };
+}
+
+function makeReq(
+  urlPath,
+  { method = "GET", body, cookie, origin = "https://holarise.org", ip = "10.0.0.1", headers = {} } = {}
+) {
+  const h = new Headers({
+    Origin: origin,
+    "CF-Connecting-IP": ip,
+    ...headers,
+  });
+  if (cookie) h.set("Cookie", cookie);
+  let payload;
+  if (body !== undefined && !(body instanceof FormData) && !(body instanceof Uint8Array)) {
+    h.set("Content-Type", "application/json");
+    payload = JSON.stringify(body);
+  } else {
+    payload = body;
+  }
+  return new Request(`https://holarise.org${urlPath}`, { method, headers: h, body: payload });
+}
+
+function extractCookie(res, name) {
+  const setCookie = res.headers.get("Set-Cookie") || "";
+  const re = new RegExp(`${name}=([^;]+)`);
+  const m = setCookie.match(re);
+  return m ? `${name}=${m[1]}` : "";
+}
+
+const VALID_PNG_BYTES = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+]);
+
+test("Migration 0006 cleans seeded AI album/photos in D1 & parses Email/Phone smart identifier", async () => {
+  const DB = createFullMockD1();
+  const seededAlbum = await DB.prepare("SELECT status FROM media_albums WHERE id = 'album-khoanh-khac-hoa-lac'").first();
+  assert.equal(seededAlbum.status, "draft");
+
+  const featuredSeeds = await DB.prepare("SELECT COUNT(*) AS cnt FROM media_photos WHERE is_featured_home = 1").first();
+  assert.equal(Number(featuredSeeds.cnt), 0);
+
+  const fatherEvent = await DB.prepare("SELECT title_en FROM events WHERE id = 'holaheart-cuoc-doi-cua-cha-2026-11-29'").first();
+  assert.ok(fatherEvent.title_en.includes("Father"));
+
+  const pPhone = parseMemberIdentifier("+84 912.345.678");
+  assert.equal(pPhone.ok, true);
+  assert.equal(pPhone.kind, "phone");
+  assert.equal(pPhone.phoneNorm, "0912345678");
+
+  const pEmail = parseMemberIdentifier("  MinhAnh@FPT.edu.vn ");
+  assert.equal(pEmail.ok, true);
+  assert.equal(pEmail.kind, "email");
+  assert.equal(pEmail.email, "minhanh@fpt.edu.vn");
+
+  const badRef = validateReflectionInput({ activitySlug: "test", content: "Quá ngắn" });
+  assert.equal(badRef.ok, false);
+});
+
+test("Unified Member Auth (Email & Phone), Strict Admin Isolation, Avatar Upload & 1-Tap Event Booking", async () => {
+  const DB = createFullMockD1();
+  const MEDIA_KV = createMockKV();
+  const env = { DB, MEDIA_KV };
+
+  // Bootstrap admin
+  const bootRes = await authBootstrap({
+    request: makeReq("/api/auth/bootstrap", {
+      method: "POST",
+      body: { email: "admin@holarise.org", name: "Admin Hola", password: "AdminStrongPassword123!" },
+    }),
+    env,
+  });
+  assert.equal(bootRes.status, 201);
+  const adminCookie = extractCookie(bootRes, "holarise_session");
+  assert.ok(adminCookie.startsWith("holarise_session="));
+
+  // Register Member #1 using Email + autoRegisterEvent in a single 10s step!
+  const regRes = await memberRegister({
+    request: makeReq("/api/member/auth/register", {
+      method: "POST",
+      ip: "10.0.0.2",
+      body: {
+        name: "Nguyễn Minh Anh",
+        identifier: "MinhAnh@fpt.edu.vn",
+        password: "holaPassword123",
+        organization: "ĐH FPT Hòa Lạc",
+        pillarChoice: "holaheart",
+        autoRegisterEvent: {
+          eventId: "holaheart-cuoc-doi-cua-cha-2026-11-29",
+          activityTitle: 'Workshop "Cuộc Đời Của Cha"',
+          note: "Đi 1 mình",
+        },
+      },
+    }),
+    env,
+  });
+  assert.equal(regRes.status, 201);
+  const regBody = await regRes.json();
+  assert.equal(regBody.ok, true);
+  assert.match(regBody.member.memberCode, /^HOLA-2026-[A-Z0-9]{4}$/);
+  assert.ok(regBody.autoRegistration?.id);
+  const member1Cookie = extractCookie(regRes, "holarise_member_session");
+  assert.ok(member1Cookie.startsWith("holarise_member_session="));
+
+  // Member session MUST be rejected (401) by /api/admin/* endpoints!
+  const forbiddenAdmin = await adminMembersList({
+    request: makeReq("/api/admin/members", { cookie: member1Cookie }),
+    env,
+  });
+  assert.equal(forbiddenAdmin.status, 401);
+
+  // Admin session MUST NOT authenticate as a community member!
+  const statusWithAdminCookie = await memberStatus({
+    request: makeReq("/api/member/auth/status", { cookie: adminCookie }),
+    env,
+  });
+  const statusAdminJson = await statusWithAdminCookie.json();
+  assert.equal(statusAdminJson.authenticated, false);
+
+  // Duplicate Email registration rejected cleanly with 409
+  const dupRes = await memberRegister({
+    request: makeReq("/api/member/auth/register", {
+      method: "POST",
+      ip: "10.0.0.3",
+      body: { name: "Người Khác", identifier: "minhanh@fpt.edu.vn", password: "holaPassword123" },
+    }),
+    env,
+  });
+  assert.equal(dupRes.status, 409);
+
+  // Register Member #2 using Phone number (+84 format) and login using 09... format!
+  const regPhoneRes = await memberRegister({
+    request: makeReq("/api/member/auth/register", {
+      method: "POST",
+      ip: "10.0.0.4",
+      body: {
+        name: "Trần Quốc Bảo",
+        identifier: "+84 988 111 222",
+        password: "baoPassword99",
+        pillarChoice: "holagreen",
+      },
+    }),
+    env,
+  });
+  assert.equal(regPhoneRes.status, 201);
+
+  const loginPhoneRes = await memberLogin({
+    request: makeReq("/api/member/auth/login", {
+      method: "POST",
+      ip: "10.0.0.5",
+      body: { identifier: "0988.111.222", password: "baoPassword99" },
+    }),
+    env,
+  });
+  assert.equal(loginPhoneRes.status, 200);
+  const member2Cookie = extractCookie(loginPhoneRes, "holarise_member_session");
+  assert.ok(member2Cookie);
+
+  // Block SVG XSS upload on member media endpoint
+  const svgBytes = new TextEncoder().encode("<svg onload='alert(1)'></svg>");
+  const badMediaRes = await memberMediaUpload({
+    request: makeReq("/api/member/media", {
+      method: "POST",
+      cookie: member1Cookie,
+      body: svgBytes,
+      headers: { "Content-Type": "image/svg+xml" },
+    }),
+    env,
+  });
+  assert.equal(badMediaRes.status, 415);
+
+  // Upload real PNG avatar & replace it (old KV key cleaned automatically!)
+  const av1Res = await memberMediaUpload({
+    request: makeReq("/api/member/media", {
+      method: "POST",
+      cookie: member1Cookie,
+      body: VALID_PNG_BYTES,
+      headers: { "Content-Type": "image/png" },
+    }),
+    env,
+  });
+  assert.equal(av1Res.status, 201);
+  const av1 = await av1Res.json();
+  assert.equal(MEDIA_KV.store.has(`media:${av1.id}`), true);
+
+  const patchProf1 = await memberProfilePatch({
+    request: makeReq("/api/member/profile", {
+      method: "PATCH",
+      cookie: member1Cookie,
+      body: { name: "Nguyễn Minh Anh", avatarUrl: av1.url, pillarChoice: "holaconnect" },
+    }),
+    env,
+  });
+  assert.equal(patchProf1.status, 200);
+
+  const av2Res = await memberMediaUpload({
+    request: makeReq("/api/member/media", {
+      method: "POST",
+      cookie: member1Cookie,
+      body: VALID_PNG_BYTES,
+      headers: { "Content-Type": "image/png" },
+    }),
+    env,
+  });
+  const av2 = await av2Res.json();
+  await memberProfilePatch({
+    request: makeReq("/api/member/profile", {
+      method: "PATCH",
+      cookie: member1Cookie,
+      body: { name: "Nguyễn Minh Anh", avatarUrl: av2.url },
+    }),
+    env,
+  });
+  assert.equal(MEDIA_KV.store.has(`media:${av1.id}`), false);
+  assert.equal(MEDIA_KV.store.has(`media:${av2.id}`), true);
+
+  // 1-Tap Event Booking for Email-only Member #1 (no phone required!) + Idempotency on double-tap
+  const oneTapRes1 = await publicRegister({
+    request: makeReq("/api/registrations", {
+      method: "POST",
+      cookie: member1Cookie,
+      ip: "10.0.0.6",
+      body: {
+        source: "event_modal",
+        eventId: "holaconnect-leo-nui-lam-nghiep-2026-11-26",
+        activity: "HolaConnect · Chiều Leo Núi",
+      },
+    }),
+    env,
+  });
+  assert.equal(oneTapRes1.status, 201);
+  const oneTapJson1 = await oneTapRes1.json();
+
+  const oneTapDup = await publicRegister({
+    request: makeReq("/api/registrations", {
+      method: "POST",
+      cookie: member1Cookie,
+      ip: "10.0.0.6",
+      body: {
+        source: "event_modal",
+        eventId: "holaconnect-leo-nui-lam-nghiep-2026-11-26",
+        activity: "HolaConnect · Chiều Leo Núi",
+      },
+    }),
+    env,
+  });
+  assert.equal(oneTapDup.status, 200);
+  const oneTapDupJson = await oneTapDup.json();
+  assert.equal(oneTapDupJson.duplicate, true);
+  assert.equal(oneTapDupJson.id, oneTapJson1.id);
+
+  // Dashboard returns member's 2 booked events in parallel
+  const dashRes = await memberDashboard({
+    request: makeReq("/api/member/dashboard", { cookie: member1Cookie }),
+    env,
+  });
+  assert.equal(dashRes.status, 200);
+  const dashJson = await dashRes.json();
+  assert.equal(dashJson.registrations.length, 2);
+
+  // Logout invalidates session
+  const logoutRes = await memberLogout({
+    request: makeReq("/api/member/auth/logout", { method: "POST", cookie: member2Cookie }),
+    env,
+  });
+  assert.equal(logoutRes.status, 200);
+  const afterLogout = await memberDashboard({
+    request: makeReq("/api/member/dashboard", { cookie: member2Cookie }),
+    env,
+  });
+  assert.equal(afterLogout.status, 401);
+});
+
+test("Editorial Guestbook Lifecycle (Create -> Pending -> Admin Approve -> Heart Toggle -> Edit Reverts to Pending -> Delete Cleans KV) & CMS Visuals Override", async () => {
+  const DB = createFullMockD1();
+  const MEDIA_KV = createMockKV();
+  const env = { DB, MEDIA_KV };
+
+  const bootRes = await authBootstrap({
+    request: makeReq("/api/auth/bootstrap", {
+      method: "POST",
+      body: { email: "admin@holarise.org", name: "Admin", password: "AdminStrongPassword123!" },
+    }),
+    env,
+  });
+  const adminCookie = extractCookie(bootRes, "holarise_session");
+
+  const regRes = await memberRegister({
+    request: makeReq("/api/member/auth/register", {
+      method: "POST",
+      ip: "10.0.1.1",
+      body: { name: "Lê Thu Hà", identifier: "thuha@vnu.edu.vn", password: "haPassword123" },
+    }),
+    env,
+  });
+  const memberCookie = extractCookie(regRes, "holarise_member_session");
+
+  // Upload reflection memory photo
+  const photoUpRes = await memberMediaUpload({
+    request: makeReq("/api/member/media", {
+      method: "POST",
+      cookie: memberCookie,
+      body: VALID_PNG_BYTES,
+      headers: { "Content-Type": "image/png" },
+    }),
+    env,
+  });
+  const photoUp = await photoUpRes.json();
+
+  const slug = "tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart";
+  const createRefRes = await reflectionsCreate({
+    request: makeReq("/api/reflections", {
+      method: "POST",
+      cookie: memberCookie,
+      ip: "10.0.1.2",
+      body: {
+        activitySlug: slug,
+        participantRole: "volunteer",
+        pullQuote: "Một buổi chiều ngồi lại để thấy mình cần gọi về cho Mẹ ngay.",
+        content: "Không gian ấm áp tại Mây Lang Thang giúp mình lắng lại thật sự giữa mùa thi cử căng thẳng.",
+        photoUrl: photoUp.url,
+      },
+    }),
+    env,
+  });
+  assert.equal(createRefRes.status, 201);
+  const createdRef = (await createRefRes.json()).reflection;
+  assert.equal(createdRef.status, "pending");
+
+  // 1 reflection per member per activity enforced (409)
+  const secondTry = await reflectionsCreate({
+    request: makeReq("/api/reflections", {
+      method: "POST",
+      cookie: memberCookie,
+      ip: "10.0.1.2",
+      body: { activitySlug: slug, content: "Thử gửi bài thứ hai cho cùng hoạt động này." },
+    }),
+    env,
+  });
+  assert.equal(secondTry.status, 409);
+
+  // Before Admin approval: public anonymous GET sees 0 approved items, author sees myReflection
+  const anonBefore = await (await reflectionsGet({ request: makeReq(`/api/reflections?slug=${slug}`), env })).json();
+  assert.equal(anonBefore.items.length, 0);
+  assert.equal(anonBefore.myReflection, null);
+
+  const ownerBefore = await (
+    await reflectionsGet({ request: makeReq(`/api/reflections?slug=${slug}`, { cookie: memberCookie }), env })
+  ).json();
+  assert.equal(ownerBefore.items.length, 0);
+  assert.equal(ownerBefore.myReflection.id, createdRef.id);
+
+  // Admin lists pending & approves 1-click
+  const adminList = await (
+    await adminReflectionsList({ request: makeReq("/api/admin/reflections?status=pending", { cookie: adminCookie }), env })
+  ).json();
+  assert.equal(adminList.items.length, 1);
+
+  const approveRes = await adminReflectionPatch({
+    request: makeReq(`/api/admin/reflections/${createdRef.id}`, {
+      method: "PATCH",
+      cookie: adminCookie,
+      body: { status: "approved" },
+    }),
+    env,
+    params: { id: createdRef.id },
+  });
+  assert.equal(approveRes.status, 200);
+
+  // Public anonymous reader sees approved reflection & toggles Heart ♥ cleanly without negative drift
+  const anonAfter = await (await reflectionsGet({ request: makeReq(`/api/reflections?slug=${slug}`), env })).json();
+  assert.equal(anonAfter.items.length, 1);
+  assert.equal(anonAfter.items[0].pullQuote, "Một buổi chiều ngồi lại để thấy mình cần gọi về cho Mẹ ngay.");
+  assert.equal(anonAfter.items[0].email, undefined); // Zero PII leak!
+
+  const heart1Res = await reflectionHeart({
+    request: makeReq(`/api/reflections/${createdRef.id}/heart`, { method: "POST", ip: "10.0.2.1" }),
+    env,
+    params: { id: createdRef.id },
+  });
+  assert.equal(heart1Res.status, 200);
+  const readerCookie = extractCookie(heart1Res, "holarise_reader_id");
+  const heart1Json = await heart1Res.json();
+  assert.equal(heart1Json.hearted, true);
+  assert.equal(heart1Json.heartCount, 1);
+
+  // Second click with same reader cookie un-hearts back to 0 cleanly
+  const heart2Res = await reflectionHeart({
+    request: makeReq(`/api/reflections/${createdRef.id}/heart`, {
+      method: "POST",
+      cookie: readerCookie,
+      ip: "10.0.2.1",
+    }),
+    env,
+    params: { id: createdRef.id },
+  });
+  const heart2Json = await heart2Res.json();
+  assert.equal(heart2Json.hearted, false);
+  assert.equal(heart2Json.heartCount, 0);
+
+  // Editing an approved reflection AUTOMATICALLY reverts status to 'pending'!
+  const editRes = await reflectionPatch({
+    request: makeReq(`/api/reflections/${createdRef.id}`, {
+      method: "PATCH",
+      cookie: memberCookie,
+      body: {
+        participantRole: "volunteer",
+        pullQuote: "Câu trích dẫn đã cập nhật mới.",
+        content: "Nội dung chia sẻ được chỉnh sửa thêm chi tiết kỷ niệm đẹp tại Hòa Lạc.",
+        photoUrl: photoUp.url,
+      },
+    }),
+    env,
+    params: { id: createdRef.id },
+  });
+  assert.equal(editRes.status, 200);
+  const editedRef = (await editRes.json()).reflection;
+  assert.equal(editedRef.status, "pending");
+
+  const anonAfterEdit = await (await reflectionsGet({ request: makeReq(`/api/reflections?slug=${slug}`), env })).json();
+  assert.equal(anonAfterEdit.items.length, 0);
+
+  // Deleting reflection cleans up photo from MEDIA_KV!
+  assert.equal(MEDIA_KV.store.has(`media:${photoUp.id}`), true);
+  const delRes = await reflectionDelete({
+    request: makeReq(`/api/reflections/${createdRef.id}`, { method: "DELETE", cookie: memberCookie }),
+    env,
+    params: { id: createdRef.id },
+  });
+  assert.equal(delRes.status, 200);
+  assert.equal(MEDIA_KV.store.has(`media:${photoUp.id}`), false);
+
+  // CMS Site Visuals Override (/api/admin/visuals) allows replacing Hero & Pillar photos dynamically
+  const putVisRes = await adminVisualsPut({
+    request: makeReq("/api/admin/visuals", {
+      method: "PUT",
+      cookie: adminCookie,
+      body: {
+        heroImage: "/api/media/img-20261124-realhero01.jpg",
+        heroImageAlt: "Ảnh chụp thật bình minh Hòa Lạc mới tải lên từ CMS",
+        heroIsIllustration: false,
+        pillars: {
+          holagreen: {
+            image: "/api/media/img-20261124-realgreen1.jpg",
+            imageAlt: "Buổi trồng cây thực tế đầu tiên của HolaGreen",
+            isIllustration: false,
+          },
+        },
+      },
+    }),
+    env,
+  });
+  assert.equal(putVisRes.status, 200);
+  const getVis = await (await adminVisualsGet({ request: makeReq("/api/admin/visuals", { cookie: adminCookie }), env })).json();
+  assert.equal(getVis.visuals.heroImage, "/api/media/img-20261124-realhero01.jpg");
+  assert.equal(getVis.visuals.pillars.holagreen.image, "/api/media/img-20261124-realgreen1.jpg");
+  assert.equal(getVis.visuals.pillars.holagreen.isIllustration, false);
+
+  // Admin member management: lock account & delete cleanup
+  const membersList = await (await adminMembersList({ request: makeReq("/api/admin/members", { cookie: adminCookie }), env })).json();
+  assert.equal(membersList.items.length, 1);
+  const targetMemberId = membersList.items[0].id;
+
+  const lockRes = await adminMemberPatch({
+    request: makeReq(`/api/admin/members/${targetMemberId}`, {
+      method: "PATCH",
+      cookie: adminCookie,
+      body: { isActive: false },
+    }),
+    env,
+    params: { id: targetMemberId },
+  });
+  assert.equal(lockRes.status, 200);
+
+  const lockedDash = await memberDashboard({
+    request: makeReq("/api/member/dashboard", { cookie: memberCookie }),
+    env,
+  });
+  assert.equal(lockedDash.status, 401);
+
+  const delMemberRes = await adminMemberDelete({
+    request: makeReq(`/api/admin/members/${targetMemberId}`, { method: "DELETE", cookie: adminCookie }),
+    env,
+    params: { id: targetMemberId },
+  });
+  assert.equal(delMemberRes.status, 200);
+});

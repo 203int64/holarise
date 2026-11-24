@@ -21,17 +21,11 @@
 
       header.classList.toggle("is-scrolled", currentY > 36);
 
-      if (window.innerWidth <= 820 && !drawerIsOpen) {
-        if (currentY <= 44) {
-          header.classList.remove("is-compact-mobile");
-        } else if (delta > 5) {
-          /* Scrolling down on mobile -> wordmark shrinks into compact HR logo badge */
-          header.classList.add("is-compact-mobile");
-        } else if (delta < -8) {
-          /* Scrolling up -> HR badge expands back into HolaRise wordmark */
-          header.classList.remove("is-compact-mobile");
-        }
-      } else {
+      if (window.innerWidth > 820 || drawerIsOpen || currentY <= 18) {
+        header.classList.remove("is-compact-mobile");
+      } else if (delta > 7 && currentY > 76) {
+        header.classList.add("is-compact-mobile");
+      } else if (delta < -7) {
         header.classList.remove("is-compact-mobile");
       }
 
@@ -49,8 +43,85 @@
       },
       { passive: true }
     );
+    window.addEventListener("resize", onScroll, { passive: true });
     onScroll();
   }
+
+  /* 1B. Mobile Default Collapsed Accordions (Zero Dead role="button" Traps on Desktop!) */
+  function initMobileCollapsibleCards() {
+    var mobileFoldMq = window.matchMedia("(max-width: 820px)");
+    var pairs = [];
+
+    document.querySelectorAll("[data-mobile-pillar]").forEach(function (pillar) {
+      var trigger = pillar.querySelector("[data-mobile-pillar-toggle]");
+      if (trigger) pairs.push({ container: pillar, trigger: trigger });
+    });
+
+    document.querySelectorAll("[data-mobile-fold]").forEach(function (card) {
+      var trigger = card.querySelector("[data-mobile-fold-toggle]");
+      if (trigger) pairs.push({ container: card, trigger: trigger });
+    });
+
+    var syncAriaForViewport = function (isMobile) {
+      pairs.forEach(function (item) {
+        if (isMobile) {
+          var isOpen = item.container.classList.contains("is-mobile-open");
+          item.trigger.setAttribute("role", "button");
+          item.trigger.setAttribute("tabindex", "0");
+          item.trigger.setAttribute("aria-expanded", String(isOpen));
+        } else {
+          item.trigger.removeAttribute("role");
+          item.trigger.removeAttribute("tabindex");
+          item.trigger.removeAttribute("aria-expanded");
+        }
+      });
+    };
+
+    var toggleItem = function (container, trigger) {
+      if (!mobileFoldMq.matches) return;
+      var nextOpen = !container.classList.contains("is-mobile-open");
+      container.classList.toggle("is-mobile-open", nextOpen);
+      trigger.setAttribute("aria-expanded", String(nextOpen));
+      if (window.ScrollTrigger) {
+        window.ScrollTrigger.refresh();
+      }
+    };
+
+    pairs.forEach(function (item) {
+      item.trigger.addEventListener("click", function () {
+        toggleItem(item.container, item.trigger);
+      });
+      item.trigger.addEventListener("keydown", function (e) {
+        if (!mobileFoldMq.matches) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleItem(item.container, item.trigger);
+        }
+      });
+    });
+
+    /* Auto-open target pillar on mobile if user navigates to #holaheart, #holagreen, or #holaconnect */
+    var expandHashPillar = function () {
+      var hash = (window.location.hash || "").replace(/^#/, "");
+      if (!hash) return;
+      var target = document.getElementById(hash);
+      if (target && target.hasAttribute("data-mobile-pillar")) {
+        target.classList.add("is-mobile-open");
+        var btn = target.querySelector("[data-mobile-pillar-toggle]");
+        if (btn && mobileFoldMq.matches) btn.setAttribute("aria-expanded", "true");
+      }
+    };
+
+    syncAriaForViewport(mobileFoldMq.matches);
+    expandHashPillar();
+    window.addEventListener("hashchange", expandHashPillar);
+    if (typeof mobileFoldMq.addEventListener === "function") {
+      mobileFoldMq.addEventListener("change", function (e) {
+        syncAriaForViewport(e.matches);
+      });
+    }
+  }
+  initMobileCollapsibleCards();
 
   /* 2. Full-Screen Mobile Editorial Glass Drawer */
   if (navToggle && mobileDrawer) {
@@ -60,6 +131,9 @@
       mobileDrawer.classList.toggle("is-open", open);
       mobileDrawer.setAttribute("aria-hidden", String(!open));
       document.body.style.overflow = open ? "hidden" : "";
+      if (window.HolaSmoothScroll) {
+        window.HolaSmoothScroll.setLocked(open);
+      }
       if (open && header) {
         header.classList.remove("is-compact-mobile");
       }
@@ -186,10 +260,22 @@
   function openDialog(dialog) {
     if (!dialog || dialog.open) return;
     dialog.removeAttribute("data-closing");
+    if (window.HolaSmoothScroll) {
+      window.HolaSmoothScroll.setLocked(true);
+    }
     dialog.showModal();
   }
 
   window.__holaRiseOpenDialog = openDialog;
+  window.__holaRiseCloseDialog = closeDialog;
+
+  function syncSmoothUnlockAfterClose() {
+    if (!window.HolaSmoothScroll) return;
+    var anyOpen = Boolean(document.querySelector("dialog.club-dialog[open]"));
+    if (!anyOpen) {
+      window.HolaSmoothScroll.setLocked(false);
+    }
+  }
 
   function closeDialog(dialog) {
     if (!dialog || !dialog.open) return;
@@ -229,6 +315,7 @@
 
     dialog.addEventListener("close", function () {
       dialog.removeAttribute("data-closing");
+      syncSmoothUnlockAfterClose();
     });
 
     /* Mandatory Safari fallback when closedby="any" is unsupported */
@@ -254,28 +341,16 @@
     });
   });
 
-  /* 5. Lightbox v2 Trigger (Single Photos + Album Viewer + Prev/Next + Keyboard + Touch Swipe) */
+  /* 5. Lightbox v2 Trigger (Single Photos + Dynamic Guestbook Photos + Album Viewer + Prev/Next + Swipe) */
   var lightbox = document.getElementById("gallery-lightbox");
   var lightboxImg = document.getElementById("lightbox-img");
   var lightboxCaption = document.getElementById("lightbox-caption");
   var lightboxCounter = document.getElementById("lightbox-counter");
-  var lightboxDownload = document.getElementById("lightbox-download");
-  var lightboxDrive = document.getElementById("lightbox-drive");
   var lightboxPrevBtn = lightbox ? lightbox.querySelector("[data-lightbox-prev]") : null;
   var lightboxNextBtn = lightbox ? lightbox.querySelector("[data-lightbox-next]") : null;
 
   if (lightbox && lightboxImg && lightboxCaption) {
-    var galleryTriggers = Array.prototype.slice.call(document.querySelectorAll("[data-lightbox-src]"));
-    var defaultSlides = galleryTriggers.map(function (btn) {
-      return {
-        src: btn.getAttribute("data-lightbox-src") || "",
-        alt: btn.getAttribute("data-lightbox-alt") || "",
-        caption: btn.getAttribute("data-lightbox-caption") || "",
-        photographer: "",
-        driveUrl: "",
-      };
-    });
-    var activeSlides = defaultSlides;
+    var activeSlides = [];
     var activeGalleryIdx = 0;
 
     var formatIdx = function (n) {
@@ -294,22 +369,6 @@
         captionText = captionText ? captionText + " · Ảnh: " + item.photographer : "Ảnh: " + item.photographer;
       }
       lightboxCaption.textContent = captionText;
-      if (lightboxDownload) {
-        if (item.src) {
-          lightboxDownload.href = item.src;
-          lightboxDownload.hidden = false;
-        } else {
-          lightboxDownload.hidden = true;
-        }
-      }
-      if (lightboxDrive) {
-        if (item.driveUrl && item.driveUrl.indexOf("https://") === 0) {
-          lightboxDrive.href = item.driveUrl;
-          lightboxDrive.hidden = false;
-        } else {
-          lightboxDrive.hidden = true;
-        }
-      }
       if (lightboxCounter) {
         lightboxCounter.textContent = formatIdx(activeGalleryIdx + 1) + " / " + formatIdx(total);
       }
@@ -318,12 +377,22 @@
       if (lightboxNextBtn) lightboxNextBtn.hidden = !multi;
     };
 
-    galleryTriggers.forEach(function (btn, idx) {
-      btn.addEventListener("click", function () {
-        activeSlides = defaultSlides;
-        showGalleryIndex(idx);
-        openDialog(lightbox);
+    document.addEventListener("click", function (e) {
+      var trigger = e.target.closest("[data-lightbox-src]");
+      if (!trigger) return;
+      e.preventDefault();
+      var allTriggers = Array.prototype.slice.call(document.querySelectorAll("[data-lightbox-src]"));
+      activeSlides = allTriggers.map(function (btn) {
+        return {
+          src: btn.getAttribute("data-lightbox-src") || "",
+          alt: btn.getAttribute("data-lightbox-alt") || "",
+          caption: btn.getAttribute("data-lightbox-caption") || "",
+          photographer: "",
+        };
       });
+      var clickedIdx = allTriggers.indexOf(trigger);
+      showGalleryIndex(clickedIdx >= 0 ? clickedIdx : 0);
+      openDialog(lightbox);
     });
 
     document.querySelectorAll("[data-album-open]").forEach(function (btn) {
@@ -341,7 +410,6 @@
               alt: p.alt || payload.title || "",
               caption: p.caption || payload.title || "",
               photographer: p.photographer || "",
-              driveUrl: payload.driveUrl || "",
             };
           });
           showGalleryIndex(0);
@@ -405,6 +473,8 @@
   var eventTitleDisplay = document.getElementById("modal-event-title");
   var eventTypeDisplay = document.getElementById("modal-event-type");
   var eventMetaDisplay = document.getElementById("modal-event-meta");
+  var eventDetailLink = document.getElementById("modal-event-detail-link");
+  var modalIcsBtn = document.getElementById("modal-ics-btn");
   var eventInputHidden = document.getElementById("modal-event-input");
   var eventIdHidden = document.getElementById("modal-event-id");
 
@@ -418,6 +488,7 @@
         var eventLocation = btn.getAttribute("data-event-location") || "Hòa Lạc – Thạch Thất, Hà Nội";
         var eventFee = btn.getAttribute("data-event-fee") || "Phi lợi nhuận · Minh bạch";
         var eventType = btn.getAttribute("data-event-type") || "Cộng đồng HolaRise";
+        var eventHref = btn.getAttribute("data-event-href") || "";
 
         if (eventTitleDisplay) eventTitleDisplay.textContent = title;
         if (eventTypeDisplay) eventTypeDisplay.textContent = eventType;
@@ -425,6 +496,26 @@
           eventMetaDisplay.textContent = [eventDate, eventTime, eventLocation, eventFee]
             .filter(Boolean)
             .join(" · ");
+        }
+        if (eventDetailLink) {
+          if (eventHref && eventHref.indexOf("/") === 0) {
+            eventDetailLink.href = eventHref;
+            eventDetailLink.hidden = false;
+          } else {
+            eventDetailLink.hidden = true;
+          }
+        }
+        if (modalIcsBtn) {
+          if (eventId === "holaheart-cuoc-doi-cua-cha-2026-11-29") {
+            modalIcsBtn.hidden = false;
+            modalIcsBtn.setAttribute("data-ics-title", title);
+            modalIcsBtn.setAttribute("data-ics-start", "20261129T121500Z");
+            modalIcsBtn.setAttribute("data-ics-end", "20261129T143000Z");
+            modalIcsBtn.setAttribute("data-ics-location", eventLocation);
+            modalIcsBtn.setAttribute("data-ics-url", "https://holarise.org/su-kien/cuoc-doi-cua-cha/");
+          } else {
+            modalIcsBtn.hidden = true;
+          }
         }
         if (eventInputHidden) eventInputHidden.value = title;
         if (eventIdHidden) eventIdHidden.value = eventId;
@@ -436,6 +527,7 @@
         eventModal.dataset.eventLocation = eventLocation;
         eventModal.dataset.eventFee = eventFee;
         eventModal.dataset.eventType = eventType;
+        eventModal.dataset.eventHref = eventHref;
 
         var modalForm = eventModal.querySelector("form[data-club-form]");
         var modalSuccess = document.getElementById("modal-pass-success");
@@ -456,7 +548,7 @@
   }
 
   /* 7. Registration & Contact Form Submission + Local Offline Drafts + Accessible Inline Validation */
-  var DRAFT_FIELDS = ["fullName", "phone", "email", "role", "eventChoice", "organization", "note"];
+  var DRAFT_FIELDS = ["fullName", "phone", "email", "role", "eventChoice", "seatCount", "organization", "note"];
   var EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   var supportsHasSelector = Boolean(window.CSS && CSS.supports && CSS.supports("selector(:has(a))"));
 
@@ -621,6 +713,10 @@
         data.skills = selectedSkills;
         hasValue = true;
       }
+      var anonCheckEl = form.querySelector('input[type="checkbox"][name="anonShare"]');
+      if (anonCheckEl) {
+        data.anonShare = Boolean(anonCheckEl.checked);
+      }
       if (hasValue) {
         data.savedAt = Date.now();
         window.localStorage.setItem(key, JSON.stringify(data));
@@ -723,6 +819,10 @@
           btn.setAttribute("aria-pressed", isMatch ? "true" : "false");
         });
       }
+      if (typeof existingDraft.anonShare === "boolean") {
+        var restoredAnonEl = form.querySelector('input[type="checkbox"][name="anonShare"]');
+        if (restoredAnonEl) restoredAnonEl.checked = existingDraft.anonShare;
+      }
       var orgInputEl = form.querySelector('[name="organization"]');
       if (orgInputEl && orgInputEl.value) {
         form.querySelectorAll("[data-org-chip]").forEach(function (btn) {
@@ -749,7 +849,7 @@
     form.addEventListener("holarise:chips-changed", scheduleDraftSave);
 
     /* Validate-after-interaction ARIA sync (modern-web-guidance: accessible-error-announcement & required-field-feedback) */
-    var formFields = form.querySelectorAll("input:not([type='hidden']):not([type='radio']), select, textarea");
+    var formFields = form.querySelectorAll("input:not([type='hidden']):not([type='radio']):not([type='checkbox']), select, textarea");
     formFields.forEach(function (field) {
       field.setAttribute("aria-invalid", "false");
       linkError(field, false);
@@ -843,8 +943,14 @@
       });
       payload.submittedAt = new Date().toISOString();
 
+      var isFatherStudio = form.hasAttribute("data-father-studio");
       var checkedRoleRadio = form.querySelector('input[type="radio"][name="role"]:checked');
       var checkedEventRadio = form.querySelector('input[type="radio"][name="eventChoice"]:checked');
+      var checkedSeatRadio = form.querySelector('input[type="radio"][name="seatCount"]:checked');
+      var anonCheckInput = form.querySelector('input[type="checkbox"][name="anonShare"]');
+      var seatValue = checkedSeatRadio ? checkedSeatRadio.value || "" : "";
+      var seatShort = checkedSeatRadio ? checkedSeatRadio.getAttribute("data-seat-short") || seatValue : "";
+
       if (checkedEventRadio) {
         if (checkedEventRadio.value) {
           payload.eventId = checkedEventRadio.value;
@@ -855,6 +961,8 @@
         }
       }
       delete payload.eventChoice;
+      delete payload.seatCount;
+      delete payload.anonShare;
 
       var activeVibeBtn = form.querySelector('[data-vibe-chip][aria-pressed="true"]');
       var vibeValue = activeVibeBtn ? activeVibeBtn.getAttribute("data-vibe-chip") || "" : "";
@@ -868,53 +976,88 @@
         var pv = btn.getAttribute("data-partner-chip");
         if (pv) partnerValues.push(pv);
       });
-      var isPartnerMode = checkedRoleRadio && checkedRoleRadio.getAttribute("data-mode") === "partner";
+      var isPartnerMode = Boolean(checkedRoleRadio && checkedRoleRadio.getAttribute("data-mode") === "partner");
+      var modalContainer = form.closest("#event-register-modal");
       var invitedBy = form.dataset.invitedBy || "";
+      var rawNote = (payload.note || "").trim();
       var metaParts = [];
-      if (isPartnerMode) {
+
+      if (isFatherStudio) {
+        if (seatValue) metaParts.push("Số chỗ: " + seatValue);
+        if (rawNote) {
+          metaParts.push(
+            anonCheckInput && anonCheckInput.checked
+              ? "Tâm sự về Cha: Cho phép đọc ẩn danh"
+              : "Tâm sự về Cha: Chỉ gửi riêng BTC"
+          );
+        }
+      } else if (modalContainer) {
+        if (vibeValue) metaParts.push("Số chỗ: " + vibeValue);
+      } else if (isPartnerMode) {
         if (partnerValues.length) metaParts.push("Hợp tác: " + partnerValues.join(", "));
       } else {
         if (vibeValue) metaParts.push("Tâm thế: " + vibeValue);
         if (skillValues.length) metaParts.push("Hứng thú: " + skillValues.join(", "));
       }
       if (invitedBy) metaParts.push("Rủ bởi: " + invitedBy);
-      var rawNote = (payload.note || "").trim();
+
       if (metaParts.length) {
         payload.note = ("[" + metaParts.join(" | ") + "]" + (rawNote ? " " + rawNote : "")).slice(0, 1000);
       }
 
-      var modalContainer = form.closest("#event-register-modal");
+      var resolvedEventId = (payload.eventId || "").trim();
+      var isFatherEvent = isFatherStudio || resolvedEventId === "holaheart-cuoc-doi-cua-cha-2026-11-29";
+      var resolvedEventUrl =
+        form.getAttribute("data-event-url") ||
+        (modalContainer && modalContainer.dataset.eventHref) ||
+        (isFatherEvent ? "/su-kien/cuoc-doi-cua-cha/" : "");
+
       var passSnapshot = {
         id: "",
         source: payload.source || "join_page",
+        formKind: isFatherStudio ? "workshop" : modalContainer ? "modal" : "join",
+        isFatherWorkshop: isFatherEvent,
+        eventUrl: resolvedEventUrl,
         fullName: nameVal,
         phone: ((phoneEl || {}).value || "").trim(),
         organization: (payload.organization || "").trim(),
         role: (payload.role || "").trim(),
-        badge:
-          (checkedRoleRadio && checkedRoleRadio.getAttribute("data-badge")) ||
-          (modalContainer && modalContainer.dataset.eventType) ||
-          "Cộng đồng HolaRise",
-        theme: (checkedRoleRadio && checkedRoleRadio.getAttribute("data-theme")) || "emerald",
-        greeting: (checkedRoleRadio && checkedRoleRadio.getAttribute("data-greeting")) || "",
-        eventId: (payload.eventId || "").trim(),
+        badge: isFatherEvent
+          ? "WORKSHOP · CUỘC ĐỜI CỦA CHA"
+          : (checkedRoleRadio && checkedRoleRadio.getAttribute("data-badge")) ||
+            (modalContainer && modalContainer.dataset.eventType) ||
+            "Cộng đồng HolaRise",
+        theme: isFatherEvent
+          ? "father-sunset"
+          : (checkedRoleRadio && checkedRoleRadio.getAttribute("data-theme")) || "emerald",
+        greeting: isFatherEvent
+          ? "Cha có thể không nói nhiều, nhưng cả cuộc đời Cha chính là minh chứng cho tình yêu ấy."
+          : (checkedRoleRadio && checkedRoleRadio.getAttribute("data-greeting")) || "",
+        eventId: resolvedEventId,
         eventTitle:
           (payload.activity || "").trim() ||
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-title")) ||
           (isPartnerMode ? "Hợp tác Tổ chức · Chapter 01" : "Nhịp tuần Hòa Lạc – Thạch Thất"),
         eventDate:
+          form.getAttribute("data-event-date") ||
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-date")) ||
           (modalContainer && modalContainer.dataset.eventDate) ||
           "Theo lịch từng hoạt động",
         eventTime:
+          form.getAttribute("data-event-time") ||
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-time")) ||
           (modalContainer && modalContainer.dataset.eventTime) ||
           "1–2 buổi / tuần",
         eventLocation:
+          form.getAttribute("data-event-location") ||
           (checkedEventRadio && checkedEventRadio.getAttribute("data-event-location")) ||
           (modalContainer && modalContainer.dataset.eventLocation) ||
           "Hòa Lạc – Thạch Thất, Hà Nội",
-        vibe: isPartnerMode ? partnerValues[0] || "Hợp tác tổ chức" : vibeValue || "Muốn tìm hiểu trước",
+        vibe: isFatherStudio
+          ? seatShort || seatValue || "01 chỗ · Đi một mình"
+          : isPartnerMode
+            ? partnerValues[0] || "Hợp tác tổ chức"
+            : vibeValue || "Đi 1 mình (1 chỗ)",
         skills: skillValues,
         isPartner: isPartnerMode,
       };
@@ -964,6 +1107,8 @@
           passSnapshot.id = (result.data && result.data.id) || "REG-HOLARISE";
           var preservedActivity = (form.querySelector('[name="activity"]') || {}).value || "";
           var preservedEventId = (form.querySelector('[name="eventId"]') || {}).value || "";
+          var hiddenRoleInput = form.querySelector('input[type="hidden"][name="role"]');
+          var preservedRole = hiddenRoleInput ? hiddenRoleInput.value : "";
           form.reset();
           formFields.forEach(function (field) {
             if (interactedFields) interactedFields.delete(field);
@@ -983,6 +1128,7 @@
           var evIdInput = form.querySelector('[name="eventId"]');
           if (actInput && preservedActivity) actInput.value = preservedActivity;
           if (evIdInput && preservedEventId) evIdInput.value = preservedEventId;
+          if (hiddenRoleInput && preservedRole) hiddenRoleInput.value = preservedRole;
           form.dispatchEvent(
             new CustomEvent("holarise:registration-success", {
               bubbles: true,

@@ -1,11 +1,11 @@
 <section class="page-hero">
   <div class="container">
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
-      <a href="/">Trang chủ</a>
+      <a href="/" data-i18n="nav.home">Trang chủ</a>
       <span aria-hidden="true">/</span>
-      <span aria-current="page">Về HolaRise</span>
+      <span aria-current="page" data-i18n="nav.about">Về HolaRise</span>
     </nav>
-    <h1>{{BRAND_FULL_NAME}}</h1>
+    <h1 data-i18n="brand.fullName">{{BRAND_FULL_NAME}}</h1>
     <p>{{BRAND_SUBTITLE}}</p>
   </div>
 </section>
@@ -15,28 +15,46 @@
     <div class="join-grid">
       <div>
         <div class="plate-media" data-curtain style="margin-bottom: 24px;">
-          <img src="{{ABOUT_IMAGE}}" alt="{{ABOUT_IMAGE_ALT}}" width="1280" height="714" fetchpriority="high" decoding="async">
+          <!-- CMS:ABOUT_MEDIA:START -->
+          {{ABOUT_MEDIA_HTML}}
+          <!-- CMS:ABOUT_MEDIA:END -->
         </div>
         <div class="grid-2" style="gap: 20px;">
-          <div class="value-col">
-            <span class="value-num">SỨ MỆNH</span>
-            <p>{{PHILOSOPHY_MISSION}}</p>
-          </div>
-          <div class="value-col">
-            <span class="value-num">TẦM NHÌN</span>
-            <p>{{PHILOSOPHY_VISION}}</p>
-          </div>
+          <article class="value-col" data-mobile-fold>
+            <div class="mobile-fold-head" data-mobile-fold-toggle>
+              <div class="mobile-fold-titles">
+                <span class="value-num" data-i18n="about.mission.tag">01 · SỨ MỆNH</span>
+                <h3 data-i18n="about.mission.title">Sứ mệnh</h3>
+              </div>
+              <span class="mobile-fold-indicator" aria-hidden="true"></span>
+            </div>
+            <div class="mobile-fold-body">
+              <p>{{PHILOSOPHY_MISSION}}</p>
+            </div>
+          </article>
+          <article class="value-col" data-mobile-fold>
+            <div class="mobile-fold-head" data-mobile-fold-toggle>
+              <div class="mobile-fold-titles">
+                <span class="value-num" data-i18n="about.vision.tag">02 · TẦM NHÌN</span>
+                <h3 data-i18n="about.vision.title">Tầm nhìn</h3>
+              </div>
+              <span class="mobile-fold-indicator" aria-hidden="true"></span>
+            </div>
+            <div class="mobile-fold-body">
+              <p>{{PHILOSOPHY_VISION}}</p>
+            </div>
+          </article>
         </div>
       </div>
 
       <div>
-        <div class="kicker">Chapter 01 · Hòa Lạc – Thạch Thất</div>
-        <h2 class="section-title">Khởi nguồn từ Hòa Lạc, nuôi khát vọng lan tỏa xa hơn</h2>
-        <p style="color: var(--ink-secondary); line-height: 1.74; margin-bottom: 16px;">
-          <strong style="color: var(--ink); font-weight: 600;">{{BRAND_SHORT_NAME}}</strong> không ra đời từ những bản kế hoạch trên giấy, mà trưởng thành từ những buổi gặp gỡ, đêm nhạc sẻ chia và đối thoại chân thành của người trẻ tại Hòa Lạc – Thạch Thất.
+        <div class="kicker">Hola · Hòa Lạc</div>
+        <h2 class="section-title" data-i18n="about.story.title">Khởi nguồn từ Hòa Lạc, nuôi dưỡng hành trình bền vững</h2>
+        <p style="color: var(--ink-secondary); line-height: 1.74; margin-bottom: 16px;" data-i18n="about.story.p1">
+          Cộng đồng HolaRise trưởng thành từ những buổi gặp gỡ, đêm nhạc mộc và vòng tròn đối thoại chân thành của người trẻ tại Hòa Lạc.
         </p>
-        <p style="color: var(--ink-secondary); line-height: 1.74; margin-bottom: 22px;">
-          Chúng tôi xem <strong style="color: var(--ink); font-weight: 500;">Hòa Lạc – Thạch Thất</strong> là cái nôi đầu tiên để rèn luyện một mô hình cộng đồng tử tế, minh bạch và đủ sâu sắc — trước khi từng bước nhân rộng tới nhiều địa phương khác trên cả nước.
+        <p style="color: var(--ink-secondary); line-height: 1.74; margin-bottom: 22px;" data-i18n="about.story.p2">
+          Chúng tôi xem Hòa Lạc là cái nôi để rèn luyện một mô hình cộng đồng tử tế, minh bạch và có chiều sâu — trước khi từng bước nhân rộng tới nhiều vùng đất mới.
         </p>
         <blockquote class="editorial-callout">
           <p class="editorial-callout-quote">“{{PHILOSOPHY_QUOTE}}”</p>
@@ -48,49 +66,11 @@
 </section>
 
 <section class="section section--mist" id="mo-hinh-tac-dong">
-  <div class="container">
-    <div class="section-header" style="margin-bottom: 36px;">
-      <div class="kicker">Mô hình Tạo Tác Động</div>
-      <h2 class="section-title">3 trụ cột từ nội lực đến phụng sự</h2>
-      <p class="section-lead">Mọi chương trình của HolaRise nối tiếp từ việc nuôi dưỡng đời sống tinh thần bên trong đến hành động gìn giữ môi trường sống và sẻ chia cùng cộng đồng Hòa Lạc – Thạch Thất.</p>
-    </div>
-
-    <div class="grid-3 toc-columns" data-stagger-group>
-      <a class="toc-col" href="#holaheart" data-stagger-item>
-        <div class="toc-col-top">
-          <span class="value-num">01</span>
-          <span class="toc-col-arrow" aria-hidden="true">→</span>
-        </div>
-        <h3>HolaHeart</h3>
-        <p>Chuỗi workshop tiếp thêm động lực, sẻ chia về giá trị nhân văn, gia đình, mối quan hệ và sức khỏe tinh thần.</p>
-      </a>
-
-      <a class="toc-col" href="#holagreen" data-stagger-item>
-        <div class="toc-col-top">
-          <span class="value-num">02</span>
-          <span class="toc-col-arrow" aria-hidden="true">→</span>
-        </div>
-        <h3>HolaGreen</h3>
-        <p>Giữ xanh cảnh quan, giảm nhựa dùng một lần và ươm cây bản địa khắp Hòa Lạc – Thạch Thất.</p>
-      </a>
-
-      <a class="toc-col" href="#holaconnect" data-stagger-item>
-        <div class="toc-col-top">
-          <span class="value-num">03</span>
-          <span class="toc-col-arrow" aria-hidden="true">→</span>
-        </div>
-        <h3>HolaConnect</h3>
-        <p>Đưa tri thức, tủ sách và sự đồng hành lâu dài đến với trẻ em và cư dân địa phương.</p>
-      </a>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="chuong-trinh">
-  <div class="container">
+  <div class="container" id="chuong-trinh">
     <div class="section-header" style="margin-bottom: 20px;">
-      <div class="kicker">Chi tiết hoạt động</div>
-      <h2 class="section-title">Ba chương hành động thực tế</h2>
+      <div class="kicker" data-i18n="home.pillars.kicker">Mô hình Tạo Tác Động</div>
+      <h2 class="section-title" data-i18n="about.pillars.title">3 trụ cột từ nội lực đến phụng sự</h2>
+      <p class="section-lead" data-i18n="about.pillars.lead">Mọi hoạt động nối tiếp từ việc nuôi dưỡng đời sống tinh thần bên trong đến hành động giữ xanh môi trường sống và sẻ chia cùng cộng đồng Hòa Lạc.</p>
     </div>
 
     <div class="pillar-chapters">
@@ -99,12 +79,12 @@
   </div>
 </section>
 
-<section class="section section--mist" id="bo-loc-gia-tri">
+<section class="section" id="bo-loc-gia-tri">
   <div class="container">
     <div class="section-header" style="margin-bottom: 32px;">
-      <div class="kicker">Hệ giá trị dẫn đường</div>
-      <h2 class="section-title">4 chuẩn mực trong từng hành động</h2>
-      <p class="section-lead">Thước đo giúp Ban Điều Phối và thành viên giữ trọn tinh thần nhất quán dù quy mô cộng đồng lớn dần theo thời gian.</p>
+      <div class="kicker" data-i18n="about.values.kicker">Hệ giá trị dẫn đường</div>
+      <h2 class="section-title" data-i18n="about.values.title">4 chuẩn mực trong từng hành động</h2>
+      <p class="section-lead" data-i18n="about.values.lead">Thước đo giúp Ban Điều Phối và thành viên giữ trọn tinh thần nhất quán qua từng mùa hoạt động.</p>
     </div>
 
     <div class="grid-4" data-stagger-group>
@@ -113,15 +93,15 @@
   </div>
 </section>
 
-<section class="section" id="minh-bach">
+<section class="section section--mist" id="minh-bach">
   <div class="container">
     <div class="section-header--split" style="margin-bottom: 32px;">
       <div>
-        <div class="kicker">Cam kết uy tín</div>
-        <h2 class="section-title" style="margin-bottom: 0;">5 nguyên tắc tổ chức &amp; minh bạch</h2>
+        <div class="kicker" data-i18n="about.principles.kicker">Cam kết cộng đồng</div>
+        <h2 class="section-title" style="margin-bottom: 0;" data-i18n="about.principles.title">5 nguyên tắc tổ chức &amp; minh bạch</h2>
       </div>
       <a class="arrow-link" href="/chinh-sach/">
-        <span>Đọc Chuẩn mực Minh bạch &amp; An toàn</span>
+        <span data-i18n="about.principles.link">Đọc Chuẩn mực Minh bạch &amp; An toàn</span>
         <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
       </a>
     </div>
@@ -132,20 +112,16 @@
   </div>
 </section>
 
-{{PARTNERS_STRIP}}
-
 {{TESTIMONIALS_SECTION}}
-
-<div class="container"><div class="hairline" data-hairline></div></div>
 
 <section class="section" id="sdgs">
   <div class="container">
     <div class="section-header" style="margin-bottom: 32px;">
-      <div class="kicker">Tầm nhìn phát triển bền vững</div>
-      <h2 class="section-title">Góp phần vào 6 mục tiêu Liên Hợp Quốc (UN SDGs)</h2>
+      <div class="kicker" data-i18n="about.sdgs.kicker">Phát triển bền vững</div>
+      <h2 class="section-title" data-i18n="about.sdgs.title">Đóng góp vào 6 mục tiêu Liên Hợp Quốc (UN SDGs)</h2>
     </div>
 
-    <div class="sdg-grid" data-stagger-group>
+    <div class="grid-3" data-stagger-group>
       {{SDGS_HTML}}
     </div>
   </div>
@@ -153,18 +129,14 @@
 
 <section class="section section--compact">
   <div class="container">
-    <div class="cta-band">
+    <div class="cta-band" data-reveal>
       <div>
-        <h2>Cùng kiến tạo dấu ấn đẹp từ Hòa Lạc – Thạch Thất</h2>
-        <p>Đăng ký tham gia hoạt động hằng tuần hoặc đề xuất hợp tác cùng nhà trường, câu lạc bộ và không gian của bạn.</p>
-        <p class="cta-reassurance">Cộng đồng phi lợi nhuận · Minh bạch thông tin và chi phí trước mỗi hoạt động.</p>
+        <h2 data-i18n="about.cta.title">Đồng hành cùng Hola tại Hòa Lạc</h2>
+        <p data-i18n="about.cta.desc">Nhận Thẻ Thành Viên Hola hoặc gửi đề xuất hợp tác cùng nhà trường, câu lạc bộ và không gian văn hóa.</p>
       </div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px;">
-        <a class="btn btn--light" href="/tham-gia/" data-magnetic>
-          <span>Tham gia &amp; Hợp tác</span>
-          <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
-        </a>
-        <a class="btn btn--ghost-dark" href="/hanh-trinh/">Xem Hành trình thật</a>
+        <a class="btn btn--light" href="/tham-gia/" data-magnetic data-i18n="home.cta.primary">Tạo Thẻ Thành Viên</a>
+        <a class="btn btn--ghost-dark" href="/lich-hoat-dong/" data-i18n="home.cta.secondary">Xem lịch tuần này</a>
       </div>
     </div>
   </div>

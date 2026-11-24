@@ -4,6 +4,7 @@ const STATIC_ROUTES = [
   ["/", "1.0", "weekly"],
   ["/gioi-thieu/", "0.9", "monthly"],
   ["/lich-hoat-dong/", "0.9", "weekly"],
+  ["/su-kien/cuoc-doi-cua-cha/", "0.9", "weekly"],
   ["/hanh-trinh/", "0.9", "weekly"],
   ["/tham-gia/", "0.9", "monthly"],
   ["/chinh-sach/", "0.5", "yearly"],

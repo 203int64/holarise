@@ -17,6 +17,11 @@
     posts: [],
     partners: [],
     users: [],
+    reflections: [],
+    refStatus: "pending",
+    members: [],
+    memberSearch: "",
+    visuals: {},
     slugTouched: false,
   };
 
@@ -24,8 +29,17 @@
     registrations: "Đơn đăng ký",
     events: "Lịch hoạt động",
     posts: "Hành trình & Bài viết",
+    community: "Lưu bút & Thành viên",
     settings: "Đối tác & Cài đặt",
   };
+
+  const VISUAL_SLOTS = [
+    { key: "hero", label: "Ảnh Hero Trang chủ", fallback: "/assets/images/hero-holarise-binh-minh.webp" },
+    { key: "about", label: "Ảnh Trang Về HolaRise", fallback: "/assets/images/musicspace-archive/07-656713008_1333975742086926_7656936221069546148_n.jpg" },
+    { key: "holaheart", label: "Ảnh Đại diện HolaHeart", fallback: "/assets/images/events/holaheart-2026-11-15/06-group-dialogue.jpg" },
+    { key: "holagreen", label: "Ảnh Đại diện HolaGreen", fallback: "/assets/images/illustrations/G03.jpg" },
+    { key: "holaconnect", label: "Ảnh Đại diện HolaConnect", fallback: "/assets/images/illustrations/C04.jpg" },
+  ];
 
   const REG_STATUS_LABEL = {
     new: "Mới nhận",
@@ -446,6 +460,7 @@
     if (tab === "registrations") loadRegistrations();
     else if (tab === "events") loadEvents();
     else if (tab === "posts") loadPosts();
+    else if (tab === "community") loadCommunity();
     else if (tab === "settings") loadSettings();
   }
 
@@ -642,14 +657,16 @@
     $("#ev-kind").value = ev ? ev.kind : "upcoming";
     $("#ev-status").value = ev ? ev.status : "published";
     $("#ev-title").value = ev ? ev.title : "";
+    if ($("#ev-title-en")) $("#ev-title-en").value = ev ? ev.titleEn || ev.title_en || "" : "";
     $("#ev-type").value = ev ? ev.type : "HolaHeart · Giá trị sống";
     $("#ev-date").value = ev && /^\d{4}-\d{2}-\d{2}$/.test(ev.date) ? ev.date : new Date().toISOString().slice(0, 10);
     $("#ev-date-display").value = ev ? ev.dateDisplay || "" : "";
     $("#ev-time").value = ev ? ev.time || "" : "07:30 – 10:30";
-    $("#ev-location").value = ev ? ev.location || "" : "Hòa Lạc – Thạch Thất, Hà Nội";
+    $("#ev-location").value = ev ? ev.location || "" : "Hòa Lạc, Hà Nội";
     $("#ev-fee").value = ev ? ev.fee || "" : "Miễn phí";
     $("#ev-seats").value = ev ? ev.seats || "" : "Mở đăng ký";
     $("#ev-summary").value = ev ? ev.summary || "" : "";
+    if ($("#ev-summary-en")) $("#ev-summary-en").value = ev ? ev.summaryEn || ev.summary_en || "" : "";
     $("#ev-participants").value = ev ? ev.participants || "" : "";
     const imgUrl = ev ? ev.image : "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg";
     $("#ev-image").value = imgUrl;
@@ -741,8 +758,154 @@
   }
 
   /* =========================================================================
-     TAB 4: PARTNERS, SETTINGS & TEAM USERS
+     TAB 3B: COMMUNITY (REFLECTIONS MODERATION & MEMBERS)
      ========================================================================= */
+  function updatePendingRefsBadge(count) {
+    const n = Number(count || 0);
+    [$("#badge-pending-refs"), $("#badge-pending-refs-mobile")].forEach((b) => {
+      if (!b) return;
+      b.hidden = n <= 0;
+      b.textContent = String(n);
+    });
+  }
+
+  async function loadCommunity() {
+    await Promise.all([loadAdminReflections(), loadAdminMembers()]);
+  }
+
+  async function loadAdminReflections() {
+    const box = $("#reflections-admin-container");
+    if (!box) return;
+    renderSkeleton(box, 2);
+    try {
+      const qs = new URLSearchParams();
+      if (state.refStatus) qs.set("status", state.refStatus);
+      const data = await api(`/api/admin/reflections?${qs.toString()}`);
+      state.reflections = data.items || [];
+      if (data.counts && typeof data.counts.pending !== "undefined") {
+        updatePendingRefsBadge(data.counts.pending);
+      }
+
+      if (!state.reflections.length) {
+        renderEmptyState(
+          box,
+          "Chưa có lưu bút nào trong mục này",
+          "Khi thành viên gửi cảm nhận dưới các bài Hành trình, bài sẽ xuất hiện ở đây để Ban Điều Phối duyệt."
+        );
+        return;
+      }
+
+      box.innerHTML = `<div class="item-list">${state.reflections
+        .map(
+          (rf) => `<article class="item-row">
+            ${rf.photoUrl ? `<img class="item-thumb" src="${esc(rf.photoUrl)}" alt="Ảnh lưu bút của ${esc(rf.authorName)}" loading="lazy">` : ""}
+            <div class="item-body">
+              <div class="item-meta">
+                <span class="badge badge--${rf.status === "approved" ? "published" : rf.status === "rejected" ? "cancelled" : "pending"}">${
+                  rf.status === "approved" ? "Đã duyệt" : rf.status === "rejected" ? "Đã ẩn" : "Chờ duyệt"
+                }</span>
+                <span>${esc(rf.authorName)} (${esc(rf.authorCode)})</span>
+                <span>· ${esc(rf.participantRole)}</span>
+                <span>· Bài: <code>${esc(rf.activitySlug)}</code></span>
+              </div>
+              ${rf.pullQuote ? `<h3>“${esc(rf.pullQuote)}”</h3>` : ""}
+              <p class="item-excerpt">${esc(rf.content)}</p>
+            </div>
+            <div class="item-actions">
+              ${rf.status !== "approved" ? `<button class="btn btn--primary btn--sm" type="button" data-mod-ref="${esc(rf.id)}" data-mod-status="approved">Duyệt</button>` : ""}
+              ${rf.status !== "rejected" ? `<button class="btn btn--outline btn--sm" type="button" data-mod-ref="${esc(rf.id)}" data-mod-status="rejected">Ẩn</button>` : ""}
+              <button class="btn btn--danger-ghost btn--sm" type="button" data-delete-ref="${esc(rf.id)}">Xóa</button>
+            </div>
+          </article>`
+        )
+        .join("")}</div>`;
+    } catch (err) {
+      renderErrorState(box, err.message, "community");
+    }
+  }
+
+  async function loadAdminMembers() {
+    const box = $("#members-admin-container");
+    if (!box) return;
+    renderSkeleton(box, 2);
+    try {
+      const qs = new URLSearchParams();
+      if (state.memberSearch) qs.set("q", state.memberSearch);
+      const data = await api(`/api/admin/members?${qs.toString()}`);
+      state.members = data.items || [];
+
+      if (!state.members.length) {
+        renderEmptyState(
+          box,
+          "Chưa có thành viên phù hợp",
+          "Thành viên đăng ký Thẻ Thành Viên Hola tại /tham-gia/ sẽ hiển thị tại đây."
+        );
+        return;
+      }
+
+      box.innerHTML = `<div class="item-list">${state.members
+        .map(
+          (m) => `<div class="user-row">
+            <div>
+              <strong>${esc(m.name)}</strong>
+              <span class="badge badge--${m.isActive ? "published" : "cancelled"}">${m.isActive ? "Đang hoạt động" : "Đã khóa"}</span>
+              <span class="cell-sub"><code>${esc(m.memberCode)}</code> · ${esc(m.phone || m.email || "—")} · ${esc(m.organization || "Hòa Lạc")} · ${esc(m.primaryPillar)}</span>
+            </div>
+            <div class="item-actions">
+              <button class="btn btn--outline btn--sm" type="button" data-toggle-member="${esc(m.id)}" data-active="${m.isActive ? "1" : "0"}">${m.isActive ? "Khóa" : "Mở khóa"}</button>
+              <button class="btn btn--outline btn--sm" type="button" data-reset-member-pw="${esc(m.id)}">Đổi MK tạm</button>
+              <button class="btn btn--danger-ghost btn--sm" type="button" data-delete-member="${esc(m.id)}">Xóa</button>
+            </div>
+          </div>`
+        )
+        .join("")}</div>`;
+    } catch (err) {
+      renderErrorState(box, err.message, "community");
+    }
+  }
+
+  /* =========================================================================
+     TAB 4: VISUALS, PARTNERS, SETTINGS & TEAM USERS
+     ========================================================================= */
+  function renderVisualsEditor() {
+    const grid = $("#visuals-editor-grid");
+    if (!grid) return;
+    grid.innerHTML = VISUAL_SLOTS.map((slot) => {
+      const cur = state.visuals[slot.key] || {};
+      const src = cur.url || slot.fallback;
+      const alt = cur.alt || "";
+      const isIllust = cur.isIllustration === true;
+      return `<div class="visual-slot-card" data-visual-slot="${esc(slot.key)}">
+        <div class="visual-slot-head">
+          <strong>${esc(slot.label)}</strong>
+          <span class="cell-sub">${cur.url ? "Đang dùng ảnh CMS" : "Đang dùng ảnh mặc định"}</span>
+        </div>
+        <div class="uploader-box">
+          <img id="vis-prev-${esc(slot.key)}" class="uploader-preview" src="${esc(src)}" alt="Xem trước ${esc(slot.label)}">
+          <div class="uploader-controls">
+            <input type="file" accept="image/*" class="file-input" data-visual-upload="${esc(slot.key)}">
+            <div class="upload-meta" id="vis-meta-${esc(slot.key)}">Chọn ảnh chụp thật (tự động nén JPEG).</div>
+            <input type="text" id="vis-url-${esc(slot.key)}" value="${esc(cur.url || "")}" placeholder="${esc(slot.fallback)}" autocorrect="off" autocapitalize="none" spellcheck="false">
+            <input type="text" id="vis-alt-${esc(slot.key)}" value="${esc(alt)}" placeholder="Mô tả ảnh (Alt text ngắn gọn)">
+            <label class="check-chip" style="margin-top:4px;">
+              <input type="checkbox" id="vis-real-${esc(slot.key)}" ${isIllust ? "" : "checked"}>
+              <span>Ảnh chụp thật (tắt nhãn Ảnh định hướng)</span>
+            </label>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  async function loadVisuals() {
+    try {
+      const res = await api("/api/admin/visuals");
+      state.visuals = res.visuals || {};
+      renderVisualsEditor();
+    } catch (err) {
+      toast(err.message, "error");
+    }
+  }
   function renderPartnersList() {
     const box = $("#partners-container");
     if (!box) return;
@@ -807,6 +970,7 @@
   }
 
   async function loadSettings() {
+    loadVisuals();
     try {
       const pRes = await api("/api/admin/partners");
       state.partners = pRes.items || [];
@@ -1055,6 +1219,7 @@
         kind: $("#ev-kind").value,
         status: $("#ev-status").value,
         title: $("#ev-title").value.trim(),
+        titleEn: $("#ev-title-en") ? $("#ev-title-en").value.trim() : "",
         type: $("#ev-type").value,
         date: $("#ev-date").value.trim(),
         dateDisplay: $("#ev-date-display").value.trim(),
@@ -1063,6 +1228,7 @@
         fee: $("#ev-fee").value.trim(),
         seats: $("#ev-seats").value.trim(),
         summary: $("#ev-summary").value.trim(),
+        summaryEn: $("#ev-summary-en") ? $("#ev-summary-en").value.trim() : "",
         participants: $("#ev-participants").value.trim(),
         image: $("#ev-image").value.trim(),
         filters,
@@ -1281,10 +1447,156 @@
       }
     });
 
+    // Community tab filters & refresh
+    $("#btn-refresh-community")?.addEventListener("click", () => loadCommunity());
+    $$("[data-ref-status]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.refStatus = btn.getAttribute("data-ref-status") || "";
+        $$("[data-ref-status]").forEach((b) => {
+          const active = b === btn;
+          b.classList.toggle("btn--primary", active);
+          b.classList.toggle("btn--outline", !active);
+        });
+        loadAdminReflections();
+      });
+    });
+    $("#member-search-form")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      state.memberSearch = ($("#member-search-input")?.value || "").trim();
+      loadAdminMembers();
+    });
+
+    // Site Visuals upload & save
+    document.addEventListener("change", async (e) => {
+      const input = e.target.closest("input[data-visual-upload]");
+      if (!input) return;
+      const slot = input.getAttribute("data-visual-upload");
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const metaEl = document.getElementById(`vis-meta-${slot}`);
+      const urlEl = document.getElementById(`vis-url-${slot}`);
+      const prevEl = document.getElementById(`vis-prev-${slot}`);
+      if (metaEl) metaEl.textContent = "Đang nén & tải ảnh lên...";
+      input.disabled = true;
+      try {
+        const { blob, width, height } = await compressImageToJpeg(file, 1600, 0.84);
+        const fd = new FormData();
+        fd.append("file", blob, `visual-${slot}.jpg`);
+        const up = await api("/api/admin/media", { method: "POST", body: fd });
+        if (urlEl) urlEl.value = up.url;
+        if (prevEl) prevEl.src = up.url;
+        if (metaEl) metaEl.textContent = `Đã tải lên (${width}×${height}). Bấm “Lưu hình ảnh giao diện” để áp dụng.`;
+        toast("Đã tải ảnh lên — nhớ bấm Lưu để xuất bản!", "success");
+      } catch (err) {
+        if (metaEl) metaEl.textContent = `Lỗi: ${err.message}`;
+        toast(err.message, "error");
+      } finally {
+        input.disabled = false;
+        input.value = "";
+      }
+    });
+
+    $("#visuals-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = $("#btn-save-visuals");
+      const alertEl = $("#visuals-alert");
+      showAlert(alertEl, "");
+      const payload = {};
+      VISUAL_SLOTS.forEach((slot) => {
+        const url = (document.getElementById(`vis-url-${slot.key}`)?.value || "").trim();
+        const alt = (document.getElementById(`vis-alt-${slot.key}`)?.value || "").trim();
+        const isReal = Boolean(document.getElementById(`vis-real-${slot.key}`)?.checked);
+        if (url) {
+          payload[slot.key] = { url, alt, isIllustration: !isReal };
+        }
+      });
+      btn.disabled = true;
+      btn.textContent = "Đang lưu...";
+      try {
+        const res = await api("/api/admin/visuals", { method: "PUT", body: payload });
+        state.visuals = res.visuals || {};
+        renderVisualsEditor();
+        showAlert(alertEl, "Đã cập nhật hình ảnh giao diện trực tiếp lên website!", true);
+      } catch (err) {
+        showAlert(alertEl, formatApiError(err));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Lưu hình ảnh giao diện";
+      }
+    });
+
     // Delegated click handler for dynamic rows & retry/empty buttons
     document.addEventListener("click", async (e) => {
-      const btn = e.target.closest("button[data-open-reg], button[data-edit-event], button[data-delete-event], button[data-edit-post], button[data-delete-post], button[data-toggle-partner], button[data-edit-partner], button[data-delete-partner], button[data-toggle-user], button[data-delete-user], button[data-retry], button[data-empty-cta]");
+      const btn = e.target.closest("button[data-open-reg], button[data-edit-event], button[data-delete-event], button[data-edit-post], button[data-delete-post], button[data-toggle-partner], button[data-edit-partner], button[data-delete-partner], button[data-toggle-user], button[data-delete-user], button[data-mod-ref], button[data-delete-ref], button[data-toggle-member], button[data-reset-member-pw], button[data-delete-member], button[data-retry], button[data-empty-cta]");
       if (!btn) return;
+
+      if (btn.dataset.modRef) {
+        const id = btn.dataset.modRef;
+        const status = btn.dataset.modStatus;
+        try {
+          await api(`/api/admin/reflections/${encodeURIComponent(id)}`, {
+            method: "PATCH",
+            body: { status },
+          });
+          toast(status === "approved" ? "Đã duyệt và xuất bản lưu bút!" : "Đã ẩn lưu bút.", "success");
+          loadAdminReflections();
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+      if (btn.dataset.deleteRef) {
+        if (window.confirm("Xóa vĩnh viễn lưu bút này?")) {
+          try {
+            await api(`/api/admin/reflections/${encodeURIComponent(btn.dataset.deleteRef)}`, { method: "DELETE" });
+            toast("Đã xóa lưu bút.");
+            loadAdminReflections();
+          } catch (err) {
+            toast(err.message, "error");
+          }
+        }
+        return;
+      }
+      if (btn.dataset.toggleMember) {
+        const nextActive = btn.dataset.active !== "1";
+        try {
+          await api(`/api/admin/members/${encodeURIComponent(btn.dataset.toggleMember)}`, {
+            method: "PATCH",
+            body: { isActive: nextActive },
+          });
+          toast(nextActive ? "Đã mở khóa Thẻ Thành Viên." : "Đã khóa Thẻ Thành Viên.");
+          loadAdminMembers();
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+      if (btn.dataset.resetMemberPw) {
+        const newPw = window.prompt("Nhập mật khẩu tạm mới cho thành viên (tối thiểu 6 ký tự):");
+        if (!newPw || newPw.trim().length < 6) return;
+        try {
+          await api(`/api/admin/members/${encodeURIComponent(btn.dataset.resetMemberPw)}`, {
+            method: "PATCH",
+            body: { resetPassword: newPw.trim() },
+          });
+          toast("Đã cấp lại mật khẩu tạm cho thành viên.", "success");
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+      if (btn.dataset.deleteMember) {
+        if (window.confirm("Xóa vĩnh viễn tài khoản thành viên này và các lưu bút liên quan?")) {
+          try {
+            await api(`/api/admin/members/${encodeURIComponent(btn.dataset.deleteMember)}`, { method: "DELETE" });
+            toast("Đã xóa tài khoản thành viên.");
+            loadAdminMembers();
+          } catch (err) {
+            toast(err.message, "error");
+          }
+        }
+        return;
+      }
 
       if (btn.dataset.openReg) {
         openRegDialog(btn.dataset.openReg);

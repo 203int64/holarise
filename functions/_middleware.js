@@ -17,6 +17,9 @@ function buildLegacyRedirectPath(pathname, search) {
   if (cleanPath === "/hoat-dong") {
     return `/gioi-thieu/${search}#chuong-trinh`;
   }
+  if (cleanPath === "/tai-khoan") {
+    return `/tham-gia/${search}`;
+  }
   if (cleanPath === "/tin-tuc") {
     return `/hanh-trinh/${search}`;
   }

@@ -14,7 +14,7 @@ import shutil
 import struct
 import sys
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlencode, urlparse
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
@@ -124,37 +124,47 @@ def json_ld_script(data: dict) -> str:
     return f'<script type="application/ld+json">\n{payload}\n</script>'
 
 
+def _is_nav_item_active(active_path: str, href: str) -> bool:
+    if active_path == href:
+        return True
+    if href != "/" and active_path.startswith(href):
+        return True
+    if href == "/lich-hoat-dong/" and active_path.startswith("/su-kien/"):
+        return True
+    return False
+
+
 def build_nav_links(active_path: str) -> str:
     items = [
-        ("/gioi-thieu/", "Về HolaRise"),
-        ("/lich-hoat-dong/", "Lịch hoạt động"),
-        ("/hanh-trinh/", "Hành trình"),
+        ("/gioi-thieu/", "Về HolaRise", "nav.about"),
+        ("/lich-hoat-dong/", "Lịch hoạt động", "nav.schedule"),
+        ("/hanh-trinh/", "Hành trình", "nav.journey"),
     ]
     links = []
-    for href, label in items:
-        is_active = active_path == href or (href != "/" and active_path.startswith(href))
+    for href, label, i18n_key in items:
+        is_active = _is_nav_item_active(active_path, href)
         cls = "nav-link is-active" if is_active else "nav-link"
-        aria = ' aria-current="page"' if is_active else ""
-        links.append(f'<a class="{cls}" href="{href}"{aria}>{esc(label)}</a>')
+        aria = ' aria-current="page"' if active_path == href else ""
+        links.append(f'<a class="{cls}" href="{href}" data-i18n="{i18n_key}"{aria}>{esc(label)}</a>')
     return "\n        ".join(links)
 
 
 def build_mobile_nav_links(active_path: str) -> str:
     items = [
-        ("/", "01", "Trang chủ"),
-        ("/gioi-thieu/", "02", "Về HolaRise"),
-        ("/lich-hoat-dong/", "03", "Lịch hoạt động"),
-        ("/hanh-trinh/", "04", "Hành trình & Kho ảnh"),
+        ("/", "01", "Trang chủ", "nav.home"),
+        ("/gioi-thieu/", "02", "Về HolaRise", "nav.about"),
+        ("/lich-hoat-dong/", "03", "Lịch hoạt động", "nav.schedule"),
+        ("/hanh-trinh/", "04", "Hành trình", "nav.journey"),
     ]
     links = []
-    for idx, (href, num, label) in enumerate(items):
-        is_active = active_path == href or (href != "/" and active_path.startswith(href))
+    for idx, (href, num, label, i18n_key) in enumerate(items):
+        is_active = _is_nav_item_active(active_path, href)
         cls = "drawer-link is-active" if is_active else "drawer-link"
-        aria = ' aria-current="page"' if is_active else ""
+        aria = ' aria-current="page"' if active_path == href else ""
         links.append(
             f'<a class="{cls}" href="{href}" style="--i: {idx};"{aria}>'
             f'<span class="drawer-link-num">{num}</span>'
-            f'<span class="drawer-link-label">{esc(label)}</span>'
+            f'<span class="drawer-link-label" data-i18n="{i18n_key}">{esc(label)}</span>'
             f'<span class="drawer-link-arrow" aria-hidden="true">→</span>'
             f"</a>"
         )
@@ -186,9 +196,9 @@ def build_pwa_tabbar_links(active_path: str) -> str:
     ]
     links = []
     for href, label, svg_body in items:
-        is_active = active_path == href or (href != "/" and active_path.startswith(href))
+        is_active = _is_nav_item_active(active_path, href)
         cls = "pwa-tab is-active" if is_active else "pwa-tab"
-        aria = ' aria-current="page"' if is_active else ""
+        aria = ' aria-current="page"' if active_path == href else ""
         links.append(
             f'<a class="{cls}" href="{href}"{aria}>'
             f'<svg class="pwa-tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{svg_body}</svg>'
@@ -245,19 +255,47 @@ def render_hero_quick_pills(pills: list) -> str:
     return "\n          ".join(rendered)
 
 
+EVENT_DEDICATED_ROUTES = {
+    "holaheart-cuoc-doi-cua-cha-2026-11-29": "/su-kien/cuoc-doi-cua-cha/",
+}
+
+
+def resolve_event_href(ws: dict) -> str:
+    if not isinstance(ws, dict):
+        return ""
+    raw = str(ws.get("href") or "").strip()
+    if raw.startswith("/") and not raw.startswith("//"):
+        return raw
+    return EVENT_DEDICATED_ROUTES.get(ws.get("id", ""), "")
+
+
 def render_hero_upcoming_bar(upcoming: list) -> str:
     if not upcoming:
         return ""
     ws = upcoming[0]
+    event_href = resolve_event_href(ws)
+    title_html = (
+        f'<a class="upcoming-title upcoming-title--link" href="{esc(event_href)}">{esc(ws["title"])}</a>'
+        if event_href
+        else f'<span class="upcoming-title">{esc(ws["title"])}</span>'
+    )
+    if event_href:
+        actions_html = f"""<div class="upcoming-bar-actions">
+      <a class="btn btn--primary btn--sm" href="{esc(event_href)}">Xem thư mời &amp; Giữ chỗ →</a>
+      <button class="btn btn--outline btn--sm" type="button" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}" data-event-href="{esc(event_href)}">Giữ chỗ nhanh</button>
+    </div>"""
+    else:
+        actions_html = f"""<button class="btn btn--outline btn--sm" type="button" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}">Giữ chỗ tham gia</button>"""
+
     return f"""<div class="upcoming-bar" aria-label="Sự kiện sắp diễn ra">
   <div class="container upcoming-bar-inner">
     <div class="upcoming-bar-info">
       <span class="upcoming-dot" aria-hidden="true"></span>
       <span class="upcoming-label">Sắp diễn ra</span>
-      <span class="upcoming-title">{esc(ws['title'])}</span>
+      {title_html}
       <span class="upcoming-date">· {esc(ws['dateDisplay'])} ({esc(ws['time'])}) · {esc(ws['fee'])}</span>
     </div>
-    <button class="btn btn--outline btn--sm" type="button" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}">Giữ chỗ miễn phí</button>
+    {actions_html}
   </div>
 </div>"""
 
@@ -298,35 +336,42 @@ def render_story_stage(pillars: list) -> str:
         active_cls = " is-active" if idx == 0 else ""
         selected = "true" if idx == 0 else "false"
         tab_label = p.get("shortTab", f'{num} · {p["badge"]}')
+        filter_key = p.get("filterKey") or derive_pillar_filter(p.get("badge", ""), [], p.get("id", ""))
         tabs.append(
-            f'<button class="story-tab{active_cls}" type="button" role="tab" aria-selected="{selected}" data-story-tab="{idx}">{esc(tab_label)}</button>'
+            f'<button class="story-tab{active_cls}" type="button" role="tab" aria-selected="{selected}" data-story-tab="{idx}" data-pillar="{esc(filter_key)}">{esc(tab_label)}</button>'
         )
 
         chips_html = "".join(f'<span class="visual-chip">{esc(h)}</span>' for h in p["highlights"])
         metric_badge = p.get("metricBadge", "")
         metric_html = f'<span class="story-metric-pill">{esc(metric_badge)}</span>' if metric_badge else ""
-        filter_key = p.get("filterKey") or derive_pillar_filter(p.get("badge", ""), [], p.get("id", ""))
         cta_href = f"/lich-hoat-dong/?nhom={esc(filter_key)}"
         cta_label = f"Xem lịch {p['badge']}"
 
         panels.append(
-            f"""<article class="story-panel{active_cls}" data-story-panel="{idx}">
+            f"""<article class="story-panel{active_cls}" data-story-panel="{idx}" data-pillar="{esc(filter_key)}">
           <div class="story-panel-index">{num} / 0{len(pillars)} — {esc(p['badge'])}</div>
-          <h3>{esc(p['title'])}</h3>
-          <p class="story-panel-summary">{esc(p['summary'])}</p>
+          <h3 data-i18n="pillar.{esc(filter_key)}.title">{esc(p['title'])}</h3>
+          <p class="story-panel-summary" data-i18n="pillar.{esc(filter_key)}.summary">{esc(p['summary'])}</p>
           <div class="visual-chip-row" aria-label="Hoạt động tiêu biểu">{chips_html}</div>
           <div class="story-panel-footer">
             {metric_html}
-            <a class="arrow-link" href="{cta_href}"><span>{esc(cta_label)}</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
+            <a class="arrow-link" href="{cta_href}"><span data-i18n="pillar.{esc(filter_key)}.cta">{esc(cta_label)}</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
           </div>
         </article>"""
         )
 
         priority_attr = ' fetchpriority="low" loading="lazy" decoding="async"' if idx > 0 else ' loading="lazy" decoding="async"'
-        image_label = "HolaHeart · 15/11/2026" if filter_key == "holaheart" else f"{p['badge']} · Hòa Lạc – Thạch Thất"
+        image_label = "HolaHeart · 15/11/2026" if filter_key == "holaheart" else f"{p['badge']} · Hòa Lạc"
+        orient_chip = (
+            '<span class="visual-orientation-chip" data-i18n="media.orientation">Ảnh định hướng</span>'
+            if p.get("imageIsIllustration")
+            else ""
+        )
         slides.append(
-            f"""<div class="story-slide image-note{active_cls}" data-story-slide="{idx}" tabindex="{0 if idx == 0 else -1}" role="group" aria-label="Chú thích ảnh: {esc(image_label)} · {esc(p['imageAlt'])}">
-          <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="960" height="720"{priority_attr}>
+            f"""<div class="story-slide image-note{active_cls}" data-story-slide="{idx}" data-pillar="{esc(filter_key)}" tabindex="{0 if idx == 0 else -1}" role="group" aria-label="{esc(image_label)} · {esc(p['imageAlt'])}">
+          <!-- CMS:PILLAR_SLIDE_{idx}:START -->
+          <img src="{esc(p['image'])}" alt="{esc(p['imageAlt'])}" width="960" height="720"{priority_attr}>{orient_chip}
+          <!-- CMS:PILLAR_SLIDE_{idx}:END -->
           {render_image_tooltip(p['imageAlt'], image_label)}
           <div class="story-slide-scrim" aria-hidden="true"></div>
         </div>"""
@@ -442,35 +487,53 @@ def render_pillars(pillars: list, detailed: bool = False) -> str:
             )
 
         collage_buttons = []
+        orient_chip = (
+            '<span class="visual-orientation-chip" data-i18n="media.orientation">Ảnh định hướng</span>'
+            if p.get("imageIsIllustration")
+            else ""
+        )
         for frame in photo_frames:
             main_cls = " pillar-photo--main" if frame["is_main"] else ""
             cap = frame["caption"]
             full_cap = f"{p['badge']} · {cap}" if p["badge"] not in cap else cap
             loading_attr = 'loading="lazy" decoding="async"'
             width_attr = 'width="960" height="600"' if frame["is_main"] else 'width="480" height="300"'
+            if frame["is_main"]:
+                img_block = f"""<!-- CMS:PILLAR_MAIN_{filter_key.upper()}:START -->
+            <img src="{esc(frame['src'])}" alt="{esc(frame['alt'])}" {width_attr} {loading_attr}>{orient_chip}
+            <!-- CMS:PILLAR_MAIN_{filter_key.upper()}:END -->"""
+            else:
+                img_block = f'<img src="{esc(frame["src"])}" alt="{esc(frame["alt"])}" {width_attr} {loading_attr}>'
             collage_buttons.append(
                 f"""<button class="pillar-photo{main_cls}" type="button" aria-label="Xem ảnh: {esc(cap)}" data-lightbox-src="{esc(frame['src'])}" data-lightbox-alt="{esc(frame['alt'])}" data-lightbox-caption="{esc(full_cap)}">
-            <img src="{esc(frame['src'])}" alt="{esc(frame['alt'])}" {width_attr} {loading_attr}>
+            {img_block}
             <span class="pillar-photo-cap" aria-hidden="true">{esc(cap)}</span>
           </button>"""
             )
 
         chapters.append(
-            f"""<article class="pillar-chapter{reverse_cls}"{anchor_id} data-reveal>
+            f"""<article class="pillar-chapter{reverse_cls}"{anchor_id} data-pillar="{esc(filter_key)}" data-reveal data-mobile-pillar>
         <div class="pillar-chapter-copy">
-          <div class="pillar-chapter-eyebrow">
-            <span class="pillar-chapter-num">0{idx}</span>
-            <span aria-hidden="true">·</span>
-            <span class="pillar-chapter-kicker">{esc(p['badge'])}</span>
+          <div class="pillar-chapter-head" data-mobile-pillar-toggle>
+            <div class="pillar-chapter-head-main">
+              <div class="pillar-chapter-eyebrow">
+                <span class="pillar-chapter-num">0{idx}</span>
+                <span aria-hidden="true">·</span>
+                <span class="pillar-chapter-kicker">{esc(p['badge'])}</span>
+              </div>
+              <h3 data-i18n="pillar.{esc(filter_key)}.title">{esc(p['title'])}</h3>
+            </div>
+            <span class="mobile-fold-indicator" aria-hidden="true"></span>
           </div>
-          <h3>{esc(p['title'])}</h3>
-          <p class="pillar-lead">{esc(p['summary'])}</p>
-          {story_html}
-          <ul class="pillar-focus-list" aria-label="Trọng tâm hoạt động">
-            {highlights_html}
-          </ul>
-          <div class="pillar-chapter-actions">
-            <a class="arrow-link" href="{cta_href}"><span>{esc(cta_label)}</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
+          <div class="pillar-chapter-fold">
+            <p class="pillar-lead" data-i18n="pillar.{esc(filter_key)}.summary">{esc(p['summary'])}</p>
+            {story_html}
+            <ul class="pillar-focus-list" aria-label="Trọng tâm hoạt động">
+              {highlights_html}
+            </ul>
+            <div class="pillar-chapter-actions">
+              <a class="arrow-link" href="{cta_href}"><span data-i18n="pillar.{esc(filter_key)}.cta">{esc(cta_label)}</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
+            </div>
           </div>
         </div>
         <div class="pillar-collage">
@@ -493,34 +556,55 @@ def render_workshops(upcoming: list) -> str:
     for ws in upcoming:
         pillar = derive_pillar_filter(ws.get("type", ""), ws.get("filters", []))
         token_set = [pillar] + [x for x in ws.get("filters", []) if x != pillar]
-        cat_attr = f' data-workshop-card data-category="{esc(" ".join(token_set))}"'
-        cards.append(
-            f"""<article class="event-card" data-stagger-item{cat_attr}>
-        <div class="event-card-media" data-curtain>
-          <img src="{esc(ws['image'])}" alt="{esc(ws['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
+        cat_attr = f' data-workshop-card data-pillar="{esc(pillar)}" data-category="{esc(" ".join(token_set))}"'
+        event_href = resolve_event_href(ws)
+        title_en_attr = f' data-title-en="{esc(ws["titleEn"])}"' if ws.get("titleEn") else ""
+        summary_en_attr = f' data-summary-en="{esc(ws["summaryEn"])}"' if ws.get("summaryEn") else ""
+        media_inner = f"""<img src="{esc(ws['image'])}" alt="{esc(ws['imageAlt'])}" width="640" height="420" loading="lazy" decoding="async">
           <div class="event-card-badges">
             <span class="glass-badge">{esc(ws['dateDisplay'])}</span>
             <span class="glass-badge glass-badge--accent">{esc(ws['fee'])}</span>
-          </div>
-        </div>
+          </div>"""
+        if event_href:
+            media_html = f"""<a class="event-card-media event-card-media--link" data-curtain href="{esc(event_href)}" aria-label="{esc(ws['title'])}">
+          {media_inner}
+        </a>"""
+            title_html = f'<h3 class="card-title"><a href="{esc(event_href)}"{title_en_attr}>{esc(ws["title"])}</a></h3>'
+            footer_html = f"""<div class="card-footer card-footer--dual">
+            <a class="btn btn--primary btn--sm" href="{esc(event_href)}">
+              <span data-i18n="cta.viewInvite">Xem thư mời &amp; Giữ chỗ</span>
+              <span aria-hidden="true">→</span>
+            </a>
+            <button class="btn btn--outline btn--sm" type="button" data-i18n="cta.quickBook" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}" data-event-href="{esc(event_href)}">Giữ chỗ nhanh</button>
+          </div>"""
+        else:
+            media_html = f"""<div class="event-card-media" data-curtain>
+          {media_inner}
+        </div>"""
+            title_html = f'<h3 class="card-title"{title_en_attr}>{esc(ws["title"])}</h3>'
+            footer_html = f"""<div class="card-footer">
+            <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}">
+              <span data-i18n="cta.reserveSeat">Giữ chỗ tham dự</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>"""
+
+        cards.append(
+            f"""<article class="event-card" data-stagger-item{cat_attr}>
+        {media_html}
         <div class="event-card-body">
           <div class="card-meta">
             <span class="cat">{esc(ws['type'])}</span>
             <span>·</span>
             <span>{esc(ws['seats'])}</span>
           </div>
-          <h3 class="card-title">{esc(ws['title'])}</h3>
-          <p class="card-text">{esc(ws['summary'])}</p>
+          {title_html}
+          <p class="card-text"{summary_en_attr}>{esc(ws['summary'])}</p>
           <div class="event-info-inline">
             <span>{ICON_CALENDAR} {esc(ws['time'])}</span>
             <span>{ICON_PIN} {esc(ws['location'])}</span>
           </div>
-          <div class="card-footer">
-            <button class="btn btn--primary btn--sm" type="button" style="width: 100%; justify-content: space-between;" data-register-event="{esc(ws['title'])}" data-event-id="{esc(ws['id'])}" data-event-date="{esc(ws['dateDisplay'])}" data-event-time="{esc(ws['time'])}" data-event-location="{esc(ws['location'])}" data-event-fee="{esc(ws['fee'])}" data-event-type="{esc(ws['type'])}">
-              <span>Đăng ký tham gia</span>
-              <span aria-hidden="true">→</span>
-            </button>
-          </div>
+          {footer_html}
         </div>
       </article>"""
         )
@@ -534,12 +618,12 @@ def render_home_upcoming_section(upcoming: list) -> str:
   <div class="container">
     <div class="section-header--split" style="margin-bottom: 28px;" data-reveal>
       <div>
-        <div class="kicker">Lịch tuần này</div>
-        <h2 class="section-title" style="margin-bottom: 6px;">Hoạt động sắp diễn ra tại Hòa Lạc – Thạch Thất</h2>
-        <p class="section-lead">Đăng ký tham gia trực tiếp ngay trên từng buổi gặp mặt.</p>
+        <div class="kicker" data-i18n="home.upcoming.kicker">Lịch tuần này</div>
+        <h2 class="section-title" style="margin-bottom: 6px;" data-i18n="home.upcoming.title">Hoạt động sắp diễn ra tại Hòa Lạc</h2>
+        <p class="section-lead" data-i18n="home.upcoming.lead">Giữ chỗ trực tiếp ngay trên từng buổi gặp mặt.</p>
       </div>
       <a class="arrow-link" href="/lich-hoat-dong/">
-        <span>Xem toàn bộ lịch</span>
+        <span data-i18n="home.upcoming.all">Xem toàn bộ lịch</span>
         <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
       </a>
     </div>
@@ -555,21 +639,21 @@ def render_schedule_upcoming_content(upcoming: list) -> str:
     if not upcoming:
         return """<div class="schedule-empty-flagship" role="status">
       <div class="schedule-empty-copy">
-        <span class="kicker">Nhịp hoạt động định kỳ</span>
-        <h3>Ban Điều Phối đang chuẩn bị cho những cuộc gặp tiếp theo tại Hòa Lạc – Thạch Thất</h3>
-        <p>Các buổi HolaHeart, HolaGreen và HolaConnect được tổ chức luân phiên 1–2 buổi mỗi tuần theo tinh thần phi lợi nhuận. Để lại liên hệ để nhận lịch mới nhất ngay khi mở đăng ký.</p>
+        <span class="kicker" data-i18n="schedule.empty.kicker">Nhịp hoạt động định kỳ</span>
+        <h3 data-i18n="schedule.empty.title">Ban Điều Phối đang chuẩn bị cho những cuộc gặp tiếp theo tại Hòa Lạc</h3>
+        <p data-i18n="schedule.empty.desc">Các buổi HolaHeart, HolaGreen và HolaConnect diễn ra luân phiên 1–2 buổi mỗi tuần theo tinh thần phi lợi nhuận.</p>
       </div>
       <div class="schedule-empty-actions">
-        <a class="btn btn--primary" href="/tham-gia/">Nhận thông báo lịch tuần mới →</a>
-        <a class="btn btn--outline" href="/gioi-thieu/#chuong-trinh">Tìm hiểu 3 trụ cột</a>
+        <a class="btn btn--primary" href="/tham-gia/" data-i18n="schedule.empty.cta">Tạo Thẻ Thành Viên nhận lịch mới →</a>
+        <a class="btn btn--outline" href="/gioi-thieu/#chuong-trinh" data-i18n="schedule.empty.secondary">Tìm hiểu 3 trụ cột</a>
       </div>
     </div>"""
     return f"""<div class="grid-3" data-stagger-group>
       {render_workshops(upcoming)}
     </div>
     <div class="filter-empty" data-filter-empty="[data-workshop-card]" hidden>
-      <p>Hiện chưa có buổi sắp tới nào thuộc nhóm này trong tuần.</p>
-      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-workshop-card]">Xem tất cả lịch hoạt động</button>
+      <p data-i18n="schedule.filterEmpty">Hiện chưa có buổi sắp tới nào thuộc nhóm này trong tuần.</p>
+      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-workshop-card]" data-i18n="schedule.filterReset">Xem tất cả lịch hoạt động</button>
     </div>"""
 
 
@@ -609,10 +693,17 @@ def render_sdgs(sdgs: list) -> str:
     cards = []
     for s in sdgs:
         cards.append(
-            f"""<article class="sdg-col" data-stagger-item style="--sdg-color: {esc(s['color'])};">
-        <span class="sdg-code">{esc(s['code'])}</span>
-        <h3>{esc(s['title'])}</h3>
-        <p>{esc(s['description'])}</p>
+            f"""<article class="sdg-col" data-stagger-item data-mobile-fold style="--sdg-color: {esc(s['color'])};">
+        <div class="mobile-fold-head" data-mobile-fold-toggle>
+          <div class="mobile-fold-titles">
+            <span class="sdg-code">{esc(s['code'])}</span>
+            <h3>{esc(s['title'])}</h3>
+          </div>
+          <span class="mobile-fold-indicator" aria-hidden="true"></span>
+        </div>
+        <div class="mobile-fold-body">
+          <p>{esc(s['description'])}</p>
+        </div>
       </article>"""
         )
     return "\n      ".join(cards)
@@ -625,7 +716,11 @@ def render_news_cards(articles: list, filterable: bool = False) -> str:
         tokens = [pillar] + [x for x in a.get("filters", []) if x != pillar]
         if a.get("categorySlug") and a["categorySlug"] not in tokens:
             tokens.append(a["categorySlug"])
-        attr = f' data-news-card data-category="{esc(" ".join(tokens))}"' if filterable else ""
+        attr = (
+            f' data-news-card data-pillar="{esc(pillar)}" data-category="{esc(" ".join(tokens))}"'
+            if filterable
+            else f' data-pillar="{esc(pillar)}"'
+        )
         href = f'/hanh-trinh/{esc(a["slug"])}/'
         cards.append(
             f"""<article class="editorial-card" data-stagger-item{attr}>
@@ -640,7 +735,7 @@ def render_news_cards(articles: list, filterable: bool = False) -> str:
         <h3 class="card-title"><a href="{href}">{esc(a['title'])}</a></h3>
         <p class="card-text">{esc(a['excerpt'])}</p>
         <div class="card-footer">
-          <a class="arrow-link" href="{href}">Xem tường thuật &amp; hình ảnh →</a>
+          <a class="arrow-link" href="{href}" data-i18n="journey.readAndWrite">Đọc tường thuật &amp; Viết lưu bút →</a>
         </div>
       </article>"""
         )
@@ -652,12 +747,12 @@ def render_horizontal_gallery(gallery: list) -> str:
     items = []
     for idx, g in enumerate(gallery, start=1):
         src = g.get("src") or g.get("url") or ""
-        caption = g.get("caption") or g.get("alt") or "Khoảnh khắc HolaRise tại Hòa Lạc – Thạch Thất"
+        caption = g.get("caption") or g.get("alt") or "Khoảnh khắc Hola tại Hòa Lạc"
         alt = g.get("alt") or caption
         label = g.get("label") or g.get("sourceLabel") or ""
         full_caption = f"{label} · {caption}" if label and label not in caption else caption
         items.append(
-            f"""<button class="horizontal-card" type="button" aria-label="Xem ảnh: {esc(caption)}" data-lightbox-src="{esc(src)}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}">
+            f"""<button class="horizontal-card" type="button" aria-label="Xem ảnh: {esc(caption)}" data-lightbox-src="{esc(src)}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}" data-card-index="{idx:02d} / {total:02d}">
         <div class="horizontal-frame">
           <img src="{esc(src)}" alt="{esc(alt)}" width="960" height="600" loading="lazy" decoding="async">
           <div class="horizontal-caption">
@@ -703,9 +798,8 @@ def render_photo_wall(photos: list) -> str:
 def render_faqs(faqs: list) -> str:
     items = []
     for idx, f in enumerate(faqs):
-        open_attr = " open" if idx == 0 else ""
         items.append(
-            f"""<details class="faq-details"{open_attr}>
+            f"""<details class="faq-details">
         <summary>{esc(f['question'])}</summary>
         <div class="faq-answer">{esc(f['answer'])}</div>
       </details>"""
@@ -717,13 +811,56 @@ def render_numbered_cards(items: list) -> str:
     cards = []
     for idx, item in enumerate(items, start=1):
         cards.append(
-            f"""<article class="value-col" data-stagger-item>
-        <span class="value-num">0{idx}</span>
-        <h3>{esc(item['title'])}</h3>
-        <p>{esc(item['description'])}</p>
+            f"""<article class="value-col" data-stagger-item data-mobile-fold>
+        <div class="mobile-fold-head" data-mobile-fold-toggle>
+          <div class="mobile-fold-titles">
+            <span class="value-num">0{idx}</span>
+            <h3>{esc(item['title'])}</h3>
+          </div>
+          <span class="mobile-fold-indicator" aria-hidden="true"></span>
+        </div>
+        <div class="mobile-fold-body">
+          <p>{esc(item['description'])}</p>
+        </div>
       </article>"""
         )
     return "\n      ".join(cards)
+
+
+def render_partners_strip(partners: list) -> str:
+    active = [
+        p
+        for p in (partners or [])
+        if isinstance(p, dict) and p.get("isActive", True) is not False and str(p.get("name", "")).strip()
+    ]
+    if not active:
+        return ""
+    items = []
+    for p in active:
+        name = str(p.get("name", "")).strip()
+        logo_url = str(p.get("logoUrl", "")).strip()
+        website_url = str(p.get("websiteUrl", "")).strip()
+        logo_html = (
+            f'<img class="partner-colophon-logo" src="{esc(logo_url)}" alt="Logo {esc(name)}" width="20" height="20" loading="lazy" decoding="async">'
+            if logo_url and (logo_url.startswith("/") or logo_url.startswith("https://"))
+            else ""
+        )
+        label_html = f'<span class="partner-colophon-name">{esc(name)}</span>'
+        if website_url and website_url.startswith("https://"):
+            items.append(
+                f'<a class="partner-colophon-link" href="{esc(website_url)}" target="_blank" rel="noopener noreferrer" aria-label="{esc(name)} — Đơn vị đồng hành">{logo_html}{label_html}<span class="partner-colophon-arrow" aria-hidden="true">↗</span></a>'
+            )
+        else:
+            items.append(f'<span class="partner-colophon-link">{logo_html}{label_html}</span>')
+
+    items_joined = '<span class="partner-colophon-dot" aria-hidden="true">·</span>'.join(items)
+    return f"""<div class="partner-colophon" id="doi-tac" aria-label="Đơn vị đồng hành">
+  <div class="container partner-colophon-inner">
+    <span class="partner-colophon-label" data-i18n="partner.colophonLabel">Đồng hành không gian</span>
+    <span class="partner-colophon-dot" aria-hidden="true">·</span>
+    <div class="partner-colophon-list">{items_joined}</div>
+  </div>
+</div>"""
 
 
 def render_testimonials_section(testimonials: list) -> str:
@@ -917,35 +1054,73 @@ def events_schema(site: dict, upcoming: list) -> list:
     b = site["brand"]
     schemas = []
     for ws in upcoming:
-        schemas.append(
-            {
-                "@context": "https://schema.org",
-                "@type": "Event",
-                "name": ws["title"],
-                "startDate": ws["date"],
-                "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-                "eventStatus": "https://schema.org/EventScheduled",
-                "isAccessibleForFree": True,
-                "image": [abs_url(b["siteUrl"], ws["image"])],
-                "description": ws["summary"],
-                "location": {
-                    "@type": "Place",
-                    "name": ws["location"],
-                    "address": {
-                        "@type": "PostalAddress",
-                        "addressLocality": "Hòa Lạc, Thạch Thất",
-                        "addressRegion": "Hà Nội",
-                        "addressCountry": "VN",
-                    },
+        landing = ws.get("landing") if isinstance(ws.get("landing"), dict) else {}
+        start_date = landing.get("startIso") or ws["date"]
+        end_date = landing.get("endIso") or ""
+        event_href = resolve_event_href(ws)
+        schema_item = {
+            "@context": "https://schema.org",
+            "@type": "Event",
+            "name": ws["title"],
+            "startDate": start_date,
+            "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+            "eventStatus": "https://schema.org/EventScheduled",
+            "isAccessibleForFree": True,
+            "image": [abs_url(b["siteUrl"], landing.get("ogImage") or ws["image"])],
+            "description": ws["summary"],
+            "location": {
+                "@type": "Place",
+                "name": ws["location"],
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "Hòa Lạc, Thạch Thất",
+                    "addressRegion": "Hà Nội",
+                    "addressCountry": "VN",
                 },
-                "organizer": {
-                    "@type": "NGO",
-                    "name": b["fullName"],
-                    "url": b["siteUrl"],
-                },
-            }
-        )
+            },
+            "organizer": {
+                "@type": "NGO",
+                "name": b["fullName"],
+                "url": b["siteUrl"],
+            },
+        }
+        if end_date:
+            schema_item["endDate"] = end_date
+        if event_href:
+            schema_item["url"] = abs_url(b["siteUrl"], event_href)
+        schemas.append(schema_item)
     return schemas
+
+
+def render_invitation_letter_body(landing: dict) -> str:
+    paras = landing.get("letterParagraphs", [])
+    pull = (landing.get("letterPullQuote") or "").strip()
+    closing = (landing.get("letterClosing") or "").strip()
+    blocks = []
+    for idx, raw_p in enumerate(paras):
+        lines_html = "<br>".join(esc(ln.strip()) for ln in str(raw_p).split("\n") if ln.strip())
+        cls = ' class="invite-lead-p"' if idx == 0 else ""
+        blocks.append(f"<p{cls}>{lines_html}</p>")
+        if idx == 1 and pull:
+            blocks.append(f'<blockquote class="invite-pullquote">“{esc(pull)}”</blockquote>')
+    if closing:
+        blocks.append(f'<p class="invite-closing-p">{esc(closing)}</p>')
+    return "\n      ".join(blocks)
+
+
+def build_google_calendar_url(ws: dict, landing: dict, canonical_url: str) -> str:
+    details = f"{ws['summary']}\n\nXem thư mời & giữ chỗ: {canonical_url}"
+    query = urlencode(
+        {
+            "action": "TEMPLATE",
+            "text": ws["title"],
+            "dates": f"{landing['icsStartUtc']}/{landing['icsEndUtc']}",
+            "details": details,
+            "location": ws["location"],
+            "ctz": "Asia/Ho_Chi_Minh",
+        }
+    )
+    return f"https://calendar.google.com/calendar/render?{query}"
 
 
 def faq_schema(faqs: list) -> dict:
@@ -1009,6 +1184,7 @@ def write_page(
             "OG_IMAGE_URL": esc(og_img_url),
             "BODY_CLASS": esc(body_class),
             "BRAND_FULL_NAME": esc(b["fullName"]),
+            "BRAND_SHORT_NAME": esc(b["shortName"]),
             "BRAND_SUBTITLE": format_inline_pillar_tags(b["subtitle"]),
             "BRAND_TAGLINE": esc(b["tagline"]),
             "LOGO_DARK": esc(b["logoDark"]),
@@ -1045,6 +1221,7 @@ def collect_precache_urls() -> list:
         "/assets/images/musicspace-archive/",
         "/assets/images/pwa/screenshot-",
         "/assets/images/og-cover.jpg",
+        "/assets/images/hero-holarise-",
     )
 
     for html_file in sorted(DIST_DIR.rglob("*.html")):
@@ -1355,6 +1532,9 @@ def generate_cloudflare_headers() -> str:
 /lich-hoat-dong/*
   Cache-Control: public, max-age=0, must-revalidate
 
+/su-kien/*
+  Cache-Control: public, max-age=0, must-revalidate
+
 /hanh-trinh/*
   Cache-Control: public, max-age=0, must-revalidate
 
@@ -1402,13 +1582,16 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
         f"- **{p['badge']} ({p['title']})**: {p['summary']}"
         for p in activities.get("pillars", [])
     ]
-    upcoming_lines = [
-        f"- {ws['dateDisplay']} ({ws['time']}): {ws['title']} — {ws['location']} ({ws['fee']}, {ws['seats']})"
-        for ws in workshops.get("upcoming", [])
-    ]
+    upcoming_lines = []
+    for ws in workshops.get("upcoming", []):
+        ev_href = resolve_event_href(ws)
+        title_md = f"[{ws['title']}]({abs_url(b['siteUrl'], ev_href)})" if ev_href else ws["title"]
+        upcoming_lines.append(
+            f"- {ws['dateDisplay']} ({ws['time']}): {title_md} — {ws['location']} ({ws['fee']}, {ws['seats']})"
+        )
     if not upcoming_lines:
         upcoming_lines = [
-            f"- Nhịp hoạt động định kỳ 1–2 buổi/tuần tại Hòa Lạc – Thạch Thất. Theo dõi lịch cập nhật tại {abs_url(b['siteUrl'], '/lich-hoat-dong/')}."
+            f"- Nhịp hoạt động định kỳ 1–2 buổi/tuần tại Hòa Lạc. Theo dõi lịch cập nhật tại {abs_url(b['siteUrl'], '/lich-hoat-dong/')}."
         ]
 
     past_lines = []
@@ -1435,17 +1618,18 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
 > {b['subtitle']}
 
 - Website: {b['siteUrl']}
-- Định vị: Chapter 01 · {b['location']} (tầm nhìn lan tỏa tới nhiều địa phương trên cả nước)
+- Địa bàn khởi nguồn: {b['location']}
+- Văn phòng liên hệ: {c['address']}
 - Nhịp sinh hoạt: {c['meetingTime']}
 - Liên hệ: {c['email']} | Hotline/Zalo: {c['phoneDisplay']}
 - Nguyên tắc: Cộng đồng phi lợi nhuận, công khai minh bạch chi phí (nếu phát sinh) trước mỗi hoạt động.
 
 ## Các trang chính (Flagship 3+1)
-- [Trang chủ]({abs_url(b['siteUrl'], '/')}): Tuyên ngôn, khoảnh khắc thật và mô hình Tạo Tác Động 3 trụ cột.
-- [Về HolaRise]({abs_url(b['siteUrl'], '/gioi-thieu/')}): Câu chuyện Chapter 01 Hòa Lạc – Thạch Thất, Theory of Change, 3 trụ cột, 4 chuẩn mực, 5 nguyên tắc minh bạch và 6 UN SDGs.
+- [Trang chủ]({abs_url(b['siteUrl'], '/')}): Tuyên ngôn, khoảnh khắc gặp gỡ tại Hòa Lạc và mô hình Tạo Tác Động 3 trụ cột.
+- [Về HolaRise]({abs_url(b['siteUrl'], '/gioi-thieu/')}): Câu chuyện khởi nguồn tại Hòa Lạc, 3 trụ cột, 4 chuẩn mực, 5 nguyên tắc minh bạch và 6 UN SDGs.
 - [Lịch hoạt động]({abs_url(b['siteUrl'], '/lich-hoat-dong/')}): Lịch 1–2 buổi/tuần lọc theo HolaHeart, HolaGreen, HolaConnect.
-- [Hành trình]({abs_url(b['siteUrl'], '/hanh-trinh/')}): Tường thuật sự kiện và triển lãm ảnh thật (HolaHeart 15/11 & HolaHeart × MusicSpace).
-- [Tham gia & Hợp tác]({abs_url(b['siteUrl'], '/tham-gia/')}): Đăng ký Thẻ Gieo Mầm cho người trẻ và cổng kết nối đối tác, nhà trường, CLB.
+- [Hành trình]({abs_url(b['siteUrl'], '/hanh-trinh/')}): Tường thuật sự kiện, lưu bút cảm nhận thành viên và triển lãm khoảnh khắc tại Hòa Lạc.
+- [Tham gia & Thẻ Thành Viên]({abs_url(b['siteUrl'], '/tham-gia/')}): Tạo Thẻ Thành Viên Hola (giữ chỗ 1 chạm, viết lưu bút) và cổng kết nối đối tác, nhà trường, CLB.
 - [Chuẩn mực Minh bạch & An toàn]({abs_url(b['siteUrl'], '/chinh-sach/')}): Quy tắc cộng đồng và quyền riêng tư dữ liệu, hình ảnh.
 
 ## Mô hình Tạo Tác Động (Heart → Green → Connect)
@@ -1486,11 +1670,17 @@ def build_site() -> list:
     home_gallery_mix = list(activities["gallery"][:5]) + list(heart_photo_wall[:5])
 
     # 1. Home page
+    hero_orient_chip = (
+        '<span class="visual-orientation-chip" data-i18n="media.orientation">Ảnh định hướng</span>'
+        if h.get("imageIsIllustration")
+        else ""
+    )
+    hero_media_html = f'<img class="hero-card-img" src="{esc(h["image"])}" alt="{esc(h["imageAlt"])}" width="1376" height="768" fetchpriority="high" decoding="async" data-cinema-img>{hero_orient_chip}'
+
     home_main = render_template(
         load_template("home.html"),
         {
-            "HERO_IMAGE": esc(h["image"]),
-            "HERO_IMAGE_ALT": esc(h["imageAlt"]),
+            "HERO_MEDIA_HTML": hero_media_html,
             "HERO_BADGE": esc(h["badge"]),
             "HERO_HEADLINE_LINES": render_hero_headline_lines(h["headline"]),
             "HERO_QUICK_PILLS": render_hero_quick_pills(h.get("quickPills", [])),
@@ -1507,7 +1697,7 @@ def build_site() -> list:
             "PHILOSOPHY_VISION": esc(p["vision"]),
             "STORY_STAGE_HTML": render_story_stage(activities["pillars"]),
             "HORIZONTAL_GALLERY_HTML": f"<!-- CMS:HORIZONTAL_GALLERY:START -->\n{render_horizontal_gallery(home_gallery_mix)}\n<!-- CMS:HORIZONTAL_GALLERY:END -->",
-            "PARTNERS_STRIP": "<!-- CMS:PARTNERS_STRIP:START --><!-- CMS:PARTNERS_STRIP:END -->",
+            "PARTNERS_STRIP": f"<!-- CMS:PARTNERS_STRIP:START -->\n{render_partners_strip(site.get('partners', []))}\n<!-- CMS:PARTNERS_STRIP:END -->",
             "TESTIMONIALS_SECTION": render_testimonials_section(site.get("testimonials", [])),
             "FAQ_HTML": render_faqs(site["faqs"]),
         },
@@ -1544,14 +1734,22 @@ def build_site() -> list:
 
     # 2. About page (/gioi-thieu/ — Về HolaRise)
     about_media = site.get("about", {})
+    about_img_src = about_media.get("image") or h["image"]
+    about_img_alt = about_media.get("imageAlt") or h["imageAlt"]
+    about_orient_chip = (
+        '<span class="visual-orientation-chip" data-i18n="media.orientation">Ảnh định hướng</span>'
+        if about_media.get("imageIsIllustration")
+        else ""
+    )
+    about_media_html = f'<img src="{esc(about_img_src)}" alt="{esc(about_img_alt)}" width="1280" height="714" fetchpriority="high" decoding="async">{about_orient_chip}'
+
     about_main = render_template(
         load_template("about.html"),
         {
             "BRAND_FULL_NAME": esc(b["fullName"]),
             "BRAND_SHORT_NAME": esc(b["shortName"]),
             "BRAND_SUBTITLE": format_inline_pillar_tags(b["subtitle"]),
-            "ABOUT_IMAGE": esc(about_media.get("image") or h["image"]),
-            "ABOUT_IMAGE_ALT": esc(about_media.get("imageAlt") or h["imageAlt"]),
+            "ABOUT_MEDIA_HTML": about_media_html,
             "PHILOSOPHY_QUOTE": esc(p["quote"]),
             "PHILOSOPHY_MOTTO": esc(p["motto"]),
             "PHILOSOPHY_MISSION": format_inline_pillar_tags(p["mission"]),
@@ -1560,7 +1758,6 @@ def build_site() -> list:
             "CORE_VALUES_HTML": render_numbered_cards(p["coreValues"]),
             "SDGS_HTML": render_sdgs(site["sdgs"]),
             "PRINCIPLES_HTML": render_numbered_cards(site["principles"]),
-            "PARTNERS_STRIP": "<!-- CMS:PARTNERS_STRIP:START --><!-- CMS:PARTNERS_STRIP:END -->",
             "TESTIMONIALS_SECTION": render_testimonials_section(site.get("testimonials", [])),
         },
     )
@@ -1569,8 +1766,8 @@ def build_site() -> list:
         site,
         "gioi-thieu/index.html",
         "/gioi-thieu/",
-        f"Về HolaRise · Chapter 01 Hòa Lạc – Thạch Thất | {b['brandName']}",
-        f"Khám phá mô hình Tạo Tác Động (HolaHeart → HolaGreen → HolaConnect), sứ mệnh khởi nguồn từ Hòa Lạc – Thạch Thất và chuẩn mực minh bạch của {b['brandName']}.",
+        f"Về HolaRise · Hòa Lạc | {b['brandName']}",
+        f"Khám phá mô hình Tạo Tác Động (HolaHeart → HolaGreen → HolaConnect), sứ mệnh khởi nguồn từ Hòa Lạc và chuẩn mực minh bạch của {b['brandName']}.",
         about_main,
         [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Về HolaRise", "/gioi-thieu/")])],
     )
@@ -1591,8 +1788,8 @@ def build_site() -> list:
         site,
         "lich-hoat-dong/index.html",
         "/lich-hoat-dong/",
-        f"Lịch hoạt động Hòa Lạc – Thạch Thất | {b['brandName']}",
-        f"Cập nhật lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc – Thạch Thất của {b['shortName']} trên 3 trụ cột: HolaHeart, HolaGreen và HolaConnect.",
+        f"Lịch hoạt động tại Hòa Lạc | {b['brandName']}",
+        f"Cập nhật lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc của {b['shortName']} trên 3 trụ cột: HolaHeart, HolaGreen và HolaConnect.",
         ws_main,
         [
             org_ld,
@@ -1601,6 +1798,67 @@ def build_site() -> list:
         event_schemas=events_schema(site, workshops["upcoming"]),
     )
     sitemap_urls.append(("/lich-hoat-dong/", "0.9", "weekly"))
+
+    # 3b. Dedicated Editorial Event Invitation Pages (/su-kien/<slug>/)
+    invite_tpl = load_template("event_invitation.html")
+    invite_phone_raw = re.sub(r"[^0-9+]", "", site["contact"]["phoneDisplay"])
+    for ws in workshops.get("upcoming", []):
+        landing = ws.get("landing")
+        if not isinstance(landing, dict):
+            continue
+        slug = landing["slug"]
+        url_path = landing.get("urlPath") or f"/su-kien/{slug}/"
+        canonical_ev_url = abs_url(b["siteUrl"], url_path)
+        gcal_url = build_google_calendar_url(ws, landing, canonical_ev_url)
+        invite_main = render_template(
+            invite_tpl,
+            {
+                "BRAND_SHORT_NAME": esc(b["shortName"]),
+                "EVENT_ID": esc(ws["id"]),
+                "EVENT_TITLE": esc(ws["title"]),
+                "EVENT_DATE_DISPLAY": esc(ws["dateDisplay"]),
+                "EVENT_LOCATION": esc(ws["location"]),
+                "EVENT_FEE": esc(ws["fee"]),
+                "EVENT_SEATS": esc(ws["seats"]),
+                "EVENT_IMAGE": esc(ws["image"]),
+                "EVENT_IMAGE_ALT": esc(ws["imageAlt"]),
+                "INVITE_HEADLINE": esc(landing["headline"]),
+                "INVITE_START_ISO": esc(landing["startIso"]),
+                "INVITE_END_ISO": esc(landing["endIso"]),
+                "INVITE_ICS_START": esc(landing["icsStartUtc"]),
+                "INVITE_ICS_END": esc(landing["icsEndUtc"]),
+                "INVITE_TIME_LABEL": esc(landing["timeLabel"]),
+                "INVITE_VENUE_NAME": esc(landing["venueName"]),
+                "LETTER_BODY_HTML": render_invitation_letter_body(landing),
+                "LETTER_SIGNOFF": esc(landing["letterSignoff"]),
+                "GOOGLE_CAL_URL": esc(gcal_url),
+                "CANONICAL_EVENT_URL": esc(canonical_ev_url),
+                "FORM_ENDPOINT": esc(site["contact"].get("formEndpoint", "")),
+                "CONTACT_PHONE": esc(site["contact"]["phoneDisplay"]),
+                "CONTACT_PHONE_RAW": esc(invite_phone_raw),
+                "CONTACT_ZALO": esc(site["contact"].get("zalo", "")),
+            },
+        )
+        write_page(
+            base_tpl,
+            site,
+            f"su-kien/{slug}/index.html",
+            url_path,
+            landing.get("seoTitle") or f"{ws['title']} | {b['brandName']}",
+            landing.get("seoDescription") or ws["summary"],
+            invite_main,
+            [
+                org_ld,
+                events_schema(site, [ws])[0],
+                breadcrumb_schema(
+                    b["siteUrl"],
+                    [("Trang chủ", "/"), ("Lịch hoạt động", "/lich-hoat-dong/"), (ws["title"], url_path)],
+                ),
+            ],
+            og_image=landing.get("ogImage") or ws["image"],
+            body_class="is-father-invite",
+        )
+        sitemap_urls.append((url_path, "0.9", "weekly"))
 
     # 4. Journey & Photo Archive page (/hanh-trinh/)
     c = site["contact"]
@@ -1618,8 +1876,8 @@ def build_site() -> list:
         site,
         "hanh-trinh/index.html",
         "/hanh-trinh/",
-        f"Hành trình & Khoảnh khắc thật Hòa Lạc – Thạch Thất | {b['brandName']}",
-        f"Tường thuật sự kiện và triển lãm ảnh tư liệu thật từ chuỗi đêm nhạc HolaHeart × MusicSpace và chuyên đề giá trị sống của {b['shortName']}.",
+        f"Hành trình tại Hòa Lạc | {b['brandName']}",
+        f"Tường thuật sự kiện, lưu bút cảm nhận thành viên và triển lãm khoảnh khắc từ các chương trình của {b['shortName']} tại Hòa Lạc.",
         news_list_main,
         [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Hành trình", "/hanh-trinh/")])],
     )
@@ -1635,6 +1893,7 @@ def build_site() -> list:
             news_detail_tpl,
             {
                 "BRAND_SHORT_NAME": esc(b["shortName"]),
+                "ARTICLE_SLUG": esc(article["slug"]),
                 "ARTICLE_CATEGORY": esc(article["category"]),
                 "ARTICLE_TITLE": esc(article["title"]),
                 "ARTICLE_DATE": esc(article["date"]),
@@ -1689,6 +1948,7 @@ def build_site() -> list:
         news_detail_tpl,
         {
             "BRAND_SHORT_NAME": esc(b["shortName"]),
+            "ARTICLE_SLUG": "__SSR_ARTICLE_SLUG__",
             "ARTICLE_CATEGORY": "__SSR_ARTICLE_CATEGORY__",
             "ARTICLE_TITLE": "__SSR_ARTICLE_TITLE__",
             "ARTICLE_DATE": "__SSR_ARTICLE_DATE__",
@@ -1746,8 +2006,8 @@ def build_site() -> list:
         site,
         "tham-gia/index.html",
         "/tham-gia/",
-        f"Tham gia & Hợp tác tại Hòa Lạc – Thạch Thất | {b['brandName']}",
-        f"Đăng ký nhận Thẻ Gieo Mầm, theo dõi lịch hoạt động hằng tuần hoặc đề xuất hợp tác cùng {b['shortName']} tại Hòa Lạc – Thạch Thất.",
+        f"Tham gia & Thẻ Thành Viên Hola | {b['brandName']}",
+        f"Tạo Thẻ Thành Viên Hola trong 10 giây, giữ chỗ sự kiện 1 chạm hoặc gửi đề xuất hợp tác cùng {b['shortName']} tại Hòa Lạc.",
         join_main,
         [
             org_ld,

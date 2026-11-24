@@ -1,8 +1,10 @@
-<!-- PART 1: Full-Bleed Visual Editorial Hero Card (Real Human Moment) -->
+<!-- PART 1: Full-Bleed Visual Editorial Hero Card -->
 <section class="hero-stage" aria-label="Giới thiệu Cộng đồng HolaRise">
   <div class="container">
     <div class="hero-card" data-hero-card>
-      <img class="hero-card-img" src="{{HERO_IMAGE}}" alt="{{HERO_IMAGE_ALT}}" width="1376" height="768" fetchpriority="high" decoding="async" data-cinema-img>
+      <!-- CMS:HERO_MEDIA:START -->
+      {{HERO_MEDIA_HTML}}
+      <!-- CMS:HERO_MEDIA:END -->
       <div class="hero-card-scrim" aria-hidden="true"></div>
 
       <div class="hero-card-top" data-hero-stagger>
@@ -14,19 +16,19 @@
 
       <div class="hero-card-bottom">
         <div class="hero-card-copy">
-          <h1 class="hero-display-title">
+          <h1 class="hero-display-title" data-i18n-html="home.hero.headlineHtml">
             {{HERO_HEADLINE_LINES}}
           </h1>
-          <p class="hero-display-lead" data-hero-stagger>{{HERO_DESCRIPTION}}</p>
+          <p class="hero-display-lead" data-hero-stagger data-i18n="home.hero.lead">{{HERO_DESCRIPTION}}</p>
         </div>
 
         <div class="hero-card-actions" data-hero-stagger>
           <a class="btn btn--light" href="{{HERO_PRIMARY_HREF}}" data-magnetic>
-            <span>{{HERO_PRIMARY_LABEL}}</span>
+            <span data-i18n="home.hero.primaryCta">{{HERO_PRIMARY_LABEL}}</span>
             <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
           </a>
           <a class="hero-ghost-link" href="{{HERO_SECONDARY_HREF}}">
-            <span>{{HERO_SECONDARY_LABEL}}</span>
+            <span data-i18n="home.hero.secondaryCta">{{HERO_SECONDARY_LABEL}}</span>
             <span aria-hidden="true">↓</span>
           </a>
         </div>
@@ -44,22 +46,22 @@
     <div class="kinetic-line kinetic-line--primary" data-kinetic-dir="1">
       <span class="kinetic-word kinetic-word--strong">HolaRise</span>
       <span class="kinetic-sep"></span>
-      <span class="kinetic-word">Hòa Lạc – Thạch Thất</span>
+      <span class="kinetic-word" data-i18n="kinetic.place">Hòa Lạc</span>
       <span class="kinetic-sep"></span>
-      <span class="kinetic-word kinetic-word--strong">Cùng Vươn Lên</span>
+      <span class="kinetic-word kinetic-word--strong" data-i18n="kinetic.rise">Cùng Vươn Lên</span>
       <span class="kinetic-sep"></span>
-      <span class="kinetic-word">Phụng Sự Cộng Đồng</span>
+      <span class="kinetic-word" data-i18n="kinetic.serve">Phụng Sự Cộng Đồng</span>
       <span class="kinetic-sep"></span>
       <span class="kinetic-word kinetic-word--strong">HolaRise</span>
       <span class="kinetic-sep"></span>
-      <span class="kinetic-word">Hòa Lạc – Thạch Thất</span>
+      <span class="kinetic-word" data-i18n="kinetic.place">Hòa Lạc</span>
       <span class="kinetic-sep"></span>
-      <span class="kinetic-word kinetic-word--strong">Cùng Vươn Lên</span>
+      <span class="kinetic-word kinetic-word--strong" data-i18n="kinetic.rise">Cùng Vươn Lên</span>
       <span class="kinetic-sep"></span>
-      <span class="kinetic-word">Phụng Sự Cộng Đồng</span>
+      <span class="kinetic-word" data-i18n="kinetic.serve">Phụng Sự Cộng Đồng</span>
     </div>
     <div class="kinetic-line kinetic-line--secondary" data-kinetic-dir="-1">
-      <span class="kinetic-word kinetic-word--serif">Together We Rise, Together We Serve</span>
+      <span class="kinetic-word kinetic-word--serif">Hola · Together We Rise, Together We Serve</span>
       <span class="kinetic-sep kinetic-sep--emerald"></span>
       <span class="kinetic-word kinetic-word--outline">HolaHeart</span>
       <span class="kinetic-sep"></span>
@@ -67,7 +69,7 @@
       <span class="kinetic-sep kinetic-sep--emerald"></span>
       <span class="kinetic-word kinetic-word--outline">HolaConnect</span>
       <span class="kinetic-sep"></span>
-      <span class="kinetic-word kinetic-word--serif">Together We Rise, Together We Serve</span>
+      <span class="kinetic-word kinetic-word--serif">Hola · Together We Rise, Together We Serve</span>
       <span class="kinetic-sep kinetic-sep--emerald"></span>
       <span class="kinetic-word kinetic-word--outline">HolaHeart</span>
       <span class="kinetic-sep"></span>
@@ -78,22 +80,26 @@
   </div>
 </section>
 
-<!-- PART 2: Lịch hoạt động sắp tới (Tự động ẩn hoàn toàn nếu chưa có buổi sắp diễn ra) -->
+<!-- PART 2: Lịch hoạt động sắp tới -->
 {{HOME_UPCOMING_SECTION}}
 
-<!-- PART 3: Dòng chảy Khoảnh khắc Thật (HolaHeart 15/11 + Chuỗi HolaHeart × MusicSpace) -->
-<section class="horizontal-section" id="hanh-trinh-that" data-horizontal-section aria-label="Khoảnh khắc thật của HolaRise">
+<!-- PART 3: Dòng chảy Khoảnh khắc tại Hòa Lạc -->
+<section class="horizontal-section" id="hanh-trinh-that" data-horizontal-section aria-label="Những cuộc gặp tại Hòa Lạc">
+  <div class="exhibition-cursor-pill" id="exhibition-cursor-pill" aria-hidden="true">
+    <span class="exhibition-cursor-dot"></span>
+    <span data-cursor-pill-text data-i18n="home.gallery.cursor">XEM ẢNH</span>
+  </div>
   <div class="horizontal-sticky-stage">
     <div class="container">
       <div class="section-header--split" style="margin-bottom: 0;" data-reveal>
         <div>
-          <div class="kicker">Dấu ấn thực tế · 2025 – 2026</div>
-          <h2 class="section-title" style="margin-bottom: 6px;">Những cuộc gặp thật tại Hòa Lạc – Thạch Thất</h2>
-          <p class="section-lead">Tư liệu từ các đêm nhạc &amp; workshop HolaHeart × MusicSpace và chuyên đề đối thoại 15/11/2026.</p>
+          <div class="kicker" data-i18n="home.gallery.kicker">Dấu ấn hành trình · 2025 – 2026</div>
+          <h2 class="section-title" style="margin-bottom: 6px;" data-i18n="home.gallery.title">Những cuộc gặp tại Hòa Lạc</h2>
+          <p class="section-lead" data-i18n="home.gallery.lead">Khoảnh khắc từ các đêm nhạc mộc HolaHeart × MusicSpace và chuyên đề đối thoại 15/11/2026.</p>
         </div>
         <div class="exhibition-header-right">
           <a class="arrow-link" href="/hanh-trinh/">
-            <span>Khám phá toàn bộ Hành trình</span>
+            <span data-i18n="home.gallery.all">Khám phá toàn bộ Hành trình</span>
             <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
           </a>
         </div>
@@ -104,7 +110,7 @@
           <div class="exhibition-progress-fill" data-exhibition-fill></div>
         </div>
         <span class="exhibition-progress-count" data-exhibition-count aria-live="polite">01 / 10</span>
-        <div class="exhibition-arrows" aria-label="Điều hướng ảnh tư liệu">
+        <div class="exhibition-arrows" aria-label="Điều hướng ảnh">
           <button class="exhibition-arrow-btn" type="button" data-exhibition-prev aria-label="Xem ảnh trước">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
@@ -124,16 +130,16 @@
 </section>
 
 <!-- PART 4: Ba trụ cột theo mạch Heart → Green → Connect -->
-<section class="section story-section" id="chuong-trinh-trong-tam" data-story-section aria-label="Ba trụ cột tạo tác động">
+<section class="section story-section" id="chuong-trinh-trong-tam" data-story-section data-pillar="holaheart" aria-label="Ba trụ cột tạo tác động">
   <div class="container">
     <div class="section-header--split" style="margin-bottom: 24px;" data-reveal>
       <div>
-        <div class="kicker">Mô hình Tạo Tác Động</div>
-        <h2 class="section-title" style="margin-bottom: 6px;">Từ nội lực bên trong đến phụng sự cộng đồng</h2>
-        <p class="section-lead">Ba trụ cột gắn kết liền mạch: vun bồi nhân cách (HolaHeart) → giữ xanh môi trường sống (HolaGreen) → lan tỏa tri thức và sẻ chia (HolaConnect).</p>
+        <div class="kicker" data-i18n="home.pillars.kicker">Mô hình Tạo Tác Động</div>
+        <h2 class="section-title" style="margin-bottom: 6px;" data-i18n="home.pillars.title">Từ nội lực bên trong đến phụng sự cộng đồng</h2>
+        <p class="section-lead" data-i18n="home.pillars.lead">Ba trụ cột gắn kết liền mạch: lắng nghe &amp; nhân cách (HolaHeart) → giữ xanh cảnh quan (HolaGreen) → tri thức &amp; sẻ chia (HolaConnect).</p>
       </div>
       <a class="arrow-link" href="/gioi-thieu/#mo-hinh-tac-dong">
-        <span>Xem triết lý tổ chức</span>
+        <span data-i18n="home.pillars.more">Xem triết lý tổ chức</span>
         <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
       </a>
     </div>
@@ -147,8 +153,8 @@
   <div class="manifesto-glow" data-manifesto-glow aria-hidden="true"></div>
   <div class="container">
     <div class="manifesto-top" data-reveal>
-      <div class="kicker kicker--sunrise">Tuyên ngôn hành động</div>
-      <span class="manifesto-coords" aria-label="Chapter 01 tại Hòa Lạc – Thạch Thất">CHAPTER 01 · HÒA LẠC – THẠCH THẤT · HƯỚNG TỚI CẢ NƯỚC</span>
+      <div class="kicker kicker--sunrise" data-i18n="home.manifesto.kicker">Tuyên ngôn hành động</div>
+      <span class="manifesto-coords">HOLA · HÒA LẠC · TOGETHER WE RISE</span>
     </div>
 
     <blockquote class="manifesto-quote" data-scrub-words>“{{PHILOSOPHY_QUOTE}}”</blockquote>
@@ -156,36 +162,36 @@
     <div class="manifesto-meta" data-reveal>
       <span class="manifesto-motto">{{PHILOSOPHY_MOTTO}}</span>
       <a class="arrow-link arrow-link--dark" href="/gioi-thieu/">
-        <span>Về HolaRise &amp; Chuẩn mực minh bạch</span>
+        <span data-i18n="home.manifesto.link">Về HolaRise &amp; Chuẩn mực minh bạch</span>
         <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
       </a>
     </div>
 
     <div class="mission-grid" data-stagger-group>
       <div class="mission-col" data-stagger-item>
-        <h3>01 · Sứ mệnh</h3>
-        <p>{{PHILOSOPHY_MISSION}}</p>
+        <h3 data-i18n="about.mission.heading">01 · Sứ mệnh</h3>
+        <p data-i18n="about.mission.body">{{PHILOSOPHY_MISSION}}</p>
       </div>
       <div class="mission-col" data-stagger-item>
-        <h3>02 · Tầm nhìn</h3>
-        <p>{{PHILOSOPHY_VISION}}</p>
+        <h3 data-i18n="about.vision.heading">02 · Tầm nhìn</h3>
+        <p data-i18n="about.vision.body">{{PHILOSOPHY_VISION}}</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- PART 5B: Đơn vị & Không gian đồng hành (Tự động ẩn nếu chưa bật đối tác trong CMS) -->
+<!-- PART 5B: Dòng chữ ký đơn vị đồng hành (1 hàng tinh tế) -->
 {{PARTNERS_STRIP}}
 
-<!-- PART 5C: Tiếng nói người trẻ (Tự động ẩn nếu chưa có chia sẻ được duyệt) -->
+<!-- PART 5C: Tiếng nói người trẻ -->
 {{TESTIMONIALS_SECTION}}
 
 <!-- PART 6: Giải Đáp Nhanh & Banner Đăng Ký -->
 <section class="section" aria-labelledby="home-faq-heading">
   <div class="container">
     <div class="section-header" style="margin-bottom: 28px;" data-reveal>
-      <div class="kicker">Minh bạch &amp; An tâm</div>
-      <h2 class="section-title" id="home-faq-heading">Những điều người trẻ &amp; đối tác thường hỏi</h2>
+      <div class="kicker" data-i18n="home.faq.kicker">Minh bạch &amp; An tâm</div>
+      <h2 class="section-title" id="home-faq-heading" data-i18n="home.faq.title">Những điều người trẻ &amp; đối tác thường hỏi</h2>
     </div>
 
     <div class="faq-list" data-reveal>
@@ -198,16 +204,12 @@
   <div class="container">
     <div class="cta-band" data-reveal>
       <div>
-        <h2>Sẵn sàng bắt đầu hành trình cùng HolaRise?</h2>
-        <p>Ghi danh nhận lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc – Thạch Thất, hoặc kết nối đồng hành cùng tổ chức của bạn.</p>
-        <p class="cta-reassurance">Cộng đồng phi lợi nhuận · Minh bạch lịch trình &amp; chi phí trước mỗi buổi gặp mặt.</p>
+        <h2 data-i18n="home.cta.title">Sẵn sàng bắt đầu hành trình cùng Hola tại Hòa Lạc?</h2>
+        <p data-i18n="home.cta.desc">Tạo Thẻ Thành Viên Hola trong 10 giây để giữ chỗ sự kiện 1 chạm và lưu lại cảm nhận sau mỗi chương trình.</p>
       </div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px;">
-        <a class="btn btn--light" href="/tham-gia/" data-magnetic>
-          <span>Tham gia ngay</span>
-          <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
-        </a>
-        <a class="btn btn--ghost-dark" href="/lich-hoat-dong/">Xem lịch hoạt động</a>
+        <a class="btn btn--light" href="/tham-gia/" data-magnetic data-i18n="home.cta.primary">Tạo Thẻ Thành Viên</a>
+        <a class="btn btn--ghost-dark" href="/lich-hoat-dong/" data-i18n="home.cta.secondary">Xem lịch tuần này</a>
       </div>
     </div>
   </div>

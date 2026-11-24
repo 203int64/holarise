@@ -45,6 +45,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
   <link rel="stylesheet" href="/assets/css/styles.css?v={{CACHE_BUST}}">
+  <script>
+    (function () {
+      try {
+        var q = new URLSearchParams(window.location.search).get("lang");
+        var saved = q || localStorage.getItem("holarise_lang") || "vi";
+        var lang = saved === "en" ? "en" : "vi";
+        document.documentElement.dataset.lang = lang;
+        document.documentElement.lang = lang;
+        if (q === "en" || q === "vi") localStorage.setItem("holarise_lang", lang);
+      } catch (_e) {}
+    })();
+  </script>
   {{JSON_LD_SCRIPTS}}
 </head>
 <body class="{{BODY_CLASS}}">
@@ -73,7 +85,14 @@
       </nav>
 
       <div class="header-actions">
-        <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/">Tham gia</a>
+        <button class="lang-switch" type="button" data-lang-toggle aria-label="Chuyển ngôn ngữ Việt / Anh">
+          <span class="lang-switch-opt" data-lang-opt="vi">VI</span>
+          <span class="lang-switch-sep" aria-hidden="true">/</span>
+          <span class="lang-switch-opt" data-lang-opt="en">EN</span>
+        </button>
+        <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/" data-header-member-btn>
+          <span data-header-member-label data-i18n="nav.join">Tham gia</span>
+        </a>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Mở menu điều hướng">
           <span class="nav-toggle-bars" aria-hidden="true">
             <span></span>
@@ -91,12 +110,12 @@
         {{MOBILE_NAV_LINKS}}
       </nav>
       <div class="mobile-drawer-footer">
-        <a class="btn btn--primary" href="/tham-gia/" style="width: 100%; justify-content: space-between; padding: 15px 22px;">
-          <span>Đăng ký tham gia hoạt động</span>
+        <a class="btn btn--primary" href="/tham-gia/" data-drawer-member-btn style="width: 100%; justify-content: space-between; padding: 15px 22px;">
+          <span data-drawer-member-label data-i18n="nav.memberStudio">Tham gia &amp; Thẻ Thành Viên</span>
           <span aria-hidden="true">→</span>
         </a>
         <button class="btn btn--outline pwa-install-drawer-btn" type="button" data-pwa-install hidden>
-          <span>Cài ứng dụng HolaRise về máy</span>
+          <span data-i18n="pwa.installApp">Cài ứng dụng HolaRise về máy</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 3v12"></path>
             <path d="m7 10 5 5 5-5"></path>
@@ -104,8 +123,12 @@
           </svg>
         </button>
         <div class="mobile-drawer-meta">
-          <span>{{CONTACT_ADDRESS}}</span>
-          <span>{{CONTACT_PHONE}}</span>
+          <span><a href="tel:{{CONTACT_PHONE_RAW}}" style="color: var(--ink); font-weight: 500; text-decoration: none;">Hotline / Zalo: {{CONTACT_PHONE}}</a></span>
+          <button class="lang-switch lang-switch--drawer" type="button" data-lang-toggle aria-label="Switch language VI / EN">
+            <span class="lang-switch-opt" data-lang-opt="vi">Tiếng Việt</span>
+            <span class="lang-switch-sep" aria-hidden="true">·</span>
+            <span class="lang-switch-opt" data-lang-opt="en">English</span>
+          </button>
         </div>
       </div>
     </div>
@@ -122,19 +145,19 @@
           <a class="footer-logo-row" href="/" aria-label="{{BRAND_FULL_NAME}}">
             <img src="{{LOGO_LIGHT}}" alt="HolaRise – {{BRAND_FULL_NAME}}" width="104" height="24" loading="lazy" style="height: 22px; width: auto;">
           </a>
-          <p style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;">{{BRAND_FULL_NAME}}</p>
-          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);">{{BRAND_SUBTITLE}}</p>
-          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">{{BRAND_TAGLINE}} · Chapter 01 · Hòa Lạc – Thạch Thất</p>
+          <p style="margin: 12px 0 4px; font-size: 0.86rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em;" data-i18n="brand.fullName">{{BRAND_FULL_NAME}}</p>
+          <p style="margin: 0 0 10px; font-size: 0.84rem; color: var(--ink-secondary);" data-i18n="brand.subtitle">{{BRAND_SUBTITLE}}</p>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--accent); font-weight: 500;">Hola · {{BRAND_TAGLINE}}</p>
         </div>
 
         <div>
-          <h2 class="footer-heading">Khám phá</h2>
+          <h2 class="footer-heading" data-i18n="footer.explore">Khám phá</h2>
           <ul class="footer-links">
-            <li><a href="/">Trang chủ</a></li>
-            <li><a href="/gioi-thieu/">Về HolaRise</a></li>
-            <li><a href="/lich-hoat-dong/">Lịch hoạt động</a></li>
-            <li><a href="/hanh-trinh/">Hành trình &amp; Kho ảnh</a></li>
-            <li><a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a></li>
+            <li><a href="/" data-i18n="nav.home">Trang chủ</a></li>
+            <li><a href="/gioi-thieu/" data-i18n="nav.about">Về HolaRise</a></li>
+            <li><a href="/lich-hoat-dong/" data-i18n="nav.schedule">Lịch hoạt động</a></li>
+            <li><a href="/hanh-trinh/" data-i18n="nav.journey">Hành trình</a></li>
+            <li><a href="/chinh-sach/" data-i18n="footer.transparency">Chuẩn mực Minh bạch &amp; An toàn</a></li>
             <li>
               <button class="pwa-install-footer-btn" type="button" data-pwa-install hidden>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -142,30 +165,39 @@
                   <path d="m7 10 5 5 5-5"></path>
                   <path d="M5 21h14"></path>
                 </svg>
-                <span>Cài ứng dụng về máy</span>
+                <span data-i18n="pwa.installShort">Cài ứng dụng về máy</span>
               </button>
             </li>
           </ul>
         </div>
 
         <div>
-          <h2 class="footer-heading">3 Trụ cột</h2>
+          <h2 class="footer-heading" data-i18n="footer.pillars">3 Trụ cột</h2>
           <ul class="footer-links">
-            <li><a href="/lich-hoat-dong/?nhom=holaheart">HolaHeart · Nội lực &amp; Lắng nghe</a></li>
-            <li><a href="/lich-hoat-dong/?nhom=holagreen">HolaGreen · Sinh thái &amp; Cảnh quan</a></li>
-            <li><a href="/lich-hoat-dong/?nhom=holaconnect">HolaConnect · Phụng sự &amp; Kết nối</a></li>
-            <li><a href="/tham-gia/">Tham gia &amp; Hợp tác</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holaheart" data-i18n="footer.pHeart">HolaHeart · Nội lực &amp; Lắng nghe</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holagreen" data-i18n="footer.pGreen">HolaGreen · Sinh thái &amp; Cảnh quan</a></li>
+            <li><a href="/lich-hoat-dong/?nhom=holaconnect" data-i18n="footer.pConnect">HolaConnect · Tri thức &amp; Phụng sự</a></li>
+            <li><a href="/tham-gia/" data-i18n="footer.pJoin">Thẻ Thành Viên &amp; Hợp tác</a></li>
           </ul>
         </div>
 
         <div>
-          <h2 class="footer-heading">Liên hệ · Chapter 01</h2>
+          <h2 class="footer-heading" data-i18n="footer.contact">Văn phòng &amp; Liên hệ</h2>
           <ul class="footer-links">
-            <li>Địa bàn: {{CONTACT_ADDRESS}}</li>
+            <li><span data-i18n="footer.officeLabel">Văn phòng:</span> {{CONTACT_ADDRESS}}</li>
             <li><a href="tel:{{CONTACT_PHONE_RAW}}">{{CONTACT_PHONE}}</a></li>
             <li><a href="mailto:{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</a></li>
-            <li>Nhịp sinh hoạt: {{CONTACT_MEETING}}</li>
+            <li>{{CONTACT_MEETING}}</li>
           </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span data-i18n="footer.copyright">© 2026 {{BRAND_FULL_NAME}} ({{BRAND_SHORT_NAME}}). Cộng đồng phi lợi nhuận.</span>
+        <div class="footer-bottom-meta">
+          <a href="/chinh-sach/" data-i18n="footer.privacy">Bảo mật &amp; Quy tắc</a>
+          <span aria-hidden="true">·</span>
+          <a href="/tham-gia/" data-i18n="footer.memberPass">Thẻ Thành Viên Hola</a>
         </div>
       </div>
     </div>
@@ -175,13 +207,22 @@
   <dialog class="club-dialog" id="event-register-modal" closedby="any" aria-labelledby="modal-heading">
     <div class="dialog-inner">
       <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
-      <span class="kicker" style="margin-bottom: 8px;">Gửi thông tin quan tâm</span>
-      <h2 id="modal-heading" style="margin: 0 0 12px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Trao đổi về hoạt động HolaRise</h2>
+      <span class="kicker" id="modal-kicker" style="margin-bottom: 8px;">Đăng ký giữ chỗ nhanh</span>
+      <h2 id="modal-heading" style="margin: 0 0 12px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Giữ chỗ tham dự hoạt động</h2>
 
       <div class="modal-event-ticket">
         <span class="modal-ticket-type" id="modal-event-type">Thông tin hoạt động</span>
         <p class="modal-ticket-title" id="modal-event-title"></p>
         <div class="modal-ticket-meta" id="modal-event-meta"></div>
+        <a class="modal-ticket-detail-link" id="modal-event-detail-link" href="/lich-hoat-dong/" hidden>Đọc trọn vẹn lá thư mời &amp; thông tin chi tiết →</a>
+      </div>
+
+      <div class="modal-member-bar" id="modal-member-rsvp-bar" hidden>
+        <div class="modal-member-bar-copy">
+          <strong id="modal-member-bar-title">Đang giữ chỗ bằng Thẻ Thành Viên</strong>
+          <span id="modal-member-bar-sub">Thông tin đã điền sẵn từ hồ sơ Hola của bạn.</span>
+        </div>
+        <button class="btn btn--primary btn--sm" type="button" id="modal-member-onetap-btn">Giữ chỗ 1 chạm</button>
       </div>
 
       <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" novalidate>
@@ -211,7 +252,7 @@
             </div>
           </div>
           <div class="field">
-          <label for="modal-email">Email (không bắt buộc)</label>
+            <label for="modal-email">Email (không bắt buộc)</label>
             <input id="modal-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" enterkeyhint="next" data-error="modal-email-error">
             <div id="modal-email-error" class="field-error">
               <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -225,41 +266,42 @@
           <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Chọn nhanh đơn vị">
             <button type="button" class="quick-chip" data-org-chip="ĐH FPT" aria-pressed="false">ĐH FPT</button>
             <button type="button" class="quick-chip" data-org-chip="ĐHQGHN (VNU)" aria-pressed="false">ĐHQGHN</button>
-            <button type="button" class="quick-chip" data-org-chip="THPT Hòa Lạc" aria-pressed="false">THPT Hòa Lạc</button>
+            <button type="button" class="quick-chip" data-org-chip="THPT Thạch Thất" aria-pressed="false">THPT Thạch Thất</button>
             <button type="button" class="quick-chip" data-org-chip="Đã đi làm" aria-pressed="false">Đi làm</button>
           </div>
         </div>
         <div class="field">
-          <span class="field-label-text">Cách bạn muốn đồng hành</span>
-          <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Cách bạn muốn đồng hành">
-            <button type="button" class="quick-chip is-selected" data-vibe-chip="Quan tâm tìm hiểu" aria-pressed="true">Muốn tìm hiểu trước</button>
-            <button type="button" class="quick-chip" data-vibe-chip="Đi cùng bạn bè" aria-pressed="false">Có thể đi cùng bạn</button>
-            <button type="button" class="quick-chip" data-vibe-chip="Lần đầu tham gia" aria-pressed="false">Lần đầu tìm hiểu</button>
+          <span class="field-label-text">Số chỗ giữ</span>
+          <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Số chỗ bạn muốn giữ">
+            <button type="button" class="quick-chip is-selected" data-vibe-chip="Đi 1 mình (1 chỗ)" aria-pressed="true">Đi 1 mình (1 chỗ)</button>
+            <button type="button" class="quick-chip" data-vibe-chip="Đi cùng 1 bạn (2 chỗ)" aria-pressed="false">Đi cùng 1 bạn (2 chỗ)</button>
+            <button type="button" class="quick-chip" data-vibe-chip="Nhóm 3+ người" aria-pressed="false">Nhóm 3+ người</button>
           </div>
         </div>
         <div class="field">
-          <label for="modal-note">Lời nhắn (không bắt buộc)</label>
-          <textarea id="modal-note" name="note" rows="2" placeholder="Bạn muốn hỏi thêm điều gì về HolaRise?"></textarea>
+          <label for="modal-note" id="modal-note-label">Lời nhắn hoặc câu chuyện muốn gửi BTC (không bắt buộc)</label>
+          <textarea id="modal-note" name="note" rows="2" placeholder="Ghi chú thêm hoặc đôi dòng tâm sự (nếu có)..."></textarea>
         </div>
         <div class="form-status" role="status" aria-live="polite"></div>
-        <button class="btn btn--primary" type="submit">Gửi thông tin quan tâm</button>
-        <p class="form-privacy-note">Đây chưa phải đăng ký cho một sự kiện cụ thể. Chi phí, nếu có, sẽ được ghi trong thông báo từng hoạt động. Xem <a href="/chinh-sach/">Chính sách bảo mật</a>.</p>
+        <button class="btn btn--primary" type="submit" id="modal-submit-btn">Xác nhận giữ chỗ tham dự</button>
+        <p class="form-privacy-note">Thông tin dùng để Ban Điều Phối sắp xếp chỗ ngồi và gửi nhắc lịch. Chi phí (nếu có) được công khai minh bạch trên thẻ sự kiện. Xem <a href="/chinh-sach/">Chính sách bảo mật</a>.</p>
       </form>
 
       <div class="modal-pass-success" id="modal-pass-success" hidden>
         <div class="modal-pass-badge">
           <span class="live-status-dot" aria-hidden="true"></span>
-          <span>ĐÃ GHI NHẬN THÔNG TIN</span>
+          <span>ĐÃ GHI NHẬN GIỮ CHỖ</span>
         </div>
         <div class="modal-pass-code-row">
-          <span>Mã thông tin:</span>
+          <span>Mã vé giữ chỗ:</span>
           <strong class="pass-code" id="modal-pass-code"></strong>
         </div>
         <p class="modal-pass-summary" id="modal-pass-summary"></p>
         <span id="modal-pass-invite-text" class="visually-hidden"></span>
         <div class="pass-actions-buttons">
-          <button type="button" class="btn btn--primary btn--sm" data-pass-download="modal">Tải phiếu (PNG)</button>
-          <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Chia sẻ thông tin HolaRise</button>
+          <button type="button" class="btn btn--primary btn--sm" data-pass-download="modal">Tải Thiệp Vé (PNG)</button>
+          <button type="button" class="btn btn--outline btn--sm" data-ics-download="modal" id="modal-ics-btn" hidden>Lưu lịch (.ics)</button>
+          <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Rủ bạn đi cùng</button>
           <span class="copy-control">
             <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
               <span>Sao chép lời mời</span>
@@ -267,8 +309,66 @@
             <span class="copy-tip" role="status"></span>
           </span>
         </div>
-        <button type="button" class="pass-reset-link" data-pass-new="modal">Đăng ký thêm</button>
+        <button type="button" class="pass-reset-link" data-pass-new="modal">Đăng ký thêm cho người đi cùng</button>
       </div>
+    </div>
+  </dialog>
+
+  <!-- Native HTML5 <dialog> Đăng Nhập / Tạo Thẻ Thành Viên Hola Nhanh -->
+  <dialog class="club-dialog" id="member-auth-modal" closedby="any" aria-labelledby="member-auth-heading">
+    <div class="dialog-inner">
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
+      <span class="kicker" style="margin-bottom: 8px;">Thẻ Thành Viên Hola</span>
+      <h2 id="member-auth-heading" style="margin: 0 0 14px; font-size: 1.32rem; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);">Đăng nhập hoặc Tạo Thẻ Thành Viên</h2>
+
+      <div class="member-mode-tabs" role="tablist" aria-label="Chọn chế độ tài khoản">
+        <button class="member-mode-tab is-active" type="button" role="tab" aria-selected="true" data-modal-auth-tab="login">Đăng nhập</button>
+        <button class="member-mode-tab" type="button" role="tab" aria-selected="false" data-modal-auth-tab="register">Tạo Thẻ mới (10 giây)</button>
+      </div>
+
+      <form class="form-grid" id="modal-member-login-form" novalidate>
+        <div class="field">
+          <label for="ma-login-id">Email hoặc Số điện thoại <span aria-hidden="true">*</span></label>
+          <input id="ma-login-id" name="identifier" type="text" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="09xx xxx xxx hoặc tenban@gmail.com" required>
+        </div>
+        <div class="field">
+          <label for="ma-login-pw">Mật khẩu <span aria-hidden="true">*</span></label>
+          <div class="member-pw-wrap">
+            <input id="ma-login-pw" name="password" type="password" autocomplete="current-password" minlength="6" required placeholder="Nhập mật khẩu của bạn">
+            <button type="button" class="member-pw-toggle" data-member-pw-toggle="ma-login-pw" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
+          </div>
+        </div>
+        <div class="form-status" id="ma-login-status" role="status" aria-live="polite"></div>
+        <button class="btn btn--primary" type="submit">Đăng nhập Thẻ Thành Viên</button>
+      </form>
+
+      <form class="form-grid" id="modal-member-register-form" novalidate hidden>
+        <div class="field">
+          <label for="ma-reg-name">Họ và tên <span aria-hidden="true">*</span></label>
+          <input id="ma-reg-name" name="name" type="text" autocomplete="name" minlength="2" required placeholder="Ví dụ: Nguyễn Minh Anh">
+        </div>
+        <div class="field">
+          <label for="ma-reg-id">Email hoặc Số điện thoại <span aria-hidden="true">*</span></label>
+          <input id="ma-reg-id" name="identifier" type="text" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="09xx xxx xxx hoặc tenban@gmail.com" required>
+        </div>
+        <div class="field">
+          <label for="ma-reg-pw">Mật khẩu (tối thiểu 6 ký tự) <span aria-hidden="true">*</span></label>
+          <div class="member-pw-wrap">
+            <input id="ma-reg-pw" name="password" type="password" autocomplete="new-password" minlength="6" required placeholder="Tạo mật khẩu dễ nhớ">
+            <button type="button" class="member-pw-toggle" data-member-pw-toggle="ma-reg-pw" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="ma-reg-pillar">Trụ cột bạn quan tâm nhất</label>
+          <select id="ma-reg-pillar" name="primaryPillar">
+            <option value="holaheart">HolaHeart · Nội lực &amp; Lắng nghe</option>
+            <option value="holagreen">HolaGreen · Sinh thái &amp; Cảnh quan</option>
+            <option value="holaconnect">HolaConnect · Tri thức &amp; Phụng sự</option>
+          </select>
+        </div>
+        <div class="form-status" id="ma-reg-status" role="status" aria-live="polite"></div>
+        <button class="btn btn--primary" type="submit">Tạo Thẻ Thành Viên Hola</button>
+      </form>
     </div>
   </dialog>
 
@@ -288,8 +388,6 @@
       <div class="lightbox-bar">
         <div class="lightbox-caption" id="lightbox-caption"></div>
         <div class="lightbox-bar-right">
-          <a class="lightbox-action-link" id="lightbox-download" href="/assets/images/logo-mark.png" download hidden>Tải ảnh</a>
-          <a class="lightbox-action-link" id="lightbox-drive" href="https://drive.google.com" target="_blank" rel="noopener noreferrer" hidden>Ảnh gốc (Drive) ↗</a>
           <span class="lightbox-counter" id="lightbox-counter" aria-live="polite"></span>
         </div>
       </div>
@@ -316,7 +414,7 @@
       <div data-pwa-guide="ios">
         <span class="kicker" style="margin-bottom: 8px;">Cài đặt trên iPhone / iPad</span>
         <h2 id="pwa-dialog-title-ios" class="pwa-dialog-title">Thêm HolaRise vào Màn hình chính</h2>
-        <p class="pwa-dialog-lead">Mở nhanh như ứng dụng gốc, theo dõi lịch hoạt động và hành trình cộng đồng mượt mà tại Hòa Lạc – Thạch Thất.</p>
+        <p class="pwa-dialog-lead">Mở nhanh như ứng dụng gốc, theo dõi lịch hoạt động và hành trình cộng đồng mượt mà tại Hòa Lạc.</p>
         <ol class="pwa-steps">
           <li class="pwa-step">
             <span class="pwa-step-num" aria-hidden="true">1</span>
@@ -382,11 +480,13 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
+  <script src="/assets/js/i18n.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/vendor/gsap.min.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/vendor/ScrollTrigger.min.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/motion.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/main.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/join-pass.js?v={{CACHE_BUST}}" defer></script>
+  <script src="/assets/js/member.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/pwa.js?v={{CACHE_BUST}}" defer></script>
 </body>
 </html>

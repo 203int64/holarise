@@ -73,6 +73,7 @@ export async function onRequestGet({ request, env, params }) {
     __SSR_CANONICAL_URL__: escHtml(canonicalUrl),
     __SSR_OG_IMAGE_URL__: escHtml(ogImageUrl),
     __SSR_EXTRA_JSON_LD__: buildArticleSchemas(article),
+    __SSR_ARTICLE_SLUG__: escHtml(article.slug),
     __SSR_ARTICLE_CATEGORY__: escHtml(article.category),
     __SSR_ARTICLE_TITLE__: escHtml(article.title),
     __SSR_ARTICLE_DATE__: escHtml(article.date),

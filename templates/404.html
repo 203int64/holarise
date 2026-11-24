@@ -1,28 +1,28 @@
 <section class="page-hero">
   <div class="container">
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
-      <a href="/">Trang chủ</a>
+      <a href="/" data-i18n="nav.home">Trang chủ</a>
       <span aria-hidden="true">/</span>
-      <span aria-current="page">Không tìm thấy trang (404)</span>
+      <span aria-current="page">404</span>
     </nav>
-    <h1>Trang bạn tìm hiện không tồn tại</h1>
-    <p>Liên kết này có thể đã thay đổi hoặc nhập chưa đúng địa chỉ. Bạn có thể quay về trang chủ hoặc chọn nhanh một chuyên mục của {{BRAND_SHORT_NAME}} bên dưới.</p>
+    <h1 data-i18n="notFound.title">Trang bạn tìm hiện không tồn tại</h1>
+    <p data-i18n="notFound.desc">Liên kết này có thể đã thay đổi. Mời bạn quay về Trang chủ hoặc chọn nhanh một chuyên mục của Hola bên dưới.</p>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
     <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 36px;">
-      <a class="btn btn--primary" href="/">Về Trang chủ</a>
-      <a class="btn btn--outline" href="/gioi-thieu/">Về HolaRise</a>
-      <a class="btn btn--outline" href="/lich-hoat-dong/">Lịch hoạt động</a>
-      <a class="btn btn--outline" href="/hanh-trinh/">Hành trình &amp; Kho ảnh</a>
-      <a class="btn btn--outline" href="/tham-gia/">Tham gia &amp; Hợp tác</a>
+      <a class="btn btn--primary" href="/" data-i18n="nav.home">Trang chủ</a>
+      <a class="btn btn--outline" href="/gioi-thieu/" data-i18n="nav.about">Về HolaRise</a>
+      <a class="btn btn--outline" href="/lich-hoat-dong/" data-i18n="nav.schedule">Lịch hoạt động</a>
+      <a class="btn btn--outline" href="/hanh-trinh/" data-i18n="nav.journey">Hành trình</a>
+      <a class="btn btn--outline" href="/tham-gia/" data-i18n="nav.join">Tham gia</a>
     </div>
 
     <div class="info-box" style="max-width: 680px;">
-      <h2>Cần hỗ trợ tìm thông tin tại Hòa Lạc – Thạch Thất?</h2>
-      <p style="color: var(--ink-secondary); margin: 0 0 12px;">Ban Điều Phối duy trì {{CONTACT_MEETING}} tại {{CONTACT_ADDRESS}}.</p>
+      <h2>Cần hỗ trợ tại Hòa Lạc?</h2>
+      <p style="color: var(--ink-secondary); margin: 0 0 12px;">Văn phòng liên hệ: {{CONTACT_ADDRESS}} ({{CONTACT_MEETING}}).</p>
       <p style="margin: 0; font-size: 0.94rem;">
         Email: <a href="mailto:{{CONTACT_EMAIL}}" style="color: var(--accent); font-weight: 500;">{{CONTACT_EMAIL}}</a> · Hotline: <a href="tel:{{CONTACT_PHONE_RAW}}" style="color: var(--accent); font-weight: 500;">{{CONTACT_PHONE}}</a>
       </p>

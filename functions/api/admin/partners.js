@@ -51,12 +51,25 @@ function normalizePartnerList(rawItems) {
   return { ok: true, items: out };
 }
 
+const DEFAULT_PARTNERS_JSON = JSON.stringify([
+  {
+    id: "partner-musicspace",
+    name: "MusicSpace",
+    role: "Không gian Âm nhạc & Kết nối",
+    logoUrl: "/assets/images/logo-musicspace.png",
+    websiteUrl: "https://musicspace.edu.vn",
+    isActive: true,
+    sortOrder: 0,
+  },
+]);
+
 export async function onRequestGet(context) {
   const auth = await requireAdmin(context);
   if (!auth.ok) return auth.response;
 
   const map = await getSettingsMap(context.env.DB);
-  const items = parsePartnersJson(map.partners_json || "[]");
+  const raw = map.partners_json !== undefined ? map.partners_json : DEFAULT_PARTNERS_JSON;
+  const items = parsePartnersJson(raw);
   return jsonResponse({ ok: true, items });
 }
 

@@ -1,4 +1,5 @@
 import {
+  applySiteVisualsSsr,
   buildEventsJsonLd,
   parsePartnersJson,
   renderHeroUpcomingBar,
@@ -16,7 +17,7 @@ export async function onRequestGet({ request, env }) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
 
-  const [assetRes, eventsRes, featuredRes, partnersRow] = await Promise.all([
+  const [assetRes, eventsRes, featuredRes, partnersRow, visualsRow] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
     env.DB.prepare(
       "SELECT * FROM events WHERE status = 'published' ORDER BY sort_order ASC, date ASC, created_at DESC LIMIT 60"
@@ -36,6 +37,9 @@ export async function onRequestGet({ request, env }) {
     env.DB.prepare("SELECT value FROM settings WHERE key = 'partners_json'")
       .first()
       .catch(() => null),
+    env.DB.prepare("SELECT value FROM settings WHERE key = 'site_visuals_json'")
+      .first()
+      .catch(() => null),
   ]);
 
   if (!assetRes.ok || !eventsRes) {
@@ -49,7 +53,12 @@ export async function onRequestGet({ request, env }) {
   html = replaceMarker(html, "HERO_UPCOMING_BAR", renderHeroUpcomingBar(upcoming));
   html = replaceMarker(html, "HOME_UPCOMING_SECTION", renderHomeUpcomingSectionHtml(upcoming));
   html = replaceMarker(html, "EVENTS_JSON_LD", buildEventsJsonLd(upcoming.slice(0, 1)));
-  html = replaceMarker(html, "PARTNERS_STRIP", renderPartnersStripHtml(partners));
+  if (partnersRow) {
+    html = replaceMarker(html, "PARTNERS_STRIP", renderPartnersStripHtml(partners));
+  }
+  if (visualsRow?.value) {
+    html = applySiteVisualsSsr(html, visualsRow.value);
+  }
 
   let homePhotos = (featuredRes?.results || []).map((r) => ({
     url: r.url,

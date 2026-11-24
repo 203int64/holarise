@@ -1,9 +1,59 @@
 {
   "intro": {
-    "title": "Lịch hoạt động tại Hòa Lạc – Thạch Thất",
-    "description": "HolaRise duy trì nhịp 1–2 buổi sinh hoạt, đối thoại và hành động cộng đồng mỗi tuần luân phiên giữa HolaHeart, HolaGreen và HolaConnect."
+    "title": "Lịch hoạt động tại Hòa Lạc",
+    "description": "Hola duy trì nhịp 1–2 buổi đối thoại, sinh thái và kết nối cộng đồng mỗi tuần luân phiên giữa HolaHeart, HolaGreen và HolaConnect."
   },
   "upcoming": [
+    {
+      "id": "holaheart-cuoc-doi-cua-cha-2026-11-29",
+      "type": "HolaHeart · Lắng nghe – Tri ân – Yêu thương",
+      "filters": [
+        "holaheart",
+        "biet-on",
+        "tu-te"
+      ],
+      "date": "2026-11-29",
+      "dateDisplay": "Chủ Nhật, 29/11/2026",
+      "time": "19:15",
+      "location": "Quán Cafe Mây Lang Thang, Hòa Lạc",
+      "fee": "Miễn phí tham dự · Tự túc đồ uống",
+      "seats": "Mở đăng ký · 35 chỗ ấm cúng",
+      "title": "Workshop \"Cuộc Đời Của Cha\"",
+      "titleEn": "Workshop \"My Father's Life\"",
+      "summary": "Có những tình yêu chẳng bao giờ nói thành lời. Dành một buổi tối Chủ Nhật đặc biệt tại Hòa Lạc để lắng nghe, cảm nhận và nhìn lại bóng lưng âm thầm của Cha.",
+      "summaryEn": "Some love is never spoken aloud. Spend a quiet Sunday evening in Hoa Lac listening, reflecting, and honoring our fathers' silent devotion.",
+      "highlights": [
+        "Lắng nghe những hy sinh chẳng nói thành lời",
+        "Nhìn lại bóng lưng & hành trình của Cha",
+        "Viết tiếp lời yêu thương khi còn kịp lúc"
+      ],
+      "image": "/assets/images/events/cuoc-doi-cua-cha-poster.jpg",
+      "imageAlt": "Poster Workshop Cuộc Đời Của Cha — hình ảnh người cha khoác vai con ngồi ngắm hoàng hôn ấm áp bên mặt hồ yên bình.",
+      "href": "/su-kien/cuoc-doi-cua-cha/",
+      "landing": {
+        "slug": "cuoc-doi-cua-cha",
+        "urlPath": "/su-kien/cuoc-doi-cua-cha/",
+        "ogImage": "/assets/images/events/cuoc-doi-cua-cha-og.jpg",
+        "seoTitle": "Thư Mời Workshop \"Cuộc Đời Của Cha\" · 19h15 CN 29/11/2026 | HolaHeart",
+        "seoDescription": "Thư mời tham dự Workshop Cuộc Đời Của Cha lúc 19h15 Chủ Nhật 29/11/2026 tại Quán Cafe Mây Lang Thang, Hòa Lạc. Cùng lắng nghe, tri ân và viết tiếp câu chuyện về Cha.",
+        "headline": "Workshop “Cuộc Đời Của Cha”",
+        "startIso": "2026-11-29T19:15:00+07:00",
+        "endIso": "2026-11-29T21:30:00+07:00",
+        "icsStartUtc": "20261129T121500Z",
+        "icsEndUtc": "20261129T143000Z",
+        "timeLabel": "19h15, Chủ Nhật ngày 29/11/2026",
+        "venueName": "Quán Cafe Mây Lang Thang",
+        "letterParagraphs": [
+          "Có những tình yêu chẳng bao giờ nói thành lời.\nCó những hy sinh âm thầm mà chúng ta đôi khi vô tình không nhận ra.",
+          "Đó là bóng lưng Cha – người đã dành cả cuộc đời để che chở, chở che, mong ngóng và chờ đợi những đứa con trưởng thành.",
+          "Hãy cùng chúng tôi dành một buổi tối đặc biệt để lắng nghe, cảm nhận và nhìn lại Cuộc Đời Của Cha.",
+          "Biết đâu, sau buổi gặp gỡ này, chúng ta sẽ hiểu Cha hơn, yêu thương Cha nhiều hơn và biết trân trọng những điều vẫn luôn hiện hữu bên cạnh mình."
+        ],
+        "letterPullQuote": "Cha có thể không nói nhiều về tình yêu, nhưng cả cuộc đời Cha chính là minh chứng cho tình yêu ấy.",
+        "letterClosing": "Đừng để những yêu thương chỉ còn là điều muốn nói. Hãy đến và cùng chúng tôi viết tiếp câu chuyện về Cha!",
+        "letterSignoff": "Trân trọng kính mời bạn!"
+      }
+    },
     {
       "id": "holaconnect-leo-nui-lam-nghiep-2026-11-26",
       "type": "HolaConnect · Gắn kết & Thể chất",
@@ -15,42 +65,21 @@
       "date": "2026-11-26",
       "dateDisplay": "Thứ Năm, 26/11/2026",
       "time": "14:30 – 17:30",
-      "location": "ĐH Lâm Nghiệp (Núi Luốt), Xuân Mai – Hòa Lạc",
+      "location": "Núi Luốt – ĐH Lâm Nghiệp (Xuân Mai)",
       "fee": "Miễn phí",
       "seats": "Mở đăng ký · 25 chỗ",
       "title": "HolaConnect · Chiều Leo Núi & Kết Nối Giữa Rừng Thông",
-      "summary": "Tạm rời màn hình máy tính để cùng bạn bè người trẻ Hòa Lạc – Xuân Mai trekking cung đồi rừng thực nghiệm Núi Luốt tại ĐH Lâm Nghiệp, hít thở không khí chiều thu và trò chuyện kết nối trên đỉnh đồi thông.",
+      "titleEn": "HolaConnect · Pine Hill Trek & Afternoon Circle",
+      "summary": "Tạm rời màn hình máy tính để cùng bạn bè người trẻ Hòa Lạc trekking cung đồi rừng thông Núi Luốt, hít thở không khí chiều thu và trò chuyện kết nối.",
+      "summaryEn": "Step away from screens for a refreshing afternoon trek up Nui Luot pine hill and an open connection circle with fellow youth.",
       "highlights": [
         "Trekking nhẹ nhàng rừng thông Núi Luốt",
         "Vòng tròn làm quen & sẻ chia trên đồi",
         "Rèn luyện sức bền & gắn kết bạn đồng hành"
       ],
-      "image": "/assets/images/events/activity-nature-trail.jpg",
-      "imageAlt": "Con đường mòn rợp bóng cây xanh dẫn lên đồi rừng tại buổi chiều leo núi kết nối HolaConnect."
-    },
-    {
-      "id": "holaheart-ws-nguoi-tre-cung-ngoi-lai-2026-11-29",
-      "type": "HolaHeart · Đối thoại & Nội lực",
-      "filters": [
-        "holaheart",
-        "biet-on",
-        "tu-te"
-      ],
-      "date": "2026-11-29",
-      "dateDisplay": "Chủ Nhật, 29/11/2026",
-      "time": "20:00 – 21:30",
-      "location": "Mây Lang Thang Cafe, Hòa Lạc",
-      "fee": "Miễn phí",
-      "seats": "Mở đăng ký · 30 chỗ",
-      "title": "Workshop HolaHeart: Người trẻ cùng ngồi lại?!..",
-      "summary": "Giữa những deadline dồn dập và nghìn thông báo lướt qua mỗi ngày, đã bao lâu chúng mình chưa thực sự ngồi lại với nhau? Một tối Chủ Nhật không bục giảng tại Mây Lang Thang để người trẻ Hòa Lạc cất điện thoại, gỡ bỏ những câu hỏi lửng lơ và lắng nghe nhau bằng sự chân thành.",
-      "highlights": [
-        "90 phút đối thoại mộc không phán xét",
-        "Gỡ rối áp lực đồng trang lứa & mất kết nối",
-        "Tìm lại điểm tựa tinh thần cho tuần mới"
-      ],
-      "image": "/assets/images/events/holaheart-2026-11-15/04-wide-venue.jpg",
-      "imageAlt": "Không gian buổi tối ấm cúng nơi những người trẻ cùng ngồi lại trò chuyện tại Mây Lang Thang Cafe, Hòa Lạc."
+      "image": "/assets/images/illustrations/holagreen/G03.jpg",
+      "imageAlt": "Ảnh định hướng hoạt động dã ngoại và gắn kết thiên nhiên của người trẻ HolaRise.",
+      "imageIsIllustration": true
     }
   ],
   "pastTopics": [
@@ -60,7 +89,7 @@
       "title": "HolaHeart · Tình yêu thương của Mẹ trong thời đại AI",
       "time": "14:00–16:50",
       "location": "Mây Lang Thang Cafe, Hòa Lạc",
-      "participants": "Xem tường thuật & album 8 ảnh thật",
+      "participants": "Xem tường thuật & viết lưu bút",
       "image": "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg",
       "imageAlt": "Diễn giả cầm micro chia sẻ tại sự kiện HolaHeart ngày 15/11/2026.",
       "href": "/hanh-trinh/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/"
@@ -68,13 +97,13 @@
     {
       "id": "holaheart-musicspace-series",
       "date": "2025 – 2026",
-      "title": "Chuỗi Âm nhạc & Workshop · HolaHeart × MusicSpace",
+      "title": "Chuỗi Đêm Nhạc Mộc & Đối Thoại · HolaHeart × MusicSpace",
       "time": "Định kỳ buổi tối",
-      "location": "Hòa Lạc – Thạch Thất",
-      "participants": "Xem 14 khoảnh khắc tuyển chọn",
+      "location": "Hòa Lạc",
+      "participants": "Xem câu chuyện & viết lưu bút",
       "image": "/assets/images/musicspace-archive/15-671661990_1333975782086922_4394124200415584759_n.jpg",
       "imageAlt": "Vòng tròn chia sẻ ngoài trời trong chuỗi HolaHeart × MusicSpace tại Hòa Lạc.",
-      "href": "/hanh-trinh/#musicspace-chapter"
+      "href": "/hanh-trinh/chuoi-am-nhac-ket-noi-holaheart-musicspace/"
     }
   ]
 }

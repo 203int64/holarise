@@ -1223,3 +1223,26 @@ dialog.cms-dialog::backdrop {
     animation: none;
   }
 }
+
+
+/* Site Visuals CMS Slot Grid */
+.visuals-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+.visual-slot-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.visual-slot-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}

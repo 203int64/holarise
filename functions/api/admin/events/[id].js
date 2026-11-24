@@ -41,6 +41,14 @@ export async function onRequestPut(context) {
       parsed.data.sortOrder !== undefined || parsed.data.sort_order !== undefined
         ? (parsed.data.sortOrder ?? parsed.data.sort_order)
         : existing.sort_order,
+    titleEn:
+      parsed.data.titleEn !== undefined || parsed.data.title_en !== undefined
+        ? (parsed.data.titleEn ?? parsed.data.title_en)
+        : (existing.title_en || ""),
+    summaryEn:
+      parsed.data.summaryEn !== undefined || parsed.data.summary_en !== undefined
+        ? (parsed.data.summaryEn ?? parsed.data.summary_en)
+        : (existing.summary_en || ""),
   };
 
   const validated = validateEventInput(mergedBody);
@@ -51,35 +59,73 @@ export async function onRequestPut(context) {
   const v = validated.value;
   const now = new Date().toISOString();
 
-  await context.env.DB.prepare(
-    `UPDATE events
-     SET kind = ?, type = ?, filters_json = ?, date = ?, date_display = ?, time = ?, location = ?,
-         fee = ?, seats = ?, title = ?, summary = ?, highlights_json = ?, participants = ?,
-         image = ?, image_alt = ?, status = ?, sort_order = ?, updated_at = ?
-     WHERE id = ?`
-  )
-    .bind(
-      v.kind,
-      v.type,
-      JSON.stringify(v.filters),
-      v.date,
-      v.date_display,
-      v.time,
-      v.location,
-      v.fee,
-      v.seats,
-      v.title,
-      v.summary,
-      JSON.stringify(v.highlights),
-      v.participants,
-      v.image,
-      v.image_alt,
-      v.status,
-      v.sort_order,
-      now,
-      id
+  try {
+    await context.env.DB.prepare(
+      `UPDATE events
+       SET kind = ?, type = ?, filters_json = ?, date = ?, date_display = ?, time = ?, location = ?,
+           fee = ?, seats = ?, title = ?, title_en = ?, summary = ?, summary_en = ?, highlights_json = ?, participants = ?,
+           image = ?, image_alt = ?, status = ?, sort_order = ?, updated_at = ?
+       WHERE id = ?`
     )
-    .run();
+      .bind(
+        v.kind,
+        v.type,
+        JSON.stringify(v.filters),
+        v.date,
+        v.date_display,
+        v.time,
+        v.location,
+        v.fee,
+        v.seats,
+        v.title,
+        v.title_en,
+        v.summary,
+        v.summary_en,
+        JSON.stringify(v.highlights),
+        v.participants,
+        v.image,
+        v.image_alt,
+        v.status,
+        v.sort_order,
+        now,
+        id
+      )
+      .run();
+  } catch (err) {
+    if (String(err?.message || "").includes("title_en")) {
+      await context.env.DB.prepare(
+        `UPDATE events
+         SET kind = ?, type = ?, filters_json = ?, date = ?, date_display = ?, time = ?, location = ?,
+             fee = ?, seats = ?, title = ?, summary = ?, highlights_json = ?, participants = ?,
+             image = ?, image_alt = ?, status = ?, sort_order = ?, updated_at = ?
+         WHERE id = ?`
+      )
+        .bind(
+          v.kind,
+          v.type,
+          JSON.stringify(v.filters),
+          v.date,
+          v.date_display,
+          v.time,
+          v.location,
+          v.fee,
+          v.seats,
+          v.title,
+          v.summary,
+          JSON.stringify(v.highlights),
+          v.participants,
+          v.image,
+          v.image_alt,
+          v.status,
+          v.sort_order,
+          now,
+          id
+        )
+        .run();
+    } else {
+      throw err;
+    }
+  }
 
   const updated = await context.env.DB.prepare("SELECT * FROM events WHERE id = ?").bind(id).first();
   return jsonResponse({ ok: true, item: serializeEventRow(updated) });
