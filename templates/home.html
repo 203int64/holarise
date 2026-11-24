@@ -2,7 +2,10 @@
 <section class="hero-stage" aria-label="Giới thiệu Cộng đồng HolaRise">
   <div class="container">
     <div class="hero-card" data-hero-card>
-      <img class="hero-card-img" src="{{HERO_IMAGE}}" srcset="{{HERO_IMAGE_SRCSET}}" sizes="(min-width: 1280px) 1240px, calc(100vw - 40px)" alt="{{HERO_IMAGE_ALT}}" width="1671" height="941" fetchpriority="high" decoding="async">
+      <picture class="hero-card-picture">
+        <source media="(max-width: 640px)" type="image/webp" srcset="{{HERO_MOBILE_IMAGE_SRCSET}}" sizes="calc(100vw - 40px)" width="1024" height="1536">
+        <img class="hero-card-img" src="{{HERO_IMAGE}}" srcset="{{HERO_IMAGE_SRCSET}}" sizes="(min-width: 1280px) 1240px, calc(100vw - 40px)" alt="{{HERO_IMAGE_ALT}}" width="1671" height="941" fetchpriority="high" decoding="async">
+      </picture>
       <div class="hero-card-scrim" aria-hidden="true"></div>
 
       <div class="hero-card-bottom">

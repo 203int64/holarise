@@ -1331,6 +1331,10 @@ html.has-motion .scrub-word {
   will-change: transform;
 }
 
+.hero-card-picture {
+  display: block;
+}
+
 .hero-card-img {
   display: block;
   width: 100%;
@@ -1399,6 +1403,12 @@ html.has-motion .scrub-word {
   letter-spacing: -0.035em;
   color: #ffffff;
   text-wrap: balance;
+}
+
+@media (min-width: 641px) {
+  .hero-display-title .split-line-mask + .split-line-mask .split-line-inner::first-letter {
+    text-transform: uppercase;
+  }
 }
 
 .hero-display-title .accent-word {
@@ -4113,6 +4123,34 @@ dialog.club-dialog[open]:where(:not([data-closing]))::backdrop {
   .filter-btn {
     padding: 0 0 10px;
     font-size: 0.86rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-card-img {
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+  }
+
+  .hero-card-scrim {
+    display: block;
+    background: linear-gradient(to bottom, transparent 58%, rgba(11, 17, 15, 0.68) 100%);
+  }
+
+  .hero-card-bottom {
+    position: absolute;
+    padding: 0 clamp(20px, 6vw, 36px) clamp(24px, 7vw, 44px);
+  }
+
+  .hero-display-title {
+    margin: 0;
+    font-size: clamp(1.55rem, 7.2vw, 2.5rem);
+  }
+
+  .hero-location,
+  .hero-display-lead,
+  .hero-card-actions {
+    display: none;
   }
 }
 

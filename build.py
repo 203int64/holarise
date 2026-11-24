@@ -1074,9 +1074,9 @@ def write_page(
     out_path.write_text(rendered, encoding="utf-8")
 
 
-def collect_precache_urls(hero_srcset: str) -> list:
+def collect_precache_urls(*hero_srcsets: str) -> list:
     """Collect canonical routes and versioned core assets actually used by generated pages."""
-    urls = set(srcset_urls(hero_srcset))
+    urls = {url for srcset in hero_srcsets for url in srcset_urls(srcset)}
     excluded_prefixes = (
         "/assets/images/events/",
         "/assets/images/illustrations/",
@@ -1530,6 +1530,7 @@ def build_site() -> list:
         {
             "HERO_IMAGE": esc(h["image"]),
             "HERO_IMAGE_SRCSET": esc(h["imageSrcset"]),
+            "HERO_MOBILE_IMAGE_SRCSET": esc(h["mobileImageSrcset"]),
             "HERO_IMAGE_ALT": esc(h["imageAlt"]),
             "HERO_BADGE": esc(h["badge"]),
             "HERO_HEADLINE_LINES": render_hero_headline_lines(h["headline"]),
@@ -2029,7 +2030,7 @@ Sitemap: {abs_url(b['siteUrl'], '/sitemap.xml')}
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
-    precache_urls = collect_precache_urls(h["imageSrcset"])
+    precache_urls = collect_precache_urls(h["imageSrcset"], h["mobileImageSrcset"])
     (DIST_DIR / "sw.js").write_text(
         generate_service_worker(CURRENT_BUILD_HASH, precache_urls), encoding="utf-8"
     )
@@ -2116,13 +2117,12 @@ def verify_dist() -> list:
             elif not target_path.exists():
                 errors.append(f"[{rel}] Missing asset {attr}=\"{target}\"")
 
-        for img_tag in re.findall(r"<img\b[^>]*>", text):
-            srcset = re.search(r'\ssrcset="([^"]+)"', img_tag)
-            if srcset:
-                for url in srcset_urls(srcset.group(1)):
-                    if url.startswith("/assets/") and not (DIST_DIR / url.lstrip("/")).is_file():
-                        errors.append(f"[{rel}] Missing image variant: {url}")
+        for srcset in re.findall(r'<(?:img|source)\b[^>]*\ssrcset="([^"]+)"', text):
+            for url in srcset_urls(srcset):
+                if url.startswith("/assets/") and not (DIST_DIR / url.lstrip("/")).is_file():
+                    errors.append(f"[{rel}] Missing image variant: {url}")
 
+        for img_tag in re.findall(r"<img\b[^>]*>", text):
             if re.search(r'\bsrc=""', img_tag):
                 errors.append(f"[{rel}] Empty img src attribute: {img_tag[:80]}")
             if 'id="float-preview-img"' in img_tag or 'id="lightbox-img"' in img_tag or 'class="brand-part' in img_tag:

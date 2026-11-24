@@ -30,7 +30,7 @@
   },
   "hero": {
     "badge": "Chapter 01 · Hòa Lạc – Thạch Thất",
-    "headline": "Từ nội lực tử tế, Vươn mình phụng sự cộng đồng.",
+    "headline": "Từ nội lực tử tế, vươn mình phụng\u00a0sự cộng đồng.",
     "description": "Khởi nguồn từ cái nôi tri thức trẻ Hòa Lạc – Thạch Thất, HolaRise kết nối những người trẻ chọn sống sâu hơn, hành động xanh hơn và bền bỉ lan tỏa giá trị thật đến cộng đồng.",
     "quickPills": [
       "HolaHeart · Nội lực",
@@ -47,7 +47,8 @@
     },
     "image": "/assets/images/holarise-binh-minh-1671.webp",
     "imageSrcset": "/assets/images/holarise-binh-minh-768.webp 768w, /assets/images/holarise-binh-minh-1200.webp 1200w, /assets/images/holarise-binh-minh-1671.webp 1671w",
-    "imageAlt": "Nhóm HolaRise đi trên sườn đồi lúc bình minh, dưới dòng chữ Together We Rise, Together We Serve."
+    "mobileImageSrcset": "/assets/images/holarise-binh-minh-doc-512.webp 512w, /assets/images/holarise-binh-minh-doc-768.webp 768w, /assets/images/holarise-binh-minh-doc-1024.webp 1024w",
+    "imageAlt": "Nhóm HolaRise đi trên sườn đồi lúc bình minh."
   },
   "about": {
     "image": "/assets/images/hero-hoalac.jpg",
