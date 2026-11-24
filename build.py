@@ -2540,16 +2540,56 @@ def verify_dist() -> list:
     return errors
 
 
+FORBIDDEN_PUBLIC_COPY_PATTERNS = (
+    ("giữa nhịp sống số", "Văn sáo rỗng kiểu AI (AGENTS.md Tầng 2 - Cổng 1)"),
+    ("giữa nhịp sống hối hả", "Văn sáo rỗng kiểu AI (AGENTS.md Tầng 2 - Cổng 1)"),
+    ("khoảng lặng cần thiết", "Văn sáo rỗng kiểu AI (AGENTS.md Tầng 2 - Cổng 1)"),
+    ("điểm tựa cảm xúc", "Văn sáo rỗng kiểu AI (AGENTS.md Tầng 2 - Cổng 1)"),
+    ("cùng tần số", "Cụm từ sáo mòn (AGENTS.md Tầng 2 - Cổng 1)"),
+    ("không bán khóa học ẩn", "Câu tự thanh minh yếu thế (AGENTS.md Tầng 2 - Cổng 1)"),
+    ("không giáo điều", "Câu tự thanh minh yếu thế (AGENTS.md Tầng 2 - Cổng 1)"),
+    ("không thương mại hóa niềm tin", "Câu tự thanh minh yếu thế (AGENTS.md Tầng 2 - Cổng 1)"),
+    ("che chở, chở che", "Điệp từ sến / lỗi biên tập (AGENTS.md Tầng 2 - Cổng 2)"),
+    ("pbkdf2-sha256", "Lộ thuật ngữ kỹ thuật ra trang công khai (AGENTS.md Tầng 2 - Cổng 1)"),
+    ("localstorage", "Lộ thuật ngữ kỹ thuật ra trang công khai (AGENTS.md Tầng 2 - Cổng 1)"),
+)
+
+
+def audit_public_copy() -> list:
+    """Scan visible public HTML text in dist/ against AGENTS.md Tầng 2 forbidden copy patterns."""
+    warnings = []
+    for f in sorted(DIST_DIR.rglob("*.html")):
+        rel = f.relative_to(DIST_DIR)
+        if rel in (Path("admin/index.html"), Path("media/index.html")):
+            continue
+        raw = f.read_text(encoding="utf-8")
+        cleaned = re.sub(r"<(script|style)\b[^>]*>.*?</\1>", " ", raw, flags=re.I | re.S)
+        visible = html.unescape(re.sub(r"<[^>]+>", " ", cleaned))
+        normalized = re.sub(r"\s+", " ", visible).lower()
+        for phrase, reason in FORBIDDEN_PUBLIC_COPY_PATTERNS:
+            if phrase in normalized:
+                warnings.append(f"[{rel}] \"{phrase}\" -> {reason}")
+    return warnings
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build HolaRise static website")
-    parser.add_argument("--check", action="store_true", help="Run automated SEO & link verification after build")
+    parser.add_argument("--check", action="store_true", help="Run automated SEO, link & copy verification after build")
+    parser.add_argument("--strict-copy", action="store_true", help="Fail with exit code 1 if any AGENTS.md copy violation is found")
     args = parser.parse_args()
 
     urls = build_site()
     print(f"Built {len(urls)} pages successfully into {DIST_DIR}")
 
-    if args.check:
+    if args.check or args.strict_copy:
         errors = verify_dist()
+        copy_warnings = audit_public_copy()
+        if copy_warnings:
+            print(f"[COPY-WARN] Found {len(copy_warnings)} legacy copy violation(s) against AGENTS.md Tầng 2:")
+            for cw in copy_warnings:
+                print("  -", cw)
+            if args.strict_copy:
+                errors.extend(f"[COPY] {cw}" for cw in copy_warnings)
         if errors:
             print("Verification FAILED:")
             for err in errors:

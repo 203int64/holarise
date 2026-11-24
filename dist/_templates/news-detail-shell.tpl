@@ -44,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=50d8804cfb">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=c64847d99b">
   <script>
     (function () {
       try {
@@ -393,10 +393,15 @@
 
       <div class="modal-member-bar" id="modal-member-rsvp-bar" hidden>
         <div class="modal-member-bar-copy">
-          <strong id="modal-member-bar-title">Đang giữ chỗ bằng Thẻ Thành Viên</strong>
-          <span id="modal-member-bar-sub">Thông tin đã điền sẵn từ hồ sơ Hola của bạn.</span>
+          <strong id="modal-member-bar-title">Đang giữ chỗ bằng tài khoản HolaRise</strong>
+          <span id="modal-member-bar-sub">Chỉ cần chọn số chỗ và bấm xác nhận.</span>
         </div>
         <button class="btn btn--primary btn--sm" type="button" id="modal-member-onetap-btn">Giữ chỗ 1 chạm</button>
+      </div>
+
+      <div class="rsvp-guest-signin-bar" data-rsvp-guest-prompt>
+        <span>Đăng nhập bằng Google / Passkey để giữ chỗ trong 1 chạm.</span>
+        <button type="button" class="btn btn--outline btn--sm" data-open-member-auth>Đăng nhập</button>
       </div>
 
       <form class="form-grid" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register" data-endpoint="/api/registrations" data-phone="077.777.1948" data-phone-raw="0777771948" data-zalo="https://zalo.me/0777771948" novalidate>
@@ -407,41 +412,42 @@
           <label for="modal-website">Website</label>
           <input id="modal-website" name="website" type="text" tabindex="-1" autocomplete="off">
         </div>
-        <p class="form-required-note">Các mục có dấu <span aria-hidden="true">*</span> là bắt buộc.</p>
-        <div class="field">
-          <label for="modal-name">Họ và tên <span aria-hidden="true">*</span></label>
-          <input id="modal-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Nguyễn Minh Anh" required minlength="2" enterkeyhint="next" data-error="modal-name-error">
-          <div id="modal-name-error" class="field-error">
-            <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <span data-error-text>Lỗi: Vui lòng nhập họ và tên đầy đủ (tối thiểu 2 ký tự).</span>
-          </div>
-        </div>
-        <div class="form-row-2">
+        <div class="form-grid" data-guest-identity-fields>
           <div class="field">
-            <label for="modal-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
-            <input id="modal-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="next" data-error="modal-phone-error">
-            <div id="modal-phone-error" class="field-error">
+            <label for="modal-name">Họ và tên <span aria-hidden="true">*</span></label>
+            <input id="modal-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Nguyễn Minh Anh" required minlength="2" enterkeyhint="next" data-error="modal-name-error">
+            <div id="modal-name-error" class="field-error">
               <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span data-error-text>Lỗi: Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).</span>
+              <span data-error-text>Lỗi: Vui lòng nhập họ và tên đầy đủ (tối thiểu 2 ký tự).</span>
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="modal-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
+              <input id="modal-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="next" data-error="modal-phone-error">
+              <div id="modal-phone-error" class="field-error">
+                <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span data-error-text>Lỗi: Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="modal-email">Email (không bắt buộc)</label>
+              <input id="modal-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" enterkeyhint="next" data-error="modal-email-error">
+              <div id="modal-email-error" class="field-error">
+                <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span data-error-text>Lỗi: Email chưa đúng định dạng (ví dụ: tenban@gmail.com), hoặc bạn có thể để trống.</span>
+              </div>
             </div>
           </div>
           <div class="field">
-            <label for="modal-email">Email (không bắt buộc)</label>
-            <input id="modal-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" enterkeyhint="next" data-error="modal-email-error">
-            <div id="modal-email-error" class="field-error">
-              <svg class="field-error-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span data-error-text>Lỗi: Email chưa đúng định dạng (ví dụ: tenban@gmail.com), hoặc bạn có thể để trống.</span>
+            <label for="modal-org">Trường / Đơn vị tại Hòa Lạc</label>
+            <input id="modal-org" name="organization" type="text" autocomplete="organization" placeholder="Ví dụ: ĐH FPT, ĐHQGHN, THPT..." enterkeyhint="next">
+            <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Chọn nhanh đơn vị">
+              <button type="button" class="quick-chip" data-org-chip="ĐH FPT" aria-pressed="false">ĐH FPT</button>
+              <button type="button" class="quick-chip" data-org-chip="ĐHQGHN (VNU)" aria-pressed="false">ĐHQGHN</button>
+              <button type="button" class="quick-chip" data-org-chip="THPT Thạch Thất" aria-pressed="false">THPT Thạch Thất</button>
+              <button type="button" class="quick-chip" data-org-chip="Đã đi làm" aria-pressed="false">Đi làm</button>
             </div>
-          </div>
-        </div>
-        <div class="field">
-          <label for="modal-org">Trường / Đơn vị tại Hòa Lạc</label>
-          <input id="modal-org" name="organization" type="text" autocomplete="organization" placeholder="Ví dụ: ĐH FPT, ĐHQGHN, THPT..." enterkeyhint="next">
-          <div class="quick-chip-row quick-chip-row--compact" role="group" aria-label="Chọn nhanh đơn vị">
-            <button type="button" class="quick-chip" data-org-chip="ĐH FPT" aria-pressed="false">ĐH FPT</button>
-            <button type="button" class="quick-chip" data-org-chip="ĐHQGHN (VNU)" aria-pressed="false">ĐHQGHN</button>
-            <button type="button" class="quick-chip" data-org-chip="THPT Thạch Thất" aria-pressed="false">THPT Thạch Thất</button>
-            <button type="button" class="quick-chip" data-org-chip="Đã đi làm" aria-pressed="false">Đi làm</button>
           </div>
         </div>
         <div class="field">
@@ -719,13 +725,13 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/i18n.js?v=50d8804cfb" defer></script>
-  <script src="/assets/vendor/gsap.min.js?v=50d8804cfb" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=50d8804cfb" defer></script>
-  <script src="/assets/js/motion.js?v=50d8804cfb" defer></script>
-  <script src="/assets/js/main.js?v=50d8804cfb" defer></script>
-  <script src="/assets/js/join-pass.js?v=50d8804cfb" defer></script>
-  <script src="/assets/js/member.js?v=50d8804cfb" defer></script>
-  <script src="/assets/js/pwa.js?v=50d8804cfb" defer></script>
+  <script src="/assets/js/i18n.js?v=c64847d99b" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=c64847d99b" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=c64847d99b" defer></script>
+  <script src="/assets/js/motion.js?v=c64847d99b" defer></script>
+  <script src="/assets/js/main.js?v=c64847d99b" defer></script>
+  <script src="/assets/js/join-pass.js?v=c64847d99b" defer></script>
+  <script src="/assets/js/member.js?v=c64847d99b" defer></script>
+  <script src="/assets/js/pwa.js?v=c64847d99b" defer></script>
 </body>
 </html>

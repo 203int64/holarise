@@ -209,6 +209,21 @@
       }
     }
 
+    // Toggle guest login prompts vs hiding redundant identity fields when signed in
+    $$("[data-rsvp-guest-prompt]").forEach((el) => {
+      el.hidden = Boolean(m);
+    });
+    $$("[data-guest-identity-fields]").forEach((group) => {
+      group.hidden = Boolean(m);
+      group.querySelectorAll("input[name='fullName'], input[name='phone']").forEach((inp) => {
+        if (m) {
+          inp.removeAttribute("required");
+        } else {
+          inp.setAttribute("required", "");
+        }
+      });
+    });
+
     // 1-Tap RSVP Bar in #event-register-modal
     const modalBar = $("#modal-member-rsvp-bar");
     const modalBarTitle = $("#modal-member-bar-title");
@@ -219,16 +234,16 @@
         modalBar.hidden = false;
         if (modalBarTitle) modalBarTitle.textContent = `${m.name} · ${m.memberCode}`;
         if (modalBarSub) {
-          modalBarSub.textContent = "Đã kết nối Thẻ Thành Viên — bấm giữ chỗ 1 chạm ngay.";
+          modalBarSub.textContent = `${m.email || m.phone || "Tài khoản HolaRise"} — chọn số chỗ và bấm xác nhận.`;
         }
         const fName = modalForm.querySelector('[name="fullName"]');
         const fPhone = modalForm.querySelector('[name="phone"]');
         const fEmail = modalForm.querySelector('[name="email"]');
         const fOrg = modalForm.querySelector('[name="organization"]');
-        if (fName && !fName.value) fName.value = m.name || "";
-        if (fPhone && !fPhone.value && m.phone) fPhone.value = m.phone;
-        if (fEmail && !fEmail.value && m.email) fEmail.value = m.email;
-        if (fOrg && !fOrg.value && m.organization) fOrg.value = m.organization;
+        if (fName) fName.value = m.name || "";
+        if (fPhone) fPhone.value = m.phone || m.email || "";
+        if (fEmail) fEmail.value = m.email || "";
+        if (fOrg) fOrg.value = m.organization || "";
       } else {
         modalBar.hidden = true;
       }
@@ -237,23 +252,27 @@
     // 1-Tap RSVP Bar on /su-kien/cuoc-doi-cua-cha/
     const wsBar = $("#ws-member-rsvp-bar");
     const wsBarTitle = $("#ws-member-bar-title");
+    const wsBarSub = $("#ws-member-bar-sub");
     const wsForm = $("form[data-father-studio]");
     if (wsBar && wsForm) {
       if (m) {
         wsBar.hidden = false;
-        if (wsBarTitle) wsBarTitle.textContent = `Thẻ Thành Viên ${m.name} (${m.memberCode})`;
+        if (wsBarTitle) wsBarTitle.textContent = `${m.name} · ${m.memberCode}`;
+        if (wsBarSub) {
+          wsBarSub.textContent = `${m.email || m.phone || "Tài khoản HolaRise"} — chỉ cần chọn số chỗ và bấm Xác nhận.`;
+        }
         const fName = wsForm.querySelector('[name="fullName"]');
         const fPhone = wsForm.querySelector('[name="phone"]');
         const fEmail = wsForm.querySelector('[name="email"]');
         const fOrg = wsForm.querySelector('[name="organization"]');
-        if (fName && !fName.value) {
+        if (fName) {
           fName.value = m.name || "";
           fName.dispatchEvent(new Event("input", { bubbles: true }));
         }
-        if (fPhone && !fPhone.value && m.phone) fPhone.value = m.phone;
-        if (fEmail && !fEmail.value && m.email) fEmail.value = m.email;
-        if (fOrg && !fOrg.value && m.organization) {
-          fOrg.value = m.organization;
+        if (fPhone) fPhone.value = m.phone || m.email || "";
+        if (fEmail) fEmail.value = m.email || "";
+        if (fOrg) {
+          fOrg.value = m.organization || "";
           fOrg.dispatchEvent(new Event("input", { bubbles: true }));
         }
       } else {
