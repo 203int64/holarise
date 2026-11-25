@@ -4876,6 +4876,10 @@ html.is-standalone .mobile-drawer-inner {
     -webkit-tap-highlight-color: transparent;
   }
 
+  html.is-standalone.is-dock-compact .mobile-dock {
+    --k: 0;
+  }
+
   html.is-standalone .mobile-dock-ind {
     position: absolute;
     left: 5px;

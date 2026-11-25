@@ -22,7 +22,15 @@
   var prefersReducedMotion =
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var lastScrollY = window.scrollY || 0;
-  var dockExpanded = 1;
+  var dockExpanded = document.documentElement.classList.contains("is-dock-compact") ? 0 : 1;
+  var setDockExpanded = function (val) {
+    if (val === dockExpanded) return;
+    dockExpanded = val;
+    document.documentElement.classList.toggle("is-dock-compact", dockExpanded === 0);
+    try {
+      window.sessionStorage.setItem("holarise_dock_k", String(dockExpanded));
+    } catch (_e) {}
+  };
 
   if (header || mobileDock) {
     var scrollRafPending = false;
@@ -44,18 +52,13 @@
       }
 
       if (mobileDock) {
-        var nextExpanded = dockExpanded;
         var nearBottom = currentY + window.innerHeight >= document.documentElement.scrollHeight - 24;
-        if (currentY <= 16 || prefersReducedMotion || drawerIsOpen) {
-          nextExpanded = 1;
+        if (prefersReducedMotion || drawerIsOpen) {
+          setDockExpanded(1);
         } else if (delta > 14 && currentY > 72) {
-          nextExpanded = 0;
-        } else if (delta < -14 && !nearBottom) {
-          nextExpanded = 1;
-        }
-        if (nextExpanded !== dockExpanded) {
-          dockExpanded = nextExpanded;
-          mobileDock.style.setProperty("--k", String(dockExpanded));
+          setDockExpanded(0);
+        } else if ((delta < -14 && !nearBottom) || (delta < 0 && currentY <= 16)) {
+          setDockExpanded(1);
         }
       }
 
