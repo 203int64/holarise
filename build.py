@@ -910,10 +910,41 @@ def render_photo_wall(photos: list) -> str:
 def render_faqs(faqs: list) -> str:
     items = []
     for idx, f in enumerate(faqs):
+        q_lower = f["question"].lower()
+        if "đối tác" in q_lower or "nhà trường" in q_lower or "đồng tổ chức" in q_lower:
+            topic, topic_label, cta_html = (
+                "partner",
+                "Hợp tác",
+                '<a class="faq-inline-link" href="/tham-gia/?chuong-trinh=hoptac">Gửi đề xuất hợp tác →</a>',
+            )
+        elif "chi phí" in q_lower or "mất phí" in q_lower or "giữ chỗ" in q_lower:
+            topic, topic_label, cta_html = (
+                "rsvp",
+                "Giữ chỗ & Chi phí",
+                '<a class="faq-inline-link" href="/lich-hoat-dong/">Xem lịch &amp; chi phí từng buổi →</a>',
+            )
+        else:
+            topic, topic_label, cta_html = (
+                "newbie",
+                "Người đi lần đầu",
+                '<a class="faq-inline-link" href="/su-kien/cuoc-doi-cua-cha/">Xem thư mời gần nhất →</a>',
+            )
+        num = f"{idx + 1:02d}"
+        open_attr = " open" if idx == 0 else ""
         items.append(
-            f"""<details class="faq-details">
-        <summary>{esc(f['question'])}</summary>
-        <div class="faq-answer">{esc(f['answer'])}</div>
+            f"""<details class="faq-details faq-live-item" data-faq-topic="{topic}"{open_attr}>
+        <summary class="faq-live-summary">
+          <span class="faq-live-num" aria-hidden="true">{num}</span>
+          <span class="faq-live-qwrap">
+            <span class="faq-live-tag">{topic_label}</span>
+            <span class="faq-live-q">{esc(f['question'])}</span>
+          </span>
+          <span class="faq-live-plus" aria-hidden="true"></span>
+        </summary>
+        <div class="faq-answer faq-live-answer">
+          <p>{esc(f['answer'])}</p>
+          {cta_html}
+        </div>
       </details>"""
         )
     return "\n      ".join(items)
@@ -1959,14 +1990,15 @@ def build_site() -> list:
 
     def format_event_share_title(ws: dict, brand_name: str) -> str:
         _, pillar_label = derive_event_pillar(ws)
-        raw_title = (ws.get("title") or "").strip()
+        raw_title = (ws.get("shortTitle") or ws.get("title") or "").strip()
         clean_title = re.sub(rf"^{re.escape(pillar_label)}\s*[·\-–—:]\s*", "", raw_title, flags=re.IGNORECASE).strip() or raw_title
+        clean_title = re.sub(r'^Workshop\s+["“](.+?)["”]$', r"\1", clean_title, flags=re.IGNORECASE).strip()
         iso_date = (ws.get("date") or "").strip()
         short_date = ""
         m_date = re.match(r"^(\d{4})-(\d{2})-(\d{2})$", iso_date)
         if m_date:
-            short_date = f" ({m_date.group(3)}/{m_date.group(2)})"
-        return f"{pillar_label} · {clean_title}{short_date} | {brand_name}"
+            short_date = f" | {m_date.group(3)}/{m_date.group(2)}"
+        return f"{pillar_label} · {clean_title}{short_date}"
 
     def build_default_landing(ws: dict) -> dict:
         slug = resolve_event_slug(ws)

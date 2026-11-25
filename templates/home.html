@@ -181,16 +181,38 @@
 {{TESTIMONIALS_SECTION}}
 <!-- CMS:TESTIMONIALS:END -->
 
-<!-- PART 6: Giải Đáp Nhanh & Banner Đăng Ký -->
-<section class="section" aria-labelledby="home-faq-heading">
+<!-- PART 6: Giải Đáp Nhanh Sinh Động & Banner Đăng Ký -->
+<section class="section faq-live-section" id="hoi-dap" aria-labelledby="home-faq-heading">
   <div class="container">
-    <div class="section-header" style="margin-bottom: 28px;" data-reveal>
-      <div class="kicker" data-i18n="home.faq.kicker">Minh bạch &amp; An tâm</div>
-      <h2 class="section-title" id="home-faq-heading" data-i18n="home.faq.title">Những điều người trẻ &amp; đối tác thường hỏi</h2>
-    </div>
+    <div class="faq-live-grid">
+      <div class="faq-live-aside" data-reveal>
+        <div class="kicker" data-i18n="home.faq.kicker">Minh bạch &amp; An tâm</div>
+        <h2 class="section-title" id="home-faq-heading" data-i18n="home.faq.title">Những điều người trẻ &amp; đối tác thường hỏi</h2>
+        <p class="section-lead" style="margin-bottom: 20px;">Chọn nhanh chủ đề bạn đang băn khoăn, hoặc nhắn trực tiếp Ban Điều Phối nếu cần hỏi thêm về lịch gặp, ghép xe hay đồng tổ chức.</p>
 
-    <div class="faq-list" data-reveal>
-      {{FAQ_HTML}}
+        <div class="faq-topic-chips" role="group" aria-label="Lọc câu hỏi theo chủ đề" data-faq-filter-group>
+          <button type="button" class="faq-topic-chip is-active" data-faq-filter="all" aria-pressed="true">Tất cả</button>
+          <button type="button" class="faq-topic-chip" data-faq-filter="newbie" aria-pressed="false">Người đi lần đầu</button>
+          <button type="button" class="faq-topic-chip" data-faq-filter="rsvp" aria-pressed="false">Giữ chỗ &amp; Chi phí</button>
+          <button type="button" class="faq-topic-chip" data-faq-filter="partner" aria-pressed="false">Hợp tác</button>
+        </div>
+
+        <div class="faq-concierge-card">
+          <div class="faq-concierge-status">
+            <span class="faq-online-dot" aria-hidden="true"></span>
+            <span>Ban Điều Phối HolaRise · Hỗ trợ trực tiếp</span>
+          </div>
+          <p class="faq-concierge-text">Vẫn còn thắc mắc riêng trước buổi gặp đầu tiên? Nhắn ngay Zalo hoặc gửi câu hỏi để chúng mình giải đáp sớm nhất.</p>
+          <div class="faq-concierge-actions">
+            <a class="btn btn--primary btn--sm" href="{{CONTACT_ZALO}}" target="_blank" rel="noopener noreferrer">Nhắn Zalo điều phối ↗</a>
+            <button type="button" class="btn btn--outline btn--sm" data-feedback-open>Gửi câu hỏi nhanh</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-list faq-live-list" data-faq-accordion data-reveal>
+        {{FAQ_HTML}}
+      </div>
     </div>
   </div>
 </section>

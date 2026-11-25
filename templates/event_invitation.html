@@ -1,4 +1,37 @@
 <div class="invite-theme-root" data-pillar="{{EVENT_PILLAR}}">
+<!-- Sealed 3D Envelope Opening Stage (auto-shown when URL has ?gui= or ?moi=, or via Preview) -->
+<section class="hl-env-stage" id="hl-env-stage" hidden aria-label="Mở phong bì thư mời">
+  <div class="hl-env-stage-inner">
+    <div class="hl-env-eyebrow">MỘT LỜI MỜI DÀNH CHO BẠN · {{EVENT_PILLAR_LABEL}}</div>
+    <div class="hl-env-salutation" id="hl-env-salutation">Gửi bạn,</div>
+    <p class="hl-env-sub"><strong id="hl-env-inviter-txt">HolaRise</strong> muốn cùng bạn đến<br>{{INVITE_HEADLINE}}.</p>
+
+    <div class="hl-env-wrap">
+      <div class="hl-env" id="hl-env-box">
+        <div class="hl-env-back"></div>
+        <div class="hl-env-letter" aria-hidden="true">
+          <div class="hl-env-letter-kicker">THIỆP MỜI · {{EVENT_PILLAR_LABEL}}</div>
+          <div class="hl-env-letter-title">{{INVITE_HEADLINE}}</div>
+          <div class="hl-env-letter-meta">{{INVITE_TIME_LABEL}}</div>
+          <div class="hl-env-letter-line"></div>
+          <div class="hl-env-letter-for">Dành cho <span id="hl-env-card-recipient">bạn</span></div>
+        </div>
+        <div class="hl-env-front"></div>
+        <div class="hl-env-flap"></div>
+        <span class="hl-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <button type="button" class="hl-env-seal" id="hl-env-seal-btn" aria-label="Chạm vào con dấu để mở thiệp">H</button>
+      </div>
+    </div>
+
+    <p class="hl-env-hint">Chạm vào con dấu để mở thiệp</p>
+    <div class="hl-env-actions">
+      <button type="button" class="hl-env-open-btn" id="hl-env-open-btn">Mở thiệp</button>
+      <button type="button" class="hl-env-skip-btn" id="hl-env-skip-btn">Xem thẳng thư mời</button>
+    </div>
+  </div>
+</section>
+
+<div class="hl-invite-main-flow" id="hl-invite-main-flow">
 <section class="page-hero invite-hero">
   <div class="container invite-narrow">
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
@@ -33,6 +66,13 @@
 
 <section class="section invite-letter-section" aria-label="Nội dung thư mời">
   <div class="container invite-narrow">
+    <!-- Handwritten Personal Note Card (shown after opening envelope when ?loi= is present) -->
+    <div class="hl-handnote-wrap" id="hl-handnote-wrap" hidden>
+      <div class="hl-ltr" id="hl-ltr-card">
+        <div class="hl-hw-body" id="hl-hw-body"></div>
+      </div>
+    </div>
+
     <figure class="invite-poster-figure">
       <button class="invite-poster-btn" type="button" aria-label="Xem ảnh lớn {{EVENT_TITLE}}" data-lightbox-src="{{EVENT_IMAGE}}" data-lightbox-alt="{{EVENT_IMAGE_ALT}}" data-lightbox-caption="{{EVENT_TITLE}} · {{INVITE_TIME_LABEL}} tại {{INVITE_VENUE_NAME}}">
         <img src="{{EVENT_IMAGE}}" alt="{{EVENT_IMAGE_ALT}}" width="1024" height="576" fetchpriority="high" decoding="async">
@@ -100,14 +140,25 @@
       <img class="share-preview-thumb" src="{{EVENT_IMAGE}}" alt="{{EVENT_IMAGE_ALT}}" width="76" height="76" loading="lazy">
       <div class="share-preview-body">
         <span class="share-preview-eyebrow">{{EVENT_PILLAR_LABEL}} — Sự kiện · holarise.org</span>
-        <strong class="share-preview-title">{{EVENT_SHARE_TITLE}}</strong>
+        <strong class="share-preview-title" id="share-preview-title">{{EVENT_SHARE_TITLE}}</strong>
         <p class="share-preview-meta">{{INVITE_TIME_LABEL}} · {{INVITE_VENUE_NAME}}</p>
       </div>
     </div>
 
+    <div class="share-inviter-grid">
+      <div class="share-inviter-field">
+        <label for="share-recipient-name">Gửi tới <span class="auth-hint-inline">(tên người được mời)</span></label>
+        <input id="share-recipient-name" type="text" maxlength="60" placeholder="Ví dụ: Lan Anh">
+      </div>
+      <div class="share-inviter-field">
+        <label for="share-inviter-name">Người mời <span class="auth-hint-inline">(tên bạn)</span></label>
+        <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi">
+      </div>
+    </div>
+
     <div class="share-inviter-field">
-      <label for="share-inviter-name">Cá nhân hóa lời mời <span class="auth-hint-inline">(tùy chọn tên của bạn)</span></label>
-      <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi — bạn mở link sẽ thấy lời mời từ bạn">
+      <label for="share-personal-note">Lời nhắn viết tay trên thiệp <span class="auth-hint-inline">(tùy chọn)</span></label>
+      <input id="share-personal-note" type="text" maxlength="140" placeholder="Ví dụ: Cuối tuần này đi cùng mình nhé, có chỗ ngồi ấm lắm...">
     </div>
 
     <div class="share-platforms-block">
@@ -121,7 +172,10 @@
     </div>
 
     <div class="share-url-block">
-      <label for="share-url-input" class="share-section-label">Đường dẫn thư mời</label>
+      <div class="share-url-head">
+        <label for="share-url-input" class="share-section-label">Đường dẫn thư mời</label>
+        <button type="button" class="share-preview-trigger" id="share-preview-env-btn">Xem thử hiệu ứng mở thiệp ↗</button>
+      </div>
       <div class="share-url-row">
         <input id="share-url-input" type="text" readonly value="{{CANONICAL_EVENT_URL}}">
         <button type="button" class="btn btn--primary btn--sm share-copy-btn" id="share-copy-btn">Sao chép</button>
@@ -129,4 +183,5 @@
     </div>
   </div>
 </dialog>
+</div>
 </div>

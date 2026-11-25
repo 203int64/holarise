@@ -1081,7 +1081,7 @@ test("Workshop 'Cuộc Đời Của Cha' migration 0005, SSR links, sitemap & se
   assert.ok(inviteHtml.includes("Tình thương của người cha hiếm khi cất thành lời."));
   assert.ok(inviteHtml.includes("https://zalo.me/g/7fock88aizzrdkmr9ggf"));
   assert.ok(inviteHtml.includes("2026-11-29T19:15:00+07:00"));
-  assert.ok(fs.existsSync(path.join(ROOT, "dist/su-kien/chieu-leo-nui-rung-thong-nui-luot/index.html")));
+  assert.ok(fs.existsSync(path.join(ROOT, "dist/su-kien/leo-nui-luot/index.html")));
   assert.ok(fs.existsSync(path.join(ROOT, "dist/en/index.html")));
 
   // 4. Seat reservation payload from Workshop Studio stores cleanly & returns seat confirmation

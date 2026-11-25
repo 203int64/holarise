@@ -47,7 +47,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=7d31d7469c">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=a093cf0dc4">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -161,6 +161,39 @@
 
   <main id="main-content">
     <div class="invite-theme-root" data-pillar="__SSR_EVENT_PILLAR__">
+<!-- Sealed 3D Envelope Opening Stage (auto-shown when URL has ?gui= or ?moi=, or via Preview) -->
+<section class="hl-env-stage" id="hl-env-stage" hidden aria-label="Mở phong bì thư mời">
+  <div class="hl-env-stage-inner">
+    <div class="hl-env-eyebrow">MỘT LỜI MỜI DÀNH CHO BẠN · __SSR_EVENT_PILLAR_LABEL__</div>
+    <div class="hl-env-salutation" id="hl-env-salutation">Gửi bạn,</div>
+    <p class="hl-env-sub"><strong id="hl-env-inviter-txt">HolaRise</strong> muốn cùng bạn đến<br>__SSR_INVITE_HEADLINE__.</p>
+
+    <div class="hl-env-wrap">
+      <div class="hl-env" id="hl-env-box">
+        <div class="hl-env-back"></div>
+        <div class="hl-env-letter" aria-hidden="true">
+          <div class="hl-env-letter-kicker">THIỆP MỜI · __SSR_EVENT_PILLAR_LABEL__</div>
+          <div class="hl-env-letter-title">__SSR_INVITE_HEADLINE__</div>
+          <div class="hl-env-letter-meta">__SSR_INVITE_TIME_LABEL__</div>
+          <div class="hl-env-letter-line"></div>
+          <div class="hl-env-letter-for">Dành cho <span id="hl-env-card-recipient">bạn</span></div>
+        </div>
+        <div class="hl-env-front"></div>
+        <div class="hl-env-flap"></div>
+        <span class="hl-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <button type="button" class="hl-env-seal" id="hl-env-seal-btn" aria-label="Chạm vào con dấu để mở thiệp">H</button>
+      </div>
+    </div>
+
+    <p class="hl-env-hint">Chạm vào con dấu để mở thiệp</p>
+    <div class="hl-env-actions">
+      <button type="button" class="hl-env-open-btn" id="hl-env-open-btn">Mở thiệp</button>
+      <button type="button" class="hl-env-skip-btn" id="hl-env-skip-btn">Xem thẳng thư mời</button>
+    </div>
+  </div>
+</section>
+
+<div class="hl-invite-main-flow" id="hl-invite-main-flow">
 <section class="page-hero invite-hero">
   <div class="container invite-narrow">
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
@@ -195,6 +228,13 @@
 
 <section class="section invite-letter-section" aria-label="Nội dung thư mời">
   <div class="container invite-narrow">
+    <!-- Handwritten Personal Note Card (shown after opening envelope when ?loi= is present) -->
+    <div class="hl-handnote-wrap" id="hl-handnote-wrap" hidden>
+      <div class="hl-ltr" id="hl-ltr-card">
+        <div class="hl-hw-body" id="hl-hw-body"></div>
+      </div>
+    </div>
+
     <figure class="invite-poster-figure">
       <button class="invite-poster-btn" type="button" aria-label="Xem ảnh lớn __SSR_EVENT_TITLE__" data-lightbox-src="__SSR_EVENT_IMAGE__" data-lightbox-alt="__SSR_EVENT_IMAGE_ALT__" data-lightbox-caption="__SSR_EVENT_TITLE__ · __SSR_INVITE_TIME_LABEL__ tại __SSR_INVITE_VENUE_NAME__">
         <img src="__SSR_EVENT_IMAGE__" alt="__SSR_EVENT_IMAGE_ALT__" width="1024" height="576" fetchpriority="high" decoding="async">
@@ -262,14 +302,25 @@
       <img class="share-preview-thumb" src="__SSR_EVENT_IMAGE__" alt="__SSR_EVENT_IMAGE_ALT__" width="76" height="76" loading="lazy">
       <div class="share-preview-body">
         <span class="share-preview-eyebrow">__SSR_EVENT_PILLAR_LABEL__ — Sự kiện · holarise.org</span>
-        <strong class="share-preview-title">__SSR_EVENT_SHARE_TITLE__</strong>
+        <strong class="share-preview-title" id="share-preview-title">__SSR_EVENT_SHARE_TITLE__</strong>
         <p class="share-preview-meta">__SSR_INVITE_TIME_LABEL__ · __SSR_INVITE_VENUE_NAME__</p>
       </div>
     </div>
 
+    <div class="share-inviter-grid">
+      <div class="share-inviter-field">
+        <label for="share-recipient-name">Gửi tới <span class="auth-hint-inline">(tên người được mời)</span></label>
+        <input id="share-recipient-name" type="text" maxlength="60" placeholder="Ví dụ: Lan Anh">
+      </div>
+      <div class="share-inviter-field">
+        <label for="share-inviter-name">Người mời <span class="auth-hint-inline">(tên bạn)</span></label>
+        <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi">
+      </div>
+    </div>
+
     <div class="share-inviter-field">
-      <label for="share-inviter-name">Cá nhân hóa lời mời <span class="auth-hint-inline">(tùy chọn tên của bạn)</span></label>
-      <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi — bạn mở link sẽ thấy lời mời từ bạn">
+      <label for="share-personal-note">Lời nhắn viết tay trên thiệp <span class="auth-hint-inline">(tùy chọn)</span></label>
+      <input id="share-personal-note" type="text" maxlength="140" placeholder="Ví dụ: Cuối tuần này đi cùng mình nhé, có chỗ ngồi ấm lắm...">
     </div>
 
     <div class="share-platforms-block">
@@ -283,7 +334,10 @@
     </div>
 
     <div class="share-url-block">
-      <label for="share-url-input" class="share-section-label">Đường dẫn thư mời</label>
+      <div class="share-url-head">
+        <label for="share-url-input" class="share-section-label">Đường dẫn thư mời</label>
+        <button type="button" class="share-preview-trigger" id="share-preview-env-btn">Xem thử hiệu ứng mở thiệp ↗</button>
+      </div>
       <div class="share-url-row">
         <input id="share-url-input" type="text" readonly value="__SSR_CANONICAL_URL__">
         <button type="button" class="btn btn--primary btn--sm share-copy-btn" id="share-copy-btn">Sao chép</button>
@@ -291,6 +345,7 @@
     </div>
   </div>
 </dialog>
+</div>
 </div>
 
   </main>
@@ -764,11 +819,11 @@
     <a class="mobile-dock-link" href="/tham-gia/" aria-label="Tham gia"><svg class="mobile-dock-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path pathLength="1" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg><span class="mobile-dock-label" aria-hidden="true">Tham gia</span></a>
   </nav>
 
-  <script src="/assets/vendor/gsap.min.js?v=7d31d7469c" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=7d31d7469c" defer></script>
-  <script src="/assets/js/motion.js?v=7d31d7469c" defer></script>
-  <script src="/assets/js/main.js?v=7d31d7469c" defer></script>
-  <script src="/assets/js/join-pass.js?v=7d31d7469c" defer></script>
-  <script src="/assets/js/member.js?v=7d31d7469c" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=a093cf0dc4" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=a093cf0dc4" defer></script>
+  <script src="/assets/js/motion.js?v=a093cf0dc4" defer></script>
+  <script src="/assets/js/main.js?v=a093cf0dc4" defer></script>
+  <script src="/assets/js/join-pass.js?v=a093cf0dc4" defer></script>
+  <script src="/assets/js/member.js?v=a093cf0dc4" defer></script>
 </body>
 </html>

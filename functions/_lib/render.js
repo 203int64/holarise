@@ -28,6 +28,7 @@ export function resolveEventSlug(ws) {
   if (explicitSlug) return explicitSlug;
   const id = String(ws.id || "").trim().toLowerCase();
   if (id === "holaheart-cuoc-doi-cua-cha-2026-11-29") return "cuoc-doi-cua-cha";
+  if (id === "holaconnect-leo-nui-lam-nghiep-2026-11-26") return "leo-nui-luot";
   return id.replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
 }
 

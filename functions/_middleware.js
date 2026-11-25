@@ -14,6 +14,10 @@ const LEGACY_POST_SLUG_MAP = {
   "chuoi-am-nhac-ket-noi-holaheart-musicspace": "holaheart-musicspace",
 };
 
+const LEGACY_EVENT_SLUG_MAP = {
+  "chieu-leo-nui-rung-thong-nui-luot": "leo-nui-luot",
+};
+
 function buildLegacyRedirectPath(pathname, search) {
   const cleanPath = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
   if (cleanPath === "/workshop") {
@@ -40,6 +44,12 @@ function buildLegacyRedirectPath(pathname, search) {
     const rest = cleanPath.slice("/hanh-trinh/".length);
     if (rest && !rest.includes("/") && LEGACY_POST_SLUG_MAP[rest]) {
       return `/hanh-trinh/${LEGACY_POST_SLUG_MAP[rest]}/${search}`;
+    }
+  }
+  if (cleanPath.startsWith("/su-kien/")) {
+    const rest = cleanPath.slice("/su-kien/".length);
+    if (rest && !rest.includes("/") && LEGACY_EVENT_SLUG_MAP[rest]) {
+      return `/su-kien/${LEGACY_EVENT_SLUG_MAP[rest]}/${search}`;
     }
   }
   return null;

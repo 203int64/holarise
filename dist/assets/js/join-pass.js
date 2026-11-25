@@ -1520,38 +1520,216 @@
     });
   });
 
-  /* MusicSpace-style Event Share & Personalized Invitation Modal */
-  (function initEventShareModal() {
+  /* MusicSpace-style 3D Sealed Envelope + Handwritten Note & Personalized Share Modal */
+  (function initEventShareAndEnvelope() {
     var modal = document.getElementById("event-share-modal");
+    var envStage = document.getElementById("hl-env-stage");
+    var envBox = document.getElementById("hl-env-box");
+    var mainFlow = document.getElementById("hl-invite-main-flow");
+    var handnoteWrap = document.getElementById("hl-handnote-wrap");
+    var hwBody = document.getElementById("hl-hw-body");
+
+    function escHtmlSimple(s) {
+      return String(s || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function wrapHandLines(text, maxChars) {
+      var words = String(text || "").split(/\s+/).filter(Boolean);
+      var out = [];
+      var cur = "";
+      words.forEach(function (w) {
+        if (cur && (cur + " " + w).length > (maxChars || 26)) {
+          out.push(cur);
+          cur = w;
+        } else {
+          cur = cur ? cur + " " + w : w;
+        }
+      });
+      if (cur) out.push(cur);
+      return out;
+    }
+
+    function renderHandwrittenNote(recipient, inviter, note) {
+      if (!handnoteWrap || !hwBody) return;
+      var cleanNote = String(note || "").trim();
+      if (!cleanNote) {
+        handnoteWrap.hidden = true;
+        return;
+      }
+      var penSvg =
+        '<svg class="hl-pen" width="24" height="24" viewBox="0 0 24 24" fill="#FFFFFF" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
+      var lines = wrapHandLines(cleanNote, 28);
+      var t = 1.1;
+      var tilts = [0.4, -0.35, 0.25, -0.45, 0.3];
+      var html =
+        '<div style="transform:rotate(-0.8deg)"><span class="hl-wl" style="--t:0.35s;--d:0.65s;--n:5;font-size:1.55rem;font-weight:700;"><span class="hl-ink">Gửi ' +
+        escHtmlSimple(recipient || "bạn") +
+        ",</span>" +
+        penSvg +
+        "</span></div>";
+
+      lines.forEach(function (line, i) {
+        var writes = i < 3;
+        var d = writes ? Math.max(0.45, line.length * 0.048) : 0.7;
+        var cls = writes ? "hl-wl" : "hl-wl hl-wfade";
+        html +=
+          '<div style="transform:rotate(' +
+          tilts[i % tilts.length] +
+          'deg)"><span class="' +
+          cls +
+          '" style="--t:' +
+          t.toFixed(2) +
+          "s;--d:" +
+          d.toFixed(2) +
+          "s;--n:" +
+          Math.max(2, Math.round(d / 0.13)) +
+          ';"><span class="hl-ink">' +
+          escHtmlSimple(line) +
+          "</span>" +
+          penSvg +
+          "</span></div>";
+        if (writes) t += d + 0.22;
+      });
+
+      var signT = t + 0.25;
+      html +=
+        '<div class="hl-hw-sign"><span class="hl-wl" style="--t:' +
+        signT.toFixed(2) +
+        's;--d:0.6s;--n:5;font-size:1.7rem;font-weight:700;"><span class="hl-ink">' +
+        escHtmlSimple(inviter || "HolaRise") +
+        "</span>" +
+        penSvg +
+        '</span><svg class="hl-wdraw" width="150" height="20" viewBox="0 0 170 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="--t:' +
+        (signT + 0.55).toFixed(2) +
+        's;--d:0.55s;margin-top:-6px;"><path pathLength="1" d="M4 13C34 3 66 20 98 10s44-5 58 2c6 3 4 8-3 6"/></svg></div>';
+
+      hwBody.innerHTML = html;
+      handnoteWrap.hidden = false;
+    }
+
+    var envTimer = 0;
+    var activeEnvData = null;
+
+    function revealMainInvitation(instant) {
+      if (envTimer) {
+        window.clearTimeout(envTimer);
+        envTimer = 0;
+      }
+      if (envStage) envStage.hidden = true;
+      if (envBox) envBox.classList.remove("hl-open");
+      if (mainFlow) {
+        mainFlow.hidden = false;
+        if (!instant) {
+          mainFlow.classList.remove("hl-invin");
+          void mainFlow.offsetWidth;
+          mainFlow.classList.add("hl-invin");
+        }
+      }
+      if (activeEnvData) {
+        renderHandwrittenNote(activeEnvData.recipient, activeEnvData.inviter, activeEnvData.note);
+      }
+    }
+
+    function openEnvelopeStage(data) {
+      if (!envStage || !envBox || !mainFlow) return;
+      activeEnvData = data || {};
+      var recipient = String(activeEnvData.recipient || "").trim() || "bạn";
+      var inviter = String(activeEnvData.inviter || "").trim() || "HolaRise";
+      var initial = inviter.charAt(0).toUpperCase() || "H";
+
+      var salEl = document.getElementById("hl-env-salutation");
+      var invEl = document.getElementById("hl-env-inviter-txt");
+      var cardRecEl = document.getElementById("hl-env-card-recipient");
+      var sealBtn = document.getElementById("hl-env-seal-btn");
+      if (salEl) salEl.textContent = "Gửi " + recipient + ",";
+      if (invEl) invEl.textContent = inviter;
+      if (cardRecEl) cardRecEl.textContent = recipient;
+      if (sealBtn) sealBtn.textContent = initial;
+
+      envBox.classList.remove("hl-open");
+      envStage.hidden = false;
+      mainFlow.hidden = true;
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    function triggerEnvelopeOpen() {
+      if (!envBox || envBox.classList.contains("hl-open")) return;
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) {
+        revealMainInvitation(true);
+        return;
+      }
+      envBox.classList.add("hl-open");
+      envTimer = window.setTimeout(function () {
+        revealMainInvitation(false);
+      }, 2450);
+    }
+
+    if (envStage) {
+      document.getElementById("hl-env-seal-btn")?.addEventListener("click", triggerEnvelopeOpen);
+      document.getElementById("hl-env-open-btn")?.addEventListener("click", triggerEnvelopeOpen);
+      document.getElementById("hl-env-skip-btn")?.addEventListener("click", function () {
+        revealMainInvitation(true);
+      });
+
+      try {
+        var qs = new URLSearchParams(window.location.search);
+        var urlRecipient = (qs.get("gui") || qs.get("to") || "").trim().slice(0, 60);
+        var urlInviter = (qs.get("moi") || qs.get("from") || "").trim().slice(0, 60);
+        var urlNote = (qs.get("loi") || qs.get("note") || "").trim().slice(0, 140);
+        if (urlRecipient || urlInviter) {
+          openEnvelopeStage({ recipient: urlRecipient, inviter: urlInviter, note: urlNote });
+        }
+      } catch (_e) {}
+    }
+
     if (!modal) return;
 
     var baseUrl = modal.getAttribute("data-share-url") || window.location.href.split("?")[0];
-    var shareTitle = modal.getAttribute("data-share-title") || document.title;
+    var baseShareTitle = modal.getAttribute("data-share-title") || document.title;
     var shareTime = modal.getAttribute("data-share-time") || "";
     var shareVenue = modal.getAttribute("data-share-venue") || "";
     var urlInput = document.getElementById("share-url-input");
+    var recipientInput = document.getElementById("share-recipient-name");
     var inviterInput = document.getElementById("share-inviter-name");
+    var noteInput = document.getElementById("share-personal-note");
+    var previewTitleEl = document.getElementById("share-preview-title");
     var copyBtn = document.getElementById("share-copy-btn");
+    var previewEnvBtn = document.getElementById("share-preview-env-btn");
+
+    function getCurrentShareTitle() {
+      var rec = recipientInput ? recipientInput.value.trim() : "";
+      if (!rec) return baseShareTitle;
+      return baseShareTitle.indexOf("| " + rec) >= 0 ? baseShareTitle : baseShareTitle + " | " + rec;
+    }
 
     function buildCurrentShareUrl() {
+      var rec = recipientInput ? recipientInput.value.trim() : "";
       var inviter = inviterInput ? inviterInput.value.trim() : "";
-      if (!inviter) return baseUrl;
+      var note = noteInput ? noteInput.value.trim() : "";
       try {
         var u = new URL(baseUrl, window.location.origin);
-        u.searchParams.set("moi", inviter);
+        if (rec) u.searchParams.set("gui", rec);
+        if (inviter) u.searchParams.set("moi", inviter);
+        if (note) u.searchParams.set("loi", note);
         return u.toString();
       } catch (_e) {
         return baseUrl;
       }
     }
 
-    function syncUrlField() {
+    function syncSharePreview() {
       if (urlInput) urlInput.value = buildCurrentShareUrl();
+      if (previewTitleEl) previewTitleEl.textContent = getCurrentShareTitle();
     }
 
-    if (inviterInput) {
-      inviterInput.addEventListener("input", syncUrlField);
-    }
+    [recipientInput, inviterInput, noteInput].forEach(function (inp) {
+      if (inp) inp.addEventListener("input", syncSharePreview);
+    });
 
     document.addEventListener("click", function (e) {
       var trigger = e.target.closest("[data-open-invite-share]");
@@ -1559,12 +1737,26 @@
       if (inviterInput && !inviterInput.value.trim() && window.HolaMember && window.HolaMember.member && window.HolaMember.member.name) {
         inviterInput.value = window.HolaMember.member.name;
       }
-      syncUrlField();
+      syncSharePreview();
       if (copyBtn) copyBtn.textContent = "Sao chép";
       if (typeof modal.showModal === "function" && !modal.open) {
         modal.showModal();
       }
     });
+
+    if (previewEnvBtn) {
+      previewEnvBtn.addEventListener("click", function () {
+        var rec = recipientInput ? recipientInput.value.trim() : "";
+        var inv = inviterInput ? inviterInput.value.trim() : "";
+        var note = noteInput ? noteInput.value.trim() : "";
+        if (modal.open) modal.close();
+        openEnvelopeStage({
+          recipient: rec || "bạn",
+          inviter: inv || "HolaRise",
+          note: note || "Hẹn gặp bạn ở buổi sinh hoạt thật ấm cúng này nhé.",
+        });
+      });
+    }
 
     if (copyBtn && urlInput) {
       copyBtn.addEventListener("click", function () {
@@ -1590,13 +1782,14 @@
       btn.addEventListener("click", function () {
         var platform = btn.getAttribute("data-share-platform");
         var link = buildCurrentShareUrl();
-        var summary = [shareTitle, [shareTime, shareVenue].filter(Boolean).join(" · ")].filter(Boolean).join("\n");
+        var titleNow = getCurrentShareTitle();
+        var summary = [titleNow, [shareTime, shareVenue].filter(Boolean).join(" · ")].filter(Boolean).join("\n");
         var encUrl = encodeURIComponent(link);
         var encText = encodeURIComponent(summary);
 
         if (platform === "zalo") {
           if (navigator.share) {
-            navigator.share({ title: shareTitle, text: summary, url: link }).catch(function () {});
+            navigator.share({ title: titleNow, text: summary, url: link }).catch(function () {});
             return;
           }
           if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1612,7 +1805,7 @@
         }
         if (platform === "messenger") {
           if (navigator.share) {
-            navigator.share({ title: shareTitle, text: summary, url: link }).catch(function () {});
+            navigator.share({ title: titleNow, text: summary, url: link }).catch(function () {});
             return;
           }
           window.open("https://www.facebook.com/dialog/send?link=" + encUrl + "&redirect_uri=" + encUrl, "_blank", "noopener,noreferrer");
