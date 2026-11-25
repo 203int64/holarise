@@ -596,6 +596,7 @@ export function safeJsonLdScript(obj) {
 
 export function buildArticleSchemas(article) {
   const slugPath = `/hanh-trinh/${article.slug}/`;
+  const orgId = `${SITE_URL}/#organization`;
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -604,9 +605,11 @@ export function buildArticleSchemas(article) {
     image: [absUrl(article.image)],
     datePublished: article.date,
     dateModified: (article.updatedAt || article.date || "").slice(0, 10),
-    author: { "@type": "Organization", name: article.author },
+    inLanguage: "vi-VN",
+    author: { "@type": "Organization", "@id": orgId, name: article.author },
     publisher: {
       "@type": "Organization",
+      "@id": orgId,
       name: BRAND_FULL_NAME,
       logo: { "@type": "ImageObject", url: LOGO_MARK_URL, width: 512, height: 512 },
     },
@@ -625,9 +628,11 @@ export function buildArticleSchemas(article) {
 }
 
 export function buildEventsJsonLd(upcoming) {
+  const orgId = `${SITE_URL}/#organization`;
   return (upcoming || [])
     .map((ws) => {
       const eventHref = resolveEventHref(ws);
+      const eventUrl = eventHref ? absUrl(eventHref) : absUrl("/lich-hoat-dong/");
       const times = buildEventIsoTimes(ws.date, ws.time);
       const schemaObj = {
         "@context": "https://schema.org",
@@ -649,8 +654,16 @@ export function buildEventsJsonLd(upcoming) {
             addressCountry: "VN",
           },
         },
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "VND",
+          availability: "https://schema.org/InStock",
+          url: eventUrl,
+        },
         organizer: {
           "@type": "NGO",
+          "@id": orgId,
           name: BRAND_FULL_NAME,
           url: SITE_URL,
         },
@@ -659,7 +672,7 @@ export function buildEventsJsonLd(upcoming) {
         schemaObj.endDate = times.endIso;
       }
       if (eventHref) {
-        schemaObj.url = absUrl(eventHref);
+        schemaObj.url = eventUrl;
       }
       return safeJsonLdScript(schemaObj);
     })

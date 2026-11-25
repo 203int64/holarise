@@ -35,8 +35,8 @@ npx wrangler d1 migrations apply holarise-db --remote
 4. Vào ô **URL Inspection** ở trên cùng, dán lần lượt 4 URL quan trọng nhất và bấm **Request Indexing**:
    - `https://holarise.org/`
    - `https://holarise.org/gioi-thieu/`
-   - `https://holarise.org/hoat-dong/`
-   - `https://holarise.org/tin-tuc/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/`
+   - `https://holarise.org/lich-hoat-dong/`
+   - `https://holarise.org/hanh-trinh/tinh-yeu-thuong-cua-me/`
 
 *(Thông thường sau 24–72 giờ, `site:holarise.org` sẽ bắt đầu hiện trên Google.)*
 

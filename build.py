@@ -1203,9 +1203,10 @@ def render_article_body(paragraphs: list) -> str:
     return "\n      ".join(out)
 
 
-def organization_schema(site: dict) -> dict:
+def organization_schema(site: dict, lang: str = "vi") -> dict:
     b = site["brand"]
     c = site["contact"]
+    org_id = f"{b['siteUrl'].rstrip('/')}/#organization"
     same_as = []
     for key in ("facebook", "youtube", "instagram"):
         raw = (c.get(key) or "").strip()
@@ -1215,10 +1216,12 @@ def organization_schema(site: dict) -> dict:
         if parsed.scheme in ("http", "https") and parsed.path.strip("/"):
             same_as.append(raw)
 
+    is_en = lang == "en"
     schema = {
         "@context": "https://schema.org",
         "@type": "NGO",
-        "name": b["fullName"],
+        "@id": org_id,
+        "name": b.get("brandName", "HolaRise") if is_en else b["fullName"],
         "alternateName": [
             b.get("brandName", "HolaRise"),
             b["shortName"],
@@ -1234,18 +1237,22 @@ def organization_schema(site: dict) -> dict:
             "height": 512,
         },
         "image": abs_url(b["siteUrl"], b["ogImage"]),
-        "description": site["seo"]["defaultDescription"],
+        "description": (
+            "Originating in Hoa Lac, Hanoi, HolaRise is an independent non-profit youth community uniting young people through HolaHeart, HolaGreen, and HolaConnect aligned with UN SDGs."
+            if is_en
+            else site["seo"]["defaultDescription"]
+        ),
         "email": c["email"],
         "telephone": c["phoneDisplay"],
         "areaServed": {
             "@type": "Place",
-            "name": "Hòa Lạc, Hà Nội, Việt Nam",
+            "name": "Hoa Lac, Hanoi, Vietnam" if is_en else "Hòa Lạc, Hà Nội, Việt Nam",
         },
         "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Tân Xã, Hòa Lạc",
-            "addressLocality": "Hòa Lạc",
-            "addressRegion": "Hà Nội",
+            "streetAddress": "Tan Xa, Hoa Lac" if is_en else "Tân Xã, Hòa Lạc",
+            "addressLocality": "Hoa Lac" if is_en else "Hòa Lạc",
+            "addressRegion": "Hanoi" if is_en else "Hà Nội",
             "addressCountry": "VN",
         },
     }
@@ -1272,12 +1279,14 @@ def breadcrumb_schema(site_url: str, crumbs: list) -> dict:
 
 def events_schema(site: dict, upcoming: list) -> list:
     b = site["brand"]
+    org_id = f"{b['siteUrl'].rstrip('/')}/#organization"
     schemas = []
     for ws in upcoming:
         landing = ws.get("landing") if isinstance(ws.get("landing"), dict) else {}
         start_date = landing.get("startIso") or ws["date"]
         end_date = landing.get("endIso") or ""
         event_href = resolve_event_href(ws)
+        event_url = abs_url(b["siteUrl"], event_href) if event_href else abs_url(b["siteUrl"], "/lich-hoat-dong/")
         schema_item = {
             "@context": "https://schema.org",
             "@type": "Event",
@@ -1298,8 +1307,16 @@ def events_schema(site: dict, upcoming: list) -> list:
                     "addressCountry": "VN",
                 },
             },
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "VND",
+                "availability": "https://schema.org/InStock",
+                "url": event_url,
+            },
             "organizer": {
                 "@type": "NGO",
+                "@id": org_id,
                 "name": b["fullName"],
                 "url": b["siteUrl"],
             },
@@ -1307,7 +1324,7 @@ def events_schema(site: dict, upcoming: list) -> list:
         if end_date:
             schema_item["endDate"] = end_date
         if event_href:
-            schema_item["url"] = abs_url(b["siteUrl"], event_href)
+            schema_item["url"] = event_url
         schemas.append(schema_item)
     return schemas
 
@@ -1392,6 +1409,27 @@ def write_page(
         verification_tags.append(f'\n  <meta name="msvalidate.01" content="{esc(b_verify)}">')
 
     is_en_page = url_path.startswith("/en/")
+    html_lang = "en" if is_en_page else "vi"
+    og_locale = "en_US" if is_en_page else "vi_VN"
+    og_site_name = b.get("brandName", "HolaRise")
+    social_li_parts = []
+    for s_key, s_label in (("youtube", "YouTube"), ("facebook", "Facebook"), ("instagram", "Instagram")):
+        s_url = (c.get(s_key) or "").strip()
+        if s_url and urlparse(s_url).scheme in ("http", "https"):
+            link_text = f"Official {s_label} ↗" if is_en_page else f"{s_label} chính thức ↗"
+            social_li_parts.append(
+                f'\n            <li><a href="{esc(s_url)}" target="_blank" rel="noopener noreferrer me">{link_text}</a></li>'
+            )
+    contact_social_links_li = "".join(social_li_parts)
+    hreflang_links = ""
+    if url_path in ("/", "/en/"):
+        vi_url = abs_url(b["siteUrl"], "/")
+        en_url = abs_url(b["siteUrl"], "/en/")
+        hreflang_links = (
+            f'\n  <link rel="alternate" hreflang="vi" href="{esc(vi_url)}">'
+            f'\n  <link rel="alternate" hreflang="en" href="{esc(en_url)}">'
+            f'\n  <link rel="alternate" hreflang="x-default" href="{esc(vi_url)}">'
+        )
     lang_switch_href = "/" if is_en_page else "/en/"
     lang_switch_label = "VN" if is_en_page else "EN"
     lang_switch_aria = "Chuyển sang trang Tiếng Việt" if is_en_page else "View English International Profile"
@@ -1399,13 +1437,17 @@ def write_page(
     rendered = render_template(
         base_tpl,
         {
+            "HTML_LANG": html_lang,
             "PAGE_TITLE": esc(title),
             "PAGE_DESCRIPTION": esc(description),
             "PAGE_KEYWORDS": esc(site["seo"]["keywords"]),
             "ROBOTS_CONTENT": esc(robots),
             "VERIFICATION_META": "".join(verification_tags),
             "CANONICAL_URL": esc(canonical),
+            "HREFLANG_LINKS": hreflang_links,
             "OG_TYPE": esc(og_type),
+            "OG_LOCALE": og_locale,
+            "OG_SITE_NAME": esc(og_site_name),
             "OG_IMAGE_URL": esc(og_img_url),
             "OG_IMAGE_ALT": esc(title if og_image else b.get("ogImageAlt", title)),
             "BODY_CLASS": esc(body_class),
@@ -1430,6 +1472,7 @@ def write_page(
             "CONTACT_ZALO": esc(c.get("zalo", "")),
             "CONTACT_ZALO_GROUP": esc(c.get("zaloGroup") or c.get("zalo", "")),
             "CONTACT_MEETING": esc(c["meetingTime"]),
+            "CONTACT_SOCIAL_LINKS_LI": contact_social_links_li,
             "FORM_ENDPOINT": esc(c.get("formEndpoint", "")),
             "CURRENT_YEAR": str(datetime.date.today().year),
             "CACHE_BUST": esc(cache_bust or CURRENT_BUILD_HASH),
@@ -1822,8 +1865,10 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
     for ws in workshops.get("upcoming", []):
         ev_href = resolve_event_href(ws)
         title_md = f"[{ws['title']}]({abs_url(b['siteUrl'], ev_href)})" if ev_href else ws["title"]
+        meta_parts = [part.strip() for part in (ws.get("fee", ""), ws.get("seats", "")) if str(part or "").strip()]
+        meta_suffix = f" ({', '.join(meta_parts)})" if meta_parts else ""
         upcoming_lines.append(
-            f"- {ws['dateDisplay']} ({ws['time']}): {title_md} — {ws['location']} ({ws['fee']}, {ws['seats']})"
+            f"- {ws['dateDisplay']} ({ws['time']}): {title_md} — {ws['location']}{meta_suffix}"
         )
     if not upcoming_lines:
         upcoming_lines = [
@@ -1845,11 +1890,23 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
         slug_url = abs_url(b["siteUrl"], f"/hanh-trinh/{a['slug']}/")
         news_lines.append(f"- [{a['title']}]({slug_url}): {a['excerpt']} ({a['dateDisplay']})")
 
+    faq_lines = [f"- **{f['question']}** {f['answer']}" for f in site.get("faqs", [])]
+    faq_section = ""
+    if faq_lines:
+        faq_section = "\n## Câu hỏi thường gặp (FAQ)\n" + "\n".join(faq_lines) + "\n"
+
     past_section = ""
     if past_lines:
         past_section = "\n## Dấu mốc đã tổ chức\n" + "\n".join(past_lines) + "\n"
 
-    return f"""# {b['brandName']} — {b['fullName']}
+    social_entries = []
+    for s_key, s_label in (("youtube", "YouTube"), ("facebook", "Facebook"), ("instagram", "Instagram")):
+        s_url = (c.get(s_key) or "").strip()
+        if s_url and urlparse(s_url).scheme in ("http", "https"):
+            social_entries.append(f"{s_label}: {s_url}")
+    social_line = f"\n- Kênh chính thức: {' | '.join(social_entries)}" if social_entries else ""
+
+    return f"""# {b['fullName']}
 
 > {b['subtitle']}
 
@@ -1857,7 +1914,7 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
 - Địa bàn khởi nguồn: {b['location']}
 - Văn phòng liên hệ: {c['address']}
 - Nhịp sinh hoạt: {c['meetingTime']}
-- Liên hệ: {c['email']} | Hotline/Zalo: {c['phoneDisplay']}
+- Liên hệ: {c['email']} | Hotline/Zalo: {c['phoneDisplay']}{social_line}
 - Nguyên tắc: Cộng đồng phi lợi nhuận, công khai minh bạch chi phí (nếu phát sinh) trước mỗi hoạt động.
 
 ## Các trang chính (Flagship 3+1)
@@ -1866,6 +1923,7 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
 - [Lịch hoạt động]({abs_url(b['siteUrl'], '/lich-hoat-dong/')}): Lịch 1–2 buổi/tuần lọc theo HolaHeart, HolaGreen, HolaConnect.
 - [Hành trình]({abs_url(b['siteUrl'], '/hanh-trinh/')}): Tường thuật sự kiện, lưu bút cảm nhận thành viên và triển lãm khoảnh khắc tại Hòa Lạc.
 - [Tham gia & Thẻ Thành Viên]({abs_url(b['siteUrl'], '/tham-gia/')}): Tạo Thẻ Thành Viên Hola (giữ chỗ 1 chạm, viết lưu bút) và cổng kết nối đối tác, nhà trường, CLB.
+- [International Profile (English)]({abs_url(b['siteUrl'], '/en/')}): Non-profit youth community profile, 3 pillars, UN SDGs alignment, and partnership contact.
 - [Chuẩn mực Minh bạch & An toàn]({abs_url(b['siteUrl'], '/chinh-sach/')}): Quy tắc cộng đồng và quyền riêng tư dữ liệu, hình ảnh.
 
 ## Mô hình Tạo Tác Động (Heart → Green → Connect)
@@ -1876,7 +1934,7 @@ def generate_llms_txt(site: dict, activities: dict, workshops: dict, news: list)
 {past_section}
 ## Dấu mốc & Tường thuật mới nhất
 {chr(10).join(news_lines)}
-"""
+{faq_section}"""
 
 
 def build_site() -> list:
@@ -1947,21 +2005,68 @@ def build_site() -> list:
             "FAQ_HTML": render_faqs(site["faqs"]),
         },
     )
+    org_id = f"{b['siteUrl'].rstrip('/')}/#organization"
+    sitelink_nav = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "@id": f"{b['siteUrl'].rstrip('/')}/#navigation",
+        "name": "Điều hướng chính HolaRise",
+        "itemListElement": [
+            {
+                "@type": "SiteNavigationElement",
+                "position": 1,
+                "name": "Về HolaRise",
+                "description": "Câu chuyện khởi nguồn tại Hòa Lạc, mô hình 3 trụ cột HolaHeart · HolaGreen · HolaConnect, 5 nguyên tắc minh bạch và 6 UN SDGs.",
+                "url": abs_url(b["siteUrl"], "/gioi-thieu/"),
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "position": 2,
+                "name": "Lịch hoạt động",
+                "description": "Lịch sinh hoạt định kỳ 1–2 buổi mỗi tuần của HolaHeart, HolaGreen và HolaConnect tại Hòa Lạc. Giữ chỗ nhanh không cần mật khẩu.",
+                "url": abs_url(b["siteUrl"], "/lich-hoat-dong/"),
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "position": 3,
+                "name": "Hành trình",
+                "description": "Tường thuật các buổi đối thoại, hoạt động cộng đồng, lưu bút thành viên và tư liệu hình ảnh thực tế của HolaRise.",
+                "url": abs_url(b["siteUrl"], "/hanh-trinh/"),
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "position": 4,
+                "name": "Tham gia & Đồng hành",
+                "description": "Giữ chỗ tham dự trong 15 giây, mở Thẻ Thành Viên Hola hoặc gửi đề xuất hợp tác cùng nhà trường, câu lạc bộ và đối tác.",
+                "url": abs_url(b["siteUrl"], "/tham-gia/"),
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "position": 5,
+                "name": "Minh bạch & Quy tắc",
+                "description": "Chuẩn mực phi lợi nhuận, minh bạch chi phí từng con số, quy tắc an toàn cộng đồng và bảo vệ dữ liệu cá nhân tại HolaRise.",
+                "url": abs_url(b["siteUrl"], "/chinh-sach/"),
+            },
+        ],
+    }
     home_schemas = [
         org_ld,
         {
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "name": b["fullName"],
+            "@id": f"{b['siteUrl'].rstrip('/')}/#website",
+            "name": b.get("brandName", "HolaRise"),
             "alternateName": [
-                b.get("brandName", "HolaRise"),
+                b["fullName"],
                 b["shortName"],
                 "Cộng đồng Thanh niên Hòa Lạc",
                 b.get("englishName", "HolaRise – Youth Community & Social Impact Initiative"),
             ],
             "url": abs_url(b["siteUrl"], "/"),
             "inLanguage": "vi-VN",
+            "publisher": {"@id": org_id},
         },
+        sitelink_nav,
         faq_schema(site["faqs"]),
     ]
     write_page(
@@ -2012,8 +2117,8 @@ def build_site() -> list:
         site,
         "gioi-thieu/index.html",
         "/gioi-thieu/",
-        f"Về HolaRise · Hòa Lạc | {b['brandName']}",
-        f"Khám phá mô hình Tạo Tác Động (HolaHeart → HolaGreen → HolaConnect), sứ mệnh khởi nguồn từ Hòa Lạc và chuẩn mực minh bạch của {b['brandName']}.",
+        "Về HolaRise – Sứ mệnh & 3 Trụ cột",
+        "Câu chuyện khởi nguồn tại Hòa Lạc, mô hình 3 trụ cột HolaHeart · HolaGreen · HolaConnect, 5 nguyên tắc minh bạch và 6 UN SDGs.",
         about_main,
         [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Về HolaRise", "/gioi-thieu/")])],
     )
@@ -2034,8 +2139,8 @@ def build_site() -> list:
         site,
         "lich-hoat-dong/index.html",
         "/lich-hoat-dong/",
-        f"Lịch hoạt động tại Hòa Lạc | {b['brandName']}",
-        f"Cập nhật lịch 1–2 hoạt động mỗi tuần tại Hòa Lạc của {b['shortName']} trên 3 trụ cột: HolaHeart, HolaGreen và HolaConnect.",
+        f"Lịch hoạt động | {b['brandName']}",
+        "Lịch sinh hoạt định kỳ 1–2 buổi mỗi tuần của HolaHeart, HolaGreen và HolaConnect tại Hòa Lạc. Giữ chỗ nhanh không cần mật khẩu.",
         ws_main,
         [
             org_ld,
@@ -2286,8 +2391,8 @@ def build_site() -> list:
         site,
         "hanh-trinh/index.html",
         "/hanh-trinh/",
-        f"Hành trình tại Hòa Lạc | {b['brandName']}",
-        f"Tường thuật sự kiện, lưu bút cảm nhận thành viên và triển lãm khoảnh khắc từ các chương trình của {b['shortName']} tại Hòa Lạc.",
+        f"Hành trình | {b['brandName']}",
+        "Tường thuật các buổi đối thoại, hoạt động cộng đồng, lưu bút thành viên và tư liệu hình ảnh thực tế của HolaRise.",
         news_list_main,
         [org_ld, breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Hành trình", "/hanh-trinh/")])],
     )
@@ -2326,9 +2431,11 @@ def build_site() -> list:
             "image": [abs_url(b["siteUrl"], article["image"])],
             "datePublished": article["date"],
             "dateModified": article["date"],
-            "author": {"@type": "Organization", "name": article["author"]},
+            "inLanguage": "vi-VN",
+            "author": {"@type": "Organization", "@id": org_id, "name": article["author"]},
             "publisher": {
                 "@type": "Organization",
+                "@id": org_id,
                 "name": b["fullName"],
                 "logo": {
                     "@type": "ImageObject",
@@ -2339,12 +2446,13 @@ def build_site() -> list:
             },
             "mainEntityOfPage": abs_url(b["siteUrl"], slug_path),
         }
+        article_seo_title = (article.get("seoTitle") or "").strip() or f"{article['title']} | {b['brandName']}"
         write_page(
             base_tpl,
             site,
             f"hanh-trinh/{article['slug']}/index.html",
             slug_path,
-            f"{article['title']} | {b['brandName']}",
+            article_seo_title,
             article["excerpt"],
             detail_main,
             [
@@ -2425,8 +2533,8 @@ def build_site() -> list:
         site,
         "tham-gia/index.html",
         "/tham-gia/",
-        f"Tham gia & Đồng hành | {b['brandName']} – Cộng đồng Thanh niên Hòa Lạc",
-        f"Giữ chỗ tham dự hoạt động trong 15 giây không cần mật khẩu hoặc gửi đề xuất hợp tác cùng {b['fullName']}.",
+        f"Tham gia & Đồng hành | {b['brandName']}",
+        "Giữ chỗ tham dự trong 15 giây, mở Thẻ Thành Viên Hola hoặc gửi đề xuất hợp tác cùng nhà trường, câu lạc bộ và đối tác.",
         join_main,
         [
             org_ld,
@@ -2450,14 +2558,9 @@ def build_site() -> list:
         "en/index.html",
         "/en/",
         "HolaRise — Non-Profit Youth Community & Social Impact Profile",
-        "Originating in Hoa Lac, Hanoi, HolaRise is an independent non-profit youth community uniting young people through HolaHeart, HolaGreen, and HolaConnect aligned with UN SDGs.",
+        "Originating in Hoa Lac, Hanoi, HolaRise is a non-profit youth community uniting young people through HolaHeart, HolaGreen, and HolaConnect (UN SDGs).",
         en_main,
-        [org_ld],
-    )
-    en_out = DIST_DIR / "en" / "index.html"
-    en_out.write_text(
-        en_out.read_text(encoding="utf-8").replace('<html lang="vi">', '<html lang="en">', 1),
-        encoding="utf-8",
+        [organization_schema(site, lang="en")],
     )
     sitemap_urls.append(("/en/", "0.8", "monthly"))
 
@@ -2479,12 +2582,12 @@ def build_site() -> list:
         site,
         "chinh-sach/index.html",
         "/chinh-sach/",
-        f"Bảo mật & Quy tắc Cộng đồng | {b['brandName']}",
-        f"Chính sách bảo mật thông tin đăng ký và 4 quy tắc sinh hoạt tình nguyện minh bạch của {b['fullName']}.",
+        f"Minh bạch & Quy tắc | {b['brandName']}",
+        "Chuẩn mực phi lợi nhuận, minh bạch chi phí từng con số, quy tắc an toàn cộng đồng và bảo vệ dữ liệu cá nhân tại HolaRise.",
         privacy_main,
         [
             org_ld,
-            breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Bảo mật & Quy tắc", "/chinh-sach/")]),
+            breadcrumb_schema(b["siteUrl"], [("Trang chủ", "/"), ("Minh bạch & Quy tắc", "/chinh-sach/")]),
         ],
     )
     sitemap_urls.append(("/chinh-sach/", "0.5", "yearly"))
@@ -2580,6 +2683,7 @@ Disallow: /admin/
 Disallow: /media/
 Disallow: /api/
 Disallow: /_templates/
+Disallow: /tv/
 
 Sitemap: {abs_url(b['siteUrl'], '/sitemap.xml')}
 """
