@@ -57,6 +57,16 @@ export function sanitizeDriveName(raw, fallback = "media") {
   return clean || fallback;
 }
 
+export function buildEventFolderName({ eventDate = "", title = "", fallback = "su-kien" } = {}) {
+  const dateMatch = String(eventDate || "").trim().match(/^(\d{4}-\d{2}-\d{2})/);
+  const datePart = dateMatch ? dateMatch[1] : "";
+  const cleanTitle = sanitizeDriveName(title, "");
+  if (datePart && cleanTitle) {
+    return sanitizeDriveName(`${datePart} - ${cleanTitle}`, fallback);
+  }
+  return cleanTitle || datePart || sanitizeDriveName(fallback, "su-kien");
+}
+
 export async function getDriveAccessToken(env, fetchImpl = fetch) {
   const cfg = getDriveConfig(env);
   if (!cfg.clientId || !cfg.clientSecret || !cfg.refreshToken) {
@@ -155,6 +165,33 @@ function concatUint8Arrays(parts) {
 }
 
 /**
+ * Ensure a Drive folder exists at <ROOT>/<category>/<subfolder> and return its ID + shareable link.
+ * Returns null if Drive is not configured or subfolder is empty.
+ */
+export async function ensureCategorySubfolder(
+  env,
+  { category = "album", subfolder = "", fetchImpl = fetch } = {}
+) {
+  if (!isDriveConfigured(env)) return null;
+  const sub = sanitizeDriveName(subfolder, "");
+  if (!sub) return null;
+
+  const cfg = getDriveConfig(env);
+  const accessToken = await getDriveAccessToken(env, fetchImpl);
+  const cat = normalizeDriveCategory(category);
+
+  let parentId = cfg.rootFolderId || "";
+  parentId = await ensureSubfolder(cat, parentId, accessToken, fetchImpl);
+  const folderId = await ensureSubfolder(sub, parentId, accessToken, fetchImpl);
+
+  return {
+    folderId,
+    folderName: sub,
+    folderUrl: `https://drive.google.com/drive/folders/${folderId}`,
+  };
+}
+
+/**
  * Upload original uncompressed image bytes to Google Drive via multipart/related API v3.
  */
 export async function uploadImageToDrive(
@@ -165,10 +202,10 @@ export async function uploadImageToDrive(
   const accessToken = await getDriveAccessToken(env, fetchImpl);
 
   const cat = normalizeDriveCategory(category);
+  const sub = String(subfolder || "").trim();
   let parentId = cfg.rootFolderId || "";
-  if (parentId) {
+  if (parentId || sub) {
     parentId = await ensureSubfolder(cat, parentId, accessToken, fetchImpl);
-    const sub = String(subfolder || "").trim();
     if (sub) {
       parentId = await ensureSubfolder(sub, parentId, accessToken, fetchImpl);
     }

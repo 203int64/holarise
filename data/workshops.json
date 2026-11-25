@@ -17,8 +17,11 @@
       "time": "19:15 – 21:30",
       "location": "Mây Lang Thang Cafe (ngõ 2 đường vào TTGDQP, Hòa Lạc)",
       "venueUrl": "https://musicspace.edu.vn/love/space/may-lang-thang-cafe",
-      "fee": "Vé 0đ · Đồ uống tự chọn tại quán (35.000đ – 50.000đ)",
-      "seats": "35 chỗ ngồi vòng tròn",
+      "fee": "Miễn phí tham dự · Tự túc đồ uống tại quán",
+      "seats": "",
+      "seatCapacity": 0,
+      "externalBooked": 0,
+      "showSeatBar": false,
       "title": "Workshop \"Cuộc Đời Của Cha\"",
       "summary": "Tình thương của người cha hiếm khi cất thành lời. Một buổi tối Chủ Nhật dưới ánh đèn vàng ấm để ngồi lại, lắng nghe và nhìn sâu hơn vào dáng lưng trầm mặc của Cha.",
       "highlights": [
@@ -34,7 +37,7 @@
         "urlPath": "/su-kien/cuoc-doi-cua-cha/",
         "ogImage": "/assets/images/events/cuoc-doi-cua-cha-og.jpg",
         "seoTitle": "Thư mời Workshop \"Cuộc Đời Của Cha\" · 19h15 CN 29/11/2026 | HolaRise",
-        "seoDescription": "Thư mời tham dự buổi đối thoại Cuộc Đời Của Cha lúc 19h15 Chủ Nhật 29/11/2026 tại Mây Lang Thang Cafe (ngõ 2 đường vào TTGDQP, Hòa Lạc). Vé 0đ, 35 chỗ ngồi ấm cúng.",
+        "seoDescription": "Thư mời tham dự buổi đối thoại Cuộc Đời Của Cha lúc 19h15 Chủ Nhật 29/11/2026 tại Mây Lang Thang Cafe (ngõ 2 đường vào TTGDQP, Hòa Lạc). Miễn phí tham dự, tự túc đồ uống tại quán.",
         "headline": "Workshop “Cuộc Đời Của Cha”",
         "startIso": "2026-11-29T19:15:00+07:00",
         "endIso": "2026-11-29T21:30:00+07:00",
@@ -68,8 +71,11 @@
       "dateDisplay": "Thứ Năm, 26/11/2026",
       "time": "14:30 – 17:30",
       "location": "Núi Luốt – ĐH Lâm Nghiệp (Xuân Mai)",
-      "fee": "Miễn phí · Tự chuẩn bị nước uống cá nhân",
-      "seats": "25 người trẻ đồng hành",
+      "fee": "Miễn phí tham dự · Tự chuẩn bị nước uống cá nhân",
+      "seats": "",
+      "seatCapacity": 0,
+      "externalBooked": 0,
+      "showSeatBar": false,
       "title": "HolaConnect · Chiều Leo Núi & Trò Chuyện Dưới Tán Thông",
       "summary": "Tạm rời màn hình máy tính để sải bước dưới tán thông chiều Núi Luốt, hít thở bầu không khí trong lành và ngồi lại trò chuyện cùng những người bạn mới.",
       "highlights": [
@@ -118,7 +124,7 @@
       "participants": "Xem tường thuật & gửi cảm nhận",
       "image": "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg",
       "imageAlt": "Người dẫn chuyện chia sẻ tại buổi đối thoại HolaHeart ngày 15/11/2026.",
-      "href": "/hanh-trinh/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/"
+      "href": "/hanh-trinh/tinh-yeu-thuong-cua-me/"
     },
     {
       "id": "holaheart-musicspace-series",
@@ -129,7 +135,7 @@
       "participants": "Xem câu chuyện & gửi cảm nhận",
       "image": "/assets/images/musicspace-archive/15-671661990_1333975782086922_4394124200415584759_n.jpg",
       "imageAlt": "Vòng tròn chia sẻ ngoài trời trong chuỗi HolaHeart × MusicSpace tại Hòa Lạc.",
-      "href": "/hanh-trinh/chuoi-am-nhac-ket-noi-holaheart-musicspace/"
+      "href": "/hanh-trinh/holaheart-musicspace/"
     }
   ]
 }

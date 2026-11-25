@@ -224,6 +224,37 @@
       });
     });
 
+    // 1-Tap Guestbook Composer Identity Sync (hide redundant Name input for signed-in members)
+    const prMemberBar = $("#pr-member-bar");
+    const prGuestRow = $("#pr-guest-row");
+    const prNameInput = $("#pr-name");
+    const prOrgInput = $("#pr-org");
+    if (prMemberBar && prGuestRow) {
+      if (m) {
+        prMemberBar.hidden = false;
+        prGuestRow.hidden = true;
+        const avEl = $("#pr-member-avatar");
+        const nmEl = $("#pr-member-name");
+        const subEl = $("#pr-member-sub");
+        if (avEl) {
+          avEl.innerHTML = m.avatarUrl
+            ? `<img src="${esc(m.avatarUrl)}" alt="${esc(m.name)}">`
+            : esc((m.name || "H").trim().charAt(0).toUpperCase());
+        }
+        if (nmEl) nmEl.textContent = m.name || "Thành viên HolaRise";
+        if (subEl) subEl.textContent = m.organization ? `${m.organization} · Thành viên HolaRise` : "Đang viết với tài khoản của bạn";
+        if (prNameInput) {
+          prNameInput.value = m.name || "";
+          prNameInput.removeAttribute("required");
+        }
+        if (prOrgInput) prOrgInput.value = m.organization || "";
+      } else {
+        prMemberBar.hidden = true;
+        prGuestRow.hidden = false;
+        if (prNameInput) prNameInput.setAttribute("required", "");
+      }
+    }
+
     // 1-Tap RSVP Bar in #event-register-modal
     const modalBar = $("#modal-member-rsvp-bar");
     const modalBarTitle = $("#modal-member-bar-title");
@@ -754,27 +785,9 @@
     const form = $("#onboarding-form");
     if (!wizard || !form) return;
 
-    let step = 1;
-    const total = 3;
-    const labelEl = $("#ob-step-label");
-    const fillEl = $("#ob-progress-fill");
-    const prevBtn = $("#ob-prev-btn");
-    const nextBtn = $("#ob-next-btn");
     const finishBtn = $("#ob-finish-btn");
     const skipBtn = $("#ob-skip-btn");
     const statusEl = $("#ob-status");
-
-    function renderStep() {
-      $$("[data-ob-step]", form).forEach((el) => {
-        el.hidden = Number(el.getAttribute("data-ob-step")) !== step;
-      });
-      if (labelEl) labelEl.textContent = `Bước ${step} / ${total}`;
-      if (fillEl) fillEl.style.width = `${Math.round((step / total) * 100)}%`;
-      if (prevBtn) prevBtn.hidden = step <= 1;
-      if (nextBtn) nextBtn.hidden = step >= total;
-      if (finishBtn) finishBtn.hidden = step < total;
-      setStatus(statusEl, "");
-    }
 
     function finishOnboardingUi() {
       state.needsOnboarding = false;
@@ -786,29 +799,18 @@
       refreshJoinDashboard();
     }
 
-    prevBtn?.addEventListener("click", () => {
-      if (step > 1) {
-        step -= 1;
-        renderStep();
-      }
-    });
-
-    nextBtn?.addEventListener("click", () => {
-      if (step === 2) {
-        const nm = ($("#ob-name")?.value || "").trim();
-        if (nm.length < 2) {
-          setStatus(statusEl, "Vui lòng nhập tên hiển thị (tối thiểu 2 ký tự).", "error");
-          $("#ob-name")?.focus();
-          return;
-        }
-      }
-      if (step < total) {
-        step += 1;
-        renderStep();
-      }
-    });
-
     skipBtn?.addEventListener("click", finishOnboardingUi);
+
+    $$("[data-org-chip]", wizard).forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const targetId = chip.getAttribute("data-org-target") || "ob-org";
+        const input = document.getElementById(targetId);
+        if (input) {
+          input.value = chip.getAttribute("data-org-chip") || "";
+          input.focus();
+        }
+      });
+    });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -817,8 +819,16 @@
       const organization = ($("#ob-org")?.value || "").trim();
       const bio = ($("#ob-bio")?.value || "").trim();
 
-      finishBtn.disabled = true;
-      finishBtn.textContent = "Đang hoàn tất...";
+      if (name.length < 2) {
+        setStatus(statusEl, "Vui lòng nhập tên hiển thị (tối thiểu 2 ký tự).", "error");
+        $("#ob-name")?.focus();
+        return;
+      }
+
+      if (finishBtn) {
+        finishBtn.disabled = true;
+        finishBtn.textContent = "Đang hoàn tất...";
+      }
       try {
         const res = await api("/api/member/profile", {
           method: "PATCH",
@@ -830,12 +840,12 @@
       } catch (err) {
         setStatus(statusEl, err.message, "error");
       } finally {
-        finishBtn.disabled = false;
-        finishBtn.textContent = "Hoàn tất & Mở Thẻ";
+        if (finishBtn) {
+          finishBtn.disabled = false;
+          finishBtn.textContent = "Hoàn tất & Mở Thẻ Thành Viên";
+        }
       }
     });
-
-    renderStep();
   }
 
   /* =========================================================================

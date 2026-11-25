@@ -176,6 +176,9 @@ export function serializeEventRow(row) {
     location: row.location,
     fee: row.fee,
     seats: row.seats,
+    seatCapacity: Number(row.seat_capacity || 0),
+    externalBooked: Number(row.external_booked || 0),
+    showSeatBar: Boolean(row.show_seat_bar),
     title: row.title,
     titleEn: row.title_en || "",
     summary: row.summary,
@@ -285,8 +288,7 @@ function compactFeeLabel(feeStr) {
   const raw = String(feeStr || "").trim();
   if (!raw) return "Miễn phí";
   const head = raw.split("·")[0].trim();
-  if (head.toLowerCase().includes("miễn phí")) return "Miễn phí";
-  if (head.toLowerCase().includes("0đ")) return "Vé 0đ";
+  if (head.toLowerCase().includes("miễn phí") || head.toLowerCase().includes("0đ")) return "Miễn phí";
   return head.slice(0, 20);
 }
 
@@ -295,6 +297,28 @@ function compactSeatsLabel(seatsStr) {
   const m = raw.match(/(\d+)/);
   if (m) return `${m[1]} chỗ`;
   return raw.slice(0, 16);
+}
+
+export function renderSeatBarHtml(ev, webBookedCount = 0) {
+  if (!ev || !ev.showSeatBar) return "";
+  const cap = Math.max(0, Number(ev.seatCapacity || 0));
+  if (cap <= 0) return "";
+  const ext = Math.max(0, Number(ev.externalBooked || 0));
+  const web = Math.max(0, Number(webBookedCount || 0));
+  const booked = Math.min(cap, web + ext);
+  const remaining = Math.max(0, cap - booked);
+  const pct = Math.min(100, Math.round((booked / cap) * 100));
+  const statusText = remaining === 0 ? "Đã đủ chỗ tham dự" : `Còn ${remaining} / ${cap} chỗ`;
+  const urgentClass = remaining <= Math.max(3, Math.round(cap * 0.15)) ? " is-urgent" : "";
+  return `<div class="invite-seat-meter${urgentClass}" aria-label="${escHtml(statusText)}">
+        <div class="invite-seat-meter-row">
+          <span class="invite-seat-meter-label">${escHtml(statusText)}</span>
+          <span class="invite-seat-meter-pct">${pct}% đã giữ chỗ</span>
+        </div>
+        <div class="invite-seat-meter-track" role="progressbar" aria-valuenow="${booked}" aria-valuemin="0" aria-valuemax="${cap}">
+          <span class="invite-seat-meter-fill" style="width: ${pct}%;"></span>
+        </div>
+      </div>`;
 }
 
 export function renderWorkshopsHtml(upcoming) {
@@ -455,7 +479,7 @@ export function renderPastWorkshopsHtml(pastList) {
         item.href && String(item.href).startsWith("/")
           ? item.href
           : item.id === "holaheart-first-event-2026"
-            ? "/hanh-trinh/tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart/"
+            ? "/hanh-trinh/tinh-yeu-thuong-cua-me/"
             : "";
       const meta = [item.time, item.location, item.participants]
         .filter(Boolean)

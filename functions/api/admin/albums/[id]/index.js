@@ -1,4 +1,9 @@
-import { trashDriveFile } from "../../../../_lib/drive.js";
+import {
+  buildEventFolderName,
+  ensureCategorySubfolder,
+  isDriveConfigured,
+  trashDriveFile,
+} from "../../../../_lib/drive.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../../_lib/security.js";
 import { validateAlbumInput } from "../../../../_lib/validation.js";
 import { serializeAlbumRow } from "../index.js";
@@ -39,6 +44,31 @@ export async function onRequestGet(context) {
 
   if (!album) {
     return errorResponse(404, "NOT_FOUND", "Không tìm thấy album.");
+  }
+
+  // Lazy auto-provision Drive folder for pre-existing albums (e.g. 15/11) that lack drive_url
+  if (!album.drive_url && isDriveConfigured(context.env)) {
+    try {
+      const folderName = buildEventFolderName({
+        eventDate: album.event_date,
+        title: album.title,
+        fallback: album.slug,
+      });
+      const folder = await ensureCategorySubfolder(context.env, {
+        category: "album",
+        subfolder: folderName,
+      });
+      if (folder?.folderUrl) {
+        album.drive_url = folder.folderUrl;
+        await context.env.DB.prepare(
+          "UPDATE media_albums SET drive_url = ?, updated_at = ? WHERE id = ?"
+        )
+          .bind(folder.folderUrl, new Date().toISOString(), id)
+          .run();
+      }
+    } catch {
+      // Best-effort: never block opening album workspace
+    }
   }
 
   const { results } = await context.env.DB.prepare(

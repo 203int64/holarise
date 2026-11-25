@@ -1,12 +1,12 @@
-<section class="page-hero page-hero--compact">
+<section class="page-hero page-hero--compact join-page-hero">
   <div class="container">
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
-      <a href="/" data-i18n="nav.home">Trang chủ</a>
+      <a href="/">Trang chủ</a>
       <span aria-hidden="true">/</span>
-      <span aria-current="page" data-i18n="join.breadcrumb">Thành viên HolaRise</span>
+      <span aria-current="page">Tham gia</span>
     </nav>
-    <h1 data-i18n="join.hero.title">Tham gia cộng đồng {{BRAND_SHORT_NAME}}</h1>
-    <p data-i18n="join.hero.desc">Đăng ký hoặc đăng nhập trong 5 giây, sau đó hoàn thiện Thẻ Thành Viên Hola của riêng bạn để giữ chỗ 1 chạm và lưu giữ hành trình tại Hòa Lạc.</p>
+    <h1>Tham gia {{BRAND_NAME}}</h1>
+    <p>Đăng nhập không mật khẩu hoặc tạo Thẻ Thành Viên để giữ chỗ 1 chạm và lưu giữ hành trình đồng hành cùng chúng mình.</p>
   </div>
 </section>
 
@@ -155,24 +155,24 @@
     </div>
   </div>
 
-  <!-- STEP 2A: FIRST-TIME 3-STEP ONBOARDING WIZARD (Shown for new Google / Email sign-ups) -->
+  <!-- STEP 2A: SINGLE-SCREEN PROFILE ONBOARDING (Fast 1-step setup with 48-school presets) -->
   <div class="container" id="member-onboarding-wizard" hidden>
-    <div class="auth-center-stage">
+    <div class="auth-center-stage auth-center-stage--wide">
       <div class="auth-card-surface">
         <div class="onboarding-top">
-          <span class="onboarding-step-label" id="ob-step-label">Bước 1 / 3</span>
-          <button type="button" class="auth-text-link auth-text-link--muted" id="ob-skip-btn">Bỏ qua</button>
-        </div>
-        <div class="member-completion-track" style="margin-bottom: 20px;" aria-hidden="true">
-          <span class="member-completion-fill" id="ob-progress-fill" style="width: 33%;"></span>
+          <span class="onboarding-step-label">Hoàn thiện hồ sơ thành viên</span>
+          <button type="button" class="auth-text-link auth-text-link--muted" id="ob-skip-btn">Để sau</button>
         </div>
 
         <form class="auth-form" id="onboarding-form" novalidate>
-          <!-- Step 1: Pillar -->
-          <div data-ob-step="1">
-            <h2 class="auth-heading">Bạn quan tâm mảng nào nhất tại HolaRise?</h2>
-            <p class="auth-lead">Chọn 1 trụ cột khởi đầu — bạn vẫn có thể tham gia cả 3 hoạt động bất cứ lúc nào.</p>
-            <div class="auth-pillar-strip" style="margin-top: 8px;">
+          <div>
+            <h2 class="auth-heading">Chào mừng bạn đến với HolaRise</h2>
+            <p class="auth-lead">Chọn trụ cột quan tâm và đơn vị học tập/công tác để hoàn thiện Thẻ Thành Viên của bạn.</p>
+          </div>
+
+          <div class="auth-field">
+            <label>Mảng hoạt động bạn quan tâm nhất</label>
+            <div class="auth-pillar-strip" style="margin-top: 4px;">
               <div class="auth-pillar-item">
                 <input class="visually-hidden" type="radio" name="obPillar" id="ob-p-heart" value="holaheart" checked>
                 <label class="auth-pillar-btn" for="ob-p-heart"><span class="auth-pillar-dot" style="background:#B85D3B;"></span><span>HolaHeart</span></label>
@@ -188,36 +188,33 @@
             </div>
           </div>
 
-          <!-- Step 2: Name & Organization -->
-          <div data-ob-step="2" hidden>
-            <h2 class="auth-heading">Thông tin của bạn tại Hòa Lạc</h2>
-            <p class="auth-lead">Giúp Ban Điều Phối dễ kết nối bạn với nhóm cùng trường hoặc khu vực.</p>
-            <div class="auth-field" style="margin-bottom: 14px;">
-              <label for="ob-name">Tên hiển thị trên Thẻ Thành Viên</label>
+          <div class="auth-row-2">
+            <div class="auth-field">
+              <label for="ob-name">Tên hiển thị trên thẻ <span aria-hidden="true">*</span></label>
               <input id="ob-name" name="name" type="text" autocomplete="name" minlength="2" required placeholder="Trần Quốc Bảo">
             </div>
             <div class="auth-field">
-              <label for="ob-org">Trường / Đơn vị <span class="auth-hint-inline">(tùy chọn)</span></label>
-              <input id="ob-org" name="organization" type="text" autocomplete="organization" placeholder="ĐH FPT, ĐHQGHN, Đã đi làm...">
+              <label for="ob-org">Trường / Đơn vị <span class="auth-hint-inline">(48 gợi ý sẵn)</span></label>
+              <input id="ob-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Gõ để tìm trường hoặc đơn vị...">
             </div>
           </div>
 
-          <!-- Step 3: Bio & Finish -->
-          <div data-ob-step="3" hidden>
-            <h2 class="auth-heading">Một câu ngắn cho Thẻ Thành Viên</h2>
-            <p class="auth-lead">Bạn có thể đổi ảnh đại diện hoặc sửa lại bất cứ lúc nào sau bước này.</p>
-            <div class="auth-field">
-              <label for="ob-bio">Châm ngôn / Lời giới thiệu ngắn <span class="auth-hint-inline">(tùy chọn)</span></label>
-              <input id="ob-bio" name="bio" type="text" maxlength="160" placeholder="Sống sâu hơn, xanh hơn và kết nối nhiều hơn tại Hòa Lạc.">
-            </div>
+          <div class="org-quick-chips" aria-label="Chọn nhanh đơn vị phổ biến">
+            <button type="button" class="org-chip-btn" data-org-chip="Đại học FPT Hà Nội (Hòa Lạc)" data-org-target="ob-org">ĐH FPT</button>
+            <button type="button" class="org-chip-btn" data-org-chip="Đại học Quốc gia Hà Nội – Cơ sở Hòa Lạc (ĐHQGHN)" data-org-target="ob-org">ĐHQGHN Hòa Lạc</button>
+            <button type="button" class="org-chip-btn" data-org-chip="Khu Công nghệ cao Hòa Lạc (HHTP)" data-org-target="ob-org">KCNC Hòa Lạc</button>
+            <button type="button" class="org-chip-btn" data-org-chip="Người đi làm / Tự do" data-org-target="ob-org">Người đi làm</button>
+          </div>
+
+          <div class="auth-field">
+            <label for="ob-bio">Một câu ngắn cho thẻ <span class="auth-hint-inline">(tùy chọn)</span></label>
+            <input id="ob-bio" name="bio" type="text" maxlength="160" placeholder="Ví dụ: Sống sâu hơn, xanh hơn và bền bỉ sẻ chia.">
           </div>
 
           <div class="form-status" id="ob-status" role="status" aria-live="polite"></div>
 
           <div class="ob-nav-row">
-            <button type="button" class="btn btn--outline btn--sm" id="ob-prev-btn" hidden>← Quay lại</button>
-            <button type="button" class="auth-submit-btn" id="ob-next-btn" style="flex: 1;">Tiếp theo</button>
-            <button type="submit" class="auth-submit-btn" id="ob-finish-btn" style="flex: 1;" hidden>Hoàn tất &amp; Mở Thẻ</button>
+            <button type="submit" class="auth-submit-btn" id="ob-finish-btn" style="flex: 1;">Hoàn tất &amp; Mở Thẻ Thành Viên</button>
           </div>
         </form>
       </div>
@@ -320,7 +317,7 @@
               </div>
               <div class="auth-field">
                 <label for="prof-org">Trường / Đơn vị</label>
-                <input id="prof-org" name="organization" type="text" autocomplete="organization" placeholder="ĐH FPT, ĐHQGHN, Đã đi làm...">
+                <input id="prof-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Gõ để chọn từ 48 trường / đơn vị...">
               </div>
             </div>
             <div class="auth-row-2">

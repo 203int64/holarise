@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  buildEventFolderName,
+  ensureCategorySubfolder,
   fetchDriveImage,
   isDriveConfigured,
   resetDriveCachesForTest,
@@ -307,4 +309,177 @@ test("Media Gate enforces secret PIN, verified uploader profile, and WebAuthn pa
   const optData = await optRes.json();
   assert.equal(optData.options.rpId, "holarise.org");
   assert.ok(optData.options.challenge.length >= 32);
+});
+
+import { onRequestPost as verifyGatePost } from "../functions/api/auth/verify-gate.js";
+
+test("2-Step Vault: /api/auth/verify-gate issues HMAC gateToken accepted by Step 2 registration", async () => {
+  const db = createMockD1();
+  const env = { DB: db, MEDIA_ACCESS_PIN: "1948" };
+
+  // Wrong PIN -> 401
+  const wrong = await verifyGatePost({
+    request: new Request("https://holarise.org/api/auth/verify-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({ pin: "0000" }),
+    }),
+    env,
+  });
+  assert.equal(wrong.status, 401);
+
+  // Correct PIN -> 200 + HMAC gateToken
+  const right = await verifyGatePost({
+    request: new Request("https://holarise.org/api/auth/verify-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({ pin: "1948" }),
+    }),
+    env,
+  });
+  assert.equal(right.status, 200);
+  const { gateToken } = await right.json();
+  assert.ok(gateToken && gateToken.split(".").length === 3);
+
+  // Step 2 registration using gateToken (without resending raw PIN)
+  const reg = await mediaGatePost({
+    request: new Request("https://holarise.org/api/auth/media-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({
+        gateToken,
+        fullName: "Trần Quốc Bảo",
+        phone: "0987654321",
+        department: "Ban Truyền Thông",
+        email: "bao@holarise.org",
+        password: "StrongPassword123",
+      }),
+    }),
+    env,
+  });
+  assert.equal(reg.status, 200);
+  const regData = await reg.json();
+  assert.equal(regData.ok, true);
+  assert.equal(regData.user.name, "Trần Quốc Bảo");
+
+  // Duplicate email registration must be blocked with 409 EMAIL_EXISTS (no password overwrite)
+  const dup = await mediaGatePost({
+    request: new Request("https://holarise.org/api/auth/media-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({
+        gateToken,
+        fullName: "Kẻ Chiếm Quyền",
+        phone: "0911223344",
+        department: "Ban Khác",
+        email: "bao@holarise.org",
+        password: "HackedPassword999",
+      }),
+    }),
+    env,
+  });
+  assert.equal(dup.status, 409);
+  const dupData = await dup.json();
+  assert.equal(dupData.error.code, "EMAIL_EXISTS");
+});
+
+import { onRequestPost as createEventPost } from "../functions/api/admin/events/index.js";
+import { createSession } from "../functions/_lib/security.js";
+
+test("Event & Album folder naming + auto-provision draft media album on event creation", async () => {
+  resetDriveCachesForTest();
+
+  // 1. Vietnamese folder naming with date prefix
+  assert.equal(
+    buildEventFolderName({ eventDate: "2026-11-29", title: "Cuộc Đời Của Cha" }),
+    "2026-11-29 - Cuộc Đời Của Cha"
+  );
+  assert.equal(
+    buildEventFolderName({ eventDate: "2026-12-05", title: "HolaGreen: Dọn rác / Hồ Tân Xã" }),
+    "2026-12-05 - HolaGreen- Dọn rác - Hồ Tân Xã"
+  );
+
+  // 2. ensureCategorySubfolder creates <root>/album/<folderName> and returns Drive URL
+  const createdFolders = [];
+  const mockFetch = async (url, init = {}) => {
+    if (String(url).startsWith("https://oauth2.googleapis.com/token")) {
+      return new Response(JSON.stringify({ access_token: "ya29.folder-token", expires_in: 3600 }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (String(url).includes("/drive/v3/files?q=")) {
+      return new Response(JSON.stringify({ files: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (String(url).startsWith("https://www.googleapis.com/drive/v3/files?fields=id")) {
+      const body = JSON.parse(init.body);
+      createdFolders.push(body);
+      return new Response(JSON.stringify({ id: `drvFolder_${createdFolders.length}` }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("Not Found", { status: 404 });
+  };
+
+  const folder = await ensureCategorySubfolder(DRIVE_ENV, {
+    category: "album",
+    subfolder: buildEventFolderName({ eventDate: "2026-11-29", title: "Cuộc Đời Của Cha" }),
+    fetchImpl: mockFetch,
+  });
+  assert.equal(folder.folderName, "2026-11-29 - Cuộc Đời Của Cha");
+  assert.equal(folder.folderUrl, "https://drive.google.com/drive/folders/drvFolder_2");
+  assert.equal(createdFolders[0].name, "album");
+  assert.equal(createdFolders[1].name, "2026-11-29 - Cuộc Đời Của Cha");
+
+  // 3. Creating an event in /admin auto-provisions a matching draft album in media_albums
+  const db = createMockD1();
+  const now = new Date().toISOString();
+  await db
+    .prepare(
+      "INSERT INTO admin_users (id, email, name, password_hash, password_salt, role, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?)"
+    )
+    .bind("usr_admin_1", "admin@holarise.org", "Admin", "h", "s", "super_admin", now)
+    .run();
+  const { rawToken } = await createSession(db, "usr_admin_1");
+
+  const evRes = await createEventPost({
+    request: new Request("https://holarise.org/api/admin/events", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://holarise.org",
+        Cookie: `holarise_session=${rawToken}`,
+      },
+      body: JSON.stringify({
+        kind: "upcoming",
+        type: "Workshop",
+        title: "Cuộc Đời Của Cha",
+        date: "2026-11-29",
+        dateDisplay: "29/11/2026",
+        time: "14:00 - 17:00",
+        location: "Hòa Lạc",
+        fee: "Miễn phí",
+        summary: "Buổi trò chuyện về gia đình và lòng biết ơn.",
+        filters: ["biet-on"],
+      }),
+    }),
+    env: { DB: db },
+  });
+  assert.equal(evRes.status, 201);
+  const evData = await evRes.json();
+  assert.equal(evData.ok, true);
+  assert.ok(evData.mediaAlbum);
+  assert.equal(evData.mediaAlbum.folderName, "2026-11-29 - Cuộc Đời Của Cha");
+
+  const albRow = await db
+    .prepare("SELECT title, event_date, status FROM media_albums WHERE id = ?")
+    .bind(evData.mediaAlbum.id)
+    .first();
+  assert.equal(albRow.title, "Cuộc Đời Của Cha");
+  assert.equal(albRow.event_date, "2026-11-29");
+  assert.equal(albRow.status, "draft");
 });

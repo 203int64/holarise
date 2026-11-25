@@ -184,23 +184,13 @@
           <span class="footer-web-only" data-i18n="footer.copyright">© 2026 {{BRAND_FULL_NAME}}</span>
         </div>
         <div class="footer-bottom-meta">
-          <a class="footer-web-only" href="/chinh-sach/" data-i18n="footer.privacy">Bảo mật &amp; Quy tắc</a>
+          <a class="footer-web-only" href="/chinh-sach/">Bảo mật &amp; Quy tắc</a>
           <span class="footer-web-only" aria-hidden="true">·</span>
-          <button class="footer-feedback-trigger" type="button" data-open-feedback-modal data-i18n="footer.contribute">Đóng góp</button>
+          <button class="footer-feedback-trigger" type="button" data-open-feedback-modal>Đóng góp &amp; Báo lỗi</button>
         </div>
       </div>
-      <p class="footer-shake-tip footer-web-only">Gặp lỗi hiển thị? Lắc điện thoại hoặc bấm <button class="footer-shake-tip-link" type="button" data-open-feedback-modal data-feedback-bug="1">Báo lỗi nhanh</button> để tự đọc màn hình và gửi góp ý.</p>
     </div>
   </footer>
-
-  <!-- One-time Mobile Shake-to-Report Guide Toast (hidden by default; controlled via localStorage) -->
-  <div class="shake-guide-toast" id="shake-guide-toast" role="status" aria-live="polite" hidden>
-    <p class="shake-guide-text" id="shake-guide-text">Mẹo nhỏ: Lắc nhẹ điện thoại khi gặp lỗi để tự đọc màn hình và báo nhanh.</p>
-    <div class="shake-guide-actions">
-      <button type="button" class="shake-guide-cta" id="shake-guide-cta">Thử ngay</button>
-      <button type="button" class="shake-guide-close" id="shake-guide-close" aria-label="Đóng hướng dẫn">×</button>
-    </div>
-  </div>
 
   <!-- Native HTML5 <dialog> Xác Nhận Tham Gia Sự Kiện -->
   <dialog class="club-dialog club-dialog--rsvp" id="event-register-modal" closedby="any" aria-labelledby="modal-heading">
@@ -240,28 +230,11 @@
         <input type="hidden" name="source" value="event_modal">
         <input type="hidden" name="activity" id="modal-event-input" value="">
         <input type="hidden" name="eventId" id="modal-event-id" value="">
+        <input type="hidden" name="seatCount" value="Đi 1 mình (1 chỗ)">
         <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
           <label for="modal-website">Website</label>
           <input id="modal-website" name="website" type="text" tabindex="-1" autocomplete="off">
         </div>
-
-        <fieldset class="invite-fieldset">
-          <legend class="invite-legend">Số chỗ bạn muốn giữ</legend>
-          <div class="seat-segmented">
-            <div class="seat-seg-item">
-              <input class="visually-hidden" type="radio" name="seatCount" id="modal-seat-1" value="Đi 1 mình (1 chỗ)" data-seat-short="01 chỗ · Đi một mình" checked>
-              <label class="seat-seg-label" for="modal-seat-1">Đi 1 mình</label>
-            </div>
-            <div class="seat-seg-item">
-              <input class="visually-hidden" type="radio" name="seatCount" id="modal-seat-2" value="Đi cùng 1 bạn (2 chỗ)" data-seat-short="02 chỗ · Đi cùng bạn">
-              <label class="seat-seg-label" for="modal-seat-2">Đi cùng 1 bạn</label>
-            </div>
-            <div class="seat-seg-item">
-              <input class="visually-hidden" type="radio" name="seatCount" id="modal-seat-3" value="Nhóm 3+ người" data-seat-short="Nhóm 3+ chỗ">
-              <label class="seat-seg-label" for="modal-seat-3">Nhóm 3+ người</label>
-            </div>
-          </div>
-        </fieldset>
 
         <div class="form-grid" data-guest-identity-fields>
           <div class="form-row-2">
@@ -541,11 +514,6 @@
           <summary>Ngữ cảnh kỹ thuật tự động đọc</summary>
           <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
         </details>
-
-        <div class="fb-shake-row" id="fb-shake-row" hidden>
-          <span class="fb-shake-text" id="fb-shake-text">Lắc điện thoại để tự đọc màn hình và báo lỗi nhanh</span>
-          <button type="button" class="fb-shot-btn" id="fb-shake-toggle">Bật lắc máy</button>
-        </div>
 
         <div class="auth-row-2">
           <div class="auth-field">

@@ -47,7 +47,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=a101738fe5">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=3a4eedc409">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -114,8 +114,8 @@
       </nav>
 
       <div class="header-actions">
-        <a class="lang-switch" href="/en/" aria-label="Switch to English International Profile">
-          <span class="lang-switch-opt">EN</span>
+        <a class="lang-switch" href="/en/" aria-label="View English International Profile">
+          <span class="lang-switch-opt">EN · Profile</span>
         </a>
         <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/" data-header-member-btn>
           <span data-header-member-label data-i18n="nav.join">Đăng nhập</span>
@@ -220,47 +220,46 @@
         <span class="guestbook-count-pill" id="guestbook-count-pill">Đang tải...</span>
       </div>
 
-      <div class="guestbook-composer-wrap" id="public-reflection-wrap">
-        <form class="form-grid guestbook-form" id="public-reflection-form" novalidate>
+      <div class="guestbook-composer-wrap gb-composer-card" id="public-reflection-wrap">
+        <form class="gb-composer-form" id="public-reflection-form" novalidate>
           <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
             <label for="pr-website">Website</label>
             <input id="pr-website" name="website" type="text" tabindex="-1" autocomplete="off">
           </div>
 
-          <div class="form-row-2">
-            <div class="field">
-              <label for="pr-name">Tên của bạn <span aria-hidden="true">*</span></label>
-              <input id="pr-name" name="authorName" type="text" autocomplete="name" required minlength="2" maxlength="120" placeholder="Ví dụ: Minh Anh (hoặc Ẩn danh)">
-            </div>
-            <div class="field">
-              <label for="pr-org">Trường / Đơn vị (tùy chọn)</label>
-              <input id="pr-org" name="authorOrg" type="text" maxlength="160" placeholder="ĐH FPT, ĐHQGHN, Đã đi làm...">
+          <input id="pr-org" name="authorOrg" type="hidden" value="">
+          <input id="pr-role" name="participantRole" type="hidden" value="Người tham dự">
+
+          <!-- Signed-in Member Identity Strip (auto-shown by member.js, hides guest inputs) -->
+          <div class="gb-member-identity" id="pr-member-bar" hidden>
+            <span class="gb-member-avatar" id="pr-member-avatar" aria-hidden="true">H</span>
+            <div class="gb-member-info">
+              <strong id="pr-member-name">Thành viên HolaRise</strong>
+              <span id="pr-member-sub">Đang viết với tài khoản của bạn</span>
             </div>
           </div>
 
-          <div class="form-row-2">
-            <div class="field">
-              <label for="pr-role">Vai trò tại buổi gặp</label>
-              <select id="pr-role" name="participantRole">
-                <option value="Thành viên tham dự">Người tham dự</option>
-                <option value="Tình nguyện viên">Tình nguyện viên</option>
-                <option value="Diễn giả · Khách mời">Diễn giả · Khách mời</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="pr-quote">Một câu tâm đắc nhất (tùy chọn)</label>
-              <input id="pr-quote" name="pullQuote" type="text" maxlength="180" placeholder="Một khoảnh khắc hoặc câu nói bạn nhớ nhất...">
-            </div>
+          <div class="gb-textarea-wrap">
+            <label for="pr-content" class="visually-hidden">Cảm nhận của bạn</label>
+            <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="Điều gì đọng lại trong bạn sau buổi gặp này? Viết vài dòng chân thật nhé..."></textarea>
           </div>
 
-          <div class="field">
-            <label for="pr-content">Cảm nhận của bạn <span aria-hidden="true">*</span></label>
-            <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="Gửi lại vài dòng trải nghiệm của bạn — không cần tạo tài khoản hay đăng nhập..."></textarea>
+          <!-- Compact Guest Identity Row (hidden automatically when signed in) -->
+          <div class="gb-guest-row" id="pr-guest-row">
+            <div class="gb-guest-name-wrap">
+              <label for="pr-name" class="visually-hidden">Tên của bạn</label>
+              <input id="pr-name" name="authorName" type="text" autocomplete="name" required minlength="2" maxlength="120" placeholder="Tên của bạn *">
+            </div>
+            <label class="gb-anon-toggle">
+              <input type="checkbox" id="pr-anon-check">
+              <span>Gửi ẩn danh</span>
+            </label>
           </div>
 
           <div class="form-status" id="pr-status" role="status" aria-live="polite"></div>
 
-          <div class="gb-form-actions">
+          <div class="gb-composer-foot">
+            <span class="gb-composer-hint">Không cần tạo tài khoản · Sẽ hiển thị sau khi duyệt nhanh</span>
             <button class="btn btn--primary btn--sm" type="submit" id="pr-submit-btn">Gửi cảm nhận</button>
           </div>
         </form>
@@ -335,7 +334,7 @@
             <li><span data-i18n="footer.officeLabel">Văn phòng:</span> Tân Xã – Hòa Lạc – Thạch Thất, Hà Nội</li>
             <li><a href="tel:0777771948">077.777.1948</a></li>
             <li><a href="mailto:phungsu@holarise.org">phungsu@holarise.org</a></li>
-            <li>Sinh hoạt định kỳ theo lịch công bố</li>
+            <li>Sinh hoạt định kỳ: 1–2 hoạt động hàng tuần</li>
           </ul>
         </div>
       </div>
@@ -348,23 +347,13 @@
           <span class="footer-web-only" data-i18n="footer.copyright">© 2026 HolaRise – Cộng đồng Thanh niên Hòa Lạc</span>
         </div>
         <div class="footer-bottom-meta">
-          <a class="footer-web-only" href="/chinh-sach/" data-i18n="footer.privacy">Bảo mật &amp; Quy tắc</a>
+          <a class="footer-web-only" href="/chinh-sach/">Bảo mật &amp; Quy tắc</a>
           <span class="footer-web-only" aria-hidden="true">·</span>
-          <button class="footer-feedback-trigger" type="button" data-open-feedback-modal data-i18n="footer.contribute">Đóng góp</button>
+          <button class="footer-feedback-trigger" type="button" data-open-feedback-modal>Đóng góp &amp; Báo lỗi</button>
         </div>
       </div>
-      <p class="footer-shake-tip footer-web-only">Gặp lỗi hiển thị? Lắc điện thoại hoặc bấm <button class="footer-shake-tip-link" type="button" data-open-feedback-modal data-feedback-bug="1">Báo lỗi nhanh</button> để tự đọc màn hình và gửi góp ý.</p>
     </div>
   </footer>
-
-  <!-- One-time Mobile Shake-to-Report Guide Toast (hidden by default; controlled via localStorage) -->
-  <div class="shake-guide-toast" id="shake-guide-toast" role="status" aria-live="polite" hidden>
-    <p class="shake-guide-text" id="shake-guide-text">Mẹo nhỏ: Lắc nhẹ điện thoại khi gặp lỗi để tự đọc màn hình và báo nhanh.</p>
-    <div class="shake-guide-actions">
-      <button type="button" class="shake-guide-cta" id="shake-guide-cta">Thử ngay</button>
-      <button type="button" class="shake-guide-close" id="shake-guide-close" aria-label="Đóng hướng dẫn">×</button>
-    </div>
-  </div>
 
   <!-- Native HTML5 <dialog> Xác Nhận Tham Gia Sự Kiện -->
   <dialog class="club-dialog club-dialog--rsvp" id="event-register-modal" closedby="any" aria-labelledby="modal-heading">
@@ -404,28 +393,11 @@
         <input type="hidden" name="source" value="event_modal">
         <input type="hidden" name="activity" id="modal-event-input" value="">
         <input type="hidden" name="eventId" id="modal-event-id" value="">
+        <input type="hidden" name="seatCount" value="Đi 1 mình (1 chỗ)">
         <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
           <label for="modal-website">Website</label>
           <input id="modal-website" name="website" type="text" tabindex="-1" autocomplete="off">
         </div>
-
-        <fieldset class="invite-fieldset">
-          <legend class="invite-legend">Số chỗ bạn muốn giữ</legend>
-          <div class="seat-segmented">
-            <div class="seat-seg-item">
-              <input class="visually-hidden" type="radio" name="seatCount" id="modal-seat-1" value="Đi 1 mình (1 chỗ)" data-seat-short="01 chỗ · Đi một mình" checked>
-              <label class="seat-seg-label" for="modal-seat-1">Đi 1 mình</label>
-            </div>
-            <div class="seat-seg-item">
-              <input class="visually-hidden" type="radio" name="seatCount" id="modal-seat-2" value="Đi cùng 1 bạn (2 chỗ)" data-seat-short="02 chỗ · Đi cùng bạn">
-              <label class="seat-seg-label" for="modal-seat-2">Đi cùng 1 bạn</label>
-            </div>
-            <div class="seat-seg-item">
-              <input class="visually-hidden" type="radio" name="seatCount" id="modal-seat-3" value="Nhóm 3+ người" data-seat-short="Nhóm 3+ chỗ">
-              <label class="seat-seg-label" for="modal-seat-3">Nhóm 3+ người</label>
-            </div>
-          </div>
-        </fieldset>
 
         <div class="form-grid" data-guest-identity-fields>
           <div class="form-row-2">
@@ -706,11 +678,6 @@
           <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
         </details>
 
-        <div class="fb-shake-row" id="fb-shake-row" hidden>
-          <span class="fb-shake-text" id="fb-shake-text">Lắc điện thoại để tự đọc màn hình và báo lỗi nhanh</span>
-          <button type="button" class="fb-shot-btn" id="fb-shake-toggle">Bật lắc máy</button>
-        </div>
-
         <div class="auth-row-2">
           <div class="auth-field">
             <label for="fb-name">Tên của bạn <span class="auth-hint-inline">(tùy chọn)</span></label>
@@ -772,11 +739,11 @@
     <a class="mobile-dock-link" href="/tham-gia/" aria-label="Tham gia"><svg class="mobile-dock-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path pathLength="1" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg><span class="mobile-dock-label" aria-hidden="true">Tham gia</span></a>
   </nav>
 
-  <script src="/assets/vendor/gsap.min.js?v=a101738fe5" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=a101738fe5" defer></script>
-  <script src="/assets/js/motion.js?v=a101738fe5" defer></script>
-  <script src="/assets/js/main.js?v=a101738fe5" defer></script>
-  <script src="/assets/js/join-pass.js?v=a101738fe5" defer></script>
-  <script src="/assets/js/member.js?v=a101738fe5" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=3a4eedc409" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=3a4eedc409" defer></script>
+  <script src="/assets/js/motion.js?v=3a4eedc409" defer></script>
+  <script src="/assets/js/main.js?v=3a4eedc409" defer></script>
+  <script src="/assets/js/join-pass.js?v=3a4eedc409" defer></script>
+  <script src="/assets/js/member.js?v=3a4eedc409" defer></script>
 </body>
 </html>

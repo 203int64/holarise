@@ -35,11 +35,23 @@
 
   const VISUAL_SLOTS = [
     { key: "hero", label: "Ảnh Hero Trang chủ", fallback: "/assets/images/hero-holarise-binh-minh.webp" },
-    { key: "about", label: "Ảnh Trang Về HolaRise", fallback: "/assets/images/musicspace-archive/07-656713008_1333975742086926_7656936221069546148_n.jpg" },
-    { key: "holaheart", label: "Ảnh Đại diện HolaHeart", fallback: "/assets/images/events/holaheart-2026-11-15/06-group-dialogue.jpg" },
-    { key: "holagreen", label: "Ảnh Đại diện HolaGreen", fallback: "/assets/images/illustrations/G03.jpg" },
-    { key: "holaconnect", label: "Ảnh Đại diện HolaConnect", fallback: "/assets/images/illustrations/C04.jpg" },
+    { key: "about", label: "Ảnh Trang Về HolaRise", fallback: "/assets/images/hero-holarise-binh-minh.webp" },
+    { key: "holaheart", label: "Ảnh Đại diện HolaHeart", fallback: "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg" },
+    { key: "holagreen", label: "Ảnh Đại diện HolaGreen", fallback: "/assets/images/illustrations/holagreen/G03.jpg" },
+    { key: "holaconnect", label: "Ảnh Đại diện HolaConnect", fallback: "/assets/images/illustrations/holaconnect/C04.jpg" },
   ];
+
+  function getVisualSlotData(visuals, key) {
+    const v = visuals && typeof visuals === "object" ? visuals : {};
+    if (key === "hero") {
+      return { url: v.heroImage || "", alt: v.heroImageAlt || "", isIllustration: Boolean(v.heroIsIllustration) };
+    }
+    if (key === "about") {
+      return { url: v.aboutImage || "", alt: v.aboutImageAlt || "", isIllustration: Boolean(v.aboutIsIllustration) };
+    }
+    const p = v.pillars && v.pillars[key] ? v.pillars[key] : {};
+    return { url: p.image || "", alt: p.imageAlt || "", isIllustration: Boolean(p.isIllustration) };
+  }
 
   const REG_STATUS_LABEL = {
     new: "Mới nhận",
@@ -341,6 +353,20 @@
     return "khac";
   }
 
+  function detectUploadSubfolder(targetId) {
+    const id = String(targetId || "").toLowerCase();
+    if (id.includes("ev-") || id.includes("event")) {
+      const title = ($("#ev-title")?.value || "")
+        .replace(/[\\/:*?"<>|\r\n]+/g, "-")
+        .replace(/\s+/g, " ")
+        .trim();
+      const dateMatch = ($("#ev-date")?.value || "").trim().match(/^(\d{4}-\d{2}-\d{2})/);
+      if (dateMatch && title) return `${dateMatch[1]} - ${title}`.slice(0, 120);
+      if (title) return title.slice(0, 120);
+    }
+    return "";
+  }
+
   function initImageUploaders() {
     $$("[data-upload-target]").forEach((fileInput) => {
       const targetId = fileInput.getAttribute("data-upload-target");
@@ -364,6 +390,8 @@
           const storageInfo = await getMediaStorageInfo();
           const form = new FormData();
           form.append("category", detectUploadCategory(targetId));
+          const subfolder = detectUploadSubfolder(targetId);
+          if (subfolder) form.append("subfolder", subfolder);
 
           if (storageInfo.driveConfigured) {
             if (metaEl) metaEl.textContent = "Đang tải ảnh gốc lên Google Drive...";
@@ -437,14 +465,18 @@
     $("#boot-loader").hidden = true;
     $("#admin-shell").hidden = true;
     $("#auth-screen").hidden = false;
-    $("#login-form").hidden = !initialized;
-    $("#bootstrap-form").hidden = initialized;
-    $("#auth-heading").textContent = initialized
-      ? "Đăng nhập Quản trị CMS"
-      : "Khởi tạo Tài khoản Quản trị Đầu tiên";
-    $("#auth-lead").textContent = initialized
-      ? "Dành riêng cho Ban Điều Phối quản lý bài viết, lịch sự kiện và danh sách đăng ký."
-      : "Thiết lập tài khoản Quản trị viên chính (Super Admin) duy nhất để bắt đầu vận hành HolaRise CMS.";
+    const pinStep = $("#vault-step-pin");
+    const authStep = $("#vault-step-auth");
+    if (initialized) {
+      $("#bootstrap-form").hidden = true;
+      if (pinStep && authStep) {
+        window.HolaVault?.setStep?.("pin");
+      }
+    } else {
+      if (pinStep) pinStep.hidden = true;
+      if (authStep) authStep.hidden = true;
+      $("#bootstrap-form").hidden = false;
+    }
   }
 
   function enterAdminShell(user) {
@@ -705,8 +737,11 @@
     $("#ev-date-display").value = ev ? ev.dateDisplay || "" : "";
     $("#ev-time").value = ev ? ev.time || "" : "07:30 – 10:30";
     $("#ev-location").value = ev ? ev.location || "" : "Hòa Lạc, Hà Nội";
-    $("#ev-fee").value = ev ? ev.fee || "" : "Miễn phí";
-    $("#ev-seats").value = ev ? ev.seats || "" : "Mở đăng ký";
+    $("#ev-fee").value = ev ? ev.fee || "" : "Miễn phí tham dự · Tự túc đồ uống";
+    $("#ev-seats").value = ev ? ev.seats || "" : "";
+    if ($("#ev-seat-capacity")) $("#ev-seat-capacity").value = ev ? Number(ev.seatCapacity || 0) : 0;
+    if ($("#ev-external-booked")) $("#ev-external-booked").value = ev ? Number(ev.externalBooked || 0) : 0;
+    if ($("#ev-show-seat-bar")) $("#ev-show-seat-bar").checked = ev ? Boolean(ev.showSeatBar) : false;
     $("#ev-summary").value = ev ? ev.summary || "" : "";
     if ($("#ev-summary-en")) $("#ev-summary-en").value = ev ? ev.summaryEn || ev.summary_en || "" : "";
     $("#ev-participants").value = ev ? ev.participants || "" : "";
@@ -914,7 +949,7 @@
     const grid = $("#visuals-editor-grid");
     if (!grid) return;
     grid.innerHTML = VISUAL_SLOTS.map((slot) => {
-      const cur = state.visuals[slot.key] || {};
+      const cur = getVisualSlotData(state.visuals, slot.key);
       const src = cur.url || slot.fallback;
       const alt = cur.alt || "";
       const isIllust = cur.isIllustration === true;
@@ -1120,26 +1155,80 @@
       }
     });
 
-    // Login form
-    $("#btn-admin-biometric-login")?.addEventListener("click", async () => {
-      const btn = $("#btn-admin-biometric-login");
-      const alertEl = $("#login-alert");
+    // Progressive Passkey Login (Single button -> reveal Register/Email only on failure)
+    async function handleAdminBiometric(btn) {
+      const alertEl = $("#vault-login-alert");
       showAlert(alertEl, "");
       if (!window.HolaPasskey?.isSupported?.()) {
-        showAlert(alertEl, "Thiết bị hoặc trình duyệt này chưa hỗ trợ sinh trắc học.");
+        showAlert(alertEl, "Thiết bị hoặc trình duyệt này chưa hỗ trợ đăng nhập nhanh. Bạn có thể đăng ký mới hoặc dùng Email bên dưới.");
+        window.HolaVault?.revealFallback?.();
         return;
       }
+      const labelEl = btn.querySelector("span") || btn;
+      const prevText = labelEl.textContent;
       btn.disabled = true;
-      btn.textContent = "Đang xác thực sinh trắc học...";
+      labelEl.textContent = "Đang xác thực...";
       try {
-        const res = await window.HolaPasskey.loginWithPasskey($("#login-email")?.value?.trim() || "");
+        const res = await window.HolaPasskey.loginWithPasskey("");
         toast(`Chào mừng trở lại, ${res.user.name}!`, "success");
         enterAdminShell(res.user);
       } catch (err) {
-        showAlert(alertEl, err.message || "Đăng nhập sinh trắc học thất bại.");
+        showAlert(
+          alertEl,
+          err?.message || "Đăng nhập không thành công. Nếu bạn là thành viên mới, hãy chọn Đăng ký bên dưới."
+        );
+        window.HolaVault?.revealFallback?.();
       } finally {
         btn.disabled = false;
-        btn.textContent = "Đăng nhập bằng Sinh trắc học (Face ID / Touch ID)";
+        labelEl.textContent = prevText;
+      }
+    }
+
+    $("#btn-vault-login")?.addEventListener("click", (e) => {
+      handleAdminBiometric(e.currentTarget);
+    });
+
+    $("#admin-register-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const alertEl = $("#ar-alert");
+      const btn = $("#ar-submit");
+      showAlert(alertEl, "");
+      const gateToken = window.HolaVault?.getGateToken?.() || "";
+      if (!gateToken) {
+        showAlert(alertEl, "Phiên mã bảo mật đã hết hạn. Vui lòng nhập lại mã.");
+        window.HolaVault?.reset?.();
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = "Đang tạo tài khoản...";
+      try {
+        const res = await api("/api/auth/media-gate", {
+          method: "POST",
+          body: {
+            gateToken,
+            fullName: $("#ar-name").value.trim(),
+            phone: $("#ar-phone").value.trim(),
+            department: $("#ar-dept").value.trim(),
+            email: $("#ar-email").value.trim(),
+            password: $("#ar-password").value,
+          },
+        });
+        $("#ar-password").value = "";
+        toast(`Đã tạo tài khoản ${res.user.name}!`, "success");
+        if (res.requiresPasskeySetup && window.HolaPasskey?.isSupported?.()) {
+          try {
+            await window.HolaPasskey.registerPasskey();
+            toast("Đã kích hoạt Sinh trắc học (Face ID / Touch ID) thành công!", "success");
+          } catch {
+            // Optional if user cancels prompt
+          }
+        }
+        enterAdminShell(res.user);
+      } catch (err) {
+        showAlert(alertEl, formatApiError(err));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Hoàn tất đăng ký & Bật Face ID";
       }
     });
 
@@ -1341,6 +1430,9 @@
         location: $("#ev-location").value.trim(),
         fee: $("#ev-fee").value.trim(),
         seats: $("#ev-seats").value.trim(),
+        seatCapacity: Number($("#ev-seat-capacity")?.value || 0),
+        externalBooked: Number($("#ev-external-booked")?.value || 0),
+        showSeatBar: Boolean($("#ev-show-seat-bar")?.checked),
         summary: $("#ev-summary").value.trim(),
         summaryEn: $("#ev-summary-en") ? $("#ev-summary-en").value.trim() : "",
         participants: $("#ev-participants").value.trim(),
@@ -1626,13 +1718,25 @@
       const btn = $("#btn-save-visuals");
       const alertEl = $("#visuals-alert");
       showAlert(alertEl, "");
-      const payload = {};
+      const payload = { pillars: {} };
       VISUAL_SLOTS.forEach((slot) => {
-        const url = (document.getElementById(`vis-url-${slot.key}`)?.value || "").trim();
+        const url = (document.getElementById(`vis-url-${slot.key}`)?.value || "").trim() || slot.fallback;
         const alt = (document.getElementById(`vis-alt-${slot.key}`)?.value || "").trim();
         const isReal = Boolean(document.getElementById(`vis-real-${slot.key}`)?.checked);
-        if (url) {
-          payload[slot.key] = { url, alt, isIllustration: !isReal };
+        if (slot.key === "hero") {
+          payload.heroImage = url;
+          if (alt) payload.heroImageAlt = alt;
+          payload.heroIsIllustration = !isReal;
+        } else if (slot.key === "about") {
+          payload.aboutImage = url;
+          if (alt) payload.aboutImageAlt = alt;
+          payload.aboutIsIllustration = !isReal;
+        } else {
+          payload.pillars[slot.key] = {
+            image: url,
+            imageAlt: alt,
+            isIllustration: !isReal,
+          };
         }
       });
       btn.disabled = true;

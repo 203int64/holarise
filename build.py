@@ -643,10 +643,8 @@ def compact_fee_label(fee_str: str) -> str:
     if not raw:
         return "Miễn phí"
     head = raw.split("·", 1)[0].strip()
-    if "miễn phí" in head.lower():
+    if "miễn phí" in head.lower() or "0đ" in head.lower():
         return "Miễn phí"
-    if "0đ" in head.lower():
-        return "Vé 0đ"
     return head[:20]
 
 
@@ -1293,8 +1291,8 @@ def write_page(
 
     is_en_page = url_path.startswith("/en/")
     lang_switch_href = "/" if is_en_page else "/en/"
-    lang_switch_label = "VN" if is_en_page else "EN"
-    lang_switch_aria = "Chuyển sang tiếng Việt" if is_en_page else "Switch to English International Profile"
+    lang_switch_label = "Tiếng Việt" if is_en_page else "EN · Profile"
+    lang_switch_aria = "Chuyển sang trang Tiếng Việt" if is_en_page else "View English International Profile"
 
     rendered = render_template(
         base_tpl,
@@ -2009,7 +2007,8 @@ def build_site() -> list:
                 "EVENT_DATE_DISPLAY": esc(ws["dateDisplay"]),
                 "EVENT_LOCATION": esc(ws["location"]),
                 "EVENT_FEE": esc(ws["fee"]),
-                "EVENT_SEATS": esc(ws["seats"]),
+                "EVENT_SEATS": esc(ws.get("seats", "")),
+                "EVENT_SEAT_BAR_HTML": "",
                 "EVENT_IMAGE": esc(ws["image"]),
                 "EVENT_IMAGE_ALT": esc(ws["imageAlt"]),
                 "EVENT_ZALO_GROUP": esc(ev_zalo),
@@ -2074,6 +2073,7 @@ def build_site() -> list:
             "EVENT_LOCATION": "__SSR_EVENT_LOCATION__",
             "EVENT_FEE": "__SSR_EVENT_FEE__",
             "EVENT_SEATS": "__SSR_EVENT_SEATS__",
+            "EVENT_SEAT_BAR_HTML": "__SSR_EVENT_SEAT_BAR_HTML__",
             "EVENT_IMAGE": "__SSR_EVENT_IMAGE__",
             "EVENT_IMAGE_ALT": "__SSR_EVENT_IMAGE_ALT__",
             "EVENT_ZALO_GROUP": "__SSR_EVENT_ZALO_GROUP__",
@@ -2259,6 +2259,7 @@ def build_site() -> list:
     join_main = render_template(
         load_template("join.html"),
         {
+            "BRAND_NAME": esc(b["brandName"]),
             "BRAND_SHORT_NAME": esc(b["shortName"]),
             "FORM_ENDPOINT": esc(c.get("formEndpoint", "")),
             "CONTACT_ADDRESS": esc(c["address"]),

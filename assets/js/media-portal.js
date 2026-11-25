@@ -164,6 +164,7 @@
     $("#boot-loader").hidden = true;
     $("#media-shell").hidden = true;
     $("#auth-screen").hidden = false;
+    window.HolaVault?.reset?.();
   }
 
   async function enterMediaShell(user) {
@@ -490,10 +491,20 @@
       item.error = "";
       renderUploadQueue();
 
+      const dateMatch = String(state.activeAlbum.eventDate || "").trim().match(/^(\d{4}-\d{2}-\d{2})/);
+      const cleanTitle = String(state.activeAlbum.title || "")
+        .replace(/[\\/:*?"<>|\r\n]+/g, "-")
+        .replace(/\s+/g, " ")
+        .trim();
+      const folderName =
+        dateMatch && cleanTitle
+          ? `${dateMatch[1]} - ${cleanTitle}`.slice(0, 120)
+          : (cleanTitle || state.activeAlbum.slug || "").slice(0, 120);
+
       const fd = new FormData();
       fd.append("file", uploadPayload, uploadFilename);
       fd.append("category", "album");
-      fd.append("subfolder", state.activeAlbum.slug || state.activeAlbum.title || "");
+      fd.append("subfolder", folderName);
       const uploaded = await apiFetch("/api/admin/media", { method: "POST", body: fd });
 
       const attached = await apiFetch(`/api/admin/albums/${encodeURIComponent(albumId)}/photos`, {
@@ -595,27 +606,37 @@
      Event Binding
      ========================================================================= */
   function bindEvents() {
-    // Login
-    $("#btn-biometric-login")?.addEventListener("click", async () => {
-      const btn = $("#btn-biometric-login");
-      const alertEl = $("#biometric-alert");
+    // Progressive Passkey Login (Single button -> reveal Register/Email only on failure)
+    async function handleBiometricLogin(btnEl) {
+      const alertEl = $("#vault-login-alert");
       showAlert(alertEl, "");
       if (!window.HolaPasskey?.isSupported?.()) {
-        showAlert(alertEl, "Thiết bị hoặc trình duyệt này chưa hỗ trợ sinh trắc học. Vui lòng dùng Mã cổng đội ngũ bên dưới.");
+        showAlert(alertEl, "Thiết bị hoặc trình duyệt này chưa hỗ trợ đăng nhập nhanh. Bạn có thể đăng ký mới hoặc dùng Email bên dưới.");
+        window.HolaVault?.revealFallback?.();
         return;
       }
-      btn.disabled = true;
-      btn.textContent = "Đang xác thực sinh trắc học...";
+      const labelEl = btnEl.querySelector("span") || btnEl;
+      const prevText = labelEl.textContent;
+      btnEl.disabled = true;
+      labelEl.textContent = "Đang xác thực...";
       try {
-        const res = await window.HolaPasskey.loginWithPasskey($("#mg-email")?.value?.trim() || "");
+        const res = await window.HolaPasskey.loginWithPasskey("");
         toast(`Chào mừng ${res.user.name}!`, "success");
         await enterMediaShell(res.user);
       } catch (err) {
-        showAlert(alertEl, err.message || "Không thể đăng nhập bằng sinh trắc học.");
+        showAlert(
+          alertEl,
+          err?.message || "Đăng nhập không thành công. Nếu bạn là thành viên mới, hãy chọn Đăng ký bên dưới."
+        );
+        window.HolaVault?.revealFallback?.();
       } finally {
-        btn.disabled = false;
-        btn.textContent = "Đăng nhập bằng Sinh trắc học (Face ID / Touch ID)";
+        btnEl.disabled = false;
+        labelEl.textContent = prevText;
       }
+    }
+
+    $("#btn-vault-login")?.addEventListener("click", (e) => {
+      handleBiometricLogin(e.currentTarget);
     });
 
     $("#media-gate-form")?.addEventListener("submit", async (e) => {
@@ -623,21 +644,28 @@
       const alertEl = $("#mg-alert");
       const btn = $("#mg-submit");
       showAlert(alertEl, "");
+      const gateToken = window.HolaVault?.getGateToken?.() || "";
+      if (!gateToken) {
+        showAlert(alertEl, "Phiên mã cổng đã hết hạn. Vui lòng nhập lại mã cổng.");
+        window.HolaVault?.reset?.();
+        return;
+      }
       btn.disabled = true;
-      btn.textContent = "Đang xác thực hồ sơ...";
+      btn.textContent = "Đang tạo hồ sơ...";
       try {
         const res = await apiFetch("/api/auth/media-gate", {
           method: "POST",
           json: {
+            gateToken,
             fullName: $("#mg-name").value.trim(),
             phone: $("#mg-phone").value.trim(),
             department: $("#mg-dept").value.trim(),
             email: $("#mg-email").value.trim(),
-            pin: $("#mg-pin").value.trim(),
+            password: $("#mg-password")?.value || "",
           },
         });
-        $("#mg-pin").value = "";
-        toast(`Đã xác thực người đăng: ${res.user.name}!`, "success");
+        if ($("#mg-password")) $("#mg-password").value = "";
+        toast(`Chào mừng ${res.user.name}!`, "success");
         if (res.requiresPasskeySetup && window.HolaPasskey?.isSupported?.()) {
           try {
             await window.HolaPasskey.registerPasskey();
@@ -652,10 +680,10 @@
         const detail = err?.data?.error?.fields
           ? Object.values(err.data.error.fields).join(" ")
           : err.message;
-        showAlert(alertEl, detail || "Xác thực thất bại.");
+        showAlert(alertEl, detail || "Đăng ký thất bại.");
       } finally {
         btn.disabled = false;
-        btn.textContent = "Xác thực & Kích hoạt Sinh trắc học";
+        btn.textContent = "Hoàn tất đăng ký & Bật Face ID";
       }
     });
 

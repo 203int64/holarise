@@ -1,11 +1,12 @@
 /**
  * POST /api/auth/media-gate
- * Verifies team access PIN (stored in Cloudflare Secret MEDIA_ACCESS_PIN, never hardcoded)
- * plus mandatory verified uploader profile (Full Name, Phone/Zalo, Department/Role, Email),
- * then issues a session cookie and prompts Passkey (Face ID / Touch ID) enrollment.
+ * Step 2 (Register): Registers or updates a verified team uploader account
+ * after validating either the HMAC gateToken from Step 1 (/api/auth/verify-gate)
+ * or direct team access PIN (MEDIA_ACCESS_PIN).
  */
 
 import { ensureAdminPasskeySchema, getAdminUserProfile } from "../../_lib/admin-passkey-schema.js";
+import { constantTimeStringEqual, verifyGateToken } from "../../_lib/gate-token.js";
 import {
   buildSessionCookie,
   checkRateLimit,
@@ -20,17 +21,6 @@ import {
 import { cleanStr, isValidEmail } from "../../_lib/validation.js";
 
 const VN_PHONE_RE = /^(?:0|\+?84)(?:3|5|7|8|9)\d{8}$/;
-
-function constantTimeStringEqual(a, b) {
-  const s1 = String(a || "");
-  const s2 = String(b || "");
-  const len = Math.max(s1.length, s2.length);
-  let diff = s1.length ^ s2.length;
-  for (let i = 0; i < len; i++) {
-    diff |= (s1.charCodeAt(i) || 0) ^ (s2.charCodeAt(i) || 0);
-  }
-  return diff === 0;
-}
 
 export async function onRequestPost({ request, env }) {
   if (!env?.DB) {
@@ -50,12 +40,12 @@ export async function onRequestPost({ request, env }) {
   }
 
   const ipHash = await getClientIpHash(request);
-  const rl = await checkRateLimit(env.DB, `media-gate:${ipHash}`, 5, 15 * 60 * 1000);
+  const rl = await checkRateLimit(env.DB, `media-gate:${ipHash}`, 8, 15 * 60 * 1000);
   if (!rl.allowed) {
     return errorResponse(
       429,
       "RATE_LIMITED",
-      `Bạn đã nhập sai quá số lần cho phép. Vui lòng thử lại sau ${rl.retryAfterSec} giây.`,
+      `Bạn đã thử quá nhiều lần. Vui lòng thử lại sau ${rl.retryAfterSec} giây.`,
       null,
       { "Retry-After": String(rl.retryAfterSec) }
     );
@@ -64,16 +54,23 @@ export async function onRequestPost({ request, env }) {
   const parsed = await readJsonBody(request, 16 * 1024);
   if (!parsed.ok) return parsed.response;
 
+  const gateToken = cleanStr(parsed.data.gateToken, 256);
   const pin = cleanStr(parsed.data.pin, 32);
+  const gateValid =
+    (gateToken && (await verifyGateToken(gateToken, expectedPin))) ||
+    (pin && constantTimeStringEqual(pin, expectedPin));
+
+  if (!gateValid) {
+    return errorResponse(401, "INVALID_PIN", "Phiên xác thực mã cổng không hợp lệ hoặc đã hết hạn.");
+  }
+
   const fullName = cleanStr(parsed.data.fullName ?? parsed.data.name, 100);
   const phoneRaw = cleanStr(parsed.data.phone, 24).replace(/[\s.-]+/g, "");
   const department = cleanStr(parsed.data.department, 80);
   const email = cleanStr(parsed.data.email, 160).toLowerCase();
+  const password = String(parsed.data.password || "");
 
   const fields = {};
-  if (!pin || !constantTimeStringEqual(pin, expectedPin)) {
-    return errorResponse(401, "INVALID_PIN", "Mã cổng đội ngũ không đúng.");
-  }
   if (fullName.length < 3 || fullName.split(/\s+/).filter(Boolean).length < 2) {
     fields.fullName = "Vui lòng nhập đầy đủ Họ và tên (ít nhất 2 từ).";
   }
@@ -85,6 +82,9 @@ export async function onRequestPost({ request, env }) {
   }
   if (!isValidEmail(email)) {
     fields.email = "Vui lòng nhập địa chỉ email hợp lệ.";
+  }
+  if (password && password.length < 8) {
+    fields.password = "Mật khẩu tối thiểu 8 ký tự.";
   }
   if (Object.keys(fields).length > 0) {
     return errorResponse(
@@ -98,34 +98,34 @@ export async function onRequestPost({ request, env }) {
   await ensureAdminPasskeySchema(env.DB);
   const now = new Date().toISOString();
 
-  let user = await env.DB.prepare(
-    "SELECT id, email, name, role, is_active FROM admin_users WHERE email = ?"
+  const existing = await env.DB.prepare(
+    "SELECT id, is_active FROM admin_users WHERE email = ?"
   )
     .bind(email)
     .first();
 
-  if (user && !user.is_active) {
-    return errorResponse(403, "ACCOUNT_DISABLED", "Tài khoản này đang bị tạm khóa.");
+  if (existing) {
+    if (!existing.is_active) {
+      return errorResponse(403, "ACCOUNT_DISABLED", "Tài khoản này đang bị tạm khóa.");
+    }
+    return errorResponse(
+      409,
+      "EMAIL_EXISTS",
+      "Email này đã có tài khoản. Vui lòng chuyển sang Đăng nhập bằng Email.",
+      { email: "Email này đã được đăng ký trước đó." }
+    );
   }
 
-  if (user) {
-    await env.DB.prepare(
-      "UPDATE admin_users SET name = ?, phone = ?, department = ?, last_login_at = ? WHERE id = ?"
-    )
-      .bind(fullName, phoneRaw, department, now, user.id)
-      .run();
-  } else {
-    const newId = `usr_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-    const randomPw = crypto.randomUUID() + crypto.randomUUID();
-    const { hash, salt } = await hashPassword(randomPw);
-    await env.DB.prepare(
-      `INSERT INTO admin_users (id, email, name, phone, department, password_hash, password_salt, role, is_active, created_at, last_login_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'media', 1, ?, ?)`
-    )
-      .bind(newId, email, fullName, phoneRaw, department, hash, salt, now, now)
-      .run();
-    user = { id: newId };
-  }
+  const newId = `usr_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+  const secretPw = password || crypto.randomUUID() + crypto.randomUUID();
+  const { hash, salt } = await hashPassword(secretPw);
+  await env.DB.prepare(
+    `INSERT INTO admin_users (id, email, name, phone, department, password_hash, password_salt, role, is_active, created_at, last_login_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 'media', 1, ?, ?)`
+  )
+    .bind(newId, email, fullName, phoneRaw, department, hash, salt, now, now)
+    .run();
+  const user = { id: newId };
 
   const [{ rawToken }, profile] = await Promise.all([
     createSession(env.DB, user.id),

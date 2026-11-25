@@ -3,18 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>HolaRise CMS | Trang Quản Trị Nội Dung &amp; Đăng Ký</title>
-  <meta name="description" content="Trang quản trị bài viết, lịch sự kiện và danh sách đăng ký của Cộng đồng Thanh niên Hòa Lạc - HolaRise.">
+  <title>HolaRise CMS – Cổng Điều Phối &amp; Xuất Bản Nội Dung</title>
+  <meta name="description" content="Không gian điều phối sự kiện, xuất bản tường thuật và quản lý đăng ký dành cho Ban Điều Phối Cộng đồng Thanh niên Hòa Lạc – HolaRise.">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#FFFFFF">
+  <meta name="theme-color" content="#0B110F">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" href="/assets/images/favicon-48.png" type="image/png" sizes="48x48">
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" sizes="180x180">
+
+  <!-- Open Graph / Zalo / Messenger -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:site_name" content="HolaRise – Cộng đồng Thanh niên Hòa Lạc">
+  <meta property="og:title" content="HolaRise CMS – Cổng Điều Phối &amp; Xuất Bản Nội Dung">
+  <meta property="og:description" content="Không gian điều phối sự kiện, bài viết và kho ảnh gốc Google Drive dành cho Ban Điều Phối HolaRise.">
+  <meta property="og:url" content="https://holarise.org/admin/">
+  <meta property="og:image" content="https://holarise.org/assets/images/holarise-binh-minh-og.jpg">
+  <meta property="og:image:secure_url" content="https://holarise.org/assets/images/holarise-binh-minh-og.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="HolaRise CMS – Cổng Điều Phối Cộng đồng Thanh niên Hòa Lạc">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HolaRise CMS – Cổng Điều Phối &amp; Xuất Bản Nội Dung">
+  <meta name="twitter:description" content="Không gian điều phối sự kiện, bài viết và đăng ký dành cho Ban Điều Phối HolaRise.">
+  <meta name="twitter:image" content="https://holarise.org/assets/images/holarise-binh-minh-og.jpg">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=a101738fe5">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=3a4eedc409">
 </head>
 <body>
   <a class="skip-link" href="#admin-main">Chuyển tới khu vực quản trị</a>
@@ -23,43 +42,152 @@
   <div class="visually-hidden" id="aria-announcer" aria-live="polite"></div>
   <div class="toast-stack" id="toast-stack" role="status" aria-live="polite"></div>
 
-  <!-- AUTH / BOOTSTRAP GATE -->
-  <section class="auth-screen" id="auth-screen" hidden>
-    <div class="auth-card">
-      <div class="auth-brand">
-        <img src="/assets/images/logo-mark.png" alt="Logo HR HolaRise" width="40" height="40">
-        <div>
-          <span class="auth-kicker">HolaRise · Hòa Lạc</span>
-          <h1 id="auth-heading">Đăng nhập Quản trị CMS</h1>
-        </div>
-      </div>
-
-      <p class="auth-lead" id="auth-lead">Dành riêng cho Ban Điều Phối quản lý bài viết, lịch sự kiện và danh sách đăng ký.</p>
-
-      <!-- Login Form -->
-      <form class="admin-form" id="login-form" aria-labelledby="auth-heading" novalidate hidden>
-        <div class="field">
-          <label for="login-email">Email Ban Điều Phối <span aria-hidden="true">*</span></label>
-          <input id="login-email" name="email" type="email" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@holarise.org" required data-error="login-email-err" enterkeyhint="next">
-          <div id="login-email-err" class="field-error">Vui lòng nhập địa chỉ email hợp lệ.</div>
-        </div>
-
-        <div class="field">
-          <label for="login-password">Mật khẩu <span aria-hidden="true">*</span></label>
-          <div class="password-wrap">
-            <input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" required data-error="login-pw-err" enterkeyhint="done">
-            <button type="button" class="pw-toggle" data-pw-toggle="login-password" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
+  <!-- 2-STEP EDITORIAL VAULT / BOOTSTRAP GATE -->
+  <section class="vault-screen" id="auth-screen" hidden>
+    <div class="vault-shell">
+      <aside class="vault-aside" aria-hidden="true">
+        <div class="vault-aside-bg"></div>
+        <div class="vault-aside-content">
+          <div class="vault-aside-brand">
+            <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="40" height="40">
+            <span>HolaRise · Hòa Lạc</span>
           </div>
-          <div id="login-pw-err" class="field-error">Vui lòng nhập mật khẩu (tối thiểu 8 ký tự).</div>
+          <div class="vault-aside-copy">
+            <p class="vault-kicker">Ban Điều Phối CMS</p>
+            <h2>Điều phối gọn gàng, minh bạch từng buổi gặp.</h2>
+            <p class="vault-quote">Quản lý thư mời sự kiện, bài tường thuật, danh sách giữ chỗ và kho ảnh gốc Google Drive tại một nơi duy nhất.</p>
+          </div>
+          <ul class="vault-pillars">
+            <li>Đồng bộ trực tiếp với Google Drive &amp; Edge SSR</li>
+            <li>Bảo vệ 2 lớp: Mã cổng đội ngũ &amp; Sinh trắc học</li>
+            <li>Phân quyền rõ ràng giữa Ban Điều Phối &amp; Ban Hình Ảnh</li>
+          </ul>
         </div>
+      </aside>
 
-        <div class="form-alert" id="login-alert" role="alert" hidden></div>
-        <button class="btn btn--primary btn--full" type="submit">Đăng nhập vào CMS</button>
-        <button class="btn btn--outline btn--full" type="button" id="btn-admin-biometric-login" style="margin-top: 8px;">Đăng nhập bằng Sinh trắc học (Face ID / Touch ID)</button>
-      </form>
+      <div class="vault-panel">
+        <div class="vault-panel-inner">
+          <div class="vault-mobile-brand">
+            <img src="/assets/images/logo-mark.png" alt="Logo HR HolaRise" width="36" height="36">
+            <div>
+              <strong>HolaRise CMS</strong>
+              <span>Cổng Ban Điều Phối</span>
+            </div>
+          </div>
 
-      <!-- First-Time Bootstrap Super Admin Form -->
-      <form class="admin-form" id="bootstrap-form" aria-labelledby="auth-heading" novalidate hidden>
+          <!-- STEP 1: TEAM ACCESS CODE GATE (shown when initialized) -->
+          <div class="vault-step" id="vault-step-pin" data-vault-step="pin">
+            <span class="vault-step-badge">Bước 1 / 2 · Mã bảo mật</span>
+            <h1 class="vault-title">Nhập mã bảo mật</h1>
+            <p class="vault-subtitle">Nhập mã 4 chữ số nội bộ để mở cổng truy cập Ban Điều Phối.</p>
+
+            <form id="pin-gate-form" class="pin-gate-form" novalidate>
+              <div class="pin-group" role="group" aria-label="Mã bảo mật 4 chữ số">
+                <input class="pin-box" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="Chữ số thứ 1" data-pin-index="0">
+                <input class="pin-box" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Chữ số thứ 2" data-pin-index="1">
+                <input class="pin-box" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Chữ số thứ 3" data-pin-index="2">
+                <input class="pin-box" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Chữ số thứ 4" data-pin-index="3">
+              </div>
+              <div class="form-alert" id="pin-gate-alert" role="alert" hidden></div>
+              <button class="btn btn--primary btn--full btn--lg" type="submit" id="pin-gate-submit">Tiếp tục</button>
+            </form>
+          </div>
+
+          <!-- STEP 2: PROGRESSIVE LOGIN -> FALLBACK REGISTER / EMAIL -->
+          <div class="vault-step" id="vault-step-auth" data-vault-step="auth" hidden>
+            <div class="vault-step-head">
+              <span class="vault-step-badge vault-step-badge--ok">Bước 2 / 2 · Đã mở cổng</span>
+              <button class="vault-back-btn" type="button" id="btn-vault-back">← Nhập lại mã</button>
+            </div>
+
+            <!-- VIEW A: SINGLE LOGIN BUTTON (DEFAULT) -->
+            <div class="vault-view" data-auth-view="login">
+              <h1 class="vault-title" id="auth-heading">Đăng nhập Quản trị CMS</h1>
+              <p class="vault-subtitle" id="auth-lead">Xác thực bằng Face ID, Touch ID hoặc khóa thiết bị đã đăng ký.</p>
+
+              <button class="btn btn--primary btn--full btn--lg" type="button" id="btn-vault-login">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3H5a2 2 0 0 0-2 2v2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 21h2a2 2 0 0 0 2-2v-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M9 10v.01"/><path d="M15 10v.01"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg>
+                <span>Đăng nhập</span>
+              </button>
+
+              <div class="form-alert" id="vault-login-alert" role="alert" hidden></div>
+
+              <!-- REVEALED ONLY AFTER LOGIN FAILS -->
+              <div class="vault-fallback" id="vault-fallback-box" hidden>
+                <p class="vault-fallback-text">Chưa có khóa sinh trắc học trên thiết bị này?</p>
+                <button class="btn btn--outline btn--full btn--lg" type="button" data-vault-go="register">Đăng ký tài khoản mới</button>
+                <button class="vault-link-btn" type="button" data-vault-go="email">Đã có tài khoản? Đăng nhập bằng Email</button>
+              </div>
+            </div>
+
+            <!-- VIEW B: REGISTER (REVEALED ONLY AFTER LOGIN FAILURE -> REGISTER CLICK) -->
+            <div class="vault-view" data-auth-view="register" hidden>
+              <button class="vault-subback" type="button" data-vault-go="login">← Quay lại Đăng nhập</button>
+              <h1 class="vault-title">Đăng ký tài khoản đội ngũ</h1>
+              <p class="vault-subtitle">Điền thông tin thành viên để tạo hồ sơ và bật Face ID / Touch ID cho lần sau.</p>
+
+              <form id="admin-register-form" class="admin-form" novalidate>
+                <div class="field">
+                  <label for="ar-name">Họ và tên đầy đủ <span aria-hidden="true">*</span></label>
+                  <input id="ar-name" name="fullName" type="text" autocomplete="name" required minlength="3" placeholder="Ví dụ: Nguyễn Minh Anh">
+                </div>
+                <div class="field-row-2">
+                  <div class="field">
+                    <label for="ar-phone">SĐT / Zalo <span aria-hidden="true">*</span></label>
+                    <input id="ar-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="09xxxxxxxx">
+                  </div>
+                  <div class="field">
+                    <label for="ar-dept">Ban / Vai trò <span aria-hidden="true">*</span></label>
+                    <input id="ar-dept" name="department" type="text" required minlength="2" placeholder="Ban Điều Phối">
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="ar-email">Email liên hệ <span aria-hidden="true">*</span></label>
+                  <input id="ar-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="tenban@holarise.org">
+                </div>
+                <div class="field">
+                  <label for="ar-password">Mật khẩu dự phòng (tối thiểu 8 ký tự) <span aria-hidden="true">*</span></label>
+                  <input id="ar-password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="Tối thiểu 8 ký tự">
+                </div>
+                <div class="form-alert" id="ar-alert" role="alert" hidden></div>
+                <button class="btn btn--primary btn--full btn--lg" type="submit" id="ar-submit">Hoàn tất đăng ký &amp; Bật Face ID</button>
+              </form>
+
+              <button class="vault-link-btn" type="button" data-vault-go="email">Đã có tài khoản? Đăng nhập bằng Email</button>
+            </div>
+
+            <!-- VIEW C: EMAIL FALLBACK (FOR EXISTING USERS ON A NEW DEVICE) -->
+            <div class="vault-view" data-auth-view="email" hidden>
+              <button class="vault-subback" type="button" data-vault-go="login">← Quay lại Đăng nhập</button>
+              <h1 class="vault-title">Đăng nhập bằng Email</h1>
+              <p class="vault-subtitle">Dành cho thành viên đã có tài khoản khi truy cập trên thiết bị mới.</p>
+
+              <form class="admin-form" id="login-form" aria-labelledby="auth-heading" novalidate>
+                <div class="field">
+                  <label for="login-email">Email Ban Điều Phối <span aria-hidden="true">*</span></label>
+                  <input id="login-email" name="email" type="email" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@holarise.org" required data-error="login-email-err" enterkeyhint="next">
+                  <div id="login-email-err" class="field-error">Vui lòng nhập địa chỉ email hợp lệ.</div>
+                </div>
+
+                <div class="field">
+                  <label for="login-password">Mật khẩu <span aria-hidden="true">*</span></label>
+                  <div class="password-wrap">
+                    <input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" required data-error="login-pw-err" enterkeyhint="done">
+                    <button type="button" class="pw-toggle" data-pw-toggle="login-password" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
+                  </div>
+                  <div id="login-pw-err" class="field-error">Vui lòng nhập mật khẩu (tối thiểu 8 ký tự).</div>
+                </div>
+
+                <div class="form-alert" id="login-alert" role="alert" hidden></div>
+                <button class="btn btn--primary btn--full btn--lg" type="submit">Đăng nhập vào CMS</button>
+              </form>
+
+              <button class="vault-link-btn" type="button" data-vault-go="register">Chưa có tài khoản? Đăng ký mới</button>
+            </div>
+          </div>
+
+          <!-- First-Time Bootstrap Super Admin Form -->
+          <form class="admin-form" id="bootstrap-form" aria-labelledby="auth-heading" novalidate hidden>
         <div class="setup-banner">
           <strong>Khởi tạo lần đầu:</strong> Chưa có tài khoản Quản trị viên nào trong cơ sở dữ liệu. Tài khoản bạn tạo ngay bây giờ sẽ là <strong>Quản trị viên chính (Super Admin)</strong> và form này sẽ tự động khóa vĩnh viễn sau đó.
         </div>
@@ -88,11 +216,13 @@
         </div>
 
         <div class="form-alert" id="boot-alert" role="alert" hidden></div>
-        <button class="btn btn--primary btn--full" type="submit">Tạo tài khoản Quản trị chính</button>
+        <button class="btn btn--primary btn--full btn--lg" type="submit">Tạo tài khoản Quản trị chính</button>
       </form>
 
-      <div class="auth-footer">
-        <a href="/">← Quay về trang chủ HolaRise</a>
+          <div class="vault-footer">
+            <a href="/">← Quay về trang chủ HolaRise</a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -532,20 +662,40 @@
           </div>
         </div>
 
-        <div class="form-row-3">
+        <div class="form-row-2">
           <div class="field">
             <label for="ev-location">Địa điểm</label>
             <input id="ev-location" name="location" type="text" placeholder="Hòa Lạc, Hà Nội">
           </div>
           <div class="field">
-            <label for="ev-fee">Chi phí</label>
-            <input id="ev-fee" name="fee" type="text" placeholder="Miễn phí">
-          </div>
-          <div class="field">
-            <label for="ev-seats">Tình trạng chỗ / Số tham gia</label>
-            <input id="ev-seats" name="seats" type="text" placeholder="Còn 20/40 chỗ">
+            <label for="ev-fee">Chi phí / Hỗ trợ (nếu có)</label>
+            <span class="field-hint">Mặc định: Miễn phí tham dự · Tự túc đồ uống. Ghi rõ nếu có hỗ trợ thêm.</span>
+            <input id="ev-fee" name="fee" type="text" placeholder="Miễn phí tham dự · Tự túc đồ uống">
           </div>
         </div>
+
+        <fieldset class="chip-fieldset">
+          <legend>Cài đặt thanh chỗ còn lại (tùy chọn)</legend>
+          <div class="form-row-3" style="margin-top: 8px;">
+            <div class="field">
+              <label for="ev-seat-capacity">Tổng sức chứa</label>
+              <input id="ev-seat-capacity" name="seatCapacity" type="number" min="0" max="5000" value="0" placeholder="Ví dụ: 35">
+            </div>
+            <div class="field">
+              <label for="ev-external-booked">Đã đăng ký ngoài web</label>
+              <span class="field-hint">Khách đăng ký qua Zalo / trực tiếp</span>
+              <input id="ev-external-booked" name="externalBooked" type="number" min="0" max="5000" value="0" placeholder="0">
+            </div>
+            <div class="field">
+              <label for="ev-seats">Ghi chú chỗ (tùy chọn)</label>
+              <input id="ev-seats" name="seats" type="text" placeholder="Để trống nếu không cần">
+            </div>
+          </div>
+          <label class="check-chip" style="margin-top: 10px;">
+            <input type="checkbox" id="ev-show-seat-bar" name="showSeatBar">
+            <span>Hiển thị thanh chỗ còn lại trên trang thư mời (tự trừ cả đơn đăng ký trên web &amp; ngoài web)</span>
+          </label>
+        </fieldset>
 
         <fieldset class="chip-fieldset">
           <legend>Nhóm lọc phụ trợ (tuỳ chọn)</legend>
@@ -943,7 +1093,7 @@
           </div>
           <div class="field">
             <label for="ref-slug">Gắn với bài Hành trình (slug — tùy chọn)</label>
-            <input id="ref-slug" name="activitySlug" type="text" placeholder="tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart">
+            <input id="ref-slug" name="activitySlug" type="text" placeholder="tinh-yeu-thuong-cua-me">
           </div>
         </div>
         <div class="field">
@@ -987,8 +1137,9 @@
     </div>
   </dialog>
 
-  <script src="/assets/js/passkey-client.js?v=a101738fe5" defer></script>
-  <script src="/assets/js/admin.js?v=a101738fe5" defer></script>
-  <script src="/assets/js/admin-studio.js?v=a101738fe5" defer></script>
+  <script src="/assets/js/passkey-client.js?v=3a4eedc409" defer></script>
+  <script src="/assets/js/gate-ui.js?v=3a4eedc409" defer></script>
+  <script src="/assets/js/admin.js?v=3a4eedc409" defer></script>
+  <script src="/assets/js/admin-studio.js?v=3a4eedc409" defer></script>
 </body>
 </html>

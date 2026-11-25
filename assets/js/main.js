@@ -1402,6 +1402,22 @@
     loadPublicReflections();
 
     if (prForm) {
+      var prAnonCheck = document.getElementById("pr-anon-check");
+      var prNameField = document.getElementById("pr-name");
+      if (prAnonCheck && prNameField) {
+        prAnonCheck.addEventListener("change", function () {
+          if (prAnonCheck.checked) {
+            prNameField.dataset.prevName = prNameField.value;
+            prNameField.value = "Ẩn danh";
+            prNameField.readOnly = true;
+          } else {
+            prNameField.readOnly = false;
+            prNameField.value = prNameField.dataset.prevName || "";
+            prNameField.focus();
+          }
+        });
+      }
+
       prForm.addEventListener("submit", function (e) {
         e.preventDefault();
         if (prStatus) {
@@ -1409,11 +1425,13 @@
           prStatus.textContent = "";
         }
         var fd = new FormData(prForm);
+        var rawName = String(fd.get("authorName") || "").trim();
+        if (prAnonCheck && prAnonCheck.checked) rawName = "Ẩn danh";
         var payload = {
           activitySlug: gbSlug,
-          authorName: String(fd.get("authorName") || "").trim(),
+          authorName: rawName,
           authorOrg: String(fd.get("authorOrg") || "").trim(),
-          participantRole: String(fd.get("participantRole") || "").trim(),
+          participantRole: String(fd.get("participantRole") || "").trim() || "Người tham dự",
           pullQuote: String(fd.get("pullQuote") || "").trim(),
           content: String(fd.get("content") || "").trim(),
           website: String(fd.get("website") || "").trim(),
@@ -1421,7 +1439,7 @@
         if (payload.authorName.length < 2 || payload.content.length < 12) {
           if (prStatus) {
             prStatus.className = "form-status is-error";
-            prStatus.textContent = "Vui lòng nhập tên (ít nhất 2 ký tự) và cảm nhận (ít nhất 12 ký tự).";
+            prStatus.textContent = "Vui lòng nhập tên (hoặc chọn Gửi ẩn danh) và viết ít nhất 12 ký tự.";
           }
           return;
         }
@@ -1794,6 +1812,8 @@
       setFeedbackStatus("", "");
       currentDiagnostics = collectDiagnosticsText();
       if (diagPreviewEl) diagPreviewEl.textContent = currentDiagnostics;
+      var diagDetailsEl = document.getElementById("fb-diag-details");
+      if (diagDetailsEl) diagDetailsEl.open = false;
 
       if (options.bugMode) {
         var bugRadio = form.querySelector('input[name="feedbackKind"][value="Báo lỗi kỹ thuật"]');
@@ -1803,9 +1823,23 @@
       if (typeof dialog.showModal === "function" && !dialog.open) {
         dialog.showModal();
       }
+      var noteInput = document.getElementById("fb-note");
+      if (noteInput) {
+        setTimeout(function () { noteInput.focus(); }, 60);
+      }
       if (options.autoCapture) {
         captureViewportScreenshot();
       }
+    }
+
+    var fbNoteEl = document.getElementById("fb-note");
+    if (fbNoteEl) {
+      fbNoteEl.addEventListener("keydown", function (e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+          e.preventDefault();
+          if (typeof form.requestSubmit === "function") form.requestSubmit();
+        }
+      });
     }
 
     document.addEventListener("click", function (e) {
@@ -2018,8 +2052,8 @@
         shakeTextEl.textContent = "Đang bật: đóng cửa sổ rồi lắc nhẹ điện thoại 2 nhịp để báo lỗi";
         shakeToggleBtn.textContent = "Tắt lắc máy";
       } else {
-        shakeTextEl.textContent = "Lắc điện thoại để tự đọc màn hình và báo lỗi nhanh";
-        shakeToggleBtn.textContent = "Bật lắc máy";
+        shakeTextEl.textContent = "Bấm Báo lỗi nhanh ở cuối trang khi cần gửi góp ý";
+        shakeToggleBtn.textContent = "Bật";
       }
     }
 
@@ -2052,21 +2086,8 @@
       updateShakeUi();
     }
 
-    if (hasMotion && window.isSecureContext) {
-      var optedOut = false;
-      var iosPreviouslyGranted = false;
-      try {
-        optedOut = localStorage.getItem(SHAKE_OFF_KEY) === "1";
-        iosPreviouslyGranted = localStorage.getItem(SHAKE_IOS_GRANTED_KEY) === "1";
-      } catch (_) {}
-      if ((!needsIosPermission || iosPreviouslyGranted) && !optedOut) {
-        enableShake(false);
-      } else {
-        updateShakeUi();
-      }
-    } else {
-      updateShakeUi();
-    }
+    // Shake-to-report disabled by design: users use the footer feedback button instead.
+    if (shakeRowEl) shakeRowEl.hidden = true;
 
     if (shakeToggleBtn) {
       shakeToggleBtn.addEventListener("click", function () {

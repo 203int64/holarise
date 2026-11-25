@@ -60,7 +60,7 @@ export async function onRequestPost(context) {
       }
       originalFilename = String(file.name || "");
       category = normalizeDriveCategory(formData.get("category"));
-      subfolder = String(formData.get("subfolder") || "").trim().slice(0, 80);
+      subfolder = String(formData.get("subfolder") || "").trim().slice(0, 120);
       bytes = new Uint8Array(await file.arrayBuffer());
     } else {
       const buf = await context.request.arrayBuffer();

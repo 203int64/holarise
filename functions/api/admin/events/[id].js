@@ -49,6 +49,18 @@ export async function onRequestPut(context) {
       parsed.data.summaryEn !== undefined || parsed.data.summary_en !== undefined
         ? (parsed.data.summaryEn ?? parsed.data.summary_en)
         : (existing.summary_en || ""),
+    seatCapacity:
+      parsed.data.seatCapacity !== undefined || parsed.data.seat_capacity !== undefined
+        ? (parsed.data.seatCapacity ?? parsed.data.seat_capacity)
+        : (existing.seat_capacity || 0),
+    externalBooked:
+      parsed.data.externalBooked !== undefined || parsed.data.external_booked !== undefined
+        ? (parsed.data.externalBooked ?? parsed.data.external_booked)
+        : (existing.external_booked || 0),
+    showSeatBar:
+      parsed.data.showSeatBar !== undefined || parsed.data.show_seat_bar !== undefined
+        ? (parsed.data.showSeatBar ?? parsed.data.show_seat_bar)
+        : Boolean(existing.show_seat_bar),
   };
 
   const validated = validateEventInput(mergedBody);
@@ -63,7 +75,8 @@ export async function onRequestPut(context) {
     await context.env.DB.prepare(
       `UPDATE events
        SET kind = ?, type = ?, filters_json = ?, date = ?, date_display = ?, time = ?, location = ?,
-           fee = ?, seats = ?, title = ?, title_en = ?, summary = ?, summary_en = ?, highlights_json = ?, participants = ?,
+           fee = ?, seats = ?, seat_capacity = ?, external_booked = ?, show_seat_bar = ?,
+           title = ?, title_en = ?, summary = ?, summary_en = ?, highlights_json = ?, participants = ?,
            image = ?, image_alt = ?, status = ?, sort_order = ?, updated_at = ?
        WHERE id = ?`
     )
@@ -77,6 +90,9 @@ export async function onRequestPut(context) {
         v.location,
         v.fee,
         v.seats,
+        v.seat_capacity,
+        v.external_booked,
+        v.show_seat_bar,
         v.title,
         v.title_en,
         v.summary,
@@ -92,7 +108,8 @@ export async function onRequestPut(context) {
       )
       .run();
   } catch (err) {
-    if (String(err?.message || "").includes("title_en")) {
+    const msg = String(err?.message || "");
+    if (msg.includes("seat_capacity") || msg.includes("title_en")) {
       await context.env.DB.prepare(
         `UPDATE events
          SET kind = ?, type = ?, filters_json = ?, date = ?, date_display = ?, time = ?, location = ?,

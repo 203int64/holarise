@@ -1,30 +1,36 @@
 /* ==========================================================================
-   HolaRise CMS Admin — Design System Aligned (Editorial Gallery Light)
-   Inherits exact palette & Inter typography from styles.css (#FFFFFF / #F6F7F6 / #0B6E4F)
+   HolaRise CMS & Media — Quiet-Luxury Editorial Design System
+   Aligned 1:1 with styles.css (Be Vietnam Pro + Lora · Deep Forest #145A40 · Obsidian #0B110F)
    ========================================================================== */
 
 :root {
   --bg: #ffffff;
-  --surface: #f6f7f6;
-  --surface-hover: #eef1ef;
+  --surface: #f7f7f5;
+  --surface-hover: #eeefe9;
+  --obsidian: #0b110f;
+  --obsidian-soft: #131d19;
   --ink: #0e1512;
-  --ink-secondary: #4c5853;
-  --ink-muted: #5b6862;
-  --line: #e4e8e6;
-  --line-strong: #cdd4d0;
-  --accent: #0b6e4f;
-  --accent-hover: #08553d;
-  --accent-soft: #edf6f2;
+  --ink-secondary: #47534e;
+  --ink-muted: #66736d;
+  --line: #e4e7e4;
+  --line-strong: #cdd3ce;
+  --accent: #145a40;
+  --accent-hover: #0e432f;
+  --accent-soft: #eef6f2;
+  --sunrise: #b85d3b;
+  --sunrise-soft: #faf3ef;
   --warn-bg: #fef5e7;
   --warn-ink: #9a5b13;
   --info-bg: #eaf2ff;
   --info-ink: #1d4ed8;
   --danger-bg: #fef2f2;
   --danger-ink: #b91c1c;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --font-sans: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Lora", Georgia, "Times New Roman", serif;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 *,
@@ -1245,4 +1251,398 @@ dialog.cms-dialog::backdrop {
   justify-content: space-between;
   align-items: baseline;
   gap: 8px;
+}
+
+
+/* ==========================================================================
+   2-Step Split Editorial Vault Auth Screen (/media/ & /admin/)
+   ========================================================================== */
+.vault-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--obsidian);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.vault-shell {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+}
+
+.vault-aside {
+  position: relative;
+  overflow: hidden;
+  background: var(--obsidian);
+  color: #f4f7f5;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 52px;
+}
+
+.vault-aside-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(160deg, rgba(11, 17, 15, 0.72) 0%, rgba(11, 17, 15, 0.88) 65%, rgba(11, 17, 15, 0.96) 100%),
+    url("/assets/images/holarise-binh-minh-og.jpg") center / cover no-repeat;
+  transform: scale(1.03);
+}
+
+.vault-aside-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  max-width: 480px;
+}
+
+.vault-aside-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.9);
+}
+
+.vault-aside-brand img {
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.vault-kicker {
+  margin: 0 0 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e49b76;
+}
+
+.vault-aside-copy h2 {
+  margin: 0 0 16px;
+  font-family: var(--font-serif);
+  font-size: clamp(1.85rem, 2.8vw, 2.45rem);
+  font-weight: 400;
+  line-height: 1.24;
+  letter-spacing: -0.015em;
+  color: #ffffff;
+}
+
+.vault-quote {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: rgba(244, 247, 245, 0.74);
+}
+
+.vault-pillars {
+  list-style: none;
+  margin: 0;
+  padding: 20px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  display: grid;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: rgba(244, 247, 245, 0.82);
+}
+
+.vault-pillars li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vault-pillars li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e49b76;
+  flex: none;
+}
+
+.vault-panel {
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px;
+}
+
+.vault-panel-inner {
+  width: 100%;
+  max-width: 430px;
+}
+
+.vault-mobile-brand {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.vault-mobile-brand img {
+  border-radius: 9px;
+}
+
+.vault-mobile-brand strong {
+  display: block;
+  font-size: 0.98rem;
+  line-height: 1.2;
+}
+
+.vault-mobile-brand span {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.vault-step {
+  animation: vaultFadeIn 0.28s var(--ease-expo);
+}
+
+@keyframes vaultFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.vault-step-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.vault-step-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background: var(--surface);
+  color: var(--ink-secondary);
+  border: 1px solid var(--line);
+}
+
+.vault-step-badge--ok {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: rgba(20, 90, 64, 0.22);
+}
+
+.vault-back-btn {
+  background: none;
+  border: 0;
+  padding: 4px 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.vault-back-btn:hover {
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.vault-title {
+  margin: 12px 0 6px;
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.vault-subtitle {
+  margin: 0 0 24px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+}
+
+/* 4-Digit PIN Input Boxes */
+.pin-gate-form {
+  display: grid;
+  gap: 16px;
+}
+
+.pin-group {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.pin-box {
+  width: 100%;
+  height: 64px;
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.pin-box:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(20, 90, 64, 0.12);
+  transform: translateY(-1px);
+}
+
+.pin-box.is-filled {
+  background: #ffffff;
+  border-color: var(--ink);
+}
+
+.pin-group.is-shake {
+  animation: pinShake 0.36s ease;
+}
+
+@keyframes pinShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.btn--lg {
+  min-height: 48px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+}
+
+.vault-view {
+  animation: vaultFadeIn 0.24s var(--ease-expo);
+}
+
+.vault-view .form-alert {
+  margin-top: 14px;
+}
+
+.vault-subback {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 0;
+  padding: 2px 0;
+  margin-bottom: 4px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.vault-subback:hover {
+  color: var(--ink);
+}
+
+.vault-fallback {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+  animation: vaultFadeIn 0.24s var(--ease-expo);
+}
+
+.vault-fallback-text {
+  margin: 0 0 2px;
+  font-size: 0.86rem;
+  color: var(--ink-secondary);
+  text-align: center;
+}
+
+.vault-link-btn {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 6px 4px;
+  background: none;
+  border: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  text-align: center;
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+.vault-fallback .vault-link-btn {
+  margin-top: 2px;
+}
+
+.vault-link-btn:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.field-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.vault-footer {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  font-size: 0.84rem;
+  color: var(--ink-muted);
+}
+
+.vault-footer a:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .vault-shell {
+    grid-template-columns: 1fr;
+  }
+  .vault-aside {
+    display: none;
+  }
+  .vault-panel {
+    padding: 28px 20px;
+    align-items: flex-start;
+  }
+  .vault-panel-inner {
+    margin: auto 0;
+  }
+  .vault-mobile-brand {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .field-row-2 {
+    grid-template-columns: 1fr;
+  }
+  .pin-box {
+    height: 58px;
+    font-size: 1.45rem;
+  }
 }

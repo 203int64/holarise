@@ -4,11 +4,23 @@ import {
   buildEventIsoTimes,
   buildEventsJsonLd,
   escHtml,
+  renderSeatBarHtml,
+  replaceMarker,
   resolveEventSlug,
   serializeEventRow,
 } from "../_lib/render.js";
 
 const DEFAULT_ZALO_GROUP = "https://zalo.me/g/7fock88aizzrdkmr9ggf";
+
+async function countWebRegistrations(db, eventId) {
+  if (!db || !eventId) return 0;
+  const row = await db
+    .prepare("SELECT COUNT(*) AS cnt FROM registrations WHERE event_id = ? AND status != 'cancelled'")
+    .bind(eventId)
+    .first()
+    .catch(() => null);
+  return Number(row?.cnt || 0);
+}
 
 export async function onRequestGet({ request, env, params }) {
   const slug = String(params?.slug || "").trim().toLowerCase();
@@ -16,11 +28,31 @@ export async function onRequestGet({ request, env, params }) {
     return new Response("Not Found", { status: 404 });
   }
 
-  // Serve pre-rendered static invitation if it exists (preserves custom editorial letter copy)
+  // Serve pre-rendered static invitation if it exists, enriched with live D1 seat bar & fee
   if (env?.ASSETS) {
     const staticRes = await env.ASSETS.fetch(new Request(new URL(`/su-kien/${slug}/index.html`, request.url)));
     if (staticRes && staticRes.ok) {
-      return staticRes;
+      if (!env?.DB) return staticRes;
+      const eventsRes = await env.DB.prepare("SELECT * FROM events WHERE status = 'published' LIMIT 100")
+        .all()
+        .catch(() => ({ results: [] }));
+      const matchedStatic = (eventsRes.results || [])
+        .map(serializeEventRow)
+        .find((ev) => ev && (resolveEventSlug(ev) === slug || ev.id.toLowerCase() === slug));
+      if (!matchedStatic) return staticRes;
+
+      const webBooked = matchedStatic.showSeatBar ? await countWebRegistrations(env.DB, matchedStatic.id) : 0;
+      let html = await staticRes.text();
+      html = replaceMarker(html, "EVENT_SEAT_BAR", renderSeatBarHtml(matchedStatic, webBooked));
+      if (matchedStatic.fee) {
+        html = replaceMarker(html, "EVENT_FEE", escHtml(matchedStatic.fee));
+      }
+      const headers = new Headers(staticRes.headers);
+      headers.set("Content-Type", "text/html; charset=utf-8");
+      headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+      headers.delete("Content-Length");
+      headers.delete("ETag");
+      return new Response(html, { status: 200, headers });
     }
   }
 
@@ -76,6 +108,9 @@ export async function onRequestGet({ request, env, params }) {
     `<p class="invite-closing">Mời bạn giữ chỗ trước để chúng mình sắp xếp chu đáo và gửi định vị chi tiết trong Nhóm Zalo buổi gặp.</p>`
   );
 
+  const webBooked = matched.showSeatBar ? await countWebRegistrations(env.DB, matched.id) : 0;
+  const seatBarHtml = renderSeatBarHtml(matched, webBooked);
+
   const replacements = {
     __SSR_PAGE_TITLE__: escHtml(`Thư mời ${matched.title} | HolaRise`),
     __SSR_PAGE_DESCRIPTION__: escHtml(matched.summary || matched.title),
@@ -88,8 +123,9 @@ export async function onRequestGet({ request, env, params }) {
     __SSR_EVENT_TITLE__: escHtml(matched.title),
     __SSR_EVENT_DATE_DISPLAY__: escHtml(matched.dateDisplay || matched.date),
     __SSR_EVENT_LOCATION__: escHtml(matched.location || "Hòa Lạc, Hà Nội"),
-    __SSR_EVENT_FEE__: escHtml(matched.fee || "Phi lợi nhuận · Minh bạch"),
-    __SSR_EVENT_SEATS__: escHtml(matched.seats || "Mở đăng ký"),
+    __SSR_EVENT_FEE__: escHtml(matched.fee || "Miễn phí tham dự · Tự túc đồ uống"),
+    __SSR_EVENT_SEATS__: escHtml(matched.seats || ""),
+    __SSR_EVENT_SEAT_BAR_HTML__: seatBarHtml,
     __SSR_EVENT_IMAGE__: escHtml(matched.image),
     __SSR_EVENT_IMAGE_ALT__: escHtml(matched.imageAlt || matched.title),
     __SSR_EVENT_ZALO_GROUP__: escHtml(DEFAULT_ZALO_GROUP),

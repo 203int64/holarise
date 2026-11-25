@@ -234,8 +234,13 @@ export function validateEventInput(body) {
 
   const time = cleanStr(body.time, 60);
   const location = cleanStr(body.location, 140) || "Hòa Lạc, Hà Nội";
-  const fee = cleanStr(body.fee, 80) || "Miễn phí";
-  const seats = cleanStr(body.seats, 80) || "Mở đăng ký";
+  const fee = cleanStr(body.fee, 120) || "Miễn phí tham dự · Tự túc đồ uống";
+  const seats = cleanStr(body.seats, 80);
+  const rawCap = Number(body.seatCapacity ?? body.seat_capacity ?? 0);
+  const seatCapacity = Number.isFinite(rawCap) ? Math.min(5000, Math.max(0, Math.trunc(rawCap))) : 0;
+  const rawExt = Number(body.externalBooked ?? body.external_booked ?? 0);
+  const externalBooked = Number.isFinite(rawExt) ? Math.min(5000, Math.max(0, Math.trunc(rawExt))) : 0;
+  const showSeatBar = Boolean(body.showSeatBar ?? body.show_seat_bar) ? 1 : 0;
   const summary = cleanStr(body.summary, 360);
   if (kind === "upcoming" && summary.length < 8) {
     fields.summary = "Mô tả ngắn cho sự kiện sắp tới cần ít nhất 8 ký tự.";
@@ -280,6 +285,9 @@ export function validateEventInput(body) {
       location,
       fee,
       seats,
+      seat_capacity: seatCapacity,
+      external_booked: externalBooked,
+      show_seat_bar: showSeatBar,
       title,
       title_en: titleEn,
       summary,

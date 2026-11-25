@@ -9,6 +9,11 @@
 
 const CANONICAL_ORIGIN = "https://holarise.org";
 
+const LEGACY_POST_SLUG_MAP = {
+  "tinh-yeu-thuong-cua-me-trong-thoi-dai-ai-holaheart": "tinh-yeu-thuong-cua-me",
+  "chuoi-am-nhac-ket-noi-holaheart-musicspace": "holaheart-musicspace",
+};
+
 function buildLegacyRedirectPath(pathname, search) {
   const cleanPath = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
   if (cleanPath === "/workshop") {
@@ -26,9 +31,16 @@ function buildLegacyRedirectPath(pathname, search) {
   if (cleanPath.startsWith("/tin-tuc/")) {
     const rest = cleanPath.slice("/tin-tuc/".length);
     if (rest && !rest.includes("/")) {
-      return `/hanh-trinh/${rest}/${search}`;
+      const mapped = LEGACY_POST_SLUG_MAP[rest] || rest;
+      return `/hanh-trinh/${mapped}/${search}`;
     }
     return `/hanh-trinh/${search}`;
+  }
+  if (cleanPath.startsWith("/hanh-trinh/")) {
+    const rest = cleanPath.slice("/hanh-trinh/".length);
+    if (rest && !rest.includes("/") && LEGACY_POST_SLUG_MAP[rest]) {
+      return `/hanh-trinh/${LEGACY_POST_SLUG_MAP[rest]}/${search}`;
+    }
   }
   return null;
 }

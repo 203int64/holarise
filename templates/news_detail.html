@@ -58,47 +58,46 @@
         <span class="guestbook-count-pill" id="guestbook-count-pill">Đang tải...</span>
       </div>
 
-      <div class="guestbook-composer-wrap" id="public-reflection-wrap">
-        <form class="form-grid guestbook-form" id="public-reflection-form" novalidate>
+      <div class="guestbook-composer-wrap gb-composer-card" id="public-reflection-wrap">
+        <form class="gb-composer-form" id="public-reflection-form" novalidate>
           <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
             <label for="pr-website">Website</label>
             <input id="pr-website" name="website" type="text" tabindex="-1" autocomplete="off">
           </div>
 
-          <div class="form-row-2">
-            <div class="field">
-              <label for="pr-name">Tên của bạn <span aria-hidden="true">*</span></label>
-              <input id="pr-name" name="authorName" type="text" autocomplete="name" required minlength="2" maxlength="120" placeholder="Ví dụ: Minh Anh (hoặc Ẩn danh)">
-            </div>
-            <div class="field">
-              <label for="pr-org">Trường / Đơn vị (tùy chọn)</label>
-              <input id="pr-org" name="authorOrg" type="text" maxlength="160" placeholder="ĐH FPT, ĐHQGHN, Đã đi làm...">
+          <input id="pr-org" name="authorOrg" type="hidden" value="">
+          <input id="pr-role" name="participantRole" type="hidden" value="Người tham dự">
+
+          <!-- Signed-in Member Identity Strip (auto-shown by member.js, hides guest inputs) -->
+          <div class="gb-member-identity" id="pr-member-bar" hidden>
+            <span class="gb-member-avatar" id="pr-member-avatar" aria-hidden="true">H</span>
+            <div class="gb-member-info">
+              <strong id="pr-member-name">Thành viên HolaRise</strong>
+              <span id="pr-member-sub">Đang viết với tài khoản của bạn</span>
             </div>
           </div>
 
-          <div class="form-row-2">
-            <div class="field">
-              <label for="pr-role">Vai trò tại buổi gặp</label>
-              <select id="pr-role" name="participantRole">
-                <option value="Thành viên tham dự">Người tham dự</option>
-                <option value="Tình nguyện viên">Tình nguyện viên</option>
-                <option value="Diễn giả · Khách mời">Diễn giả · Khách mời</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="pr-quote">Một câu tâm đắc nhất (tùy chọn)</label>
-              <input id="pr-quote" name="pullQuote" type="text" maxlength="180" placeholder="Một khoảnh khắc hoặc câu nói bạn nhớ nhất...">
-            </div>
+          <div class="gb-textarea-wrap">
+            <label for="pr-content" class="visually-hidden">Cảm nhận của bạn</label>
+            <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="Điều gì đọng lại trong bạn sau buổi gặp này? Viết vài dòng chân thật nhé..."></textarea>
           </div>
 
-          <div class="field">
-            <label for="pr-content">Cảm nhận của bạn <span aria-hidden="true">*</span></label>
-            <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="Gửi lại vài dòng trải nghiệm của bạn — không cần tạo tài khoản hay đăng nhập..."></textarea>
+          <!-- Compact Guest Identity Row (hidden automatically when signed in) -->
+          <div class="gb-guest-row" id="pr-guest-row">
+            <div class="gb-guest-name-wrap">
+              <label for="pr-name" class="visually-hidden">Tên của bạn</label>
+              <input id="pr-name" name="authorName" type="text" autocomplete="name" required minlength="2" maxlength="120" placeholder="Tên của bạn *">
+            </div>
+            <label class="gb-anon-toggle">
+              <input type="checkbox" id="pr-anon-check">
+              <span>Gửi ẩn danh</span>
+            </label>
           </div>
 
           <div class="form-status" id="pr-status" role="status" aria-live="polite"></div>
 
-          <div class="gb-form-actions">
+          <div class="gb-composer-foot">
+            <span class="gb-composer-hint">Không cần tạo tài khoản · Sẽ hiển thị sau khi duyệt nhanh</span>
             <button class="btn btn--primary btn--sm" type="submit" id="pr-submit-btn">Gửi cảm nhận</button>
           </div>
         </form>

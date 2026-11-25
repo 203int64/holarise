@@ -1,3 +1,8 @@
+import {
+  buildEventFolderName,
+  ensureCategorySubfolder,
+  isDriveConfigured,
+} from "../../../_lib/drive.js";
 import { serializeEventRow } from "../../../_lib/render.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
 import { slugifyVi, validateEventInput } from "../../../_lib/validation.js";
@@ -48,8 +53,8 @@ export async function onRequestPost(context) {
   try {
     await context.env.DB.prepare(
       `INSERT INTO events
-       (id, kind, type, filters_json, date, date_display, time, location, fee, seats, title, title_en, summary, summary_en, highlights_json, participants, image, image_alt, status, sort_order, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       (id, kind, type, filters_json, date, date_display, time, location, fee, seats, seat_capacity, external_booked, show_seat_bar, title, title_en, summary, summary_en, highlights_json, participants, image, image_alt, status, sort_order, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         id,
@@ -62,6 +67,9 @@ export async function onRequestPost(context) {
         v.location,
         v.fee,
         v.seats,
+        v.seat_capacity,
+        v.external_booked,
+        v.show_seat_bar,
         v.title,
         v.title_en,
         v.summary,
@@ -77,7 +85,8 @@ export async function onRequestPost(context) {
       )
       .run();
   } catch (err) {
-    if (String(err?.message || "").includes("title_en")) {
+    const msg = String(err?.message || "");
+    if (msg.includes("seat_capacity") || msg.includes("title_en")) {
       await context.env.DB.prepare(
         `INSERT INTO events
          (id, kind, type, filters_json, date, date_display, time, location, fee, seats, title, summary, highlights_json, participants, image, image_alt, status, sort_order, created_at, updated_at)
@@ -112,5 +121,65 @@ export async function onRequestPost(context) {
   }
 
   const created = await context.env.DB.prepare("SELECT * FROM events WHERE id = ?").bind(id).first();
-  return jsonResponse({ ok: true, item: serializeEventRow(created) }, 201);
+
+  // Best-effort auto-provision a draft Media Album + Google Drive event folder
+  let mediaAlbum = null;
+  try {
+    let albumSlug = slugifyVi(v.title).slice(0, 72) || baseSlug || `su-kien-${id.slice(-6)}`;
+    const existingAlbum = await context.env.DB.prepare("SELECT id FROM media_albums WHERE slug = ?")
+      .bind(albumSlug)
+      .first();
+    if (existingAlbum) {
+      albumSlug = `${albumSlug}-${id.slice(-6)}`;
+    }
+
+    const folderName = buildEventFolderName({
+      eventDate: v.date,
+      title: v.title,
+      fallback: albumSlug,
+    });
+
+    let driveUrl = "";
+    if (isDriveConfigured(context.env)) {
+      try {
+        const folder = await ensureCategorySubfolder(context.env, {
+          category: "album",
+          subfolder: folderName,
+        });
+        if (folder?.folderUrl) driveUrl = folder.folderUrl;
+      } catch {
+        // Best-effort Drive folder provisioning
+      }
+    }
+
+    const albumId = `alb-${crypto.randomUUID().slice(0, 12)}`;
+    await context.env.DB.prepare(
+      `INSERT INTO media_albums (
+         id, slug, title, description, event_date, date_display, location,
+         filters_json, drive_url, cover_url, status, sort_order, created_by, created_at, updated_at
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', 0, ?, ?, ?)`
+    )
+      .bind(
+        albumId,
+        albumSlug,
+        v.title,
+        v.summary || "",
+        v.date || "",
+        v.date_display || "",
+        v.location || "",
+        JSON.stringify(v.filters || []),
+        driveUrl,
+        v.image || "",
+        auth.user.email,
+        now,
+        now
+      )
+      .run();
+
+    mediaAlbum = { id: albumId, slug: albumSlug, folderName, driveUrl };
+  } catch {
+    // Graceful fallback if media_albums table is not present in a minimal DB
+  }
+
+  return jsonResponse({ ok: true, item: serializeEventRow(created), mediaAlbum }, 201);
 }

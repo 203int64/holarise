@@ -1,3 +1,8 @@
+import {
+  buildEventFolderName,
+  ensureCategorySubfolder,
+  isDriveConfigured,
+} from "../../../_lib/drive.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
 import { validateAlbumInput } from "../../../_lib/validation.js";
 
@@ -48,9 +53,39 @@ export async function onRequestGet(context) {
      LIMIT 200`
   ).all();
 
+  const rows = results || [];
+  if (isDriveConfigured(context.env)) {
+    let provisioned = 0;
+    for (const row of rows) {
+      if (row.drive_url || provisioned >= 3) continue;
+      provisioned += 1;
+      try {
+        const folderName = buildEventFolderName({
+          eventDate: row.event_date,
+          title: row.title,
+          fallback: row.slug,
+        });
+        const folder = await ensureCategorySubfolder(context.env, {
+          category: "album",
+          subfolder: folderName,
+        });
+        if (folder?.folderUrl) {
+          row.drive_url = folder.folderUrl;
+          await context.env.DB.prepare(
+            "UPDATE media_albums SET drive_url = ?, updated_at = ? WHERE id = ?"
+          )
+            .bind(folder.folderUrl, new Date().toISOString(), row.id)
+            .run();
+        }
+      } catch {
+        // Best-effort: never block listing albums
+      }
+    }
+  }
+
   return jsonResponse({
     ok: true,
-    items: (results || []).map(serializeAlbumRow),
+    items: rows.map(serializeAlbumRow),
   });
 }
 
@@ -76,6 +111,24 @@ export async function onRequestPost(context) {
   const id = `alb-${crypto.randomUUID().slice(0, 12)}`;
   const now = new Date().toISOString();
 
+  let driveUrl = v.drive_url;
+  if (!driveUrl && isDriveConfigured(context.env)) {
+    try {
+      const folderName = buildEventFolderName({
+        eventDate: v.event_date,
+        title: v.title,
+        fallback: slug,
+      });
+      const folder = await ensureCategorySubfolder(context.env, {
+        category: "album",
+        subfolder: folderName,
+      });
+      if (folder?.folderUrl) driveUrl = folder.folderUrl;
+    } catch {
+      // Best-effort: never block album creation if Drive is temporarily unavailable
+    }
+  }
+
   await context.env.DB.prepare(
     `INSERT INTO media_albums (
        id, slug, title, description, event_date, date_display, location,
@@ -91,7 +144,7 @@ export async function onRequestPost(context) {
       v.date_display,
       v.location,
       JSON.stringify(v.filters),
-      v.drive_url,
+      driveUrl,
       v.cover_url,
       v.status,
       v.sort_order,

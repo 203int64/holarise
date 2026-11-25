@@ -56,11 +56,13 @@
 
     <div class="invite-rsvp-card">
       <div class="invite-rsvp-card-top">
-        <span class="kicker">Xác nhận tham dự · {{EVENT_SEATS}}</span>
-        <span class="invite-rsvp-fee">{{EVENT_FEE}}</span>
+        <span class="kicker">Xác nhận tham dự</span>
+        <span class="invite-rsvp-fee"><!-- CMS:EVENT_FEE:START -->{{EVENT_FEE}}<!-- CMS:EVENT_FEE:END --></span>
       </div>
 
       <h2 id="ws-rsvp-heading" class="invite-rsvp-heading">{{EVENT_RSVP_HEADING}}</h2>
+
+      <!-- CMS:EVENT_SEAT_BAR:START -->{{EVENT_SEAT_BAR_HTML}}<!-- CMS:EVENT_SEAT_BAR:END -->
 
       <div class="invite-rsvp-facts">
         <time datetime="{{INVITE_START_ISO}}">{{INVITE_TIME_LABEL}}</time>
