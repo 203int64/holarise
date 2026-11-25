@@ -14,27 +14,49 @@
     document.documentElement.classList.add("is-standalone");
   }
 
-  /* 1. Sticky / Smart Mobile In-Place Logo Morph (Wordmark <-> HR Badge) */
+  /* 1. Sticky / Smart Mobile In-Place Logo Morph (Wordmark <-> HR Badge) & Floating Capsule Dock */
   var header = document.querySelector(".site-header");
   var navToggle = document.querySelector("[data-nav-toggle]");
   var mobileDrawer = document.querySelector("[data-mobile-drawer]");
+  var mobileDock = document.querySelector("[data-mobile-dock]");
+  var prefersReducedMotion =
+    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var lastScrollY = window.scrollY || 0;
+  var dockExpanded = 1;
 
-  if (header) {
+  if (header || mobileDock) {
     var scrollRafPending = false;
     var onScroll = function () {
-      var currentY = window.scrollY || 0;
+      var currentY = Math.max(0, window.scrollY || 0);
       var delta = currentY - lastScrollY;
       var drawerIsOpen = mobileDrawer && mobileDrawer.classList.contains("is-open");
 
-      header.classList.toggle("is-scrolled", currentY > 36);
+      if (header) {
+        header.classList.toggle("is-scrolled", currentY > 36);
 
-      if (window.innerWidth > 820 || drawerIsOpen || currentY <= 18) {
-        header.classList.remove("is-compact-mobile");
-      } else if (delta > 7 && currentY > 76) {
-        header.classList.add("is-compact-mobile");
-      } else if (delta < -7) {
-        header.classList.remove("is-compact-mobile");
+        if (window.innerWidth > 820 || drawerIsOpen || currentY <= 18) {
+          header.classList.remove("is-compact-mobile");
+        } else if (delta > 7 && currentY > 76) {
+          header.classList.add("is-compact-mobile");
+        } else if (delta < -7) {
+          header.classList.remove("is-compact-mobile");
+        }
+      }
+
+      if (mobileDock) {
+        var nextExpanded = dockExpanded;
+        var nearBottom = currentY + window.innerHeight >= document.documentElement.scrollHeight - 24;
+        if (currentY <= 16 || prefersReducedMotion || drawerIsOpen) {
+          nextExpanded = 1;
+        } else if (delta > 14 && currentY > 72) {
+          nextExpanded = 0;
+        } else if (delta < -14 && !nearBottom) {
+          nextExpanded = 1;
+        }
+        if (nextExpanded !== dockExpanded) {
+          dockExpanded = nextExpanded;
+          mobileDock.style.setProperty("--k", String(dockExpanded));
+        }
       }
 
       lastScrollY = currentY;
