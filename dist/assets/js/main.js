@@ -14,46 +14,27 @@
     document.documentElement.classList.add("is-standalone");
   }
 
-  /* 1. Sticky / Smart Mobile In-Place Logo Morph (Wordmark <-> HR Badge) & Floating Capsule Dock */
+  /* 1. Sticky / Smart Mobile In-Place Logo Morph (Wordmark <-> HR Badge) */
   var header = document.querySelector(".site-header");
   var navToggle = document.querySelector("[data-nav-toggle]");
   var mobileDrawer = document.querySelector("[data-mobile-drawer]");
-  var mobileDock = document.querySelector("[data-mobile-dock]");
-  var prefersReducedMotion =
-    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var lastScrollY = window.scrollY || 0;
-  var dockExpanded = 1;
 
-  if (header || mobileDock) {
+  if (header) {
     var scrollRafPending = false;
     var onScroll = function () {
       var currentY = window.scrollY || 0;
       var delta = currentY - lastScrollY;
       var drawerIsOpen = mobileDrawer && mobileDrawer.classList.contains("is-open");
 
-      if (header) {
-        header.classList.toggle("is-scrolled", currentY > 36);
+      header.classList.toggle("is-scrolled", currentY > 36);
 
-        if (window.innerWidth > 820 || drawerIsOpen || currentY <= 18) {
-          header.classList.remove("is-compact-mobile");
-        } else if (delta > 7 && currentY > 76) {
-          header.classList.add("is-compact-mobile");
-        } else if (delta < -7) {
-          header.classList.remove("is-compact-mobile");
-        }
-      }
-
-      if (mobileDock) {
-        if (currentY <= 8 || prefersReducedMotion || drawerIsOpen) {
-          dockExpanded = 1;
-        } else if (delta > 2 && currentY > 48) {
-          dockExpanded = 0;
-        } else if (delta < -2) {
-          dockExpanded = 1;
-        }
-        var shimmer = prefersReducedMotion ? 0 : Math.abs(((currentY / 420) % 2) - 1);
-        mobileDock.style.setProperty("--k", String(dockExpanded));
-        mobileDock.style.setProperty("--sh", String(shimmer));
+      if (window.innerWidth > 820 || drawerIsOpen || currentY <= 18) {
+        header.classList.remove("is-compact-mobile");
+      } else if (delta > 7 && currentY > 76) {
+        header.classList.add("is-compact-mobile");
+      } else if (delta < -7) {
+        header.classList.remove("is-compact-mobile");
       }
 
       lastScrollY = currentY;

@@ -245,7 +245,7 @@ def build_mobile_dock(active_path: str) -> str:
     ind_idx = max(0, active_idx)
     inner = "\n    ".join(links)
     return (
-        f'<nav class="mobile-dock" data-mobile-dock data-active="{active_idx}" '
+        f'<nav class="mobile-dock" id="mobile-dock" data-mobile-dock data-active="{active_idx}" '
         f'style="--i: {ind_idx};" aria-label="{nav_label}">\n'
         f'    <span class="mobile-dock-ind" aria-hidden="true"></span>\n'
         f'    {inner}\n'

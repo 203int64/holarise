@@ -77,6 +77,39 @@
   :active-view-transition-type(back)::view-transition-new(root) {
     animation-name: mpa-in-back;
   }
+
+  /* Keep standalone mobile dock pinned during cross-document transitions; glide only the active pill */
+  ::view-transition-group(mobile-dock-fade) {
+    z-index: 95;
+    animation: none;
+  }
+
+  ::view-transition-old(mobile-dock-fade),
+  ::view-transition-new(mobile-dock-fade) {
+    animation: none;
+  }
+
+  ::view-transition-group(mobile-dock) {
+    z-index: 110;
+    animation: none;
+  }
+
+  ::view-transition-old(mobile-dock),
+  ::view-transition-new(mobile-dock) {
+    animation-duration: 0.16s;
+  }
+
+  ::view-transition-group(mobile-dock-ind) {
+    z-index: 111;
+    animation-duration: 0.28s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  ::view-transition-old(mobile-dock-ind),
+  ::view-transition-new(mobile-dock-ind) {
+    height: 100%;
+    animation: none;
+  }
 }
 
 @keyframes mpa-out {
@@ -4758,62 +4791,15 @@ body.nav-open .pwa-install-banner {
 }
 
 /* ==========================================================================
-   Standalone Mobile App Floating Glass Capsule Nav (MusicSpace-inspired)
-   Shown ONLY in display-mode: standalone / html.is-standalone on <= 820px
+   Standalone Mobile App Floating Glass Capsule Nav
+   Shown ONLY in html.is-standalone (set synchronously in <head>) on <= 820px
    ========================================================================== */
-@property --k {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 1;
-}
-
-@keyframes dockPluck {
-  0% { opacity: 0; transform: scaleX(0.5); }
-  30% { opacity: 1; transform: translateX(3px) scaleX(1.04); }
-  50% { transform: translateX(-2px); }
-  68% { transform: translateX(1.2px); }
-  84% { transform: translateX(-0.5px); }
-  100% { transform: none; }
-}
-
-@keyframes dockIcPop {
-  0% { scale: 0.8; }
-  60% { scale: 1.1; }
-  100% { scale: 1; }
-}
-
-@keyframes dockDraw {
-  to { stroke-dashoffset: 0; }
-}
-
 .mobile-dock,
 .mobile-dock-fade {
   display: none;
 }
 
 /* Safe-area support & Native feel when installed (standalone mode) */
-@media (display-mode: standalone) {
-  html,
-  body {
-    overscroll-behavior-y: none;
-    touch-action: pan-x pan-y;
-  }
-
-  .site-header {
-    padding-top: env(safe-area-inset-top, 0px);
-    height: calc(var(--header-height) + env(safe-area-inset-top, 0px));
-  }
-
-  .scroll-progress {
-    top: env(safe-area-inset-top, 0px);
-  }
-
-  .mobile-drawer-inner {
-    padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px) + 24px);
-    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
-  }
-}
-
 html.is-standalone,
 html.is-standalone body {
   overscroll-behavior-y: none;
@@ -4834,164 +4820,6 @@ html.is-standalone .mobile-drawer-inner {
   padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
 }
 
-@media (max-width: 820px) and (display-mode: standalone) {
-  body {
-    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
-  }
-
-  .mobile-dock-fade {
-    display: block;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: calc(88px + env(safe-area-inset-bottom, 0px));
-    z-index: 95;
-    pointer-events: none;
-    background: linear-gradient(
-      color-mix(in srgb, var(--bg) 0%, transparent),
-      color-mix(in srgb, var(--bg) 82%, transparent)
-    );
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    -webkit-mask-image: linear-gradient(transparent, #000 75%);
-    mask-image: linear-gradient(transparent, #000 75%);
-  }
-
-  .mobile-dock {
-    --k: 1;
-    --w: calc(54px + var(--k) * 24px);
-    position: fixed;
-    left: 50%;
-    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-    z-index: 110;
-    display: flex;
-    padding: 5px;
-    border-radius: 16px;
-    translate: -50% 0;
-    background: color-mix(in srgb, var(--surface) 74%, transparent);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow:
-      inset 0 0 0 0.5px rgba(255, 255, 255, 0.85),
-      inset 0 1px 0 rgba(255, 255, 255, 0.96),
-      0 0 0 0.5px rgba(11, 17, 15, 0.08),
-      0 10px 28px rgba(11, 17, 15, 0.12);
-    transition: --k 0.56s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.25s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .mobile-dock::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(
-      105deg,
-      rgba(255, 255, 255, 0) 36%,
-      color-mix(in srgb, var(--surface) 72%, transparent) 50%,
-      rgba(255, 255, 255, 0) 64%
-    );
-    background-size: 260% 100%;
-    background-position: calc(var(--sh, 0) * 100%) 0;
-    opacity: 0.65;
-  }
-
-  .mobile-dock-ind {
-    position: absolute;
-    left: 5px;
-    top: 5px;
-    bottom: 5px;
-    width: var(--w);
-    border-radius: 11px;
-    background: color-mix(in srgb, var(--accent) 12%, transparent);
-    translate: calc(var(--i, 0) * var(--w)) 0;
-    transition:
-      translate 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-      scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-      background-color 0.3s ease,
-      box-shadow 0.3s ease;
-    animation: dockPluck 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
-  }
-
-  .mobile-dock[data-active="-1"] .mobile-dock-ind {
-    opacity: 0;
-    animation: none;
-  }
-
-  .mobile-dock:has(a:nth-of-type(1):active) .mobile-dock-ind { --i: 0; opacity: 1; }
-  .mobile-dock:has(a:nth-of-type(2):active) .mobile-dock-ind { --i: 1; opacity: 1; }
-  .mobile-dock:has(a:nth-of-type(3):active) .mobile-dock-ind { --i: 2; opacity: 1; }
-  .mobile-dock:has(a:nth-of-type(4):active) .mobile-dock-ind { --i: 3; opacity: 1; }
-
-  .mobile-dock:has(a:active) .mobile-dock-ind {
-    scale: 1.06 1.1;
-    background: color-mix(in srgb, var(--accent) 18%, transparent);
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 18%, transparent);
-  }
-
-  .mobile-dock-link {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: var(--w);
-    height: calc(44px + var(--k) * 2px);
-    color: var(--ink-secondary);
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 14px;
-    letter-spacing: 0.005em;
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  .mobile-dock-link.is-active,
-  .mobile-dock-link[aria-current="page"] {
-    color: var(--accent);
-    font-weight: 700;
-  }
-
-  .mobile-dock-icon {
-    flex: none;
-    transition: scale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  .mobile-dock-link:active .mobile-dock-icon {
-    scale: 0.86;
-  }
-
-  .mobile-dock-link[aria-current="page"] .mobile-dock-icon {
-    animation: dockIcPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.16s both;
-  }
-
-  .mobile-dock-link[aria-current="page"] .mobile-dock-icon path,
-  .mobile-dock-link[aria-current="page"] .mobile-dock-icon rect {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: dockDraw 0.78s cubic-bezier(0.2, 0.8, 0.2, 1) 0.24s forwards;
-  }
-
-  .mobile-dock-label {
-    height: calc(var(--k) * 14px);
-    opacity: var(--k);
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  .shake-guide-toast {
-    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
-  }
-
-  body:has(.mobile-drawer.is-open) .mobile-dock,
-  body:has(.mobile-drawer.is-open) .mobile-dock-fade {
-    opacity: 0;
-    pointer-events: none;
-  }
-}
-
 @media (max-width: 820px) {
   html.is-standalone body {
     padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
@@ -5006,6 +4834,7 @@ html.is-standalone .mobile-drawer-inner {
     height: calc(88px + env(safe-area-inset-bottom, 0px));
     z-index: 95;
     pointer-events: none;
+    view-transition-name: mobile-dock-fade;
     background: linear-gradient(
       color-mix(in srgb, var(--bg) 0%, transparent),
       color-mix(in srgb, var(--bg) 82%, transparent)
@@ -5017,8 +4846,7 @@ html.is-standalone .mobile-drawer-inner {
   }
 
   html.is-standalone .mobile-dock {
-    --k: 1;
-    --w: calc(54px + var(--k) * 24px);
+    --w: min(78px, calc((100vw - 34px) / 4));
     position: fixed;
     left: 50%;
     bottom: calc(14px + env(safe-area-inset-bottom, 0px));
@@ -5026,8 +4854,9 @@ html.is-standalone .mobile-drawer-inner {
     display: flex;
     padding: 5px;
     border-radius: 16px;
-    translate: -50% 0;
-    background: color-mix(in srgb, var(--surface) 74%, transparent);
+    transform: translate3d(-50%, 0, 0);
+    view-transition-name: mobile-dock;
+    background: color-mix(in srgb, var(--surface) 78%, transparent);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     box-shadow:
@@ -5035,25 +4864,8 @@ html.is-standalone .mobile-drawer-inner {
       inset 0 1px 0 rgba(255, 255, 255, 0.96),
       0 0 0 0.5px rgba(11, 17, 15, 0.08),
       0 10px 28px rgba(11, 17, 15, 0.12);
-    transition: --k 0.56s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.25s ease;
+    transition: opacity 0.2s ease;
     -webkit-tap-highlight-color: transparent;
-  }
-
-  html.is-standalone .mobile-dock::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(
-      105deg,
-      rgba(255, 255, 255, 0) 36%,
-      color-mix(in srgb, var(--surface) 72%, transparent) 50%,
-      rgba(255, 255, 255, 0) 64%
-    );
-    background-size: 260% 100%;
-    background-position: calc(var(--sh, 0) * 100%) 0;
-    opacity: 0.65;
   }
 
   html.is-standalone .mobile-dock-ind {
@@ -5063,47 +4875,36 @@ html.is-standalone .mobile-drawer-inner {
     bottom: 5px;
     width: var(--w);
     border-radius: 11px;
+    pointer-events: none;
     background: color-mix(in srgb, var(--accent) 12%, transparent);
-    translate: calc(var(--i, 0) * var(--w)) 0;
-    transition:
-      translate 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-      scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-      background-color 0.3s ease,
-      box-shadow 0.3s ease;
-    animation: dockPluck 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+    transform: translate3d(calc(var(--i, 0) * var(--w)), 0, 0);
+    view-transition-name: mobile-dock-ind;
   }
 
   html.is-standalone .mobile-dock[data-active="-1"] .mobile-dock-ind {
     opacity: 0;
-    animation: none;
-  }
-
-  html.is-standalone .mobile-dock:has(a:nth-of-type(1):active) .mobile-dock-ind { --i: 0; opacity: 1; }
-  html.is-standalone .mobile-dock:has(a:nth-of-type(2):active) .mobile-dock-ind { --i: 1; opacity: 1; }
-  html.is-standalone .mobile-dock:has(a:nth-of-type(3):active) .mobile-dock-ind { --i: 2; opacity: 1; }
-  html.is-standalone .mobile-dock:has(a:nth-of-type(4):active) .mobile-dock-ind { --i: 3; opacity: 1; }
-
-  html.is-standalone .mobile-dock:has(a:active) .mobile-dock-ind {
-    scale: 1.06 1.1;
-    background: color-mix(in srgb, var(--accent) 18%, transparent);
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 18%, transparent);
+    view-transition-name: none;
   }
 
   html.is-standalone .mobile-dock-link {
     position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 2px;
     width: var(--w);
-    height: calc(44px + var(--k) * 2px);
+    height: 48px;
     color: var(--ink-secondary);
     font-size: 11px;
     font-weight: 600;
     line-height: 14px;
     letter-spacing: 0.005em;
     text-decoration: none;
-    transition: color 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: color 0.18s ease, opacity 0.12s ease;
   }
 
   html.is-standalone .mobile-dock-link.is-active,
@@ -5114,27 +4915,15 @@ html.is-standalone .mobile-drawer-inner {
 
   html.is-standalone .mobile-dock-icon {
     flex: none;
-    transition: scale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.14s ease;
   }
 
   html.is-standalone .mobile-dock-link:active .mobile-dock-icon {
-    scale: 0.86;
-  }
-
-  html.is-standalone .mobile-dock-link[aria-current="page"] .mobile-dock-icon {
-    animation: dockIcPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.16s both;
-  }
-
-  html.is-standalone .mobile-dock-link[aria-current="page"] .mobile-dock-icon path,
-  html.is-standalone .mobile-dock-link[aria-current="page"] .mobile-dock-icon rect {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: dockDraw 0.78s cubic-bezier(0.2, 0.8, 0.2, 1) 0.24s forwards;
+    transform: scale(0.9);
   }
 
   html.is-standalone .mobile-dock-label {
-    height: calc(var(--k) * 14px);
-    opacity: var(--k);
+    height: 14px;
     overflow: hidden;
     white-space: nowrap;
   }
@@ -5147,22 +4936,19 @@ html.is-standalone .mobile-drawer-inner {
   html.is-standalone body:has(.mobile-drawer.is-open) .mobile-dock-fade {
     opacity: 0;
     pointer-events: none;
+    view-transition-name: none;
+  }
+
+  html.is-standalone body:has(.mobile-drawer.is-open) .mobile-dock-ind {
+    view-transition-name: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mobile-dock,
-  .mobile-dock-ind,
+  .mobile-dock-link,
   .mobile-dock-icon {
     transition: none !important;
-  }
-
-  .mobile-dock-ind,
-  .mobile-dock-link[aria-current="page"] .mobile-dock-icon,
-  .mobile-dock-link[aria-current="page"] .mobile-dock-icon path,
-  .mobile-dock-link[aria-current="page"] .mobile-dock-icon rect {
-    animation: none !important;
-    stroke-dashoffset: 0 !important;
   }
 }
 
