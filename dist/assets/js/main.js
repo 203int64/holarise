@@ -2494,4 +2494,52 @@
       });
     });
   })();
+
+  /* Orientation Visual Chip — Click/Tap to Reveal, Click Outside or Esc to Collapse */
+  (function () {
+    var chips = document.querySelectorAll(".visual-orientation-chip");
+    chips.forEach(function (chip) {
+      if (!chip.hasAttribute("role")) chip.setAttribute("role", "button");
+      if (!chip.hasAttribute("tabindex")) chip.setAttribute("tabindex", "0");
+      chip.setAttribute("aria-expanded", "false");
+    });
+
+    function closeAll(except) {
+      document.querySelectorAll(".visual-orientation-chip.is-open").forEach(function (el) {
+        if (el !== except) {
+          el.classList.remove("is-open");
+          el.setAttribute("aria-expanded", "false");
+        }
+      });
+    }
+
+    function toggleChip(chip, e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var willOpen = !chip.classList.contains("is-open");
+      closeAll(chip);
+      chip.classList.toggle("is-open", willOpen);
+      chip.setAttribute("aria-expanded", String(willOpen));
+    }
+
+    document.addEventListener("click", function (e) {
+      var chip = e.target.closest(".visual-orientation-chip");
+      if (chip) {
+        toggleChip(chip, e);
+      } else {
+        closeAll(null);
+      }
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        closeAll(null);
+        return;
+      }
+      if (e.key === "Enter" || e.key === " ") {
+        var chip = e.target.closest && e.target.closest(".visual-orientation-chip");
+        if (chip) toggleChip(chip, e);
+      }
+    });
+  })();
 })();
