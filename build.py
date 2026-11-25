@@ -1948,6 +1948,26 @@ def build_site() -> list:
     invite_phone_raw = re.sub(r"[^0-9+]", "", site["contact"]["phoneDisplay"])
     default_zalo_group = site["contact"].get("zaloGroup") or site["contact"].get("zalo", "")
 
+    def derive_event_pillar(ws: dict) -> tuple[str, str]:
+        raw_type = (ws.get("type") or "").lower()
+        filters = [str(f).lower() for f in (ws.get("filters") or [])]
+        if "holagreen" in raw_type or "holagreen" in filters:
+            return ("holagreen", "HolaGreen")
+        if "holaconnect" in raw_type or "holaconnect" in filters:
+            return ("holaconnect", "HolaConnect")
+        return ("holaheart", "HolaHeart")
+
+    def format_event_share_title(ws: dict, brand_name: str) -> str:
+        _, pillar_label = derive_event_pillar(ws)
+        raw_title = (ws.get("title") or "").strip()
+        clean_title = re.sub(rf"^{re.escape(pillar_label)}\s*[·\-–—:]\s*", "", raw_title, flags=re.IGNORECASE).strip() or raw_title
+        iso_date = (ws.get("date") or "").strip()
+        short_date = ""
+        m_date = re.match(r"^(\d{4})-(\d{2})-(\d{2})$", iso_date)
+        if m_date:
+            short_date = f" ({m_date.group(3)}/{m_date.group(2)})"
+        return f"{pillar_label} · {clean_title}{short_date} | {brand_name}"
+
     def build_default_landing(ws: dict) -> dict:
         slug = resolve_event_slug(ws)
         raw_date = str(ws.get("date") or "2026-11-29").strip()
@@ -1970,7 +1990,7 @@ def build_site() -> list:
             "slug": slug,
             "urlPath": f"/su-kien/{slug}/",
             "ogImage": ws.get("image") or b["ogImage"],
-            "seoTitle": f"Thư mời {ws['title']} | {b['brandName']}",
+            "seoTitle": format_event_share_title(ws, b["brandName"]),
             "seoDescription": ws.get("summary") or b["subtitle"],
             "headline": ws["title"],
             "startIso": start_iso,
@@ -1996,12 +2016,17 @@ def build_site() -> list:
         canonical_ev_url = abs_url(b["siteUrl"], url_path)
         gcal_url = build_google_calendar_url(ws, landing, canonical_ev_url)
         ev_zalo = landing.get("zaloGroup") or ws.get("zaloGroup") or default_zalo_group
+        ev_pillar_key, ev_pillar_label = derive_event_pillar(ws)
+        ev_share_title = landing.get("seoTitle") or format_event_share_title(ws, b["brandName"])
         invite_main = render_template(
             invite_tpl,
             {
                 "BRAND_SHORT_NAME": esc(b["shortName"]),
                 "EVENT_ID": esc(ws["id"]),
                 "EVENT_SLUG": esc(slug),
+                "EVENT_PILLAR": esc(ev_pillar_key),
+                "EVENT_PILLAR_LABEL": esc(ev_pillar_label),
+                "EVENT_SHARE_TITLE": esc(ev_share_title),
                 "EVENT_KICKER": esc(ws.get("type") or "HolaRise · Thư mời tham dự"),
                 "EVENT_TITLE": esc(ws["title"]),
                 "EVENT_DATE_DISPLAY": esc(ws["dateDisplay"]),
@@ -2067,6 +2092,9 @@ def build_site() -> list:
             "BRAND_SHORT_NAME": esc(b["shortName"]),
             "EVENT_ID": "__SSR_EVENT_ID__",
             "EVENT_SLUG": "__SSR_EVENT_SLUG__",
+            "EVENT_PILLAR": "__SSR_EVENT_PILLAR__",
+            "EVENT_PILLAR_LABEL": "__SSR_EVENT_PILLAR_LABEL__",
+            "EVENT_SHARE_TITLE": "__SSR_EVENT_SHARE_TITLE__",
             "EVENT_KICKER": "__SSR_EVENT_KICKER__",
             "EVENT_TITLE": "__SSR_EVENT_TITLE__",
             "EVENT_DATE_DISPLAY": "__SSR_EVENT_DATE_DISPLAY__",

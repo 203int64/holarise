@@ -1,3 +1,4 @@
+<div class="invite-theme-root" data-pillar="{{EVENT_PILLAR}}">
 <section class="page-hero invite-hero">
   <div class="container invite-narrow">
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
@@ -8,7 +9,7 @@
       <span aria-current="page">Thư mời</span>
     </nav>
 
-    <div class="kicker" style="margin-top: 18px;">{{EVENT_KICKER}}</div>
+    <div class="kicker invite-pillar-kicker" style="margin-top: 18px;">{{EVENT_KICKER}}</div>
     <h1 class="invite-title">{{INVITE_HEADLINE}}</h1>
 
     <div class="invite-meta-bar">
@@ -19,6 +20,8 @@
       </div>
       <div class="invite-meta-links">
         <button class="invite-text-btn invite-text-btn--accent" type="button" data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/su-kien/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Giữ chỗ tham dự</button>
+        <span aria-hidden="true">·</span>
+        <button class="invite-text-btn" type="button" data-open-invite-share>Chia sẻ thư mời</button>
         <span aria-hidden="true">·</span>
         <a href="{{GOOGLE_CAL_URL}}" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
         <span aria-hidden="true">·</span>
@@ -74,10 +77,56 @@
 
       <div class="invite-rsvp-actions">
         <button class="btn btn--primary" type="button" id="ws-open-rsvp-btn" data-open-on-hash="giu-cho" data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/su-kien/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Xác nhận tham dự</button>
-        <a class="btn btn--outline" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Vào Nhóm Zalo buổi gặp ↗</a>
+        <button class="btn btn--outline" type="button" data-open-invite-share>Chia sẻ thư mời</button>
+        <a class="btn btn--outline" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a>
       </div>
 
       <p class="invite-rsvp-footnote">Giữ chỗ trong 15 giây, không cần tạo mật khẩu · <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a></p>
     </div>
   </div>
 </section>
+
+<!-- MusicSpace-style Event Share & Personalized Invitation Modal -->
+<dialog class="club-dialog club-dialog--share" id="event-share-modal" closedby="any" data-pillar="{{EVENT_PILLAR}}" data-share-url="{{CANONICAL_EVENT_URL}}" data-share-title="{{EVENT_SHARE_TITLE}}" data-share-time="{{INVITE_TIME_LABEL}}" data-share-venue="{{INVITE_VENUE_NAME}}" aria-labelledby="event-share-heading">
+  <div class="dialog-inner share-dialog-inner">
+    <button class="modal-close" type="button" data-modal-close aria-label="Đóng chia sẻ">×</button>
+
+    <div class="share-dialog-head">
+      <span class="kicker invite-pillar-kicker">CHIA SẺ THƯ MỜI · {{EVENT_PILLAR_LABEL}}</span>
+      <h2 id="event-share-heading" class="share-dialog-title">{{INVITE_HEADLINE}}</h2>
+    </div>
+
+    <div class="share-preview-card">
+      <img class="share-preview-thumb" src="{{EVENT_IMAGE}}" alt="{{EVENT_IMAGE_ALT}}" width="76" height="76" loading="lazy">
+      <div class="share-preview-body">
+        <span class="share-preview-eyebrow">{{EVENT_PILLAR_LABEL}} — Sự kiện · holarise.org</span>
+        <strong class="share-preview-title">{{EVENT_SHARE_TITLE}}</strong>
+        <p class="share-preview-meta">{{INVITE_TIME_LABEL}} · {{INVITE_VENUE_NAME}}</p>
+      </div>
+    </div>
+
+    <div class="share-inviter-field">
+      <label for="share-inviter-name">Cá nhân hóa lời mời <span class="auth-hint-inline">(tùy chọn tên của bạn)</span></label>
+      <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi — bạn mở link sẽ thấy lời mời từ bạn">
+    </div>
+
+    <div class="share-platforms-block">
+      <span class="share-section-label">Gửi qua</span>
+      <div class="share-platforms-grid">
+        <button type="button" class="share-platform-btn" data-share-platform="zalo">Zalo</button>
+        <button type="button" class="share-platform-btn" data-share-platform="messenger">Messenger</button>
+        <button type="button" class="share-platform-btn" data-share-platform="facebook">Facebook</button>
+        <button type="button" class="share-platform-btn" data-share-platform="telegram">Telegram</button>
+      </div>
+    </div>
+
+    <div class="share-url-block">
+      <label for="share-url-input" class="share-section-label">Đường dẫn thư mời</label>
+      <div class="share-url-row">
+        <input id="share-url-input" type="text" readonly value="{{CANONICAL_EVENT_URL}}">
+        <button type="button" class="btn btn--primary btn--sm share-copy-btn" id="share-copy-btn">Sao chép</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+</div>

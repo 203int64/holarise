@@ -47,7 +47,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=8ee58dcc4f">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=7d31d7469c">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -160,7 +160,8 @@
   </div>
 
   <main id="main-content">
-    <section class="page-hero invite-hero">
+    <div class="invite-theme-root" data-pillar="__SSR_EVENT_PILLAR__">
+<section class="page-hero invite-hero">
   <div class="container invite-narrow">
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
       <a href="/">Trang chủ</a>
@@ -170,7 +171,7 @@
       <span aria-current="page">Thư mời</span>
     </nav>
 
-    <div class="kicker" style="margin-top: 18px;">__SSR_EVENT_KICKER__</div>
+    <div class="kicker invite-pillar-kicker" style="margin-top: 18px;">__SSR_EVENT_KICKER__</div>
     <h1 class="invite-title">__SSR_INVITE_HEADLINE__</h1>
 
     <div class="invite-meta-bar">
@@ -181,6 +182,8 @@
       </div>
       <div class="invite-meta-links">
         <button class="invite-text-btn invite-text-btn--accent" type="button" data-register-event="__SSR_EVENT_TITLE__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-event-date="__SSR_EVENT_DATE_DISPLAY__" data-event-time="__SSR_INVITE_TIME_LABEL__" data-event-location="__SSR_EVENT_LOCATION__" data-venue-url="" data-event-fee="__SSR_EVENT_FEE__" data-event-seats="__SSR_EVENT_SEATS__" data-event-type="__SSR_EVENT_KICKER__" data-event-href="/su-kien/__SSR_EVENT_SLUG__/" data-event-image="__SSR_EVENT_IMAGE__" data-zalo-group="__SSR_EVENT_ZALO_GROUP__" data-ics-start="__SSR_INVITE_ICS_START__" data-ics-end="__SSR_INVITE_ICS_END__" data-note-summary="+ Gửi đôi dòng chia sẻ hoặc lời nhắn cho người điều phối (tùy chọn)" data-note-placeholder="Điều bạn muốn chia sẻ trước buổi gặp, hoặc để trống nếu chỉ muốn đến lắng nghe..." data-anon-share="true">Giữ chỗ tham dự</button>
+        <span aria-hidden="true">·</span>
+        <button class="invite-text-btn" type="button" data-open-invite-share>Chia sẻ thư mời</button>
         <span aria-hidden="true">·</span>
         <a href="__SSR_GOOGLE_CAL_URL__" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
         <span aria-hidden="true">·</span>
@@ -236,13 +239,59 @@
 
       <div class="invite-rsvp-actions">
         <button class="btn btn--primary" type="button" id="ws-open-rsvp-btn" data-open-on-hash="giu-cho" data-register-event="__SSR_EVENT_TITLE__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-event-date="__SSR_EVENT_DATE_DISPLAY__" data-event-time="__SSR_INVITE_TIME_LABEL__" data-event-location="__SSR_EVENT_LOCATION__" data-venue-url="" data-event-fee="__SSR_EVENT_FEE__" data-event-seats="__SSR_EVENT_SEATS__" data-event-type="__SSR_EVENT_KICKER__" data-event-href="/su-kien/__SSR_EVENT_SLUG__/" data-event-image="__SSR_EVENT_IMAGE__" data-zalo-group="__SSR_EVENT_ZALO_GROUP__" data-ics-start="__SSR_INVITE_ICS_START__" data-ics-end="__SSR_INVITE_ICS_END__" data-note-summary="+ Gửi đôi dòng chia sẻ hoặc lời nhắn cho người điều phối (tùy chọn)" data-note-placeholder="Điều bạn muốn chia sẻ trước buổi gặp, hoặc để trống nếu chỉ muốn đến lắng nghe..." data-anon-share="true">Xác nhận tham dự</button>
-        <a class="btn btn--outline" href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Vào Nhóm Zalo buổi gặp ↗</a>
+        <button class="btn btn--outline" type="button" data-open-invite-share>Chia sẻ thư mời</button>
+        <a class="btn btn--outline" href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a>
       </div>
 
       <p class="invite-rsvp-footnote">Giữ chỗ trong 15 giây, không cần tạo mật khẩu · <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a></p>
     </div>
   </div>
 </section>
+
+<!-- MusicSpace-style Event Share & Personalized Invitation Modal -->
+<dialog class="club-dialog club-dialog--share" id="event-share-modal" closedby="any" data-pillar="__SSR_EVENT_PILLAR__" data-share-url="__SSR_CANONICAL_URL__" data-share-title="__SSR_EVENT_SHARE_TITLE__" data-share-time="__SSR_INVITE_TIME_LABEL__" data-share-venue="__SSR_INVITE_VENUE_NAME__" aria-labelledby="event-share-heading">
+  <div class="dialog-inner share-dialog-inner">
+    <button class="modal-close" type="button" data-modal-close aria-label="Đóng chia sẻ">×</button>
+
+    <div class="share-dialog-head">
+      <span class="kicker invite-pillar-kicker">CHIA SẺ THƯ MỜI · __SSR_EVENT_PILLAR_LABEL__</span>
+      <h2 id="event-share-heading" class="share-dialog-title">__SSR_INVITE_HEADLINE__</h2>
+    </div>
+
+    <div class="share-preview-card">
+      <img class="share-preview-thumb" src="__SSR_EVENT_IMAGE__" alt="__SSR_EVENT_IMAGE_ALT__" width="76" height="76" loading="lazy">
+      <div class="share-preview-body">
+        <span class="share-preview-eyebrow">__SSR_EVENT_PILLAR_LABEL__ — Sự kiện · holarise.org</span>
+        <strong class="share-preview-title">__SSR_EVENT_SHARE_TITLE__</strong>
+        <p class="share-preview-meta">__SSR_INVITE_TIME_LABEL__ · __SSR_INVITE_VENUE_NAME__</p>
+      </div>
+    </div>
+
+    <div class="share-inviter-field">
+      <label for="share-inviter-name">Cá nhân hóa lời mời <span class="auth-hint-inline">(tùy chọn tên của bạn)</span></label>
+      <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi — bạn mở link sẽ thấy lời mời từ bạn">
+    </div>
+
+    <div class="share-platforms-block">
+      <span class="share-section-label">Gửi qua</span>
+      <div class="share-platforms-grid">
+        <button type="button" class="share-platform-btn" data-share-platform="zalo">Zalo</button>
+        <button type="button" class="share-platform-btn" data-share-platform="messenger">Messenger</button>
+        <button type="button" class="share-platform-btn" data-share-platform="facebook">Facebook</button>
+        <button type="button" class="share-platform-btn" data-share-platform="telegram">Telegram</button>
+      </div>
+    </div>
+
+    <div class="share-url-block">
+      <label for="share-url-input" class="share-section-label">Đường dẫn thư mời</label>
+      <div class="share-url-row">
+        <input id="share-url-input" type="text" readonly value="__SSR_CANONICAL_URL__">
+        <button type="button" class="btn btn--primary btn--sm share-copy-btn" id="share-copy-btn">Sao chép</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+</div>
 
   </main>
 
@@ -715,11 +764,11 @@
     <a class="mobile-dock-link" href="/tham-gia/" aria-label="Tham gia"><svg class="mobile-dock-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path pathLength="1" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg><span class="mobile-dock-label" aria-hidden="true">Tham gia</span></a>
   </nav>
 
-  <script src="/assets/vendor/gsap.min.js?v=8ee58dcc4f" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=8ee58dcc4f" defer></script>
-  <script src="/assets/js/motion.js?v=8ee58dcc4f" defer></script>
-  <script src="/assets/js/main.js?v=8ee58dcc4f" defer></script>
-  <script src="/assets/js/join-pass.js?v=8ee58dcc4f" defer></script>
-  <script src="/assets/js/member.js?v=8ee58dcc4f" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=7d31d7469c" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=7d31d7469c" defer></script>
+  <script src="/assets/js/motion.js?v=7d31d7469c" defer></script>
+  <script src="/assets/js/main.js?v=7d31d7469c" defer></script>
+  <script src="/assets/js/join-pass.js?v=7d31d7469c" defer></script>
+  <script src="/assets/js/member.js?v=7d31d7469c" defer></script>
 </body>
 </html>

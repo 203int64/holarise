@@ -12,6 +12,23 @@ import {
 
 const DEFAULT_ZALO_GROUP = "https://zalo.me/g/7fock88aizzrdkmr9ggf";
 
+function derivePillarMeta(ev) {
+  const key = String(ev?.pillar || "").toLowerCase();
+  if (key === "holagreen") return { key: "holagreen", label: "HolaGreen" };
+  if (key === "holaconnect") return { key: "holaconnect", label: "HolaConnect" };
+  return { key: "holaheart", label: "HolaHeart" };
+}
+
+function formatEventShareTitle(ev) {
+  const { label } = derivePillarMeta(ev);
+  const rawTitle = String(ev?.title || "").trim();
+  const cleanTitle =
+    rawTitle.replace(new RegExp(`^${label}\\s*[·\\-–—:]\\s*`, "i"), "").trim() || rawTitle;
+  const m = String(ev?.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const shortDate = m ? ` (${m[3]}/${m[2]})` : "";
+  return `${label} · ${cleanTitle}${shortDate} | HolaRise`;
+}
+
 async function countWebRegistrations(db, eventId) {
   if (!db || !eventId) return 0;
   const row = await db
@@ -110,15 +127,20 @@ export async function onRequestGet({ request, env, params }) {
 
   const webBooked = matched.showSeatBar ? await countWebRegistrations(env.DB, matched.id) : 0;
   const seatBarHtml = renderSeatBarHtml(matched, webBooked);
+  const pillarMeta = derivePillarMeta(matched);
+  const shareTitle = formatEventShareTitle(matched);
 
   const replacements = {
-    __SSR_PAGE_TITLE__: escHtml(`Thư mời ${matched.title} | HolaRise`),
+    __SSR_PAGE_TITLE__: escHtml(shareTitle),
     __SSR_PAGE_DESCRIPTION__: escHtml(matched.summary || matched.title),
     __SSR_CANONICAL_URL__: escHtml(canonicalUrl),
     __SSR_OG_IMAGE_URL__: escHtml(absUrl(matched.image)),
     __SSR_EXTRA_JSON_LD__: buildEventsJsonLd([matched]),
     __SSR_EVENT_ID__: escHtml(matched.id),
     __SSR_EVENT_SLUG__: escHtml(slug),
+    __SSR_EVENT_PILLAR__: escHtml(pillarMeta.key),
+    __SSR_EVENT_PILLAR_LABEL__: escHtml(pillarMeta.label),
+    __SSR_EVENT_SHARE_TITLE__: escHtml(shareTitle),
     __SSR_EVENT_KICKER__: escHtml(matched.type || "HolaRise · Thư mời tham dự"),
     __SSR_EVENT_TITLE__: escHtml(matched.title),
     __SSR_EVENT_DATE_DISPLAY__: escHtml(matched.dateDisplay || matched.date),

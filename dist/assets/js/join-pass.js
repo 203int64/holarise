@@ -1505,9 +1505,7 @@
       if (navigator.share) {
         navigator
           .share({
-            title: snap.isFatherWorkshop
-              ? 'Thư mời Workshop "Cuộc Đời Của Cha" · 19h15 CN 29/11'
-              : "Đi Chủ nhật cùng mình tại HolaRise Hòa Lạc!",
+            title: document.title || (snap.activity ? snap.activity + " | HolaRise" : "HolaRise"),
             text: msg,
             url: link,
           })
@@ -1521,4 +1519,109 @@
       triggerSiblingCopy(btn);
     });
   });
+
+  /* MusicSpace-style Event Share & Personalized Invitation Modal */
+  (function initEventShareModal() {
+    var modal = document.getElementById("event-share-modal");
+    if (!modal) return;
+
+    var baseUrl = modal.getAttribute("data-share-url") || window.location.href.split("?")[0];
+    var shareTitle = modal.getAttribute("data-share-title") || document.title;
+    var shareTime = modal.getAttribute("data-share-time") || "";
+    var shareVenue = modal.getAttribute("data-share-venue") || "";
+    var urlInput = document.getElementById("share-url-input");
+    var inviterInput = document.getElementById("share-inviter-name");
+    var copyBtn = document.getElementById("share-copy-btn");
+
+    function buildCurrentShareUrl() {
+      var inviter = inviterInput ? inviterInput.value.trim() : "";
+      if (!inviter) return baseUrl;
+      try {
+        var u = new URL(baseUrl, window.location.origin);
+        u.searchParams.set("moi", inviter);
+        return u.toString();
+      } catch (_e) {
+        return baseUrl;
+      }
+    }
+
+    function syncUrlField() {
+      if (urlInput) urlInput.value = buildCurrentShareUrl();
+    }
+
+    if (inviterInput) {
+      inviterInput.addEventListener("input", syncUrlField);
+    }
+
+    document.addEventListener("click", function (e) {
+      var trigger = e.target.closest("[data-open-invite-share]");
+      if (!trigger) return;
+      if (inviterInput && !inviterInput.value.trim() && window.HolaMember && window.HolaMember.member && window.HolaMember.member.name) {
+        inviterInput.value = window.HolaMember.member.name;
+      }
+      syncUrlField();
+      if (copyBtn) copyBtn.textContent = "Sao chép";
+      if (typeof modal.showModal === "function" && !modal.open) {
+        modal.showModal();
+      }
+    });
+
+    if (copyBtn && urlInput) {
+      copyBtn.addEventListener("click", function () {
+        var currentUrl = buildCurrentShareUrl();
+        urlInput.value = currentUrl;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(currentUrl).catch(function () {
+            urlInput.select();
+            document.execCommand("copy");
+          });
+        } else {
+          urlInput.select();
+          document.execCommand("copy");
+        }
+        copyBtn.textContent = "Đã chép ✓";
+        setTimeout(function () {
+          copyBtn.textContent = "Sao chép";
+        }, 2200);
+      });
+    }
+
+    modal.querySelectorAll("[data-share-platform]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var platform = btn.getAttribute("data-share-platform");
+        var link = buildCurrentShareUrl();
+        var summary = [shareTitle, [shareTime, shareVenue].filter(Boolean).join(" · ")].filter(Boolean).join("\n");
+        var encUrl = encodeURIComponent(link);
+        var encText = encodeURIComponent(summary);
+
+        if (platform === "zalo") {
+          if (navigator.share) {
+            navigator.share({ title: shareTitle, text: summary, url: link }).catch(function () {});
+            return;
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(summary + "\n" + link).catch(function () {});
+          }
+          window.open("https://chat.zalo.me/", "_blank", "noopener,noreferrer");
+          if (copyBtn) copyBtn.textContent = "Đã chép cho Zalo ✓";
+          return;
+        }
+        if (platform === "facebook") {
+          window.open("https://www.facebook.com/sharer/sharer.php?u=" + encUrl, "_blank", "noopener,noreferrer");
+          return;
+        }
+        if (platform === "messenger") {
+          if (navigator.share) {
+            navigator.share({ title: shareTitle, text: summary, url: link }).catch(function () {});
+            return;
+          }
+          window.open("https://www.facebook.com/dialog/send?link=" + encUrl + "&redirect_uri=" + encUrl, "_blank", "noopener,noreferrer");
+          return;
+        }
+        if (platform === "telegram") {
+          window.open("https://t.me/share/url?url=" + encUrl + "&text=" + encText, "_blank", "noopener,noreferrer");
+        }
+      });
+    });
+  })();
 })();
