@@ -3436,6 +3436,10 @@ html.has-motion .scrub-word {
   gap: 18px;
 }
 
+.form-row-2.is-single-col {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .field label {
   display: block;
   font-size: 0.84rem;

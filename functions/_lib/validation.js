@@ -695,6 +695,22 @@ export function validateMemberProfileInput(body) {
     out.organization = cleanStr(body.organization, 160);
   }
 
+  if (body.phone !== undefined || body.phoneDisplay !== undefined || body.phone_display !== undefined) {
+    const rawPhone = cleanStr(body.phone ?? body.phoneDisplay ?? body.phone_display, 40);
+    if (!rawPhone) {
+      out.phone_norm = null;
+      out.phone_display = "";
+    } else {
+      const parsedPhone = normalizePhone(rawPhone);
+      if (!parsedPhone.ok) {
+        fields.phone = "Vui lòng nhập số điện thoại / Zalo hợp lệ (8–15 chữ số).";
+      } else {
+        out.phone_norm = parsedPhone.phoneNorm;
+        out.phone_display = parsedPhone.phoneDisplay;
+      }
+    }
+  }
+
   if (body.pillarChoice !== undefined || body.pillar_choice !== undefined) {
     const p = cleanStr(body.pillarChoice ?? body.pillar_choice, 32).toLowerCase();
     if (!VALID_PILLAR_CHOICES.has(p)) {

@@ -209,19 +209,48 @@
       }
     }
 
+    const mPhone = String(m?.phoneDisplay || m?.phone || "").trim();
+    const hasValidPhone = mPhone.replace(/\D/g, "").length >= 8;
+
     // Toggle guest login prompts vs hiding redundant identity fields when signed in
     $$("[data-rsvp-guest-prompt]").forEach((el) => {
       el.hidden = Boolean(m);
     });
     $$("[data-guest-identity-fields]").forEach((group) => {
-      group.hidden = Boolean(m);
-      group.querySelectorAll("input[name='fullName'], input[name='phone']").forEach((inp) => {
-        if (m) {
-          inp.removeAttribute("required");
-        } else {
-          inp.setAttribute("required", "");
-        }
-      });
+      const nameWrap = group.querySelector("[data-guest-name-field]");
+      const phoneWrap = group.querySelector("[data-guest-phone-field]");
+      const row = group.querySelector("[data-guest-identity-row]");
+      const nameInp = group.querySelector("input[name='fullName']");
+      const phoneInp = group.querySelector("input[name='phone']");
+
+      if (m && hasValidPhone) {
+        group.hidden = true;
+        if (nameWrap) nameWrap.hidden = true;
+        if (phoneWrap) phoneWrap.hidden = true;
+        if (row) row.classList.remove("is-single-col");
+        if (nameInp) nameInp.removeAttribute("required");
+        if (phoneInp) phoneInp.removeAttribute("required");
+      } else if (m && !hasValidPhone && phoneWrap) {
+        // Signed in via Google/Email without phone yet: hide Name, keep Phone visible
+        group.hidden = false;
+        if (nameWrap) nameWrap.hidden = true;
+        phoneWrap.hidden = false;
+        if (row) row.classList.add("is-single-col");
+        if (nameInp) nameInp.removeAttribute("required");
+        if (phoneInp) phoneInp.setAttribute("required", "");
+      } else {
+        group.hidden = Boolean(m);
+        if (nameWrap) nameWrap.hidden = Boolean(m);
+        if (phoneWrap) phoneWrap.hidden = Boolean(m);
+        if (row) row.classList.remove("is-single-col");
+        group.querySelectorAll("input[name='fullName'], input[name='phone']").forEach((inp) => {
+          if (m) {
+            inp.removeAttribute("required");
+          } else {
+            inp.setAttribute("required", "");
+          }
+        });
+      }
     });
 
     // Expose live signed-in member state globally for all page scripts
@@ -314,20 +343,24 @@
     const modalBar = $("#modal-member-rsvp-bar");
     const modalBarTitle = $("#modal-member-bar-title");
     const modalBarSub = $("#modal-member-bar-sub");
+    const modalOneTapBtn = $("#modal-member-onetap-btn");
     const modalForm = $("#event-register-modal form[data-club-form]");
     if (modalBar && modalForm) {
       if (m) {
         modalBar.hidden = false;
         if (modalBarTitle) modalBarTitle.textContent = `${m.name} · ${m.memberCode}`;
         if (modalBarSub) {
-          modalBarSub.textContent = `${m.email || m.phone || "Tài khoản HolaRise"} — chọn số chỗ và bấm xác nhận.`;
+          modalBarSub.textContent = hasValidPhone
+            ? `${mPhone} — chỉ cần bấm xác nhận để giữ chỗ.`
+            : "Bổ sung SĐT / Zalo 1 lần bên dưới để nhận nhắc lịch và mở khóa giữ chỗ 1 chạm.";
         }
+        if (modalOneTapBtn) modalOneTapBtn.hidden = !hasValidPhone;
         const fName = modalForm.querySelector('[name="fullName"]');
         const fPhone = modalForm.querySelector('[name="phone"]');
         const fEmail = modalForm.querySelector('[name="email"]');
         const fOrg = modalForm.querySelector('[name="organization"]');
         if (fName) fName.value = m.name || "";
-        if (fPhone) fPhone.value = m.phone || m.email || "";
+        if (fPhone) fPhone.value = hasValidPhone ? mPhone : "";
         if (fEmail) fEmail.value = m.email || "";
         if (fOrg) fOrg.value = m.organization || "";
       } else {
@@ -345,7 +378,7 @@
         wsBar.hidden = false;
         if (wsBarTitle) wsBarTitle.textContent = `${m.name} · ${m.memberCode}`;
         if (wsBarSub) {
-          wsBarSub.textContent = `${m.email || m.phone || "Tài khoản HolaRise"} — chỉ cần chọn số chỗ và bấm Xác nhận.`;
+          wsBarSub.textContent = `${mPhone || m.email || "Tài khoản HolaRise"} — chỉ cần chọn số chỗ và bấm Xác nhận.`;
         }
         const fName = wsForm.querySelector('[name="fullName"]');
         const fPhone = wsForm.querySelector('[name="phone"]');
@@ -355,7 +388,7 @@
           fName.value = m.name || "";
           fName.dispatchEvent(new Event("input", { bubbles: true }));
         }
-        if (fPhone) fPhone.value = m.phone || m.email || "";
+        if (fPhone) fPhone.value = hasValidPhone ? mPhone : "";
         if (fEmail) fEmail.value = m.email || "";
         if (fOrg) {
           fOrg.value = m.organization || "";
@@ -393,7 +426,7 @@
             eventId,
             activity: activity || "Hoạt động HolaRise",
             fullName: state.member.name,
-            phone: state.member.phone || "",
+            phone: state.member.phoneDisplay || "",
             email: state.member.email || "",
             organization: state.member.organization || "",
             note: `[${seatsLabel}] Đăng ký 1 chạm bằng Thẻ ${state.member.memberCode}`,
@@ -420,6 +453,17 @@
         oneTapBtn.disabled = false;
         oneTapBtn.textContent = "Giữ chỗ 1 chạm";
       }
+    });
+
+    // Re-hydrate member fields after form.reset() and sync auto-saved phone into live member state
+    document.addEventListener("holarise:registration-success", (ev) => {
+      if (!state.member) return;
+      const savedPhone = ev?.detail?.response?.savedMemberPhone;
+      if (savedPhone) {
+        state.member.phoneDisplay = savedPhone;
+      }
+      syncHeaderAndRsvp();
+      renderMemberDashboardCard();
     });
   }
 
@@ -1000,6 +1044,10 @@
         if ($("#dash-pass-pillar")) $("#dash-pass-pillar").textContent = pillar.label;
         if ($("#dash-pass-name")) $("#dash-pass-name").textContent = ($("#prof-name")?.value || "").trim() || state.member.name;
         if ($("#dash-pass-org")) $("#dash-pass-org").textContent = ($("#prof-org")?.value || "").trim() || "Cộng đồng Hòa Lạc";
+        if ($("#dash-pass-contact")) {
+          const typedPhone = ($("#prof-phone")?.value || "").trim();
+          $("#dash-pass-contact").textContent = typedPhone || state.member.email || "—";
+        }
         if ($("#dash-pass-bio")) {
           $("#dash-pass-bio").textContent =
             ($("#prof-bio")?.value || "").trim() ||
@@ -1033,7 +1081,7 @@
             eventId: checked.value,
             activity: title,
             fullName: state.member.name,
-            phone: state.member.phone || "",
+            phone: state.member.phoneDisplay || "",
             email: state.member.email || "",
             organization: state.member.organization || "",
             note: `Đăng ký 1 chạm bằng Thẻ ${state.member.memberCode}`,
@@ -1138,6 +1186,7 @@
           method: "PATCH",
           body: {
             name: $("#prof-name").value.trim(),
+            phone: ($("#prof-phone")?.value || "").trim(),
             organization: $("#prof-org").value.trim(),
             primaryPillar: $("#prof-pillar").value,
             bio: $("#prof-bio").value.trim(),
@@ -1186,9 +1235,11 @@
     }
     if ($("#dash-pass-code")) $("#dash-pass-code").textContent = m.memberCode;
     if ($("#dash-pass-pillar")) $("#dash-pass-pillar").textContent = pillar.label;
-    if ($("#dash-pass-contact")) $("#dash-pass-contact").textContent = m.phone || m.email || "—";
+    const mPhone = String(m.phoneDisplay || m.phone || "").trim();
+    if ($("#dash-pass-contact")) $("#dash-pass-contact").textContent = mPhone || m.email || "—";
 
     if ($("#prof-name")) $("#prof-name").value = m.name || "";
+    if ($("#prof-phone")) $("#prof-phone").value = mPhone;
     if ($("#prof-org")) $("#prof-org").value = m.organization || "";
     if ($("#prof-pillar")) $("#prof-pillar").value = m.primaryPillar || "holaheart";
     if ($("#prof-bio")) $("#prof-bio").value = m.bio || "";

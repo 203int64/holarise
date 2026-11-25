@@ -838,3 +838,119 @@ test("Public guest reflection photo upload + drifted activity_reflections schema
   assert.equal(memberJson.ok, true);
   assert.equal(memberJson.reflection.photoUrl, upData.url);
 });
+
+test("Member phone flow: auto-save on first RSVP + profile phone update & duplicate guard", async () => {
+  const DB = createFullMockD1();
+  const env = { DB };
+
+  // 1. Register an email-only member (no phone yet, same as Google OAuth)
+  const regA = await memberRegister({
+    request: makeReq("/api/member/auth/register", {
+      method: "POST",
+      body: {
+        identifier: "email-only@holarise.org",
+        password: "Password123!",
+        name: "Minh Khôi",
+        organization: "ĐH FPT",
+      },
+    }),
+    env,
+  });
+  assert.equal(regA.status, 201);
+  const cookieA = extractCookie(regA, "holarise_member_session");
+
+  // 2. First event RSVP includes a valid phone -> registration succeeds AND auto-saves phone onto member
+  const rsvpRes = await publicRegister({
+    request: makeReq("/api/registrations", {
+      method: "POST",
+      cookie: cookieA,
+      body: {
+        source: "event_modal",
+        eventId: "ev-phone-autosave",
+        activity: "Vòng tròn lắng nghe",
+        fullName: "Minh Khôi",
+        phone: "0912 345 678",
+      },
+    }),
+    env,
+  });
+  assert.equal(rsvpRes.status, 201);
+  const rsvpData = await rsvpRes.json();
+  assert.equal(rsvpData.ok, true);
+  assert.equal(rsvpData.savedMemberPhone, "0912.345.678");
+
+  const statusAfterRsvp = await memberStatus({
+    request: makeReq("/api/member/auth/status", { method: "GET", cookie: cookieA }),
+    env,
+  });
+  const statusJson = await statusAfterRsvp.json();
+  assert.equal(statusJson.member.phoneDisplay, "0912.345.678");
+
+  // 3. Member updates phone in profile -> succeeds with normalized format; invalid phone -> 400
+  const badPatch = await memberProfilePatch({
+    request: makeReq("/api/member/profile", {
+      method: "PATCH",
+      cookie: cookieA,
+      body: { phone: "123" },
+    }),
+    env,
+  });
+  assert.equal(badPatch.status, 400);
+
+  const okPatch = await memberProfilePatch({
+    request: makeReq("/api/member/profile", {
+      method: "PATCH",
+      cookie: cookieA,
+      body: { phone: "+84 988 777 666" },
+    }),
+    env,
+  });
+  assert.equal(okPatch.status, 200);
+  const okPatchData = await okPatch.json();
+  assert.equal(okPatchData.member.phoneDisplay, "0988.777.666");
+
+  // 4. Second member trying to claim same phone in profile -> 409 DUPLICATE_PHONE
+  const regB = await memberRegister({
+    request: makeReq("/api/member/auth/register", {
+      method: "POST",
+      body: {
+        identifier: "second-member@holarise.org",
+        password: "Password123!",
+        name: "Lan Anh",
+      },
+    }),
+    env,
+  });
+  assert.equal(regB.status, 201);
+  const cookieB = extractCookie(regB, "holarise_member_session");
+
+  const dupPatch = await memberProfilePatch({
+    request: makeReq("/api/member/profile", {
+      method: "PATCH",
+      cookie: cookieB,
+      body: { phone: "0988 777 666" },
+    }),
+    env,
+  });
+  assert.equal(dupPatch.status, 409);
+
+  // 5. Second member submitting an event RSVP with someone else's phone still succeeds (skips auto-save safely)
+  const rsvpDupRes = await publicRegister({
+    request: makeReq("/api/registrations", {
+      method: "POST",
+      cookie: cookieB,
+      body: {
+        source: "event_modal",
+        eventId: "ev-phone-autosave",
+        activity: "Vòng tròn lắng nghe",
+        fullName: "Lan Anh",
+        phone: "0988 777 666",
+      },
+    }),
+    env,
+  });
+  assert.equal(rsvpDupRes.status, 201);
+  const rsvpDupData = await rsvpDupRes.json();
+  assert.equal(rsvpDupData.ok, true);
+  assert.equal(rsvpDupData.savedMemberPhone, "");
+});

@@ -28,7 +28,7 @@ function decodeBase64DataUrl(dataUrl) {
     return null;
   }
 }
-import { cleanStr, validateRegistrationInput } from "../_lib/validation.js";
+import { cleanStr, normalizePhone, validateRegistrationInput } from "../_lib/validation.js";
 
 export async function createEventRegistrationForMember(context, member, eventPayload, ipHash = "member") {
   const { env } = context;
@@ -322,6 +322,28 @@ export async function onRequestPost(context) {
     }
   }
 
+  // Auto-save member's phone on first RSVP if they signed up via Google/Email without a phone yet
+  let savedMemberPhone = "";
+  if (sessionMember && !sessionMember.phone_norm && !v.is_feedback && record.phone) {
+    const parsedPhone = normalizePhone(record.phone);
+    if (parsedPhone.ok) {
+      try {
+        const upd = await env.DB.prepare(
+          `UPDATE members
+           SET phone_norm = ?, phone_display = ?, updated_at = ?
+           WHERE id = ? AND (phone_norm IS NULL OR phone_norm = '')`
+        )
+          .bind(parsedPhone.phoneNorm, parsedPhone.phoneDisplay, now, sessionMember.id)
+          .run();
+        if (upd?.meta?.changes > 0) {
+          savedMemberPhone = parsedPhone.phoneDisplay;
+        }
+      } catch {
+        // Ignore UNIQUE(phone_norm) collision — event registration itself still succeeds
+      }
+    }
+  }
+
   const syncPromise = syncRegistrationToGas(env.DB, record);
   if (typeof context.waitUntil === "function") {
     context.waitUntil(syncPromise);
@@ -340,6 +362,7 @@ export async function onRequestPost(context) {
       id: record.id,
       duplicate: false,
       memberCode: sessionMember ? sessionMember.member_code : "",
+      savedMemberPhone,
       emailSentHint: Boolean(record.email),
       screenshotSaved: Boolean(screenshotPath),
       message: confirmationMessage,

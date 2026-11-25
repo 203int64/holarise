@@ -320,9 +320,13 @@
                     <input id="prof-name" name="name" type="text" autocomplete="name" minlength="2" required>
                   </div>
                   <div class="auth-field">
-                    <label for="prof-org">Trường / Đơn vị <span class="auth-hint-inline">(48 gợi ý)</span></label>
-                    <input id="prof-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Gõ để chọn trường hoặc đơn vị...">
+                    <label for="prof-phone">Số điện thoại / Zalo <span class="auth-hint-inline">(giữ chỗ 1 chạm)</span></label>
+                    <input id="prof-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx">
                   </div>
+                </div>
+                <div class="auth-field">
+                  <label for="prof-org">Trường / Đơn vị <span class="auth-hint-inline">(48 gợi ý)</span></label>
+                  <input id="prof-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Gõ để chọn trường hoặc đơn vị...">
                 </div>
                 <div class="org-quick-chips" aria-label="Chọn nhanh đơn vị">
                   <button type="button" class="org-chip-btn" data-org-chip="Đại học FPT Hà Nội (Hòa Lạc)" data-org-target="prof-org">ĐH FPT</button>

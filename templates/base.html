@@ -237,8 +237,8 @@
         </div>
 
         <div class="form-grid" data-guest-identity-fields>
-          <div class="form-row-2">
-            <div class="field">
+          <div class="form-row-2" data-guest-identity-row>
+            <div class="field" data-guest-name-field>
               <label for="modal-name">Tên gọi của bạn <span aria-hidden="true">*</span></label>
               <input id="modal-name" name="fullName" type="text" autocomplete="name" placeholder="Ví dụ: Minh Khôi" required minlength="2" enterkeyhint="next" data-error="modal-name-error">
               <div id="modal-name-error" class="field-error">
@@ -246,7 +246,7 @@
                 <span data-error-text>Vui lòng nhập tên gọi của bạn (tối thiểu 2 ký tự).</span>
               </div>
             </div>
-            <div class="field">
+            <div class="field" data-guest-phone-field>
               <label for="modal-phone">Số điện thoại / Zalo <span aria-hidden="true">*</span></label>
               <input id="modal-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" enterkeyhint="done" data-error="modal-phone-error">
               <div id="modal-phone-error" class="field-error">

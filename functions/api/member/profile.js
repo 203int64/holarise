@@ -50,16 +50,63 @@ export async function onRequestPatch(context) {
   const nextPillar = v.pillar_choice !== undefined ? v.pillar_choice : fullRow.pillar_choice;
   const nextAvatarUrl = v.avatar_url !== undefined ? v.avatar_url : fullRow.avatar_url;
   const nextAvatarKey = v.avatar_media_key !== undefined ? v.avatar_media_key : fullRow.avatar_media_key;
+  let nextPhoneNorm = fullRow.phone_norm || null;
+  let nextPhoneDisplay = fullRow.phone_display || "";
+
+  if (v.phone_norm !== undefined) {
+    if (v.phone_norm === null) {
+      if (!fullRow.email) {
+        return errorResponse(
+          400,
+          "PHONE_REQUIRED",
+          "Tài khoản chưa gắn Email nên không thể xóa số điện thoại.",
+          { phone: "Cần giữ số điện thoại để đăng nhập khi chưa có Email." }
+        );
+      }
+      nextPhoneNorm = null;
+      nextPhoneDisplay = "";
+    } else {
+      if (v.phone_norm !== fullRow.phone_norm) {
+        const dup = await env.DB.prepare("SELECT id FROM members WHERE phone_norm = ? AND id != ?")
+          .bind(v.phone_norm, member.id)
+          .first()
+          .catch(() => null);
+        if (dup) {
+          return errorResponse(
+            409,
+            "DUPLICATE_PHONE",
+            "Số điện thoại này đã được gắn với một Thẻ Thành Viên khác.",
+            { phone: "Số điện thoại này đã thuộc tài khoản khác." }
+          );
+        }
+      }
+      nextPhoneNorm = v.phone_norm;
+      nextPhoneDisplay = v.phone_display;
+    }
+  }
+
   const oldAvatarKey = fullRow.avatar_media_key || "";
   const now = new Date().toISOString();
 
   await env.DB.prepare(
     `UPDATE members
-     SET name = ?, organization = ?, pillar_choice = ?, avatar_url = ?, avatar_media_key = ?,
+     SET name = ?, phone_norm = ?, phone_display = ?, organization = ?, pillar_choice = ?, avatar_url = ?, avatar_media_key = ?,
          password_hash = ?, password_salt = ?, updated_at = ?
      WHERE id = ?`
   )
-    .bind(nextName, nextOrg, nextPillar, nextAvatarUrl, nextAvatarKey, nextHash, nextSalt, now, member.id)
+    .bind(
+      nextName,
+      nextPhoneNorm,
+      nextPhoneDisplay,
+      nextOrg,
+      nextPillar,
+      nextAvatarUrl,
+      nextAvatarKey,
+      nextHash,
+      nextSalt,
+      now,
+      member.id
+    )
     .run();
 
   if (oldAvatarKey && oldAvatarKey !== nextAvatarKey && env?.MEDIA_KV?.delete) {
