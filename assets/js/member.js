@@ -1124,10 +1124,46 @@
       }
     });
 
-    // Dashboard controls: Avatar upload, Profile save, PNG export, Logout
-    $("#btn-download-member-pass")?.addEventListener("click", () => {
-      if (state.member && window.HolaPass && typeof window.HolaPass.downloadMemberPassPng === "function") {
-        window.HolaPass.downloadMemberPassPng(state.member);
+    // Dashboard controls: Avatar upload, Profile popup, PNG export, Logout
+    $("#btn-open-profile-modal")?.addEventListener("click", () => {
+      const dlg = $("#member-profile-modal");
+      const st = $("#prof-status");
+      setStatus(st, "");
+      if (dlg && typeof dlg.showModal === "function" && !dlg.open) {
+        dlg.showModal();
+      }
+    });
+
+    $("#btn-download-member-pass")?.addEventListener("click", async () => {
+      const btn = $("#btn-download-member-pass");
+      const st = $("#dash-avatar-status");
+      if (!state.member || !window.HolaPass || typeof window.HolaPass.downloadMemberPassPng !== "function") {
+        setStatus(st, "Trình tạo thẻ chưa sẵn sàng, vui lòng tải lại trang.", "error");
+        return;
+      }
+      const prevText = btn ? btn.textContent : "Tải Thẻ (PNG)";
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Đang xuất thẻ...";
+      }
+      setStatus(st, "");
+      try {
+        const expData = computeMemberExp(state.member, state.dashboard);
+        const result = await window.HolaPass.downloadMemberPassPng(state.member, expData);
+        if (result === "shared") {
+          setStatus(st, "Đã mở bảng lưu / chia sẻ Thẻ Thành Viên.", "success");
+        } else if (result === "preview") {
+          setStatus(st, "Nhấn giữ vào ảnh thẻ để lưu về máy.", "success");
+        } else {
+          setStatus(st, "Đã tải Thẻ Thành Viên (PNG) về máy.", "success");
+        }
+      } catch (err) {
+        setStatus(st, err?.message || "Chưa xuất được ảnh thẻ lúc này. Vui lòng thử lại.", "error");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = prevText;
+        }
       }
     });
 
@@ -1196,13 +1232,67 @@
         renderMemberDashboardCard();
         syncHeaderAndRsvp();
         setStatus(st, "Đã lưu thay đổi hồ sơ thành viên.", "success");
+        const dlg = $("#member-profile-modal");
+        if (dlg && dlg.open) {
+          setTimeout(() => {
+            if (dlg.open) dlg.close();
+          }, 550);
+        }
       } catch (err) {
         setStatus(st, err.message, "error");
       } finally {
         btn.disabled = false;
-        btn.textContent = "Lưu thay đổi hồ sơ";
+        btn.textContent = "Lưu thay đổi";
       }
     });
+  }
+
+  function computeMemberExp(m, dashboard) {
+    let profileExp = 20;
+    if (m?.avatarUrl) profileExp += 10;
+    if (m?.organization) profileExp += 10;
+    if (m?.bio) profileExp += 10;
+
+    const regs = Array.isArray(dashboard?.registrations)
+      ? dashboard.registrations.filter((r) => String(r?.status || "") !== "cancelled")
+      : [];
+    const refs = Array.isArray(dashboard?.reflections) ? dashboard.reflections : [];
+
+    const eventsCount = regs.length;
+    const reflectionsCount = refs.length;
+    const totalExp = profileExp + eventsCount * 100 + reflectionsCount * 40;
+
+    const tiers = [
+      { level: 1, name: "Khởi hành", min: 0, next: 150 },
+      { level: 2, name: "Đồng hành", min: 150, next: 400 },
+      { level: 3, name: "Gắn bó", min: 400, next: 800 },
+      { level: 4, name: "Lan tỏa", min: 800, next: 800 },
+    ];
+    let current = tiers[0];
+    for (let i = tiers.length - 1; i >= 0; i -= 1) {
+      if (totalExp >= tiers[i].min) {
+        current = tiers[i];
+        break;
+      }
+    }
+    const isMax = current.level === 4;
+    const progressPct = isMax
+      ? 100
+      : Math.max(8, Math.min(100, Math.round(((totalExp - current.min) / (current.next - current.min)) * 100)));
+
+    return {
+      level: current.level,
+      tierName: current.name,
+      tierBadge: `LV.${current.level} · ${current.name.toUpperCase()}`,
+      totalExp,
+      nextExp: current.next,
+      isMax,
+      progressPct,
+      eventsCount,
+      reflectionsCount,
+      expText: isMax ? `${totalExp} EXP · Tối đa` : `${totalExp} / ${current.next} EXP`,
+      breakdownText: `${eventsCount} hoạt động · ${reflectionsCount} lưu bút`,
+    };
   }
 
   function renderMemberDashboardCard() {
@@ -1261,6 +1351,14 @@
           ? "Thẻ Thành Viên của bạn đã hoàn thiện 100% — sẵn sàng tải PNG và check-in."
           : `Bổ sung ${missing.join(", ")} để hoàn thiện 100% Thẻ Thành Viên.`;
     }
+
+    // Update Luxe Card EXP & Tier
+    const exp = computeMemberExp(m, state.dashboard);
+    if ($("#dash-pass-tier")) $("#dash-pass-tier").textContent = exp.tierBadge;
+    if ($("#dash-exp-rank")) $("#dash-exp-rank").textContent = `Hành trình · ${exp.tierName}`;
+    if ($("#dash-exp-val")) $("#dash-exp-val").textContent = exp.expText;
+    if ($("#dash-exp-fill")) $("#dash-exp-fill").style.width = `${exp.progressPct}%`;
+    if ($("#dash-exp-breakdown")) $("#dash-exp-breakdown").textContent = exp.breakdownText;
   }
 
   async function refreshJoinDashboard() {

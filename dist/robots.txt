@@ -4,5 +4,6 @@ Disallow: /admin/
 Disallow: /media/
 Disallow: /api/
 Disallow: /_templates/
+Disallow: /tv/
 
 Sitemap: https://holarise.org/sitemap.xml

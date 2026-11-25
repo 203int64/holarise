@@ -7751,14 +7751,21 @@ dialog.club-dialog--rsvp {
 }
 
 .filter-btn[data-pillar].is-active {
+  background: transparent;
+  color: var(--pillar-accent);
+}
+
+.filter-btn[data-pillar].is-active::after {
   background: var(--pillar-accent);
-  border-color: var(--pillar-accent);
-  color: #ffffff;
+}
+
+.filter-btn[data-pillar].is-active .filter-icon,
+.filter-btn[data-pillar]:hover .filter-icon {
+  color: var(--pillar-accent);
 }
 
 .filter-btn[data-pillar]:not(.is-active):hover {
-  border-color: var(--pillar-border);
-  background: var(--pillar-tint);
+  background: transparent;
   color: var(--pillar-accent);
 }
 
@@ -8070,6 +8077,13 @@ body.nav-open .pwa-offline-bar {
 }
 
 /* Authenticated Member Dashboard */
+.member-pass-stage {
+  max-width: 472px;
+  margin: 0 auto;
+}
+.member-pass-stage .member-dash-card-col {
+  position: static;
+}
 .member-dash-grid {
   display: grid;
   grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
@@ -8082,6 +8096,189 @@ body.nav-open .pwa-offline-bar {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+/* Luxe Holographic Foil Member Card */
+.member-pass-luxe {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 24px 56px -14px rgba(10, 18, 15, 0.42),
+    0 6px 18px rgba(10, 18, 15, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  isolation: isolate;
+}
+
+.member-pass-luxe[data-pass-theme="sunrise"] {
+  --card-glow-a: rgba(232, 134, 88, 0.42);
+  --card-glow-b: rgba(247, 198, 138, 0.26);
+  --card-foil: linear-gradient(125deg, rgba(255, 214, 178, 0.24), rgba(255, 255, 255, 0.04) 42%, rgba(232, 134, 88, 0.24) 76%, rgba(255, 240, 215, 0.28));
+  --card-exp-bar: linear-gradient(90deg, #e5936a, #f7d2a8);
+}
+
+.member-pass-luxe[data-pass-theme="forest"] {
+  --card-glow-a: rgba(34, 158, 112, 0.44);
+  --card-glow-b: rgba(134, 217, 181, 0.26);
+  --card-foil: linear-gradient(125deg, rgba(164, 240, 206, 0.26), rgba(255, 255, 255, 0.04) 42%, rgba(34, 158, 112, 0.24) 76%, rgba(215, 250, 232, 0.28));
+  --card-exp-bar: linear-gradient(90deg, #27a373, #96e6c5);
+}
+
+.member-pass-luxe[data-pass-theme="obsidian"] {
+  --card-glow-a: rgba(66, 154, 184, 0.44);
+  --card-glow-b: rgba(154, 210, 228, 0.28);
+  --card-foil: linear-gradient(125deg, rgba(168, 226, 245, 0.26), rgba(255, 255, 255, 0.04) 42%, rgba(66, 154, 184, 0.26) 76%, rgba(218, 244, 255, 0.3));
+  --card-exp-bar: linear-gradient(90deg, #4fa4c2, #b3e3f2);
+}
+
+.member-pass-mesh {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(circle at 86% 14%, var(--card-glow-a, rgba(232, 134, 88, 0.38)) 0%, transparent 56%),
+    radial-gradient(circle at 12% 92%, var(--card-glow-b, rgba(247, 198, 138, 0.22)) 0%, transparent 54%),
+    radial-gradient(rgba(255, 255, 255, 0.14) 0.75px, transparent 0.75px);
+  background-size: 100% 100%, 100% 100%, 20px 20px;
+}
+
+.member-pass-foil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--card-foil);
+  opacity: 0.55;
+  mix-blend-mode: screen;
+}
+
+.member-pass-luxe > :not(.member-pass-mesh):not(.member-pass-foil):not(.sunrise-pass-glare) {
+  position: relative;
+  z-index: 1;
+}
+
+.member-pass-luxe .pass-state-pill {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  letter-spacing: 0.07em;
+}
+
+/* EXP Bar inside Member Card */
+.pass-exp-panel {
+  margin: 12px 0 4px;
+  padding: 11px 13px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.pass-exp-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.pass-exp-rank {
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: rgba(244, 247, 245, 0.8);
+}
+
+.pass-exp-val {
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+
+.pass-exp-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.pass-exp-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--card-exp-bar, linear-gradient(90deg, #e5936a, #f7d2a8));
+  box-shadow: 0 0 12px var(--card-glow-a, rgba(232, 134, 88, 0.45));
+  transition: width 0.55s var(--ease-expo);
+}
+
+.pass-exp-breakdown {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: rgba(244, 247, 245, 0.64);
+}
+
+.member-pass-controls--stage {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.member-pass-controls--stage .btn {
+  justify-content: center;
+  min-height: 40px;
+}
+
+.member-profile-modal-actions {
+  margin-top: 4px;
+}
+
+.member-profile-modal-actions .auth-submit-btn {
+  width: 100%;
+  min-height: 44px;
+}
+
+@media (max-width: 640px) {
+  dialog#member-profile-modal.club-dialog--auth {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92dvh;
+    margin: auto 0 0;
+    border-radius: 22px 22px 0 0;
+    border-bottom: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  dialog#member-profile-modal .auth-dialog-inner {
+    padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+
+  dialog#member-profile-modal .auth-dialog-inner::before {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 4px;
+    margin: -4px auto 14px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ink) 16%, transparent);
+  }
+}
+
+.pass-preview-dialog {
+  width: min(420px, calc(100vw - 24px));
+}
+.pass-preview-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  margin: 12px 0;
 }
 .member-pass-identity {
   display: flex;
@@ -11598,7 +11795,7 @@ html.is-standalone .site-footer .footer-feedback-trigger {
   -webkit-box-orient: initial !important;
 }
 
-/* 3. Active Filter Pill Alignment & Icon Contrast (/lich-hoat-dong/) */
+/* 3. Active Filter Tab Alignment & Editorial Underline (/lich-hoat-dong/) */
 .filter-btn {
   display: inline-flex;
   align-items: center;
@@ -11609,15 +11806,19 @@ html.is-standalone .site-footer .footer-feedback-trigger {
 }
 
 .filter-btn.is-active {
-  background: var(--accent);
-  color: #ffffff;
-  border-color: var(--accent);
+  background: transparent;
+  color: var(--ink);
 }
 
 .filter-btn.is-active svg,
 .filter-btn.is-active .filter-icon {
-  color: #ffffff;
-  stroke: #ffffff;
+  color: var(--accent);
+}
+
+.filter-btn[data-pillar].is-active,
+.filter-btn[data-pillar].is-active svg,
+.filter-btn[data-pillar].is-active .filter-icon {
+  color: var(--pillar-accent);
 }
 
 /* 4. Balanced CTA Band & Orbital Back-to-Top Clearance above Footer */

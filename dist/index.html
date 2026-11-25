@@ -13,6 +13,9 @@
   <meta name="apple-mobile-web-app-title" content="HolaRise">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="canonical" href="https://holarise.org/">
+  <link rel="alternate" hreflang="vi" href="https://holarise.org/">
+  <link rel="alternate" hreflang="en" href="https://holarise.org/en/">
+  <link rel="alternate" hreflang="x-default" href="https://holarise.org/">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" href="/assets/images/favicon-48.png" type="image/png" sizes="48x48">
   <link rel="icon" href="/assets/images/favicon-96.png" type="image/png" sizes="96x96">
@@ -24,7 +27,7 @@
   <!-- Open Graph / Facebook / Zalo / Messenger -->
   <meta property="og:type" content="website">
   <meta property="og:locale" content="vi_VN">
-  <meta property="og:site_name" content="HolaRise – Cộng đồng Thanh niên Hòa Lạc">
+  <meta property="og:site_name" content="HolaRise">
   <meta property="og:title" content="HolaRise – Cộng đồng Thanh niên Hòa Lạc">
   <meta property="og:description" content="HolaRise – Cộng đồng Thanh niên Hòa Lạc phi lợi nhuận kết nối người trẻ qua 3 trụ cột: HolaHeart (tĩnh tại), HolaGreen (sinh thái) và HolaConnect (tri thức).">
   <meta property="og:url" content="https://holarise.org/">
@@ -48,11 +51,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=23e0049821">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=d835dc9457">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "NGO",
+  "@id": "https://holarise.org/#organization",
   "name": "HolaRise – Cộng đồng Thanh niên Hòa Lạc",
   "alternateName": [
     "HolaRise",
@@ -82,22 +86,74 @@
     "addressLocality": "Hòa Lạc",
     "addressRegion": "Hà Nội",
     "addressCountry": "VN"
-  }
+  },
+  "sameAs": [
+    "https://www.youtube.com/@holarise-az"
+  ]
 }
 </script>
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "HolaRise – Cộng đồng Thanh niên Hòa Lạc",
+  "@id": "https://holarise.org/#website",
+  "name": "HolaRise",
   "alternateName": [
-    "HolaRise",
+    "HolaRise – Cộng đồng Thanh niên Hòa Lạc",
     "Cộng đồng HolaRise",
     "Cộng đồng Thanh niên Hòa Lạc",
     "HolaRise – Youth Community & Social Impact Initiative"
   ],
   "url": "https://holarise.org/",
-  "inLanguage": "vi-VN"
+  "inLanguage": "vi-VN",
+  "publisher": {
+    "@id": "https://holarise.org/#organization"
+  }
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "@id": "https://holarise.org/#navigation",
+  "name": "Điều hướng chính HolaRise",
+  "itemListElement": [
+    {
+      "@type": "SiteNavigationElement",
+      "position": 1,
+      "name": "Về HolaRise",
+      "description": "Câu chuyện khởi nguồn tại Hòa Lạc, mô hình 3 trụ cột HolaHeart · HolaGreen · HolaConnect, 5 nguyên tắc minh bạch và 6 UN SDGs.",
+      "url": "https://holarise.org/gioi-thieu/"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "position": 2,
+      "name": "Lịch hoạt động",
+      "description": "Lịch sinh hoạt định kỳ 1–2 buổi mỗi tuần của HolaHeart, HolaGreen và HolaConnect tại Hòa Lạc. Giữ chỗ nhanh không cần mật khẩu.",
+      "url": "https://holarise.org/lich-hoat-dong/"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "position": 3,
+      "name": "Hành trình",
+      "description": "Tường thuật các buổi đối thoại, hoạt động cộng đồng, lưu bút thành viên và tư liệu hình ảnh thực tế của HolaRise.",
+      "url": "https://holarise.org/hanh-trinh/"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "position": 4,
+      "name": "Tham gia & Đồng hành",
+      "description": "Giữ chỗ tham dự trong 15 giây, mở Thẻ Thành Viên Hola hoặc gửi đề xuất hợp tác cùng nhà trường, câu lạc bộ và đối tác.",
+      "url": "https://holarise.org/tham-gia/"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "position": 5,
+      "name": "Minh bạch & Quy tắc",
+      "description": "Chuẩn mực phi lợi nhuận, minh bạch chi phí từng con số, quy tắc an toàn cộng đồng và bảo vệ dữ liệu cá nhân tại HolaRise.",
+      "url": "https://holarise.org/chinh-sach/"
+    }
+  ]
 }
 </script>
   <script type="application/ld+json">
@@ -172,8 +228,16 @@
       "addressCountry": "VN"
     }
   },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "VND",
+    "availability": "https://schema.org/InStock",
+    "url": "https://holarise.org/su-kien/cuoc-doi-cua-cha/"
+  },
   "organizer": {
     "@type": "NGO",
+    "@id": "https://holarise.org/#organization",
     "name": "HolaRise – Cộng đồng Thanh niên Hòa Lạc",
     "url": "https://holarise.org"
   },
@@ -857,7 +921,7 @@
             <li><a href="/gioi-thieu/" data-i18n="nav.about">Về HolaRise</a></li>
             <li><a href="/lich-hoat-dong/" data-i18n="nav.schedule">Lịch hoạt động</a></li>
             <li><a href="/hanh-trinh/" data-i18n="nav.journey">Hành trình</a></li>
-            <li><a href="/chinh-sach/" data-i18n="footer.transparency">Chuẩn mực Minh bạch &amp; An toàn</a></li>
+            <li><a href="/chinh-sach/" data-i18n="footer.transparency">Minh bạch &amp; Quy tắc</a></li>
             <li>
               <button class="pwa-install-footer-btn" type="button" data-pwa-install hidden>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -888,6 +952,7 @@
             <li><a href="tel:0777771948">077.777.1948</a></li>
             <li><a href="mailto:phungsu@holarise.org">phungsu@holarise.org</a></li>
             <li>Sinh hoạt định kỳ: 1–2 hoạt động hàng tuần</li>
+            <li><a href="https://www.youtube.com/@holarise-az" target="_blank" rel="noopener noreferrer me">YouTube chính thức ↗</a></li>
           </ul>
         </div>
       </div>
@@ -899,7 +964,7 @@
           <span class="footer-web-only" data-i18n="footer.copyright">© 2026 HolaRise – Cộng đồng Thanh niên Hòa Lạc</span>
         </div>
         <div class="footer-bottom-meta">
-          <a class="footer-web-only" href="/chinh-sach/">Bảo mật &amp; Quy tắc</a>
+          <a class="footer-web-only" href="/chinh-sach/">Minh bạch &amp; Quy tắc</a>
           <span class="footer-web-only" aria-hidden="true">·</span>
           <button class="footer-feedback-trigger" type="button" data-open-feedback-modal><span>Đóng góp &amp; Báo lỗi</span><span class="footer-feedback-arrow" aria-hidden="true">↗</span></button>
         </div>
@@ -1374,12 +1439,12 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/vendor/gsap.min.js?v=23e0049821" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=23e0049821" defer></script>
-  <script src="/assets/js/motion.js?v=23e0049821" defer></script>
-  <script src="/assets/js/main.js?v=23e0049821" defer></script>
-  <script src="/assets/js/join-pass.js?v=23e0049821" defer></script>
-  <script src="/assets/js/member.js?v=23e0049821" defer></script>
-  <script src="/assets/js/pwa.js?v=23e0049821" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=d835dc9457" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=d835dc9457" defer></script>
+  <script src="/assets/js/motion.js?v=d835dc9457" defer></script>
+  <script src="/assets/js/main.js?v=d835dc9457" defer></script>
+  <script src="/assets/js/join-pass.js?v=d835dc9457" defer></script>
+  <script src="/assets/js/member.js?v=d835dc9457" defer></script>
+  <script src="/assets/js/pwa.js?v=d835dc9457" defer></script>
 </body>
 </html>

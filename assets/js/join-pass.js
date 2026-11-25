@@ -1127,51 +1127,194 @@
     });
   }
 
-  /* 5C. Member Pass 1080x1350 Canvas PNG Exporter (with Avatar + 90/10 3-Pillar Harmony) */
-  function downloadMemberPassPng(member) {
-    if (!member) return;
+  /* Helper: Safe mobile-first PNG delivery (Web Share API -> <a download> -> Hold-to-Save Preview Dialog) */
+  function showPassPreviewFallback(dataUrl, fileName) {
+    var existing = document.getElementById("hola-pass-preview-dlg");
+    if (existing) existing.remove();
+    var dlg = document.createElement("dialog");
+    dlg.id = "hola-pass-preview-dlg";
+    dlg.className = "club-dialog pass-preview-dialog";
+    dlg.setAttribute("closedby", "any");
+    dlg.setAttribute("aria-label", "Lưu Thẻ Thành Viên");
+    dlg.innerHTML =
+      '<div class="dialog-inner auth-dialog-inner">' +
+      '<button class="modal-close" type="button" aria-label="Đóng">×</button>' +
+      '<h3 class="auth-dialog-title" style="margin-bottom:4px;">Thẻ Thành Viên HolaRise</h3>' +
+      '<p class="auth-dialog-sub">Nhấn giữ vào ảnh bên dưới rồi chọn <strong>Lưu ảnh</strong> về máy.</p>' +
+      '<img class="pass-preview-img" alt="Thẻ Thành Viên HolaRise">' +
+      '<a class="auth-submit-btn" style="display:flex;align-items:center;justify-content:center;text-decoration:none;min-height:44px;" download>Tải ảnh PNG</a>' +
+      "</div>";
+    var img = dlg.querySelector("img");
+    var link = dlg.querySelector("a");
+    var closeBtn = dlg.querySelector(".modal-close");
+    if (img) img.src = dataUrl;
+    if (link) {
+      link.href = dataUrl;
+      link.download = fileName;
+    }
+    if (closeBtn) closeBtn.addEventListener("click", function () { dlg.close(); });
+    dlg.addEventListener("click", function (ev) { if (ev.target === dlg) dlg.close(); });
+    dlg.addEventListener("close", function () { dlg.remove(); });
+    document.body.appendChild(dlg);
+    if (typeof dlg.showModal === "function") dlg.showModal();
+  }
+
+  function deliverPngBlob(blob, dataUrl, fileName, shareTitle) {
+    var isMobileOrApp =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      Boolean(window.navigator.standalone) ||
+      window.matchMedia("(pointer: coarse)").matches;
+
+    if (isMobileOrApp && blob && typeof File === "function" && navigator.share && navigator.canShare) {
+      try {
+        var pngFile = new File([blob], fileName, { type: "image/png" });
+        if (navigator.canShare({ files: [pngFile] })) {
+          return navigator
+            .share({ files: [pngFile], title: shareTitle || "Thẻ Thành Viên HolaRise" })
+            .then(function () { return "shared"; })
+            .catch(function (err) {
+              if (err && err.name === "AbortError") return "shared";
+              showPassPreviewFallback(dataUrl, fileName);
+              return "preview";
+            });
+        }
+      } catch (_e) {
+        // Fall through to preview / download
+      }
+    }
+
+    if (isMobileOrApp) {
+      showPassPreviewFallback(dataUrl, fileName);
+      return Promise.resolve("preview");
+    }
+
+    var objUrl = blob ? URL.createObjectURL(blob) : dataUrl;
+    var link = document.createElement("a");
+    link.href = objUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    if (blob) {
+      setTimeout(function () { URL.revokeObjectURL(objUrl); }, 1500);
+    }
+    return Promise.resolve("downloaded");
+  }
+
+  /* 5C. Member Pass 1080x1350 Luxe Foil Canvas PNG Exporter (with Avatar + EXP + Mobile Share) */
+  function downloadMemberPassPng(member, expData) {
+    if (!member) return Promise.resolve("skipped");
     var pillar = String(member.primaryPillar || "holaheart").toLowerCase();
     var palette =
       pillar === "holagreen"
-        ? { accent: "#145A40", soft: "rgba(20, 90, 64, 0.38)", chip: "#86D9B5", badge: "HOLAGREEN · SINH THÁI" }
+        ? {
+            accent: "#145A40",
+            soft: "rgba(34, 158, 112, 0.44)",
+            soft2: "rgba(134, 217, 181, 0.24)",
+            chip: "#86D9B5",
+            barA: "#27A373",
+            barB: "#96E6C5",
+            badge: "HOLAGREEN · SINH THÁI",
+          }
         : pillar === "holaconnect"
-          ? { accent: "#1F4E5F", soft: "rgba(31, 78, 95, 0.42)", chip: "#9AD2E4", badge: "HOLACONNECT · PHỤNG SỰ" }
-          : { accent: "#B85D3B", soft: "rgba(184, 93, 59, 0.40)", chip: "#F5B38C", badge: "HOLAHEART · NỘI LỰC" };
+          ? {
+              accent: "#1F4E5F",
+              soft: "rgba(66, 154, 184, 0.44)",
+              soft2: "rgba(154, 210, 228, 0.26)",
+              chip: "#9AD2E4",
+              barA: "#4FA4C2",
+              barB: "#B3E3F2",
+              badge: "HOLACONNECT · PHỤNG SỰ",
+            }
+          : {
+              accent: "#B85D3B",
+              soft: "rgba(232, 134, 88, 0.42)",
+              soft2: "rgba(247, 198, 138, 0.26)",
+              chip: "#F5B38C",
+              barA: "#E5936A",
+              barB: "#F7D2A8",
+              badge: "HOLAHEART · NỘI LỰC",
+            };
 
+    var exp = expData || {
+      tierBadge: "LV.1 · KHỞI HÀNH",
+      tierName: "Khởi hành",
+      expText: "20 / 150 EXP",
+      progressPct: 14,
+      breakdownText: "0 hoạt động · 0 lưu bút",
+    };
+
+    var canLoadAvatar =
+      member.avatarUrl &&
+      (String(member.avatarUrl).startsWith("/") || String(member.avatarUrl).startsWith("data:image/"));
     var tasks = [waitForFonts(), loadSameOriginLogo("/assets/images/logo-mark.png")];
-    if (member.avatarUrl) tasks.push(loadSameOriginLogo(member.avatarUrl));
+    if (canLoadAvatar) tasks.push(loadSameOriginLogo(member.avatarUrl));
 
-    Promise.all(tasks).then(function (assets) {
+    return Promise.all(tasks).then(function (assets) {
       var logoImg = assets[1];
       var avatarImg = assets[2] || null;
       var canvas = document.createElement("canvas");
       canvas.width = 1080;
       canvas.height = 1350;
       var ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      if (!ctx) return "skipped";
 
-      ctx.fillStyle = "#F6F7F6";
+      /* Clean warm editorial backdrop */
+      ctx.fillStyle = "#F4F5F3";
       ctx.fillRect(0, 0, 1080, 1350);
 
-      var cardX = 72;
-      var cardY = 84;
-      var cardW = 936;
-      var cardH = 1182;
+      var cardX = 64;
+      var cardY = 72;
+      var cardW = 952;
+      var cardH = 1206;
 
       ctx.save();
-      drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 42);
-      ctx.fillStyle = "#0F1412";
+      ctx.shadowColor = "rgba(10, 18, 15, 0.28)";
+      ctx.shadowBlur = 48;
+      ctx.shadowOffsetY = 24;
+      drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 44);
+      ctx.fillStyle = "#0E1412";
       ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 44);
       ctx.clip();
 
-      var glowTop = ctx.createRadialGradient(860, 190, 20, 860, 190, 560);
+      /* Dual-corner luminescence + diagonal foil sheen */
+      var glowTop = ctx.createRadialGradient(880, 180, 20, 880, 180, 580);
       glowTop.addColorStop(0, palette.soft);
       glowTop.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = glowTop;
       ctx.fillRect(cardX, cardY, cardW, cardH);
 
-      drawRoundedRect(ctx, cardX + 1.5, cardY + 1.5, cardW - 3, cardH - 3, 41);
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
+      var glowBot = ctx.createRadialGradient(180, 1140, 20, 180, 1140, 520);
+      glowBot.addColorStop(0, palette.soft2);
+      glowBot.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = glowBot;
+      ctx.fillRect(cardX, cardY, cardW, cardH);
+
+      var foil = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
+      foil.addColorStop(0, "rgba(255,255,255,0.12)");
+      foil.addColorStop(0.45, "rgba(255,255,255,0.01)");
+      foil.addColorStop(0.75, palette.soft2);
+      foil.addColorStop(1, "rgba(255,255,255,0.14)");
+      ctx.fillStyle = foil;
+      ctx.fillRect(cardX, cardY, cardW, cardH);
+
+      /* Subtle optical dot mesh */
+      ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+      for (var gx = cardX + 28; gx < cardX + cardW - 20; gx += 34) {
+        for (var gy = cardY + 28; gy < cardY + cardH - 20; gy += 34) {
+          ctx.beginPath();
+          ctx.arc(gx, gy, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      /* Double metallic hairline border */
+      drawRoundedRect(ctx, cardX + 2, cardY + 2, cardW - 4, cardH - 4, 42);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
       ctx.lineWidth = 3;
       ctx.stroke();
 
@@ -1179,42 +1322,57 @@
       var innerW = cardW - 128;
 
       if (logoImg) {
-        ctx.drawImage(logoImg, padX, cardY + 56, 56, 56);
+        ctx.drawImage(logoImg, padX, cardY + 54, 54, 54);
       }
       ctx.fillStyle = "rgba(244, 247, 245, 0.88)";
-      ctx.font = '600 22px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText("HOLARISE · HÒA LẠC", padX + 76, cardY + 92);
+      ctx.font = '600 21px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.fillText("HOLARISE · HÒA LẠC", padX + 72, cardY + 89);
 
-      drawRoundedRect(ctx, cardX + cardW - 64 - 246, cardY + 58, 246, 50, 25);
-      ctx.fillStyle = palette.accent;
+      /* Tier Pill top right */
+      ctx.font = '600 19px "Be Vietnam Pro", -apple-system, sans-serif';
+      var tierLabel = String(exp.tierBadge || "LV.1 · KHỞI HÀNH");
+      var tierW = Math.max(220, ctx.measureText(tierLabel).width + 48);
+      drawRoundedRect(ctx, cardX + cardW - 64 - tierW, cardY + 56, tierW, 48, 24);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
       ctx.fill();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.26)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
       ctx.fillStyle = "#FFFFFF";
-      ctx.font = '600 20px "Be Vietnam Pro", -apple-system, sans-serif';
       ctx.textAlign = "center";
-      ctx.fillText("THÀNH VIÊN HOLA", cardX + cardW - 64 - 123, cardY + 90);
+      ctx.fillText(tierLabel, cardX + cardW - 64 - tierW / 2, cardY + 87);
       ctx.textAlign = "left";
 
-      /* Avatar Circle (152px) */
+      /* Avatar Circle (148px) */
       var avX = padX;
-      var avY = cardY + 178;
-      var avSize = 152;
+      var avY = cardY + 168;
+      var avSize = 148;
       ctx.save();
       ctx.beginPath();
       ctx.arc(avX + avSize / 2, avY + avSize / 2, avSize / 2, 0, Math.PI * 2);
       ctx.closePath();
       ctx.clip();
+      var drewAvatar = false;
       if (avatarImg) {
-        var iw = avatarImg.naturalWidth || avatarImg.width;
-        var ih = avatarImg.naturalHeight || avatarImg.height;
-        var scale = Math.max(avSize / iw, avSize / ih);
-        var dw = iw * scale;
-        var dh = ih * scale;
-        ctx.drawImage(avatarImg, avX + (avSize - dw) / 2, avY + (avSize - dh) / 2, dw, dh);
-      } else {
+        try {
+          var iw = avatarImg.naturalWidth || avatarImg.width;
+          var ih = avatarImg.naturalHeight || avatarImg.height;
+          if (iw && ih) {
+            var scale = Math.max(avSize / iw, avSize / ih);
+            var dw = iw * scale;
+            var dh = ih * scale;
+            ctx.drawImage(avatarImg, avX + (avSize - dw) / 2, avY + (avSize - dh) / 2, dw, dh);
+            drewAvatar = true;
+          }
+        } catch (_err) {
+          drewAvatar = false;
+        }
+      }
+      if (!drewAvatar) {
         ctx.fillStyle = palette.accent;
         ctx.fillRect(avX, avY, avSize, avSize);
         ctx.fillStyle = "#FFFFFF";
-        ctx.font = '600 54px "Be Vietnam Pro", -apple-system, sans-serif';
+        ctx.font = '600 52px "Be Vietnam Pro", -apple-system, sans-serif';
         ctx.textAlign = "center";
         var initials = String(member.name || "HR")
           .split(/\s+/)
@@ -1222,55 +1380,95 @@
           .slice(-2)
           .map(function (w) { return w[0].toUpperCase(); })
           .join("");
-        ctx.fillText(initials || "HR", avX + avSize / 2, avY + avSize / 2 + 20);
+        ctx.fillText(initials || "HR", avX + avSize / 2, avY + avSize / 2 + 18);
         ctx.textAlign = "left";
       }
       ctx.restore();
       ctx.beginPath();
-      ctx.arc(avX + avSize / 2, avY + avSize / 2, avSize / 2 + 2, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(255,255,255,0.28)";
+      ctx.arc(avX + avSize / 2, avY + avSize / 2, avSize / 2 + 2.5, 0, Math.PI * 2);
+      ctx.strokeStyle = palette.chip;
       ctx.lineWidth = 3;
       ctx.stroke();
 
       /* Pillar Pill & Member Name */
       var infoX = avX + avSize + 36;
       var infoW = innerW - avSize - 36;
-      ctx.font = '600 19px "Be Vietnam Pro", -apple-system, sans-serif';
-      var bW = Math.min(infoW, ctx.measureText(palette.badge).width + 40);
-      drawRoundedRect(ctx, infoX, avY + 6, bW, 42, 21);
+      ctx.font = '600 18px "Be Vietnam Pro", -apple-system, sans-serif';
+      var bW = Math.min(infoW, ctx.measureText(palette.badge).width + 38);
+      drawRoundedRect(ctx, infoX, avY + 4, bW, 40, 20);
       ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
       ctx.fill();
       ctx.strokeStyle = palette.chip;
       ctx.lineWidth = 1.5;
       ctx.stroke();
       ctx.fillStyle = palette.chip;
-      ctx.fillText(palette.badge, infoX + 20, avY + 34);
+      ctx.fillText(palette.badge, infoX + 19, avY + 31);
 
       ctx.fillStyle = "#FFFFFF";
-      ctx.font = '600 48px "Be Vietnam Pro", -apple-system, sans-serif';
-      var nameEndY = drawWrappedLines(ctx, member.name || "Thành viên Hola", infoX, avY + 104, infoW, 58, 2);
+      ctx.font = '600 46px "Be Vietnam Pro", -apple-system, sans-serif';
+      var nameEndY = drawWrappedLines(ctx, member.name || "Thành viên Hola", infoX, avY + 98, infoW, 56, 2);
       ctx.fillStyle = "rgba(244, 247, 245, 0.72)";
-      ctx.font = '400 25px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText(member.organization || "Cộng đồng Hòa Lạc", infoX, nameEndY + 10);
+      ctx.font = '400 24px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.fillText(member.organization || "Cộng đồng Hòa Lạc", infoX, nameEndY + 8);
 
       /* Bio Quote */
       ctx.fillStyle = "rgba(253, 245, 234, 0.9)";
-      ctx.font = 'italic 400 27px "Lora", Georgia, serif';
+      ctx.font = 'italic 400 26px "Lora", Georgia, serif';
       drawWrappedLines(
         ctx,
         "“" + (member.bio || "Sống sâu hơn, xanh hơn và bền bỉ sẻ chia cùng HolaRise.") + "”",
         padX,
-        cardY + 470,
+        cardY + 412,
         innerW,
-        42,
-        3
+        40,
+        2
       );
 
+      /* EXP Progress Panel */
+      var expY = cardY + 518;
+      var expH = 144;
+      drawRoundedRect(ctx, padX, expY, innerW, expH, 22);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.07)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(244, 247, 245, 0.78)";
+      ctx.font = '500 21px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.fillText("Hành trình · " + (exp.tierName || "Khởi hành"), padX + 28, expY + 44);
+
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = '600 22px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.fillText(exp.expText || "20 / 150 EXP", padX + innerW - 28, expY + 44);
+      ctx.textAlign = "left";
+
+      var barX = padX + 28;
+      var barY = expY + 68;
+      var barW = innerW - 56;
+      var barH = 14;
+      drawRoundedRect(ctx, barX, barY, barW, barH, 7);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.14)";
+      ctx.fill();
+
+      var fillW = Math.max(24, Math.round((barW * Math.max(6, Math.min(100, Number(exp.progressPct) || 12))) / 100));
+      var barGrad = ctx.createLinearGradient(barX, barY, barX + fillW, barY);
+      barGrad.addColorStop(0, palette.barA);
+      barGrad.addColorStop(1, palette.barB);
+      drawRoundedRect(ctx, barX, barY, fillW, barH, 7);
+      ctx.fillStyle = barGrad;
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(244, 247, 245, 0.62)";
+      ctx.font = '400 19px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.fillText(exp.breakdownText || "0 hoạt động · 0 lưu bút", padX + 28, expY + 118);
+
       /* Perforation Line */
-      var divY = cardY + 680;
+      var divY = cardY + 720;
       ctx.save();
       ctx.setLineDash([12, 12]);
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.24)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(cardX + 36, divY);
@@ -1278,24 +1476,24 @@
       ctx.stroke();
       ctx.restore();
 
-      ctx.fillStyle = "#F6F7F6";
+      ctx.fillStyle = "#F4F5F3";
       ctx.beginPath();
       ctx.arc(cardX, divY, 24, 0, Math.PI * 2);
       ctx.arc(cardX + cardW, divY, 24, 0, Math.PI * 2);
       ctx.fill();
 
-      var metaY1 = divY + 68;
-      var metaY2 = divY + 228;
+      var metaY1 = divY + 64;
+      var metaY2 = divY + 216;
       var col2X = padX + innerW / 2 + 16;
       var colW = innerW / 2 - 24;
 
       function drawM(label, val, x, y, valColor) {
-        ctx.fillStyle = "rgba(244, 247, 245, 0.56)";
-        ctx.font = '600 20px "Be Vietnam Pro", -apple-system, sans-serif';
+        ctx.fillStyle = "rgba(244, 247, 245, 0.54)";
+        ctx.font = '600 19px "Be Vietnam Pro", -apple-system, sans-serif';
         ctx.fillText(label, x, y);
         ctx.fillStyle = valColor || "#FFFFFF";
-        ctx.font = '600 29px "Be Vietnam Pro", -apple-system, sans-serif';
-        drawWrappedLines(ctx, val, x, y + 40, colW, 38, 2);
+        ctx.font = '600 28px "Be Vietnam Pro", -apple-system, sans-serif';
+        drawWrappedLines(ctx, val, x, y + 38, colW, 36, 2);
       }
 
       drawM("MÃ THÀNH VIÊN", member.memberCode || "HOLA-2026-0001", padX, metaY1, palette.chip);
@@ -1303,7 +1501,7 @@
       drawM("TRỤ CỘT CHÍNH", palette.badge.split(" · ")[0], padX, metaY2);
       drawM("TRẠNG THÁI", "Đang hoạt động", col2X, metaY2);
 
-      var footY = cardY + cardH - 110;
+      var footY = cardY + cardH - 104;
       ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -1314,29 +1512,25 @@
       ctx.textAlign = "left";
       ctx.fillStyle = "rgba(244, 247, 245, 0.72)";
       ctx.font = '600 20px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText("HOLARISE.ORG", padX, footY + 56);
+      ctx.fillText("HOLARISE.ORG", padX, footY + 54);
 
       ctx.textAlign = "right";
       ctx.fillStyle = "rgba(244, 247, 245, 0.62)";
       ctx.font = '500 20px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText("HÒA LẠC · CỘNG ĐỒNG THANH NIÊN", cardX + cardW - 64, footY + 56);
+      ctx.fillText("HÒA LẠC · CỘNG ĐỒNG THANH NIÊN", cardX + cardW - 64, footY + 54);
       ctx.restore();
 
       var fileName =
         "the-thanh-vien-" + String(member.memberCode || "holarise").toLowerCase().replace(/[^a-z0-9-]+/g, "-") + ".png";
+      var dataUrl = canvas.toDataURL("image/png");
       if (canvas.toBlob) {
-        canvas.toBlob(function (blob) {
-          if (!blob) return;
-          var objUrl = URL.createObjectURL(blob);
-          var link = document.createElement("a");
-          link.href = objUrl;
-          link.download = fileName;
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          setTimeout(function () { URL.revokeObjectURL(objUrl); }, 1000);
-        }, "image/png");
+        return new Promise(function (resolve) {
+          canvas.toBlob(function (blob) {
+            deliverPngBlob(blob, dataUrl, fileName, "Thẻ Thành Viên HolaRise").then(resolve);
+          }, "image/png");
+        });
       }
+      return deliverPngBlob(null, dataUrl, fileName, "Thẻ Thành Viên HolaRise");
     });
   }
 

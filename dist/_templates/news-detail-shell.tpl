@@ -24,7 +24,7 @@
   <!-- Open Graph / Facebook / Zalo / Messenger -->
   <meta property="og:type" content="article">
   <meta property="og:locale" content="vi_VN">
-  <meta property="og:site_name" content="HolaRise – Cộng đồng Thanh niên Hòa Lạc">
+  <meta property="og:site_name" content="HolaRise">
   <meta property="og:title" content="__SSR_PAGE_TITLE__">
   <meta property="og:description" content="__SSR_PAGE_DESCRIPTION__">
   <meta property="og:url" content="__SSR_CANONICAL_URL__">
@@ -48,11 +48,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=23e0049821">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=d835dc9457">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "NGO",
+  "@id": "https://holarise.org/#organization",
   "name": "HolaRise – Cộng đồng Thanh niên Hòa Lạc",
   "alternateName": [
     "HolaRise",
@@ -82,7 +83,10 @@
     "addressLocality": "Hòa Lạc",
     "addressRegion": "Hà Nội",
     "addressCountry": "VN"
-  }
+  },
+  "sameAs": [
+    "https://www.youtube.com/@holarise-az"
+  ]
 }
 </script>
   __SSR_EXTRA_JSON_LD__
@@ -321,7 +325,7 @@
             <li><a href="/gioi-thieu/" data-i18n="nav.about">Về HolaRise</a></li>
             <li><a href="/lich-hoat-dong/" data-i18n="nav.schedule">Lịch hoạt động</a></li>
             <li><a href="/hanh-trinh/" data-i18n="nav.journey">Hành trình</a></li>
-            <li><a href="/chinh-sach/" data-i18n="footer.transparency">Chuẩn mực Minh bạch &amp; An toàn</a></li>
+            <li><a href="/chinh-sach/" data-i18n="footer.transparency">Minh bạch &amp; Quy tắc</a></li>
             <li>
               <button class="pwa-install-footer-btn" type="button" data-pwa-install hidden>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -352,6 +356,7 @@
             <li><a href="tel:0777771948">077.777.1948</a></li>
             <li><a href="mailto:phungsu@holarise.org">phungsu@holarise.org</a></li>
             <li>Sinh hoạt định kỳ: 1–2 hoạt động hàng tuần</li>
+            <li><a href="https://www.youtube.com/@holarise-az" target="_blank" rel="noopener noreferrer me">YouTube chính thức ↗</a></li>
           </ul>
         </div>
       </div>
@@ -363,7 +368,7 @@
           <span class="footer-web-only" data-i18n="footer.copyright">© 2026 HolaRise – Cộng đồng Thanh niên Hòa Lạc</span>
         </div>
         <div class="footer-bottom-meta">
-          <a class="footer-web-only" href="/chinh-sach/">Bảo mật &amp; Quy tắc</a>
+          <a class="footer-web-only" href="/chinh-sach/">Minh bạch &amp; Quy tắc</a>
           <span class="footer-web-only" aria-hidden="true">·</span>
           <button class="footer-feedback-trigger" type="button" data-open-feedback-modal><span>Đóng góp &amp; Báo lỗi</span><span class="footer-feedback-arrow" aria-hidden="true">↗</span></button>
         </div>
@@ -838,12 +843,12 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/vendor/gsap.min.js?v=23e0049821" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=23e0049821" defer></script>
-  <script src="/assets/js/motion.js?v=23e0049821" defer></script>
-  <script src="/assets/js/main.js?v=23e0049821" defer></script>
-  <script src="/assets/js/join-pass.js?v=23e0049821" defer></script>
-  <script src="/assets/js/member.js?v=23e0049821" defer></script>
-  <script src="/assets/js/pwa.js?v=23e0049821" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=d835dc9457" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=d835dc9457" defer></script>
+  <script src="/assets/js/motion.js?v=d835dc9457" defer></script>
+  <script src="/assets/js/main.js?v=d835dc9457" defer></script>
+  <script src="/assets/js/join-pass.js?v=d835dc9457" defer></script>
+  <script src="/assets/js/member.js?v=d835dc9457" defer></script>
+  <script src="/assets/js/pwa.js?v=d835dc9457" defer></script>
 </body>
 </html>
