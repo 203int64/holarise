@@ -32,6 +32,40 @@
     } catch (_e) {}
   };
 
+  /* MusicSpace-style spring pill glide across tab navigations (no view-transition backdrop halo) */
+  if (mobileDock) {
+    var curTabIdx = parseInt(mobileDock.getAttribute("data-active") || "-1", 10);
+    var prevTabRaw = null;
+    try {
+      prevTabRaw = window.sessionStorage.getItem("holarise_dock_prev_i");
+      window.sessionStorage.removeItem("holarise_dock_prev_i");
+    } catch (_e) {}
+    var prevTabIdx = prevTabRaw !== null ? parseInt(prevTabRaw, 10) : NaN;
+    var dockInd = mobileDock.querySelector(".mobile-dock-ind");
+    if (
+      dockInd &&
+      !prefersReducedMotion &&
+      curTabIdx >= 0 &&
+      Number.isFinite(prevTabIdx) &&
+      prevTabIdx >= 0 &&
+      prevTabIdx !== curTabIdx
+    ) {
+      dockInd.style.transition = "none";
+      mobileDock.style.setProperty("--i", String(prevTabIdx));
+      void dockInd.offsetWidth;
+      dockInd.style.transition = "";
+      mobileDock.style.setProperty("--i", String(curTabIdx));
+      mobileDock.classList.add("is-tab-arrived");
+    }
+    mobileDock.addEventListener("click", function (event) {
+      var link = event.target && event.target.closest ? event.target.closest(".mobile-dock-link") : null;
+      if (!link) return;
+      try {
+        window.sessionStorage.setItem("holarise_dock_prev_i", String(curTabIdx));
+      } catch (_e) {}
+    });
+  }
+
   if (header || mobileDock) {
     var scrollRafPending = false;
     var onScroll = function () {
@@ -60,6 +94,8 @@
         } else if ((delta < -14 && !nearBottom) || (delta < 0 && currentY <= 16)) {
           setDockExpanded(1);
         }
+        var shimmer = prefersReducedMotion ? 0 : Math.abs(((currentY / 420) % 2) - 1);
+        mobileDock.style.setProperty("--sh", String(shimmer));
       }
 
       lastScrollY = currentY;
