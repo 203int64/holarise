@@ -80,16 +80,22 @@ export async function onRequestPost({ request, env }) {
   try {
     const expectedOrigin = new URL(request.url).origin;
     const rpId = resolveRpId(request);
-    await verifyClientData(clientDataJSON, "webauthn.get", challenge, expectedOrigin);
-    const authData = await verifyAuthenticatorData(authenticatorData, rpId);
-    if (cred.sign_count > 0 && authData.signCount > 0 && authData.signCount <= cred.sign_count) {
+    const cdCheck = await verifyClientData(clientDataJSON, "webauthn.get", challenge, expectedOrigin);
+    if (!cdCheck.ok) {
+      return errorResponse(401, "INVALID_CLIENT_DATA", cdCheck.error || "Dữ liệu xác thực sinh trắc học không hợp lệ.");
+    }
+    const authCheck = await verifyAuthenticatorData(authenticatorData, rpId);
+    if (!authCheck.ok) {
+      return errorResponse(401, "INVALID_AUTH_DATA", authCheck.error || "Thông tin thiết bị sinh trắc học không hợp lệ.");
+    }
+    if (cred.sign_count > 0 && authCheck.signCount > 0 && authCheck.signCount <= cred.sign_count) {
       return errorResponse(401, "PASSKEY_REPLAY", "Phát hiện chữ ký sinh trắc học không hợp lệ.");
     }
     const valid = await verifyAssertionSignature({
       publicKeySpki: cred.public_key_spki,
       algorithm: cred.algorithm,
-      authenticatorDataB64: authenticatorData,
-      clientDataJSONB64: clientDataJSON,
+      authenticatorDataBytes: authCheck.authData,
+      clientDataRawBytes: cdCheck.rawBytes,
       signatureB64: signature,
     });
     if (!valid) {
@@ -99,7 +105,7 @@ export async function onRequestPost({ request, env }) {
     await env.DB.prepare(
       "UPDATE admin_passkeys SET sign_count = ?, last_used_at = ? WHERE credential_id = ?"
     )
-      .bind(Math.max(cred.sign_count, authData.signCount), nowIso, cred.credential_id)
+      .bind(Math.max(Number(cred.sign_count || 0), authCheck.signCount), nowIso, cred.credential_id)
       .run();
   } catch (err) {
     return errorResponse(401, "PASSKEY_VERIFY_FAILED", err?.message || "Xác thực sinh trắc học thất bại.");

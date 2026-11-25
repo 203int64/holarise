@@ -52,8 +52,14 @@ export async function onRequestPost(context) {
   const rpId = resolveRpId(request);
 
   try {
-    await verifyClientData(clientDataJSON, "webauthn.create", challenge, expectedOrigin);
-    const authData = await verifyAuthenticatorData(authenticatorData, rpId);
+    const cdCheck = await verifyClientData(clientDataJSON, "webauthn.create", challenge, expectedOrigin);
+    if (!cdCheck.ok) {
+      return errorResponse(400, "INVALID_CLIENT_DATA", cdCheck.error || "Dữ liệu đăng ký sinh trắc học không hợp lệ.");
+    }
+    const authCheck = await verifyAuthenticatorData(authenticatorData, rpId);
+    if (!authCheck.ok) {
+      return errorResponse(400, "INVALID_AUTH_DATA", authCheck.error || "Thông tin thiết bị sinh trắc học không hợp lệ.");
+    }
     await importSpkiPublicKey(publicKeySpki, algorithm);
 
     await env.DB.prepare(
@@ -66,7 +72,7 @@ export async function onRequestPost(context) {
         auth.user.id,
         publicKeySpki,
         algorithm,
-        authData.signCount,
+        authCheck.signCount,
         deviceLabel,
         nowIso,
         nowIso

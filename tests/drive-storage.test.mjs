@@ -606,3 +606,131 @@ test("Migration 0012 fixes production D1 missing 0003: widens role CHECK, preser
   assert.equal(albData.ok, true);
   assert.deepEqual(albData.items, []);
 });
+
+test("Admin/Media WebAuthn Passkey end-to-end register-verify & login-verify with ECDSA P-256", async () => {
+  const { onRequestPost: registerOptionsPost } = await import("../functions/api/auth/passkey/register-options.js");
+  const { onRequestPost: registerVerifyPost } = await import("../functions/api/auth/passkey/register-verify.js");
+  const { onRequestPost: loginVerifyPost } = await import("../functions/api/auth/passkey/login-verify.js");
+  const { bytesToBase64Url } = await import("../functions/_lib/webauthn.js");
+
+  const db = createMockD1();
+  const env = { DB: db, MEDIA_ACCESS_PIN: "9999" };
+
+  // 1. Register media account to obtain valid session cookie
+  const gateRes = await mediaGatePost({
+    request: new Request("https://holarise.org/api/auth/media-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({
+        pin: "9999",
+        fullName: "Trần Hải Yến",
+        phone: "0988777666",
+        department: "Ban Media",
+        email: "yen@holarise.org",
+      }),
+    }),
+    env,
+  });
+  assert.equal(gateRes.status, 200);
+  const cookieHeader = (gateRes.headers.get("Set-Cookie") || "").split(";")[0];
+
+  // 2. Request registration options
+  const regOptRes = await registerOptionsPost({
+    request: new Request("https://holarise.org/api/auth/passkey/register-options", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org", Cookie: cookieHeader },
+      body: JSON.stringify({}),
+    }),
+    env,
+  });
+  assert.equal(regOptRes.status, 200);
+  const { options: regOpts } = await regOptRes.json();
+
+  // 3. Generate real ECDSA P-256 keypair and build valid authenticatorData & clientDataJSON
+  const keyPair = await crypto.subtle.generateKey(
+    { name: "ECDSA", namedCurve: "P-256" },
+    true,
+    ["sign", "verify"]
+  );
+  const spkiBuf = await crypto.subtle.exportKey("spki", keyPair.publicKey);
+  const rpIdHash = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("holarise.org")));
+  const makeAuthData = (signCount) => {
+    const out = new Uint8Array(37);
+    out.set(rpIdHash, 0);
+    out[32] = 0x05; // UP + UV
+    out[33] = (signCount >>> 24) & 0xff;
+    out[34] = (signCount >>> 16) & 0xff;
+    out[35] = (signCount >>> 8) & 0xff;
+    out[36] = signCount & 0xff;
+    return out;
+  };
+  const regClientDataBytes = new TextEncoder().encode(
+    JSON.stringify({ type: "webauthn.create", challenge: regOpts.challenge, origin: "https://holarise.org" })
+  );
+  const credentialId = "cred-test-p256-001";
+
+  const regVerifyRes = await registerVerifyPost({
+    request: new Request("https://holarise.org/api/auth/passkey/register-verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org", Cookie: cookieHeader },
+      body: JSON.stringify({
+        credentialId,
+        publicKeySpki: bytesToBase64Url(spkiBuf),
+        algorithm: -7,
+        clientDataJSON: bytesToBase64Url(regClientDataBytes),
+        authenticatorData: bytesToBase64Url(makeAuthData(1)),
+        challenge: regOpts.challenge,
+        deviceLabel: "MacBook Touch ID",
+      }),
+    }),
+    env,
+  });
+  assert.equal(regVerifyRes.status, 201);
+
+  // 4. Request login options and sign real WebAuthn assertion
+  const loginOptRes = await passkeyLoginOptionsPost({
+    request: new Request("https://holarise.org/api/auth/passkey/login-options", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({}),
+    }),
+    env,
+  });
+  assert.equal(loginOptRes.status, 200);
+  const { options: loginOpts } = await loginOptRes.json();
+
+  const loginClientDataBytes = new TextEncoder().encode(
+    JSON.stringify({ type: "webauthn.get", challenge: loginOpts.challenge, origin: "https://holarise.org" })
+  );
+  const loginAuthData = makeAuthData(2);
+  const clientDataHash = new Uint8Array(await crypto.subtle.digest("SHA-256", loginClientDataBytes));
+  const payloadToSign = new Uint8Array(loginAuthData.length + clientDataHash.length);
+  payloadToSign.set(loginAuthData, 0);
+  payloadToSign.set(clientDataHash, loginAuthData.length);
+
+  const rawSig = await crypto.subtle.sign(
+    { name: "ECDSA", hash: "SHA-256" },
+    keyPair.privateKey,
+    payloadToSign
+  );
+
+  const loginVerifyRes = await loginVerifyPost({
+    request: new Request("https://holarise.org/api/auth/passkey/login-verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({
+        credentialId,
+        clientDataJSON: bytesToBase64Url(loginClientDataBytes),
+        authenticatorData: bytesToBase64Url(loginAuthData),
+        signature: bytesToBase64Url(rawSig),
+        challenge: loginOpts.challenge,
+      }),
+    }),
+    env,
+  });
+  assert.equal(loginVerifyRes.status, 200);
+  const loginData = await loginVerifyRes.json();
+  assert.equal(loginData.ok, true);
+  assert.equal(loginData.user.email, "yen@holarise.org");
+  assert.match(loginVerifyRes.headers.get("Set-Cookie") || "", /holarise_session=/);
+});
