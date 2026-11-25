@@ -92,6 +92,9 @@ export async function onRequestDelete(context) {
       await context.env.MEDIA_KV.delete(`media:${existing.media_key}`).catch(() => {});
     }
   }
+  if (existing.web_media_key && context.env?.MEDIA_KV) {
+    await context.env.MEDIA_KV.delete(`media:${existing.web_media_key}`).catch(() => {});
+  }
 
   // If this photo was the album's cover, fallback to the next available photo
   const album = await context.env.DB.prepare(

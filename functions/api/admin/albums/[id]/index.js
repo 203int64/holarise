@@ -4,6 +4,7 @@ import {
   isDriveConfigured,
   trashDriveFile,
 } from "../../../../_lib/drive.js";
+import { ensureMediaApprovalSchema } from "../../../../_lib/media-approval-schema.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../../_lib/security.js";
 import { validateAlbumInput } from "../../../../_lib/validation.js";
 import { serializeAlbumRow } from "../index.js";
@@ -12,11 +13,19 @@ const MEDIA_ROLES = ["super_admin", "editor", "media"];
 
 export function serializePhotoRow(row) {
   if (!row) return null;
+  const approvalStatus = row.approval_status || "approved";
+  const webUrl = row.web_url || "";
   return {
     id: row.id,
     albumId: row.album_id,
     mediaKey: row.media_key || "",
     url: row.url,
+    webUrl,
+    webMediaKey: row.web_media_key || "",
+    displayUrl: webUrl || row.url,
+    approvalStatus,
+    approvedBy: row.approved_by || "",
+    approvedAt: row.approved_at || "",
     caption: row.caption || "",
     alt: row.alt || "",
     photographer: row.photographer || "",
@@ -32,11 +41,15 @@ export async function onRequestGet(context) {
   const auth = await requireAdmin(context, { allowedRoles: MEDIA_ROLES });
   if (!auth.ok) return auth.response;
 
+  await ensureMediaApprovalSchema(context.env.DB);
+
   const id = String(context.params?.id || "");
   const album = await context.env.DB.prepare(
     `SELECT a.*,
             (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id) AS photo_count,
-            (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id AND p.is_featured_home = 1) AS featured_count
+            (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id AND COALESCE(p.approval_status, 'approved') = 'approved') AS approved_count,
+            (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id AND p.approval_status = 'pending') AS pending_count,
+            (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id AND p.is_featured_home = 1 AND COALESCE(p.approval_status, 'approved') = 'approved') AS featured_count
      FROM media_albums a WHERE a.id = ?`
   )
     .bind(id)
@@ -188,8 +201,9 @@ export async function onRequestDelete(context) {
     return errorResponse(404, "NOT_FOUND", "Không tìm thấy album để xóa.");
   }
 
+  await ensureMediaApprovalSchema(context.env.DB);
   const { results: photoRows } = await context.env.DB.prepare(
-    "SELECT media_key FROM media_photos WHERE album_id = ? AND media_key != ''"
+    "SELECT media_key, web_media_key FROM media_photos WHERE album_id = ?"
   )
     .bind(id)
     .all();
@@ -198,8 +212,9 @@ export async function onRequestDelete(context) {
   await context.env.DB.prepare("DELETE FROM media_albums WHERE id = ?").bind(id).run();
 
   const keys = (photoRows || []).map((r) => r.media_key).filter(Boolean);
+  const webKeys = (photoRows || []).map((r) => r.web_media_key).filter(Boolean);
   const driveIds = keys.filter((k) => k.startsWith("drive:")).map((k) => k.slice(6));
-  const kvKeys = keys.filter((k) => !k.startsWith("drive:"));
+  const kvKeys = [...keys.filter((k) => !k.startsWith("drive:")), ...webKeys];
   if (context.env?.MEDIA_KV && kvKeys.length > 0) {
     await Promise.allSettled(kvKeys.map((k) => context.env.MEDIA_KV.delete(`media:${k}`)));
   }

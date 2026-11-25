@@ -3,10 +3,87 @@ import {
   ensureCategorySubfolder,
   isDriveConfigured,
 } from "../../../_lib/drive.js";
+import { ensureMediaApprovalSchema } from "../../../_lib/media-approval-schema.js";
+import { getTodayVnIso } from "../../../_lib/render.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
-import { validateAlbumInput } from "../../../_lib/validation.js";
+import { slugifyVi, validateAlbumInput } from "../../../_lib/validation.js";
 
 const MEDIA_ROLES = ["super_admin", "editor", "media"];
+
+async function autoProvisionFinishedEventAlbums(env) {
+  if (!env?.DB) return;
+  const todayVn = getTodayVnIso(new Date());
+  const finishedEventsRes = await env.DB.prepare(
+    `SELECT id, title, date, date_display, location, filters_json, image, summary
+     FROM events
+     WHERE status = 'published'
+       AND (kind = 'past' OR (date != '' AND date < ?))
+     ORDER BY date DESC
+     LIMIT 60`
+  )
+    .bind(todayVn)
+    .all()
+    .catch(() => null);
+
+  const finishedEvents = finishedEventsRes?.results || [];
+  if (finishedEvents.length === 0) return;
+
+  const existingAlbumsRes = await env.DB.prepare(
+    "SELECT id, slug, event_id, event_date, title FROM media_albums LIMIT 300"
+  )
+    .all()
+    .catch(() => null);
+  const existingAlbums = existingAlbumsRes?.results || [];
+
+  const existingEventIds = new Set(existingAlbums.map((a) => a.event_id).filter(Boolean));
+  const existingSlugs = new Set(existingAlbums.map((a) => a.slug).filter(Boolean));
+  const existingDates = new Set(existingAlbums.map((a) => a.event_date).filter(Boolean));
+
+  const now = new Date().toISOString();
+  for (const ev of finishedEvents) {
+    if (!ev.id || existingEventIds.has(ev.id)) continue;
+    const baseSlug = slugifyVi(`${ev.title || ev.id}-${ev.date || ""}`).slice(0, 80) || slugifyVi(ev.id);
+    // Avoid duplicating an album already created manually for the same event date & matching title
+    const alreadyMatchedByDate =
+      ev.date &&
+      existingDates.has(ev.date) &&
+      existingAlbums.some(
+        (a) =>
+          a.event_date === ev.date &&
+          slugifyVi(a.title || "").slice(0, 24) === slugifyVi(ev.title || "").slice(0, 24)
+      );
+    if (alreadyMatchedByDate || existingSlugs.has(baseSlug)) continue;
+
+    const id = `alb-ev-${slugifyVi(ev.id).slice(0, 48)}`;
+    await env.DB.prepare(
+      `INSERT OR IGNORE INTO media_albums (
+         id, slug, title, description, event_date, date_display, location,
+         filters_json, drive_url, cover_url, status, sort_order, event_id,
+         created_by, created_at, updated_at
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, '', ?, 'published', 10, ?, 'auto-event', ?, ?)`
+    )
+      .bind(
+        id,
+        baseSlug,
+        ev.title || "Album sự kiện HolaRise",
+        ev.summary || "",
+        ev.date || "",
+        ev.date_display || ev.date || "",
+        ev.location || "Hòa Lạc, Hà Nội",
+        ev.filters_json || "[]",
+        ev.image || "",
+        ev.id,
+        now,
+        now
+      )
+      .run()
+      .catch(() => {});
+
+    existingEventIds.add(ev.id);
+    existingSlugs.add(baseSlug);
+    if (ev.date) existingDates.add(ev.date);
+  }
+}
 
 function safeParseFilters(raw) {
   try {
@@ -33,7 +110,10 @@ export function serializeAlbumRow(row) {
     status: row.status || "published",
     sortOrder: Number(row.sort_order || 0),
     photoCount: Number(row.photo_count || 0),
+    approvedCount: Number(row.approved_count ?? row.photo_count ?? 0),
+    pendingCount: Number(row.pending_count || 0),
     featuredCount: Number(row.featured_count || 0),
+    eventId: row.event_id || "",
     createdBy: row.created_by || "",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -44,10 +124,15 @@ export async function onRequestGet(context) {
   const auth = await requireAdmin(context, { allowedRoles: MEDIA_ROLES });
   if (!auth.ok) return auth.response;
 
+  await ensureMediaApprovalSchema(context.env.DB);
+  await autoProvisionFinishedEventAlbums(context.env);
+
   const { results } = await context.env.DB.prepare(
     `SELECT a.*,
             (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id) AS photo_count,
-            (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id AND p.is_featured_home = 1) AS featured_count
+            (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id AND COALESCE(p.approval_status, 'approved') = 'approved') AS approved_count,
+            (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id AND p.approval_status = 'pending') AS pending_count,
+            (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id AND p.is_featured_home = 1 AND COALESCE(p.approval_status, 'approved') = 'approved') AS featured_count
      FROM media_albums a
      ORDER BY a.sort_order ASC, a.event_date DESC, a.created_at DESC
      LIMIT 200`

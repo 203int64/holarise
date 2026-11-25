@@ -250,6 +250,59 @@
     $("#stat-featured").textContent = String(totalFeatured);
   }
 
+  function isApproverRole() {
+    return state.user?.role === "super_admin" || state.user?.role === "editor";
+  }
+
+  async function compressRemoteImageToWebBlob(url, maxDim = 1280, quality = 0.82) {
+    const res = await fetch(url, { credentials: "same-origin" });
+    if (!res.ok) {
+      throw new Error(`Không thể tải ảnh gốc để nén (HTTP ${res.status}).`);
+    }
+    const origBlob = await res.blob();
+    const img = await new Promise((resolve, reject) => {
+      const el = new Image();
+      const objUrl = URL.createObjectURL(origBlob);
+      el.onload = () => {
+        URL.revokeObjectURL(objUrl);
+        resolve(el);
+      };
+      el.onerror = () => {
+        URL.revokeObjectURL(objUrl);
+        reject(new Error("Không thể giải mã ảnh gốc để nén."));
+      };
+      el.src = objUrl;
+    });
+
+    let { width, height } = img;
+    if (width > maxDim || height > maxDim) {
+      if (width >= height) {
+        height = Math.round((height * maxDim) / width);
+        width = maxDim;
+      } else {
+        width = Math.round((width * maxDim) / height);
+        height = maxDim;
+      }
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, width, height);
+
+    // Prefer WebP for smallest size on Zalo WebView; fallback to JPEG if browser lacks WebP encode
+    const webpBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+    if (webpBlob && webpBlob.type === "image/webp" && webpBlob.size > 0) {
+      return { blob: webpBlob, ext: "webp" };
+    }
+    const jpegBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+    if (jpegBlob && jpegBlob.size > 0) {
+      return { blob: jpegBlob, ext: "jpg" };
+    }
+    throw new Error("Trình duyệt không nén được ảnh web.");
+  }
+
   function renderAlbumsGrid() {
     const grid = $("#albums-grid");
     if (!grid) return;
@@ -282,6 +335,10 @@
         const driveBadge = a.driveUrl
           ? '<span class="badge badge--info">Có link Drive</span>'
           : "";
+        const pendingBadge =
+          a.pendingCount > 0
+            ? `<span class="badge badge--pending">${a.pendingCount} chờ duyệt</span>`
+            : "";
         const filterBadges = (a.filters || [])
           .map((f) => `<span class="badge">${esc(FILTER_LABELS[f] || f)}</span>`)
           .join("");
@@ -294,7 +351,7 @@
             <span class="album-cover-count">${a.photoCount} ảnh</span>
           </div>
           <div class="album-card-body">
-            <div class="album-card-badges">${statusBadge}${driveBadge}${filterBadges}</div>
+            <div class="album-card-badges">${statusBadge}${pendingBadge}${driveBadge}${filterBadges}</div>
             <h3 class="album-card-title">${esc(a.title)}</h3>
             <div class="album-card-meta">${esc(a.dateDisplay || a.eventDate || "Chưa ghi ngày")} · ${esc(a.location || "Hòa Lạc")}</div>
             <div class="album-card-actions">
@@ -360,7 +417,12 @@
       driveRow.hidden = true;
     }
 
-    $("#ws-photos-heading").textContent = `Danh sách ảnh trong Album (${state.photos.length})`;
+    const approvedCount = state.photos.filter((p) => (p.approvalStatus || "approved") === "approved").length;
+    const pendingCount = state.photos.filter((p) => p.approvalStatus === "pending").length;
+    $("#ws-photos-heading").textContent =
+      pendingCount > 0
+        ? `Danh sách ảnh (${state.photos.length} tổng · ${approvedCount} đã lên web · ${pendingCount} chờ duyệt)`
+        : `Danh sách ảnh trong Album (${state.photos.length})`;
   }
 
   function renderPhotosGrid() {
@@ -371,18 +433,35 @@
     if (state.photos.length === 0) {
       grid.innerHTML = `<div class="media-empty-box">
         <h3>Album này chưa có ảnh nào</h3>
-        <p>Kéo thả ảnh vào khung phía trên hoặc bấm để chọn nhiều ảnh từ máy tính / điện thoại.</p>
+        <p>Kéo thả ảnh gốc vào khung phía trên hoặc bấm để chọn nhiều ảnh từ máy tính / điện thoại.</p>
       </div>`;
       return;
     }
 
+    const canApprove = isApproverRole();
+
     grid.innerHTML = state.photos
       .map((p) => {
-        const isCover = a.coverUrl === p.url;
-        return `<article class="photo-card" data-photo-id="${esc(p.id)}">
+        const status = p.approvalStatus || "approved";
+        const isApproved = status === "approved";
+        const isCover = a.coverUrl === p.url || (p.webUrl && a.coverUrl === p.webUrl);
+        const statusPill = isApproved
+          ? `<span class="photo-badge-approved">${p.webUrl ? "Đã duyệt · WebP" : "Đã lên web"}</span>`
+          : status === "rejected"
+            ? '<span class="photo-badge-rejected">Đã ẩn</span>'
+            : '<span class="photo-badge-pending">Chờ duyệt</span>';
+
+        const approveBtnHtml = canApprove
+          ? isApproved
+            ? `<button class="btn btn--ghost btn--sm" type="button" data-unapprove-photo="${esc(p.id)}">Ẩn khỏi web</button>`
+            : `<button class="btn btn--primary btn--sm" type="button" data-approve-photo="${esc(p.id)}">✓ Duyệt &amp; nén lên web</button>`
+          : "";
+
+        return `<article class="photo-card ${isApproved ? "" : "photo-card--pending"}" data-photo-id="${esc(p.id)}">
           <div class="photo-card-thumb">
-            <img src="${esc(p.url)}" alt="${esc(p.alt || p.caption || a.title)}" loading="lazy">
+            <img src="${esc(p.displayUrl || p.url)}" alt="${esc(p.alt || p.caption || a.title)}" loading="lazy">
             <div class="photo-badges">
+              ${statusPill}
               ${isCover ? '<span class="photo-badge-cover">Ảnh bìa</span>' : ""}
               ${p.isFeaturedHome ? '<span class="photo-badge-home">★ Trang chủ</span>' : ""}
             </div>
@@ -391,9 +470,10 @@
             <p class="photo-caption ${p.caption ? "" : "photo-caption--empty"}">${esc(p.caption || "Chưa có chú thích")}</p>
             ${p.photographer ? `<div class="photo-photographer">Ảnh: ${esc(p.photographer)}</div>` : ""}
             <div class="photo-card-actions">
+              ${approveBtnHtml}
               <button class="btn btn--outline btn--sm" type="button" data-edit-photo="${esc(p.id)}">Sửa</button>
-              <button class="btn btn--sm ${p.isFeaturedHome ? "btn--primary" : "btn--ghost"}" type="button" data-toggle-featured="${esc(p.id)}" data-featured="${p.isFeaturedHome ? "1" : "0"}">${p.isFeaturedHome ? "★ Đã ghim" : "☆ Ghim Trang chủ"}</button>
-              ${!isCover ? `<button class="btn btn--ghost btn--sm" type="button" data-set-cover="${esc(p.id)}">Làm bìa</button>` : ""}
+              ${isApproved && canApprove ? `<button class="btn btn--sm ${p.isFeaturedHome ? "btn--primary" : "btn--ghost"}" type="button" data-toggle-featured="${esc(p.id)}" data-featured="${p.isFeaturedHome ? "1" : "0"}">${p.isFeaturedHome ? "★ Đã ghim" : "☆ Ghim Trang chủ"}</button>` : ""}
+              ${isApproved && !isCover ? `<button class="btn btn--ghost btn--sm" type="button" data-set-cover="${esc(p.id)}">Làm bìa</button>` : ""}
               <button class="btn btn--danger-ghost btn--sm" type="button" data-delete-photo="${esc(p.id)}">Xóa</button>
             </div>
           </div>
@@ -516,6 +596,7 @@
           alt: state.activeAlbum.title,
           photographer,
           isFeaturedHome: false,
+          approvalStatus: storageInfo.driveConfigured ? "pending" : undefined,
         },
       });
 
@@ -915,6 +996,61 @@
 
     // Delegated clicks on Photos Grid
     $("#ws-photos-grid").addEventListener("click", async (e) => {
+      const approveBtn = e.target.closest("[data-approve-photo]");
+      if (approveBtn) {
+        const id = approveBtn.getAttribute("data-approve-photo");
+        const photo = state.photos.find((p) => p.id === id);
+        if (!photo) return;
+        const prevLabel = approveBtn.textContent;
+        approveBtn.disabled = true;
+        approveBtn.textContent = "Đang nén WebP...";
+        try {
+          const { blob, ext } = await compressRemoteImageToWebBlob(photo.url, 1280, 0.82);
+          approveBtn.textContent = "Đang duyệt...";
+          const fd = new FormData();
+          fd.append("action", "approve");
+          fd.append("file", blob, `${id}.${ext}`);
+          const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(id)}/approve`, {
+            method: "POST",
+            body: fd,
+          });
+          const idx = state.photos.findIndex((p) => p.id === id);
+          if (idx !== -1) state.photos[idx] = res.item;
+          renderWorkspaceHeader();
+          renderPhotosGrid();
+          await loadAlbums();
+          const kb = Math.max(1, Math.round((res.compressedBytes || blob.size) / 1024));
+          toast(`Đã duyệt & nén lên web (${kb} KB). Ảnh gốc vẫn giữ trên Drive.`, "success");
+        } catch (err) {
+          approveBtn.disabled = false;
+          approveBtn.textContent = prevLabel;
+          toast(err.message || "Không thể duyệt ảnh lúc này.", "error");
+        }
+        return;
+      }
+
+      const unapproveBtn = e.target.closest("[data-unapprove-photo]");
+      if (unapproveBtn) {
+        const id = unapproveBtn.getAttribute("data-unapprove-photo");
+        unapproveBtn.disabled = true;
+        try {
+          const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(id)}/approve`, {
+            method: "POST",
+            json: { action: "pending" },
+          });
+          const idx = state.photos.findIndex((p) => p.id === id);
+          if (idx !== -1) state.photos[idx] = res.item;
+          renderWorkspaceHeader();
+          renderPhotosGrid();
+          await loadAlbums();
+          toast("Đã ẩn ảnh khỏi web công khai (ảnh gốc trên Drive vẫn giữ nguyên).", "info");
+        } catch (err) {
+          unapproveBtn.disabled = false;
+          toast(err.message || "Không thể ẩn ảnh lúc này.", "error");
+        }
+        return;
+      }
+
       const editBtn = e.target.closest("[data-edit-photo]");
       if (editBtn) {
         const photo = state.photos.find((p) => p.id === editBtn.getAttribute("data-edit-photo"));

@@ -1,3 +1,4 @@
+import { ensureMediaApprovalSchema } from "../_lib/media-approval-schema.js";
 import {
   renderNewsCardsHtml,
   renderPublicAlbumsHtml,
@@ -12,6 +13,8 @@ export async function onRequestGet({ request, env }) {
   if (!env?.DB || !env?.ASSETS) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
+
+  await ensureMediaApprovalSchema(env.DB);
 
   const [assetRes, postsRes, albumsRes, photosRes] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
@@ -29,10 +32,12 @@ export async function onRequestGet({ request, env }) {
       .all()
       .catch(() => null),
     env.DB.prepare(
-      `SELECT p.*
+      `SELECT p.id, p.album_id, COALESCE(NULLIF(p.web_url, ''), p.url) AS url,
+              p.caption, p.alt, p.photographer
        FROM media_photos p
        JOIN media_albums a ON a.id = p.album_id
        WHERE a.status = 'published'
+         AND COALESCE(p.approval_status, 'approved') = 'approved'
        ORDER BY p.sort_order ASC, p.created_at DESC
        LIMIT 600`
     )
@@ -82,6 +87,12 @@ export async function onRequestGet({ request, env }) {
 
     if (albumsWithPhotos.length > 0) {
       html = replaceMarker(html, "D1_ALBUMS", renderPublicAlbumsHtml(albumsWithPhotos));
+      const hasD1Event1511 = albumsWithPhotos.some(
+        (a) => a.id === "alb-holaheart-2026-11-15" || a.eventDate === "2026-11-15"
+      );
+      if (hasD1Event1511) {
+        html = replaceMarker(html, "STATIC_1511_GALLERY", "");
+      }
     }
   }
 

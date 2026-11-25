@@ -341,9 +341,69 @@ test("RBAC + Full Media Portal CRUD + KV cleanup on delete + SSR /hoat-dong/ & /
   assert.equal(attachRes.status, 201);
   const attached = await attachRes.json();
   assert.equal(attached.items.length, 2);
-  assert.equal(attached.coverUrl, img1.url);
+  // CTV ('media') uploads enter 'pending' state and do NOT appear publicly until Admin approves
+  assert.equal(attached.items[0].approvalStatus, "pending");
+  assert.equal(attached.items[1].approvalStatus, "pending");
 
-  // 8. Verify SSR /hanh-trinh/ renders published album (XSS escaped!), Drive link, excludes draft album, keeps static gallery
+  const pendingActRes = await ssrJourney({ request: new Request(`${ORIGIN}/hanh-trinh/`), env });
+  const pendingActHtml = await pendingActRes.text();
+  assert.ok(!pendingActHtml.includes("Ra quân Hồ Tân Xã"));
+
+  // 7b. CTV ('media') is blocked (403) from self-approving; Admin approves & stores compressed web copy
+  const { onRequestPost: photoApprove } = await import("../functions/api/admin/photos/[id]/approve.js");
+  const ctvApproveBlocked = await photoApprove({
+    request: makeReq(`/api/admin/photos/${attached.items[0].id}/approve`, {
+      method: "POST",
+      cookie: mediaCookie,
+      json: { action: "approve" },
+    }),
+    params: { id: attached.items[0].id },
+    env,
+  });
+  assert.equal(ctvApproveBlocked.status, 403);
+
+  // Admin approves photo 1 with compressed file (stored in MEDIA_KV as web_url) and photo 2 via JSON
+  const fd = new FormData();
+  fd.append("action", "approve");
+  fd.append("file", new Blob([fakeJpegBytes()], { type: "image/jpeg" }), "compressed.jpg");
+  const approveP1 = await photoApprove({
+    request: new Request(`${ORIGIN}/api/admin/photos/${attached.items[0].id}/approve`, {
+      method: "POST",
+      headers: { Cookie: superCookie, Origin: ORIGIN },
+      body: fd,
+    }),
+    params: { id: attached.items[0].id },
+    env,
+  });
+  assert.equal(approveP1.status, 200);
+  const approvedP1 = (await approveP1.json()).item;
+  assert.equal(approvedP1.approvalStatus, "approved");
+  assert.ok(approvedP1.webUrl.startsWith("/api/media/web-"));
+
+  // Admin pins approved photo 1 to Home and approves photo 2
+  const pinP1 = await photoPatch({
+    request: makeReq(`/api/admin/photos/${attached.items[0].id}`, {
+      method: "PATCH",
+      cookie: superCookie,
+      json: { isFeaturedHome: true },
+    }),
+    params: { id: attached.items[0].id },
+    env,
+  });
+  assert.equal(pinP1.status, 200);
+
+  const approveP2 = await photoApprove({
+    request: makeReq(`/api/admin/photos/${attached.items[1].id}/approve`, {
+      method: "POST",
+      cookie: superCookie,
+      json: { action: "approve" },
+    }),
+    params: { id: attached.items[1].id },
+    env,
+  });
+  assert.equal(approveP2.status, 200);
+
+  // 8. Verify SSR /hanh-trinh/ renders published album (XSS escaped!), uses compressed webUrl, excludes draft album, keeps static gallery
   const actRes = await ssrJourney({
     request: new Request(`${ORIGIN}/hanh-trinh/`),
     env,
@@ -351,20 +411,21 @@ test("RBAC + Full Media Portal CRUD + KV cleanup on delete + SSR /hoat-dong/ & /
   assert.equal(actRes.status, 200);
   const actHtml = await actRes.text();
   assert.ok(actHtml.includes("Ra quân Hồ Tân Xã &lt;script&gt;alert(1)&lt;/script&gt;"));
+  assert.ok(actHtml.includes(approvedP1.webUrl));
   assert.ok(!actHtml.includes("<script>alert(1)</script>"));
   // Public gallery strictly hides external Google Drive download links for member privacy (BP-03)
   assert.ok(!actHtml.includes("https://drive.google.com/drive/folders/holarise-tan-xa"));
   assert.ok(!actHtml.includes("Album Nháp Nội Bộ"));
   assert.ok(actHtml.includes("HolaHeart × MusicSpace"));
 
-  // 9. Verify SSR / renders featured home photo in HORIZONTAL_GALLERY
+  // 9. Verify SSR / renders featured home photo in HORIZONTAL_GALLERY using compressed webUrl
   const homeRes = await ssrHome({
     request: new Request(`${ORIGIN}/`),
     env,
   });
   assert.equal(homeRes.status, 200);
   const homeHtml = await homeRes.text();
-  assert.ok(homeHtml.includes(img1.url));
+  assert.ok(homeHtml.includes(approvedP1.webUrl));
   assert.ok(homeHtml.includes("Ảnh 1 ven hồ"));
 
   // 10. Patch photo 2 as cover, then delete photo 2 -> KV key must be deleted & cover falls back to img1

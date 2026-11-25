@@ -1,3 +1,4 @@
+import { ensureMediaApprovalSchema } from "./_lib/media-approval-schema.js";
 import {
   applySiteVisualsSsr,
   buildEventsJsonLd,
@@ -18,6 +19,8 @@ export async function onRequestGet({ request, env }) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
 
+  await ensureMediaApprovalSchema(env.DB);
+
   const [assetRes, eventsRes, featuredRes, partnersRow, visualsRow, testimonialsRes] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
     env.DB.prepare(
@@ -26,10 +29,12 @@ export async function onRequestGet({ request, env }) {
       .all()
       .catch(() => null),
     env.DB.prepare(
-      `SELECT p.url, p.caption, p.alt, p.photographer, a.title AS album_title
+      `SELECT COALESCE(NULLIF(p.web_url, ''), p.url) AS url, p.caption, p.alt, p.photographer, a.title AS album_title
        FROM media_photos p
        JOIN media_albums a ON a.id = p.album_id
-       WHERE a.status = 'published' AND p.is_featured_home = 1
+       WHERE a.status = 'published'
+         AND COALESCE(p.approval_status, 'approved') = 'approved'
+         AND p.is_featured_home = 1
        ORDER BY p.sort_order ASC, p.created_at DESC
        LIMIT 12`
     )
@@ -83,10 +88,11 @@ export async function onRequestGet({ request, env }) {
 
   if (homePhotos.length === 0 && featuredRes) {
     const latestRes = await env.DB.prepare(
-      `SELECT p.url, p.caption, p.alt, p.photographer, a.title AS album_title
+      `SELECT COALESCE(NULLIF(p.web_url, ''), p.url) AS url, p.caption, p.alt, p.photographer, a.title AS album_title
        FROM media_photos p
        JOIN media_albums a ON a.id = p.album_id
        WHERE a.status = 'published'
+         AND COALESCE(p.approval_status, 'approved') = 'approved'
        ORDER BY p.created_at DESC
        LIMIT 8`
     )
