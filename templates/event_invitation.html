@@ -145,16 +145,17 @@
       </div>
     </div>
 
-    <div class="share-inviter-grid">
+    <div class="share-inviter-grid" id="share-inviter-grid">
       <div class="share-inviter-field">
         <label for="share-recipient-name">Gửi tới <span class="auth-hint-inline">(tên người được mời)</span></label>
         <input id="share-recipient-name" type="text" maxlength="60" placeholder="Ví dụ: Lan Anh">
       </div>
-      <div class="share-inviter-field">
+      <div class="share-inviter-field" id="share-inviter-field-wrap">
         <label for="share-inviter-name">Người mời <span class="auth-hint-inline">(tên bạn)</span></label>
         <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi">
       </div>
     </div>
+    <p class="share-inviter-signed-hint" id="share-inviter-signed-bar" hidden>Đang mời với tư cách <strong id="share-inviter-signed-name"></strong></p>
 
     <div class="share-inviter-field">
       <label for="share-personal-note">Lời nhắn viết tay trên thiệp <span class="auth-hint-inline">(tùy chọn)</span></label>

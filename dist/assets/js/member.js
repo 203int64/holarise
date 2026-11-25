@@ -224,6 +224,34 @@
       });
     });
 
+    // Expose live signed-in member state globally for all page scripts
+    window.HolaMember = {
+      get member() {
+        return state.member;
+      },
+      getMember: () => state.member,
+    };
+
+    // Auto-fill & hide "Người mời (tên bạn)" in #event-share-modal when signed in
+    const shareInviterWrap = $("#share-inviter-field-wrap");
+    const shareInviterInput = $("#share-inviter-name");
+    const shareInviterGrid = $("#share-inviter-grid");
+    const shareSignedBar = $("#share-inviter-signed-bar");
+    const shareSignedName = $("#share-inviter-signed-name");
+    if (shareInviterWrap && shareInviterInput) {
+      if (m) {
+        shareInviterWrap.hidden = true;
+        shareInviterInput.value = m.name || "";
+        if (shareInviterGrid) shareInviterGrid.classList.add("is-single-col");
+        if (shareSignedBar) shareSignedBar.hidden = false;
+        if (shareSignedName) shareSignedName.textContent = m.name || "Thành viên HolaRise";
+      } else {
+        shareInviterWrap.hidden = false;
+        if (shareInviterGrid) shareInviterGrid.classList.remove("is-single-col");
+        if (shareSignedBar) shareSignedBar.hidden = true;
+      }
+    }
+
     // Auto-fill & hide redundant identity inputs in #feedback-modal when signed in
     const fbMemberBar = $("#fb-member-bar");
     const fbGuestRow = $("#fb-guest-contact-row");

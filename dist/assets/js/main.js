@@ -405,10 +405,28 @@
     };
 
     document.addEventListener("click", function (e) {
+      var drawerCloseBtn = e.target.closest("[data-drawer-close]");
+      if (drawerCloseBtn) {
+        var drawer = drawerCloseBtn.closest("details.archive-drawer");
+        if (drawer && drawer.open) {
+          drawer.open = false;
+          var summary = drawer.querySelector("summary");
+          if (summary) {
+            var rect = drawer.getBoundingClientRect();
+            if (rect.top < 80) {
+              drawer.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "nearest" });
+            }
+            summary.focus({ preventScroll: true });
+          }
+        }
+        return;
+      }
+
       var trigger = e.target.closest("[data-lightbox-src]");
       if (!trigger) return;
       e.preventDefault();
-      var allTriggers = Array.prototype.slice.call(document.querySelectorAll("[data-lightbox-src]"));
+      var scope = trigger.closest("[data-lightbox-group]") || document;
+      var allTriggers = Array.prototype.slice.call(scope.querySelectorAll("[data-lightbox-src]"));
       activeSlides = allTriggers.map(function (btn) {
         return {
           src: btn.getAttribute("data-lightbox-src") || "",
@@ -420,6 +438,20 @@
       var clickedIdx = allTriggers.indexOf(trigger);
       showGalleryIndex(clickedIdx >= 0 ? clickedIdx : 0);
       openDialog(lightbox);
+    });
+
+    // Exclusive accordion fallback for older WebViews without <details name=""> support
+    var archiveDrawers = Array.prototype.slice.call(document.querySelectorAll("details.archive-drawer[name]"));
+    archiveDrawers.forEach(function (drawer) {
+      drawer.addEventListener("toggle", function () {
+        if (!drawer.open) return;
+        var groupName = drawer.getAttribute("name");
+        archiveDrawers.forEach(function (other) {
+          if (other !== drawer && other.open && other.getAttribute("name") === groupName) {
+            other.open = false;
+          }
+        });
+      });
     });
 
     document.querySelectorAll("[data-album-open]").forEach(function (btn) {

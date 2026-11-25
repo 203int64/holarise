@@ -47,7 +47,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=a093cf0dc4">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=07974ff9e9">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -307,16 +307,17 @@
       </div>
     </div>
 
-    <div class="share-inviter-grid">
+    <div class="share-inviter-grid" id="share-inviter-grid">
       <div class="share-inviter-field">
         <label for="share-recipient-name">Gửi tới <span class="auth-hint-inline">(tên người được mời)</span></label>
         <input id="share-recipient-name" type="text" maxlength="60" placeholder="Ví dụ: Lan Anh">
       </div>
-      <div class="share-inviter-field">
+      <div class="share-inviter-field" id="share-inviter-field-wrap">
         <label for="share-inviter-name">Người mời <span class="auth-hint-inline">(tên bạn)</span></label>
         <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi">
       </div>
     </div>
+    <p class="share-inviter-signed-hint" id="share-inviter-signed-bar" hidden>Đang mời với tư cách <strong id="share-inviter-signed-name"></strong></p>
 
     <div class="share-inviter-field">
       <label for="share-personal-note">Lời nhắn viết tay trên thiệp <span class="auth-hint-inline">(tùy chọn)</span></label>
@@ -819,11 +820,11 @@
     <a class="mobile-dock-link" href="/tham-gia/" aria-label="Tham gia"><svg class="mobile-dock-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path pathLength="1" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg><span class="mobile-dock-label" aria-hidden="true">Tham gia</span></a>
   </nav>
 
-  <script src="/assets/vendor/gsap.min.js?v=a093cf0dc4" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=a093cf0dc4" defer></script>
-  <script src="/assets/js/motion.js?v=a093cf0dc4" defer></script>
-  <script src="/assets/js/main.js?v=a093cf0dc4" defer></script>
-  <script src="/assets/js/join-pass.js?v=a093cf0dc4" defer></script>
-  <script src="/assets/js/member.js?v=a093cf0dc4" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=07974ff9e9" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=07974ff9e9" defer></script>
+  <script src="/assets/js/motion.js?v=07974ff9e9" defer></script>
+  <script src="/assets/js/main.js?v=07974ff9e9" defer></script>
+  <script src="/assets/js/join-pass.js?v=07974ff9e9" defer></script>
+  <script src="/assets/js/member.js?v=07974ff9e9" defer></script>
 </body>
 </html>
