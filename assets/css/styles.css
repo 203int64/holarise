@@ -11453,21 +11453,6 @@ a:focus-visible,
    SURGICAL PRODUCTION DEFECT PATCHES (Preserves 100% Production Look)
    ========================================================================== */
 
-/* 1. Crisp Single SVG Header Brand (Fixes overlapping a-R letters) */
-.brand-link {
-  display: inline-flex;
-  align-items: center;
-  width: auto !important;
-  height: auto !important;
-  overflow: visible !important;
-}
-
-.brand-svg-logo {
-  display: block;
-  height: 28px;
-  width: auto;
-}
-
 /* 2. Balanced 2-Column Event Grid when 2 items exist + Zero Mid-Word Truncation */
 .events-rail:has(> :nth-child(2):last-child),
 .grid-3:has(> :nth-child(2):last-child) {
