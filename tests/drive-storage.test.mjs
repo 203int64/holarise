@@ -483,3 +483,126 @@ test("Event & Album folder naming + auto-provision draft media album on event cr
   assert.equal(albRow.event_date, "2026-11-29");
   assert.equal(albRow.status, "draft");
 });
+
+import { onRequestGet as listAlbumsGet } from "../functions/api/admin/albums/index.js";
+
+test("Migration 0012 fixes production D1 missing 0003: widens role CHECK, preserves admin/sessions, creates media tables", async () => {
+  const sqlite = new DatabaseSync(":memory:");
+  // Reproduce exact production D1 state: 0001_init + 0010 (WITHOUT 0003_media_portal)
+  sqlite.exec(fs.readFileSync(new URL("../migrations/0001_init.sql", import.meta.url), "utf8"));
+  sqlite.exec(
+    fs.readFileSync(new URL("../migrations/0010_admin_passkeys_and_profile.sql", import.meta.url), "utf8")
+  );
+  sqlite.exec("PRAGMA foreign_keys = ON;");
+
+  const db = {
+    prepare(sql) {
+      const stmt = sqlite.prepare(sql);
+      return {
+        _params: [],
+        bind(...args) {
+          this._params = args;
+          return this;
+        },
+        async first() {
+          return stmt.get(...this._params) ?? null;
+        },
+        async all() {
+          return { results: stmt.all(...this._params) };
+        },
+        async run() {
+          const info = stmt.run(...this._params);
+          return { success: true, meta: { changes: info.changes } };
+        },
+      };
+    },
+  };
+
+  const now = new Date().toISOString();
+  await db
+    .prepare(
+      `INSERT INTO admin_users (id, email, name, role, password_hash, password_salt, is_active, created_at, phone, department)
+       VALUES (?, ?, ?, 'super_admin', 'h', 's', 1, ?, '0987654321', 'Ban Điều Phối')`
+    )
+    .bind("usr_prod_1", "root@holarise.org", "Root Admin", now)
+    .run();
+  await createSession(db, "usr_prod_1");
+
+  // Confirm bug before 0012: media-gate fails with CHECK constraint error
+  await assert.rejects(
+    () =>
+      mediaGatePost({
+        request: new Request("https://holarise.org/api/auth/media-gate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+          body: JSON.stringify({
+            pin: "9999",
+            fullName: "Lê Minh Quân",
+            phone: "0912345678",
+            department: "Ban Hình Ảnh",
+            email: "quan@holarise.org",
+          }),
+        }),
+        env: { DB: db, MEDIA_ACCESS_PIN: "9999" },
+      }),
+    /CHECK constraint failed/
+  );
+
+  // Apply 0012 inside a transaction (matching Cloudflare D1 --file behavior)
+  sqlite.exec("BEGIN;");
+  sqlite.exec(
+    fs.readFileSync(new URL("../migrations/0012_fix_media_role_and_tables.sql", import.meta.url), "utf8")
+  );
+  sqlite.exec("COMMIT;");
+
+  // Verify existing admin user (including phone/department) and active session survived intact
+  const preservedAdmin = await db
+    .prepare("SELECT email, phone, department, role FROM admin_users WHERE id = ?")
+    .bind("usr_prod_1")
+    .first();
+  assert.deepEqual(
+    { ...preservedAdmin },
+    {
+      email: "root@holarise.org",
+      phone: "0987654321",
+      department: "Ban Điều Phối",
+      role: "super_admin",
+    }
+  );
+  const preservedSessions = await db.prepare("SELECT COUNT(*) AS cnt FROM sessions").first();
+  assert.equal(preservedSessions.cnt, 1);
+
+  // Verify media registration now succeeds with 200 OK
+  const okRes = await mediaGatePost({
+    request: new Request("https://holarise.org/api/auth/media-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({
+        pin: "9999",
+        fullName: "Lê Minh Quân",
+        phone: "0912345678",
+        department: "Ban Hình Ảnh",
+        email: "quan@holarise.org",
+      }),
+    }),
+    env: { DB: db, MEDIA_ACCESS_PIN: "9999" },
+  });
+  assert.equal(okRes.status, 200);
+  const okData = await okRes.json();
+  assert.equal(okData.ok, true);
+  assert.equal(okData.user.role, "media");
+
+  // Verify /api/admin/albums also works with the newly registered media session
+  const cookieHeader = (okRes.headers.get("Set-Cookie") || "").split(";")[0];
+  const albRes = await listAlbumsGet({
+    request: new Request("https://holarise.org/api/admin/albums", {
+      method: "GET",
+      headers: { Cookie: cookieHeader },
+    }),
+    env: { DB: db },
+  });
+  assert.equal(albRes.status, 200);
+  const albData = await albRes.json();
+  assert.equal(albData.ok, true);
+  assert.deepEqual(albData.items, []);
+});
