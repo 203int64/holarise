@@ -2221,46 +2221,24 @@
     }
   })();
 
-  /* Interactive FAQ Topic Filter & Exclusive Smooth Accordion */
+  /* Editorial Hairline FAQ — Fluid Exclusive Accordion (Aesop x Linear x Apple) */
   (function () {
-    var faqGroup = document.querySelector("[data-faq-filter-group]");
     var faqList = document.querySelector("[data-faq-accordion]");
     if (!faqList) return;
 
-    var items = Array.prototype.slice.call(faqList.querySelectorAll(".faq-live-item"));
-    items.forEach(function (item) {
-      item.addEventListener("toggle", function () {
-        if (!item.open) return;
-        items.forEach(function (other) {
-          if (other !== item && other.open) {
-            other.open = false;
-          }
+    var rows = Array.prototype.slice.call(faqList.querySelectorAll("[data-faq-row]"));
+    rows.forEach(function (row) {
+      var btn = row.querySelector(".faq-trigger");
+      if (!btn) return;
+      btn.addEventListener("click", function () {
+        var willOpen = !row.classList.contains("is-open");
+        rows.forEach(function (other) {
+          var isTarget = other === row && willOpen;
+          other.classList.toggle("is-open", isTarget);
+          var otherBtn = other.querySelector(".faq-trigger");
+          if (otherBtn) otherBtn.setAttribute("aria-expanded", String(isTarget));
         });
       });
     });
-
-    if (faqGroup) {
-      var chips = Array.prototype.slice.call(faqGroup.querySelectorAll("[data-faq-filter]"));
-      chips.forEach(function (chip) {
-        chip.addEventListener("click", function () {
-          var topic = chip.getAttribute("data-faq-filter") || "all";
-          chips.forEach(function (c) {
-            var active = c === chip;
-            c.classList.toggle("is-active", active);
-            c.setAttribute("aria-pressed", String(active));
-          });
-          var firstVisible = null;
-          items.forEach(function (item) {
-            var match = topic === "all" || item.getAttribute("data-faq-topic") === topic;
-            item.hidden = !match;
-            if (match && !firstVisible) firstVisible = item;
-            if (!match) item.open = false;
-          });
-          if (firstVisible && !items.some(function (i) { return !i.hidden && i.open; })) {
-            firstVisible.open = true;
-          }
-        });
-      });
-    }
   })();
 })();

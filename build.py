@@ -875,23 +875,102 @@ def render_horizontal_gallery(gallery: list) -> str:
     return "\n      ".join(items)
 
 
-def render_gallery(gallery: list, default_label: str = "Tư liệu HolaRise") -> str:
-    items = []
-    for index, g in enumerate(gallery):
+def _format_gallery_caption(label: str, caption: str) -> str:
+    label_clean = (label or "").strip()
+    caption_clean = (caption or "").strip()
+    if not label_clean:
+        return caption_clean
+    if not caption_clean:
+        return label_clean
+    if label_clean.lower() in caption_clean.lower():
+        return caption_clean
+    # Avoid duplicating trailing date/segment already present in caption
+    label_parts = [p.strip() for p in label_clean.split("·") if p.strip()]
+    unique_parts = [p for p in label_parts if p.lower() not in caption_clean.lower()]
+    if not unique_parts:
+        return caption_clean
+    return f"{' · '.join(unique_parts)} · {caption_clean}"
+
+
+def render_archive_drawer(
+    gallery: list,
+    *,
+    title: str,
+    meta: str,
+    pillar: str = "holaheart",
+    default_label: str = "Tư liệu HolaRise",
+    desc: str = "",
+    story_href: str = "",
+    story_label: str = "Đọc tường thuật &amp; Viết lưu bút →",
+    drawer_id: str = "",
+) -> str:
+    total = len(gallery)
+    if total == 0:
+        return ""
+
+    # 3-photo fanned stack preview (max 3 distinct thumbnails)
+    stack_classes = ["is-front", "is-mid", "is-back"]
+    stack_imgs = []
+    for idx, g in enumerate(gallery[:3]):
         src = g.get("src") or g.get("url") or ""
-        desktop_sizes = "(min-width: 1280px) 820px, 64vw" if index == 0 else "(min-width: 1280px) 400px, 32vw"
-        sizes = f"(max-width: 820px) calc(100vw - 40px), {desktop_sizes}"
+        stack_alt = g.get("alt") or g.get("caption") or title
+        stack_imgs.append(
+            f'<img class="archive-stack-img {stack_classes[idx]}" {image_attrs(src, "120px")} alt="{esc(stack_alt)}" width="160" height="120" loading="lazy" decoding="async">'
+        )
+    # Render back-to-front so DOM paint order matches z-depth cleanly
+    stack_html = "\n          ".join(reversed(stack_imgs))
+
+    thumbs = []
+    for idx, g in enumerate(gallery, start=1):
+        src = g.get("src") or g.get("url") or ""
         label = g.get("label") or g.get("sourceLabel") or default_label
         caption = g.get("caption") or g.get("alt") or label
         alt = g.get("alt") or caption
-        full_caption = f"{label} · {caption}" if label and label not in caption else caption
-        items.append(
-            f"""<button class="gallery-item image-note" type="button" aria-label="Xem ảnh: {esc(alt)}" data-lightbox-src="{esc(full_image_url(src))}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}">
-        <img {image_attrs(src, sizes)} alt="{esc(alt)}" width="720" height="480" loading="lazy" decoding="async">
-        {render_image_tooltip(caption, label)}
-      </button>"""
+        full_caption = _format_gallery_caption(label, caption)
+        thumbs.append(
+            f"""<button class="archive-thumb" type="button" aria-label="Xem ảnh {idx:02d}: {esc(alt)}" data-lightbox-src="{esc(full_image_url(src))}" data-lightbox-alt="{esc(alt)}" data-lightbox-caption="{esc(full_caption)}">
+            <img {image_attrs(src, '(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 280px')} alt="{esc(alt)}" width="480" height="360" loading="lazy" decoding="async">
+            <span class="archive-thumb-idx" aria-hidden="true">{idx:02d}</span>
+            <span class="archive-thumb-cap" aria-hidden="true">{esc(caption)}</span>
+          </button>"""
         )
-    return '<div class="gallery-grid">\n      ' + "\n      ".join(items) + "\n    </div>"
+
+    id_attr = f' id="{esc(drawer_id)}"' if drawer_id else ""
+    desc_html = f'\n          <p class="archive-drawer-desc">{esc(desc)}</p>' if desc else ""
+    story_link_html = (
+        f'<a class="arrow-link" href="{esc(story_href)}" data-i18n="journey.readAndWrite">{story_label}</a>'
+        if story_href
+        else ""
+    )
+
+    return f"""<details class="archive-drawer" name="journey-gallery"{id_attr} data-pillar="{esc(pillar)}" data-lightbox-group>
+      <summary class="archive-drawer-head">
+        <div class="archive-drawer-stack" aria-hidden="true">
+          {stack_html}
+        </div>
+        <div class="archive-drawer-info">
+          <div class="archive-drawer-meta">
+            <span class="archive-drawer-date">{esc(meta)}</span>
+            <span class="archive-drawer-count">{total} ảnh</span>
+          </div>
+          <h3 class="archive-drawer-title">{esc(title)}</h3>{desc_html}
+        </div>
+        <span class="archive-drawer-toggle" aria-hidden="true">
+          <span class="archive-toggle-closed">Mở bộ ảnh</span>
+          <span class="archive-toggle-open">Thu gọn</span>
+          <svg class="archive-toggle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </summary>
+      <div class="archive-drawer-body">
+        <div class="archive-contact-sheet">
+          {chr(10).join('          ' + t for t in thumbs)}
+        </div>
+        <div class="archive-drawer-foot">
+          {story_link_html}
+          <button class="btn btn--outline btn--sm" type="button" data-drawer-close>Thu gọn bộ ảnh ↑</button>
+        </div>
+      </div>
+    </details>"""
 
 
 def render_photo_wall(photos: list) -> str:
@@ -912,40 +991,32 @@ def render_faqs(faqs: list) -> str:
     for idx, f in enumerate(faqs):
         q_lower = f["question"].lower()
         if "đối tác" in q_lower or "nhà trường" in q_lower or "đồng tổ chức" in q_lower:
-            topic, topic_label, cta_html = (
-                "partner",
-                "Hợp tác",
-                '<a class="faq-inline-link" href="/tham-gia/?chuong-trinh=hoptac">Gửi đề xuất hợp tác →</a>',
-            )
+            cta_html = '<a class="faq-inline-link" href="/tham-gia/?chuong-trinh=hoptac">Đề xuất đồng tổ chức →</a>'
         elif "chi phí" in q_lower or "mất phí" in q_lower or "giữ chỗ" in q_lower:
-            topic, topic_label, cta_html = (
-                "rsvp",
-                "Giữ chỗ & Chi phí",
-                '<a class="faq-inline-link" href="/lich-hoat-dong/">Xem lịch &amp; chi phí từng buổi →</a>',
-            )
+            cta_html = '<a class="faq-inline-link" href="/lich-hoat-dong/">Xem lịch &amp; chi phí từng buổi →</a>'
         else:
-            topic, topic_label, cta_html = (
-                "newbie",
-                "Người đi lần đầu",
-                '<a class="faq-inline-link" href="/su-kien/cuoc-doi-cua-cha/">Xem thư mời gần nhất →</a>',
-            )
+            cta_html = ""
         num = f"{idx + 1:02d}"
-        open_attr = " open" if idx == 0 else ""
+        is_open = idx == 0
+        open_cls = " is-open" if is_open else ""
+        expanded = "true" if is_open else "false"
+        panel_id = f"faq-panel-{idx + 1}"
         items.append(
-            f"""<details class="faq-details faq-live-item" data-faq-topic="{topic}"{open_attr}>
-        <summary class="faq-live-summary">
-          <span class="faq-live-num" aria-hidden="true">{num}</span>
-          <span class="faq-live-qwrap">
-            <span class="faq-live-tag">{topic_label}</span>
-            <span class="faq-live-q">{esc(f['question'])}</span>
-          </span>
-          <span class="faq-live-plus" aria-hidden="true"></span>
-        </summary>
-        <div class="faq-answer faq-live-answer">
-          <p>{esc(f['answer'])}</p>
-          {cta_html}
+            f"""<div class="faq-row{open_cls}" data-faq-row>
+        <button class="faq-trigger" type="button" aria-expanded="{expanded}" aria-controls="{panel_id}">
+          <span class="faq-num" aria-hidden="true">{num}</span>
+          <span class="faq-q">{esc(f['question'])}</span>
+          <span class="faq-plus" aria-hidden="true"></span>
+        </button>
+        <div class="faq-panel" id="{panel_id}" role="region">
+          <div class="faq-panel-inner">
+            <div class="faq-panel-content">
+              <p>{esc(f['answer'])}</p>
+              {cta_html}
+            </div>
+          </div>
         </div>
-      </details>"""
+      </div>"""
         )
     return "\n      ".join(items)
 
@@ -2189,8 +2260,24 @@ def build_site() -> list:
         load_template("news_list.html"),
         {
             "NEWS_LIST_HTML": render_news_cards(news, filterable=True),
-            "GALLERY_HTML": render_gallery(activities["gallery"], "HolaHeart · 15/11/2026"),
-            "MUSICSPACE_GALLERY_HTML": render_gallery(heart_photo_wall, "HolaHeart × MusicSpace"),
+            "GALLERY_HTML": render_archive_drawer(
+                activities["gallery"],
+                title="HolaHeart: Tình yêu thương của Mẹ trong thời đại AI",
+                meta="15/11/2026 · Mây Lang Thang Cafe, Hòa Lạc",
+                pillar="holaheart",
+                default_label="HolaHeart · 15/11/2026",
+                story_href="/hanh-trinh/tinh-yeu-thuong-cua-me/",
+            ),
+            "MUSICSPACE_GALLERY_HTML": render_archive_drawer(
+                heart_photo_wall,
+                title="HolaHeart × MusicSpace tại Hòa Lạc",
+                meta="2025 – 2026 · Chuỗi âm nhạc & đối thoại",
+                pillar="holaheart",
+                default_label="HolaHeart × MusicSpace",
+                desc="Những khoảnh khắc tuyển chọn từ chuỗi đêm nhạc mộc và giao lưu kết nối của người trẻ Hòa Lạc.",
+                story_href="/hanh-trinh/holaheart-musicspace/",
+                drawer_id="musicspace-chapter",
+            ),
             "CONTACT_EMAIL": esc(c["email"]),
         },
     )

@@ -1250,31 +1250,194 @@
       }
 
       const bookingsBox = $("#member-bookings-list");
+      const walletSummary = $("#member-wallet-summary");
       const regs = data.registrations || [];
+
+      const PILLAR_META = {
+        holaheart: { label: "HolaHeart", sub: "Tĩnh tại & Lắng nghe" },
+        holagreen: { label: "HolaGreen", sub: "Sinh thái & Cảnh quan" },
+        holaconnect: { label: "HolaConnect", sub: "Tri thức & Phụng sự" },
+      };
+
+      function getStatusLabel(st) {
+        if (st === "attended") return "Đã tham dự";
+        if (st === "contacted") return "Đã xác nhận";
+        if (st === "cancelled") return "Đã hủy";
+        return "Đã giữ chỗ";
+      }
+
+      function getScheduleText(r) {
+        const parts = [r.eventTime, r.eventDateDisplay || r.eventDate].filter(Boolean);
+        return parts.length ? parts.join(" · ") : formatDateVi(r.createdAt || r.created_at);
+      }
+
+      function buildWalletSnapshot(r) {
+        const m = state.member || {};
+        const pillarKey = PILLAR_META[r.eventPillar] ? r.eventPillar : "holaheart";
+        const pm = PILLAR_META[pillarKey];
+        return {
+          id: r.id,
+          eventId: r.eventId || r.event_id || "",
+          eventTitle: r.activityTitle || r.activity_title || "Hoạt động HolaRise",
+          eventType: r.eventType || `${pm.label} · ${pm.sub}`,
+          badge: r.eventType || `${pm.label} · ${pm.sub}`,
+          pillar: pillarKey,
+          eventDate: r.eventDateDisplay || r.eventDate || "",
+          eventTime: r.eventTime || "",
+          eventLocation: r.eventLocation || "Hòa Lạc, Hà Nội",
+          eventSummary: r.eventSummary || "",
+          fullName: r.fullName || m.name || "Thành viên Hola",
+          organization: r.organization || m.organization || "Cộng đồng HolaRise",
+          status: r.status || "new",
+        };
+      }
+
+      const walletDlg = $("#member-wallet-dialog");
+      const walletDlgBody = $("#wallet-dlg-body");
+      const walletDlgKicker = $("#wallet-dlg-kicker");
+      const walletDlgLink = $("#wallet-dlg-link");
+      const walletDlgClose = $("#wallet-dlg-close");
+      const walletDlgDownload = $("#wallet-dlg-download");
+
+      function openWalletDialog(reg) {
+        if (!walletDlg || !walletDlgBody || !reg) return;
+        state.activeWalletReg = reg;
+        const pillarKey = PILLAR_META[reg.eventPillar] ? reg.eventPillar : "holaheart";
+        const pm = PILLAR_META[pillarKey];
+        const title = reg.activityTitle || reg.activity_title || "Hoạt động HolaRise";
+        const schedule = getScheduleText(reg);
+        const location = reg.eventLocation || "Hòa Lạc, Hà Nội";
+        const statusText = getStatusLabel(reg.status);
+        const holderName = reg.fullName || state.member?.name || "Thành viên Hola";
+        const holderOrg = reg.organization || state.member?.organization || "Cộng đồng HolaRise";
+
+        if (walletDlgKicker) {
+          walletDlgKicker.textContent = `${pm.label} · Thẻ sự kiện`;
+        }
+
+        walletDlgBody.innerHTML = `<article class="wallet-full-pass wallet-full-pass--${esc(pillarKey)}">
+          <div class="wallet-full-head">
+            <span class="wallet-full-brand">HOLARISE · HÒA LẠC</span>
+            <span class="wallet-status-chip wallet-status-chip--${esc(reg.status || "new")}">${esc(statusText)}</span>
+          </div>
+          <span class="wallet-pillar-pill">${esc(reg.eventType || `${pm.label} · ${pm.sub}`)}</span>
+          <h3 id="wallet-dlg-title" class="wallet-full-title">${esc(title)}</h3>
+          <p class="wallet-full-holder">${esc(holderName)} · ${esc(holderOrg)}</p>
+          <div class="wallet-full-divider" aria-hidden="true"></div>
+          <dl class="wallet-full-grid">
+            <div>
+              <dt>Thời gian</dt>
+              <dd>${esc(schedule)}</dd>
+            </div>
+            <div>
+              <dt>Địa điểm</dt>
+              <dd>${esc(location)}</dd>
+            </div>
+            <div>
+              <dt>Mã giữ chỗ</dt>
+              <dd class="wallet-code">${esc(reg.id)}</dd>
+            </div>
+            <div>
+              <dt>Ngày đăng ký</dt>
+              <dd>${esc(formatDateVi(reg.createdAt || reg.created_at))}</dd>
+            </div>
+          </dl>
+          ${reg.note ? `<p class="wallet-full-note">Ghi chú: ${esc(reg.note)}</p>` : ""}
+          <div class="wallet-full-foot">
+            <span>HOLARISE.ORG</span>
+            <span>${reg.status === "attended" ? "ĐÃ ĐÓNG DẤU THAM DỰ" : "THẺ GIỮ CHỖ ĐIỆN TỬ"}</span>
+          </div>
+        </article>`;
+
+        if (walletDlgLink) {
+          if (reg.eventHref) {
+            walletDlgLink.href = reg.eventHref;
+            walletDlgLink.hidden = false;
+          } else {
+            walletDlgLink.hidden = true;
+          }
+        }
+
+        if (typeof walletDlg.showModal === "function") {
+          if (!walletDlg.open) walletDlg.showModal();
+        } else {
+          walletDlg.setAttribute("open", "");
+        }
+      }
+
+      if (walletDlg && !walletDlg.dataset.bound) {
+        walletDlg.dataset.bound = "1";
+        walletDlgClose?.addEventListener("click", () => {
+          if (typeof walletDlg.close === "function") walletDlg.close();
+          else walletDlg.removeAttribute("open");
+        });
+        walletDlg.addEventListener("click", (e) => {
+          if (e.target === walletDlg) {
+            if (typeof walletDlg.close === "function") walletDlg.close();
+            else walletDlg.removeAttribute("open");
+          }
+        });
+        walletDlgDownload?.addEventListener("click", () => {
+          if (!state.activeWalletReg) return;
+          if (window.HolaPass && typeof window.HolaPass.downloadPassPng === "function") {
+            window.HolaPass.downloadPassPng(buildWalletSnapshot(state.activeWalletReg));
+          }
+        });
+      }
+
       if (bookingsBox) {
         if (!regs.length) {
+          if (walletSummary) walletSummary.hidden = true;
           bookingsBox.innerHTML =
-            '<p class="member-empty-hint">Bạn chưa giữ chỗ hoạt động nào. Ghé <a href="/lich-hoat-dong/" style="color:var(--accent);font-weight:500;">Lịch hoạt động</a> để đặt chỗ 1 chạm.</p>';
+            '<p class="member-empty-hint">Ví hành trình của bạn chưa có thẻ sự kiện nào. Ghé <a href="/lich-hoat-dong/" style="color:var(--accent);font-weight:500;">Lịch hoạt động</a> để giữ chỗ 1 chạm và nhận thẻ đầu tiên.</p>';
         } else {
+          const attendedCount = regs.filter((r) => r.status === "attended").length;
+          const activeCount = regs.filter((r) => r.status !== "cancelled" && r.status !== "attended").length;
+          if (walletSummary) {
+            walletSummary.hidden = false;
+            walletSummary.innerHTML = `
+              <span class="wallet-stat-chip"><strong>${regs.length}</strong> thẻ trong ví</span>
+              ${activeCount ? `<span class="wallet-stat-chip"><strong>${activeCount}</strong> sắp tham dự</span>` : ""}
+              ${attendedCount ? `<span class="wallet-stat-chip wallet-stat-chip--attended"><strong>${attendedCount}</strong> đã hoàn thành</span>` : ""}
+              <span class="wallet-stat-hint">Chạm vào thẻ để mở chi tiết &amp; tải PNG</span>
+            `;
+          }
+
           bookingsBox.innerHTML = regs
-            .map(
-              (r) => `<div class="member-list-item">
-                <div>
-                  <strong>${esc(r.activity_title)}</strong>
-                  <span class="member-list-meta">Mã ${esc(r.id)} · ${esc(formatDateVi(r.created_at))}</span>
+            .map((r, idx) => {
+              const pillarKey = PILLAR_META[r.eventPillar] ? r.eventPillar : "holaheart";
+              const pm = PILLAR_META[pillarKey];
+              const title = r.activityTitle || r.activity_title || "Hoạt động HolaRise";
+              const schedule = getScheduleText(r);
+              const location = r.eventLocation || "Hòa Lạc, Hà Nội";
+              const statusText = getStatusLabel(r.status);
+              const isFront = idx === regs.length - 1;
+              return `<button type="button" class="wallet-card wallet-card--${esc(pillarKey)}${isFront ? " is-front" : ""}" data-wallet-idx="${idx}" style="--card-index:${idx};">
+                <div class="wallet-card-top">
+                  <span class="wallet-card-pillar">${esc(pm.label)}</span>
+                  <span class="wallet-status-chip wallet-status-chip--${esc(r.status || "new")}">${esc(statusText)}</span>
                 </div>
-                <span class="member-status-pill member-status-pill--${esc(r.status)}">${
-                  r.status === "attended"
-                    ? "Đã tham gia"
-                    : r.status === "contacted"
-                      ? "Đã xác nhận"
-                      : r.status === "cancelled"
-                        ? "Đã hủy"
-                        : "Đã ghi nhận"
-                }</span>
-              </div>`
-            )
+                <div class="wallet-card-title">${esc(title)}</div>
+                <div class="wallet-card-meta">
+                  <span>${esc(schedule)}</span>
+                  <span>${esc(location)}</span>
+                </div>
+                <div class="wallet-card-foot">
+                  <code class="wallet-code">${esc(r.id)}</code>
+                  <span class="wallet-card-cta">Mở thẻ →</span>
+                </div>
+              </button>`;
+            })
             .join("");
+
+          bookingsBox.querySelectorAll("[data-wallet-idx]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const i = Number(btn.getAttribute("data-wallet-idx"));
+              if (Number.isInteger(i) && regs[i]) {
+                openWalletDialog(regs[i]);
+              }
+            });
+          });
         }
       }
 
@@ -1290,7 +1453,7 @@
               (rf) => `<div class="member-list-item">
                 <div>
                   <a href="/hanh-trinh/${esc(rf.activitySlug)}/#activity-guestbook"><strong>${esc(rf.pullQuote || rf.content.slice(0, 72))}</strong></a>
-                  <span class="member-list-meta">${esc(rf.participantRole)} · ${esc(formatDateVi(rf.createdAt))} · ♥ ${Number(rf.heartsCount || 0)}</span>
+                  <span class="member-list-meta">${esc(rf.participantRole)} · ${esc(formatDateVi(rf.createdAt))} · ♥ ${Number(rf.heartCount ?? rf.heartsCount ?? 0)}</span>
                 </div>
                 <span class="member-status-pill member-status-pill--${esc(rf.status)}">${
                   rf.status === "approved"

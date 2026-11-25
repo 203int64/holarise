@@ -85,9 +85,9 @@
         "Vòng tròn làm quen và sẻ chia giữa đồi chiều",
         "Rèn luyện sức bền, kết bạn đa trường — có nhóm ghép xe từ Hòa Lạc"
       ],
-      "image": "/assets/images/hero-holarise-binh-minh.webp",
-      "imageAlt": "Khung cảnh sườn đồi buổi sớm — mời bạn tham gia chặng đi bộ rừng thông Núi Luốt ngày 26/11/2026.",
-      "imageIsIllustration": true,
+      "image": "/assets/images/events/activity-nature-trail.jpg",
+      "imageAlt": "Tuyến đường mòn dưới tán rừng xanh — chặng đi bộ chiều Núi Luốt ngày 26/11/2026.",
+      "imageIsIllustration": false,
       "href": "/su-kien/leo-nui-luot/",
       "landing": {
         "slug": "leo-nui-luot",

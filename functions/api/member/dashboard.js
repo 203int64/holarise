@@ -1,4 +1,30 @@
+import { resolveEventHref } from "../../_lib/render.js";
 import { errorResponse, getSessionMember, jsonResponse, serializePublicMember } from "../../_lib/security.js";
+
+function inferEventPillar(eventType, eventId, title) {
+  const hay = `${eventType || ""} ${eventId || ""} ${title || ""}`.toLowerCase();
+  if (hay.includes("holagreen") || hay.includes("sinh thái") || hay.includes("cảnh quan")) {
+    return "holagreen";
+  }
+  if (hay.includes("holaconnect") || hay.includes("leo núi") || hay.includes("tri thức") || hay.includes("phụng sự")) {
+    return "holaconnect";
+  }
+  return "holaheart";
+}
+
+function buildPhoneMatchVariants(phoneNorm) {
+  const clean = String(phoneNorm || "").replace(/\D/g, "");
+  if (clean.length < 8) return [];
+  const variants = new Set([clean]);
+  if (clean.startsWith("0") && clean.length === 10) {
+    variants.add(`84${clean.slice(1)}`);
+    variants.add(`+84${clean.slice(1)}`);
+  } else if (clean.startsWith("84") && clean.length === 11) {
+    variants.add(`0${clean.slice(2)}`);
+    variants.add(`+${clean}`);
+  }
+  return Array.from(variants);
+}
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -11,16 +37,53 @@ export async function onRequestGet(context) {
     return errorResponse(401, "MEMBER_UNAUTHORIZED", "Vui lòng đăng nhập tài khoản Thành viên Hola.");
   }
 
+  const matchClauses = ["r.member_id = ?"];
+  const bindParams = [member.id];
+
+  const memberEmail = String(member.email || "").trim().toLowerCase();
+  if (memberEmail) {
+    matchClauses.push("((r.member_id IS NULL OR r.member_id = '') AND LOWER(TRIM(r.email)) = ?)");
+    bindParams.push(memberEmail);
+  }
+
+  const phoneVariants = buildPhoneMatchVariants(member.phone_norm);
+  if (phoneVariants.length) {
+    const placeholders = phoneVariants.map(() => "?").join(", ");
+    matchClauses.push(
+      `((r.member_id IS NULL OR r.member_id = '') AND REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(TRIM(r.phone), ' ', ''), '.', ''), '-', ''), '(', ''), ')', '') IN (${placeholders}))`
+    );
+    bindParams.push(...phoneVariants);
+  }
+
+  const regQuery = `
+    SELECT
+      r.id,
+      r.source,
+      r.event_id,
+      r.activity_title,
+      r.full_name,
+      r.organization,
+      r.role,
+      r.note,
+      r.status,
+      r.created_at,
+      e.title AS event_title,
+      e.type AS event_type,
+      e.kind AS event_kind,
+      e.date AS event_date,
+      e.date_display AS event_date_display,
+      e.time AS event_time,
+      e.location AS event_location,
+      e.summary AS event_summary
+    FROM registrations r
+    LEFT JOIN events e ON e.id = r.event_id
+    WHERE ${matchClauses.join(" OR ")}
+    ORDER BY COALESCE(NULLIF(e.date, ''), substr(r.created_at, 1, 10)) DESC, r.created_at DESC
+    LIMIT 60
+  `;
+
   const [regsRes, refsRes] = await Promise.all([
-    env.DB.prepare(
-      `SELECT id, event_id, activity_title, role, note, status, created_at
-       FROM registrations
-       WHERE member_id = ?
-       ORDER BY created_at DESC
-       LIMIT 50`
-    )
-      .bind(member.id)
-      .all(),
+    env.DB.prepare(regQuery).bind(...bindParams).all(),
     env.DB.prepare(
       `SELECT id, activity_slug, participant_role, pull_quote, content, photo_url, heart_count, status, admin_note, created_at, updated_at
        FROM activity_reflections
@@ -32,15 +95,38 @@ export async function onRequestGet(context) {
       .all(),
   ]);
 
-  const registrations = (regsRes.results || []).map((r) => ({
-    id: r.id,
-    eventId: r.event_id || "",
-    activityTitle: r.activity_title || "",
-    role: r.role || "",
-    note: r.note || "",
-    status: r.status || "new",
-    createdAt: r.created_at,
-  }));
+  const seenRegIds = new Set();
+  const registrations = [];
+  for (const r of regsRes.results || []) {
+    if (!r.id || seenRegIds.has(r.id)) continue;
+    seenRegIds.add(r.id);
+
+    const title = r.event_title || r.activity_title || "Hoạt động HolaRise";
+    const pillar = inferEventPillar(r.event_type, r.event_id, title);
+    const eventHref = r.event_id ? resolveEventHref({ id: r.event_id }) : "";
+
+    registrations.push({
+      id: r.id,
+      source: r.source || "event_modal",
+      eventId: r.event_id || "",
+      activityTitle: title,
+      eventType: r.event_type || "",
+      eventPillar: pillar,
+      eventKind: r.event_kind || "",
+      eventDate: r.event_date || "",
+      eventDateDisplay: r.event_date_display || "",
+      eventTime: r.event_time || "",
+      eventLocation: r.event_location || "",
+      eventSummary: r.event_summary || "",
+      eventHref,
+      fullName: r.full_name || member.name || "",
+      organization: r.organization || member.organization || "",
+      role: r.role || "",
+      note: r.note || "",
+      status: r.status || "new",
+      createdAt: r.created_at,
+    });
+  }
 
   const reflections = (refsRes.results || []).map((r) => ({
     id: r.id,

@@ -686,3 +686,61 @@ test("HR-YYMMDD-STT sequential member codes, QR SVG & /tv/[code] privacy-safe ac
   });
   assert.equal(notFoundRes.status, 404);
 });
+
+test("Member Journey Wallet: joins events metadata & auto-matches unlinked guest registrations by email/phone without leaking other members", async () => {
+  const DB = createFullMockD1();
+  const MEDIA_KV = createMockKV();
+  const env = { DB, MEDIA_KV };
+
+  // Seed an event in D1
+  await DB.prepare(
+    `INSERT OR REPLACE INTO events (id, kind, type, filters_json, date, date_display, time, location, fee, seats, title, summary, highlights_json, participants, image, image_alt, status, sort_order, created_at, updated_at)
+     VALUES ('holaconnect-leo-nui-lam-nghiep-2026-11-26', 'upcoming', 'HolaConnect · Tri thức & Phụng sự', '["holaconnect"]', '2026-11-26', 'Thứ Năm, 26/11/2026', '14:30 – 17:30', 'Đồi Lâm Nghiệp, Hòa Lạc', 'Miễn phí', '', 'Chiều Leo Núi & Kết Nối Giữa Rừng', 'Cùng nhau đi bộ đường rừng và trò chuyện.', '[]', '', '/assets/images/activity-workshop.jpg', '', 'published', 1, '2026-11-20T00:00:00.000Z', '2026-11-20T00:00:00.000Z')`
+  ).run();
+
+  // Register a member with phone 0912345678
+  const regRes = await memberRegister({
+    request: makeReq("/api/member/auth/register", {
+      method: "POST",
+      body: {
+        identifier: "0912 345 678",
+        password: "MemberWalletPass123!",
+        name: "Nguyễn Minh Anh",
+        organization: "ĐH FPT",
+      },
+    }),
+    env,
+  });
+  assert.equal(regRes.status, 201);
+  const memberCookie = extractCookie(regRes, "holarise_member_session");
+
+  // Insert an unlinked guest registration with +84 formatted phone
+  await DB.prepare(
+    `INSERT INTO registrations (id, member_id, source, event_id, activity_title, full_name, phone, email, role, organization, note, status, admin_note, sync_status, sync_error, ip_hash, created_at, updated_at)
+     VALUES ('REG-261125-GUEST1', '', 'event_modal', 'holaconnect-leo-nui-lam-nghiep-2026-11-26', 'Chiều Leo Núi & Kết Nối Giữa Rừng', 'Nguyễn Minh Anh', '+84 912 345 678', '', 'Người tham dự', 'ĐH FPT', 'Đi 1 mình', 'attended', '', 'skipped', '', 'hash1', '2026-11-25T02:00:00.000Z', '2026-11-25T02:00:00.000Z')`
+  ).run();
+
+  // Insert another member's linked registration (must NOT appear in this member's wallet)
+  await DB.prepare(
+    `INSERT INTO registrations (id, member_id, source, event_id, activity_title, full_name, phone, email, role, organization, note, status, admin_note, sync_status, sync_error, ip_hash, created_at, updated_at)
+     VALUES ('REG-261125-OTHER1', 'other-member-id', 'event_modal', 'holaconnect-leo-nui-lam-nghiep-2026-11-26', 'Chiều Leo Núi & Kết Nối Giữa Rừng', 'Người Khác', '0912345678', '', 'Người tham dự', 'ĐHQG', '', 'new', '', 'skipped', '', 'hash2', '2026-11-25T03:00:00.000Z', '2026-11-25T03:00:00.000Z')`
+  ).run();
+
+  const dashRes = await memberDashboard({
+    request: makeReq("/api/member/dashboard", { cookie: memberCookie }),
+    env,
+  });
+  assert.equal(dashRes.status, 200);
+  const dash = await dashRes.json();
+
+  assert.equal(dash.registrations.length, 1);
+  const card = dash.registrations[0];
+  assert.equal(card.id, "REG-261125-GUEST1");
+  assert.equal(card.activityTitle, "Chiều Leo Núi & Kết Nối Giữa Rừng");
+  assert.equal(card.eventPillar, "holaconnect");
+  assert.equal(card.eventDateDisplay, "Thứ Năm, 26/11/2026");
+  assert.equal(card.eventTime, "14:30 – 17:30");
+  assert.equal(card.eventLocation, "Đồi Lâm Nghiệp, Hòa Lạc");
+  assert.equal(card.eventHref, "/su-kien/leo-nui-luot/");
+  assert.equal(card.status, "attended");
+});

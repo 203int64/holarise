@@ -721,56 +721,87 @@ export function renderHorizontalGalleryHtml(photos) {
 export function renderPublicAlbumsHtml(albumsWithPhotos) {
   if (!albumsWithPhotos || albumsWithPhotos.length === 0) return "";
 
-  const cardsHtml = albumsWithPhotos
+  const pad2 = (n) => (n < 10 ? `0${n}` : String(n));
+  const stackClasses = ["is-front", "is-mid", "is-back"];
+
+  return albumsWithPhotos
     .map((album) => {
       const photos = Array.isArray(album.photos) ? album.photos : [];
+      if (photos.length === 0) return "";
       const filters = Array.isArray(album.filters) ? album.filters : [];
       const pillar = derivePillarFilter(album.title, filters);
       const tokenSet = new Set([pillar, ...filters]);
       const filtersAttr = Array.from(tokenSet).join(" ");
-      const cover = album.coverUrl || photos[0]?.url || "/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg";
 
-      const payloadJson = JSON.stringify({
-        title: album.title || "",
-        photos: photos.map((p) => ({
-          src: fullImageUrl(p.url),
-          alt: p.alt || p.caption || album.title,
-          caption: p.caption || album.title,
-          photographer: p.photographer || "",
-        })),
-      })
-        .replace(/</g, "\\u003c")
-        .replace(/>/g, "\\u003e")
-        .replace(/&/g, "\\u0026");
+      const previewList = [];
+      if (album.coverUrl) {
+        previewList.push({ url: album.coverUrl, alt: album.title || "Ảnh bìa bộ ảnh HolaRise" });
+      }
+      for (const p of photos) {
+        if (previewList.length >= 3) break;
+        if (p.url && !previewList.some((item) => item.url === p.url)) {
+          previewList.push({ url: p.url, alt: p.alt || p.caption || album.title || "Khoảnh khắc HolaRise" });
+        }
+      }
+      const stackHtml = previewList
+        .slice(0, 3)
+        .map(
+          (item, idx) =>
+            `<img class="archive-stack-img ${stackClasses[idx]}" ${imageAttrs(item.url, "120px")} alt="${escHtml(item.alt)}" width="160" height="120" loading="lazy" decoding="async">`
+        )
+        .reverse()
+        .join("\n          ");
 
-      const filterTags = filters
-        .map((f) => `<span class="public-album-tag">${escHtml(FILTER_LABELS_VI[f] || f)}</span>`)
-        .join("");
+      const metaParts = [album.dateDisplay || album.eventDate || "", album.location || ""].filter(Boolean);
+      const metaText = metaParts.join(" · ");
 
-      return `<article class="public-album-card" data-album-card data-pillar="${escHtml(pillar)}" data-category="${escHtml(filtersAttr)}" data-stagger-item>
-        <button class="public-album-cover" type="button" data-album-open aria-label="Xem ${photos.length} ảnh trong album ${escHtml(album.title)}">
-          <img ${imageAttrs(cover, "(max-width: 640px) calc(100vw - 40px), 420px")} alt="${escHtml(album.title)}" width="720" height="480" loading="lazy" decoding="async">
-          <span class="public-album-count">${photos.length} ảnh</span>
-        </button>
-        <div class="public-album-body">
-          ${filterTags ? `<div class="public-album-tags">${filterTags}</div>` : ""}
-          <h3 class="public-album-title">${escHtml(album.title)}</h3>
-          <div class="public-album-meta">${escHtml(album.dateDisplay || album.eventDate || "")}${album.location ? ` · ${escHtml(album.location)}` : ""}</div>
-          ${album.description ? `<p class="public-album-desc">${escHtml(album.description)}</p>` : ""}
-          <div class="public-album-actions">
-            <button class="btn btn--primary btn--sm" type="button" data-album-open>Xem ${photos.length} ảnh</button>
-          </div>
+      const thumbsHtml = photos
+        .map((p, idx) => {
+          const caption = p.caption || album.title || "Khoảnh khắc HolaRise";
+          const alt = p.alt || caption;
+          const photographer = p.photographer ? ` · Ảnh: ${p.photographer}` : "";
+          const fullCaption = `${caption}${photographer}`;
+          return `<button class="archive-thumb" type="button" aria-label="Xem ảnh ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(fullImageUrl(p.url))}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCaption)}">
+            <img ${imageAttrs(p.url, "(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 280px")} alt="${escHtml(alt)}" width="480" height="360" loading="lazy" decoding="async">
+            <span class="archive-thumb-idx" aria-hidden="true">${pad2(idx + 1)}</span>
+            <span class="archive-thumb-cap" aria-hidden="true">${escHtml(caption)}</span>
+          </button>`;
+        })
+        .join("\n          ");
+
+      const descHtml = album.description ? `\n          <p class="archive-drawer-desc">${escHtml(album.description)}</p>` : "";
+
+      return `<details class="archive-drawer" name="journey-gallery" data-album-card data-pillar="${escHtml(pillar)}" data-category="${escHtml(filtersAttr)}" data-lightbox-group>
+      <summary class="archive-drawer-head">
+        <div class="archive-drawer-stack" aria-hidden="true">
+          ${stackHtml}
         </div>
-        <script type="application/json" class="album-photos-data">${payloadJson}</script>
-      </article>`;
-    })
-    .join("\n      ");
-
-  return `<div class="d1-albums-block">
-      <div class="public-albums-grid" data-stagger-group>
-        ${cardsHtml}
+        <div class="archive-drawer-info">
+          <div class="archive-drawer-meta">
+            ${metaText ? `<span class="archive-drawer-date">${escHtml(metaText)}</span>` : ""}
+            <span class="archive-drawer-count">${photos.length} ảnh</span>
+          </div>
+          <h3 class="archive-drawer-title">${escHtml(album.title)}</h3>${descHtml}
+        </div>
+        <span class="archive-drawer-toggle" aria-hidden="true">
+          <span class="archive-toggle-closed">Mở bộ ảnh</span>
+          <span class="archive-toggle-open">Thu gọn</span>
+          <svg class="archive-toggle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </summary>
+      <div class="archive-drawer-body">
+        <div class="archive-contact-sheet">
+          ${thumbsHtml}
+        </div>
+        <div class="archive-drawer-foot">
+          <span></span>
+          <button class="btn btn--outline btn--sm" type="button" data-drawer-close>Thu gọn bộ ảnh ↑</button>
+        </div>
       </div>
-    </div>`;
+    </details>`;
+    })
+    .filter(Boolean)
+    .join("\n      ");
 }
 
 export function parsePartnersJson(raw) {

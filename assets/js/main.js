@@ -405,10 +405,28 @@
     };
 
     document.addEventListener("click", function (e) {
+      var drawerCloseBtn = e.target.closest("[data-drawer-close]");
+      if (drawerCloseBtn) {
+        var drawer = drawerCloseBtn.closest("details.archive-drawer");
+        if (drawer && drawer.open) {
+          drawer.open = false;
+          var summary = drawer.querySelector("summary");
+          if (summary) {
+            var rect = drawer.getBoundingClientRect();
+            if (rect.top < 80) {
+              drawer.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "nearest" });
+            }
+            summary.focus({ preventScroll: true });
+          }
+        }
+        return;
+      }
+
       var trigger = e.target.closest("[data-lightbox-src]");
       if (!trigger) return;
       e.preventDefault();
-      var allTriggers = Array.prototype.slice.call(document.querySelectorAll("[data-lightbox-src]"));
+      var scope = trigger.closest("[data-lightbox-group]") || document;
+      var allTriggers = Array.prototype.slice.call(scope.querySelectorAll("[data-lightbox-src]"));
       activeSlides = allTriggers.map(function (btn) {
         return {
           src: btn.getAttribute("data-lightbox-src") || "",
@@ -420,6 +438,20 @@
       var clickedIdx = allTriggers.indexOf(trigger);
       showGalleryIndex(clickedIdx >= 0 ? clickedIdx : 0);
       openDialog(lightbox);
+    });
+
+    // Exclusive accordion fallback for older WebViews without <details name=""> support
+    var archiveDrawers = Array.prototype.slice.call(document.querySelectorAll("details.archive-drawer[name]"));
+    archiveDrawers.forEach(function (drawer) {
+      drawer.addEventListener("toggle", function () {
+        if (!drawer.open) return;
+        var groupName = drawer.getAttribute("name");
+        archiveDrawers.forEach(function (other) {
+          if (other !== drawer && other.open && other.getAttribute("name") === groupName) {
+            other.open = false;
+          }
+        });
+      });
     });
 
     document.querySelectorAll("[data-album-open]").forEach(function (btn) {
@@ -2189,46 +2221,24 @@
     }
   })();
 
-  /* Interactive FAQ Topic Filter & Exclusive Smooth Accordion */
+  /* Editorial Hairline FAQ — Fluid Exclusive Accordion (Aesop x Linear x Apple) */
   (function () {
-    var faqGroup = document.querySelector("[data-faq-filter-group]");
     var faqList = document.querySelector("[data-faq-accordion]");
     if (!faqList) return;
 
-    var items = Array.prototype.slice.call(faqList.querySelectorAll(".faq-live-item"));
-    items.forEach(function (item) {
-      item.addEventListener("toggle", function () {
-        if (!item.open) return;
-        items.forEach(function (other) {
-          if (other !== item && other.open) {
-            other.open = false;
-          }
+    var rows = Array.prototype.slice.call(faqList.querySelectorAll("[data-faq-row]"));
+    rows.forEach(function (row) {
+      var btn = row.querySelector(".faq-trigger");
+      if (!btn) return;
+      btn.addEventListener("click", function () {
+        var willOpen = !row.classList.contains("is-open");
+        rows.forEach(function (other) {
+          var isTarget = other === row && willOpen;
+          other.classList.toggle("is-open", isTarget);
+          var otherBtn = other.querySelector(".faq-trigger");
+          if (otherBtn) otherBtn.setAttribute("aria-expanded", String(isTarget));
         });
       });
     });
-
-    if (faqGroup) {
-      var chips = Array.prototype.slice.call(faqGroup.querySelectorAll("[data-faq-filter]"));
-      chips.forEach(function (chip) {
-        chip.addEventListener("click", function () {
-          var topic = chip.getAttribute("data-faq-filter") || "all";
-          chips.forEach(function (c) {
-            var active = c === chip;
-            c.classList.toggle("is-active", active);
-            c.setAttribute("aria-pressed", String(active));
-          });
-          var firstVisible = null;
-          items.forEach(function (item) {
-            var match = topic === "all" || item.getAttribute("data-faq-topic") === topic;
-            item.hidden = !match;
-            if (match && !firstVisible) firstVisible = item;
-            if (!match) item.open = false;
-          });
-          if (firstVisible && !items.some(function (i) { return !i.hidden && i.open; })) {
-            firstVisible.open = true;
-          }
-        });
-      });
-    }
   })();
 })();

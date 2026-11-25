@@ -226,7 +226,7 @@
     <div class="member-hub-shell">
       <nav class="member-hub-tabs" role="tablist" aria-label="Quản lý tài khoản thành viên">
         <button type="button" class="member-hub-tab is-active" role="tab" aria-selected="true" data-dash-tab="profile">Thẻ &amp; Hồ sơ</button>
-        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="activity">Hoạt động của tôi</button>
+        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="activity">Ví hành trình</button>
         <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="security">Bảo mật</button>
       </nav>
 
@@ -292,7 +292,7 @@
 
               <div class="pass-footer pass-footer--clean">
                 <span>HOLARISE.ORG</span>
-                <span>TOGETHER WE RISE, TOGETHER WE SERVE</span>
+                <span>HÒA LẠC · CỘNG ĐỒNG THANH NIÊN</span>
               </div>
             </article>
 
@@ -354,21 +354,36 @@
         </div>
       </div>
 
-      <!-- TAB 2: MY ACTIVITY (Bookings + Reflections + Optional Quick Book) -->
+      <!-- TAB 2: MY JOURNEY WALLET (Event Pass Wallet + Reflections + Quick Book) -->
       <div class="member-hub-pane" data-dash-pane="activity" hidden>
         <div class="member-hub-stack">
           <section class="member-panel-box">
             <div class="member-panel-head">
               <div>
-                <span class="kicker">Hoạt động của tôi</span>
-                <h2>Lịch sử giữ chỗ sự kiện</h2>
+                <span class="kicker">Ví hành trình cá nhân</span>
+                <h2>Thẻ sự kiện của tôi</h2>
               </div>
               <a class="arrow-link" href="/lich-hoat-dong/">Xem lịch tuần này →</a>
             </div>
-            <div id="member-bookings-list" class="member-list-stack">
-              <p class="member-empty-hint">Đang tải lịch sử giữ chỗ...</p>
+            <div id="member-wallet-summary" class="member-wallet-summary" hidden></div>
+            <div id="member-bookings-list" class="member-wallet-stack">
+              <p class="member-empty-hint">Đang mở ví thẻ sự kiện...</p>
             </div>
           </section>
+
+          <dialog id="member-wallet-dialog" class="wallet-pass-dialog" aria-labelledby="wallet-dlg-title">
+            <div class="wallet-dlg-shell">
+              <div class="wallet-dlg-topbar">
+                <span class="kicker" id="wallet-dlg-kicker">Thẻ sự kiện</span>
+                <button type="button" class="wallet-dlg-close" id="wallet-dlg-close" aria-label="Đóng thẻ sự kiện">✕</button>
+              </div>
+              <div id="wallet-dlg-body"></div>
+              <div class="wallet-dlg-actions">
+                <button type="button" class="btn btn--primary btn--sm" id="wallet-dlg-download">Tải thẻ sự kiện (PNG)</button>
+                <a class="btn btn--outline btn--sm" id="wallet-dlg-link" href="/lich-hoat-dong/" hidden>Mở thư mời sự kiện →</a>
+              </div>
+            </div>
+          </dialog>
 
           <section class="member-panel-box">
             <div class="member-panel-head">

@@ -367,118 +367,16 @@
   gsap.registerPlugin(ScrollTrigger);
   gsap.ticker.lagSmoothing(0);
 
-  /* 2D. Zero-Dependency Desktop Velvety Wheel Inertia Engine (0% Idle CPU, Modal & Trackpad Safe) */
-  if (isFinePointer) {
-    var smoothLocked = false;
-    var smoothRunning = false;
-    var currentScrollY = window.scrollY || 0;
-    var targetScrollY = currentScrollY;
-
-    var getMaxScrollY = function () {
-      return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    };
-
-    var hasScrollableAncestor = function (node, dy) {
-      var el = node && node.nodeType === 1 ? node : null;
-      while (el && el !== document.body && el !== document.documentElement) {
-        if (el.tagName === "DIALOG" || el.tagName === "TEXTAREA" || el.tagName === "SELECT") {
-          return true;
-        }
-        var st = window.getComputedStyle(el);
-        var oy = st.overflowY;
-        if ((oy === "auto" || oy === "scroll") && el.scrollHeight > el.clientHeight + 2) {
-          if ((dy < 0 && el.scrollTop > 0) || (dy > 0 && el.scrollTop + el.clientHeight < el.scrollHeight)) {
-            return true;
-          }
-        }
-        el = el.parentElement;
-      }
-      return false;
-    };
-
-    var onSmoothTick = function () {
-      if (smoothLocked || !desktopMq.matches) {
-        gsap.ticker.remove(onSmoothTick);
-        smoothRunning = false;
-        return;
-      }
-      var ratio = gsap.ticker.deltaRatio ? gsap.ticker.deltaRatio(60) : 1;
-      var alpha = 1 - Math.pow(0.865, Math.min(2.5, Math.max(0.5, ratio)));
-      var diff = targetScrollY - currentScrollY;
-      if (Math.abs(diff) < 0.45) {
-        currentScrollY = targetScrollY;
-        window.scrollTo(0, Math.round(currentScrollY));
-        ScrollTrigger.update();
-        gsap.ticker.remove(onSmoothTick);
-        smoothRunning = false;
-        return;
-      }
-      currentScrollY += diff * alpha;
-      window.scrollTo(0, currentScrollY);
-      ScrollTrigger.update();
-    };
-
-    var startSmoothTick = function () {
-      if (!smoothRunning) {
-        smoothRunning = true;
-        gsap.ticker.add(onSmoothTick);
-      }
-    };
-
-    window.addEventListener(
-      "wheel",
-      function (e) {
-        if (smoothLocked || !desktopMq.matches || e.defaultPrevented || e.ctrlKey || e.metaKey) return;
-        if (document.querySelector("dialog[open]")) return;
-        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-        if (hasScrollableAncestor(e.target, e.deltaY)) return;
-
-        // Only smooth discrete/stepped wheel deltas; let native high-frequency trackpad momentum pass if tiny
-        var rawDelta = e.deltaMode === 1 ? e.deltaY * 36 : e.deltaMode === 2 ? e.deltaY * window.innerHeight * 0.85 : e.deltaY;
-        if (e.deltaMode === 0 && Math.abs(rawDelta) < 18 && !smoothRunning) {
-          return;
-        }
-
-        e.preventDefault();
-        if (!smoothRunning) {
-          currentScrollY = window.scrollY || 0;
-          targetScrollY = currentScrollY;
-        }
-        var clampedStep = Math.max(-240, Math.min(240, rawDelta * 0.94));
-        targetScrollY = Math.max(0, Math.min(getMaxScrollY(), targetScrollY + clampedStep));
-        startSmoothTick();
-      },
-      { passive: false }
-    );
-
-    window.addEventListener(
-      "scroll",
-      function () {
-        if (!smoothRunning) {
-          currentScrollY = window.scrollY || 0;
-          targetScrollY = currentScrollY;
-        }
-      },
-      { passive: true }
-    );
-
-    window.HolaSmoothScroll = {
-      setLocked: function (locked) {
-        smoothLocked = Boolean(locked);
-        if (smoothLocked && smoothRunning) {
-          gsap.ticker.remove(onSmoothTick);
-          smoothRunning = false;
-        }
-        currentScrollY = window.scrollY || 0;
-        targetScrollY = currentScrollY;
-      },
-      scrollTo: function (destY) {
-        currentScrollY = window.scrollY || 0;
-        targetScrollY = Math.max(0, Math.min(getMaxScrollY(), Number(destY) || 0));
-        startSmoothTick();
-      },
-    };
-  }
+  /* 2D. Native Scroll Shim (Zero wheel/trackpad hijacking — smooth 120fps native inertia) */
+  window.HolaSmoothScroll = {
+    setLocked: function () {},
+    scrollTo: function (destY) {
+      window.scrollTo({
+        top: Math.max(0, Number(destY) || 0),
+        behavior: prefersReduced ? "auto" : "smooth",
+      });
+    },
+  };
 
   /* 3. Clean Fade-Up Kicker Badges */
   document.querySelectorAll(".kicker").forEach(function (kicker) {

@@ -502,8 +502,9 @@
       if (passGreetingEl && snap.greeting) passGreetingEl.textContent = snap.greeting;
       if (passEventEl) passEventEl.textContent = snap.eventTitle || "Nhịp tuần Hòa Lạc";
       if (passScheduleEl) {
+        var joinTimeParts = [snap.eventTime, snap.eventDate].filter(Boolean);
         passScheduleEl.textContent = snap.eventId
-          ? snap.eventDate + " (" + snap.eventTime + ")"
+          ? joinTimeParts.join(" · ") || DEFAULT_SCHEDULE
           : DEFAULT_SCHEDULE;
       }
       if (passVibeEl) passVibeEl.textContent = snap.vibe || "Giữ chỗ 1 chạm & Lưu bút";
@@ -806,6 +807,52 @@
     });
   }
 
+  function resolveEventCardPalette(snapshot) {
+    var hay = String(
+      (snapshot.pillar || "") + " " + (snapshot.eventType || "") + " " + (snapshot.eventId || "") + " " + (snapshot.eventTitle || "")
+    ).toLowerCase();
+    if (hay.indexOf("holagreen") >= 0 || hay.indexOf("sinh thái") >= 0 || hay.indexOf("cảnh quan") >= 0) {
+      return {
+        pillarName: "HolaGreen",
+        badge: "HolaGreen · Sinh thái & Cảnh quan",
+        bg: "#0C1511",
+        glowTop: "rgba(38, 162, 105, 0.34)",
+        glowBot: "rgba(20, 90, 64, 0.42)",
+        accent: "#6EE7B7",
+        pillBg: "#145A40",
+        pillBorder: "rgba(110, 231, 183, 0.45)",
+        pillTint: "rgba(20, 90, 64, 0.28)",
+        fallbackQuote: "Cùng nhau giữ gìn cảnh quan xanh và bước chậm giữa thiên nhiên Hòa Lạc.",
+      };
+    }
+    if (hay.indexOf("holaconnect") >= 0 || hay.indexOf("leo núi") >= 0 || hay.indexOf("tri thức") >= 0 || hay.indexOf("phụng sự") >= 0) {
+      return {
+        pillarName: "HolaConnect",
+        badge: "HolaConnect · Tri thức & Phụng sự",
+        bg: "#0D1519",
+        glowTop: "rgba(56, 152, 182, 0.34)",
+        glowBot: "rgba(31, 78, 95, 0.44)",
+        accent: "#93D5EA",
+        pillBg: "#1F4E5F",
+        pillBorder: "rgba(147, 213, 234, 0.45)",
+        pillTint: "rgba(31, 78, 95, 0.28)",
+        fallbackQuote: "Đi cùng nhau trên những cung đường thật, mở rộng kết nối và sẻ chia tri thức.",
+      };
+    }
+    return {
+      pillarName: "HolaHeart",
+      badge: "HolaHeart · Tĩnh tại & Lắng nghe",
+      bg: "#16110E",
+      glowTop: "rgba(217, 121, 72, 0.36)",
+      glowBot: "rgba(168, 73, 23, 0.32)",
+      accent: "#F5B38C",
+      pillBg: "#9C4625",
+      pillBorder: "rgba(245, 179, 140, 0.48)",
+      pillTint: "rgba(217, 121, 72, 0.2)",
+      fallbackQuote: "Một buổi gặp gỡ chậm rãi để lắng nghe, trò chuyện và đồng hành cùng nhau.",
+    };
+  }
+
   function downloadPassPng(snapshot) {
     if (!snapshot) return;
     if (snapshot.isFatherWorkshop) {
@@ -820,13 +867,38 @@
       var ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      var isFather = Boolean(snapshot.isFatherWorkshop);
+      var palette = resolveEventCardPalette(snapshot);
+      var status = String(snapshot.status || "").toLowerCase();
+      var isEventTicket = Boolean(snapshot.eventId || snapshot.eventTitle || String(snapshot.id || "").indexOf("REG-") === 0);
+
+      var statusLabel = snapshot.isPartner
+        ? "ĐÃ TIẾP NHẬN"
+        : status === "attended"
+          ? "ĐÃ THAM DỰ"
+          : status === "contacted"
+            ? "ĐÃ XÁC NHẬN"
+            : status === "cancelled"
+              ? "ĐÃ HỦY CHỖ"
+              : isEventTicket
+                ? "ĐÃ GIỮ CHỖ"
+                : "THÀNH VIÊN HOLA";
+
+      var stampTop = snapshot.isPartner
+        ? "ĐỐI TÁC"
+        : status === "attended"
+          ? "ĐÃ THAM DỰ"
+          : status === "cancelled"
+            ? "ĐÃ HỦY"
+            : isEventTicket
+              ? "ĐÃ GIỮ CHỖ"
+              : "THÀNH VIÊN";
+      var stampBottom = status === "attended" ? "HOLARISE" : "HÒA LẠC";
 
       /* Outer Editorial Frame */
-      ctx.fillStyle = isFather ? "#FCF8F1" : "#F6F7F6";
+      ctx.fillStyle = "#F6F7F6";
       ctx.fillRect(0, 0, 1080, 1350);
 
-      /* Main Obsidian / Sunset Espresso Pass Card */
+      /* Main Pass Card */
       var cardX = 72;
       var cardY = 84;
       var cardW = 936;
@@ -834,54 +906,25 @@
 
       ctx.save();
       drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 42);
-      ctx.fillStyle = isFather ? "#1A110B" : snapshot.theme === "sunrise" ? "#111512" : "#0B110F";
+      ctx.fillStyle = palette.bg;
       ctx.fill();
       ctx.clip();
 
       var glowTop = ctx.createRadialGradient(880, 185, 20, 880, 185, 560);
-      glowTop.addColorStop(
-        0,
-        isFather
-          ? "rgba(236, 148, 76, 0.44)"
-          : snapshot.theme === "sunrise"
-            ? "rgba(217, 121, 72, 0.36)"
-            : "rgba(217, 121, 72, 0.24)"
-      );
-      glowTop.addColorStop(1, "rgba(217, 121, 72, 0)");
+      glowTop.addColorStop(0, palette.glowTop);
+      glowTop.addColorStop(1, "rgba(0, 0, 0, 0)");
       ctx.fillStyle = glowTop;
       ctx.fillRect(cardX, cardY, cardW, cardH);
 
       var glowBottom = ctx.createRadialGradient(200, 1120, 20, 200, 1120, 560);
-      glowBottom.addColorStop(0, isFather ? "rgba(168, 73, 23, 0.36)" : "rgba(11, 110, 79, 0.38)");
-      glowBottom.addColorStop(1, isFather ? "rgba(168, 73, 23, 0)" : "rgba(11, 110, 79, 0)");
+      glowBottom.addColorStop(0, palette.glowBot);
+      glowBottom.addColorStop(1, "rgba(0, 0, 0, 0)");
       ctx.fillStyle = glowBottom;
       ctx.fillRect(cardX, cardY, cardW, cardH);
 
-      if (isFather) {
-        /* Golden Sunset Horizon & Lake Shimmer Motif */
-        var sunOrb = ctx.createRadialGradient(810, 470, 8, 810, 470, 120);
-        sunOrb.addColorStop(0, "rgba(255, 222, 168, 0.32)");
-        sunOrb.addColorStop(1, "rgba(236, 148, 76, 0)");
-        ctx.fillStyle = sunOrb;
-        ctx.beginPath();
-        ctx.arc(810, 470, 120, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = "rgba(245, 179, 140, 0.16)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(cardX + 540, 495);
-        ctx.lineTo(cardX + cardW - 64, 495);
-        ctx.moveTo(cardX + 610, 512);
-        ctx.lineTo(cardX + cardW - 110, 512);
-        ctx.moveTo(cardX + 665, 528);
-        ctx.lineTo(cardX + cardW - 150, 528);
-        ctx.stroke();
-      }
-
       /* Card Border */
       drawRoundedRect(ctx, cardX + 1.5, cardY + 1.5, cardW - 3, cardH - 3, 41);
-      ctx.strokeStyle = isFather ? "rgba(245, 179, 140, 0.24)" : "rgba(255, 255, 255, 0.16)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
       ctx.lineWidth = 3;
       ctx.stroke();
 
@@ -893,7 +936,7 @@
         ctx.drawImage(logoImg, padX, cardY + 56, 56, 56);
       } else {
         drawRoundedRect(ctx, padX, cardY + 56, 56, 56, 12);
-        ctx.fillStyle = isFather ? "#A84917" : "#0B6E4F";
+        ctx.fillStyle = palette.pillBg;
         ctx.fill();
         ctx.fillStyle = "#FFFFFF";
         ctx.font = '700 22px "Be Vietnam Pro", -apple-system, sans-serif';
@@ -902,103 +945,98 @@
 
       ctx.fillStyle = "rgba(244, 247, 245, 0.88)";
       ctx.font = '600 22px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText(isFather ? "HOLAHEART · THƯ MỜI ĐẶC BIỆT" : "HOLARISE · HÒA LẠC", padX + 76, cardY + 92);
+      ctx.fillText(isEventTicket ? "HOLARISE · THẺ SỰ KIỆN" : "HOLARISE · HÒA LẠC", padX + 76, cardY + 92);
 
       /* Status Pill */
-      drawRoundedRect(ctx, cardX + cardW - 64 - 230, cardY + 58, 230, 50, 25);
-      ctx.fillStyle = isFather ? "#A84917" : "#0B6E4F";
+      ctx.font = '600 20px "Be Vietnam Pro", -apple-system, sans-serif';
+      var pillW = Math.max(210, Math.min(280, ctx.measureText(statusLabel).width + 52));
+      drawRoundedRect(ctx, cardX + cardW - 64 - pillW, cardY + 58, pillW, 50, 25);
+      ctx.fillStyle = status === "cancelled" ? "rgba(180, 62, 62, 0.85)" : palette.pillBg;
       ctx.fill();
       ctx.fillStyle = "#FFFFFF";
-      ctx.font = '600 21px "Be Vietnam Pro", -apple-system, sans-serif';
       ctx.textAlign = "center";
-      ctx.fillText(
-        isFather ? "ĐÃ GIỮ CHỖ" : snapshot.isPartner ? "ĐÃ TIẾP NHẬN" : "THÀNH VIÊN HOLA",
-        cardX + cardW - 64 - 115,
-        cardY + 91
-      );
+      ctx.fillText(statusLabel, cardX + cardW - 64 - pillW / 2, cardY + 91);
       ctx.textAlign = "left";
 
       /* Program Tag Pill */
-      var tagText = (isFather ? "WORKSHOP · CUỘC ĐỜI CỦA CHA" : snapshot.badge || "CỘNG ĐỒNG HOLARISE").toUpperCase();
-      ctx.font = '600 20px "Be Vietnam Pro", -apple-system, sans-serif';
-      var tagW = Math.min(540, ctx.measureText(tagText).width + 48);
-      drawRoundedRect(ctx, padX, cardY + 168, tagW, 48, 24);
-      ctx.fillStyle = "rgba(217, 121, 72, 0.18)";
+      var tagText = String(snapshot.badge || snapshot.eventType || palette.badge).toUpperCase();
+      ctx.font = '600 19px "Be Vietnam Pro", -apple-system, sans-serif';
+      var tagW = Math.min(innerW - 180, ctx.measureText(tagText).width + 44);
+      drawRoundedRect(ctx, padX, cardY + 166, tagW, 46, 23);
+      ctx.fillStyle = palette.pillTint;
       ctx.fill();
-      ctx.strokeStyle = "rgba(217, 121, 72, 0.55)";
+      ctx.strokeStyle = palette.pillBorder;
       ctx.lineWidth = 2;
       ctx.stroke();
-      ctx.fillStyle = "#F5B38C";
-      ctx.fillText(tagText, padX + 24, cardY + 199);
+      ctx.fillStyle = palette.accent;
+      ctx.fillText(tagText, padX + 22, cardY + 196);
 
       /* Member Name & Org */
       ctx.fillStyle = "#FFFFFF";
-      ctx.font = '600 60px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.font = '600 58px "Be Vietnam Pro", -apple-system, sans-serif';
       var afterNameY = drawWrappedLines(
         ctx,
-        snapshot.fullName || "Khách mời HolaHeart",
+        snapshot.fullName || "Thành viên Hola",
         padX,
-        cardY + 292,
-        innerW - 140,
-        74,
+        cardY + 290,
+        innerW - 190,
+        72,
         2
       );
 
       ctx.fillStyle = "rgba(244, 247, 245, 0.76)";
-      ctx.font = '400 28px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.font = '400 27px "Be Vietnam Pro", -apple-system, sans-serif';
       ctx.fillText(
-        snapshot.organization || (isFather ? "Khách mời · Hòa Lạc" : "Cộng đồng Hòa Lạc"),
+        snapshot.organization || "Cộng đồng HolaRise",
         padX,
         afterNameY + 18
       );
 
-      /* Editorial Lora Quote */
+      /* Editorial Lora Quote (Never hardcoded to a single event) */
+      var quoteBody = String(snapshot.greeting || snapshot.eventSummary || palette.fallbackQuote).trim();
       ctx.fillStyle = "rgba(253, 245, 234, 0.9)";
-      ctx.font = 'italic 400 27px "Lora", Georgia, serif';
+      ctx.font = 'italic 400 26px "Lora", Georgia, serif';
       drawWrappedLines(
         ctx,
-        "“" +
-          (snapshot.greeting ||
-            "Cha có thể không nói nhiều, nhưng cả cuộc đời Cha chính là minh chứng cho tình yêu ấy.") +
-          "”",
+        "“" + quoteBody + "”",
         padX,
-        cardY + 510,
+        cardY + 504,
         innerW,
-        42,
+        40,
         3
       );
 
-      /* Rotated Circular Confirmation Stamp */
+      /* Rotated Circular Confirmation Stamp (Sized cleanly inside circle) */
       ctx.save();
-      ctx.translate(cardX + cardW - 155, cardY + 275);
-      ctx.rotate(-0.21);
+      ctx.translate(cardX + cardW - 150, cardY + 278);
+      ctx.rotate(-0.18);
       ctx.beginPath();
-      ctx.arc(0, 0, 88, 0, Math.PI * 2);
-      ctx.fillStyle = isFather ? "rgba(26, 17, 11, 0.85)" : "rgba(11, 17, 15, 0.8)";
+      ctx.arc(0, 0, 86, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(11, 17, 15, 0.82)";
       ctx.fill();
-      ctx.strokeStyle = "#F5B38C";
-      ctx.lineWidth = 4;
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 3.5;
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(0, 0, 74, 0, Math.PI * 2);
-      ctx.setLineDash([7, 5]);
-      ctx.strokeStyle = "rgba(245, 179, 140, 0.65)";
+      ctx.arc(0, 0, 73, 0, Math.PI * 2);
+      ctx.setLineDash([6, 5]);
+      ctx.strokeStyle = palette.pillBorder;
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = "#F5B38C";
+      ctx.fillStyle = palette.accent;
       ctx.textAlign = "center";
-      ctx.font = '700 20px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText(isFather ? "ĐÃ GIỮ CHỖ" : snapshot.isPartner ? "ĐỐI TÁC ĐỒNG HÀNH" : "THÀNH VIÊN HOLA", 0, -4);
-      ctx.font = '600 17px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText(isFather ? "19H15 · 29/11" : "HÒA LẠC", 0, 24);
+      ctx.font = '700 16px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.fillText(stampTop, 0, -4);
+      ctx.font = '600 14px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.fillText(stampBottom, 0, 20);
       ctx.restore();
 
       /* Perforation Line & Side Cutouts */
-      var divY = cardY + 695;
+      var divY = cardY + 690;
       ctx.save();
       ctx.setLineDash([12, 12]);
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.24)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(cardX + 36, divY);
@@ -1006,46 +1044,42 @@
       ctx.stroke();
       ctx.restore();
 
-      ctx.fillStyle = isFather ? "#FCF8F1" : "#F6F7F6";
+      ctx.fillStyle = "#F6F7F6";
       ctx.beginPath();
       ctx.arc(cardX, divY, 24, 0, Math.PI * 2);
       ctx.arc(cardX + cardW, divY, 24, 0, Math.PI * 2);
       ctx.fill();
 
       /* 2x2 Ticket Metadata Grid */
-      var metaY1 = divY + 68;
-      var metaY2 = divY + 236;
+      var metaY1 = divY + 66;
+      var metaY2 = divY + 232;
       var col2X = padX + innerW / 2 + 16;
       var colW = innerW / 2 - 24;
 
       function drawMeta(label, val, x, y, valColor) {
         ctx.fillStyle = "rgba(244, 247, 245, 0.56)";
-        ctx.font = '600 20px "Be Vietnam Pro", -apple-system, sans-serif';
+        ctx.font = '600 19px "Be Vietnam Pro", -apple-system, sans-serif';
         ctx.fillText(label, x, y);
         ctx.fillStyle = valColor || "#FFFFFF";
-        ctx.font = '600 28px "Be Vietnam Pro", -apple-system, sans-serif';
-        drawWrappedLines(ctx, val, x, y + 40, colW, 38, 2);
+        ctx.font = '600 26px "Be Vietnam Pro", -apple-system, sans-serif';
+        drawWrappedLines(ctx, val, x, y + 38, colW, 36, 2);
       }
 
-      if (isFather) {
-        drawMeta("THỜI GIAN", "19h15 · Chủ Nhật, 29/11/2026", padX, metaY1);
-        drawMeta("ĐỊA ĐIỂM", "Cafe Mây Lang Thang · Hòa Lạc", col2X, metaY1);
-        drawMeta("SỐ CHỖ GIỮ", snapshot.vibe || "01 chỗ · Đi một mình", padX, metaY2);
-        drawMeta("MÃ THIỆP VÉ", snapshot.id || "CHA-2911", col2X, metaY2, "#F5B38C");
-      } else {
-        drawMeta(snapshot.isPartner ? "ĐỊNH HƯỚNG" : "HÀNH TRÌNH", snapshot.eventTitle || "Nhịp tuần Hòa Lạc", padX, metaY1);
-        drawMeta(
-          "NHỊP HOẠT ĐỘNG",
-          snapshot.eventId ? snapshot.eventDate + " · " + snapshot.eventTime : DEFAULT_SCHEDULE,
-          col2X,
-          metaY1
-        );
-        drawMeta(snapshot.isPartner ? "HÌNH THỨC" : "QUYỀN LỢI", snapshot.vibe || "Giữ chỗ 1 chạm & Lưu bút", padX, metaY2);
-        drawMeta("MÃ THÀNH VIÊN", snapshot.id || "HOLA-2026-0001", col2X, metaY2, "#F5B38C");
-      }
+      var scheduleParts = [snapshot.eventTime, snapshot.eventDate].filter(Boolean);
+      var scheduleVal = scheduleParts.length ? scheduleParts.join(" · ") : "Cập nhật qua Nhóm Zalo";
+      var locationOrVibeLabel = snapshot.isPartner ? "HÌNH THỨC" : snapshot.eventLocation ? "ĐỊA ĐIỂM" : "GHI CHÚ";
+      var locationOrVibeVal = snapshot.isPartner
+        ? snapshot.vibe || "Đồng hành tổ chức"
+        : snapshot.eventLocation || snapshot.vibe || "Hòa Lạc, Hà Nội";
+      var codeLabel = isEventTicket ? "MÃ GIỮ CHỖ" : "MÃ THÀNH VIÊN";
 
-      /* Bottom Barcode & Coordinates */
-      var footY = cardY + cardH - 115;
+      drawMeta(snapshot.isPartner ? "ĐỊNH HƯỚNG" : "SỰ KIỆN", snapshot.eventTitle || "Hoạt động HolaRise", padX, metaY1);
+      drawMeta("THỜI GIAN", scheduleVal, col2X, metaY1);
+      drawMeta(locationOrVibeLabel, locationOrVibeVal, padX, metaY2);
+      drawMeta(codeLabel, snapshot.id || "HOLA-2026-0001", col2X, metaY2, palette.accent);
+
+      /* Clean Typographic Footer (Zero fake barcode, 100% Vietnamese) */
+      var footY = cardY + cardH - 110;
       ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -1053,25 +1087,18 @@
       ctx.lineTo(cardX + cardW - 64, footY);
       ctx.stroke();
 
-      var barWidths = [6, 12, 5, 4, 9, 6, 14, 5, 4, 10, 6, 12, 6, 4, 9, 6, 10];
-      var bx = padX;
-      ctx.fillStyle = "rgba(244, 247, 245, 0.78)";
-      for (var k = 0; k < barWidths.length; k++) {
-        ctx.fillRect(bx, footY + 32, barWidths[k], 42);
-        bx += barWidths[k] + 8;
-      }
+      ctx.textAlign = "left";
+      ctx.fillStyle = "rgba(244, 247, 245, 0.72)";
+      ctx.font = '600 20px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.fillText("HOLARISE.ORG", padX, footY + 56);
 
       ctx.textAlign = "right";
-      ctx.fillStyle = isFather ? "rgba(245, 179, 140, 0.85)" : "rgba(244, 247, 245, 0.65)";
-      ctx.font = '500 21px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText(
-        isFather ? "LẮNG NGHE · TRI ÂN · YÊU THƯƠNG" : "TOGETHER WE RISE, TOGETHER WE SERVE",
-        cardX + cardW - 64,
-        footY + 60
-      );
+      ctx.fillStyle = "rgba(244, 247, 245, 0.62)";
+      ctx.font = '500 20px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.fillText("HÒA LẠC · CỘNG ĐỒNG THANH NIÊN", cardX + cardW - 64, footY + 56);
       ctx.restore();
 
-      var filePrefix = isFather ? "thiep-moi-cuoc-doi-cua-cha-" : "holarise-pass-";
+      var filePrefix = isEventTicket ? "the-su-kien-holarise-" : "holarise-pass-";
       var fileName =
         filePrefix + String(snapshot.id || "hola-rise").toLowerCase().replace(/[^a-z0-9-]+/g, "-") + ".png";
 
@@ -1231,7 +1258,7 @@
       ctx.font = 'italic 400 27px "Lora", Georgia, serif';
       drawWrappedLines(
         ctx,
-        "“" + (member.bio || "Cùng nhau kiến tạo những cuối tuần tử tế, sâu sắc và kết nối tại Hòa Lạc.") + "”",
+        "“" + (member.bio || "Sống sâu hơn, xanh hơn và bền bỉ sẻ chia cùng HolaRise.") + "”",
         padX,
         cardY + 470,
         innerW,
@@ -1276,7 +1303,7 @@
       drawM("TRỤ CỘT CHÍNH", palette.badge.split(" · ")[0], padX, metaY2);
       drawM("TRẠNG THÁI", "Đang hoạt động", col2X, metaY2);
 
-      var footY = cardY + cardH - 115;
+      var footY = cardY + cardH - 110;
       ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -1284,17 +1311,15 @@
       ctx.lineTo(cardX + cardW - 64, footY);
       ctx.stroke();
 
-      var barWidths = [6, 12, 5, 4, 9, 6, 14, 5, 4, 10, 6, 12, 6, 4, 9, 6, 10];
-      var bx = padX;
-      ctx.fillStyle = "rgba(244, 247, 245, 0.78)";
-      for (var k = 0; k < barWidths.length; k++) {
-        ctx.fillRect(bx, footY + 32, barWidths[k], 42);
-        bx += barWidths[k] + 8;
-      }
+      ctx.textAlign = "left";
+      ctx.fillStyle = "rgba(244, 247, 245, 0.72)";
+      ctx.font = '600 20px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.fillText("HOLARISE.ORG", padX, footY + 56);
+
       ctx.textAlign = "right";
-      ctx.fillStyle = "rgba(244, 247, 245, 0.68)";
-      ctx.font = '500 21px "Be Vietnam Pro", -apple-system, sans-serif';
-      ctx.fillText("TOGETHER WE RISE, TOGETHER WE SERVE", cardX + cardW - 64, footY + 60);
+      ctx.fillStyle = "rgba(244, 247, 245, 0.62)";
+      ctx.font = '500 20px "Be Vietnam Pro", -apple-system, sans-serif';
+      ctx.fillText("HÒA LẠC · CỘNG ĐỒNG THANH NIÊN", cardX + cardW - 64, footY + 56);
       ctx.restore();
 
       var fileName =

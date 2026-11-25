@@ -11447,3 +11447,785 @@ a:focus-visible,
 .share-inviter-signed-hint strong {
   color: var(--ink);
 }
+
+
+/* ==========================================================================
+   SURGICAL PRODUCTION DEFECT PATCHES (Preserves 100% Production Look)
+   ========================================================================== */
+
+/* 1. Crisp Single SVG Header Brand (Fixes overlapping a-R letters) */
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.brand-svg-logo {
+  display: block;
+  height: 28px;
+  width: auto;
+}
+
+/* 2. Balanced 2-Column Event Grid when 2 items exist + Zero Mid-Word Truncation */
+.events-rail:has(> :nth-child(2):last-child),
+.grid-3:has(> :nth-child(2):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.event-card .card-text,
+.event-info-row,
+.event-info-row span {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: initial !important;
+}
+
+/* 3. Active Filter Pill Alignment & Icon Contrast (/lich-hoat-dong/) */
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: auto;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.filter-btn.is-active {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+.filter-btn.is-active svg,
+.filter-btn.is-active .filter-icon {
+  color: #ffffff;
+  stroke: #ffffff;
+}
+
+/* 4. Balanced CTA Band & Orbital Back-to-Top Clearance above Footer */
+.cta-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.cta-band > div:first-child {
+  max-width: 56ch;
+}
+
+.cta-band-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.orbital-top-btn {
+  bottom: 76px !important;
+  right: 22px !important;
+}
+
+/* 5. Left-align FAQ Question Text flush next to 01..05 number (overrides base .faq-details summary flex) */
+.faq-details.faq-live-item > summary.faq-live-summary {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 28px;
+  align-items: center;
+  justify-content: stretch;
+  gap: 14px;
+  padding: 18px 20px;
+  text-align: left;
+}
+
+.faq-details.faq-live-item > summary.faq-live-summary .faq-live-qwrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
+}
+
+/* 6. Ensure Hidden Panes in /tham-gia/ & Filter Empty States Respect [hidden] */
+[data-join-pane][hidden],
+.filter-empty[hidden] {
+  display: none !important;
+}
+
+/* 7. Mobile Hero Contrast & Visible CTAs (Fixes invisible/hidden mobile hero controls) */
+@media (max-width: 768px) {
+  .hero-card {
+    min-height: 540px;
+  }
+
+  .hero-card-scrim {
+    display: block !important;
+    background: linear-gradient(
+      to bottom,
+      rgba(11, 17, 15, 0.08) 0%,
+      rgba(11, 17, 15, 0.28) 42%,
+      rgba(11, 17, 15, 0.88) 100%
+    ) !important;
+  }
+
+  .hero-display-lead {
+    display: block !important;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: rgba(244, 247, 245, 0.92);
+    margin: 10px 0 16px;
+  }
+
+  .hero-card-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .events-rail:has(> :nth-child(2):last-child),
+  .grid-3:has(> :nth-child(2):last-child) {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-band {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ============================================================================
+   MEMBER JOURNEY WALLET (Apple Wallet / Luma-inspired Event Pass Stack)
+   ============================================================================ */
+.member-wallet-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.wallet-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--bg-soft, #f3f1ec);
+  border: 1px solid var(--line, rgba(20, 26, 22, 0.1));
+  font-size: 0.82rem;
+  color: var(--ink, #141a16);
+}
+
+.wallet-stat-chip--attended {
+  background: rgba(20, 90, 64, 0.1);
+  border-color: rgba(20, 90, 64, 0.24);
+  color: #145a40;
+}
+
+.wallet-stat-hint {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--muted, #5c665f);
+}
+
+.member-wallet-stack {
+  display: flex;
+  flex-direction: column;
+  padding-top: 6px;
+}
+
+.wallet-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 20px 22px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #f4f7f5;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 -6px 20px rgba(11, 17, 15, 0.18), 0 12px 28px rgba(11, 17, 15, 0.16);
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.24s ease;
+  z-index: calc(1 + var(--card-index, 0));
+}
+
+.wallet-card + .wallet-card {
+  margin-top: -54px;
+}
+
+.wallet-card:not(.is-front):hover,
+.wallet-card:not(.is-front):focus-visible {
+  transform: translateY(-22px);
+  box-shadow: 0 -10px 26px rgba(11, 17, 15, 0.26), 0 18px 34px rgba(11, 17, 15, 0.22);
+}
+
+.wallet-card.is-front:hover,
+.wallet-card.is-front:focus-visible {
+  transform: translateY(-4px);
+}
+
+.wallet-card:focus-visible {
+  outline: 2px solid var(--accent, #b85d3b);
+  outline-offset: 3px;
+}
+
+.wallet-card--holaheart {
+  background: radial-gradient(circle at 88% 12%, rgba(217, 121, 72, 0.34), transparent 56%),
+    linear-gradient(145deg, #1b1410 0%, #110d0b 100%);
+}
+
+.wallet-card--holagreen {
+  background: radial-gradient(circle at 88% 12%, rgba(38, 162, 105, 0.32), transparent 56%),
+    linear-gradient(145deg, #0f1b16 0%, #09120e 100%);
+}
+
+.wallet-card--holaconnect {
+  background: radial-gradient(circle at 88% 12%, rgba(56, 152, 182, 0.32), transparent 56%),
+    linear-gradient(145deg, #101b21 0%, #0a1216 100%);
+}
+
+.wallet-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wallet-card-pillar {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(245, 224, 200, 0.85);
+}
+
+.wallet-card--holagreen .wallet-card-pillar {
+  color: #86efac;
+}
+
+.wallet-card--holaconnect .wallet-card-pillar {
+  color: #93d5ea;
+}
+
+.wallet-status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.wallet-status-chip--attended {
+  background: rgba(20, 90, 64, 0.88);
+  color: #e9fbf2;
+}
+
+.wallet-status-chip--contacted {
+  background: rgba(31, 78, 95, 0.88);
+  color: #e6f6fb;
+}
+
+.wallet-status-chip--cancelled {
+  background: rgba(168, 49, 49, 0.82);
+  color: #fdecec;
+}
+
+.wallet-card-title {
+  font-family: var(--font-serif, "Lora", Georgia, serif);
+  font-size: 1.12rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #ffffff;
+}
+
+.wallet-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 0.84rem;
+  color: rgba(244, 247, 245, 0.76);
+}
+
+.wallet-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  margin-top: 4px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.16);
+}
+
+.wallet-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: #f5b38c;
+}
+
+.wallet-card--holagreen .wallet-code {
+  color: #6ee7b7;
+}
+
+.wallet-card--holaconnect .wallet-code {
+  color: #93d5ea;
+}
+
+.wallet-card-cta {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* Native <dialog> Full Event Pass Viewer */
+.wallet-pass-dialog {
+  width: min(500px, calc(100vw - 28px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 1px solid var(--line, rgba(20, 26, 22, 0.12));
+  border-radius: 22px;
+  background: var(--surface, #ffffff);
+  color: var(--ink, #141a16);
+  box-shadow: 0 24px 64px rgba(11, 17, 15, 0.34);
+  overflow: auto;
+}
+
+.wallet-pass-dialog::backdrop {
+  background: rgba(11, 17, 15, 0.58);
+  backdrop-filter: blur(4px);
+}
+
+.wallet-dlg-shell {
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wallet-dlg-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wallet-dlg-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--line, rgba(20, 26, 22, 0.14));
+  background: transparent;
+  color: var(--ink, #141a16);
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wallet-dlg-close:hover {
+  background: var(--bg-soft, #f3f1ec);
+}
+
+.wallet-full-pass {
+  padding: 22px;
+  border-radius: 18px;
+  color: #f4f7f5;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.wallet-full-pass--holaheart {
+  background: radial-gradient(circle at 86% 12%, rgba(217, 121, 72, 0.36), transparent 56%),
+    linear-gradient(155deg, #1b1410 0%, #110d0b 100%);
+}
+
+.wallet-full-pass--holagreen {
+  background: radial-gradient(circle at 86% 12%, rgba(38, 162, 105, 0.34), transparent 56%),
+    linear-gradient(155deg, #0f1b16 0%, #09120e 100%);
+}
+
+.wallet-full-pass--holaconnect {
+  background: radial-gradient(circle at 86% 12%, rgba(56, 152, 182, 0.34), transparent 56%),
+    linear-gradient(155deg, #101b21 0%, #0a1216 100%);
+}
+
+.wallet-full-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.wallet-full-brand {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: rgba(244, 247, 245, 0.8);
+}
+
+.wallet-pillar-pill {
+  display: inline-block;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #f5b38c;
+  margin-bottom: 10px;
+}
+
+.wallet-full-pass--holagreen .wallet-pillar-pill {
+  color: #6ee7b7;
+}
+
+.wallet-full-pass--holaconnect .wallet-pillar-pill {
+  color: #93d5ea;
+}
+
+.wallet-full-title {
+  margin: 0 0 6px;
+  font-family: var(--font-serif, "Lora", Georgia, serif);
+  font-size: 1.32rem;
+  line-height: 1.32;
+  color: #ffffff;
+}
+
+.wallet-full-holder {
+  margin: 0;
+  font-size: 0.88rem;
+  color: rgba(244, 247, 245, 0.74);
+}
+
+.wallet-full-divider {
+  margin: 16px 0;
+  border-top: 1px dashed rgba(255, 255, 255, 0.22);
+}
+
+.wallet-full-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 12px;
+  margin: 0;
+}
+
+.wallet-full-grid dt {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(244, 247, 245, 0.56);
+  margin-bottom: 3px;
+}
+
+.wallet-full-grid dd {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffffff;
+  word-break: break-word;
+}
+
+.wallet-full-note {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 0.82rem;
+  color: rgba(244, 247, 245, 0.82);
+}
+
+.wallet-full-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: rgba(244, 247, 245, 0.65);
+}
+
+.wallet-dlg-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .wallet-stat-hint {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .wallet-card + .wallet-card {
+    margin-top: -42px;
+  }
+
+  .wallet-full-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallet-card {
+    transition: none;
+  }
+}
+
+
+/* ==========================================================================
+   EDITORIAL HAIRLINE FAQ (Aesop x Linear x Apple — Zero Boxy Cards)
+   ========================================================================== */
+.faq-editorial-section {
+  background: var(--bg);
+}
+
+.faq-editorial-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(32px, 5vw, 76px);
+  align-items: start;
+}
+
+.faq-editorial-aside {
+  position: sticky;
+  top: calc(var(--header-height) + 32px);
+}
+
+.faq-editorial-aside .section-title {
+  margin-bottom: 12px;
+}
+
+.faq-editorial-aside .section-lead {
+  margin-bottom: 24px;
+  max-width: 34ch;
+}
+
+.faq-editorial-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.faq-text-trigger {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: color 0.22s ease, gap 0.28s var(--ease-expo);
+}
+
+.faq-text-trigger:hover {
+  color: var(--ink);
+  gap: 12px;
+}
+
+/* Hairline Stack — ZERO boxes, ZERO shadows, ZERO background fills */
+.faq-editorial-list {
+  border-top: 1px solid var(--line);
+}
+
+.faq-row {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+}
+
+/* Animated emerald hairline accent draws smoothly left-to-right when open */
+.faq-row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 1.5px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.5s var(--ease-expo);
+  pointer-events: none;
+}
+
+.faq-row.is-open::after {
+  transform: scaleX(1);
+}
+
+.faq-trigger {
+  appearance: none;
+  background: none;
+  border: 0;
+  width: 100%;
+  padding: 26px 0;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 24px;
+  align-items: baseline;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.faq-num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  transition: color 0.25s ease;
+}
+
+.faq-q {
+  font-family: var(--font-sans);
+  font-size: clamp(1.05rem, 1.45vw, 1.22rem);
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.015em;
+  color: var(--ink-secondary);
+  transition: color 0.25s ease, transform 0.35s var(--ease-expo);
+}
+
+.faq-trigger:hover .faq-num,
+.faq-row.is-open .faq-num {
+  color: var(--accent);
+}
+
+.faq-trigger:hover .faq-q {
+  color: var(--ink);
+  transform: translateX(4px);
+}
+
+.faq-row.is-open .faq-q {
+  color: var(--ink);
+}
+
+/* Minimalist Hairline Plus -> 45deg Cross */
+.faq-plus {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  align-self: center;
+  justify-self: end;
+  transition: transform 0.38s var(--ease-expo);
+}
+
+.faq-plus::before,
+.faq-plus::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 1.5px;
+  background: var(--ink-muted);
+  transform: translate(-50%, -50%);
+  transition: background-color 0.25s ease;
+}
+
+.faq-plus::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.faq-trigger:hover .faq-plus::before,
+.faq-trigger:hover .faq-plus::after {
+  background: var(--ink);
+}
+
+.faq-row.is-open .faq-plus {
+  transform: rotate(45deg);
+}
+
+.faq-row.is-open .faq-plus::before,
+.faq-row.is-open .faq-plus::after {
+  background: var(--accent);
+}
+
+/* Fluid Physics Collapse (grid-template-rows: 0fr -> 1fr) */
+.faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.42s var(--ease-expo), opacity 0.32s ease;
+}
+
+.faq-row.is-open .faq-panel {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.faq-panel-inner {
+  overflow: hidden;
+}
+
+.faq-panel-content {
+  padding: 0 36px 28px 56px;
+  color: var(--ink-secondary);
+  font-size: 0.96rem;
+  line-height: 1.72;
+  max-width: 66ch;
+}
+
+.faq-panel-content p {
+  margin: 0;
+}
+
+.faq-panel-content .faq-inline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+  transition: gap 0.25s var(--ease-expo), opacity 0.2s ease;
+}
+
+.faq-panel-content .faq-inline-link:hover {
+  gap: 10px;
+  opacity: 0.8;
+}
+
+@media (max-width: 900px) {
+  .faq-editorial-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .faq-editorial-aside {
+    position: static;
+  }
+
+  .faq-trigger {
+    grid-template-columns: 34px minmax(0, 1fr) 20px;
+    padding: 22px 0;
+  }
+
+  .faq-panel-content {
+    padding: 0 12px 24px 46px;
+  }
+}
+
+@media (max-width: 520px) {
+  .faq-panel-content {
+    padding: 0 0 22px 0;
+  }
+}

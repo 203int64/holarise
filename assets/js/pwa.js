@@ -264,50 +264,27 @@
     });
   }
 
+  // Unregister legacy Service Workers & clear stale caches to prevent stuck outdated pages
   if ("serviceWorker" in navigator) {
-    var hadController = Boolean(navigator.serviceWorker.controller);
-
-    navigator.serviceWorker.addEventListener("controllerchange", function () {
-      // Never reload a first-time visitor when clients.claim() claims the initial tab;
-      // mark hadController so a subsequent SKIP_WAITING update in the same session reloads cleanly.
-      if (!hadController) {
-        hadController = true;
-        return;
-      }
-      if (isReloadingForSw) return;
-      isReloadingForSw = true;
-      window.location.reload();
-    });
-
     window.addEventListener("load", function () {
       navigator.serviceWorker
-        .register("/sw.js", { scope: "/" })
-        .then(function (registration) {
-          lastSwUpdateCheck = Date.now();
-
-          if (registration.waiting && navigator.serviceWorker.controller) {
-            showUpdateToast(registration.waiting);
-          }
-
-          registration.addEventListener("updatefound", function () {
-            var installing = registration.installing;
-            if (!installing) return;
-            installing.addEventListener("statechange", function () {
-              if (installing.state === "installed" && navigator.serviceWorker.controller) {
-                showUpdateToast(installing);
-              }
-            });
-          });
-
-          document.addEventListener("visibilitychange", function () {
-            if (document.visibilityState !== "visible" || !navigator.onLine) return;
-            var now = Date.now();
-            if (now - lastSwUpdateCheck < 30 * 60 * 1000) return;
-            lastSwUpdateCheck = now;
-            registration.update().catch(function () {});
+        .getRegistrations()
+        .then(function (registrations) {
+          registrations.forEach(function (reg) {
+            reg.unregister().catch(function () {});
           });
         })
         .catch(function () {});
+      if ("caches" in window) {
+        window.caches
+          .keys()
+          .then(function (keys) {
+            keys.forEach(function (key) {
+              window.caches.delete(key).catch(function () {});
+            });
+          })
+          .catch(function () {});
+      }
     });
   }
 })();
