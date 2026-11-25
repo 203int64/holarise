@@ -1371,7 +1371,16 @@ html.has-motion .scrub-word {
 .hero-card-img {
   display: block;
   width: 100%;
-  height: auto;
+  height: clamp(360px, 58svh, 540px);
+  object-fit: cover;
+  object-position: center 14%;
+}
+
+@media (max-width: 640px) {
+  .hero-card-img {
+    height: clamp(260px, 48svh, 380px);
+    object-position: center 20%;
+  }
 }
 
 .hero-card-scrim {
@@ -1379,9 +1388,9 @@ html.has-motion .scrub-word {
   inset: 0;
   background: linear-gradient(
     to bottom,
-    transparent 44%,
-    rgba(10, 20, 16, 0.42) 67%,
-    rgba(10, 20, 16, 0.93) 100%
+    transparent 54%,
+    rgba(10, 20, 16, 0.38) 76%,
+    rgba(10, 20, 16, 0.88) 100%
   );
   pointer-events: none;
 }
@@ -1399,18 +1408,18 @@ html.has-motion .scrub-word {
   position: absolute;
   inset: auto 0 0;
   z-index: 2;
-  padding: 36px 36px 34px;
+  padding: 28px 34px 28px;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 24px;
+  gap: 20px;
   will-change: transform, opacity;
 }
 
 .hero-card-copy {
-  flex: 1 1 460px;
-  max-width: 680px;
+  flex: 1 1 420px;
+  max-width: 560px;
   min-width: 0;
 }
 
@@ -1429,13 +1438,12 @@ html.has-motion .scrub-word {
 }
 
 .hero-display-title {
-  margin: 0 0 12px;
-  font-size: clamp(2rem, 4.4vw, 3.65rem);
+  margin: 0 0 8px;
+  font-size: clamp(1.7rem, 3.05vw, 2.55rem);
   font-weight: 500;
-  line-height: 1.09;
-  letter-spacing: -0.035em;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
   color: #ffffff;
-  text-wrap: balance;
 }
 
 @media (min-width: 641px) {
