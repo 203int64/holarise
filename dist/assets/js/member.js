@@ -1065,6 +1065,14 @@
       }
     });
 
+    $("#btn-change-avatar")?.addEventListener("click", () => {
+      const inp = $("#dash-avatar-input");
+      if (inp) {
+        inp.value = "";
+        inp.click();
+      }
+    });
+
     $("#dash-avatar-input")?.addEventListener("change", async (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
