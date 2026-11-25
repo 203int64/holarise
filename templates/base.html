@@ -585,11 +585,80 @@
   <div class="mobile-dock-fade" aria-hidden="true"></div>
   {{MOBILE_DOCK}}
 
+  <!-- Non-blocking Floating PWA Install Banner (Chrome/Edge/Safari, hidden in standalone & in-app WebViews) -->
+  <aside class="pwa-install-banner" id="pwa-install-banner" aria-label="Cài ứng dụng HolaRise" hidden>
+    <img class="pwa-banner-icon" src="/assets/images/pwa/icon-192.png" alt="Biểu tượng ứng dụng HolaRise" width="38" height="38" loading="lazy">
+    <div class="pwa-banner-copy">
+      <strong class="pwa-banner-title">Cài ứng dụng HolaRise</strong>
+      <span class="pwa-banner-sub">Mở nhanh lịch hoạt động và Thẻ Thành Viên</span>
+    </div>
+    <div class="pwa-banner-actions">
+      <button class="btn btn--primary btn--sm pwa-banner-install-btn" type="button" data-pwa-install>Cài ngay</button>
+      <button class="pwa-banner-close" type="button" data-pwa-banner-dismiss aria-label="Đóng gợi ý cài ứng dụng">×</button>
+    </div>
+  </aside>
+
+  <!-- Native HTML5 <dialog> Hướng Dẫn Cài Ứng Dụng (iOS Safari & Zalo/FB WebView) -->
+  <dialog class="club-dialog pwa-dialog" id="pwa-install-dialog" closedby="any" aria-labelledby="pwa-dialog-title-ios">
+    <div class="dialog-inner">
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng hướng dẫn">×</button>
+
+      <div data-pwa-guide="ios">
+        <span class="kicker" style="margin-bottom: 8px;">Cài đặt trên iPhone / iPad</span>
+        <h2 id="pwa-dialog-title-ios" class="pwa-dialog-title">Thêm HolaRise vào Màn hình chính</h2>
+        <p class="pwa-dialog-lead">Mở nhanh từ màn hình chính để xem lịch hoạt động và Thẻ Thành Viên chỉ trong một chạm.</p>
+        <ol class="pwa-steps">
+          <li class="pwa-step">
+            <span class="pwa-step-num" aria-hidden="true">1</span>
+            <span>
+              Chạm biểu tượng <strong>Chia sẻ</strong>
+              <span class="pwa-inline-icon" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 16V3"></path>
+                  <path d="m7 8 5-5 5 5"></path>
+                  <path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path>
+                </svg>
+              </span>
+              ở thanh dưới cùng trình duyệt Safari.
+            </span>
+          </li>
+          <li class="pwa-step">
+            <span class="pwa-step-num" aria-hidden="true">2</span>
+            <span>Cuộn xuống chọn <strong>Thêm vào Màn hình chính</strong>, sau đó bấm <strong>Thêm</strong>.</span>
+          </li>
+        </ol>
+      </div>
+
+      <div data-pwa-guide="webview" hidden>
+        <span class="kicker" style="margin-bottom: 8px;">Trình duyệt trong ứng dụng</span>
+        <h2 id="pwa-dialog-title-webview" class="pwa-dialog-title">Mở bằng Safari hoặc Chrome để cài đặt</h2>
+        <p class="pwa-dialog-lead">Trình duyệt mở từ Zalo hoặc Messenger chưa hỗ trợ cài ứng dụng trực tiếp về màn hình chính.</p>
+        <ol class="pwa-steps">
+          <li class="pwa-step">
+            <span class="pwa-step-num" aria-hidden="true">1</span>
+            <span>Bấm biểu tượng menu <strong>⋯</strong> ở góc màn hình.</span>
+          </li>
+          <li class="pwa-step">
+            <span class="pwa-step-num" aria-hidden="true">2</span>
+            <span>Chọn <strong>Mở bằng Safari</strong> (iPhone) hoặc <strong>Mở bằng Chrome</strong> (Android), sau đó bấm <strong>Cài ứng dụng</strong>.</span>
+          </li>
+        </ol>
+        <div class="pwa-copy-row">
+          <button class="btn btn--primary btn--sm" type="button" data-pwa-copy-url>Sao chép đường dẫn</button>
+          <span class="pwa-copy-feedback" data-pwa-copy-feedback role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
+
   <script src="/assets/vendor/gsap.min.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/vendor/ScrollTrigger.min.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/motion.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/main.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/join-pass.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/member.js?v={{CACHE_BUST}}" defer></script>
+  <script src="/assets/js/pwa.js?v={{CACHE_BUST}}" defer></script>
 </body>
 </html>

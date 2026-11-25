@@ -2,12 +2,18 @@
  * HolaRise PWA Runtime
  * - Progressive install UX following modern-web-guidance (install-web-app):
  *   navigator.install() -> beforeinstallprompt -> maintained iOS Safari / Zalo-FB WebView guides
- * - Service Worker lifecycle & non-disruptive Update Toast (SKIP_WAITING)
- * - Offline status indicator & /offline/ recovery
+ * - Delayed non-blocking floating install banner (Chrome/Edge/Safari only; hidden in Zalo/FB WebViews & standalone)
  * - Standalone display-mode class sync (including iOS navigator.standalone)
+ * - Legacy Service Worker cleanup (no heavy precache per AGENTS.md)
  */
 (function () {
   "use strict";
+
+  var BANNER_DISMISS_KEY = "holarise_pwa_banner_dismissed_at";
+  var BANNER_DISMISS_TTL_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+  var BANNER_DELAY_MS = 10000; // 10s for visitors who do not scroll
+  var BANNER_SCROLL_RATIO = 0.2;
+  var BANNER_SCROLL_MIN_PX = 260;
 
   var htmlEl = document.documentElement;
   var installButtons = Array.prototype.slice.call(document.querySelectorAll("[data-pwa-install]"));
@@ -18,26 +24,76 @@
   var copyUrlBtn = installDialog ? installDialog.querySelector("[data-pwa-copy-url]") : null;
   var copyFeedback = installDialog ? installDialog.querySelector("[data-pwa-copy-feedback]") : null;
 
-  var updateToast = document.getElementById("pwa-update-toast");
-  var updateApplyBtn = document.querySelector("[data-pwa-update-apply]");
-  var updateDismissBtn = document.querySelector("[data-pwa-update-dismiss]");
-  var offlineBar = document.getElementById("pwa-offline-bar");
+  var installBanner = document.getElementById("pwa-install-banner");
+  var bannerDismissBtn = installBanner ? installBanner.querySelector("[data-pwa-banner-dismiss]") : null;
 
   var ua = navigator.userAgent || "";
+  var pathname = (window.location && window.location.pathname) || "/";
   var standaloneMq = window.matchMedia ? window.matchMedia("(display-mode: standalone)") : null;
   var isInAppBrowser = /Zalo|FBAN|FBAV|FB_IAB|Instagram|Messenger|Line\/|MicroMessenger|BytedanceWebview|TikTok/i.test(ua);
   var isIos =
     /iPad|iPhone|iPod/i.test(ua) ||
     (navigator.platform === "MacIntel" && typeof navigator.maxTouchPoints === "number" && navigator.maxTouchPoints > 1);
+  var isExcludedBannerRoute = /^\/(en|admin|offline)(\/|$)/i.test(pathname);
   var supportsWebInstall = typeof Navigator !== "undefined" && typeof Navigator.prototype.install === "function";
 
   var deferredInstallPrompt;
-  var waitingWorker = null;
-  var isReloadingForSw = false;
-  var lastSwUpdateCheck = 0;
+  var bannerTriggered = false;
+  var bannerDismissedInSession = false;
+  var bannerTimerId = null;
+  var standaloneZoomLocked = false;
+
+  function lockStandaloneZoom() {
+    if (standaloneZoomLocked) return;
+    standaloneZoomLocked = true;
+
+    var vp = document.querySelector('meta[name="viewport"]');
+    if (vp) {
+      vp.setAttribute(
+        "content",
+        "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      );
+    }
+
+    var preventZoom = function (event) {
+      event.preventDefault();
+    };
+    document.addEventListener("gesturestart", preventZoom, { passive: false });
+    document.addEventListener("gesturechange", preventZoom, { passive: false });
+    document.addEventListener("gestureend", preventZoom, { passive: false });
+    document.addEventListener(
+      "touchmove",
+      function (event) {
+        if (event.touches && event.touches.length > 1) {
+          event.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+  }
 
   function isStandaloneMode() {
     return Boolean((standaloneMq && standaloneMq.matches) || window.navigator.standalone === true);
+  }
+
+  function isBannerDismissed() {
+    if (bannerDismissedInSession) return true;
+    try {
+      var raw = window.localStorage.getItem(BANNER_DISMISS_KEY);
+      if (!raw) return false;
+      var ts = parseInt(raw, 10);
+      if (!Number.isFinite(ts)) return false;
+      return Date.now() - ts < BANNER_DISMISS_TTL_MS;
+    } catch (_e) {
+      return false;
+    }
+  }
+
+  function markBannerDismissed() {
+    bannerDismissedInSession = true;
+    try {
+      window.localStorage.setItem(BANNER_DISMISS_KEY, String(Date.now()));
+    } catch (_e) {}
   }
 
   function setStatus(message) {
@@ -46,26 +102,59 @@
     }
   }
 
-  function syncStandaloneClass() {
-    var standalone = isStandaloneMode();
-    htmlEl.classList.toggle("is-standalone", standalone);
-    syncInstallButtons();
-  }
-
   function canOfferInstall() {
     if (isStandaloneMode()) return false;
     return supportsWebInstall || Boolean(deferredInstallPrompt) || isInAppBrowser || isIos;
   }
 
+  function canShowFloatingBanner() {
+    if (!installBanner) return false;
+    if (!bannerTriggered) return false;
+    if (isStandaloneMode() || isInAppBrowser || isExcludedBannerRoute) return false;
+    if (isBannerDismissed()) return false;
+    return supportsWebInstall || Boolean(deferredInstallPrompt) || isIos;
+  }
+
+  function hideFloatingBanner() {
+    if (!installBanner) return;
+    installBanner.classList.remove("is-visible");
+    installBanner.hidden = true;
+  }
+
+  function syncInstallBanner() {
+    if (!installBanner) return;
+    if (!canShowFloatingBanner()) {
+      hideFloatingBanner();
+      return;
+    }
+    if (installBanner.hidden) {
+      installBanner.hidden = false;
+      window.requestAnimationFrame(function () {
+        installBanner.classList.add("is-visible");
+      });
+    }
+  }
+
   function syncInstallButtons() {
     var show = canOfferInstall();
     installButtons.forEach(function (btn) {
+      if (btn.classList.contains("pwa-banner-install-btn")) return;
       btn.hidden = !show;
       if (btn.classList.contains("pwa-install-footer-btn")) {
         var li = btn.closest("li");
         if (li) li.hidden = !show;
       }
     });
+    syncInstallBanner();
+  }
+
+  function syncStandaloneClass() {
+    var standalone = isStandaloneMode();
+    htmlEl.classList.toggle("is-standalone", standalone);
+    if (standalone) {
+      lockStandaloneZoom();
+    }
+    syncInstallButtons();
   }
 
   function openInstallGuide(mode) {
@@ -105,11 +194,46 @@
 
   window.addEventListener("appinstalled", function () {
     deferredInstallPrompt = undefined;
+    hideFloatingBanner();
     setStatus("Ứng dụng HolaRise đã được cài đặt về thiết bị.");
     syncInstallButtons();
   });
 
-  /* 3. Install button click handler (strict transient user activation + aria-disabled) */
+  /* 3. Delayed floating banner trigger (10s timer OR 20% scroll) */
+  function triggerBannerEligibility() {
+    if (bannerTriggered) return;
+    bannerTriggered = true;
+    if (bannerTimerId) {
+      window.clearTimeout(bannerTimerId);
+      bannerTimerId = null;
+    }
+    window.removeEventListener("scroll", onBannerScroll);
+    syncInstallBanner();
+  }
+
+  function onBannerScroll() {
+    var docEl = document.documentElement;
+    var scrollTop = window.scrollY || docEl.scrollTop || 0;
+    var maxScroll = Math.max(0, (docEl.scrollHeight || 0) - window.innerHeight);
+    if (scrollTop >= BANNER_SCROLL_MIN_PX || (maxScroll > 0 && scrollTop / maxScroll >= BANNER_SCROLL_RATIO)) {
+      triggerBannerEligibility();
+    }
+  }
+
+  if (installBanner && !isStandaloneMode() && !isInAppBrowser && !isExcludedBannerRoute && !isBannerDismissed()) {
+    bannerTimerId = window.setTimeout(triggerBannerEligibility, BANNER_DELAY_MS);
+    window.addEventListener("scroll", onBannerScroll, { passive: true });
+  }
+
+  if (bannerDismissBtn) {
+    bannerDismissBtn.addEventListener("click", function () {
+      markBannerDismissed();
+      hideFloatingBanner();
+      setStatus("Đã ẩn gợi ý cài đặt ứng dụng.");
+    });
+  }
+
+  /* 4. Install button click handler (strict transient user activation + aria-disabled) */
   installButtons.forEach(function (btn) {
     btn.addEventListener("click", async function () {
       if (btn.getAttribute("aria-disabled") === "true") return;
@@ -129,9 +253,12 @@
         if (supportsWebInstall) {
           // Call directly during the click handler to preserve transient user activation.
           await navigator.install();
+          hideFloatingBanner();
           setStatus("Ứng dụng HolaRise đã được cài đặt hoặc mở.");
           installButtons.forEach(function (b) {
-            b.hidden = true;
+            if (!b.classList.contains("pwa-banner-install-btn")) {
+              b.hidden = true;
+            }
           });
         } else if (deferredInstallPrompt) {
           // Save and clear the single-use event before awaiting the user's choice.
@@ -139,11 +266,12 @@
           deferredInstallPrompt = undefined;
           await promptEvent.prompt();
           var choice = await promptEvent.userChoice;
-          setStatus(
-            choice && choice.outcome === "accepted"
-              ? "Ứng dụng HolaRise đang được cài đặt."
-              : "Bạn đã hủy cài đặt ứng dụng."
-          );
+          if (choice && choice.outcome === "accepted") {
+            hideFloatingBanner();
+            setStatus("Ứng dụng HolaRise đang được cài đặt.");
+          } else {
+            setStatus("Bạn đã hủy cài đặt ứng dụng.");
+          }
           if (!deferredInstallPrompt) {
             syncInstallButtons();
           }
@@ -169,13 +297,13 @@
     });
   });
 
-  /* 4. Copy URL helper inside Zalo/FB WebView guidance modal */
+  /* 5. Copy URL helper inside Zalo/FB WebView guidance modal */
   if (copyUrlBtn) {
     copyUrlBtn.addEventListener("click", function () {
       var urlToCopy = window.location.href;
       var onCopied = function () {
         if (copyFeedback) {
-          copyFeedback.textContent = "Đã sao chép đường dẫn — bạn hãy dán vào Safari hoặc Chrome nhé.";
+          copyFeedback.textContent = "Đã sao chép đường dẫn — bạn hãy dán vào Safari hoặc Chrome.";
         }
       };
       if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
@@ -207,12 +335,9 @@
     }
   }
 
-  /* 5. Offline status bar & /offline/ retry recovery */
+  /* 6. Offline page recovery */
   function syncOnlineState() {
     var offline = typeof navigator.onLine === "boolean" && !navigator.onLine;
-    if (offlineBar) {
-      offlineBar.hidden = !offline;
-    }
     htmlEl.classList.toggle("is-offline", offline);
   }
 
@@ -242,29 +367,7 @@
     });
   });
 
-  /* 6. Service Worker registration & polite Update Toast */
-  function showUpdateToast(worker) {
-    if (!worker || !updateToast) return;
-    waitingWorker = worker;
-    updateToast.hidden = false;
-  }
-
-  if (updateApplyBtn) {
-    updateApplyBtn.addEventListener("click", function () {
-      if (!waitingWorker) return;
-      updateApplyBtn.setAttribute("aria-disabled", "true");
-      updateApplyBtn.textContent = "Đang cập nhật...";
-      waitingWorker.postMessage({ type: "SKIP_WAITING" });
-    });
-  }
-
-  if (updateDismissBtn && updateToast) {
-    updateDismissBtn.addEventListener("click", function () {
-      updateToast.hidden = true;
-    });
-  }
-
-  // Unregister legacy Service Workers & clear stale caches to prevent stuck outdated pages
+  /* 7. Unregister legacy Service Workers & clear stale caches to prevent stuck outdated pages */
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
       navigator.serviceWorker

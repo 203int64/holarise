@@ -117,10 +117,13 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: calc(var(--header-height) + 20px);
+  overflow-x: clip;
+  touch-action: manipulation;
 }
 
 body {
   margin: 0;
+  overflow-x: clip;
   font-family: var(--font-sans);
   font-size: 16px;
   font-weight: 400;
@@ -4300,8 +4303,8 @@ dialog.club-dialog[open]:where(:not([data-closing]))::backdrop {
 .pwa-install-footer-btn[hidden],
 .footer-links li[hidden],
 .footer-links li:has(> [data-pwa-install][hidden]),
-.pwa-offline-bar[hidden],
-.pwa-update-toast[hidden],
+.pwa-install-banner[hidden],
+.is-standalone .pwa-install-banner,
 [data-pwa-guide][hidden] {
   display: none !important;
 }
@@ -4421,105 +4424,148 @@ dialog.club-dialog[open]:where(:not([data-closing]))::backdrop {
   font-weight: 500;
 }
 
-.pwa-offline-bar {
+/* Non-blocking Floating PWA Install Banner */
+.pwa-install-banner {
   position: fixed;
   left: 14px;
   right: 14px;
   bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   margin-inline: auto;
-  width: fit-content;
-  max-width: min(calc(100% - 28px), 460px);
-  z-index: 230;
+  width: calc(100% - 28px);
+  max-width: 440px;
+  z-index: 195;
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 10px 16px;
-  border-radius: 999px;
+  gap: 12px;
+  padding: 11px 12px 11px 13px;
+  border-radius: 18px;
   border: 1px solid var(--line-strong);
   background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 18px 44px rgba(11, 17, 15, 0.14);
   color: var(--ink);
-  font-size: 0.82rem;
-  font-weight: 500;
-  line-height: 1.35;
-  box-shadow: 0 12px 30px rgba(11, 17, 15, 0.12);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.28s var(--ease-expo), transform 0.36s var(--ease-expo);
 }
 
-.pwa-offline-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #d77a4a;
+.pwa-install-banner.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+body:has(dialog[open]) .pwa-install-banner,
+body.nav-open .pwa-install-banner {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+}
+
+.pwa-banner-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
   flex-shrink: 0;
+  object-fit: cover;
 }
 
-.pwa-update-toast {
-  position: fixed;
-  left: 14px;
-  right: 14px;
-  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-  margin-inline: auto;
-  width: fit-content;
-  max-width: min(calc(100% - 28px), 440px);
-  z-index: 240;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 9px 10px 9px 16px;
-  border-radius: 999px;
-  background: var(--obsidian);
-  color: var(--ink-on-dark);
-  border: 1px solid var(--line-dark);
-  font-size: 0.84rem;
-  font-weight: 500;
+.pwa-banner-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: grid;
+  gap: 2px;
+}
+
+.pwa-banner-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.pwa-banner-sub {
+  font-size: 0.78rem;
   line-height: 1.35;
-  box-shadow: 0 18px 42px rgba(11, 17, 15, 0.28);
+  color: var(--ink-secondary);
 }
 
-.pwa-update-actions {
+.pwa-banner-actions {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
 }
 
-.pwa-update-btn {
-  border: 0;
-  border-radius: 999px;
-  padding: 7px 14px;
-  background: var(--accent);
-  color: #ffffff;
+.pwa-banner-install-btn {
+  padding: 8px 13px;
   font-size: 0.8rem;
-  font-weight: 500;
   white-space: nowrap;
-  flex-shrink: 0;
-  cursor: pointer;
-  transition: background-color var(--transition);
 }
 
-.pwa-update-btn:hover {
-  background: var(--accent-hover);
+.pwa-banner-install-btn[aria-disabled="true"] {
+  opacity: 0.65;
+  cursor: progress;
 }
 
-.pwa-update-close {
-  width: 28px;
-  height: 28px;
+.pwa-banner-close {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 0;
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--ink-on-dark);
-  font-size: 1rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-secondary);
+  font-size: 1.15rem;
   line-height: 1;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: background-color var(--transition), color var(--transition);
 }
 
-.pwa-update-close:hover {
-  background: rgba(255, 255, 255, 0.2);
+.pwa-banner-close:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+@media (max-width: 380px) {
+  .pwa-install-banner {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .pwa-banner-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .pwa-banner-title {
+    font-size: 0.84rem;
+  }
+
+  .pwa-banner-sub {
+    font-size: 0.74rem;
+  }
+
+  .pwa-banner-install-btn {
+    padding: 7px 11px;
+    font-size: 0.78rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pwa-install-banner {
+    transform: none;
+    transition: opacity 0.15s ease;
+  }
+
+  body:has(dialog[open]) .pwa-install-banner,
+  body.nav-open .pwa-install-banner {
+    transform: none;
+  }
 }
 
 /* Form Offline & Draft States */
@@ -4743,8 +4789,10 @@ dialog.club-dialog[open]:where(:not([data-closing]))::backdrop {
 
 /* Safe-area support & Native feel when installed (standalone mode) */
 @media (display-mode: standalone) {
-  html {
+  html,
+  body {
     overscroll-behavior-y: none;
+    touch-action: pan-x pan-y;
   }
 
   .site-header {
@@ -4762,8 +4810,10 @@ dialog.club-dialog[open]:where(:not([data-closing]))::backdrop {
   }
 }
 
-html.is-standalone {
+html.is-standalone,
+html.is-standalone body {
   overscroll-behavior-y: none;
+  touch-action: pan-x pan-y;
 }
 
 html.is-standalone .site-header {
@@ -8949,7 +8999,7 @@ a:focus-visible,
   border: 1px solid #d9dfdc;
   background: #fafafa;
   color: var(--ink);
-  font-size: 0.94rem;
+  font-size: 1rem;
   line-height: 1.45;
   transition: border-color 0.16s ease, background-color 0.16s ease;
 }
@@ -10156,7 +10206,7 @@ a:focus-visible,
   border-radius: 10px;
   background: var(--surface, #F7F7F5);
   font: inherit;
-  font-size: 0.88rem;
+  font-size: 1rem;
   color: var(--ink);
 }
 
@@ -10723,7 +10773,7 @@ a:focus-visible,
   border: 1px solid var(--line);
   background: #FFFFFF;
   font: inherit;
-  font-size: 0.86rem;
+  font-size: 1rem;
   color: var(--ink);
 }
 
