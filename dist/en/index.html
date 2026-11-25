@@ -47,7 +47,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=3a4eedc409">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=7930aab98b">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -633,67 +633,82 @@
       <form class="auth-form" id="feedback-form" novalidate>
         <input class="visually-hidden" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <fieldset class="auth-fieldset">
-          <legend class="auth-label">Bạn muốn gửi nội dung gì?</legend>
-          <div class="feedback-kind-grid" role="radiogroup">
+          <legend class="visually-hidden">Chọn loại phản hồi</legend>
+          <div class="feedback-kind-pills" role="radiogroup">
             <label class="feedback-kind-opt">
               <input class="visually-hidden" type="radio" name="feedbackKind" value="Đề xuất ý tưởng / hoạt động" checked>
-              <span>Đề xuất hoạt động</span>
+              <span>Đề xuất</span>
             </label>
             <label class="feedback-kind-opt">
               <input class="visually-hidden" type="radio" name="feedbackKind" value="Phản hồi trải nghiệm">
-              <span>Phản hồi trải nghiệm</span>
+              <span>Trải nghiệm</span>
             </label>
             <label class="feedback-kind-opt">
               <input class="visually-hidden" type="radio" name="feedbackKind" value="Báo lỗi kỹ thuật">
-              <span>Báo lỗi kỹ thuật</span>
+              <span>Báo lỗi</span>
             </label>
             <label class="feedback-kind-opt">
               <input class="visually-hidden" type="radio" name="feedbackKind" value="Góp ý khác">
-              <span>Góp ý khác</span>
+              <span>Khác</span>
             </label>
           </div>
         </fieldset>
 
-        <div class="auth-field">
-          <label for="fb-note">Chia sẻ chi tiết của bạn <span aria-hidden="true">*</span></label>
-          <textarea id="fb-note" name="note" rows="4" minlength="8" maxlength="1000" required placeholder="Mô tả ý tưởng, cảm nhận hoặc lỗi bạn gặp phải..."></textarea>
+        <!-- Auto-detected Signed-In Member Identity (hides guest name/contact inputs) -->
+        <div class="fb-member-bar" id="fb-member-bar" hidden>
+          <span class="gb-member-avatar" id="fb-member-avatar" aria-hidden="true">H</span>
+          <div class="gb-member-info">
+            <strong id="fb-member-name">Thành viên HolaRise</strong>
+            <span id="fb-member-sub">Đang gửi bằng tài khoản của bạn</span>
+          </div>
         </div>
 
-        <div class="fb-shot-box" id="fb-shot-box">
-          <div class="fb-shot-head">
-            <span class="fb-shot-label">Ảnh màn hình đính kèm <span class="auth-hint-inline">(tùy chọn)</span></span>
-            <span class="fb-shot-state" id="fb-shot-state" aria-live="polite"></span>
-          </div>
+        <div class="fb-composer-shell">
+          <label for="fb-note" class="visually-hidden">Chia sẻ chi tiết của bạn</label>
+          <textarea id="fb-note" name="note" rows="4" minlength="8" maxlength="1000" required placeholder="Bạn muốn đề xuất điều gì hoặc gặp lỗi ở đâu? (Có thể dán ảnh trực tiếp bằng Ctrl+V)"></textarea>
+
           <div class="fb-shot-preview" id="fb-shot-preview" hidden>
             <img id="fb-shot-img" alt="Ảnh màn hình trang đang xem">
+            <button type="button" class="fb-shot-remove" id="fb-shot-clear" aria-label="Gỡ ảnh đính kèm">×</button>
           </div>
-          <div class="fb-shot-actions">
-            <button type="button" class="fb-shot-btn" id="fb-capture-btn">Chụp màn hình này</button>
-            <label class="fb-shot-btn" for="fb-file-input">Chọn ảnh từ máy</label>
-            <input class="visually-hidden" type="file" id="fb-file-input" accept="image/jpeg,image/png,image/webp">
-            <button type="button" class="fb-shot-btn fb-shot-btn--danger" id="fb-shot-clear" hidden>Gỡ ảnh</button>
+
+          <div class="fb-composer-toolbar" id="fb-shot-box">
+            <div class="fb-toolbar-left">
+              <button type="button" class="fb-tool-chip" id="fb-capture-btn" title="Chụp màn hình hiện tại">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                <span>Chụp màn hình</span>
+              </button>
+              <label class="fb-tool-chip" for="fb-file-input" title="Chọn ảnh từ máy">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                <span>Đính kèm ảnh</span>
+              </label>
+              <input class="visually-hidden" type="file" id="fb-file-input" accept="image/jpeg,image/png,image/webp">
+            </div>
+            <span class="fb-shot-state" id="fb-shot-state" aria-live="polite"></span>
           </div>
-          <p class="fb-shot-hint">Hệ thống tự che ô nhập liệu cá nhân trước khi chụp. Bạn cũng có thể dán ảnh (Ctrl+V). Ảnh chỉ Ban Điều Phối xem được và tự xóa sau 30 ngày.</p>
         </div>
 
-        <details class="fb-diag-details" id="fb-diag-details">
-          <summary>Ngữ cảnh kỹ thuật tự động đọc</summary>
+        <details class="fb-diag-details fb-diag-details--quiet" id="fb-diag-details">
+          <summary>Thông tin kỹ thuật đính kèm tự động</summary>
           <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
         </details>
 
-        <div class="auth-row-2">
+        <div class="auth-row-2" id="fb-guest-contact-row">
           <div class="auth-field">
             <label for="fb-name">Tên của bạn <span class="auth-hint-inline">(tùy chọn)</span></label>
-            <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Có thể bỏ trống nếu ẩn danh">
+            <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Bỏ trống nếu ẩn danh">
           </div>
           <div class="auth-field">
             <label for="fb-contact">Email / Zalo <span class="auth-hint-inline">(tùy chọn)</span></label>
-            <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Để BĐP phản hồi lại bạn">
+            <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Để BĐP phản hồi lại">
           </div>
         </div>
 
         <div class="form-status" id="fb-status" role="status" aria-live="polite"></div>
-        <button class="auth-submit-btn" type="submit" id="fb-submit-btn">Gửi đóng góp tới Ban Điều Phối</button>
+        <div class="fb-submit-row">
+          <span class="fb-shortcut-hint">Nhấn <kbd>Ctrl</kbd> + <kbd>Enter</kbd> để gửi nhanh</span>
+          <button class="auth-submit-btn fb-submit-btn" type="submit" id="fb-submit-btn">Gửi phản hồi</button>
+        </div>
       </form>
     </div>
   </dialog>
@@ -742,11 +757,11 @@
     <a class="mobile-dock-link" href="/tham-gia/" aria-label="Join"><svg class="mobile-dock-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path pathLength="1" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg><span class="mobile-dock-label" aria-hidden="true">Join</span></a>
   </nav>
 
-  <script src="/assets/vendor/gsap.min.js?v=3a4eedc409" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=3a4eedc409" defer></script>
-  <script src="/assets/js/motion.js?v=3a4eedc409" defer></script>
-  <script src="/assets/js/main.js?v=3a4eedc409" defer></script>
-  <script src="/assets/js/join-pass.js?v=3a4eedc409" defer></script>
-  <script src="/assets/js/member.js?v=3a4eedc409" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=7930aab98b" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=7930aab98b" defer></script>
+  <script src="/assets/js/motion.js?v=7930aab98b" defer></script>
+  <script src="/assets/js/main.js?v=7930aab98b" defer></script>
+  <script src="/assets/js/join-pass.js?v=7930aab98b" defer></script>
+  <script src="/assets/js/member.js?v=7930aab98b" defer></script>
 </body>
 </html>

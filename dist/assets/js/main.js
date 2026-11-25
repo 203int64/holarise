@@ -1812,6 +1812,8 @@
       setFeedbackStatus("", "");
       currentDiagnostics = collectDiagnosticsText();
       if (diagPreviewEl) diagPreviewEl.textContent = currentDiagnostics;
+      var diagDetailsEl = document.getElementById("fb-diag-details");
+      if (diagDetailsEl) diagDetailsEl.open = false;
 
       if (options.bugMode) {
         var bugRadio = form.querySelector('input[name="feedbackKind"][value="Báo lỗi kỹ thuật"]');
@@ -1821,9 +1823,23 @@
       if (typeof dialog.showModal === "function" && !dialog.open) {
         dialog.showModal();
       }
+      var noteInput = document.getElementById("fb-note");
+      if (noteInput) {
+        setTimeout(function () { noteInput.focus(); }, 60);
+      }
       if (options.autoCapture) {
         captureViewportScreenshot();
       }
+    }
+
+    var fbNoteEl = document.getElementById("fb-note");
+    if (fbNoteEl) {
+      fbNoteEl.addEventListener("keydown", function (e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+          e.preventDefault();
+          if (typeof form.requestSubmit === "function") form.requestSubmit();
+        }
+      });
     }
 
     document.addEventListener("click", function (e) {

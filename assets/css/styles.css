@@ -9881,3 +9881,313 @@ a:focus-visible,
   font-size: 0.78rem;
   color: var(--ink-muted);
 }
+
+/* =========================================================================
+   LINEAR / VERCEL FEEDBACK MODAL & LUMA 3-TAB ACCOUNT HUB
+   ========================================================================= */
+.feedback-kind-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feedback-kind-pills .feedback-kind-opt {
+  flex: 1 1 auto;
+}
+
+.feedback-kind-pills .feedback-kind-opt span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface, #F6F6F4);
+  color: var(--ink-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.12s ease;
+}
+
+.feedback-kind-pills .feedback-kind-opt input:checked + span {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #FFFFFF;
+}
+
+.fb-member-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface, #F6F6F4);
+  border: 1px solid var(--line);
+}
+
+.fb-composer-shell {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #FFFFFF;
+  overflow: hidden;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.fb-composer-shell:focus-within {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(11, 17, 15, 0.06);
+}
+
+.fb-composer-shell textarea {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 14px 16px 10px;
+  font: inherit;
+  font-size: 0.94rem;
+  line-height: 1.58;
+  color: var(--ink);
+  background: transparent;
+  resize: vertical;
+  min-height: 98px;
+}
+
+.fb-composer-shell textarea:focus {
+  outline: none;
+}
+
+.fb-composer-shell .fb-shot-preview {
+  position: relative;
+  margin: 0 14px 12px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.fb-shot-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(11, 17, 15, 0.78);
+  color: #FFFFFF;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.fb-composer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--line);
+  background: rgba(11, 17, 15, 0.02);
+}
+
+.fb-toolbar-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.fb-tool-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-secondary);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.fb-tool-chip:hover,
+.fb-tool-chip:focus-visible {
+  background: #FFFFFF;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.fb-diag-details--quiet {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.fb-diag-details--quiet summary {
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 0;
+}
+
+.fb-submit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fb-shortcut-hint {
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+}
+
+.fb-shortcut-hint kbd {
+  font-family: inherit;
+  font-size: 0.72rem;
+  padding: 2px 5px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  background: var(--surface, #F6F6F4);
+  color: var(--ink-secondary);
+}
+
+.fb-submit-btn {
+  width: auto;
+  min-width: 140px;
+  padding: 0 20px;
+}
+
+@media (max-width: 540px) {
+  .fb-shortcut-hint {
+    display: none;
+  }
+  .fb-submit-btn {
+    width: 100%;
+  }
+}
+
+/* Luma-style 3-Tab Member Hub */
+.member-hub-shell {
+  max-width: 1060px;
+  margin: 0 auto;
+}
+
+.member-hub-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.member-hub-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.member-hub-tab {
+  position: relative;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 12px 16px;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease;
+}
+
+.member-hub-tab:hover {
+  color: var(--ink);
+}
+
+.member-hub-tab.is-active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.member-hub-tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+.member-hub-pane {
+  animation: hubFadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes hubFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.member-hub-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 780px;
+}
+
+.member-quick-book-details {
+  cursor: default;
+}
+
+.member-quick-book-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink);
+  cursor: pointer;
+  list-style: none;
+}
+
+.member-quick-book-summary::-webkit-details-marker {
+  display: none;
+}
+
+.member-quick-book-hint {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.pass-meta-val--ellipsis {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pass-footer--clean {
+  justify-content: space-between;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  opacity: 0.72;
+}

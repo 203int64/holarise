@@ -47,7 +47,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=3a4eedc409">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=7930aab98b">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -450,137 +450,178 @@
     </div>
   </div>
 
-  <!-- STEP 2: AUTHENTICATED MEMBER STUDIO (Complete Member Pass + 1-Tap Booking + History) -->
+  <!-- STEP 2: AUTHENTICATED MEMBER HUB (Luma-style Clean 3-Tab Architecture) -->
   <div class="container" id="member-dashboard-view" hidden>
-    <div class="member-dash-grid">
-      <div class="member-dash-card-col">
-        <div class="member-completion-bar" id="member-completion-box">
-          <div class="member-completion-top">
-            <span>Hoàn thiện Thẻ Thành Viên</span>
-            <strong id="dash-completion-pct">40%</strong>
+    <div class="member-hub-shell">
+      <nav class="member-hub-tabs" role="tablist" aria-label="Quản lý tài khoản thành viên">
+        <button type="button" class="member-hub-tab is-active" role="tab" aria-selected="true" data-dash-tab="profile">Thẻ &amp; Hồ sơ</button>
+        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="activity">Hoạt động của tôi</button>
+        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="security">Bảo mật</button>
+      </nav>
+
+      <!-- TAB 1: MEMBER PASS & PROFILE -->
+      <div class="member-hub-pane" data-dash-pane="profile">
+        <div class="member-dash-grid">
+          <div class="member-dash-card-col">
+            <div class="member-completion-bar" id="member-completion-box">
+              <div class="member-completion-top">
+                <span>Hoàn thiện Thẻ Thành Viên</span>
+                <strong id="dash-completion-pct">40%</strong>
+              </div>
+              <div class="member-completion-track" aria-hidden="true">
+                <span class="member-completion-fill" id="dash-completion-fill" style="width: 40%;"></span>
+              </div>
+              <p class="member-completion-hint" id="dash-completion-hint">Thêm ảnh đại diện, trường/đơn vị và châm ngôn để hoàn thiện thẻ của bạn.</p>
+            </div>
+
+            <article class="sunrise-pass member-pass-live" id="member-live-pass" data-sunrise-pass data-pass-theme="sunrise" aria-label="Thẻ Thành Viên Hola của bạn">
+              <div class="sunrise-pass-glare" aria-hidden="true"></div>
+              <div class="pass-header">
+                <div class="pass-brand">
+                  <img src="/assets/images/logo-mark.png" alt="Biểu trưng HolaRise" width="28" height="28">
+                  <span>HOLARISE · HÒA LẠC</span>
+                </div>
+                <span class="pass-state-pill">THÀNH VIÊN HOLA</span>
+              </div>
+
+              <div class="member-pass-identity">
+                <div class="member-pass-avatar-wrap">
+                  <img id="dash-avatar-img" class="member-pass-avatar" src="/assets/images/logo-mark.png" alt="Ảnh đại diện thành viên HolaRise" width="64" height="64" hidden>
+                  <span id="dash-avatar-initials" class="member-pass-initials" aria-hidden="true">HR</span>
+                </div>
+                <div class="member-pass-identity-text">
+                  <span class="pass-program-tag" id="dash-pass-badge">HolaHeart · Nội lực</span>
+                  <div class="pass-member-name" id="dash-pass-name">Thành viên Hola</div>
+                  <div class="pass-member-org" id="dash-pass-org">Cộng đồng HolaRise</div>
+                </div>
+              </div>
+
+              <p class="pass-greeting" id="dash-pass-bio">Sống sâu hơn, xanh hơn và bền bỉ sẻ chia cùng HolaRise.</p>
+
+              <div class="pass-divider" aria-hidden="true"></div>
+
+              <div class="pass-meta-grid">
+                <div class="pass-meta-item">
+                  <span class="pass-meta-key">Mã Thành Viên</span>
+                  <strong class="pass-meta-val pass-code" id="dash-pass-code">HOLA-2026-0000</strong>
+                </div>
+                <div class="pass-meta-item">
+                  <span class="pass-meta-key">Trụ cột chính</span>
+                  <strong class="pass-meta-val" id="dash-pass-pillar">HolaHeart</strong>
+                </div>
+                <div class="pass-meta-item">
+                  <span class="pass-meta-key">Liên hệ</span>
+                  <strong class="pass-meta-val pass-meta-val--ellipsis" id="dash-pass-contact">—</strong>
+                </div>
+                <div class="pass-meta-item">
+                  <span class="pass-meta-key">Trạng thái</span>
+                  <strong class="pass-meta-val">Đang hoạt động</strong>
+                </div>
+              </div>
+
+              <div class="pass-footer pass-footer--clean">
+                <span>HOLARISE.ORG</span>
+                <span>TOGETHER WE RISE, TOGETHER WE SERVE</span>
+              </div>
+            </article>
+
+            <div class="member-pass-controls">
+              <button type="button" class="btn btn--primary btn--sm" id="btn-download-member-pass">Tải Thẻ (PNG)</button>
+              <label class="btn btn--outline btn--sm member-avatar-upload-btn" for="dash-avatar-input">
+                <span>Đổi ảnh đại diện</span>
+                <input id="dash-avatar-input" type="file" accept="image/*" class="visually-hidden">
+              </label>
+              <button type="button" class="btn btn--outline btn--sm" id="btn-member-logout">Đăng xuất</button>
+            </div>
+            <div class="form-status" id="dash-avatar-status" role="status" aria-live="polite"></div>
           </div>
-          <div class="member-completion-track" aria-hidden="true">
-            <span class="member-completion-fill" id="dash-completion-fill" style="width: 40%;"></span>
+
+          <div class="member-dash-panels">
+            <section class="member-panel-box">
+              <div class="member-panel-head">
+                <div>
+                  <span class="kicker">Thông tin cá nhân</span>
+                  <h2>Chỉnh sửa Thẻ Thành Viên</h2>
+                </div>
+              </div>
+              <form class="auth-form" id="member-profile-form" novalidate>
+                <div class="auth-row-2">
+                  <div class="auth-field">
+                    <label for="prof-name">Họ và tên <span aria-hidden="true">*</span></label>
+                    <input id="prof-name" name="name" type="text" autocomplete="name" minlength="2" required>
+                  </div>
+                  <div class="auth-field">
+                    <label for="prof-org">Trường / Đơn vị <span class="auth-hint-inline">(48 gợi ý)</span></label>
+                    <input id="prof-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Gõ để chọn trường hoặc đơn vị...">
+                  </div>
+                </div>
+                <div class="org-quick-chips" aria-label="Chọn nhanh đơn vị">
+                  <button type="button" class="org-chip-btn" data-org-chip="Đại học FPT Hà Nội (Hòa Lạc)" data-org-target="prof-org">ĐH FPT</button>
+                  <button type="button" class="org-chip-btn" data-org-chip="Đại học Quốc gia Hà Nội – Cơ sở Hòa Lạc (ĐHQGHN)" data-org-target="prof-org">ĐHQGHN Hòa Lạc</button>
+                  <button type="button" class="org-chip-btn" data-org-chip="Khu Công nghệ cao Hòa Lạc (HHTP)" data-org-target="prof-org">KCNC Hòa Lạc</button>
+                  <button type="button" class="org-chip-btn" data-org-chip="Người đi làm / Tự do" data-org-target="prof-org">Người đi làm</button>
+                </div>
+                <div class="auth-row-2">
+                  <div class="auth-field">
+                    <label for="prof-pillar">Trụ cột đồng hành</label>
+                    <select id="prof-pillar" name="primaryPillar">
+                      <option value="holaheart">HolaHeart · Nội lực &amp; Lắng nghe</option>
+                      <option value="holagreen">HolaGreen · Sinh thái &amp; Cảnh quan</option>
+                      <option value="holaconnect">HolaConnect · Tri thức &amp; Phụng sự</option>
+                    </select>
+                  </div>
+                  <div class="auth-field">
+                    <label for="prof-bio">Châm ngôn trên thẻ <span class="auth-hint-inline">(tối đa 160 ký tự)</span></label>
+                    <input id="prof-bio" name="bio" type="text" maxlength="160" placeholder="Một câu ngắn gọn về hành trình của bạn...">
+                  </div>
+                </div>
+                <div class="form-status" id="prof-status" role="status" aria-live="polite"></div>
+                <div>
+                  <button class="auth-submit-btn" style="width:auto;min-height:42px;padding:0 22px;" type="submit" id="prof-submit-btn">Lưu thay đổi</button>
+                </div>
+              </form>
+            </section>
           </div>
-          <p class="member-completion-hint" id="dash-completion-hint">Thêm ảnh đại diện, trường/đơn vị và châm ngôn để hoàn thiện thẻ của bạn.</p>
         </div>
-
-        <article class="sunrise-pass member-pass-live" id="member-live-pass" data-sunrise-pass data-pass-theme="sunrise" aria-label="Thẻ Thành Viên Hola của bạn">
-          <div class="sunrise-pass-glare" aria-hidden="true"></div>
-          <div class="pass-header">
-            <div class="pass-brand">
-              <img src="/assets/images/logo-mark.png" alt="Biểu trưng HolaRise" width="28" height="28">
-              <span>HOLARISE · HÒA LẠC</span>
-            </div>
-            <span class="pass-state-pill">THÀNH VIÊN HOLA</span>
-          </div>
-
-          <div class="member-pass-identity">
-            <div class="member-pass-avatar-wrap">
-              <img id="dash-avatar-img" class="member-pass-avatar" src="/assets/images/logo-mark.png" alt="Ảnh đại diện thành viên HolaRise" width="64" height="64" hidden>
-              <span id="dash-avatar-initials" class="member-pass-initials" aria-hidden="true">HR</span>
-            </div>
-            <div class="member-pass-identity-text">
-              <span class="pass-program-tag" id="dash-pass-badge">HolaHeart · Nội lực</span>
-              <div class="pass-member-name" id="dash-pass-name">Thành viên Hola</div>
-              <div class="pass-member-org" id="dash-pass-org">Cộng đồng Hòa Lạc</div>
-            </div>
-          </div>
-
-          <p class="pass-greeting" id="dash-pass-bio">Cùng nhau kiến tạo những cuối tuần tử tế, sâu sắc và kết nối tại Hòa Lạc.</p>
-
-          <div class="pass-divider" aria-hidden="true"></div>
-
-          <div class="pass-meta-grid">
-            <div class="pass-meta-item">
-              <span class="pass-meta-key">Mã Thành Viên</span>
-              <strong class="pass-meta-val pass-code" id="dash-pass-code">HOLA-2026-0000</strong>
-            </div>
-            <div class="pass-meta-item">
-              <span class="pass-meta-key">Trụ cột chính</span>
-              <strong class="pass-meta-val" id="dash-pass-pillar">HolaHeart</strong>
-            </div>
-            <div class="pass-meta-item">
-              <span class="pass-meta-key">Liên hệ</span>
-              <strong class="pass-meta-val" id="dash-pass-contact">—</strong>
-            </div>
-            <div class="pass-meta-item">
-              <span class="pass-meta-key">Trạng thái</span>
-              <strong class="pass-meta-val">Đang hoạt động</strong>
-            </div>
-          </div>
-
-          <div class="pass-footer">
-            <svg class="pass-barcode" width="84" height="20" viewBox="0 0 84 20" fill="currentColor" aria-hidden="true">
-              <rect x="0" y="0" width="2" height="20"/><rect x="4" y="0" width="4" height="20"/><rect x="10" y="0" width="2" height="20"/><rect x="15" y="0" width="1" height="20"/><rect x="18" y="0" width="3" height="20"/><rect x="24" y="0" width="2" height="20"/><rect x="28" y="0" width="5" height="20"/><rect x="35" y="0" width="2" height="20"/><rect x="40" y="0" width="1" height="20"/><rect x="44" y="0" width="3" height="20"/><rect x="50" y="0" width="2" height="20"/><rect x="55" y="0" width="4" height="20"/><rect x="61" y="0" width="2" height="20"/><rect x="66" y="0" width="1" height="20"/><rect x="70" y="0" width="3" height="20"/><rect x="76" y="0" width="2" height="20"/><rect x="81" y="0" width="3" height="20"/>
-            </svg>
-            <span>TOGETHER WE RISE, TOGETHER WE SERVE</span>
-          </div>
-        </article>
-
-        <div class="member-pass-controls">
-          <button type="button" class="btn btn--primary btn--sm" id="btn-download-member-pass">Tải Thẻ (PNG)</button>
-          <label class="btn btn--outline btn--sm member-avatar-upload-btn" for="dash-avatar-input">
-            <span>Đổi ảnh đại diện</span>
-            <input id="dash-avatar-input" type="file" accept="image/*" class="visually-hidden">
-          </label>
-          <button type="button" class="btn btn--outline btn--sm" id="btn-member-logout">Đăng xuất</button>
-        </div>
-        <div class="form-status" id="dash-avatar-status" role="status" aria-live="polite"></div>
       </div>
 
-      <div class="member-dash-panels">
-        <!-- Step 2: Complete & Customize Member Pass -->
-        <section class="member-panel-box">
-          <div class="member-panel-head">
-            <div>
-              <span class="kicker">Bước 2 · Hoàn thiện Thẻ</span>
-              <h2>Tùy chỉnh Thẻ Thành Viên của bạn</h2>
-            </div>
-          </div>
-          <form class="auth-form" id="member-profile-form" novalidate>
-            <div class="auth-row-2">
-              <div class="auth-field">
-                <label for="prof-name">Họ và tên <span aria-hidden="true">*</span></label>
-                <input id="prof-name" name="name" type="text" autocomplete="name" minlength="2" required>
+      <!-- TAB 2: MY ACTIVITY (Bookings + Reflections + Optional Quick Book) -->
+      <div class="member-hub-pane" data-dash-pane="activity" hidden>
+        <div class="member-hub-stack">
+          <section class="member-panel-box">
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">Hoạt động của tôi</span>
+                <h2>Lịch sử giữ chỗ sự kiện</h2>
               </div>
-              <div class="auth-field">
-                <label for="prof-org">Trường / Đơn vị</label>
-                <input id="prof-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Gõ để chọn từ 48 trường / đơn vị...">
-              </div>
+              <a class="arrow-link" href="/lich-hoat-dong/">Xem lịch tuần này →</a>
             </div>
-            <div class="auth-row-2">
-              <div class="auth-field">
-                <label for="prof-pillar">Trụ cột đồng hành</label>
-                <select id="prof-pillar" name="primaryPillar">
-                  <option value="holaheart">HolaHeart · Nội lực &amp; Lắng nghe</option>
-                  <option value="holagreen">HolaGreen · Sinh thái &amp; Cảnh quan</option>
-                  <option value="holaconnect">HolaConnect · Tri thức &amp; Phụng sự</option>
-                </select>
-              </div>
-              <div class="auth-field">
-                <label for="prof-bio">Châm ngôn trên thẻ <span class="auth-hint-inline">(tối đa 160 ký tự)</span></label>
-                <input id="prof-bio" name="bio" type="text" maxlength="160" placeholder="Một câu ngắn gọn về hành trình của bạn...">
-              </div>
+            <div id="member-bookings-list" class="member-list-stack">
+              <p class="member-empty-hint">Đang tải lịch sử giữ chỗ...</p>
             </div>
-            <div class="form-status" id="prof-status" role="status" aria-live="polite"></div>
-            <div>
-              <button class="auth-submit-btn" style="width:auto;min-height:42px;padding:0 22px;" type="submit" id="prof-submit-btn">Lưu Thẻ Thành Viên</button>
-            </div>
-          </form>
-        </section>
+          </section>
 
-        <!-- 1-Tap Upcoming Event Booking -->
-        <section class="member-panel-box" id="member-quick-events-box">
-          <div class="member-panel-head">
-            <div>
-              <span class="kicker">Giữ chỗ 1 chạm</span>
-              <h2>Hoạt động sắp diễn ra tại Hòa Lạc</h2>
+          <section class="member-panel-box">
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">Lưu bút cộng đồng</span>
+                <h2>Cảm nhận &amp; Ảnh kỷ niệm đã gửi</h2>
+              </div>
+              <a class="arrow-link" href="/hanh-trinh/">Viết lưu bút mới →</a>
             </div>
-            <a class="arrow-link" href="/lich-hoat-dong/">Xem toàn bộ lịch →</a>
-          </div>
-          <!-- CMS:JOIN_EVENTS_SECTION:START -->
-          <fieldset class="join-fieldset" data-join-events-step>
+            <div id="member-reflections-list" class="member-list-stack">
+              <p class="member-empty-hint">Đang tải danh sách lưu bút...</p>
+            </div>
+          </section>
+
+          <details class="member-panel-box member-quick-book-details" id="member-quick-events-box">
+            <summary class="member-quick-book-summary">
+              <span>Giữ chỗ nhanh cho hoạt động sắp diễn ra</span>
+              <span class="member-quick-book-hint">Mở rộng</span>
+            </summary>
+            <div style="margin-top: 16px;">
+              <!-- CMS:JOIN_EVENTS_SECTION:START -->
+              <fieldset class="join-fieldset" data-join-events-step>
           <legend class="join-legend">Chọn hoạt động bạn muốn tham gia</legend>
           <div class="join-event-grid">
       <div class="join-event-option">
@@ -607,54 +648,33 @@
       </div>
     </div>
         </fieldset>
-          <!-- CMS:JOIN_EVENTS_SECTION:END -->
-          <div class="form-status" id="dash-event-book-status" role="status" aria-live="polite"></div>
-          <div style="margin-top: 12px;">
-            <button type="button" class="auth-submit-btn" style="width:auto;min-height:42px;padding:0 22px;" id="btn-dash-book-event">Giữ chỗ 1 chạm cho hoạt động đã chọn</button>
-          </div>
-        </section>
-
-        <!-- Passkey Management (Face ID / Touch ID / Windows Hello) -->
-        <section class="member-panel-box">
-          <div class="member-panel-head">
-            <div>
-              <span class="kicker">Đăng nhập không mật khẩu</span>
-              <h2>Passkey (Face ID · Vân tay)</h2>
+              <!-- CMS:JOIN_EVENTS_SECTION:END -->
+              <div class="form-status" id="dash-event-book-status" role="status" aria-live="polite"></div>
+              <div style="margin-top: 12px;">
+                <button type="button" class="auth-submit-btn" style="width:auto;min-height:42px;padding:0 22px;" id="btn-dash-book-event">Giữ chỗ 1 chạm</button>
+              </div>
             </div>
-            <button type="button" class="btn btn--outline btn--sm" id="btn-add-passkey">+ Thêm Passkey</button>
-          </div>
-          <div class="form-status" id="passkey-dash-status" role="status" aria-live="polite" style="margin-bottom: 10px;"></div>
-          <div id="member-passkeys-list" class="member-list-stack">
-            <p class="member-empty-hint">Thêm Passkey để đăng nhập HolaRise trong 1 chạm bằng Face ID hoặc vân tay trên thiết bị này.</p>
-          </div>
-        </section>
+          </details>
+        </div>
+      </div>
 
-        <!-- Booking History -->
-        <section class="member-panel-box">
-          <div class="member-panel-head">
-            <div>
-              <span class="kicker">Hoạt động của tôi</span>
-              <h2>Lịch sử giữ chỗ sự kiện</h2>
+      <!-- TAB 3: SECURITY (Passkey Management) -->
+      <div class="member-hub-pane" data-dash-pane="security" hidden>
+        <div class="member-hub-stack">
+          <section class="member-panel-box">
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">Đăng nhập không mật khẩu</span>
+                <h2>Passkey (Face ID · Vân tay)</h2>
+              </div>
+              <button type="button" class="btn btn--outline btn--sm" id="btn-add-passkey">+ Thêm Passkey</button>
             </div>
-          </div>
-          <div id="member-bookings-list" class="member-list-stack">
-            <p class="member-empty-hint">Đang tải lịch sử giữ chỗ...</p>
-          </div>
-        </section>
-
-        <!-- My Reflections -->
-        <section class="member-panel-box">
-          <div class="member-panel-head">
-            <div>
-              <span class="kicker">Lưu bút cộng đồng</span>
-              <h2>Cảm nhận &amp; Ảnh kỷ niệm tôi đã gửi</h2>
+            <div class="form-status" id="passkey-dash-status" role="status" aria-live="polite" style="margin-bottom: 10px;"></div>
+            <div id="member-passkeys-list" class="member-list-stack">
+              <p class="member-empty-hint">Thêm Passkey để đăng nhập HolaRise trong 1 chạm bằng Face ID hoặc vân tay trên thiết bị này.</p>
             </div>
-            <a class="arrow-link" href="/hanh-trinh/">Viết lưu bút mới →</a>
-          </div>
-          <div id="member-reflections-list" class="member-list-stack">
-            <p class="member-empty-hint">Đang tải danh sách lưu bút...</p>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
     </div>
   </div>
@@ -1040,67 +1060,82 @@
       <form class="auth-form" id="feedback-form" novalidate>
         <input class="visually-hidden" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <fieldset class="auth-fieldset">
-          <legend class="auth-label">Bạn muốn gửi nội dung gì?</legend>
-          <div class="feedback-kind-grid" role="radiogroup">
+          <legend class="visually-hidden">Chọn loại phản hồi</legend>
+          <div class="feedback-kind-pills" role="radiogroup">
             <label class="feedback-kind-opt">
               <input class="visually-hidden" type="radio" name="feedbackKind" value="Đề xuất ý tưởng / hoạt động" checked>
-              <span>Đề xuất hoạt động</span>
+              <span>Đề xuất</span>
             </label>
             <label class="feedback-kind-opt">
               <input class="visually-hidden" type="radio" name="feedbackKind" value="Phản hồi trải nghiệm">
-              <span>Phản hồi trải nghiệm</span>
+              <span>Trải nghiệm</span>
             </label>
             <label class="feedback-kind-opt">
               <input class="visually-hidden" type="radio" name="feedbackKind" value="Báo lỗi kỹ thuật">
-              <span>Báo lỗi kỹ thuật</span>
+              <span>Báo lỗi</span>
             </label>
             <label class="feedback-kind-opt">
               <input class="visually-hidden" type="radio" name="feedbackKind" value="Góp ý khác">
-              <span>Góp ý khác</span>
+              <span>Khác</span>
             </label>
           </div>
         </fieldset>
 
-        <div class="auth-field">
-          <label for="fb-note">Chia sẻ chi tiết của bạn <span aria-hidden="true">*</span></label>
-          <textarea id="fb-note" name="note" rows="4" minlength="8" maxlength="1000" required placeholder="Mô tả ý tưởng, cảm nhận hoặc lỗi bạn gặp phải..."></textarea>
+        <!-- Auto-detected Signed-In Member Identity (hides guest name/contact inputs) -->
+        <div class="fb-member-bar" id="fb-member-bar" hidden>
+          <span class="gb-member-avatar" id="fb-member-avatar" aria-hidden="true">H</span>
+          <div class="gb-member-info">
+            <strong id="fb-member-name">Thành viên HolaRise</strong>
+            <span id="fb-member-sub">Đang gửi bằng tài khoản của bạn</span>
+          </div>
         </div>
 
-        <div class="fb-shot-box" id="fb-shot-box">
-          <div class="fb-shot-head">
-            <span class="fb-shot-label">Ảnh màn hình đính kèm <span class="auth-hint-inline">(tùy chọn)</span></span>
-            <span class="fb-shot-state" id="fb-shot-state" aria-live="polite"></span>
-          </div>
+        <div class="fb-composer-shell">
+          <label for="fb-note" class="visually-hidden">Chia sẻ chi tiết của bạn</label>
+          <textarea id="fb-note" name="note" rows="4" minlength="8" maxlength="1000" required placeholder="Bạn muốn đề xuất điều gì hoặc gặp lỗi ở đâu? (Có thể dán ảnh trực tiếp bằng Ctrl+V)"></textarea>
+
           <div class="fb-shot-preview" id="fb-shot-preview" hidden>
             <img id="fb-shot-img" alt="Ảnh màn hình trang đang xem">
+            <button type="button" class="fb-shot-remove" id="fb-shot-clear" aria-label="Gỡ ảnh đính kèm">×</button>
           </div>
-          <div class="fb-shot-actions">
-            <button type="button" class="fb-shot-btn" id="fb-capture-btn">Chụp màn hình này</button>
-            <label class="fb-shot-btn" for="fb-file-input">Chọn ảnh từ máy</label>
-            <input class="visually-hidden" type="file" id="fb-file-input" accept="image/jpeg,image/png,image/webp">
-            <button type="button" class="fb-shot-btn fb-shot-btn--danger" id="fb-shot-clear" hidden>Gỡ ảnh</button>
+
+          <div class="fb-composer-toolbar" id="fb-shot-box">
+            <div class="fb-toolbar-left">
+              <button type="button" class="fb-tool-chip" id="fb-capture-btn" title="Chụp màn hình hiện tại">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                <span>Chụp màn hình</span>
+              </button>
+              <label class="fb-tool-chip" for="fb-file-input" title="Chọn ảnh từ máy">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                <span>Đính kèm ảnh</span>
+              </label>
+              <input class="visually-hidden" type="file" id="fb-file-input" accept="image/jpeg,image/png,image/webp">
+            </div>
+            <span class="fb-shot-state" id="fb-shot-state" aria-live="polite"></span>
           </div>
-          <p class="fb-shot-hint">Hệ thống tự che ô nhập liệu cá nhân trước khi chụp. Bạn cũng có thể dán ảnh (Ctrl+V). Ảnh chỉ Ban Điều Phối xem được và tự xóa sau 30 ngày.</p>
         </div>
 
-        <details class="fb-diag-details" id="fb-diag-details">
-          <summary>Ngữ cảnh kỹ thuật tự động đọc</summary>
+        <details class="fb-diag-details fb-diag-details--quiet" id="fb-diag-details">
+          <summary>Thông tin kỹ thuật đính kèm tự động</summary>
           <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
         </details>
 
-        <div class="auth-row-2">
+        <div class="auth-row-2" id="fb-guest-contact-row">
           <div class="auth-field">
             <label for="fb-name">Tên của bạn <span class="auth-hint-inline">(tùy chọn)</span></label>
-            <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Có thể bỏ trống nếu ẩn danh">
+            <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Bỏ trống nếu ẩn danh">
           </div>
           <div class="auth-field">
             <label for="fb-contact">Email / Zalo <span class="auth-hint-inline">(tùy chọn)</span></label>
-            <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Để BĐP phản hồi lại bạn">
+            <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Để BĐP phản hồi lại">
           </div>
         </div>
 
         <div class="form-status" id="fb-status" role="status" aria-live="polite"></div>
-        <button class="auth-submit-btn" type="submit" id="fb-submit-btn">Gửi đóng góp tới Ban Điều Phối</button>
+        <div class="fb-submit-row">
+          <span class="fb-shortcut-hint">Nhấn <kbd>Ctrl</kbd> + <kbd>Enter</kbd> để gửi nhanh</span>
+          <button class="auth-submit-btn fb-submit-btn" type="submit" id="fb-submit-btn">Gửi phản hồi</button>
+        </div>
       </form>
     </div>
   </dialog>
@@ -1149,11 +1184,11 @@
     <a class="mobile-dock-link is-active" href="/tham-gia/" aria-label="Tham gia" aria-current="page"><svg class="mobile-dock-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.05" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path pathLength="1" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg><span class="mobile-dock-label" aria-hidden="true">Tham gia</span></a>
   </nav>
 
-  <script src="/assets/vendor/gsap.min.js?v=3a4eedc409" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=3a4eedc409" defer></script>
-  <script src="/assets/js/motion.js?v=3a4eedc409" defer></script>
-  <script src="/assets/js/main.js?v=3a4eedc409" defer></script>
-  <script src="/assets/js/join-pass.js?v=3a4eedc409" defer></script>
-  <script src="/assets/js/member.js?v=3a4eedc409" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=7930aab98b" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=7930aab98b" defer></script>
+  <script src="/assets/js/motion.js?v=7930aab98b" defer></script>
+  <script src="/assets/js/main.js?v=7930aab98b" defer></script>
+  <script src="/assets/js/join-pass.js?v=7930aab98b" defer></script>
+  <script src="/assets/js/member.js?v=7930aab98b" defer></script>
 </body>
 </html>

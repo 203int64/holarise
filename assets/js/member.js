@@ -900,6 +900,33 @@
       btn.addEventListener("click", () => switchJoinTab(btn.getAttribute("data-join-tab")));
     });
 
+    // Luma-style 3-Tab Account Hub switcher + Quick Org Chips inside dashboard
+    function switchDashTab(tab) {
+      $$("[data-dash-tab]", dashView).forEach((btn) => {
+        const active = btn.getAttribute("data-dash-tab") === tab;
+        btn.classList.toggle("is-active", active);
+        btn.setAttribute("aria-selected", String(active));
+      });
+      $$("[data-dash-pane]", dashView).forEach((pane) => {
+        pane.hidden = pane.getAttribute("data-dash-pane") !== tab;
+      });
+    }
+
+    $$("[data-dash-tab]", dashView).forEach((btn) => {
+      btn.addEventListener("click", () => switchDashTab(btn.getAttribute("data-dash-tab")));
+    });
+
+    $$("[data-org-chip]", dashView).forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const targetId = chip.getAttribute("data-org-target") || "prof-org";
+        const input = document.getElementById(targetId);
+        if (input) {
+          input.value = chip.getAttribute("data-org-chip") || "";
+          input.focus();
+        }
+      });
+    });
+
     // Step 1 minimal 3-field register form on /tham-gia/
     const regForm = $("#member-register-form");
     if (regForm) {
@@ -948,7 +975,7 @@
         if ($("#dash-pass-bio")) {
           $("#dash-pass-bio").textContent =
             ($("#prof-bio")?.value || "").trim() ||
-            "Cùng nhau kiến tạo những cuối tuần tử tế, sâu sắc và kết nối tại Hòa Lạc.";
+            "Sống sâu hơn, xanh hơn và bền bỉ sẻ chia cùng HolaRise.";
         }
       };
       profForm.addEventListener("input", livePreview);
@@ -1119,7 +1146,7 @@
     if ($("#dash-pass-org")) $("#dash-pass-org").textContent = m.organization || "Cộng đồng Hòa Lạc";
     if ($("#dash-pass-bio")) {
       $("#dash-pass-bio").textContent =
-        m.bio || "Cùng nhau kiến tạo những cuối tuần tử tế, sâu sắc và kết nối tại Hòa Lạc.";
+        m.bio || "Sống sâu hơn, xanh hơn và bền bỉ sẻ chia cùng HolaRise.";
     }
     if ($("#dash-pass-code")) $("#dash-pass-code").textContent = m.memberCode;
     if ($("#dash-pass-pillar")) $("#dash-pass-pillar").textContent = pillar.label;
