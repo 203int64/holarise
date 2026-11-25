@@ -1386,6 +1386,15 @@
     var prStatus = document.getElementById("pr-status");
     var prBtn = document.getElementById("pr-submit-btn");
 
+    var prPhotoInput = document.getElementById("pr-photo-file");
+    var prPhotoTrigger = document.getElementById("pr-photo-trigger");
+    var prPhotoWrap = document.getElementById("pr-photo-preview-wrap");
+    var prPhotoPreview = document.getElementById("pr-photo-preview");
+    var prPhotoMeta = document.getElementById("pr-photo-meta");
+    var prPhotoClear = document.getElementById("pr-photo-clear");
+    var selectedPhotoFile = null;
+    var selectedPhotoObjectUrl = "";
+
     function escTxt(s) {
       return String(s || "")
         .replace(/&/g, "&amp;")
@@ -1394,34 +1403,217 @@
         .replace(/"/g, "&quot;");
     }
 
+    function getInitialsTxt(name) {
+      var parts = String(name || "H").trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return "H";
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function formatDateShortVi(iso) {
+      if (!iso) return "";
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      return d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+    }
+
+    function parseJsonSafe(res) {
+      return res.text().then(function (raw) {
+        var data = null;
+        if (raw) {
+          try {
+            data = JSON.parse(raw);
+          } catch (_e) {
+            data = null;
+          }
+        }
+        if (!data) {
+          var fallbackMsg =
+            res.status >= 500
+              ? "Hệ thống đang tạm bận (mã " + res.status + "). Bạn vui lòng thử lại sau giây lát."
+              : res.status === 413
+                ? "Ảnh tải lên vượt quá dung lượng cho phép."
+                : "Phản hồi máy chủ không hợp lệ. Vui lòng tải lại trang và thử lại.";
+          data = { ok: false, message: fallbackMsg };
+        }
+        return { ok: res.ok, status: res.status, data: data };
+      });
+    }
+
+    function compressReflectionImage(file, maxDim, quality) {
+      return new Promise(function (resolve, reject) {
+        var img = new Image();
+        var objUrl = URL.createObjectURL(file);
+        img.onload = function () {
+          URL.revokeObjectURL(objUrl);
+          var w = img.naturalWidth || img.width;
+          var h = img.naturalHeight || img.height;
+          if (!w || !h) {
+            reject(new Error("Không đọc được kích thước ảnh."));
+            return;
+          }
+          var scale = Math.min(1, maxDim / Math.max(w, h));
+          var tw = Math.max(1, Math.round(w * scale));
+          var th = Math.max(1, Math.round(h * scale));
+          var canvas = document.createElement("canvas");
+          canvas.width = tw;
+          canvas.height = th;
+          var ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("Trình duyệt không hỗ trợ nén ảnh."));
+            return;
+          }
+          ctx.drawImage(img, 0, 0, tw, th);
+          canvas.toBlob(
+            function (blob) {
+              if (!blob) {
+                reject(new Error("Không thể nén ảnh đã chọn."));
+                return;
+              }
+              if (blob.size > 1.15 * 1024 * 1024 && quality > 0.65) {
+                canvas.toBlob(
+                  function (smaller) {
+                    resolve(smaller || blob);
+                  },
+                  "image/jpeg",
+                  0.68
+                );
+                return;
+              }
+              resolve(blob);
+            },
+            "image/jpeg",
+            quality
+          );
+        };
+        img.onerror = function () {
+          URL.revokeObjectURL(objUrl);
+          reject(new Error("Không đọc được tệp ảnh. Vui lòng chọn ảnh JPEG, PNG hoặc WebP."));
+        };
+        img.src = objUrl;
+      });
+    }
+
+    function clearSelectedPhoto() {
+      selectedPhotoFile = null;
+      if (selectedPhotoObjectUrl) {
+        URL.revokeObjectURL(selectedPhotoObjectUrl);
+        selectedPhotoObjectUrl = "";
+      }
+      if (prPhotoInput) prPhotoInput.value = "";
+      if (prPhotoPreview) prPhotoPreview.removeAttribute("src");
+      if (prPhotoWrap) prPhotoWrap.hidden = true;
+      if (prPhotoTrigger) {
+        var span = prPhotoTrigger.querySelector("span");
+        if (span) span.textContent = "Thêm ảnh kỷ niệm";
+      }
+    }
+
+    if (prPhotoTrigger && prPhotoInput) {
+      prPhotoTrigger.addEventListener("click", function () {
+        prPhotoInput.click();
+      });
+      prPhotoInput.addEventListener("change", function () {
+        var file = prPhotoInput.files && prPhotoInput.files[0];
+        if (!file) return;
+        if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
+          if (prStatus) {
+            prStatus.className = "form-status is-error";
+            prStatus.textContent = "Vui lòng chọn ảnh định dạng JPEG, PNG hoặc WebP.";
+          }
+          prPhotoInput.value = "";
+          return;
+        }
+        if (file.size > 12 * 1024 * 1024) {
+          if (prStatus) {
+            prStatus.className = "form-status is-error";
+            prStatus.textContent = "Ảnh gốc quá lớn (tối đa 12 MB). Vui lòng chọn ảnh nhẹ hơn.";
+          }
+          prPhotoInput.value = "";
+          return;
+        }
+        if (selectedPhotoObjectUrl) URL.revokeObjectURL(selectedPhotoObjectUrl);
+        selectedPhotoFile = file;
+        selectedPhotoObjectUrl = URL.createObjectURL(file);
+        if (prPhotoPreview) prPhotoPreview.src = selectedPhotoObjectUrl;
+        if (prPhotoWrap) prPhotoWrap.hidden = false;
+        if (prPhotoMeta) {
+          var sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+          prPhotoMeta.textContent = "Đã chọn 1 ảnh (" + sizeMb + " MB) · Tự động nén gọn khi gửi";
+        }
+        if (prPhotoTrigger) {
+          var span = prPhotoTrigger.querySelector("span");
+          if (span) span.textContent = "Đổi ảnh khác";
+        }
+        if (prStatus && prStatus.classList.contains("is-error")) {
+          prStatus.className = "form-status";
+          prStatus.textContent = "";
+        }
+      });
+    }
+
+    if (prPhotoClear) {
+      prPhotoClear.addEventListener("click", clearSelectedPhoto);
+    }
+
     function loadPublicReflections() {
       if (!gbSlug || !gbList) return;
       fetch("/api/reflections?slug=" + encodeURIComponent(gbSlug))
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          var items = (data && data.items) || [];
+        .then(parseJsonSafe)
+        .then(function (res) {
+          var data = res.data || {};
+          var items = data.items || [];
+          var photoCount = items.filter(function (x) { return Boolean(x.photoUrl); }).length;
           if (gbCount) {
-            gbCount.textContent = items.length ? items.length + " cảm nhận" : "Chưa có cảm nhận";
+            if (!items.length) {
+              gbCount.textContent = "Chưa có lưu bút công khai";
+            } else if (photoCount > 0) {
+              gbCount.textContent = items.length + " mảnh ký ức · " + photoCount + " ảnh";
+            } else {
+              gbCount.textContent = items.length + " cảm nhận đã xuất bản";
+            }
           }
           if (!items.length) {
-            gbList.innerHTML = '<p class="member-empty-hint">Mời bạn là người đầu tiên chia sẻ cảm nhận sau buổi gặp này.</p>';
+            gbList.innerHTML =
+              '<div class="guestbook-empty"><p>Mời bạn là người đầu tiên lưu lại cảm nhận và một khoảnh khắc đáng nhớ sau buổi gặp này.</p></div>';
             return;
           }
           gbList.innerHTML = items
             .map(function (it) {
-              var quoteHtml = it.pullQuote ? '<blockquote class="gb-pull-quote">“' + escTxt(it.pullQuote) + '”</blockquote>' : "";
-              var photoHtml = it.photoUrl
-                ? '<figure class="gb-card-photo"><img src="' + escTxt(it.photoUrl) + '" alt="Ảnh kỷ niệm từ ' + escTxt(it.authorName) + '" loading="lazy"></figure>'
+              var hasPhoto = Boolean(it.photoUrl);
+              var avHtml = it.authorAvatarUrl
+                ? '<img class="gb-avatar-img" src="' + escTxt(it.authorAvatarUrl) + '" alt="Ảnh đại diện ' + escTxt(it.authorName) + '" width="38" height="38" loading="lazy">'
+                : '<span class="gb-avatar-initials" aria-hidden="true">' + escTxt(getInitialsTxt(it.authorName)) + "</span>";
+              var quoteHtml = it.pullQuote
+                ? '<blockquote class="gb-pull-quote">“' + escTxt(it.pullQuote) + "”</blockquote>"
                 : "";
-              var meta = [it.participantRole, it.authorOrg].filter(Boolean).join(" · ");
+              var captionBits = [it.authorName, it.authorOrg || it.participantRole].filter(Boolean).join(" · ");
+              var photoHtml = hasPhoto
+                ? '<figure class="gb-card-photo">' +
+                  '<button type="button" class="gb-photo-btn" data-lightbox-src="' + escTxt(it.photoUrl) + '" data-lightbox-alt="Khoảnh khắc của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '">' +
+                  '<img src="' + escTxt(it.photoUrl) + '" alt="Khoảnh khắc kỷ niệm của ' + escTxt(it.authorName) + '" loading="lazy" decoding="async">' +
+                  "</button></figure>"
+                : "";
+              var roleLabel = it.participantRole === "member" ? "Thành viên" : it.participantRole === "volunteer" ? "Tình nguyện viên" : it.participantRole === "speaker" ? "Diễn giả" : it.participantRole;
+              var metaParts = [it.authorOrg || roleLabel, formatDateShortVi(it.createdAt)].filter(Boolean);
+              var heartCount = Number(it.heartCount || 0);
+              var isHearted = Boolean(it.heartedByMe);
               return (
-                '<article class="gb-card">' +
+                '<article class="gb-card' + (hasPhoto ? " gb-card--photo" : "") + '" data-reflection-id="' + escTxt(it.id) + '">' +
                 photoHtml +
+                '<div class="gb-card-inner">' +
                 quoteHtml +
-                '<p class="gb-content">' + escTxt(it.content) + "</p>" +
-                '<div class="gb-meta"><strong>' + escTxt(it.authorName) + "</strong>" +
-                (meta ? "<span>" + escTxt(meta) + "</span>" : "") +
-                "</div></article>"
+                '<p class="gb-card-body">' + escTxt(it.content) + "</p>" +
+                '<footer class="gb-card-foot">' +
+                '<div class="gb-author">' +
+                avHtml +
+                '<div class="gb-author-meta"><strong>' + escTxt(it.authorName) + "</strong>" +
+                (metaParts.length ? "<span>" + escTxt(metaParts.join(" · ")) + "</span>" : "") +
+                "</div></div>" +
+                '<button type="button" class="gb-heart-btn' + (isHearted ? " is-hearted" : "") + '" data-heart-reflection="' + escTxt(it.id) + '" aria-pressed="' + (isHearted ? "true" : "false") + '" aria-label="Thả tim cảm nhận này">' +
+                '<span class="gb-heart-icon" aria-hidden="true">' + (isHearted ? "♥" : "♡") + "</span>" +
+                '<span class="gb-heart-count">' + heartCount + "</span>" +
+                "</button></footer></div></article>"
               );
             })
             .join("");
@@ -1432,6 +1624,33 @@
     }
 
     loadPublicReflections();
+    window.addEventListener("hola:member-changed", loadPublicReflections);
+
+    gbSection.addEventListener("click", function (e) {
+      var heartBtn = e.target.closest("[data-heart-reflection]");
+      if (!heartBtn || heartBtn.disabled) return;
+      var refId = heartBtn.getAttribute("data-heart-reflection");
+      if (!refId) return;
+      heartBtn.disabled = true;
+      fetch("/api/reflections/" + encodeURIComponent(refId) + "/heart", { method: "POST" })
+        .then(parseJsonSafe)
+        .then(function (res) {
+          if (!res.ok || !res.data) return;
+          var hearted = Boolean(res.data.hearted);
+          heartBtn.classList.toggle("is-hearted", hearted);
+          heartBtn.setAttribute("aria-pressed", hearted ? "true" : "false");
+          var icon = heartBtn.querySelector(".gb-heart-icon");
+          var cnt = heartBtn.querySelector(".gb-heart-count");
+          if (icon) icon.textContent = hearted ? "♥" : "♡";
+          if (cnt && typeof res.data.heartCount !== "undefined") {
+            cnt.textContent = String(res.data.heartCount);
+          }
+        })
+        .catch(function () {})
+        .finally(function () {
+          heartBtn.disabled = false;
+        });
+    });
 
     if (prForm) {
       var prAnonCheck = document.getElementById("pr-anon-check");
@@ -1458,45 +1677,79 @@
         }
         var fd = new FormData(prForm);
         var rawName = String(fd.get("authorName") || "").trim();
+        var prMemberBar = document.getElementById("pr-member-bar");
+        var isMemberSignedIn = prMemberBar && !prMemberBar.hidden;
         if (prAnonCheck && prAnonCheck.checked) rawName = "Ẩn danh";
-        var payload = {
-          activitySlug: gbSlug,
-          authorName: rawName,
-          authorOrg: String(fd.get("authorOrg") || "").trim(),
-          participantRole: String(fd.get("participantRole") || "").trim() || "Người tham dự",
-          pullQuote: String(fd.get("pullQuote") || "").trim(),
-          content: String(fd.get("content") || "").trim(),
-          website: String(fd.get("website") || "").trim(),
-        };
-        if (payload.authorName.length < 2 || payload.content.length < 12) {
+        var contentVal = String(fd.get("content") || "").trim();
+        if ((!isMemberSignedIn && rawName.length < 2) || contentVal.length < 12) {
           if (prStatus) {
             prStatus.className = "form-status is-error";
-            prStatus.textContent = "Vui lòng nhập tên (hoặc chọn Gửi ẩn danh) và viết ít nhất 12 ký tự.";
+            prStatus.textContent = isMemberSignedIn
+              ? "Cảm nhận cần ít nhất 12 ký tự."
+              : "Vui lòng nhập tên (hoặc chọn Gửi ẩn danh) và viết ít nhất 12 ký tự.";
           }
           return;
         }
         if (prBtn) {
           prBtn.disabled = true;
-          prBtn.textContent = "Đang gửi...";
+          prBtn.textContent = selectedPhotoFile ? "Đang nén & tải ảnh..." : "Đang gửi...";
         }
-        fetch("/api/reflections", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        })
-          .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+
+        var uploadStep = selectedPhotoFile
+          ? compressReflectionImage(selectedPhotoFile, 1280, 0.82).then(function (blob) {
+              var upFd = new FormData();
+              upFd.append("file", blob, "reflection.jpg");
+              return fetch("/api/reflections/media", { method: "POST", body: upFd })
+                .then(parseJsonSafe)
+                .then(function (upRes) {
+                  if (!upRes.ok || !upRes.data || !upRes.data.url) {
+                    throw new Error((upRes.data && upRes.data.message) || "Không thể tải ảnh lên lúc này.");
+                  }
+                  return upRes.data.url;
+                });
+            })
+          : Promise.resolve("");
+
+        uploadStep
+          .then(function (uploadedPhotoUrl) {
+            if (prBtn) prBtn.textContent = "Đang gửi cảm nhận...";
+            var payload = {
+              activitySlug: gbSlug,
+              authorName: rawName,
+              authorOrg: String(fd.get("authorOrg") || "").trim(),
+              participantRole: String(fd.get("participantRole") || "").trim() || "Người tham dự",
+              pullQuote: String(fd.get("pullQuote") || "").trim(),
+              content: contentVal,
+              photoUrl: uploadedPhotoUrl,
+              website: String(fd.get("website") || "").trim(),
+            };
+            return fetch("/api/reflections", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            }).then(parseJsonSafe);
+          })
           .then(function (res) {
-            if (!res.ok) throw new Error((res.data && res.data.message) || "Không thể gửi cảm nhận lúc này.");
-            prForm.reset();
+            if (!res.ok) {
+              throw new Error((res.data && res.data.message) || "Không thể gửi cảm nhận lúc này.");
+            }
+            var contentInput = document.getElementById("pr-content");
+            if (contentInput) contentInput.value = "";
+            clearSelectedPhoto();
+            if (!isMemberSignedIn) {
+              prForm.reset();
+              if (prNameField) prNameField.readOnly = false;
+            }
             if (prStatus) {
               prStatus.className = "form-status is-success";
-              prStatus.textContent = (res.data && res.data.message) || "Đã gửi cảm nhận tới Ban Điều Phối duyệt hiển thị.";
+              prStatus.textContent =
+                (res.data && res.data.message) || "Đã gửi cảm nhận tới Ban Điều Phối duyệt hiển thị.";
             }
           })
           .catch(function (err) {
             if (prStatus) {
               prStatus.className = "form-status is-error";
-              prStatus.textContent = err.message || "Có lỗi xảy ra, vui lòng thử lại.";
+              prStatus.textContent = (err && err.message) || "Có lỗi xảy ra, vui lòng thử lại.";
             }
           })
           .finally(function () {

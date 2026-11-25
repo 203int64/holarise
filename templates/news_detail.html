@@ -82,6 +82,16 @@
             <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="Điều gì đọng lại trong bạn sau buổi gặp này? Viết vài dòng chân thật nhé..."></textarea>
           </div>
 
+          <input id="pr-photo-file" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+
+          <div class="gb-photo-preview-wrap" id="pr-photo-preview-wrap" hidden>
+            <img id="pr-photo-preview" alt="Xem trước ảnh kỷ niệm">
+            <div class="gb-photo-preview-bar">
+              <span class="gb-photo-meta" id="pr-photo-meta">Ảnh sẽ được tự động nén gọn khi gửi</span>
+              <button type="button" class="gb-photo-clear" id="pr-photo-clear">Gỡ ảnh</button>
+            </div>
+          </div>
+
           <!-- Compact Guest Identity Row (hidden automatically when signed in) -->
           <div class="gb-guest-row" id="pr-guest-row">
             <div class="gb-guest-name-wrap">
@@ -97,7 +107,13 @@
           <div class="form-status" id="pr-status" role="status" aria-live="polite"></div>
 
           <div class="gb-composer-foot">
-            <span class="gb-composer-hint">Không cần tạo tài khoản · Sẽ hiển thị sau khi duyệt nhanh</span>
+            <div class="gb-composer-tools">
+              <button type="button" class="gb-attach-btn" id="pr-photo-trigger">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="m21 15-4.5-4.5a1.5 1.5 0 0 0-2.1 0L7 18"></path></svg>
+                <span>Thêm ảnh kỷ niệm</span>
+              </button>
+              <span class="gb-composer-hint">Không cần tài khoản · Hiển thị sau khi duyệt nhanh</span>
+            </div>
             <button class="btn btn--primary btn--sm" type="submit" id="pr-submit-btn">Gửi cảm nhận</button>
           </div>
         </form>

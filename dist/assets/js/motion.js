@@ -124,12 +124,26 @@
     storyPanels.forEach(function (panel, i) {
       var on = i === clamped;
       panel.classList.toggle("is-active", on);
+      panel.setAttribute("aria-hidden", String(!on));
+      if (hasGsap) {
+        window.gsap.killTweensOf(panel);
+      }
       if (on && animateWipe && hasGsap && !prefersReduced) {
         window.gsap.fromTo(
           panel,
           { y: dir * 14, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.56, ease: "power3.out", overwrite: "auto" }
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.56,
+            ease: "power3.out",
+            clearProps: "opacity,transform",
+            overwrite: "auto",
+          }
         );
+      } else {
+        panel.style.removeProperty("opacity");
+        panel.style.removeProperty("transform");
       }
     });
 
@@ -141,6 +155,14 @@
       slide.classList.toggle("is-prev", wasActive);
       slide.setAttribute("tabindex", isActiveSlide ? "0" : "-1");
 
+      if (!isActiveSlide) {
+        if (hasGsap) {
+          window.gsap.killTweensOf(slide);
+        }
+        slide.style.removeProperty("opacity");
+        slide.style.removeProperty("clip-path");
+      }
+
       if (isActiveSlide && animateWipe && hasGsap && !prefersReduced) {
         var img = slide.querySelector("img");
         var startClip = dir > 0 ? "inset(100% 0% 0% 0%)" : "inset(0% 0% 100% 0%)";
@@ -151,7 +173,7 @@
             clipPath: "inset(0% 0% 0% 0%)",
             duration: 0.78,
             ease: "power4.out",
-            clearProps: "clipPath",
+            clearProps: "clipPath,opacity",
             overwrite: "auto",
           }
         );
@@ -159,7 +181,7 @@
           window.gsap.fromTo(
             img,
             { scale: 1.13 },
-            { scale: 1, duration: 1.05, ease: "power3.out", overwrite: "auto" }
+            { scale: 1, duration: 1.05, ease: "power3.out", clearProps: "transform", overwrite: "auto" }
           );
         }
       }

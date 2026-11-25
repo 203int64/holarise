@@ -1,4 +1,4 @@
-import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
+import { ensureReflectionsSchema, errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
 import {
   VALID_REFLECTION_STATUSES,
   cleanStr,
@@ -94,7 +94,10 @@ export async function onRequestGet(context) {
   const auth = await requireAdmin(context);
   if (!auth.ok) return auth.response;
 
-  await ensureCommunityTestimonialsTable(context.env.DB);
+  await Promise.all([
+    ensureCommunityTestimonialsTable(context.env.DB),
+    ensureReflectionsSchema(context.env.DB),
+  ]);
 
   const url = new URL(context.request.url);
   const statusFilter = (url.searchParams.get("status") || "all").trim().toLowerCase();
@@ -178,7 +181,10 @@ export async function onRequestPost(context) {
   const auth = await requireAdmin(context);
   if (!auth.ok) return auth.response;
 
-  await ensureCommunityTestimonialsTable(context.env.DB);
+  await Promise.all([
+    ensureCommunityTestimonialsTable(context.env.DB),
+    ensureReflectionsSchema(context.env.DB),
+  ]);
 
   const parsed = await readJsonBody(context.request, 32 * 1024);
   if (!parsed.ok) return parsed.response;

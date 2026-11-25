@@ -521,9 +521,11 @@ export async function ensureMemberSchema(db) {
       content TEXT NOT NULL,
       photo_url TEXT NOT NULL DEFAULT '',
       photo_media_key TEXT NOT NULL DEFAULT '',
+      heart_count INTEGER NOT NULL DEFAULT 0,
       status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
-      hearts_count INTEGER NOT NULL DEFAULT 0,
       admin_note TEXT NOT NULL DEFAULT '',
+      reviewed_by TEXT NOT NULL DEFAULT '',
+      reviewed_at TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       UNIQUE(activity_slug, member_id),
@@ -558,5 +560,65 @@ export async function ensureMemberSchema(db) {
   for (const sql of stmts) {
     await db.prepare(sql).run().catch(() => {});
   }
+  await ensureReflectionsSchema(db);
   memberSchemaEnsured = true;
+}
+
+const ensuredReflectionsDbs = new WeakSet();
+
+export async function ensureReflectionsSchema(db) {
+  if (!db || ensuredReflectionsDbs.has(db)) return;
+  try {
+    const info = await db.prepare("PRAGMA table_info(activity_reflections)").all();
+    const cols = new Set((info?.results || []).map((c) => String(c.name || "").toLowerCase()));
+    if (cols.size === 0) {
+      await db
+        .prepare(
+          `CREATE TABLE IF NOT EXISTS activity_reflections (
+            id TEXT PRIMARY KEY,
+            activity_slug TEXT NOT NULL,
+            member_id TEXT NOT NULL,
+            participant_role TEXT NOT NULL DEFAULT 'member' CHECK(participant_role IN ('member','volunteer','speaker')),
+            pull_quote TEXT NOT NULL DEFAULT '',
+            content TEXT NOT NULL,
+            photo_url TEXT NOT NULL DEFAULT '',
+            photo_media_key TEXT NOT NULL DEFAULT '',
+            heart_count INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
+            admin_note TEXT NOT NULL DEFAULT '',
+            reviewed_by TEXT NOT NULL DEFAULT '',
+            reviewed_at TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE(activity_slug, member_id),
+            FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE
+          )`
+        )
+        .run()
+        .catch(() => {});
+      ensuredReflectionsDbs.add(db);
+      return;
+    }
+    if (!cols.has("heart_count")) {
+      await db.prepare("ALTER TABLE activity_reflections ADD COLUMN heart_count INTEGER NOT NULL DEFAULT 0").run().catch(() => {});
+      if (cols.has("hearts_count")) {
+        await db.prepare("UPDATE activity_reflections SET heart_count = COALESCE(hearts_count, 0)").run().catch(() => {});
+      }
+    }
+    if (!cols.has("reviewed_by")) {
+      await db.prepare("ALTER TABLE activity_reflections ADD COLUMN reviewed_by TEXT NOT NULL DEFAULT ''").run().catch(() => {});
+    }
+    if (!cols.has("reviewed_at")) {
+      await db.prepare("ALTER TABLE activity_reflections ADD COLUMN reviewed_at TEXT").run().catch(() => {});
+    }
+    if (!cols.has("photo_url")) {
+      await db.prepare("ALTER TABLE activity_reflections ADD COLUMN photo_url TEXT NOT NULL DEFAULT ''").run().catch(() => {});
+    }
+    if (!cols.has("photo_media_key")) {
+      await db.prepare("ALTER TABLE activity_reflections ADD COLUMN photo_media_key TEXT NOT NULL DEFAULT ''").run().catch(() => {});
+    }
+  } catch (_err) {
+    // Non-fatal: let caller surface concrete DB error cleanly
+  }
+  ensuredReflectionsDbs.add(db);
 }

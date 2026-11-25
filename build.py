@@ -1393,7 +1393,7 @@ def write_page(
 
     is_en_page = url_path.startswith("/en/")
     lang_switch_href = "/" if is_en_page else "/en/"
-    lang_switch_label = "Tiếng Việt" if is_en_page else "EN · Profile"
+    lang_switch_label = "VN" if is_en_page else "EN"
     lang_switch_aria = "Chuyển sang trang Tiếng Việt" if is_en_page else "View English International Profile"
 
     rendered = render_template(

@@ -1,4 +1,10 @@
-import { errorResponse, jsonResponse, readJsonBody, requireMember } from "../../_lib/security.js";
+import {
+  ensureReflectionsSchema,
+  errorResponse,
+  jsonResponse,
+  readJsonBody,
+  requireMember,
+} from "../../_lib/security.js";
 import { validateReflectionInput } from "../../_lib/validation.js";
 import { serializePublicReflection } from "./index.js";
 
@@ -7,6 +13,7 @@ export async function onRequestPatch(context) {
   if (!auth.ok) return auth.response;
 
   const { request, env, params } = context;
+  await ensureReflectionsSchema(env.DB);
   const id = String(params?.id || "").trim();
   if (!id) {
     return errorResponse(400, "MISSING_ID", "Thiếu mã lưu bút.");

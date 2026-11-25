@@ -21,6 +21,7 @@ import {
   onRequestGet as reflectionsGet,
   onRequestPost as reflectionsCreate,
 } from "../functions/api/reflections/index.js";
+import { onRequestPost as reflectionMediaUpload } from "../functions/api/reflections/media.js";
 import {
   onRequestPatch as reflectionPatch,
   onRequestDelete as reflectionDelete,
@@ -743,4 +744,97 @@ test("Member Journey Wallet: joins events metadata & auto-matches unlinked guest
   assert.equal(card.eventLocation, "Đồi Lâm Nghiệp, Hòa Lạc");
   assert.equal(card.eventHref, "/su-kien/leo-nui-luot/");
   assert.equal(card.status, "attended");
+});
+
+test("Public guest reflection photo upload + drifted activity_reflections schema self-heal", async () => {
+  const DB = createFullMockD1();
+  const MEDIA_KV = createMockKV();
+  const env = { DB, MEDIA_KV };
+
+  // 1. Public guest uploads a JPEG photo without logging in
+  const fakeJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01]);
+  const upRes = await reflectionMediaUpload({
+    request: makeReq("/api/reflections/media", {
+      method: "POST",
+      body: fakeJpeg,
+      headers: { "Content-Type": "image/jpeg" },
+    }),
+    env,
+  });
+  assert.equal(upRes.status, 201);
+  const upData = await upRes.json();
+  assert.equal(upData.ok, true);
+  assert.match(upData.url, /^\/api\/media\/ref-\d{8}-[a-z0-9-]+\.jpg$/);
+
+  // Guest submits a reflection with the uploaded photoUrl
+  const guestPost = await reflectionsCreate({
+    request: makeReq("/api/reflections", {
+      method: "POST",
+      body: {
+        activitySlug: "tinh-yeu-thuong-cua-me",
+        authorName: "Minh Quân",
+        content: "Buổi tối rất ấm áp, mọi người lắng nghe nhau thật trọn vẹn.",
+        photoUrl: upData.url,
+      },
+    }),
+    env,
+  });
+  assert.equal(guestPost.status, 201);
+  const guestJson = await guestPost.json();
+  assert.equal(guestJson.ok, true);
+  assert.equal(guestJson.reflection.photoUrl, upData.url);
+
+  // 2. Simulate legacy drifted D1 table (hearts_count instead of heart_count, missing reviewed_by/reviewed_at)
+  DB.rawDb.exec("DROP TABLE IF EXISTS reflection_hearts; DROP TABLE IF EXISTS activity_reflections;");
+  DB.rawDb.exec(`
+    CREATE TABLE activity_reflections (
+      id TEXT PRIMARY KEY,
+      activity_slug TEXT NOT NULL,
+      member_id TEXT NOT NULL,
+      participant_role TEXT NOT NULL DEFAULT 'member',
+      pull_quote TEXT NOT NULL DEFAULT '',
+      content TEXT NOT NULL,
+      photo_url TEXT NOT NULL DEFAULT '',
+      photo_media_key TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'pending',
+      hearts_count INTEGER NOT NULL DEFAULT 0,
+      admin_note TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      UNIQUE(activity_slug, member_id)
+    );
+  `);
+
+  const regRes = await memberRegister({
+    request: makeReq("/api/member/auth/register", {
+      method: "POST",
+      body: {
+        identifier: "drifted-member@holarise.org",
+        password: "DriftedPass123!",
+        name: "Church Of God",
+        organization: "FPTU",
+      },
+    }),
+    env,
+  });
+  assert.equal(regRes.status, 201);
+  const memberCookie = extractCookie(regRes, "holarise_member_session");
+
+  // Must self-heal and return 201 JSON (never 500 HTML!)
+  const memberPost = await reflectionsCreate({
+    request: makeReq("/api/reflections", {
+      method: "POST",
+      cookie: memberCookie,
+      body: {
+        activitySlug: "tinh-yeu-thuong-cua-me",
+        content: "<3 <3 <3 <3 <3 <3 <3 <3 <3",
+        photoUrl: upData.url,
+      },
+    }),
+    env,
+  });
+  assert.equal(memberPost.status, 201);
+  const memberJson = await memberPost.json();
+  assert.equal(memberJson.ok, true);
+  assert.equal(memberJson.reflection.photoUrl, upData.url);
 });

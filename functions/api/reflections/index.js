@@ -1,6 +1,7 @@
 import {
   READER_ID_COOKIE_NAME,
   checkRateLimit,
+  ensureReflectionsSchema,
   errorResponse,
   getClientIpHash,
   getSessionMember,
@@ -9,7 +10,13 @@ import {
   readJsonBody,
   verifyCsrfOrigin,
 } from "../../_lib/security.js";
-import { cleanStr, slugifyVi, validateReflectionInput } from "../../_lib/validation.js";
+import {
+  cleanStr,
+  extractMediaKeyFromUrl,
+  isSafeMediaUrl,
+  slugifyVi,
+  validateReflectionInput,
+} from "../../_lib/validation.js";
 import { ensureCommunityTestimonialsTable } from "../admin/reflections/index.js";
 
 export function serializePublicReflection(row, { heartedSet = new Set(), currentMemberId = "" } = {}) {
@@ -43,7 +50,10 @@ export async function onRequestGet(context) {
     return jsonResponse({ ok: true, items: [], myReflection: null });
   }
 
-  await ensureCommunityTestimonialsTable(env.DB);
+  await Promise.all([
+    ensureCommunityTestimonialsTable(env.DB),
+    ensureReflectionsSchema(env.DB),
+  ]);
 
   const url = new URL(request.url);
   const rawSlug = (url.searchParams.get("slug") || "").trim();
@@ -164,6 +174,7 @@ export async function onRequestPost(context) {
     const content = cleanStr(d.content, 1500);
     const rawSlug = cleanStr(d.activitySlug || d.slug, 120);
     const activitySlug = rawSlug ? slugifyVi(rawSlug) : "";
+    const photoUrl = cleanStr(d.photoUrl ?? d.photo_url, 500);
 
     if (!authorName || authorName.length < 2) {
       return errorResponse(400, "VALIDATION_ERROR", "Vui lòng nhập tên gọi của bạn (tối thiểu 2 ký tự).");
@@ -171,6 +182,10 @@ export async function onRequestPost(context) {
     if (!content || content.length < 12) {
       return errorResponse(400, "VALIDATION_ERROR", "Cảm nhận cần ít nhất 12 ký tự.");
     }
+    if (photoUrl && !isSafeMediaUrl(photoUrl)) {
+      return errorResponse(400, "VALIDATION_ERROR", "Đường dẫn ảnh đính kèm không hợp lệ.");
+    }
+    const photoMediaKey = photoUrl ? extractMediaKeyFromUrl(photoUrl) : "";
 
     const ipHash = await getClientIpHash(request);
     const rl = await checkRateLimit(env.DB, `comm_ref:${ipHash}`, 5, 15 * 60 * 1000);
@@ -184,28 +199,33 @@ export async function onRequestPost(context) {
     const authorOrg = cleanStr(d.authorOrg || d.organization, 160);
     const pullQuote = cleanStr(d.pullQuote, 180);
 
-    await env.DB.prepare(
-      `INSERT INTO community_testimonials
-       (id, activity_slug, author_name, author_role, author_org, pull_quote, content,
-        photo_url, photo_media_key, is_featured_home, heart_count, status, source,
-        reviewed_by, reviewed_at, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, '', '', 0, 0, 'pending', 'public', '', NULL, ?, ?)`
-    )
-      .bind(id, activitySlug, authorName, authorRole, authorOrg, pullQuote, content, now, now)
-      .run();
+    try {
+      await env.DB.prepare(
+        `INSERT INTO community_testimonials
+         (id, activity_slug, author_name, author_role, author_org, pull_quote, content,
+          photo_url, photo_media_key, is_featured_home, heart_count, status, source,
+          reviewed_by, reviewed_at, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 'pending', 'public', '', NULL, ?, ?)`
+      )
+        .bind(id, activitySlug, authorName, authorRole, authorOrg, pullQuote, content, photoUrl, photoMediaKey, now, now)
+        .run();
 
-    const row = await env.DB.prepare("SELECT * FROM community_testimonials WHERE id = ?").bind(id).first();
-    return jsonResponse(
-      {
-        ok: true,
-        reflection: serializePublicReflection(row),
-        message: "Cảm ơn bạn đã sẻ chia. Cảm nhận đã gửi tới Ban Điều Phối để hiển thị lên trang Hành trình.",
-      },
-      201
-    );
+      const row = await env.DB.prepare("SELECT * FROM community_testimonials WHERE id = ?").bind(id).first();
+      return jsonResponse(
+        {
+          ok: true,
+          reflection: serializePublicReflection(row),
+          message: "Cảm ơn bạn đã sẻ chia. Cảm nhận đã gửi tới Ban Điều Phối để hiển thị lên trang Hành trình.",
+        },
+        201
+      );
+    } catch (_err) {
+      return errorResponse(500, "DB_WRITE_FAILED", "Chưa thể lưu cảm nhận lúc này. Vui lòng thử lại sau giây lát.");
+    }
   }
 
-  // Path B: Legacy authenticated member reflection (preserves backward compatibility)
+  // Path B: Authenticated member reflection
+  await ensureReflectionsSchema(env.DB);
   const validated = validateReflectionInput(d, { requireSlug: true });
   if (!validated.ok) {
     return errorResponse(400, "VALIDATION_ERROR", "Vui lòng kiểm tra lại nội dung lưu bút.", validated.fields);
@@ -217,48 +237,52 @@ export async function onRequestPost(context) {
   }
 
   const v = validated.value;
-  const existing = await env.DB.prepare(
-    "SELECT id FROM activity_reflections WHERE activity_slug = ? AND member_id = ?"
-  )
-    .bind(v.activity_slug, sessionMember.id)
-    .first();
+  try {
+    const existing = await env.DB.prepare(
+      "SELECT id FROM activity_reflections WHERE activity_slug = ? AND member_id = ?"
+    )
+      .bind(v.activity_slug, sessionMember.id)
+      .first();
 
-  if (existing) {
-    return errorResponse(409, "ALREADY_SUBMITTED", "Bạn đã có một trang lưu bút cho hoạt động này.");
+    if (existing) {
+      return errorResponse(409, "ALREADY_SUBMITTED", "Bạn đã có một trang lưu bút cho hoạt động này.");
+    }
+
+    const now = new Date().toISOString();
+    const id = `ref_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+
+    await env.DB.prepare(
+      `INSERT INTO activity_reflections
+       (id, activity_slug, member_id, participant_role, pull_quote, content, photo_url, photo_media_key,
+        heart_count, status, admin_note, reviewed_by, reviewed_at, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending', '', '', NULL, ?, ?)`
+    )
+      .bind(id, v.activity_slug, sessionMember.id, v.participant_role, v.pull_quote, v.content, v.photo_url, v.photo_media_key, now, now)
+      .run();
+
+    const created = await env.DB.prepare(
+      `SELECT r.*,
+              m.name AS author_name,
+              m.organization AS author_org,
+              m.avatar_url AS author_avatar_url,
+              m.member_code AS author_member_code,
+              m.pillar_choice AS author_pillar
+       FROM activity_reflections r
+       JOIN members m ON m.id = r.member_id
+       WHERE r.id = ?`
+    )
+      .bind(id)
+      .first();
+
+    return jsonResponse(
+      {
+        ok: true,
+        reflection: serializePublicReflection(created, { currentMemberId: sessionMember.id }),
+        message: "Cảm ơn bạn đã sẻ chia! Lưu bút của bạn đã được gửi tới Ban Điều Phối duyệt hiển thị.",
+      },
+      201
+    );
+  } catch (_err) {
+    return errorResponse(500, "DB_WRITE_FAILED", "Chưa thể lưu cảm nhận lúc này. Vui lòng thử lại sau giây lát.");
   }
-
-  const now = new Date().toISOString();
-  const id = `ref_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-
-  await env.DB.prepare(
-    `INSERT INTO activity_reflections
-     (id, activity_slug, member_id, participant_role, pull_quote, content, photo_url, photo_media_key,
-      heart_count, status, admin_note, reviewed_by, reviewed_at, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending', '', '', NULL, ?, ?)`
-  )
-    .bind(id, v.activity_slug, sessionMember.id, v.participant_role, v.pull_quote, v.content, v.photo_url, v.photo_media_key, now, now)
-    .run();
-
-  const created = await env.DB.prepare(
-    `SELECT r.*,
-            m.name AS author_name,
-            m.organization AS author_org,
-            m.avatar_url AS author_avatar_url,
-            m.member_code AS author_member_code,
-            m.pillar_choice AS author_pillar
-     FROM activity_reflections r
-     JOIN members m ON m.id = r.member_id
-     WHERE r.id = ?`
-  )
-    .bind(id)
-    .first();
-
-  return jsonResponse(
-    {
-      ok: true,
-      reflection: serializePublicReflection(created, { currentMemberId: sessionMember.id }),
-      message: "Cảm ơn bạn đã sẻ chia! Lưu bút của bạn đã được gửi tới Ban Điều Phối duyệt hiển thị.",
-    },
-    201
-  );
 }

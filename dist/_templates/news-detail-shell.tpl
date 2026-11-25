@@ -47,7 +47,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
 
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1dcef9780d">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=ae1556b64f">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -115,7 +115,7 @@
 
       <div class="header-actions">
         <a class="lang-switch" href="/en/" aria-label="View English International Profile">
-          <span class="lang-switch-opt">EN · Profile</span>
+          <span class="lang-switch-opt">EN</span>
         </a>
         <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/" data-header-member-btn>
           <span data-header-member-label data-i18n="nav.join">Đăng nhập</span>
@@ -244,6 +244,16 @@
             <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="Điều gì đọng lại trong bạn sau buổi gặp này? Viết vài dòng chân thật nhé..."></textarea>
           </div>
 
+          <input id="pr-photo-file" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+
+          <div class="gb-photo-preview-wrap" id="pr-photo-preview-wrap" hidden>
+            <img id="pr-photo-preview" alt="Xem trước ảnh kỷ niệm">
+            <div class="gb-photo-preview-bar">
+              <span class="gb-photo-meta" id="pr-photo-meta">Ảnh sẽ được tự động nén gọn khi gửi</span>
+              <button type="button" class="gb-photo-clear" id="pr-photo-clear">Gỡ ảnh</button>
+            </div>
+          </div>
+
           <!-- Compact Guest Identity Row (hidden automatically when signed in) -->
           <div class="gb-guest-row" id="pr-guest-row">
             <div class="gb-guest-name-wrap">
@@ -259,7 +269,13 @@
           <div class="form-status" id="pr-status" role="status" aria-live="polite"></div>
 
           <div class="gb-composer-foot">
-            <span class="gb-composer-hint">Không cần tạo tài khoản · Sẽ hiển thị sau khi duyệt nhanh</span>
+            <div class="gb-composer-tools">
+              <button type="button" class="gb-attach-btn" id="pr-photo-trigger">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="m21 15-4.5-4.5a1.5 1.5 0 0 0-2.1 0L7 18"></path></svg>
+                <span>Thêm ảnh kỷ niệm</span>
+              </button>
+              <span class="gb-composer-hint">Không cần tài khoản · Hiển thị sau khi duyệt nhanh</span>
+            </div>
             <button class="btn btn--primary btn--sm" type="submit" id="pr-submit-btn">Gửi cảm nhận</button>
           </div>
         </form>
@@ -754,11 +770,11 @@
     <a class="mobile-dock-link" href="/tham-gia/" aria-label="Tham gia"><svg class="mobile-dock-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path pathLength="1" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg><span class="mobile-dock-label" aria-hidden="true">Tham gia</span></a>
   </nav>
 
-  <script src="/assets/vendor/gsap.min.js?v=1dcef9780d" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=1dcef9780d" defer></script>
-  <script src="/assets/js/motion.js?v=1dcef9780d" defer></script>
-  <script src="/assets/js/main.js?v=1dcef9780d" defer></script>
-  <script src="/assets/js/join-pass.js?v=1dcef9780d" defer></script>
-  <script src="/assets/js/member.js?v=1dcef9780d" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=ae1556b64f" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=ae1556b64f" defer></script>
+  <script src="/assets/js/motion.js?v=ae1556b64f" defer></script>
+  <script src="/assets/js/main.js?v=ae1556b64f" defer></script>
+  <script src="/assets/js/join-pass.js?v=ae1556b64f" defer></script>
+  <script src="/assets/js/member.js?v=ae1556b64f" defer></script>
 </body>
 </html>

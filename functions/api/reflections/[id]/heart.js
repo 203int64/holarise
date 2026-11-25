@@ -1,5 +1,6 @@
 import {
   checkRateLimit,
+  ensureReflectionsSchema,
   errorResponse,
   getClientIpHash,
   jsonResponse,
@@ -33,13 +34,46 @@ export async function onRequestPost(context) {
     );
   }
 
+  await ensureReflectionsSchema(env.DB);
+
   const target = await env.DB.prepare(
     "SELECT id, status FROM activity_reflections WHERE id = ?"
   )
     .bind(id)
     .first();
 
-  if (!target || target.status !== "approved") {
+  if (!target) {
+    const commTarget = await env.DB.prepare(
+      "SELECT id, status, heart_count FROM community_testimonials WHERE id = ?"
+    )
+      .bind(id)
+      .first()
+      .catch(() => null);
+    if (!commTarget || commTarget.status !== "approved") {
+      return errorResponse(404, "NOT_FOUND", "Không tìm thấy bài lưu bút công khai.");
+    }
+    await env.DB.prepare(
+      "UPDATE community_testimonials SET heart_count = COALESCE(heart_count, 0) + 1 WHERE id = ?"
+    )
+      .bind(id)
+      .run();
+    const refreshedComm = await env.DB.prepare(
+      "SELECT heart_count FROM community_testimonials WHERE id = ?"
+    )
+      .bind(id)
+      .first();
+    return jsonResponse(
+      {
+        ok: true,
+        id,
+        hearted: true,
+        heartCount: Math.max(0, Number(refreshedComm?.heart_count || 0)),
+      },
+      200
+    );
+  }
+
+  if (target.status !== "approved") {
     return errorResponse(404, "NOT_FOUND", "Không tìm thấy bài lưu bút công khai.");
   }
 
