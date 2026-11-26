@@ -14,7 +14,7 @@
 
 const SITE_ORIGIN = "https://holarise.org";
 const DEFAULT_FROM_EMAIL = "phungsu@holarise.org";
-const DEFAULT_FROM_NAME = "HolaRise";
+const DEFAULT_FROM_NAME = "HolaRise - Cộng đồng Thanh niên Hoà Lạc";
 const DEFAULT_LOGO_URL = `${SITE_ORIGIN}/assets/images/favicon-96.png`;
 const DEFAULT_ZALO_URL = "https://zalo.me/0777771948";
 const VALID_TEMPLATE_TYPES = new Set([
