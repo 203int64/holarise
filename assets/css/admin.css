@@ -440,7 +440,7 @@ code {
 
 .admin-shell {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 248px minmax(0, 1fr);
   min-height: 100dvh;
 }
 
@@ -453,6 +453,9 @@ code {
   background: var(--bg);
   border-right: 1px solid var(--line);
   padding: 20px 14px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
 }
 
 .sidebar-brand {
@@ -543,12 +546,26 @@ code {
 .user-meta {
   font-size: 0.76rem;
   color: var(--ink-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 .sidebar-footer-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
+}
+.sidebar-footer-actions [data-pwa-install] {
+  grid-column: 1 / -1;
+}
+.sidebar-footer-actions .btn {
+  width: 100%;
+  min-width: 0;
+  justify-content: center;
+  padding: 7px 8px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mobile-topbar,

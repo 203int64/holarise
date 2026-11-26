@@ -1674,7 +1674,7 @@
               (rf) => `<div class="member-list-item">
                 <div>
                   <a href="${refBase}${esc(rf.activitySlug)}/#activity-guestbook"><strong>${esc(rf.pullQuote || rf.content.slice(0, 72))}</strong></a>
-                  <span class="member-list-meta">${esc(rf.participantRole)} · ${esc(formatDateVi(rf.createdAt))} · ♥ ${Number(rf.heartCount ?? rf.heartsCount ?? 0)}</span>
+                  <span class="member-list-meta">${esc(rf.participantRole)} · ${esc(formatDateVi(rf.createdAt))} · ${Number(rf.heartCount ?? rf.heartsCount ?? 0)} lượt đồng cảm</span>
                 </div>
                 <span class="member-status-pill member-status-pill--${esc(rf.status)}">${
                   rf.status === "approved"

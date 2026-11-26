@@ -1,6 +1,6 @@
 # Active Plan — HolaRise Full-Stack Hardening, Speed, AI Photo Retouch, UX & SEO (Option A)
 
-**Trạng thái:** Đang triển khai (Đã duyệt Option A — 6 Atomic Phases)
+**Trạng thái:** Hoàn thành toàn bộ 6/6 Phases (`python3 build.py --check --strict-copy` + `node --test tests/*.test.mjs` PASS)
 
 ## Quy tắc khóa bắt buộc (`AGENTS.md`)
 - Đồng bộ 3 tầng: `Static Build (build.py)` ↔ `Edge SSR (functions/_lib/render.js)` ↔ `D1 Production` (cấm sửa lùi `migrations/0001..0021`; cấm sửa tay `dist/*`).
@@ -11,6 +11,6 @@
 - [x] **Phase 1 — Chốt nền & Xanh 100% test** (Archive plan cũ, xác nhận `38/38` tests pass + `build.py --check --strict-copy` PASS)
 - [x] **Phase 2 — Audit & Vá Bảo mật + Nghị định 13/2023** (Account Enumeration, CSRF/Origin, SSR XSS, quyền xem ảnh riêng tư & tâm sự ẩn danh + regression tests)
 - [x] **Phase 3 — Tốc độ Zalo In-App WebView (< 60s) & Cloudflare Turnstile** (LCP/INP/CLS, Web API gốc, cache `MEDIA_KV`, Turnstile Managed/Invisible cho form công khai)
-- [ ] **Phase 4 — AI Photo Retouch phong cách phim thật** (2–3 ảnh mẫu duyệt tone → retouch bộ ảnh thật `assets/images/` + xuất `.webp` đa kích thước + đồng bộ `data/image-widths.js`)
-- [ ] **Phase 5 — Nâng cấp UX Trang Sự kiện & `/admin/`** (Tinh gọn giữ chỗ 15s + Memory Stage + tốc độ duyệt đơn/ảnh trong `/admin/`, giữ nguyên neo `CMS:START/END`)
-- [ ] **Phase 6 — Technical SEO VN/EN & Copy 30/70** (JSON-LD, `hreflang` 2 chiều, internal links, sitemap, rà copy VN/EN vượt `--strict-copy`)
+- [x] **Phase 4 — AI Photo Retouch phong cách phim thật** (3 ảnh mẫu duyệt tone + xây studio 1-click `✦ AI 3 mẫu` ngay trong `/media/` lightbox qua Gemini Interactions API, bảo toàn bản gốc Drive)
+- [x] **Phase 5 — Nâng cấp UX Trang Sự kiện & `/admin/` / `/media/`** (1-click 3 mẫu AI + đối chiếu Before/After + phím tắt `←`/`→`/`A`/`R` duyệt nhanh ảnh)
+- [x] **Phase 6 — Technical SEO VN/EN & Copy 30/70** (Bổ sung `xmlns:xhtml` + `hreflang` 2 chiều vào static & SSR `sitemap.xml`, đưa sự kiện quá khứ Memory Stage vào sitemap, rà copy vượt `--strict-copy`)

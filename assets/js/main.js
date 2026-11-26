@@ -1557,58 +1557,117 @@
       return fallback;
     }
 
-    function compressReflectionImage(file, maxDim, quality) {
+    function canvasEncodeJpeg(source, w, h, maxDim, quality) {
       return new Promise(function (resolve, reject) {
-        var img = new Image();
-        var objUrl = URL.createObjectURL(file);
-        img.onload = function () {
-          URL.revokeObjectURL(objUrl);
-          var w = img.naturalWidth || img.width;
-          var h = img.naturalHeight || img.height;
-          if (!w || !h) {
-            reject(new Error("Không đọc được kích thước ảnh."));
-            return;
-          }
-          var scale = Math.min(1, maxDim / Math.max(w, h));
-          var tw = Math.max(1, Math.round(w * scale));
-          var th = Math.max(1, Math.round(h * scale));
-          var canvas = document.createElement("canvas");
-          canvas.width = tw;
-          canvas.height = th;
-          var ctx = canvas.getContext("2d");
-          if (!ctx) {
-            reject(new Error("Trình duyệt không hỗ trợ nén ảnh."));
-            return;
-          }
-          ctx.drawImage(img, 0, 0, tw, th);
-          canvas.toBlob(
-            function (blob) {
-              if (!blob) {
-                reject(new Error("Không thể nén ảnh đã chọn."));
-                return;
-              }
-              if (blob.size > 1.15 * 1024 * 1024 && quality > 0.65) {
-                canvas.toBlob(
-                  function (smaller) {
-                    resolve(smaller || blob);
-                  },
-                  "image/jpeg",
-                  0.68
-                );
-                return;
-              }
-              resolve(blob);
-            },
-            "image/jpeg",
-            quality
-          );
-        };
-        img.onerror = function () {
-          URL.revokeObjectURL(objUrl);
-          reject(new Error("Không đọc được tệp ảnh. Vui lòng chọn ảnh JPEG, PNG hoặc WebP."));
-        };
-        img.src = objUrl;
+        if (!w || !h) {
+          reject(new Error(t("Không đọc được kích thước ảnh.", "Could not read image dimensions.")));
+          return;
+        }
+        var scale = Math.min(1, maxDim / Math.max(w, h));
+        var tw = Math.max(1, Math.round(w * scale));
+        var th = Math.max(1, Math.round(h * scale));
+        var canvas = document.createElement("canvas");
+        canvas.width = tw;
+        canvas.height = th;
+        var ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error(t("Trình duyệt không hỗ trợ nén ảnh.", "Browser canvas is unavailable.")));
+          return;
+        }
+        ctx.drawImage(source, 0, 0, tw, th);
+        canvas.toBlob(
+          function (blob) {
+            if (!blob) {
+              reject(new Error(t("Không thể nén ảnh đã chọn.", "Could not compress selected image.")));
+              return;
+            }
+            if (blob.size > 1.15 * 1024 * 1024 && quality > 0.65) {
+              canvas.toBlob(
+                function (smaller) {
+                  resolve(smaller || blob);
+                },
+                "image/jpeg",
+                0.68
+              );
+              return;
+            }
+            resolve(blob);
+          },
+          "image/jpeg",
+          quality
+        );
       });
+    }
+
+    function decodeViaDataUrl(file, maxDim, quality) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onerror = function () {
+          reject(new Error("filereader_error"));
+        };
+        reader.onload = function () {
+          var img = new Image();
+          img.onload = function () {
+            canvasEncodeJpeg(img, img.naturalWidth || img.width, img.naturalHeight || img.height, maxDim, quality)
+              .then(resolve)
+              .catch(reject);
+          };
+          img.onerror = function () {
+            reject(new Error("img_decode_error"));
+          };
+          img.src = String(reader.result || "");
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function compressReflectionImage(file, maxDim, quality, fallbackImgEl) {
+      var tryBitmap =
+        typeof window.createImageBitmap === "function"
+          ? window
+              .createImageBitmap(file)
+              .then(function (bmp) {
+                return canvasEncodeJpeg(bmp, bmp.width, bmp.height, maxDim, quality).then(
+                  function (blob) {
+                    if (typeof bmp.close === "function") bmp.close();
+                    return blob;
+                  },
+                  function (err) {
+                    if (typeof bmp.close === "function") bmp.close();
+                    throw err;
+                  }
+                );
+              })
+          : Promise.reject(new Error("no_bitmap"));
+
+      return tryBitmap
+        .catch(function () {
+          return decodeViaDataUrl(file, maxDim, quality);
+        })
+        .catch(function () {
+          if (fallbackImgEl && fallbackImgEl.complete && fallbackImgEl.naturalWidth > 0) {
+            return canvasEncodeJpeg(
+              fallbackImgEl,
+              fallbackImgEl.naturalWidth,
+              fallbackImgEl.naturalHeight,
+              maxDim,
+              quality
+            );
+          }
+          throw new Error("fallback_img_unavailable");
+        })
+        .catch(function () {
+          var mime = String(file && file.type || "").toLowerCase();
+          if (file && file.size > 0 && file.size <= 1.2 * 1024 * 1024 && /^image\/(jpeg|jpg|png|webp)$/i.test(mime)) {
+            return file;
+          }
+          throw new Error(
+            t(
+              "Không đọc được tệp ảnh. Vui lòng chọn ảnh JPEG, PNG hoặc WebP.",
+              "Could not read image file. Please select JPEG, PNG, or WebP."
+            )
+          );
+        });
     }
 
     function isReflectionVideoFile(file) {
@@ -1621,8 +1680,8 @@
     function isReflectionImageFile(file) {
       if (!file) return false;
       var mime = String(file.type || "").toLowerCase();
-      if (/^image\/(jpeg|jpg|png|webp)$/i.test(mime)) return true;
-      return /\.(jpe?g|png|webp)$/i.test(String(file.name || ""));
+      if (/^image\//i.test(mime)) return true;
+      return /\.(jpe?g|png|webp|heic|heif|avif)$/i.test(String(file.name || ""));
     }
 
     function renderSelectedPhotoPreviews() {
@@ -1728,12 +1787,20 @@
           errors.push((file.name || t("Ảnh", "Image")) + t(": ảnh vượt quá 15 MB.", ": image exceeds the 15 MB limit."));
           return;
         }
-        selectedPhotos.push({
+        var itemObj = {
           file: file,
           mediaType: isVid ? "video" : "image",
           objectUrl: URL.createObjectURL(file),
           name: file.name || (isVid ? "video-" : "pasted-") + (selectedPhotos.length + idx + 1) + (isVid ? ".mp4" : ".png"),
-        });
+          preparedPromise: null,
+        };
+        // Eagerly compress images while Android content:// picker permission is fresh
+        if (!isVid) {
+          itemObj.preparedPromise = compressReflectionImage(file, 1280, 0.82, null).catch(function () {
+            return null;
+          });
+        }
+        selectedPhotos.push(itemObj);
         addedCount += 1;
       });
 
@@ -1762,8 +1829,10 @@
       });
       prPhotoInput.addEventListener("change", function () {
         var files = Array.prototype.slice.call(prPhotoInput.files || []);
-        prPhotoInput.value = "";
         addReflectionFiles(files, false);
+        setTimeout(function () {
+          prPhotoInput.value = "";
+        }, 0);
       });
     }
 
@@ -1865,9 +1934,21 @@
     };
 
     var REACTION_META = [
-      { key: "heart", icon: "♥", label: t("Ấm lòng", "Warm") },
-      { key: "warm", icon: "✦", label: t("Đồng cảm", "Resonate") },
-      { key: "inspire", icon: "☼", label: t("Tiếp sức", "Inspire") },
+      {
+        key: "heart",
+        icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+        label: t("Ấm lòng", "Warm"),
+      },
+      {
+        key: "warm",
+        icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>',
+        label: t("Đồng cảm", "Resonate"),
+      },
+      {
+        key: "inspire",
+        icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+        label: t("Tiếp sức", "Inspire"),
+      },
     ];
 
     function renderReflectionCardHtml(it, isPendingMine) {
@@ -2078,6 +2159,7 @@
         var filesToUpload = selectedPhotos.slice();
         var uploadedUrls = [];
 
+        var previewImgs = prPhotoGrid ? Array.prototype.slice.call(prPhotoGrid.querySelectorAll(".gb-preview-tile")) : [];
         var uploadChain = filesToUpload.reduce(function (promise, item, idx) {
           return promise.then(function () {
             var isVid = item.mediaType === "video" || isReflectionVideoFile(item.file);
@@ -2087,11 +2169,17 @@
                 "Uploading media " + (idx + 1) + "/" + filesToUpload.length + "..."
               );
             }
+            var previewImgEl = previewImgs[idx] ? previewImgs[idx].querySelector("img") : null;
             var prepareBlob = isVid
               ? Promise.resolve({ blob: item.file, filename: item.name || "reflection-" + (idx + 1) + ".mp4" })
-              : compressReflectionImage(item.file, 1280, 0.82).then(function (blob) {
-                  return { blob: blob, filename: "reflection-" + (idx + 1) + ".jpg" };
-                });
+              : Promise.resolve(item.preparedPromise)
+                  .then(function (cachedBlob) {
+                    if (cachedBlob) return cachedBlob;
+                    return compressReflectionImage(item.file, 1280, 0.82, previewImgEl);
+                  })
+                  .then(function (blob) {
+                    return { blob: blob, filename: "reflection-" + (idx + 1) + ".jpg" };
+                  });
             return prepareBlob.then(function (prepared) {
               var upFd = new FormData();
               upFd.append("file", prepared.blob, prepared.filename);

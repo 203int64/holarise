@@ -14,6 +14,7 @@ import { onRequestPost as memberRegister } from "../functions/api/member/auth/re
 import { onRequestGet as memberStatus } from "../functions/api/member/auth/status.js";
 import { onRequestPatch as memberProfilePatch } from "../functions/api/member/profile.js";
 import { onRequestGet as memberCardGet } from "../functions/tv/[code].js";
+import { onRequestGet as sitemapGet } from "../functions/sitemap.xml.js";
 
 const ROOT = path.resolve(new URL("..", import.meta.url).pathname);
 
@@ -27,6 +28,7 @@ function createMockD1() {
     "migrations/0007_passkeys.sql",
     "migrations/0008_cms_members_and_reflections.sql",
     "migrations/0010_admin_passkeys_and_profile.sql",
+    "migrations/0011_event_seats_and_slugs.sql",
     "migrations/0016_media_approval_workflow.sql",
     "migrations/0017_member_photo_contributions.sql",
     "migrations/0020_deep_member_media_event_control.sql",
@@ -325,4 +327,21 @@ test("Security Hardening: password change revokes other member sessions & /tv/[c
   });
   assert.match(mwRes.headers.get("Permissions-Policy") || "", /geolocation=\(\)/);
   assert.match(mwRes.headers.get("Strict-Transport-Security") || "", /max-age=31536000/);
+
+  // Sitemap SSR includes xmlns:xhtml bidirectional hreflang AND published past Memory Stage events
+  DB.rawDb
+    .prepare(
+      `INSERT INTO events (id, kind, type, title, date, date_display, status, sort_order, created_at, updated_at)
+       VALUES ('dem-nhac-ky-niem', 'past', 'HolaHeart', 'Đêm Nhạc Kỷ Niệm', '2025-11-10', '10/11/2025', 'published', 1, ?, ?)`
+    )
+    .run(now, now);
+  const smRes = await sitemapGet({
+    request: new Request("https://holarise.org/sitemap.xml"),
+    env,
+  });
+  assert.equal(smRes.status, 200);
+  const smXml = await smRes.text();
+  assert.match(smXml, /xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml"/);
+  assert.match(smXml, /hreflang="vi" href="https:\/\/holarise\.org\/su-kien\/dem-nhac-ky-niem\/"/);
+  assert.match(smXml, /hreflang="en" href="https:\/\/holarise\.org\/en\/events\/dem-nhac-ky-niem\/"/);
 });

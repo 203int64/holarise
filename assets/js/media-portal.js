@@ -613,7 +613,7 @@
           markers.push('<span class="tile-pill tile-pill--contrib" title="Ảnh thành viên đóng góp">Đóng góp</span>');
         }
         if (p.isFeaturedHome && status === "approved") {
-          markers.push('<span class="tile-pill tile-pill--home" title="Ghim Trang chủ">★</span>');
+          markers.push('<span class="tile-pill tile-pill--home" title="Ghim Trang chủ"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>');
         }
         if (isCover) {
           markers.push('<span class="tile-pill tile-pill--cover">Bìa</span>');
@@ -871,11 +871,206 @@
     featBtn.hidden = !canApprove || !isApproved;
     featBtn.disabled = false;
     featBtn.classList.toggle("is-active", Boolean(photo.isFeaturedHome));
-    featBtn.textContent = photo.isFeaturedHome ? "★ Đang ghim Trang chủ" : "☆ Ghim Trang chủ";
+    featBtn.innerHTML = photo.isFeaturedHome
+      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-2px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Đang ghim Trang chủ'
+      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Ghim Trang chủ';
 
     const coverBtn = $("#lb-btn-cover");
     coverBtn.hidden = !isApproved || Boolean(isCover);
     coverBtn.disabled = false;
+
+    const aiBtn = $("#lb-btn-ai-retouch");
+    if (aiBtn) {
+      const isVideo = String(photo.mediaType || "image").toLowerCase() === "video";
+      const isViewerOnly = state.user?.role === "media_viewer";
+      aiBtn.hidden = isVideo || isViewerOnly;
+      aiBtn.disabled = false;
+    }
+  }
+
+  /* =========================================================================
+     1-Click AI Photo Retouch Studio (3 Authentic Film Variants -> 1-Click Replace)
+     ========================================================================= */
+  let aiRetouchState = {
+    photoId: "",
+    originalUrl: "",
+    busy: false,
+    variants: [],
+  };
+
+  async function compressImageUrlToDataUrl(url, maxDim = 1280, quality = 0.88) {
+    const res = await fetch(url, { credentials: "same-origin" });
+    if (!res.ok) throw new Error("Không tải được ảnh gốc từ máy chủ.");
+    const blob = await res.blob();
+    const bitmapUrl = URL.createObjectURL(blob);
+    try {
+      const img = await new Promise((resolve, reject) => {
+        const el = new Image();
+        el.onload = () => resolve(el);
+        el.onerror = () => reject(new Error("Không thể đọc định dạng ảnh này."));
+        el.src = bitmapUrl;
+      });
+      const scale = Math.min(1, maxDim / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
+      const w = Math.max(1, Math.round((img.naturalWidth || 1) * scale));
+      const h = Math.max(1, Math.round((img.naturalHeight || 1) * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+      return canvas.toDataURL("image/jpeg", quality);
+    } finally {
+      URL.revokeObjectURL(bitmapUrl);
+    }
+  }
+
+  function renderAiRetouchSkeleton() {
+    const grid = $("#ai-retouch-grid");
+    if (!grid) return;
+    const labels = [
+      ["Mẫu 1 · Phim ấm Hòa Lạc", "Kodak Portra 400 · Đang chỉnh ánh sáng & màu gỗ ấm..."],
+      ["Mẫu 2 · Sáng trong tự nhiên", "Leica Natural · Đang cân bằng trắng & khử chói..."],
+      ["Mẫu 3 · Điện ảnh trầm sâu", "Classic Chrome · Đang tạo chiều sâu vùng tối..."],
+    ];
+    grid.innerHTML = labels
+      .map(
+        ([title, sub]) => `
+        <article class="ai-variant-card ai-variant-card--loading">
+          <div class="ai-variant-frame"><div class="ai-variant-shimmer"></div></div>
+          <div class="ai-variant-info">
+            <strong>${esc(title)}</strong>
+            <span>${esc(sub)}</span>
+          </div>
+        </article>`
+      )
+      .join("");
+  }
+
+  function renderAiRetouchVariants() {
+    const grid = $("#ai-retouch-grid");
+    if (!grid) return;
+    grid.innerHTML = aiRetouchState.variants
+      .map(
+        (v, idx) => `
+        <article class="ai-variant-card" data-ai-variant-idx="${idx}">
+          <div class="ai-variant-frame">
+            <img src="${esc(v.dataUrl)}" alt="${esc(v.label)}" data-ai-preview-img="${idx}">
+            <span class="ai-variant-badge" data-ai-badge="${idx}">Mẫu ${idx + 1}</span>
+          </div>
+          <div class="ai-variant-info">
+            <strong>${esc(v.label)}</strong>
+            <span>${esc(v.subtitle || "")}</span>
+          </div>
+          <div class="ai-variant-actions">
+            <button class="btn btn--outline btn--sm" type="button" data-ai-compare="${idx}">So ảnh gốc</button>
+            <button class="btn btn--primary btn--sm" type="button" data-ai-apply="${idx}">Chọn thay thế</button>
+          </div>
+        </article>`
+      )
+      .join("");
+  }
+
+  async function runAiRetouchGenerate(photo) {
+    if (!photo || aiRetouchState.busy) return;
+    const dlg = $("#ai-retouch-dialog");
+    const alertEl = $("#ai-retouch-alert");
+    const statusEl = $("#ai-retouch-status");
+    const regenBtn = $("#ai-retouch-regen");
+    const origImg = $("#ai-retouch-orig-img");
+
+    aiRetouchState = {
+      photoId: photo.id,
+      originalUrl: photo.displayUrl || photo.url,
+      busy: true,
+      variants: [],
+    };
+    if (origImg) origImg.src = aiRetouchState.originalUrl;
+    if (alertEl) showAlert(alertEl, "");
+    if (statusEl) statusEl.textContent = "Đang tạo song song 3 bản chỉnh màu phim thật (khoảng 6–12 giây)...";
+    if (regenBtn) regenBtn.disabled = true;
+    renderAiRetouchSkeleton();
+    if (dlg && !dlg.open) dlg.showModal();
+
+    try {
+      const sourceDataUrl = await compressImageUrlToDataUrl(aiRetouchState.originalUrl, 1280, 0.88);
+      const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}/ai-retouch`, {
+        method: "POST",
+        json: {
+          action: "generate",
+          imageDataUrl: sourceDataUrl,
+        },
+      });
+      aiRetouchState.variants = Array.isArray(res.variants) ? res.variants : [];
+      if (statusEl) {
+        statusEl.textContent = `Đã tạo xong ${aiRetouchState.variants.length} mẫu chỉnh màu thật. Bấm "So ảnh gốc" để đối chiếu hoặc "Chọn thay thế".`;
+      }
+      renderAiRetouchVariants();
+    } catch (err) {
+      if (statusEl) statusEl.textContent = "Chưa tạo được mẫu AI.";
+      if (alertEl) showAlert(alertEl, err.message || "Không thể kết nối Gemini AI Retouch.");
+      const grid = $("#ai-retouch-grid");
+      if (grid) grid.innerHTML = "";
+    } finally {
+      aiRetouchState.busy = false;
+      if (regenBtn) regenBtn.disabled = false;
+    }
+  }
+
+  async function applyAiRetouchVariant(idx) {
+    const variant = aiRetouchState.variants[idx];
+    if (!variant || aiRetouchState.busy) return;
+    const photoId = aiRetouchState.photoId;
+    const btn = document.querySelector(`[data-ai-apply="${idx}"]`);
+    const statusEl = $("#ai-retouch-status");
+    const alertEl = $("#ai-retouch-alert");
+
+    aiRetouchState.busy = true;
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Đang lưu thay thế...";
+    }
+    if (alertEl) showAlert(alertEl, "");
+
+    try {
+      // Re-compress chosen variant cleanly to <= 1280px JPEG so web display stays ultra-fast
+      const optimizedDataUrl = await compressImageUrlToDataUrl(variant.dataUrl, 1280, 0.88);
+      const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photoId)}/ai-retouch`, {
+        method: "POST",
+        json: {
+          action: "apply",
+          presetId: variant.id,
+          imageDataUrl: optimizedDataUrl,
+        },
+      });
+      const pIdx = state.photos.findIndex((p) => p.id === photoId);
+      if (pIdx !== -1 && res.item) state.photos[pIdx] = res.item;
+      if (
+        state.activeAlbum &&
+        res.item?.webUrl &&
+        (state.activeAlbum.coverUrl === aiRetouchState.originalUrl)
+      ) {
+        state.activeAlbum.coverUrl = res.item.webUrl;
+      }
+      renderPhotosGrid();
+      if ($("#lightbox-dialog")?.open) renderLightbox();
+      await loadAlbums(true);
+      await closeDialogSmooth($("#ai-retouch-dialog"));
+      toast(
+        res.preservedDriveOriginal
+          ? `Đã thay ảnh bằng "${variant.label}" (bản gốc Google Drive vẫn giữ nguyên).`
+          : `Đã thay ảnh bằng "${variant.label}".`,
+        "success"
+      );
+    } catch (err) {
+      if (alertEl) showAlert(alertEl, err.message || "Không thể lưu ảnh thay thế.");
+      if (statusEl) statusEl.textContent = "Lưu ảnh thất bại, vui lòng thử lại.";
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Chọn thay thế";
+      }
+    } finally {
+      aiRetouchState.busy = false;
+    }
   }
 
   function stepLightbox(delta) {
@@ -967,10 +1162,11 @@
 
     try {
       const storageInfo = await resolveMediaStorage();
+      const isVid = isVideoFile(item.file);
       let uploadPayload = item.file;
-      let uploadFilename = item.name || "photo.jpg";
+      let uploadFilename = item.name || (isVid ? "video.mp4" : "photo.jpg");
 
-      if (!storageInfo.driveConfigured) {
+      if (!isVid && !storageInfo.driveConfigured) {
         item.status = "compressing";
         item.error = "";
         renderUploadQueue();
@@ -1003,6 +1199,7 @@
         json: {
           url: uploaded.url,
           mediaKey: uploaded.id,
+          mediaType: uploaded.mediaType || (isVid ? "video" : "image"),
           caption: "",
           alt: state.activeAlbum.title,
           photographer,
@@ -1125,13 +1322,21 @@
         closeAllMenus();
       }
       const lb = $("#lightbox-dialog");
-      if (lb && lb.open && !$("#photo-dialog")?.open) {
+      if (lb && lb.open && !$("#photo-dialog")?.open && !$("#ai-retouch-dialog")?.open) {
+        const tag = (document.activeElement?.tagName || "").toLowerCase();
+        const isTyping = tag === "input" || tag === "textarea" || tag === "select";
         if (e.key === "ArrowLeft") {
           e.preventDefault();
           stepLightbox(-1);
         } else if (e.key === "ArrowRight") {
           e.preventDefault();
           stepLightbox(1);
+        } else if (!isTyping && (e.key === "a" || e.key === "A") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+          const approveBtn = $("#lb-btn-approve");
+          if (approveBtn && !approveBtn.hidden && !approveBtn.disabled) {
+            e.preventDefault();
+            approveBtn.click();
+          }
         }
       }
     });
@@ -1142,6 +1347,15 @@
       lbDlg.addEventListener("cancel", (e) => {
         e.preventDefault();
         closeDialogSmooth(lbDlg);
+      });
+      lbDlg.addEventListener("close", () => {
+        const vidEl = $("#lb-video");
+        if (vidEl) {
+          try { vidEl.pause(); } catch {}
+          vidEl.removeAttribute("src");
+          try { vidEl.load(); } catch {}
+          vidEl.hidden = true;
+        }
       });
     }
 
@@ -1700,6 +1914,65 @@
     $("#lb-btn-edit")?.addEventListener("click", () => {
       const photo = state.photos.find((p) => p.id === state.lightboxPhotoId);
       if (photo) openPhotoDialog(photo);
+    });
+
+    $("#lb-btn-ai-retouch")?.addEventListener("click", () => {
+      const photo = state.photos.find((p) => p.id === state.lightboxPhotoId);
+      if (photo) runAiRetouchGenerate(photo);
+    });
+
+    $("#ai-retouch-regen")?.addEventListener("click", () => {
+      const photo = state.photos.find((p) => p.id === aiRetouchState.photoId);
+      if (photo) runAiRetouchGenerate(photo);
+    });
+
+    $("#ai-retouch-grid")?.addEventListener("click", (e) => {
+      const compareBtn = e.target.closest("[data-ai-compare]");
+      if (compareBtn) {
+        const idx = Number(compareBtn.getAttribute("data-ai-compare"));
+        const variant = aiRetouchState.variants[idx];
+        const img = document.querySelector(`[data-ai-preview-img="${idx}"]`);
+        const badge = document.querySelector(`[data-ai-badge="${idx}"]`);
+        if (!variant || !img) return;
+        const showingOrig = compareBtn.getAttribute("data-showing-orig") === "1";
+        if (showingOrig) {
+          img.src = variant.dataUrl;
+          compareBtn.setAttribute("data-showing-orig", "0");
+          compareBtn.textContent = "So ảnh gốc";
+          if (badge) badge.textContent = `Mẫu ${idx + 1}`;
+        } else {
+          img.src = aiRetouchState.originalUrl;
+          compareBtn.setAttribute("data-showing-orig", "1");
+          compareBtn.textContent = "Xem lại AI";
+          if (badge) badge.textContent = "Ảnh gốc";
+        }
+        return;
+      }
+      const applyBtn = e.target.closest("[data-ai-apply]");
+      if (applyBtn) {
+        const idx = Number(applyBtn.getAttribute("data-ai-apply"));
+        applyAiRetouchVariant(idx);
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (
+        $("#lightbox-dialog")?.open &&
+        !$("#ai-retouch-dialog")?.open &&
+        !$("#photo-dialog")?.open &&
+        (e.key === "r" || e.key === "R") &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey
+      ) {
+        const tag = (document.activeElement?.tagName || "").toLowerCase();
+        if (tag === "input" || tag === "textarea" || tag === "select") return;
+        const btn = $("#lb-btn-ai-retouch");
+        if (btn && !btn.hidden && !btn.disabled) {
+          e.preventDefault();
+          btn.click();
+        }
+      }
     });
 
     $("#lb-btn-delete")?.addEventListener("click", async () => {
