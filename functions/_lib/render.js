@@ -47,7 +47,7 @@ export function buildEventIsoTimes(dateStr, timeStr) {
   if (!m) return { startIso: date, endIso: "", icsStart: "", icsEnd: "" };
   const hh = Math.min(23, Math.max(0, Number(m[1])));
   const mm = Math.min(59, Math.max(0, Number(m[2])));
-  const endMatch = String(timeStr || "").match(/[–-]\s*(\d{1,2})[:h](\d{2})/);
+  const endMatch = String(timeStr || "").match(/[–—-]\s*(\d{1,2})[:h](\d{2})/);
   const endHh = endMatch ? Math.min(23, Math.max(hh, Number(endMatch[1]))) : Math.min(23, hh + 2);
   const endMm = endMatch ? Math.min(59, Math.max(0, Number(endMatch[2]))) : mm;
   const pad = (n) => String(n).padStart(2, "0");
@@ -198,16 +198,32 @@ export function serializeEventRow(row) {
   };
 }
 
-export function splitEventsByDate(rows, now = new Date()) {
+export function isEventFinished(ev, now = new Date()) {
+  if (!ev) return false;
+  if (ev.kind === "past") return true;
+  const dateStr = String(ev.date || "").trim();
+  if (!ISO_DATE_RE.test(dateStr)) return false;
   const todayVn = getTodayVnIso(now);
+  if (dateStr < todayVn) return true;
+  if (dateStr > todayVn) return false;
+  const times = buildEventIsoTimes(dateStr, ev.time);
+  if (times.endIso) {
+    const endMs = Date.parse(times.endIso);
+    if (Number.isFinite(endMs)) {
+      return now.getTime() >= endMs;
+    }
+  }
+  return false;
+}
+
+export function splitEventsByDate(rows, now = new Date()) {
   const upcoming = [];
   const past = [];
 
   for (const row of rows || []) {
     const ev = row && row.pillar ? row : serializeEventRow(row);
     if (!ev) continue;
-    const isPastByDate = ISO_DATE_RE.test(String(ev.date || "")) && ev.date < todayVn;
-    if (ev.kind === "past" || isPastByDate) {
+    if (isEventFinished(ev, now)) {
       past.push(ev);
     } else {
       upcoming.push(ev);

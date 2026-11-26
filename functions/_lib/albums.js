@@ -1,4 +1,4 @@
-import { getTodayVnIso } from "./render.js";
+import { getTodayVnIso, isEventFinished } from "./render.js";
 import { slugifyVi } from "./validation.js";
 
 /**
@@ -6,14 +6,14 @@ import { slugifyVi } from "./validation.js";
  * that does not yet have an album, so both Ban Hình Ảnh (/media/) and Members (/hanh-trinh/)
  * can immediately contribute photos right after an event wraps up.
  */
-export async function autoProvisionFinishedEventAlbums(env) {
+export async function autoProvisionFinishedEventAlbums(env, nowDate = new Date()) {
   if (!env?.DB) return;
-  const todayVn = getTodayVnIso(new Date());
-  const finishedEventsRes = await env.DB.prepare(
-    `SELECT id, title, date, date_display, location, filters_json, image, summary
+  const todayVn = getTodayVnIso(nowDate);
+  const candidateEventsRes = await env.DB.prepare(
+    `SELECT id, kind, title, date, time, date_display, location, filters_json, image, summary
      FROM events
      WHERE status = 'published'
-       AND (kind = 'past' OR (date != '' AND date < ?))
+       AND (kind = 'past' OR (date != '' AND date <= ?))
      ORDER BY date DESC
      LIMIT 60`
   )
@@ -21,7 +21,7 @@ export async function autoProvisionFinishedEventAlbums(env) {
     .all()
     .catch(() => null);
 
-  const finishedEvents = finishedEventsRes?.results || [];
+  const finishedEvents = (candidateEventsRes?.results || []).filter((ev) => isEventFinished(ev, nowDate));
   if (finishedEvents.length === 0) return;
 
   const existingAlbumsRes = await env.DB.prepare(

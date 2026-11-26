@@ -7,8 +7,8 @@ import {
   buildEventsJsonLd,
   escHtml,
   fullImageUrl,
-  getTodayVnIso,
   imageAttrs,
+  isEventFinished,
   renderSeatBarHtml,
   replaceMarker,
   resolveEventSlug,
@@ -17,14 +17,6 @@ import {
 import { ensureReflectionsSchema } from "../_lib/security.js";
 
 const DEFAULT_ZALO_GROUP = "https://zalo.me/g/7fock88aizzrdkmr9ggf";
-
-function isEventFinished(ev) {
-  if (!ev) return false;
-  if (ev.kind === "past") return true;
-  const dateStr = String(ev.date || "").trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
-  return dateStr < getTodayVnIso(new Date());
-}
 
 function renderMemoryGalleryHtml(photos, ev, albumId) {
   const safeEventId = escHtml(ev.id || "");

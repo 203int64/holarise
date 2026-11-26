@@ -5,6 +5,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
 import { resetDriveCachesForTest } from "../functions/_lib/drive.js";
+import { isEventFinished, splitEventsByDate } from "../functions/_lib/render.js";
 import { hashPassword, createSession } from "../functions/_lib/security.js";
 import { onRequestGet as eventPageGet } from "../functions/su-kien/[slug].js";
 import { onRequestPost as authBootstrap } from "../functions/api/auth/bootstrap.js";
@@ -534,4 +535,29 @@ test("Standardized Drive contribution folder/filename + /media/ team visibility 
     globalThis.fetch = origFetch;
     resetDriveCachesForTest();
   }
+});
+
+test("Same-day event cutoff: switches to finished/past right after end time in Asia/Ho_Chi_Minh (+07:00)", () => {
+  const ev = {
+    id: "holaconnect-leo-nui-lam-nghiep-2026-11-26",
+    kind: "upcoming",
+    date: "2026-11-26",
+    time: "14:30 – 17:30",
+    title: "HolaConnect · Leo Núi Luốt",
+  };
+  const beforeEnd = new Date("2026-11-26T16:45:00+07:00");
+  const atEnd = new Date("2026-11-26T17:30:00+07:00");
+  const afterEnd = new Date("2026-11-26T19:45:00+07:00");
+
+  assert.equal(isEventFinished(ev, beforeEnd), false);
+  assert.equal(isEventFinished(ev, atEnd), true);
+  assert.equal(isEventFinished(ev, afterEnd), true);
+
+  const splitBefore = splitEventsByDate([ev], beforeEnd);
+  assert.equal(splitBefore.upcoming.length, 1);
+  assert.equal(splitBefore.past.length, 0);
+
+  const splitAfter = splitEventsByDate([ev], afterEnd);
+  assert.equal(splitAfter.upcoming.length, 0);
+  assert.equal(splitAfter.past.length, 1);
 });
