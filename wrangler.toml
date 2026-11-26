@@ -14,3 +14,6 @@ migrations_dir = "migrations"
 [[kv_namespaces]]
 binding = "MEDIA_KV"
 id = "84511492700740039e98811e621a40bd"
+
+[[send_email]]
+name = "EMAIL"

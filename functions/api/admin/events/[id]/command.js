@@ -1,3 +1,4 @@
+import { getEmailProviderStatus, listEventEmailLogs } from "../../../../_lib/email.js";
 import { ensureDeepControlSchema, VALID_ALBUM_VISIBILITIES, VALID_STAGE_OVERRIDES } from "../../../../_lib/media-access.js";
 import { ensureMediaApprovalSchema } from "../../../../_lib/media-approval-schema.js";
 import { serializeEventRow } from "../../../../_lib/render.js";
@@ -9,7 +10,13 @@ import {
   readJsonBody,
   requireAdmin,
 } from "../../../../_lib/security.js";
-import { cleanStr, isValidEmail, VALID_POST_STATUSES, VALID_REG_STATUSES } from "../../../../_lib/validation.js";
+import {
+  cleanStr,
+  isSafeReelAudioUrl,
+  isValidEmail,
+  VALID_POST_STATUSES,
+  VALID_REG_STATUSES,
+} from "../../../../_lib/validation.js";
 import { serializeAdminEventFeedback } from "../../event-feedback/index.js";
 
 async function findLinkedAlbum(db, ev) {
@@ -66,7 +73,7 @@ export async function onRequestGet(context) {
   }
 
   const ev = serializeEventRow(row);
-  const [regsRes, albumRow, feedbacksRes, refCountRow, membersRes] = await Promise.all([
+  const [regsRes, albumRow, feedbacksRes, refCountRow, membersRes, emailLogs] = await Promise.all([
     db
       .prepare(
         `SELECT id, member_id, source, event_id, activity_title, full_name, phone, email, role, organization,
@@ -99,6 +106,7 @@ export async function onRequestGet(context) {
       .prepare("SELECT id, member_code, name, phone_display, email, organization FROM members WHERE is_active = 1 ORDER BY created_at DESC LIMIT 120")
       .all()
       .catch(() => ({ results: [] })),
+    listEventEmailLogs(db, ev.id, 40),
   ]);
 
   const registrations = regsRes.results || [];
@@ -151,6 +159,8 @@ export async function onRequestGet(context) {
       : null,
     feedbacks: (feedbacksRes.results || []).map(serializeAdminEventFeedback),
     reflectionsCount: Number(refCountRow?.cnt || 0),
+    emailProvider: getEmailProviderStatus(context.env),
+    emailLogs,
     members: (membersRes.results || []).map((m) => ({
       id: m.id,
       memberCode: m.member_code,
@@ -204,15 +214,45 @@ export async function onRequestPatch(context) {
       ? cleanStr(d.status, 20)
       : existing.status;
 
+  const nextReelAudioUrl =
+    d.reelAudioUrl !== undefined
+      ? cleanStr(d.reelAudioUrl, 500)
+      : String(existing.reel_audio_url || "");
+  if (!isSafeReelAudioUrl(nextReelAudioUrl)) {
+    return errorResponse(
+      400,
+      "INVALID_REEL_AUDIO",
+      "Đường dẫn nhạc nền không hợp lệ. Chỉ chấp nhận tệp đã tải lên, link https:// hoặc preset có sẵn."
+    );
+  }
+  const normalizedReelAudioUrl = nextReelAudioUrl.toLowerCase().startsWith("preset:")
+    ? nextReelAudioUrl.toLowerCase()
+    : nextReelAudioUrl;
+  const nextReelAudioTitle =
+    d.reelAudioTitle !== undefined
+      ? cleanStr(d.reelAudioTitle, 120)
+      : String(existing.reel_audio_title || "");
+
   const now = new Date().toISOString();
   await db
     .prepare(
       `UPDATE events
        SET rsvp_closed = ?, stage_override = ?, seat_capacity = ?, external_booked = ?,
-           show_seat_bar = ?, status = ?, updated_at = ?
+           show_seat_bar = ?, status = ?, reel_audio_url = ?, reel_audio_title = ?, updated_at = ?
        WHERE id = ?`
     )
-    .bind(nextRsvpClosed, nextStageOverride, nextSeatCap, nextExtBooked, nextShowSeatBar, nextStatus, now, id)
+    .bind(
+      nextRsvpClosed,
+      nextStageOverride,
+      nextSeatCap,
+      nextExtBooked,
+      nextShowSeatBar,
+      nextStatus,
+      normalizedReelAudioUrl,
+      nextReelAudioTitle,
+      now,
+      id
+    )
     .run();
 
   if (d.albumId && (d.albumVisibility !== undefined || d.albumStatus !== undefined)) {

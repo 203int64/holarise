@@ -2130,6 +2130,17 @@
     }
 
     if (tab === "lifecycle") {
+      const savedAudioUrl = String(ev.reelAudioUrl || "").trim();
+      const savedAudioTitle = String(ev.reelAudioTitle || "").trim();
+      const isPresetMode =
+        savedAudioUrl === "" ||
+        savedAudioUrl === "preset:holaheart" ||
+        savedAudioUrl === "preset:holagreen" ||
+        savedAudioUrl === "preset:holaconnect" ||
+        savedAudioUrl === "preset:silent";
+      const audioMode = isPresetMode ? savedAudioUrl : "custom";
+      const customAudioUrl = isPresetMode ? "" : savedAudioUrl;
+
       box.innerHTML = `<form id="evcmd-lifecycle-form" class="deep-section">
         <div class="deep-card">
           <h3>Trạng thái Sân khấu &amp; Khóa giữ chỗ</h3>
@@ -2154,6 +2165,44 @@
             <input type="checkbox" id="evcmd-rsvp-closed" ${ev.rsvpClosed ? "checked" : ""}>
             <span><strong>Khóa nhận đơn giữ chỗ mới:</strong> Chặn biểu mẫu đăng ký (trả mã 409) ngay cả khi sự kiện chưa hết chỗ hoặc chưa qua ngày.</span>
           </label>
+        </div>
+
+        <div class="deep-card">
+          <h3>Nhạc nền Thước phim Kỷ niệm (Apple Photos Reel)</h3>
+          <p class="page-sub" style="margin:0 0 12px;">Tùy biến bản nhạc riêng cho sự kiện này khi khách bấm "Phát thước phim kỷ niệm".</p>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="evcmd-reel-audio-mode">Chế độ nhạc nền</label>
+              <select id="evcmd-reel-audio-mode">
+                <option value="" ${audioMode === "" ? "selected" : ""}>Tự động theo trụ cột (Piano trầm ấm)</option>
+                <option value="preset:holaheart" ${audioMode === "preset:holaheart" ? "selected" : ""}>Preset · HolaHeart (Fmaj9 ấm áp)</option>
+                <option value="preset:holagreen" ${audioMode === "preset:holagreen" ? "selected" : ""}>Preset · HolaGreen (Gmaj9 rừng thông)</option>
+                <option value="preset:holaconnect" ${audioMode === "preset:holaconnect" ? "selected" : ""}>Preset · HolaConnect (Cmaj9 tươi sáng)</option>
+                <option value="preset:silent" ${audioMode === "preset:silent" ? "selected" : ""}>Tắt nhạc mặc định (Khách tự bật nếu muốn)</option>
+                <option value="custom" ${audioMode === "custom" ? "selected" : ""}>Nhạc riêng (Tải file MP3/M4A/OGG/WAV hoặc dán link)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="evcmd-reel-audio-title">Tên bản nhạc hiển thị trên thước phim (tùy chọn)</label>
+              <input id="evcmd-reel-audio-title" type="text" maxlength="120" value="${esc(savedAudioTitle)}" placeholder="VD: Chiều rừng thông · Acoustic">
+            </div>
+          </div>
+          <div id="evcmd-reel-custom-wrap" style="margin-top:12px;${audioMode === "custom" ? "" : "display:none;"}">
+            <div class="field">
+              <label for="evcmd-reel-audio-url">Đường dẫn tệp nhạc (MP3, M4A, OGG, WAV)</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                <input id="evcmd-reel-audio-url" type="text" maxlength="500" value="${esc(customAudioUrl)}" placeholder="/api/media/... hoặc https://..." style="flex:1 1 240px;">
+                <label class="btn btn--outline btn--sm" style="cursor:pointer;margin:0;white-space:nowrap;">
+                  Tải tệp nhạc lên
+                  <input id="evcmd-reel-audio-file" type="file" accept=".mp3,.m4a,.ogg,.wav,audio/mpeg,audio/mp4,audio/ogg,audio/wav" hidden>
+                </label>
+              </div>
+              <small id="evcmd-reel-audio-status" class="cell-sub" style="display:block;margin-top:6px;">Hỗ trợ MP3, M4A, OGG, WAV (tối đa 15 MB qua Google Drive hoặc 8 MB qua KV).</small>
+            </div>
+            <div id="evcmd-reel-audio-player-wrap" style="margin-top:10px;${customAudioUrl ? "" : "display:none;"}">
+              <audio id="evcmd-reel-audio-preview" controls preload="none" src="${esc(customAudioUrl)}" style="width:100%;height:40px;"></audio>
+            </div>
+          </div>
         </div>
 
         <div class="deep-card">
@@ -2272,6 +2321,122 @@
       box.innerHTML = fbs.length
         ? renderFeedbackCards(fbs, "evcmd")
         : `<div class="state-box"><h3>Chưa có góp ý nào cho sự kiện này</h3><p>Góp ý gửi từ Sân khấu Kỷ niệm của buổi gặp sẽ xuất hiện trực tiếp tại đây.</p></div>`;
+      return;
+    }
+
+    if (tab === "email") {
+      const provider = data.emailProvider || {};
+      const logs = data.emailLogs || [];
+      const activeEmailSet = new Set();
+      const attendedEmailSet = new Set();
+      for (const r of data.registrations || []) {
+        const em = String(r.email || "").trim().toLowerCase();
+        if (!em || !em.includes("@") || r.status === "cancelled") continue;
+        activeEmailSet.add(em);
+        if (r.status === "attended") attendedEmailSet.add(em);
+      }
+      const defaultAlbumUrl =
+        (data.album && data.album.driveUrl) || `${SITE_ORIGIN}/su-kien/${ev.slug || ev.id}/`;
+      const defaultTestEmail = (state.user && state.user.email) || "phungsu@holarise.org";
+      const tplLabels = {
+        rsvp_confirm: "Xác nhận giữ chỗ",
+        event_reminder: "Nhắc trước giờ G",
+        event_thankyou: "Cảm ơn & Album",
+        test_preview: "Bản test",
+      };
+      const statusBadge = (s) => {
+        if (s === "sent") return `<span class="badge badge--attended">Đã gửi</span>`;
+        if (s === "failed") return `<span class="badge badge--cancelled">Lỗi</span>`;
+        return `<span class="badge badge--pending">Bỏ qua</span>`;
+      };
+
+      box.innerHTML = `<div class="deep-section">
+        <div class="deep-card">
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">
+            <h3 style="margin:0;">Trạng thái kênh gửi Email</h3>
+            <span class="badge ${provider.canSendToGuests ? "badge--attended" : "badge--pending"}">${esc(provider.label || "Chưa cấu hình")}</span>
+          </div>
+          <p class="page-sub" style="margin:0;">
+            Khách giữ chỗ có email: <strong>${activeEmailSet.size}</strong> · Đã check-in có email: <strong>${attendedEmailSet.size}</strong> · Thư xác nhận giữ chỗ tự động gửi ngay khi khách RSVP có điền email.
+          </p>
+        </div>
+
+        <form id="evcmd-email-form" class="deep-card admin-form">
+          <h3>Soạn &amp; Gửi thư cho khách sự kiện</h3>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="evcmd-email-tpl">Loại thư</label>
+              <select id="evcmd-email-tpl">
+                <option value="event_reminder" ${ev.kind === "upcoming" ? "selected" : ""}>Thư nhắc trước giờ G</option>
+                <option value="event_thankyou" ${ev.kind === "past" ? "selected" : ""}>Thư cảm ơn &amp; mở Kho ảnh sau buổi</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="evcmd-email-audience">Đối tượng nhận</label>
+              <select id="evcmd-email-audience">
+                <option value="active">Tất cả khách giữ chỗ có email (${activeEmailSet.size})</option>
+                <option value="attended">Chỉ khách đã check-in có email (${attendedEmailSet.size})</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="evcmd-email-lang">Ngôn ngữ thư</label>
+              <select id="evcmd-email-lang">
+                <option value="vi">Tiếng Việt</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="evcmd-email-test-to">Email nhận bản test</label>
+              <input id="evcmd-email-test-to" type="email" value="${esc(defaultTestEmail)}" placeholder="phungsu@holarise.org">
+            </div>
+          </div>
+          <div class="field">
+            <label for="evcmd-email-album-url">Link Kho ảnh / Kỷ niệm (dùng cho Thư cảm ơn)</label>
+            <input id="evcmd-email-album-url" type="url" value="${esc(defaultAlbumUrl)}" placeholder="https://holarise.org/su-kien/...">
+          </div>
+          <div class="field">
+            <label for="evcmd-email-note">Lời nhắn thêm từ Ban Điều Phối (tùy chọn)</label>
+            <textarea id="evcmd-email-note" rows="3" placeholder="Ví dụ: Gửi xe miễn phí ngay cổng quán, trời Hòa Lạc tối hơi lạnh bạn nhớ mang áo khoác mỏng."></textarea>
+          </div>
+          <div id="evcmd-email-alert" class="form-alert" hidden></div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+            <button class="btn btn--outline btn--sm" type="button" data-evcmd-email-action="preview">Xem trước nội dung</button>
+            <button class="btn btn--outline btn--sm" type="button" data-evcmd-email-action="test">Gửi bản test</button>
+            <button class="btn btn--primary btn--sm" type="button" data-evcmd-email-action="send_all">Gửi cho khách sự kiện</button>
+          </div>
+          <div id="evcmd-email-preview-wrap" hidden style="margin-top:14px;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;background:#FAF8F4;">
+            <div style="padding:10px 14px;background:#F5F1E8;border-bottom:1px solid var(--line-strong);font-size:13px;">
+              <strong>Tiêu đề:</strong> <span id="evcmd-email-preview-subject">—</span>
+              <span id="evcmd-email-preview-meta" class="cell-sub" style="margin-left:8px;"></span>
+            </div>
+            <iframe id="evcmd-email-preview-frame" title="Xem trước email" sandbox="" style="width:100%;height:420px;border:0;background:#FAF8F4;"></iframe>
+          </div>
+        </form>
+
+        <div class="deep-card">
+          <h3>Lịch sử gửi Email (${logs.length})</h3>
+          ${
+            logs.length
+              ? `<div class="table-wrap"><table class="data-table">
+                  <thead><tr><th>Thời gian</th><th>Người nhận</th><th>Loại thư</th><th>Kênh</th><th>Trạng thái</th></tr></thead>
+                  <tbody>${logs
+                    .map(
+                      (l) => `<tr>
+                        <td><span class="cell-sub">${esc(formatVnDateTime(l.createdAt))}</span></td>
+                        <td><strong>${esc(l.recipientName || "—")}</strong><span class="cell-sub">${esc(l.recipientEmail)}</span></td>
+                        <td>${esc(tplLabels[l.templateType] || l.templateType)}</td>
+                        <td><code>${esc(l.provider || "none")}</code></td>
+                        <td>${statusBadge(l.status)}${l.errorMessage ? `<span class="cell-sub" style="display:block;color:#b42318;">${esc(l.errorMessage.slice(0, 90))}</span>` : ""}</td>
+                      </tr>`
+                    )
+                    .join("")}</tbody>
+                </table></div>`
+              : `<p class="page-sub" style="margin:0;">Chưa có email nào được gửi cho sự kiện này.</p>`
+          }
+        </div>
+      </div>`;
     }
   }
 
@@ -3042,6 +3207,15 @@
       if (form.id === "evcmd-lifecycle-form") {
         e.preventDefault();
         const btn = form.querySelector('button[type="submit"]');
+        const audioMode = $("#evcmd-reel-audio-mode")?.value || "";
+        const customUrl = ($("#evcmd-reel-audio-url")?.value || "").trim();
+        const reelAudioUrl = audioMode === "custom" ? customUrl : audioMode;
+        const reelAudioTitle = ($("#evcmd-reel-audio-title")?.value || "").trim();
+        if (audioMode === "custom" && !customUrl) {
+          toast("Vui lòng tải tệp nhạc lên hoặc dán đường dẫn nhạc hợp lệ.", "error");
+          $("#evcmd-reel-audio-url")?.focus();
+          return;
+        }
         if (btn) {
           btn.disabled = true;
           btn.textContent = "Đang lưu...";
@@ -3056,9 +3230,11 @@
               seatCapacity: Number($("#evcmd-seat-cap")?.value || 0),
               externalBooked: Number($("#evcmd-ext-booked")?.value || 0),
               showSeatBar: Boolean($("#evcmd-show-seat-bar")?.checked),
+              reelAudioUrl,
+              reelAudioTitle,
             },
           });
-          toast("Đã cập nhật vòng đời & khóa giữ chỗ sự kiện!", "success");
+          toast("Đã cập nhật vòng đời, nhạc nền & cấu hình sự kiện!", "success");
           await openEventCommand(state.evCmd.eventId, "lifecycle");
           if (state.activeTab === "events") loadEvents();
           else if (state.activeTab === "overview") loadOverview();
@@ -3238,6 +3414,83 @@
         input.disabled = false;
         input.value = "";
       }
+    });
+
+    // Event Command Center: Per-event custom soundtrack mode, file upload & live preview
+    document.addEventListener("change", async (e) => {
+      const modeSelect = e.target.closest("#evcmd-reel-audio-mode");
+      if (modeSelect) {
+        const customWrap = $("#evcmd-reel-custom-wrap");
+        const isCustom = modeSelect.value === "custom";
+        if (customWrap) customWrap.style.display = isCustom ? "" : "none";
+        if (!isCustom) {
+          const prev = $("#evcmd-reel-audio-preview");
+          if (prev && typeof prev.pause === "function") prev.pause();
+        }
+        return;
+      }
+
+      const audioFileInput = e.target.closest("#evcmd-reel-audio-file");
+      if (!audioFileInput) return;
+      const file = audioFileInput.files && audioFileInput.files[0];
+      if (!file) return;
+      const statusEl = $("#evcmd-reel-audio-status");
+      const urlInput = $("#evcmd-reel-audio-url");
+      const titleInput = $("#evcmd-reel-audio-title");
+      const playerWrap = $("#evcmd-reel-audio-player-wrap");
+      const previewEl = $("#evcmd-reel-audio-preview");
+
+      if (statusEl) statusEl.textContent = "Đang tải tệp nhạc lên máy chủ...";
+      audioFileInput.disabled = true;
+      try {
+        const form = new FormData();
+        form.append("category", "su-kien");
+        const evTitle = String(state.evCmd.data?.event?.title || "").trim();
+        if (evTitle) form.append("subfolder", evTitle.slice(0, 100));
+        form.append("file", file, file.name || "soundtrack.mp3");
+        const up = await api("/api/admin/media", { method: "POST", body: form });
+        if (urlInput) urlInput.value = up.url || "";
+        if (titleInput && !titleInput.value.trim() && file.name) {
+          titleInput.value = file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim().slice(0, 120);
+        }
+        if (previewEl && up.url) {
+          previewEl.src = up.url;
+          if (playerWrap) playerWrap.style.display = "";
+        }
+        if (statusEl) {
+          statusEl.textContent = `Đã tải lên thành công (${formatKb(up.size)}). Bấm “Lưu cấu hình điều hành” để áp dụng.`;
+        }
+        toast("Đã tải tệp nhạc lên — bấm Lưu để gắn vào sự kiện!", "success");
+      } catch (err) {
+        if (statusEl) statusEl.textContent = `Lỗi tải nhạc: ${err.message}`;
+        toast(formatApiError(err), "error");
+      } finally {
+        audioFileInput.disabled = false;
+        audioFileInput.value = "";
+      }
+    });
+
+    document.addEventListener("input", (e) => {
+      const urlInput = e.target.closest("#evcmd-reel-audio-url");
+      if (!urlInput) return;
+      const val = urlInput.value.trim();
+      const playerWrap = $("#evcmd-reel-audio-player-wrap");
+      const previewEl = $("#evcmd-reel-audio-preview");
+      const ok = val.startsWith("/") || val.startsWith("https://");
+      if (previewEl) {
+        if (ok) {
+          previewEl.src = val;
+        } else {
+          previewEl.pause();
+          previewEl.removeAttribute("src");
+        }
+      }
+      if (playerWrap) playerWrap.style.display = ok ? "" : "none";
+    });
+
+    $("#event-command-dialog")?.addEventListener("close", () => {
+      const prev = $("#evcmd-reel-audio-preview");
+      if (prev && typeof prev.pause === "function") prev.pause();
     });
 
     $("#visuals-editor-grid")?.addEventListener("click", (e) => {
@@ -3456,7 +3709,7 @@
     // Global delegated click handler
     document.addEventListener("click", async (e) => {
       const btn = e.target.closest(
-        "button[data-go-tab], button[data-copy-url], button[data-invite-personal], button[data-open-crop], button[data-quick-reg-status], button[data-open-reg], button[data-event-command], button[data-dup-event], button[data-edit-event], button[data-delete-event], button[data-edit-post], button[data-delete-post], button[data-mod-ref], button[data-pin-ref], button[data-edit-ref], button[data-delete-ref], button[data-fb-status-set], button[data-fb-note], button[data-fb-delete], button[data-member-360], button[data-m360-checkin-reg], button[data-m360-remove-reg], button[data-m360-revoke-sessions], button[data-m360-toggle-active], button[data-m360-edit-profile], button[data-evcmd-reg-status], button[data-evcmd-revoke-member], button[data-edit-member], button[data-toggle-member], button[data-reset-member-pw], button[data-delete-member], button[data-toggle-partner], button[data-edit-partner], button[data-delete-partner], button[data-toggle-user], button[data-reset-user-pw], button[data-delete-user], button[data-retry], button[data-empty-cta]"
+        "button[data-go-tab], button[data-copy-url], button[data-invite-personal], button[data-open-crop], button[data-quick-reg-status], button[data-open-reg], button[data-event-command], button[data-dup-event], button[data-edit-event], button[data-delete-event], button[data-edit-post], button[data-delete-post], button[data-mod-ref], button[data-pin-ref], button[data-edit-ref], button[data-delete-ref], button[data-fb-status-set], button[data-fb-note], button[data-fb-delete], button[data-member-360], button[data-m360-checkin-reg], button[data-m360-remove-reg], button[data-m360-revoke-sessions], button[data-m360-toggle-active], button[data-m360-edit-profile], button[data-evcmd-reg-status], button[data-evcmd-revoke-member], button[data-evcmd-email-action], button[data-edit-member], button[data-toggle-member], button[data-reset-member-pw], button[data-delete-member], button[data-toggle-partner], button[data-edit-partner], button[data-delete-partner], button[data-toggle-user], button[data-reset-user-pw], button[data-delete-user], button[data-retry], button[data-empty-cta]"
       );
       if (!btn) return;
 
@@ -3587,6 +3840,55 @@
           openEventCommand(state.evCmd.eventId, "media");
         } catch (err) {
           toast(err.message, "error");
+        }
+        return;
+      }
+
+      if (btn.dataset.evcmdEmailAction) {
+        const mode = btn.dataset.evcmdEmailAction;
+        if (!state.evCmd.eventId) return;
+        const templateType = $("#evcmd-email-tpl")?.value || "event_reminder";
+        const audience = $("#evcmd-email-audience")?.value || "active";
+        const lang = $("#evcmd-email-lang")?.value || "vi";
+        const testEmail = ($("#evcmd-email-test-to")?.value || "").trim();
+        const albumUrl = ($("#evcmd-email-album-url")?.value || "").trim();
+        const customNote = ($("#evcmd-email-note")?.value || "").trim();
+        const alertEl = $("#evcmd-email-alert");
+        showAlert(alertEl, "");
+
+        if (mode === "send_all") {
+          const tplName = templateType === "event_thankyou" ? "Thư cảm ơn & Kho ảnh" : "Thư nhắc trước giờ G";
+          if (!confirm(`Xác nhận gửi "${tplName}" cho toàn bộ khách đủ điều kiện của sự kiện này? (Hệ thống tự động bỏ qua người đã nhận trước đó)`)) {
+            return;
+          }
+        }
+
+        btn.disabled = true;
+        try {
+          const res = await api(`/api/admin/events/${encodeURIComponent(state.evCmd.eventId)}/send-email`, {
+            method: "POST",
+            body: { mode, templateType, audience, lang, testEmail, albumUrl, customNote },
+          });
+          if (mode === "preview" && res.preview) {
+            const wrap = $("#evcmd-email-preview-wrap");
+            const subj = $("#evcmd-email-preview-subject");
+            const meta = $("#evcmd-email-preview-meta");
+            const frame = $("#evcmd-email-preview-frame");
+            if (subj) subj.textContent = res.preview.subject || "";
+            if (meta) {
+              meta.textContent = `(${res.pendingCount} khách sẽ nhận · ${res.alreadySentCount} đã gửi trước đó)`;
+            }
+            if (frame) frame.srcdoc = res.preview.html || "";
+            if (wrap) wrap.hidden = false;
+          } else {
+            toast(res.message || "Đã hoàn tất gửi email.", "success");
+            await openEventCommand(state.evCmd.eventId, "email");
+          }
+        } catch (err) {
+          showAlert(alertEl, formatApiError(err));
+          toast(formatApiError(err), "error");
+        } finally {
+          btn.disabled = false;
         }
         return;
       }

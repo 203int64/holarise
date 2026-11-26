@@ -17,6 +17,12 @@ export const VALID_REFLECTION_STATUSES = new Set(["pending", "approved", "reject
 export const VALID_REG_STATUSES = new Set(["new", "contacted", "attended", "cancelled"]);
 export const VALID_POST_STATUSES = new Set(["published", "draft"]);
 export const VALID_EVENT_KINDS = new Set(["upcoming", "past"]);
+export const VALID_REEL_AUDIO_PRESETS = new Set([
+  "preset:holaheart",
+  "preset:holagreen",
+  "preset:holaconnect",
+  "preset:silent",
+]);
 
 const CATEGORY_TO_SLUG = {
   "HolaGreen · Sạch": "moi-truong",
@@ -60,6 +66,13 @@ export function isSafeMediaUrl(url) {
   } catch {
     return false;
   }
+}
+
+export function isSafeReelAudioUrl(url) {
+  const s = cleanStr(url, 500);
+  if (!s) return true; // empty = auto ambient soundtrack by event pillar
+  if (VALID_REEL_AUDIO_PRESETS.has(s.toLowerCase())) return true;
+  return isSafeMediaUrl(s);
 }
 
 /**

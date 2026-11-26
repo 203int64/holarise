@@ -8777,7 +8777,94 @@ a:focus-visible,
   transform: translate(1.5px, -1.5px);
 }
 
+.footer-social {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.footer-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-secondary);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  transition: color 0.2s var(--ease-expo), border-color 0.2s var(--ease-expo),
+    background-color 0.2s var(--ease-expo), transform 0.2s var(--ease-expo);
+}
+
+.footer-social-link svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.footer-social-link:hover {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--ink) 24%, transparent);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  transform: translateY(-1px);
+}
+
+.footer-social-link:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+}
+
 @media (max-width: 760px) {
+  .site-footer .footer-brand {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 16px;
+  }
+  .site-footer .footer-brand .footer-logo-row {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+  .site-footer .footer-brand .footer-social {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .site-footer .footer-brand .footer-brand-name,
+  .site-footer .footer-brand .footer-brand-motto {
+    grid-column: 1 / -1;
+  }
+  .site-footer .footer-social-link {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 50%;
+    border-color: color-mix(in srgb, var(--ink) 12%, transparent);
+    background: color-mix(in srgb, var(--ink) 2.5%, transparent);
+  }
+  .site-footer .footer-social-link svg {
+    width: 16px;
+    height: 16px;
+  }
+  .site-footer .footer-social-link:active {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) 7%, transparent);
+    transform: scale(0.95);
+  }
+  .site-footer .footer-social-label {
+    display: none;
+  }
   .footer-bottom {
     gap: 10px 14px;
   }
@@ -8795,6 +8882,30 @@ a:focus-visible,
     grid-template-columns: 1fr;
     gap: 0;
     padding-bottom: 10px;
+  }
+  .site-footer .footer-brand {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 16px;
+  }
+  .site-footer .footer-brand .footer-social {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .site-footer .footer-social-link {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    border-color: color-mix(in srgb, var(--ink) 12%, transparent);
+    background: color-mix(in srgb, var(--ink) 2.5%, transparent);
+  }
+  .site-footer .footer-social-label {
+    display: none;
   }
   .site-footer .footer-grid > :not(.footer-brand) {
     display: none !important;
@@ -8834,6 +8945,30 @@ html.is-standalone .site-footer .footer-grid {
   grid-template-columns: 1fr;
   gap: 0;
   padding-bottom: 10px;
+}
+html.is-standalone .site-footer .footer-brand {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 16px;
+}
+html.is-standalone .site-footer .footer-brand .footer-social {
+  grid-column: 2;
+  grid-row: 1;
+  margin-top: 0;
+  justify-content: flex-end;
+  gap: 8px;
+}
+html.is-standalone .site-footer .footer-social-link {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  border-color: color-mix(in srgb, var(--ink) 12%, transparent);
+  background: color-mix(in srgb, var(--ink) 2.5%, transparent);
+}
+html.is-standalone .site-footer .footer-social-label {
+  display: none;
 }
 html.is-standalone .site-footer .footer-grid > :not(.footer-brand),
 html.is-standalone .site-footer .footer-web-only {
@@ -14603,476 +14738,1128 @@ dialog.contribute-dialog::backdrop {
 }
 
 /* ==========================================================================
- * APPLE HYBRID CINEMA x APPLE JOURNAL — POST-EVENT MEMORY STAGE (OPTION C)
+ * APPLE HIG MEMORY STAGE — FULL-BLEED CINEMA HERO + APPLE PHOTOS + JOURNAL
+ * Principles: Deference, Clarity, Depth. Zero decorative chrome, pure imagery.
  * ========================================================================== */
 
-.memory-stage-root--cinema {
-  --cinema-bg: #0a0c0b;
-  --cinema-surface: rgba(255, 255, 255, 0.06);
-  --cinema-surface-hover: rgba(255, 255, 255, 0.12);
-  --cinema-line: rgba(255, 255, 255, 0.12);
-  --cinema-ink: #f5f5f7;
-  --cinema-muted: rgba(245, 245, 247, 0.72);
-  --cinema-glow: rgba(217, 121, 72, 0.22);
-  --journal-bg: #faf9f6;
+/* Adaptive Liquid Glass Navbar over Full-Bleed Cinema Hero */
+body.is-memory-stage .site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 120;
+  transition: background-color 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.36s ease;
 }
 
-.memory-stage-root--cinema[data-pillar="holagreen"] {
-  --cinema-glow: rgba(16, 132, 92, 0.24);
+body.is-memory-stage:not(.is-header-light) .site-header {
+  background: rgba(12, 12, 14, 0.34);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
-.memory-stage-root--cinema[data-pillar="holaconnect"] {
-  --cinema-glow: rgba(56, 114, 214, 0.22);
+body.is-memory-stage:not(.is-header-light) .site-header .brand-part {
+  filter: brightness(0) invert(1);
 }
 
-/* ACT 1: Obsidian Cinema Theater */
-.memory-cinema-band {
+body.is-memory-stage:not(.is-header-light) .site-header .brand-morph-stage.is-morphed .brand-morph-bg {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+body.is-memory-stage:not(.is-header-light) .site-header .main-nav a {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+body.is-memory-stage:not(.is-header-light) .site-header .main-nav a:hover,
+body.is-memory-stage:not(.is-header-light) .site-header .main-nav a.is-active,
+body.is-memory-stage:not(.is-header-light) .site-header .main-nav a[aria-current="page"] {
+  color: #ffffff;
+}
+
+body.is-memory-stage:not(.is-header-light) .site-header .lang-switch {
+  color: rgba(255, 255, 255, 0.88);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body.is-memory-stage:not(.is-header-light) .site-header .lang-switch:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+body.is-memory-stage:not(.is-header-light) .site-header .header-cta {
+  background: #ffffff;
+  color: #1d1d1f;
+  border-color: transparent;
+}
+
+body.is-memory-stage:not(.is-header-light) .site-header .header-cta:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1d1d1f;
+}
+
+body.is-memory-stage:not(.is-header-light) .site-header .nav-toggle-bars span {
+  background: #ffffff;
+}
+
+body.is-memory-stage.is-header-light .site-header {
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+.memory-stage-root--apple {
+  --apple-ink: #1d1d1f;
+  --apple-muted: #6e6e73;
+  --apple-surface: #f5f5f7;
+  --apple-white: #ffffff;
+  --apple-accent: #0066cc;
+  --apple-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  color: var(--apple-ink);
+  background: var(--apple-white);
+}
+
+.apple-stage-container {
+  max-width: 1120px;
+}
+
+/* ==========================================================================
+ * ACT 1: FULL-BLEED APPLE CINEMA HERO
+ * ========================================================================== */
+.apple-hero {
   position: relative;
-  background:
-    radial-gradient(900px 460px at 50% 0%, var(--cinema-glow), transparent 68%),
-    var(--cinema-bg);
-  color: var(--cinema-ink);
-  padding-bottom: clamp(44px, 6vw, 80px);
-}
-
-.memory-hero--cinema {
-  padding-top: calc(var(--header-height, 74px) + clamp(16px, 3vw, 32px));
-  padding-bottom: clamp(28px, 4vw, 48px);
-  background: transparent;
-  border-bottom: 0;
-}
-
-.memory-cinema-poster {
-  position: relative;
-  min-height: clamp(430px, 68vh, 640px);
-  border-radius: 28px;
-  overflow: hidden;
+  width: 100%;
+  min-height: clamp(540px, 84svh, 820px);
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background: #121514;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.52);
+  align-items: flex-end;
+  background: #000000;
+  color: #ffffff;
+  overflow: hidden;
   isolation: isolate;
 }
 
-.memory-cinema-backdrop {
+.apple-hero-media {
   position: absolute;
   inset: 0;
   z-index: -2;
   overflow: hidden;
 }
 
-.memory-cinema-img {
+.apple-hero-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 36%;
   display: block;
-  transform: scale(1.02);
+  transform: scale(1.01);
   will-change: transform;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .memory-cinema-img {
-    animation: cinemaBreath 22s ease-in-out infinite alternate;
+  .apple-hero-img {
+    animation: appleHeroBreath 26s ease-in-out infinite alternate;
   }
 }
 
-@keyframes cinemaBreath {
-  0% { transform: scale(1.01) translate3d(0, 0, 0); }
-  100% { transform: scale(1.075) translate3d(0, -1.2%, 0); }
+@keyframes appleHeroBreath {
+  0% { transform: scale(1.0) translate3d(0, 0, 0); }
+  100% { transform: scale(1.055) translate3d(0, -1%, 0); }
 }
 
-.memory-cinema-scrim {
+.apple-hero-scrim {
   position: absolute;
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(180deg, rgba(10, 12, 11, 0.44) 0%, rgba(10, 12, 11, 0.12) 34%, rgba(10, 12, 11, 0.62) 66%, rgba(10, 12, 11, 0.94) 100%);
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.34) 0%,
+      rgba(0, 0, 0, 0.04) 26%,
+      rgba(0, 0, 0, 0.16) 56%,
+      rgba(0, 0, 0, 0.78) 100%
+    );
   pointer-events: none;
 }
 
-.memory-cinema-top {
+.apple-hero-content {
+  width: 100%;
+  padding-top: calc(var(--header-height, 74px) + 48px);
+  padding-bottom: clamp(40px, 7vh, 72px);
+}
+
+.apple-hero-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.apple-hero-title {
+  margin: 0 0 16px;
+  max-width: 18ch;
+  font-family: var(--font-sans, "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: clamp(2.15rem, 5vw, 3.85rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.032em;
+  color: #ffffff;
+  text-wrap: balance;
+}
+
+.apple-hero-lead {
+  margin: 0 0 28px;
+  max-width: 52ch;
+  font-size: clamp(0.98rem, 1.45vw, 1.12rem);
+  font-weight: 400;
+  line-height: 1.56;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.apple-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 12px;
-  padding: clamp(16px, 2.5vw, 26px);
 }
 
-.memory-cinema-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 14px;
-  border-radius: 999px;
-  background: rgba(15, 18, 17, 0.52);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  font-size: 0.74rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.92);
-}
-
-.memory-cinema-pill .memory-eyebrow-pillar {
-  color: #ffffff;
-}
-
-.memory-cinema-top-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.memory-glass-icon-btn {
+.apple-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 0 12px;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 22px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(15, 18, 17, 0.48);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  color: #ffffff;
+  border: 0;
   font: inherit;
-  font-size: 0.78rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s var(--ease-expo);
-}
-
-.memory-glass-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.memory-glass-icon-btn:active {
-  transform: scale(0.96);
-}
-
-.memory-cinema-bottom {
-  padding: clamp(22px, 3.6vw, 40px);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.memory-cinema-copy {
-  max-width: 720px;
-}
-
-.memory-title--cinema {
-  margin: 0 0 12px;
-  font-family: var(--font-serif, "Lora", Georgia, serif);
-  font-size: clamp(1.9rem, 4.4vw, 3.3rem);
-  font-weight: 500;
-  line-height: 1.14;
-  letter-spacing: -0.02em;
-  color: #ffffff;
-  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
-}
-
-.memory-meta-row--cinema {
-  color: rgba(245, 245, 247, 0.84);
   font-size: 0.9rem;
-}
-
-.memory-lead--cinema {
-  margin: 12px 0 0;
-  color: rgba(245, 245, 247, 0.78);
-  max-width: 60ch;
-  font-size: 0.96rem;
-  line-height: 1.65;
-}
-
-.memory-hero-actions--cinema {
-  margin-top: 4px;
-  gap: 10px;
-}
-
-.memory-btn-apple {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 20px;
-  border-radius: 999px;
-  font: inherit;
-  font-size: 0.88rem;
-  font-weight: 600;
-  letter-spacing: -0.005em;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   text-decoration: none;
   cursor: pointer;
-  border: 1px solid transparent;
-  transition: transform 0.22s var(--ease-expo), background-color 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s var(--apple-ease), background-color 0.2s ease, opacity 0.2s ease;
 }
 
-.memory-btn-apple:active {
+.apple-btn:active {
   transform: scale(0.97);
 }
 
-.memory-btn-apple--primary {
+.apple-btn--sm {
+  min-height: 38px;
+  padding: 0 18px;
+  font-size: 0.84rem;
+}
+
+.apple-btn--white {
   background: #ffffff;
-  color: #0b110f;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-}
-
-.memory-btn-apple--primary:hover {
-  background: #f0f2f1;
-}
-
-.memory-btn-apple--glass {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #ffffff;
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-}
-
-.memory-btn-apple--glass:hover {
-  background: rgba(255, 255, 255, 0.24);
-}
-
-.memory-btn-apple--ghost {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.22);
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.memory-btn-apple--ghost:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
-
-/* Curated Apple Photos Bento Gallery inside Obsidian Theater */
-.memory-gallery-section--cinema {
-  padding-top: clamp(16px, 2.5vw, 28px);
-  padding-bottom: 0;
-  background: transparent;
-}
-
-.memory-sec-head--cinema {
-  align-items: flex-end;
-  margin-bottom: 22px;
-}
-
-.memory-sec-kicker--cinema {
-  color: rgba(245, 245, 247, 0.56);
-}
-
-.memory-sec-title--cinema {
-  color: #ffffff;
-  font-size: clamp(1.45rem, 2.8vw, 2rem);
-}
-
-.memory-gallery-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-.memory-seg-control {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.memory-seg-btn {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: rgba(245, 245, 247, 0.72);
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 500;
-  padding: 6px 13px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.memory-seg-btn.is-active {
-  background: #ffffff;
-  color: #0b110f;
+  color: #1d1d1f;
   font-weight: 600;
 }
 
-.memory-cinema-add-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.92);
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+.apple-btn--white:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1d1d1f;
 }
 
-.memory-cinema-add-btn:hover {
+.apple-btn--glass {
   background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.34);
-}
-
-.memory-cinema-band .memory-exhibition-grid {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  grid-auto-flow: dense;
-  gap: 14px;
-}
-
-.memory-cinema-band .memory-stage-thumb {
-  grid-column: span 4;
-  border-radius: 18px;
-  background: #171b19;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  aspect-ratio: 4 / 3;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.25s ease;
-}
-
-.memory-cinema-band .memory-stage-thumb:hover {
-  border-color: rgba(255, 255, 255, 0.26);
-  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
-}
-
-.memory-cinema-band .memory-stage-thumb.is-lead {
-  grid-column: span 8;
-  grid-row: span 2;
-  aspect-ratio: auto;
-  height: 100%;
-  min-height: 360px;
-}
-
-.memory-cinema-band .memory-stage-thumb.is-wide {
-  grid-column: span 8;
-  aspect-ratio: 16 / 9;
-}
-
-.memory-cinema-band .memory-stage-thumb img {
-  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.memory-cinema-band .memory-stage-thumb:hover img {
-  transform: scale(1.04);
-}
-
-.memory-cinema-band .memory-gallery-quiet,
-.memory-cinema-band .memory-gallery-empty {
-  padding: 28px 24px;
-  border-radius: 20px;
-  border: 1px dashed rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(245, 245, 247, 0.78);
-}
-
-.memory-cinema-band .memory-gallery-empty p {
-  margin: 0 0 14px;
-}
-
-/* ACT 2: Apple Journal Warm Paper Reflection Wall */
-.memory-journal-band {
-  background: var(--journal-bg, #faf9f6);
-  padding-top: clamp(44px, 6vw, 76px);
-  padding-bottom: clamp(88px, 10vw, 120px);
-}
-
-.memory-sec-head--journal {
-  align-items: flex-end;
-  margin-bottom: 20px;
-}
-
-.memory-sec-title--journal {
-  font-size: clamp(1.5rem, 3vw, 2.15rem);
-  letter-spacing: -0.02em;
-}
-
-.memory-journal-head-right {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.memory-mood-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.memory-mood-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(11, 17, 15, 0.1);
-  background: #ffffff;
-  color: var(--ink-secondary);
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.16s ease;
-}
-
-.memory-mood-chip:hover {
-  border-color: var(--ink);
-  color: var(--ink);
-}
-
-.memory-mood-chip.is-active {
-  background: var(--ink);
-  border-color: var(--ink);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   color: #ffffff;
 }
 
-.memory-journal-band .memory-composer-card {
-  border-radius: 24px;
-  border: 1px solid rgba(11, 17, 15, 0.07);
+.apple-btn--glass:hover {
+  background: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+}
+
+.apple-btn--dark {
+  background: #1d1d1f;
+  color: #ffffff;
+}
+
+.apple-btn--dark:hover {
+  background: #333336;
+  color: #ffffff;
+}
+
+.apple-btn-icon {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s var(--apple-ease);
+}
+
+.apple-btn-icon:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.apple-btn-icon:active {
+  transform: scale(0.95);
+}
+
+/* ==========================================================================
+ * ACT 2: APPLE PHOTOS GALLERY (PURE WHITE CANVAS, BORDERLESS PHOTOGRAPHY)
+ * ========================================================================== */
+.apple-photos-section {
+  background: var(--apple-white);
+  padding: clamp(68px, 8.5vw, 112px) 0 clamp(60px, 7.5vw, 96px);
+}
+
+.apple-sec-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: clamp(24px, 3vw, 36px);
+}
+
+.apple-sec-title-row {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.apple-sec-title {
+  margin: 0;
+  font-family: var(--font-sans, "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: clamp(1.75rem, 3.4vw, 2.55rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: var(--apple-ink);
+}
+
+.apple-sec-count {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--apple-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-sec-count:empty {
+  display: none;
+}
+
+.apple-link-action {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: var(--apple-accent);
+  font: inherit;
+  font-size: 0.94rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+
+.apple-link-action:hover {
+  opacity: 0.72;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Pure, Borderless Apple Photos 5-Tile Cluster */
+.apple-mosaic-frame {
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--apple-white);
+}
+
+/* Remove all template stamps/overlays from photos — 100% pure photography */
+.memory-stage-root--apple .archive-thumb-idx,
+.memory-stage-root--apple .archive-thumb-cap {
+  display: none !important;
+}
+
+.memory-stage-root--apple .memory-exhibition-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 240px;
+  gap: 6px;
+}
+
+.memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="1"] {
+  grid-template-columns: 1fr;
+  grid-auto-rows: clamp(320px, 54vh, 520px);
+}
+
+.memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: clamp(280px, 42vh, 420px);
+}
+
+.memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="3"] {
+  grid-template-columns: 1.45fr 1fr;
+  grid-template-rows: repeat(2, 240px);
+}
+
+.memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="3"] .memory-stage-thumb:first-child {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="4"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 260px;
+}
+
+.memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="5"] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, clamp(200px, 24vw, 265px));
+}
+
+.memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="5"] .memory-stage-thumb:nth-child(1) {
+  grid-column: 1 / span 2;
+  grid-row: 1 / span 2;
+}
+
+.memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="5"] .memory-stage-thumb:nth-child(2) {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="5"] .memory-stage-thumb:nth-child(3) {
+  grid-column: 4;
+  grid-row: 1;
+}
+
+.memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="5"] .memory-stage-thumb:nth-child(4) {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="5"] .memory-stage-thumb:nth-child(5) {
+  grid-column: 4;
+  grid-row: 2;
+}
+
+.memory-stage-root--apple .memory-stage-thumb {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 2px;
+  border: 0;
+  background: #ececef;
+  box-shadow: none;
+  overflow: hidden;
+  transition: opacity 0.25s ease;
+}
+
+.memory-stage-root--apple .memory-stage-thumb.is-mosaic-overflow {
+  display: none !important;
+}
+
+.memory-stage-root--apple .memory-stage-thumb:hover {
+  box-shadow: none;
+  border: 0;
+}
+
+.memory-stage-root--apple .memory-stage-thumb img,
+.memory-stage-root--apple .memory-stage-thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.65s var(--apple-ease);
+}
+
+.memory-stage-root--apple .memory-stage-thumb:hover img {
+  transform: scale(1.03);
+}
+
+/* Single Apple Frosted Pill floating cleanly at bottom-right of mosaic */
+.apple-mosaic-all-pill {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 6;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  color: #1d1d1f;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+  cursor: pointer;
+  transition: transform 0.2s var(--apple-ease), background-color 0.18s ease;
+}
+
+.apple-mosaic-all-pill:hover {
   background: #ffffff;
-  box-shadow: 0 14px 40px rgba(11, 17, 15, 0.05);
+  transform: translateY(-1px);
+}
+
+.apple-mosaic-all-pill:active {
+  transform: scale(0.97);
+}
+
+.memory-stage-root--apple .memory-gallery-quiet,
+.memory-stage-root--apple .memory-gallery-empty {
+  padding: 36px 28px;
+  border-radius: 20px;
+  background: var(--apple-surface);
+  color: var(--apple-muted);
+  font-size: 0.96rem;
+}
+
+.memory-stage-root--apple .memory-gallery-empty p {
+  margin: 0 0 16px;
+}
+
+/* ==========================================================================
+ * APPLE PHOTOS FULL CONTACT SHEET MODAL (LIGHT FROSTED LIBRARY)
+ * ========================================================================== */
+.apple-sheet-dialog {
+  width: min(1160px, calc(100vw - 32px));
+  height: min(88dvh, 860px);
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  background: #ffffff;
+  color: #1d1d1f;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.apple-sheet-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.memory-sheet-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.apple-sheet-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.apple-sheet-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.apple-sheet-dialog .memory-sheet-title {
+  margin: 0;
+  font-family: var(--font-sans, "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #1d1d1f;
+}
+
+.apple-sheet-sub {
+  font-size: 0.8rem;
+  color: #6e6e73;
+}
+
+.memory-sheet-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.apple-seg-control {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 999px;
+  background: #f2f2f4;
+}
+
+.apple-seg-control .memory-seg-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #6e6e73;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.apple-seg-control .memory-seg-btn.is-active {
+  background: #ffffff;
+  color: #1d1d1f;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.apple-sheet-play-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 0;
+  background: #1d1d1f;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.apple-sheet-play-btn:hover {
+  background: #333336;
+}
+
+.apple-sheet-close-btn {
+  appearance: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 0;
+  background: #f2f2f4;
+  color: #1d1d1f;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.apple-sheet-close-btn:hover {
+  background: #e5e5ea;
+}
+
+.apple-sheet-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px 24px 28px;
+  overscroll-behavior: contain;
+  background: #ffffff;
+}
+
+.apple-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.apple-sheet-grid .memory-sheet-tile {
+  aspect-ratio: 4 / 3;
+  border-radius: 4px;
+  border: 0;
+  background: #f2f2f4;
+  overflow: hidden;
+  padding: 0;
+}
+
+.apple-sheet-grid .memory-sheet-tile img,
+.apple-sheet-grid .memory-sheet-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ==========================================================================
+ * ACT 3: APPLE JOURNAL REFLECTION WALL (#F5F5F7 SURFACE + PURE WHITE CARDS)
+ * ========================================================================== */
+.apple-journal-section {
+  background: var(--apple-surface);
+  padding: clamp(68px, 8.5vw, 112px) 0 clamp(88px, 10vw, 136px);
+}
+
+.apple-mood-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.memory-mood-chip {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 0;
+  background: #ffffff;
+  color: var(--apple-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.memory-mood-chip:hover {
+  color: var(--apple-ink);
+}
+
+.memory-mood-chip.is-active {
+  background: var(--apple-ink);
+  color: #ffffff;
+}
+
+/* Compact Single-Row Apple Journal Composer Card */
+.apple-composer-card {
+  border-radius: 20px;
+  border: 0;
+  background: #ffffff;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
   margin-bottom: 28px;
 }
 
-.memory-journal-masonry {
+.apple-member-gate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 26px;
+}
+
+.apple-gate-copy strong {
   display: block;
-  columns: 2 340px;
-  column-gap: 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--apple-ink);
+  margin-bottom: 3px;
 }
 
-.memory-journal-masonry > .gb-card {
-  break-inside: avoid;
-  page-break-inside: avoid;
-  margin-bottom: 20px;
-  border-radius: 22px;
-  border: 1px solid rgba(11, 17, 15, 0.07);
+.apple-gate-copy p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--apple-muted);
+}
+
+.apple-gate-actions {
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+ * ACT 3: PHYSICAL POSTCARD STACK + TACTILE AVATAR DOCK (ZERO SCROLL FATIGUE)
+ * ========================================================================== */
+.apple-postcard-shell {
+  padding-top: 6px;
+}
+
+.apple-postcard-stage {
+  position: relative;
+  display: block;
+  margin: 0 auto 24px;
+  isolation: isolate;
+  touch-action: pan-y;
+}
+
+/* Subtle 2-layer tilted cardstock stack behind active postcard */
+.apple-postcard-stage.has-stack::before,
+.apple-postcard-stage.has-stack::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 26px;
   background: #ffffff;
-  box-shadow: 0 8px 28px rgba(11, 17, 15, 0.045);
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+  pointer-events: none;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.memory-journal-masonry > .gb-card:hover {
+.apple-postcard-stage.has-stack::before {
+  z-index: -2;
+  transform: rotate(-1.55deg) translate3d(-4px, 8px, 0) scale(0.985);
+  box-shadow: 0 12px 30px rgba(17, 24, 21, 0.055);
+  opacity: 0.72;
+}
+
+.apple-postcard-stage.has-stack::after {
+  z-index: -1;
+  transform: rotate(1.25deg) translate3d(4px, 4px, 0) scale(0.992);
+  box-shadow: 0 14px 34px rgba(17, 24, 21, 0.065);
+  opacity: 0.88;
+}
+
+.apple-postcard-stage > .gb-card {
+  display: none;
+  margin: 0;
+  padding: clamp(24px, 3.6vw, 42px);
+  border-radius: 26px;
+  border: 0;
+  background: #ffffff;
+  box-shadow:
+    0 20px 52px rgba(17, 24, 21, 0.08),
+    0 3px 10px rgba(17, 24, 21, 0.035);
+}
+
+.apple-postcard-stage > .gb-card.is-pc-active {
+  display: block;
+}
+
+.apple-postcard-stage > .gb-card.gb-card--photo.is-pc-active {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  align-items: center;
+  gap: clamp(24px, 3.8vw, 48px);
+}
+
+.apple-postcard-stage > .gb-card.is-pc-enter-next {
+  animation: applePostcardNext 0.44s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.apple-postcard-stage > .gb-card.is-pc-enter-prev {
+  animation: applePostcardPrev 0.44s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes applePostcardNext {
+  0% {
+    opacity: 0;
+    transform: translate3d(28px, 6px, 0) rotate(1.1deg) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes applePostcardPrev {
+  0% {
+    opacity: 0;
+    transform: translate3d(-28px, 6px, 0) rotate(-1.1deg) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+.apple-postcard-stage > .gb-card:not(.gb-card--photo).is-pc-active .gb-card-inner {
+  max-width: 68ch;
+  margin: 0 auto;
+}
+
+.apple-postcard-stage > .gb-card .gb-card-photo {
+  margin: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 6px solid #ffffff;
+  box-shadow:
+    0 16px 36px rgba(17, 24, 21, 0.13),
+    0 3px 10px rgba(17, 24, 21, 0.06);
+}
+
+.apple-postcard-stage > .gb-card .gb-photo-stack-wrap {
+  margin: 0;
+  padding: 12px 16px;
+}
+
+.apple-postcard-stage > .gb-card .gb-card-inner {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.apple-postcard-stage > .gb-card .gb-pull-quote {
+  margin: 0;
+  font-size: clamp(1.18rem, 2vw, 1.52rem);
+  line-height: 1.42;
+  color: var(--apple-ink);
+}
+
+.apple-postcard-stage > .gb-card .gb-card-body {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.72;
+  color: #3a3a3c;
+}
+
+.apple-postcard-stage > .gb-card .gb-card-foot {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.apple-postcard-stage > .gb-card .gb-pending-banner {
+  grid-column: 1 / -1;
+}
+
+/* Tactile Avatar Dock + Postcard Controls Bar */
+.apple-postcard-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.apple-postcard-bar[hidden] {
+  display: none;
+}
+
+.apple-avatar-dock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: 4px 2px 6px;
+}
+
+.apple-avatar-dock::-webkit-scrollbar {
+  display: none;
+}
+
+.apple-avatar-chip {
+  appearance: none;
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 5px 14px 5px 6px;
+  border-radius: 999px;
+  border: 0;
+  background: #ffffff;
+  color: var(--apple-ink);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.045);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s ease;
+}
+
+.apple-avatar-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.apple-avatar-chip.is-active {
+  background: #1d1d1f;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(29, 29, 31, 0.2);
+}
+
+.apple-avatar-chip-av {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: #ececf0;
+  color: #1d1d1f;
+  font-size: 0.72rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.apple-avatar-chip.is-active .apple-avatar-chip-av {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.apple-avatar-chip-av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.apple-avatar-chip-name {
+  white-space: nowrap;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-postcard-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.apple-postcard-counter {
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--apple-muted);
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.apple-pc-btn {
+  width: 40px;
+  height: 40px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.apple-pc-btn:hover {
+  background: #e9e9ed;
+}
+
+.apple-pc-all-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 15px;
+  border-radius: 999px;
+  border: 0;
+  background: #ffffff;
+  color: var(--apple-ink);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.apple-pc-all-btn:hover {
+  background: #e9e9ed;
+}
+
+/* Light Apple Journal All-Reflections Sheet */
+.apple-ref-sheet-body {
+  background: #f5f5f7;
+}
+
+.apple-ref-sheet-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.apple-ref-sheet-item {
+  appearance: none;
+  text-align: left;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 18px;
+  border: 0;
+  background: #ffffff;
+  color: var(--apple-ink);
+  font: inherit;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.035);
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
+}
+
+.apple-ref-sheet-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 40px rgba(11, 17, 15, 0.08);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.075);
 }
 
-.memory-journal-masonry > .guestbook-empty {
-  column-span: all;
+.apple-ref-sheet-item.is-active {
+  box-shadow: 0 0 0 2px #1d1d1f;
+}
+
+.apple-ref-sheet-quote {
+  margin: 0;
+  font-family: var(--font-serif, "Lora", Georgia, serif);
+  font-style: italic;
+  font-size: 0.96rem;
+  line-height: 1.45;
+  color: var(--apple-ink);
+}
+
+.apple-ref-sheet-excerpt {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #48484a;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.apple-ref-sheet-author {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 0.8rem;
+  color: var(--apple-muted);
+}
+
+.apple-ref-sheet-author strong {
+  color: var(--apple-ink);
+  font-weight: 600;
 }
 
 /* Reaction Spring Pop Micro-Interaction */
@@ -15086,70 +15873,9 @@ dialog.contribute-dialog::backdrop {
   100% { transform: scale(1); }
 }
 
-/* Floating Apple Frosted Glass Dock */
-.memory-float-dock {
-  position: fixed;
-  left: 50%;
-  bottom: max(18px, env(safe-area-inset-bottom, 18px));
-  z-index: 60;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px;
-  border-radius: 999px;
-  background: rgba(18, 20, 19, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
-  transform: translate(-50%, 110px);
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
-}
-
-.memory-float-dock.is-visible {
-  transform: translate(-50%, 0);
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.memory-dock-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 0;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.9);
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background-color 0.18s ease, color 0.18s ease;
-}
-
-.memory-dock-btn:hover {
-  background: rgba(255, 255, 255, 0.14);
-  color: #ffffff;
-}
-
-.memory-dock-btn--primary {
-  background: #ffffff;
-  color: #0b110f;
-  font-weight: 600;
-}
-
-.memory-dock-btn--primary:hover {
-  background: #eff1f0;
-  color: #0b110f;
-}
-
-/* Upgraded Apple Photos Filmstrip Lightbox */
+/* ==========================================================================
+ * APPLE PHOTOS FILMSTRIP LIGHTBOX
+ * ========================================================================== */
 .lightbox-tool-btn {
   display: inline-flex;
   align-items: center;
@@ -15183,7 +15909,7 @@ dialog.contribute-dialog::backdrop {
   scroll-snap-type: x proximity;
   scrollbar-width: none;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.42);
 }
 
 .lightbox-filmstrip::-webkit-scrollbar {
@@ -15196,13 +15922,13 @@ dialog.contribute-dialog::backdrop {
   width: 56px;
   height: 42px;
   padding: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 2px solid transparent;
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   overflow: hidden;
   cursor: pointer;
-  opacity: 0.56;
+  opacity: 0.54;
   scroll-snap-align: center;
   display: grid;
   place-items: center;
@@ -15226,7 +15952,9 @@ dialog.contribute-dialog::backdrop {
   transform: scale(1.06);
 }
 
-/* Apple Photos Memories Ken Burns Reel Player */
+/* ==========================================================================
+ * APPLE PHOTOS MEMORIES KEN BURNS REEL PLAYER (AUTO-HIDE CHROME + SCRUBBER)
+ * ========================================================================== */
 .memory-reel-dialog {
   width: 100vw;
   height: 100dvh;
@@ -15251,38 +15979,33 @@ dialog.contribute-dialog::backdrop {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: #090a0b;
 }
 
-.memory-reel-progress {
-  position: absolute;
-  top: max(12px, env(safe-area-inset-top, 12px));
-  left: 16px;
-  right: 16px;
-  z-index: 12;
-  display: flex;
-  gap: 5px;
-}
-
-.memory-reel-seg {
-  flex: 1 1 0;
-  height: 3px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.24);
-  overflow: hidden;
-}
-
-.memory-reel-seg-fill {
-  display: block;
+.apple-reel-theater {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
   width: 100%;
-  height: 100%;
-  background: #ffffff;
-  transform-origin: left center;
-  transform: scaleX(0);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #000000;
+}
+
+.apple-reel-chrome {
+  transition: opacity 0.36s ease, transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Auto-hide chrome ONLY in fullscreen cinema (never hide controls in mobile split-theater) */
+.apple-reel-dialog.is-ui-idle:not(.is-split-mode) .apple-reel-chrome {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .memory-reel-top {
   position: absolute;
-  top: max(26px, calc(env(safe-area-inset-top, 12px) + 14px));
+  top: 0;
   left: 0;
   right: 0;
   z-index: 11;
@@ -15290,30 +16013,34 @@ dialog.contribute-dialog::backdrop {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 20px;
+  padding: max(16px, env(safe-area-inset-top, 16px)) 20px 32px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0) 100%);
 }
 
 .memory-reel-title-group {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1 1 auto;
   min-width: 0;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
-}
-
-.memory-reel-kicker {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
+  overflow: hidden;
 }
 
 .memory-reel-heading {
-  font-family: var(--font-serif, "Lora", Georgia, serif);
-  font-size: clamp(1rem, 2.2vw, 1.25rem);
-  font-weight: 500;
+  font-family: var(--font-sans, "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: clamp(0.95rem, 1.8vw, 1.12rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memory-reel-kicker {
+  font-size: 0.76rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.72);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -15326,15 +16053,90 @@ dialog.contribute-dialog::backdrop {
   flex-shrink: 0;
 }
 
+.memory-reel-icon-btn.is-active {
+  background: #ffffff;
+  color: #1d1d1f;
+}
+
+/* Musical Soundtrack Toggle & Animated EQ Bars in Memory Reel */
+.memory-reel-audio-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: saturate(180%) blur(18px);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.18s ease, opacity 0.18s ease;
+}
+
+.memory-reel-audio-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.memory-eq-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.memory-eq-bars i {
+  display: block;
+  width: 2.5px;
+  height: 12px;
+  border-radius: 999px;
+  background: #ffffff;
+  transform-origin: bottom center;
+  animation: eqPulse 0.9s ease-in-out infinite alternate;
+}
+
+.memory-eq-bars i:nth-child(2) {
+  animation-delay: 0.22s;
+  animation-duration: 0.75s;
+}
+
+.memory-eq-bars i:nth-child(3) {
+  animation-delay: 0.4s;
+  animation-duration: 1.05s;
+}
+
+.memory-reel-audio-btn.is-muted .memory-eq-bars i {
+  animation: none;
+  transform: scaleY(0.28);
+  opacity: 0.55;
+}
+
+.memory-audio-label {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes eqPulse {
+  0% { transform: scaleY(0.28); }
+  100% { transform: scaleY(1); }
+}
+
 .memory-reel-icon-btn {
   appearance: none;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(15, 18, 17, 0.54);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  border: 0;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: saturate(180%) blur(18px);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -15343,7 +16145,7 @@ dialog.contribute-dialog::backdrop {
 }
 
 .memory-reel-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.26);
 }
 
 .memory-reel-viewport {
@@ -15381,27 +16183,27 @@ dialog.contribute-dialog::backdrop {
 }
 
 @keyframes kbZoomIn {
-  0% { transform: scale(1); opacity: 0.25; }
-  12% { opacity: 1; }
-  100% { transform: scale(1.07); opacity: 1; }
+  0% { transform: scale(1); opacity: 0.2; }
+  14% { opacity: 1; }
+  100% { transform: scale(1.065); opacity: 1; }
 }
 
 @keyframes kbPanRight {
-  0% { transform: scale(1.05) translate3d(-1.4%, 0, 0); opacity: 0.25; }
-  12% { opacity: 1; }
-  100% { transform: scale(1.05) translate3d(1.4%, 0, 0); opacity: 1; }
+  0% { transform: scale(1.045) translate3d(-1.3%, 0, 0); opacity: 0.2; }
+  14% { opacity: 1; }
+  100% { transform: scale(1.045) translate3d(1.3%, 0, 0); opacity: 1; }
 }
 
 @keyframes kbPanLeft {
-  0% { transform: scale(1.06) translate3d(1.4%, 0, 0); opacity: 0.25; }
-  12% { opacity: 1; }
-  100% { transform: scale(1.02) translate3d(-1.4%, 0, 0); opacity: 1; }
+  0% { transform: scale(1.05) translate3d(1.3%, 0, 0); opacity: 0.2; }
+  14% { opacity: 1; }
+  100% { transform: scale(1.015) translate3d(-1.3%, 0, 0); opacity: 1; }
 }
 
 .memory-reel-tap {
   position: absolute;
   top: 76px;
-  bottom: 76px;
+  bottom: 84px;
   z-index: 6;
   border: 0;
   background: transparent;
@@ -15425,92 +16227,839 @@ dialog.contribute-dialog::backdrop {
   bottom: 0;
   z-index: 10;
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 44px 24px max(22px, env(safe-area-inset-bottom, 22px));
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.78) 100%);
+}
+
+.apple-reel-foot-meta {
+  display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  padding: 40px 24px max(22px, env(safe-area-inset-bottom, 22px));
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.78) 100%);
   pointer-events: none;
 }
 
 .memory-reel-caption {
   margin: 0;
-  font-size: 0.94rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.9rem;
+  line-height: 1.48;
+  color: rgba(255, 255, 255, 0.9);
   max-width: 64ch;
 }
 
 .memory-reel-counter {
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.68);
   white-space: nowrap;
 }
 
-/* Narrow Screen / Mobile Responsive Rules */
-@media (max-width: 860px) {
-  .memory-cinema-poster {
-    min-height: 460px;
-    border-radius: 22px;
+.apple-reel-scrubber {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.apple-reel-scrubber-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+/* ==========================================================================
+ * LIVE SWIPEABLE HƯƠNG KHÍ SHEET INSIDE REEL (APPLE MUSIC LYRICS STYLE)
+ * Default visible on Mobile Split-Theater; toggleable on Desktop
+ * ========================================================================== */
+.apple-reel-sheet {
+  display: none;
+  flex-direction: column;
+  background: #101113;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+  min-height: 0;
+}
+
+.apple-reel-dialog.is-split-mode .apple-reel-sheet {
+  display: flex;
+  flex: 0 0 264px;
+}
+
+.apple-reel-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px 8px;
+  flex-shrink: 0;
+}
+
+.apple-reel-sheet-meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.apple-reel-sheet-meta strong {
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #ffffff;
+}
+
+.apple-reel-sheet-meta span {
+  font-size: 0.78rem;
+  color: rgba(245, 245, 247, 0.56);
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-reel-write-link {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #64b5ff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.apple-reel-write-link:hover {
+  opacity: 0.8;
+}
+
+.apple-reel-ref-track {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: 4px 16px 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.apple-reel-ref-track::-webkit-scrollbar {
+  display: none;
+}
+
+.apple-reel-ref-card {
+  flex: 0 0 min(420px, 86%);
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.apple-reel-ref-quote {
+  margin: 0;
+  font-family: var(--font-serif, "Lora", Georgia, serif);
+  font-style: italic;
+  font-size: 0.98rem;
+  line-height: 1.42;
+  color: #ffffff;
+}
+
+.apple-reel-ref-body {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.58;
+  color: rgba(245, 245, 247, 0.82);
+}
+
+.apple-reel-ref-foot {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.apple-reel-ref-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.apple-reel-ref-av {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.apple-reel-ref-av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.apple-reel-ref-author-txt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.apple-reel-ref-author-txt strong {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-reel-ref-author-txt span {
+  font-size: 0.72rem;
+  color: rgba(245, 245, 247, 0.56);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-reel-ref-reacts {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.apple-reel-react-pill {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.84);
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.apple-reel-react-pill:active {
+  transform: scale(0.93);
+}
+
+.apple-reel-react-pill.is-active {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #1d1d1f;
+}
+
+.apple-reel-ref-empty {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  text-align: center;
+  color: rgba(245, 245, 247, 0.7);
+  font-size: 0.88rem;
+}
+
+.apple-reel-ref-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 2px 16px max(12px, env(safe-area-inset-bottom, 12px));
+  flex-shrink: 0;
+}
+
+.apple-reel-ref-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+  transition: width 0.24s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.24s ease;
+}
+
+.apple-reel-ref-dot.is-active {
+  width: 18px;
+  background: #ffffff;
+}
+
+/* Mobile Split-Theater: Zero dead black void + zero header text crush! */
+@media (max-width: 768px) {
+  .memory-reel-top {
+    padding: max(12px, env(safe-area-inset-top, 12px)) 14px 20px;
+    gap: 8px;
   }
-  .memory-cinema-band .memory-exhibition-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+  .memory-reel-title-group {
+    display: none;
   }
-  .memory-cinema-band .memory-stage-thumb {
-    grid-column: span 1;
-    border-radius: 14px;
+  .memory-reel-top-btns {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 6px;
   }
-  .memory-cinema-band .memory-stage-thumb.is-lead,
-  .memory-cinema-band .memory-stage-thumb.is-wide {
-    grid-column: span 2;
-    grid-row: auto;
-    aspect-ratio: 16 / 10;
-    height: auto;
+  .memory-reel-audio-btn {
+    margin-right: auto;
+    height: 36px;
+    padding: 0 12px;
+    max-width: calc(100% - 132px);
+  }
+  .memory-audio-label {
+    max-width: 132px;
+  }
+  .memory-reel-icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+  .memory-reel-foot {
+    padding: 24px 14px 10px;
+    gap: 8px;
+  }
+  .memory-reel-caption {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .apple-reel-dialog.is-split-mode .apple-reel-theater {
+    flex: 0 0 auto;
+    height: clamp(236px, 42dvh, 340px);
+  }
+  .apple-reel-dialog.is-split-mode .apple-reel-sheet {
+    flex: 1 1 auto;
     min-height: 0;
   }
-  .memory-journal-masonry {
-    columns: 1;
+  .apple-reel-dialog.is-split-mode .apple-reel-ref-card {
+    flex: 0 0 88%;
   }
 }
 
-@media (max-width: 560px) {
-  .memory-cinema-poster {
-    min-height: 440px;
+/* ==========================================================================
+ * INTERACTIVE PHYSICAL APPLE PHOTO STACK (ACT 2 MAIN DECK + ACT 3 JOURNAL)
+ * Inspired by Apple iMessage Photo Stacks & Apple Journal printed photo decks
+ * ========================================================================== */
+.apple-deck-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr);
+  align-items: center;
+  gap: clamp(32px, 5.5vw, 72px);
+  padding: clamp(18px, 3vw, 32px) 0 clamp(12px, 2vw, 24px);
+}
+
+.apple-deck-layout[hidden] {
+  display: none;
+}
+
+.apple-deck-stage {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+  aspect-ratio: 4 / 3;
+  margin: 0 auto;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  outline: none;
+}
+
+.apple-deck-stage:active {
+  cursor: grabbing;
+}
+
+.apple-deck-card {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  border: 7px solid #ffffff;
+  background: #e9e9ed;
+  overflow: hidden;
+  box-shadow:
+    0 20px 44px rgba(17, 24, 21, 0.14),
+    0 4px 12px rgba(17, 24, 21, 0.06);
+  transform-origin: 50% 62%;
+  will-change: transform, opacity;
+  transition:
+    transform 0.54s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.42s ease,
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.apple-deck-card img,
+.apple-deck-card video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* Stacked physical depth layers (front = 0, behind = 1, 2, 3) */
+.apple-deck-card[data-depth="0"] {
+  z-index: 4;
+  transform: rotate(0deg) translate3d(0, 0, 0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.apple-deck-card[data-depth="1"] {
+  z-index: 3;
+  transform: rotate(5.2deg) translate3d(16px, 5px, 0) scale(0.96);
+  opacity: 0.96;
+}
+
+.apple-deck-card[data-depth="2"] {
+  z-index: 2;
+  transform: rotate(-6.4deg) translate3d(-16px, 8px, 0) scale(0.925);
+  opacity: 0.88;
+}
+
+.apple-deck-card[data-depth="3"] {
+  z-index: 1;
+  transform: rotate(2.6deg) translate3d(8px, 14px, 0) scale(0.88);
+  opacity: 0.56;
+}
+
+/* Signature Tactile Fan-Out on Hover / Keyboard Focus */
+@media (hover: hover) {
+  .apple-deck-stage:not(.is-dragging):hover .apple-deck-card[data-depth="0"],
+  .apple-deck-stage:focus-visible .apple-deck-card[data-depth="0"] {
+    transform: rotate(-0.5deg) translate3d(0, -5px, 0) scale(1.018);
+    box-shadow:
+      0 28px 56px rgba(17, 24, 21, 0.19),
+      0 6px 16px rgba(17, 24, 21, 0.08);
+  }
+
+  .apple-deck-stage:not(.is-dragging):hover .apple-deck-card[data-depth="1"],
+  .apple-deck-stage:focus-visible .apple-deck-card[data-depth="1"] {
+    transform: rotate(9.6deg) translate3d(30px, 7px, 0) scale(0.965);
+  }
+
+  .apple-deck-stage:not(.is-dragging):hover .apple-deck-card[data-depth="2"],
+  .apple-deck-stage:focus-visible .apple-deck-card[data-depth="2"] {
+    transform: rotate(-10.8deg) translate3d(-30px, 10px, 0) scale(0.935);
+  }
+}
+
+.apple-deck-card.is-dragging-card {
+  transition: none !important;
+  box-shadow:
+    0 30px 64px rgba(17, 24, 21, 0.22),
+    0 8px 20px rgba(17, 24, 21, 0.09);
+}
+
+.apple-deck-card.is-toss-next {
+  z-index: 6 !important;
+  transform: translate3d(106%, -18px, 0) rotate(13deg) scale(0.92) !important;
+  opacity: 0 !important;
+  transition:
+    transform 0.36s cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 0.28s ease !important;
+}
+
+.apple-deck-card.is-toss-prev {
+  z-index: 6 !important;
+  transform: translate3d(-106%, -18px, 0) rotate(-13deg) scale(0.92) !important;
+  opacity: 0 !important;
+  transition:
+    transform 0.36s cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 0.28s ease !important;
+}
+
+.apple-deck-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 0;
+}
+
+.apple-deck-counter {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--apple-muted);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.apple-deck-counter strong {
+  font-size: clamp(1.85rem, 3vw, 2.35rem);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--apple-ink);
+}
+
+.apple-deck-caption {
+  margin: 0;
+  font-size: clamp(1.02rem, 1.4vw, 1.15rem);
+  font-weight: 500;
+  line-height: 1.52;
+  letter-spacing: -0.015em;
+  color: var(--apple-ink);
+  min-height: 3.1em;
+  transition: opacity 0.22s ease;
+}
+
+.apple-deck-caption.is-fading {
+  opacity: 0.35;
+}
+
+.apple-deck-hint {
+  margin: -4px 0 4px;
+  font-size: 0.84rem;
+  color: var(--apple-muted);
+}
+
+.apple-deck-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.apple-deck-nav-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apple-deck-circle-btn {
+  appearance: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 0;
+  background: #f2f2f5;
+  color: #1d1d1f;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.apple-deck-circle-btn:hover {
+  background: #e5e5ea;
+}
+
+.apple-deck-circle-btn:active {
+  transform: scale(0.94);
+}
+
+.apple-deck-all-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 0;
+  background: #1d1d1f;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.apple-deck-all-btn:hover {
+  background: #333336;
+}
+
+.apple-deck-all-btn:active {
+  transform: scale(0.97);
+}
+
+/* ==========================================================================
+ * ACT 3: MINI INTERACTIVE PHOTO STACK INSIDE MULTI-PHOTO REFLECTION CARDS
+ * ========================================================================== */
+.gb-photo-stack-wrap {
+  position: relative;
+  margin: 14px 0 4px;
+  padding: 12px 14px 16px;
+}
+
+.gb-photo-stack {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 4 / 3;
+  margin: 0 auto;
+  touch-action: pan-y;
+}
+
+.gb-stack-card {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border-radius: 18px;
+  border: 5px solid #ffffff;
+  background: #ececef;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow:
+    0 12px 28px rgba(17, 24, 21, 0.13),
+    0 2px 8px rgba(17, 24, 21, 0.06);
+  transform-origin: 50% 62%;
+  will-change: transform, opacity;
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.36s ease,
+    box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.gb-stack-card img,
+.gb-stack-card video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gb-stack-card[data-stack-depth="0"] {
+  z-index: 3;
+  transform: rotate(0deg) translate3d(0, 0, 0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gb-stack-card[data-stack-depth="1"] {
+  z-index: 2;
+  transform: rotate(5deg) translate3d(10px, 3px, 0) scale(0.96);
+  opacity: 0.94;
+}
+
+.gb-stack-card[data-stack-depth="2"] {
+  z-index: 1;
+  transform: rotate(-6.2deg) translate3d(-10px, 5px, 0) scale(0.92);
+  opacity: 0.84;
+}
+
+.gb-stack-card[data-stack-depth="hidden"] {
+  z-index: 0;
+  transform: rotate(0deg) scale(0.86);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .gb-photo-stack:hover .gb-stack-card[data-stack-depth="0"] {
+    transform: translate3d(0, -3px, 0) scale(1.02);
+    box-shadow:
+      0 18px 36px rgba(17, 24, 21, 0.17),
+      0 4px 12px rgba(17, 24, 21, 0.08);
+  }
+  .gb-photo-stack:hover .gb-stack-card[data-stack-depth="1"] {
+    transform: rotate(9deg) translate3d(18px, 4px, 0) scale(0.965);
+  }
+  .gb-photo-stack:hover .gb-stack-card[data-stack-depth="2"] {
+    transform: rotate(-10.5deg) translate3d(-18px, 6px, 0) scale(0.93);
+  }
+}
+
+.gb-stack-card.is-toss-next {
+  z-index: 5 !important;
+  transform: translate3d(88%, -10px, 0) rotate(12deg) scale(0.92) !important;
+  opacity: 0 !important;
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.24s ease !important;
+}
+
+.gb-stack-flip-btn {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 6;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(29, 29, 31, 0.72);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.gb-stack-flip-btn:hover {
+  background: rgba(29, 29, 31, 0.88);
+}
+
+.gb-stack-flip-btn:active {
+  transform: scale(0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apple-deck-card,
+  .gb-stack-card {
+    transition: opacity 0.2s ease !important;
+  }
+}
+
+/* ==========================================================================
+ * RESPONSIVE POLISH (TABLET & NARROW MOBILE 375PX)
+ * ========================================================================== */
+@media (max-width: 860px) {
+  .apple-deck-layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 12px 14px 4px;
+    overflow: hidden;
+  }
+  .apple-deck-stage {
+    max-width: 440px;
+  }
+  .apple-deck-card {
+    border-width: 5px;
+    border-radius: 20px;
+  }
+  .apple-deck-card[data-depth="1"] {
+    transform: rotate(4.2deg) translate3d(10px, 4px, 0) scale(0.96);
+  }
+  .apple-deck-card[data-depth="2"] {
+    transform: rotate(-5.2deg) translate3d(-10px, 6px, 0) scale(0.925);
+  }
+  .apple-deck-caption {
+    min-height: 0;
+  }
+  .apple-hero {
+    min-height: clamp(480px, 76svh, 680px);
+  }
+  .apple-mosaic-frame {
     border-radius: 18px;
   }
-  .memory-cinema-top {
-    padding: 14px;
+  .memory-stage-root--apple .memory-exhibition-grid,
+  .memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="5"],
+  .memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="3"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto;
+    grid-auto-rows: auto;
+    gap: 4px;
   }
-  .memory-glass-icon-btn span {
+  .memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="5"] .memory-stage-thumb:nth-child(1),
+  .memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="3"] .memory-stage-thumb:first-child {
+    grid-column: 1 / span 2;
+    grid-row: auto;
+    aspect-ratio: 16 / 10;
+  }
+  .memory-stage-root--apple .memory-exhibition-grid[data-mosaic-count="5"] .memory-stage-thumb:nth-child(n + 2) {
+    grid-column: auto;
+    grid-row: auto;
+    aspect-ratio: 4 / 3;
+  }
+  .memory-stage-root--apple .memory-stage-thumb {
+    aspect-ratio: 4 / 3;
+  }
+  .apple-sheet-dialog {
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .apple-sheet-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .apple-postcard-stage > .gb-card.gb-card--photo.is-pc-active {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .apple-postcard-stage.has-stack::before,
+  .apple-postcard-stage.has-stack::after {
     display: none;
   }
-  .memory-cinema-bottom {
-    padding: 18px;
-    gap: 16px;
+  .apple-postcard-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
-  .memory-hero-actions--cinema {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 100%;
-    gap: 8px;
+  .apple-postcard-controls {
+    justify-content: flex-end;
   }
-  .memory-hero-actions--cinema [data-memory-play-reel] {
-    grid-column: 1 / -1;
+  .apple-ref-sheet-list {
+    grid-template-columns: 1fr;
   }
-  .memory-btn-apple {
-    width: 100%;
+  .apple-member-gate {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .memory-audio-label {
+    max-width: 112px;
+  }
+  .apple-hero-content {
+    padding-bottom: 34px;
+  }
+  .apple-hero-actions {
+    gap: 10px;
+  }
+  .apple-btn {
+    min-height: 44px;
+    padding: 0 18px;
+    font-size: 0.86rem;
+  }
+  .apple-mosaic-all-pill {
+    right: 12px;
+    bottom: 12px;
+    min-height: 36px;
     padding: 0 14px;
-    font-size: 0.84rem;
-  }
-  .memory-float-dock {
-    bottom: max(12px, env(safe-area-inset-bottom, 12px));
-    max-width: calc(100vw - 24px);
-  }
-  .memory-dock-btn {
-    padding: 0 11px;
-    font-size: 0.76rem;
+    font-size: 0.8rem;
   }
 }

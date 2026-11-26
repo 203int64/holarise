@@ -1,3 +1,4 @@
+import { sendRsvpConfirmationEmail } from "../_lib/email.js";
 import { syncRegistrationToGas } from "../_lib/gas.js";
 import { verifyTurnstileToken } from "../_lib/turnstile.js";
 import {
@@ -109,11 +110,20 @@ export async function createEventRegistrationForMember(context, member, eventPay
     )
     .run();
 
-  const syncPromise = syncRegistrationToGas(env.DB, record);
+  const bgTasks = [syncRegistrationToGas(env.DB, record)];
+  if (record.email && record.event_id) {
+    bgTasks.push(
+      sendRsvpConfirmationEmail(env, {
+        registration: record,
+        lang: cleanStr(eventPayload.lang, 10).toLowerCase() === "en" ? "en" : "vi",
+      })
+    );
+  }
+  const bgPromise = Promise.allSettled(bgTasks);
   if (typeof context.waitUntil === "function") {
-    context.waitUntil(syncPromise);
+    context.waitUntil(bgPromise);
   } else {
-    await syncPromise;
+    await bgPromise;
   }
 
   return {
@@ -383,11 +393,20 @@ export async function onRequestPost(context) {
     }
   }
 
-  const syncPromise = syncRegistrationToGas(env.DB, record);
+  const bgTasks = [syncRegistrationToGas(env.DB, record)];
+  if (!v.is_feedback && record.email && record.event_id) {
+    bgTasks.push(
+      sendRsvpConfirmationEmail(env, {
+        registration: record,
+        lang: isEn ? "en" : "vi",
+      })
+    );
+  }
+  const bgPromise = Promise.allSettled(bgTasks);
   if (typeof context.waitUntil === "function") {
-    context.waitUntil(syncPromise);
+    context.waitUntil(bgPromise);
   } else {
-    await syncPromise;
+    await bgPromise;
   }
 
   const hasSpecificEvent = Boolean(record.event_id);

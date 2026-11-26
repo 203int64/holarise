@@ -1977,37 +1977,28 @@
         );
       }
 
-      var visible = photos.slice(0, 4);
-      var extraCount = photos.length - 4;
-      var countAttr = photos.length <= 4 ? String(photos.length) : "many";
-      var tiles = visible
+      var stackCards = photos
         .map(function (url, idx) {
           var isVid = isVideoUrl(url);
-          var overlay =
-            idx === 3 && extraCount > 0
-              ? '<span class="gb-collage-more" aria-hidden="true">+' + extraCount + "</span>"
-              : "";
+          var depth = idx < 3 ? String(idx) : "hidden";
           return (
-            '<button type="button" class="gb-collage-tile' + (isVid ? " is-video" : "") + '" data-lightbox-src="' + escTxt(url) + '" data-lightbox-type="' + (isVid ? "video" : "image") + '" data-lightbox-alt="' + (isVid ? "Video " : "Ảnh ") + (idx + 1) + ' của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '">' +
+            '<button type="button" class="gb-stack-card' + (isVid ? " is-video" : "") + '" data-stack-idx="' + idx + '" data-stack-depth="' + depth + '" data-lightbox-src="' + escTxt(url) + '" data-lightbox-type="' + (isVid ? "video" : "image") + '" data-lightbox-alt="' + (isVid ? "Video " : "Ảnh ") + (idx + 1) + ' của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '">' +
             renderCardMediaTileInner(url, "Khoảnh khắc " + (idx + 1) + " của " + it.authorName) +
-            overlay +
             "</button>"
           );
         })
         .join("");
 
-      var hiddenExtras = photos
-        .slice(4)
-        .map(function (url, offset) {
-          var idx = 4 + offset;
-          var isVid = isVideoUrl(url);
-          return (
-            '<button type="button" hidden data-lightbox-src="' + escTxt(url) + '" data-lightbox-type="' + (isVid ? "video" : "image") + '" data-lightbox-alt="' + (isVid ? "Video " : "Ảnh ") + (idx + 1) + ' của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '"></button>'
-          );
-        })
-        .join("");
-
-      return '<div class="gb-photo-collage" data-count="' + countAttr + '">' + tiles + hiddenExtras + "</div>";
+      return (
+        '<div class="gb-photo-stack-wrap">' +
+        '<div class="gb-photo-stack" data-gb-stack data-stack-cur="0" data-stack-total="' + photos.length + '" data-lightbox-group>' +
+        stackCards +
+        '<button type="button" class="gb-stack-flip-btn" data-gb-stack-flip aria-label="' + escTxt(t("Lật ảnh tiếp theo", "Flip next photo")) + '">' +
+        '<span data-gb-stack-label>1 / ' + photos.length + ' · ' + escTxt(t("Lật", "Flip")) + '</span>' +
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>' +
+        "</button>" +
+        "</div></div>"
+      );
     }
 
     var MOOD_META = {
@@ -3178,8 +3169,9 @@
     };
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // 1. Collect all gallery slides for Media Filter & Memory Reel
+    // 1. Collect all gallery slides for Curated 5-Tile Mosaic, Contact Sheet & Memory Reel
     var galleryWrap = document.getElementById("memory-gallery-group");
+    var gridEl = galleryWrap ? galleryWrap.querySelector(".memory-exhibition-grid") : null;
     var thumbs = galleryWrap
       ? Array.prototype.slice.call(galleryWrap.querySelectorAll(".memory-stage-thumb[data-lightbox-src]"))
       : [];
@@ -3188,7 +3180,314 @@
     }).length;
     var videoCount = thumbs.length - photoCount;
 
-    // Show media filter pills only when both photos & videos exist
+    var MAX_VISIBLE_MOSAIC = 5;
+    var sheetDlg = document.getElementById("memory-all-photos-dialog");
+    var sheetGrid = document.getElementById("memory-sheet-grid");
+    var sheetCloseBtn = document.getElementById("memory-sheet-close");
+    var sheetPlayBtn = document.getElementById("memory-sheet-play-reel");
+    var openAllBtn = document.getElementById("memory-open-all-btn");
+    var openAllLabel = document.getElementById("memory-open-all-label");
+    var sheetHydrated = false;
+
+    function openAllPhotosSheet() {
+      if (!sheetDlg || !sheetGrid) return;
+      if (!sheetHydrated) {
+        sheetHydrated = true;
+        sheetGrid.innerHTML = "";
+        thumbs.forEach(function (origTile) {
+          var clone = origTile.cloneNode(true);
+          clone.classList.remove("is-lead", "is-wide", "is-mosaic-overflow", "has-more-overlay");
+          clone.removeAttribute("data-open-all-sheet");
+          var oldOv = clone.querySelector(".memory-more-overlay");
+          if (oldOv) oldOv.remove();
+          clone.classList.add("memory-sheet-tile");
+          clone.hidden = false;
+          sheetGrid.appendChild(clone);
+        });
+      }
+      if (!sheetDlg.open) sheetDlg.showModal();
+    }
+
+    var photoCountEl = document.getElementById("memory-photo-count");
+    if (photoCountEl && thumbs.length > 0) {
+      photoCountEl.textContent = isEnStage
+        ? thumbs.length + (thumbs.length === 1 ? " photo" : " photos")
+        : thumbs.length + " ảnh";
+    }
+
+    // Interactive Physical Apple Photo Stack Deck (Act 2 main showcase)
+    var deckLayout = document.getElementById("apple-deck-layout");
+    var deckStage = document.getElementById("apple-photo-deck");
+    var deckFallback = document.getElementById("apple-gallery-fallback");
+    var deckCurEl = document.getElementById("apple-deck-cur");
+    var deckTotalEl = document.getElementById("apple-deck-total");
+    var deckCaptionEl = document.getElementById("apple-deck-caption");
+    var deckPrevBtn = document.getElementById("apple-deck-prev");
+    var deckNextBtn = document.getElementById("apple-deck-next");
+    var deckZoomBtn = document.getElementById("apple-deck-zoom");
+
+    if (deckLayout && deckStage && thumbs.length > 0) {
+      var deckSlides = thumbs.map(function (el) {
+        var imgEl = el.querySelector("img");
+        return {
+          src: el.getAttribute("data-lightbox-src") || "",
+          thumbSrc: imgEl ? imgEl.currentSrc || imgEl.getAttribute("src") || "" : el.getAttribute("data-lightbox-src") || "",
+          type: el.getAttribute("data-lightbox-type") || "image",
+          alt: el.getAttribute("data-lightbox-alt") || "",
+          caption: el.getAttribute("data-lightbox-caption") || "",
+        };
+      });
+
+      var deckIdx = 0;
+      var deckAnimating = false;
+      var VISIBLE_DEPTHS = Math.min(4, deckSlides.length);
+      var pad2 = function (n) {
+        return n < 10 ? "0" + n : String(n);
+      };
+
+      function createDeckCardEl(slideIdx, depth) {
+        var slide = deckSlides[slideIdx];
+        var card = document.createElement("div");
+        card.className = "apple-deck-card";
+        card.setAttribute("data-depth", String(depth));
+        card.setAttribute("data-slide-idx", String(slideIdx));
+        if (slide.type === "video") {
+          var vid = document.createElement("video");
+          vid.src = slide.src;
+          vid.muted = true;
+          vid.playsInline = true;
+          vid.preload = "metadata";
+          card.appendChild(vid);
+        } else {
+          var img = document.createElement("img");
+          img.src = slide.thumbSrc || slide.src;
+          img.alt = slide.alt || "";
+          img.decoding = "async";
+          card.appendChild(img);
+        }
+        return card;
+      }
+
+      function syncDeckMeta() {
+        var total = deckSlides.length;
+        var curSlide = deckSlides[deckIdx];
+        if (deckCurEl) deckCurEl.textContent = pad2(deckIdx + 1);
+        if (deckTotalEl) deckTotalEl.textContent = pad2(total);
+        if (deckCaptionEl) {
+          deckCaptionEl.classList.add("is-fading");
+          setTimeout(function () {
+            deckCaptionEl.textContent = curSlide.caption || curSlide.alt || "";
+            deckCaptionEl.classList.remove("is-fading");
+          }, 90);
+        }
+      }
+
+      function renderDeckFresh() {
+        deckStage.innerHTML = "";
+        for (var d = VISIBLE_DEPTHS - 1; d >= 0; d -= 1) {
+          var sIdx = (deckIdx + d) % deckSlides.length;
+          deckStage.appendChild(createDeckCardEl(sIdx, d));
+        }
+        syncDeckMeta();
+      }
+
+      function flipDeck(step) {
+        if (deckSlides.length <= 1 || deckAnimating) return;
+        deckAnimating = true;
+        var frontCard = deckStage.querySelector('.apple-deck-card[data-depth="0"]');
+        var isPrev = step < 0;
+        var nextIdx = (deckIdx + step + deckSlides.length) % deckSlides.length;
+
+        if (frontCard) {
+          frontCard.style.transform = "";
+          frontCard.classList.remove("is-dragging-card");
+          frontCard.classList.add(isPrev ? "is-toss-prev" : "is-toss-next");
+        }
+
+        if (!isPrev) {
+          // Promote underlying cards forward simultaneously while top card sweeps out
+          deckStage.querySelectorAll(".apple-deck-card").forEach(function (c) {
+            if (c === frontCard) return;
+            var curD = Number(c.getAttribute("data-depth"));
+            if (curD > 0) c.setAttribute("data-depth", String(curD - 1));
+          });
+          if (deckSlides.length >= VISIBLE_DEPTHS) {
+            var incomingIdx = (nextIdx + VISIBLE_DEPTHS - 1) % deckSlides.length;
+            var newBack = createDeckCardEl(incomingIdx, VISIBLE_DEPTHS - 1);
+            deckStage.insertBefore(newBack, deckStage.firstChild);
+          }
+          deckIdx = nextIdx;
+          syncDeckMeta();
+          setTimeout(function () {
+            if (frontCard && frontCard.parentNode) frontCard.remove();
+            deckAnimating = false;
+          }, 340);
+        } else {
+          deckIdx = nextIdx;
+          setTimeout(function () {
+            renderDeckFresh();
+            deckAnimating = false;
+          }, 220);
+        }
+      }
+
+      // Physical pointer drag & touch swipe on the deck
+      var dragActive = false;
+      var dragStartX = 0;
+      var dragStartY = 0;
+      var dragDx = 0;
+      var dragCard = null;
+
+      deckStage.addEventListener("pointerdown", function (e) {
+        if (deckAnimating || e.button > 0) return;
+        dragCard = deckStage.querySelector('.apple-deck-card[data-depth="0"]');
+        if (!dragCard) return;
+        dragActive = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        dragDx = 0;
+        deckStage.classList.add("is-dragging");
+        dragCard.classList.add("is-dragging-card");
+        try {
+          deckStage.setPointerCapture(e.pointerId);
+        } catch (_e) {}
+      });
+
+      deckStage.addEventListener("pointermove", function (e) {
+        if (!dragActive || !dragCard) return;
+        dragDx = e.clientX - dragStartX;
+        var dy = (e.clientY - dragStartY) * 0.16;
+        var rot = dragDx * 0.045;
+        dragCard.style.transform =
+          "translate3d(" + dragDx.toFixed(1) + "px, " + dy.toFixed(1) + "px, 0) rotate(" + rot.toFixed(2) + "deg)";
+      });
+
+      function finishDrag() {
+        if (!dragActive) return;
+        dragActive = false;
+        deckStage.classList.remove("is-dragging");
+        var card = dragCard;
+        var dx = dragDx;
+        dragCard = null;
+        dragDx = 0;
+        if (!card) return;
+        card.classList.remove("is-dragging-card");
+        if (Math.abs(dx) >= 52) {
+          flipDeck(dx < 0 ? 1 : -1);
+        } else if (Math.abs(dx) < 8) {
+          card.style.transform = "";
+          flipDeck(1);
+        } else {
+          card.style.transform = "";
+        }
+      }
+
+      deckStage.addEventListener("pointerup", finishDrag);
+      deckStage.addEventListener("pointercancel", finishDrag);
+      deckStage.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          e.preventDefault();
+          flipDeck(1);
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          flipDeck(-1);
+        }
+      });
+
+      if (deckPrevBtn) deckPrevBtn.addEventListener("click", function () { flipDeck(-1); });
+      if (deckNextBtn) deckNextBtn.addEventListener("click", function () { flipDeck(1); });
+      if (deckZoomBtn) {
+        deckZoomBtn.addEventListener("click", function () {
+          if (thumbs[deckIdx]) thumbs[deckIdx].click();
+        });
+      }
+
+      renderDeckFresh();
+      deckLayout.hidden = false;
+      if (deckFallback) deckFallback.hidden = true;
+
+      if (openAllBtn && thumbs.length >= 2) {
+        openAllBtn.hidden = false;
+        if (openAllLabel) {
+          openAllLabel.textContent = isEnStage
+            ? "View all " + thumbs.length + " photos"
+            : "Tất cả " + thumbs.length + " ảnh";
+        }
+      }
+    }
+
+    // Interactive Mini Photo Stack inside Multi-Photo Reflection Cards (Act 3)
+    function flipReflectionStack(stackEl) {
+      if (!stackEl || stackEl.dataset.flipping === "1") return;
+      var cards = Array.prototype.slice.call(stackEl.querySelectorAll(".gb-stack-card"));
+      if (cards.length <= 1) return;
+      stackEl.dataset.flipping = "1";
+      var cur = Number(stackEl.getAttribute("data-stack-cur") || "0");
+      var frontCard = cards[cur];
+      var next = (cur + 1) % cards.length;
+      if (frontCard) frontCard.classList.add("is-toss-next");
+
+      setTimeout(function () {
+        if (frontCard) frontCard.classList.remove("is-toss-next");
+        stackEl.setAttribute("data-stack-cur", String(next));
+        cards.forEach(function (c, i) {
+          var rel = (i - next + cards.length) % cards.length;
+          c.setAttribute("data-stack-depth", rel < 3 ? String(rel) : "hidden");
+        });
+        var lbl = stackEl.querySelector("[data-gb-stack-label]");
+        if (lbl) {
+          lbl.textContent = (next + 1) + " / " + cards.length + " · " + tStage("Lật", "Flip");
+        }
+        stackEl.dataset.flipping = "0";
+      }, 240);
+    }
+
+    document.addEventListener("click", function (e) {
+      var flipBtn = e.target.closest("[data-gb-stack-flip]");
+      if (!flipBtn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var stackEl = flipBtn.closest("[data-gb-stack]");
+      flipReflectionStack(stackEl);
+    });
+
+    var gbStackTouchX = 0;
+    var gbStackTarget = null;
+    document.addEventListener(
+      "touchstart",
+      function (e) {
+        var st = e.target.closest("[data-gb-stack]");
+        if (st && e.touches && e.touches.length) {
+          gbStackTarget = st;
+          gbStackTouchX = e.touches[0].clientX;
+        }
+      },
+      { passive: true }
+    );
+    document.addEventListener(
+      "touchend",
+      function (e) {
+        if (!gbStackTarget || !e.changedTouches || !e.changedTouches.length) return;
+        var dx = e.changedTouches[0].clientX - gbStackTouchX;
+        var st = gbStackTarget;
+        gbStackTarget = null;
+        if (Math.abs(dx) > 42) {
+          flipReflectionStack(st);
+        }
+      },
+      { passive: true }
+    );
+
+    if (openAllBtn) {
+      openAllBtn.addEventListener("click", openAllPhotosSheet);
+    }
+    if (sheetCloseBtn && sheetDlg) {
+      sheetCloseBtn.addEventListener("click", function () {
+        if (sheetDlg.open) sheetDlg.close();
+      });
+    }
+
+    // Media filter inside All-Photos Contact Sheet (shows when both photos & videos exist)
     var filterBar = stageRoot.querySelector("[data-memory-media-filter]");
     if (filterBar && photoCount > 0 && videoCount > 0) {
       filterBar.hidden = false;
@@ -3201,14 +3500,14 @@
 
       filterBar.addEventListener("click", function (e) {
         var btn = e.target.closest("[data-filter]");
-        if (!btn) return;
+        if (!btn || !sheetGrid) return;
         var mode = btn.getAttribute("data-filter") || "all";
         filterBar.querySelectorAll("[data-filter]").forEach(function (b) {
           var active = b === btn;
           b.classList.toggle("is-active", active);
           b.setAttribute("aria-pressed", active ? "true" : "false");
         });
-        thumbs.forEach(function (tile) {
+        sheetGrid.querySelectorAll(".memory-sheet-tile").forEach(function (tile) {
           var kind = tile.getAttribute("data-media-kind") || "image";
           tile.hidden = mode !== "all" && kind !== mode;
         });
@@ -3259,24 +3558,32 @@
       });
     });
 
-    // 5. Floating Frosted Glass Dock (visible after scrolling past Cinema Hero)
-    var floatDock = document.getElementById("memory-float-dock");
+    // 5. Adaptive Liquid Glass Navbar (dark frosted over Full-Bleed Hero -> light frosted on #ffffff/#f5f5f7)
     var heroPoster = stageRoot.querySelector("[data-memory-hero-poster]");
-    if (floatDock && heroPoster && "IntersectionObserver" in window) {
-      floatDock.hidden = false;
-      var dockObserver = new IntersectionObserver(
+    if (heroPoster && "IntersectionObserver" in window) {
+      var headerObserver = new IntersectionObserver(
         function (entries) {
           var heroVisible = entries[0] && entries[0].isIntersecting;
-          floatDock.classList.toggle("is-visible", !heroVisible);
+          document.body.classList.toggle("is-header-light", !heroVisible);
         },
-        { threshold: 0.12 }
+        { rootMargin: "-68px 0px 0px 0px", threshold: 0 }
       );
-      dockObserver.observe(heroPoster);
+      headerObserver.observe(heroPoster);
     }
 
-    // 6. Apple Journal Mood Filter (auto-populates when guestbook renders cards)
+    // 6. Apple Journal Mood Filter + Physical Postcard Stack + Tactile Avatar Dock
     var gbListEl = document.getElementById("guestbook-list");
     var moodFilterEl = document.getElementById("memory-mood-filter");
+    var pcBarEl = document.getElementById("apple-postcard-bar");
+    var pcDockEl = document.getElementById("apple-avatar-dock");
+    var pcCounterEl = document.getElementById("apple-postcard-counter");
+    var pcPrevBtn = document.getElementById("apple-pc-prev");
+    var pcNextBtn = document.getElementById("apple-pc-next");
+    var pcOpenAllBtn = document.getElementById("apple-pc-open-all");
+    var refSheetDlg = document.getElementById("memory-all-reflections-dialog");
+    var refSheetList = document.getElementById("apple-ref-sheet-list");
+    var refSheetClose = document.getElementById("apple-ref-sheet-close");
+
     var MOOD_LABELS = {
       "am-long": tStage("Ấm lòng", "Heartwarming"),
       "cham-sau": tStage("Chạm sâu", "Deeply moving"),
@@ -3285,52 +3592,282 @@
       "tiep-suc": tStage("Tiếp sức", "Inspiring"),
     };
     var activeMood = "all";
+    var pcIdx = 0;
+    var pcVisibleCards = [];
 
-    function syncMoodFilterBar() {
-      if (!gbListEl || !moodFilterEl) return;
-      var cards = Array.prototype.slice.call(gbListEl.querySelectorAll(".gb-card[data-mood-key]"));
-      var counts = {};
-      cards.forEach(function (c) {
-        var m = c.getAttribute("data-mood-key") || "";
-        if (m && MOOD_LABELS[m]) counts[m] = (counts[m] || 0) + 1;
-      });
-      var keys = Object.keys(counts);
-      if (keys.length < 2) {
-        moodFilterEl.hidden = true;
-        return;
-      }
-      moodFilterEl.hidden = false;
-      var pillsHtml =
-        '<button type="button" class="memory-mood-chip' + (activeMood === "all" ? " is-active" : "") + '" data-mood-filter="all">' +
-        tStage("Tất cả", "All") + " (" + cards.length + ")</button>" +
-        keys
-          .map(function (k) {
-            return (
-              '<button type="button" class="memory-mood-chip' + (activeMood === k ? " is-active" : "") + '" data-mood-filter="' + k + '">' +
-              '<i class="mood-dot" data-mood="' + k + '" aria-hidden="true"></i>' +
-              MOOD_LABELS[k] + " · " + counts[k] +
-              "</button>"
-            );
-          })
-          .join("");
-      moodFilterEl.innerHTML = pillsHtml;
+    function padPc(n) {
+      return n < 10 ? "0" + n : String(n);
     }
 
-    if (gbListEl && moodFilterEl && "MutationObserver" in window) {
-      var gbMut = new MutationObserver(syncMoodFilterBar);
-      gbMut.observe(gbListEl, { childList: true });
-      moodFilterEl.addEventListener("click", function (e) {
-        var btn = e.target.closest("[data-mood-filter]");
-        if (!btn) return;
-        activeMood = btn.getAttribute("data-mood-filter") || "all";
-        moodFilterEl.querySelectorAll("[data-mood-filter]").forEach(function (b) {
-          b.classList.toggle("is-active", b === btn);
-        });
-        gbListEl.querySelectorAll(".gb-card").forEach(function (card) {
-          var m = card.getAttribute("data-mood-key") || "";
-          card.hidden = activeMood !== "all" && m !== activeMood;
-        });
+    function readCardSummary(card) {
+      var nameEl = card.querySelector(".gb-author-meta strong");
+      var subEl = card.querySelector(".gb-author-meta span");
+      var avImg = card.querySelector(".gb-avatar-img");
+      var avInit = card.querySelector(".gb-avatar-initials");
+      var quoteEl = card.querySelector(".gb-pull-quote");
+      var bodyEl = card.querySelector(".gb-card-body");
+      var moodKey = card.getAttribute("data-mood-key") || "";
+      return {
+        name: nameEl ? nameEl.textContent.trim() : tStage("Thành viên", "Member"),
+        sub: subEl ? subEl.textContent.trim() : "",
+        avatarSrc: avImg ? avImg.getAttribute("src") || "" : "",
+        initials: avInit ? avInit.textContent.trim() : "H",
+        quote: quoteEl ? quoteEl.textContent.trim() : "",
+        body: bodyEl ? bodyEl.textContent.trim() : "",
+        moodKey: moodKey,
+      };
+    }
+
+    function activatePostcard(nextIdx, dir) {
+      var total = pcVisibleCards.length;
+      if (!total) {
+        if (gbListEl) gbListEl.classList.remove("has-stack");
+        if (pcBarEl) pcBarEl.hidden = true;
+        return;
+      }
+      pcIdx = ((nextIdx % total) + total) % total;
+      if (gbListEl) gbListEl.classList.toggle("has-stack", total >= 2);
+      if (pcBarEl) pcBarEl.hidden = total < 2;
+      if (pcOpenAllBtn) pcOpenAllBtn.hidden = total < 3;
+
+      var allCards = gbListEl ? Array.prototype.slice.call(gbListEl.querySelectorAll(".gb-card")) : [];
+      var targetCard = pcVisibleCards[pcIdx];
+      allCards.forEach(function (card) {
+        var isActive = card === targetCard;
+        card.classList.toggle("is-pc-active", isActive);
+        card.classList.remove("is-pc-enter-next", "is-pc-enter-prev");
+        if (isActive && dir) {
+          void card.offsetWidth;
+          card.classList.add(dir < 0 ? "is-pc-enter-prev" : "is-pc-enter-next");
+        }
       });
+
+      if (pcCounterEl) {
+        pcCounterEl.textContent = padPc(pcIdx + 1) + " / " + padPc(total);
+      }
+
+      if (pcDockEl) {
+        var chips = pcDockEl.querySelectorAll(".apple-avatar-chip");
+        chips.forEach(function (chip, i) {
+          var active = i === pcIdx;
+          chip.classList.toggle("is-active", active);
+          chip.setAttribute("aria-selected", active ? "true" : "false");
+          if (active && dir && typeof chip.scrollIntoView === "function") {
+            try {
+              chip.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+            } catch (_e) {}
+          }
+        });
+      }
+    }
+
+    function rebuildPostcardDeck(resetIdx) {
+      if (!gbListEl) return;
+      var allCards = Array.prototype.slice.call(gbListEl.querySelectorAll(".gb-card"));
+      pcVisibleCards = allCards.filter(function (card) {
+        var m = card.getAttribute("data-mood-key") || "";
+        return activeMood === "all" || m === activeMood;
+      });
+
+      if (pcDockEl) {
+        pcDockEl.innerHTML = "";
+        pcVisibleCards.forEach(function (card, i) {
+          var info = readCardSummary(card);
+          var chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "apple-avatar-chip";
+          chip.setAttribute("role", "tab");
+          chip.setAttribute("data-pc-idx", String(i));
+          chip.setAttribute("aria-selected", "false");
+
+          var av = document.createElement("span");
+          av.className = "apple-avatar-chip-av";
+          av.setAttribute("aria-hidden", "true");
+          if (info.avatarSrc) {
+            var im = document.createElement("img");
+            im.src = info.avatarSrc;
+            im.alt = "";
+            av.appendChild(im);
+          } else {
+            av.textContent = info.initials;
+          }
+          chip.appendChild(av);
+
+          var nm = document.createElement("span");
+          nm.className = "apple-avatar-chip-name";
+          nm.textContent = info.name;
+          chip.appendChild(nm);
+
+          if (info.moodKey && MOOD_LABELS[info.moodKey]) {
+            var dot = document.createElement("i");
+            dot.className = "mood-dot";
+            dot.setAttribute("data-mood", info.moodKey);
+            dot.setAttribute("aria-hidden", "true");
+            chip.appendChild(dot);
+          }
+
+          pcDockEl.appendChild(chip);
+        });
+      }
+
+      activatePostcard(resetIdx ? 0 : Math.min(pcIdx, Math.max(0, pcVisibleCards.length - 1)), 0);
+    }
+
+    function syncMoodFilterBar() {
+      if (!gbListEl) return;
+      var cards = Array.prototype.slice.call(gbListEl.querySelectorAll(".gb-card[data-mood-key]"));
+      if (moodFilterEl) {
+        var counts = {};
+        cards.forEach(function (c) {
+          var m = c.getAttribute("data-mood-key") || "";
+          if (m && MOOD_LABELS[m]) counts[m] = (counts[m] || 0) + 1;
+        });
+        var keys = Object.keys(counts);
+        if (keys.length < 2) {
+          moodFilterEl.hidden = true;
+        } else {
+          moodFilterEl.hidden = false;
+          var pillsHtml =
+            '<button type="button" class="memory-mood-chip' + (activeMood === "all" ? " is-active" : "") + '" data-mood-filter="all">' +
+            tStage("Tất cả", "All") + " (" + cards.length + ")</button>" +
+            keys
+              .map(function (k) {
+                return (
+                  '<button type="button" class="memory-mood-chip' + (activeMood === k ? " is-active" : "") + '" data-mood-filter="' + k + '">' +
+                  '<i class="mood-dot" data-mood="' + k + '" aria-hidden="true"></i>' +
+                  MOOD_LABELS[k] + " · " + counts[k] +
+                  "</button>"
+                );
+              })
+              .join("");
+          moodFilterEl.innerHTML = pillsHtml;
+        }
+      }
+      rebuildPostcardDeck(false);
+    }
+
+    if (gbListEl) {
+      if ("MutationObserver" in window) {
+        var gbMut = new MutationObserver(syncMoodFilterBar);
+        gbMut.observe(gbListEl, { childList: true });
+      }
+      syncMoodFilterBar();
+
+      if (moodFilterEl) {
+        moodFilterEl.addEventListener("click", function (e) {
+          var btn = e.target.closest("[data-mood-filter]");
+          if (!btn) return;
+          activeMood = btn.getAttribute("data-mood-filter") || "all";
+          moodFilterEl.querySelectorAll("[data-mood-filter]").forEach(function (b) {
+            b.classList.toggle("is-active", b === btn);
+          });
+          rebuildPostcardDeck(true);
+        });
+      }
+
+      if (pcDockEl) {
+        pcDockEl.addEventListener("click", function (e) {
+          var chip = e.target.closest("[data-pc-idx]");
+          if (!chip) return;
+          var target = Number(chip.getAttribute("data-pc-idx"));
+          if (Number.isFinite(target) && target !== pcIdx) {
+            activatePostcard(target, target > pcIdx ? 1 : -1);
+          }
+        });
+      }
+      if (pcPrevBtn) {
+        pcPrevBtn.addEventListener("click", function () {
+          activatePostcard(pcIdx - 1, -1);
+        });
+      }
+      if (pcNextBtn) {
+        pcNextBtn.addEventListener("click", function () {
+          activatePostcard(pcIdx + 1, 1);
+        });
+      }
+
+      // Swipe horizontally on postcard (ignoring gestures inside a card's mini photo stack)
+      var pcTouchX = 0;
+      var pcTouchActive = false;
+      gbListEl.addEventListener(
+        "touchstart",
+        function (e) {
+          if (e.target.closest("[data-gb-stack]")) {
+            pcTouchActive = false;
+            return;
+          }
+          if (e.touches && e.touches.length) {
+            pcTouchActive = true;
+            pcTouchX = e.touches[0].clientX;
+          }
+        },
+        { passive: true }
+      );
+      gbListEl.addEventListener(
+        "touchend",
+        function (e) {
+          if (!pcTouchActive || !e.changedTouches || !e.changedTouches.length) return;
+          pcTouchActive = false;
+          var dx = e.changedTouches[0].clientX - pcTouchX;
+          if (Math.abs(dx) > 52 && pcVisibleCards.length >= 2) {
+            activatePostcard(dx < 0 ? pcIdx + 1 : pcIdx - 1, dx < 0 ? 1 : -1);
+          }
+        },
+        { passive: true }
+      );
+
+      // Light Apple Journal All-Reflections Sheet
+      if (pcOpenAllBtn && refSheetDlg && refSheetList) {
+        pcOpenAllBtn.addEventListener("click", function () {
+          refSheetList.innerHTML = "";
+          pcVisibleCards.forEach(function (card, i) {
+            var info = readCardSummary(card);
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "apple-ref-sheet-item" + (i === pcIdx ? " is-active" : "");
+            btn.setAttribute("data-sheet-pc-idx", String(i));
+            if (info.quote) {
+              var q = document.createElement("p");
+              q.className = "apple-ref-sheet-quote";
+              q.textContent = info.quote;
+              btn.appendChild(q);
+            }
+            var ex = document.createElement("p");
+            ex.className = "apple-ref-sheet-excerpt";
+            ex.textContent = info.body;
+            btn.appendChild(ex);
+
+            var foot = document.createElement("div");
+            foot.className = "apple-ref-sheet-author";
+            var st = document.createElement("strong");
+            st.textContent = info.name;
+            foot.appendChild(st);
+            if (info.sub) {
+              var sp = document.createElement("span");
+              sp.textContent = info.sub;
+              foot.appendChild(sp);
+            }
+            btn.appendChild(foot);
+            refSheetList.appendChild(btn);
+          });
+          if (!refSheetDlg.open) refSheetDlg.showModal();
+        });
+
+        refSheetList.addEventListener("click", function (e) {
+          var item = e.target.closest("[data-sheet-pc-idx]");
+          if (!item) return;
+          var idx = Number(item.getAttribute("data-sheet-pc-idx"));
+          if (refSheetDlg.open) refSheetDlg.close();
+          if (Number.isFinite(idx)) {
+            activatePostcard(idx, idx >= pcIdx ? 1 : -1);
+          }
+        });
+      }
+      if (refSheetClose && refSheetDlg) {
+        refSheetClose.addEventListener("click", function () {
+          if (refSheetDlg.open) refSheetDlg.close();
+        });
+      }
     }
 
     // Spring pop feedback when tapping reaction buttons
@@ -3342,20 +3879,357 @@
       rBtn.classList.add("is-popping");
     });
 
-    // 7. Apple Photos Memories Ken Burns Reel Player
+    // 7. Apple Photos Memories Ken Burns Reel Player + Warm Felt-Piano Ambient Soundtrack
     var reelDlg = document.getElementById("memory-reel-dialog");
     var reelProgress = document.getElementById("memory-reel-progress");
     var reelImg = document.getElementById("memory-reel-img");
     var reelVideo = document.getElementById("memory-reel-video");
     var reelCaption = document.getElementById("memory-reel-caption");
     var reelCounter = document.getElementById("memory-reel-counter");
+    var reelAudioBtn = document.getElementById("memory-reel-audio");
     var reelToggleBtn = document.getElementById("memory-reel-toggle");
     var reelCloseBtn = document.getElementById("memory-reel-close");
     var reelPrevBtn = document.getElementById("memory-reel-prev");
     var reelNextBtn = document.getElementById("memory-reel-next");
 
+    function createMemorySoundtrack(pillarKey, rawAudioUrl, rawAudioTitle) {
+      var cleanUrl = String(rawAudioUrl || "").trim();
+      if (/^__SSR_/.test(cleanUrl)) cleanUrl = "";
+      var cleanTitle = String(rawAudioTitle || "").trim();
+      if (/^__SSR_/.test(cleanTitle)) cleanTitle = "";
+
+      var lowerUrl = cleanUrl.toLowerCase();
+      var startMuted = lowerUrl === "preset:silent";
+      var effectivePillar = pillarKey || "holaheart";
+      if (lowerUrl === "preset:holaheart") effectivePillar = "holaheart";
+      else if (lowerUrl === "preset:holagreen") effectivePillar = "holagreen";
+      else if (lowerUrl === "preset:holaconnect") effectivePillar = "holaconnect";
+
+      var isCustomTrack = Boolean(
+        cleanUrl && !lowerUrl.startsWith("preset:") && (cleanUrl.startsWith("/") || cleanUrl.startsWith("https://"))
+      );
+
+      var PRESET_LABELS = {
+        holaheart: tStage("Piano ấm · HolaHeart", "Warm Piano · HolaHeart"),
+        holagreen: tStage("Rừng thông · HolaGreen", "Pine Breeze · HolaGreen"),
+        holaconnect: tStage("Kết nối · HolaConnect", "Connection · HolaConnect"),
+      };
+
+      var AudioCtx = window.AudioContext || window.webkitAudioContext;
+
+      // Warm nostalgic felt-piano + analog pad chord progressions (frequencies in Hz)
+      var PROGRESSIONS = {
+        holaheart: [
+          [174.61, 220.0, 261.63, 329.63, 392.0], // Fmaj9
+          [130.81, 196.0, 246.94, 293.66, 329.63], // Cmaj9
+          [146.83, 220.0, 261.63, 329.63, 349.23], // Dm9
+          [116.54, 174.61, 220.0, 261.63, 293.66], // Bbmaj9
+        ],
+        holagreen: [
+          [196.0, 246.94, 293.66, 369.99, 440.0], // Gmaj9
+          [146.83, 220.0, 293.66, 329.63, 369.99], // Dadd9
+          [164.81, 246.94, 293.66, 369.99, 392.0], // Em9
+          [130.81, 196.0, 246.94, 293.66, 329.63], // Cmaj9
+        ],
+        holaconnect: [
+          [130.81, 196.0, 246.94, 293.66, 329.63], // Cmaj9
+          [196.0, 246.94, 293.66, 329.63, 392.0], // G6
+          [220.0, 261.63, 329.63, 392.0, 493.88], // Am9
+          [174.61, 220.0, 261.63, 329.63, 392.0], // Fmaj9
+        ],
+      };
+
+      var chords = PROGRESSIONS[effectivePillar] || PROGRESSIONS.holaheart;
+      var ctx = null;
+      var masterGain = null;
+      var reverbNode = null;
+      var warmFilter = null;
+      var chordTimer = null;
+      var chordStep = 0;
+      var playing = false;
+      var muted = startMuted;
+
+      // Custom HTML5 <audio> track state with graceful fallback to Web Audio felt-piano
+      var customAudio = null;
+      var customFailed = false;
+      var fadeTimer = null;
+
+      function clearFadeTimer() {
+        if (fadeTimer) {
+          clearInterval(fadeTimer);
+          fadeTimer = null;
+        }
+      }
+
+      function fadeCustomAudio(targetVol, durationMs, onDone) {
+        clearFadeTimer();
+        if (!customAudio) {
+          if (onDone) onDone();
+          return;
+        }
+        var steps = Math.max(1, Math.round((durationMs || 400) / 30));
+        var startVol = typeof customAudio.volume === "number" ? customAudio.volume : targetVol;
+        var stepIdx = 0;
+        fadeTimer = setInterval(function () {
+          stepIdx += 1;
+          var ratio = Math.min(1, stepIdx / steps);
+          var nextVol = Math.max(0, Math.min(1, startVol + (targetVol - startVol) * ratio));
+          try {
+            customAudio.volume = nextVol;
+          } catch (_e) {}
+          if (ratio >= 1) {
+            clearFadeTimer();
+            if (onDone) onDone();
+          }
+        }, 30);
+      }
+
+      function ensureCustomAudio() {
+        if (customAudio || customFailed || !isCustomTrack) return customAudio;
+        var el = new Audio();
+        el.loop = true;
+        el.preload = "none";
+        el.playsInline = true;
+        el.src = cleanUrl;
+        el.volume = 0;
+        el.addEventListener("error", function () {
+          customFailed = true;
+          clearFadeTimer();
+          if (playing && !muted) startSynth();
+        });
+        customAudio = el;
+        return customAudio;
+      }
+
+      function createImpulse(audioCtx, durationSec) {
+        var rate = audioCtx.sampleRate;
+        var length = Math.floor(rate * durationSec);
+        var buf = audioCtx.createBuffer(2, length, rate);
+        for (var ch = 0; ch < 2; ch += 1) {
+          var data = buf.getChannelData(ch);
+          for (var i = 0; i < length; i += 1) {
+            var decay = Math.pow(1 - i / length, 2.6);
+            data[i] = (Math.random() * 2 - 1) * decay * 0.42;
+          }
+        }
+        return buf;
+      }
+
+      function ensureContext() {
+        if (!AudioCtx) return null;
+        if (ctx) return ctx;
+        ctx = new AudioCtx();
+        masterGain = ctx.createGain();
+        masterGain.gain.setValueAtTime(0.0001, ctx.currentTime);
+
+        warmFilter = ctx.createBiquadFilter();
+        warmFilter.type = "lowpass";
+        warmFilter.frequency.setValueAtTime(1150, ctx.currentTime);
+        warmFilter.Q.setValueAtTime(0.6, ctx.currentTime);
+
+        reverbNode = ctx.createConvolver();
+        reverbNode.buffer = createImpulse(ctx, 2.3);
+
+        var wetGain = ctx.createGain();
+        wetGain.gain.setValueAtTime(0.46, ctx.currentTime);
+        var dryGain = ctx.createGain();
+        dryGain.gain.setValueAtTime(0.68, ctx.currentTime);
+
+        warmFilter.connect(dryGain);
+        warmFilter.connect(reverbNode);
+        reverbNode.connect(wetGain);
+        dryGain.connect(masterGain);
+        wetGain.connect(masterGain);
+        masterGain.connect(ctx.destination);
+        return ctx;
+      }
+
+      function playFeltNote(freq, startAt, durSec, peakGain, oscType) {
+        if (!ctx || !warmFilter) return;
+        var osc = ctx.createOscillator();
+        var osc2 = ctx.createOscillator();
+        var noteGain = ctx.createGain();
+
+        osc.type = oscType || "triangle";
+        osc2.type = "sine";
+        osc.frequency.setValueAtTime(freq, startAt);
+        osc2.frequency.setValueAtTime(freq * 1.0018, startAt);
+
+        noteGain.gain.setValueAtTime(0.0001, startAt);
+        noteGain.gain.linearRampToValueAtTime(peakGain, startAt + 0.045);
+        noteGain.gain.exponentialRampToValueAtTime(Math.max(0.0001, peakGain * 0.28), startAt + durSec * 0.45);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, startAt + durSec);
+
+        osc.connect(noteGain);
+        osc2.connect(noteGain);
+        noteGain.connect(warmFilter);
+
+        osc.start(startAt);
+        osc2.start(startAt);
+        osc.stop(startAt + durSec + 0.05);
+        osc2.stop(startAt + durSec + 0.05);
+      }
+
+      function triggerBar() {
+        if (!playing || !ctx) return;
+        var now = ctx.currentTime + 0.05;
+        var chord = chords[chordStep % chords.length];
+        chordStep += 1;
+
+        playFeltNote(chord[0], now, 5.1, 0.095, "sine");
+        playFeltNote(chord[1], now + 0.08, 4.9, 0.055, "sine");
+
+        var pattern = [1, 2, 3, 4, 2, 3];
+        pattern.forEach(function (noteIdx, step) {
+          var f = chord[noteIdx] || chord[2];
+          var octaveBoost = step === 3 ? 2 : 1;
+          var jitter = step % 2 === 0 ? 0.015 : 0.04;
+          playFeltNote(f * octaveBoost, now + step * 0.72 + jitter, 2.6, step === 3 ? 0.045 : 0.062, "triangle");
+        });
+      }
+
+      function applySynthVolume() {
+        if (!ctx || !masterGain) return;
+        var now = ctx.currentTime;
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.setValueAtTime(Math.max(0.0001, masterGain.gain.value), now);
+        masterGain.gain.linearRampToValueAtTime(playing && !muted ? 0.55 : 0.0001, now + (playing && !muted ? 1.1 : 0.4));
+      }
+
+      function startSynth() {
+        try {
+          var audioCtx = ensureContext();
+          if (!audioCtx) return;
+          if (audioCtx.state === "suspended") audioCtx.resume().catch(function () {});
+          applySynthVolume();
+          if (chordTimer) clearInterval(chordTimer);
+          triggerBar();
+          chordTimer = setInterval(triggerBar, 4600);
+        } catch (_e) {}
+      }
+
+      function stopSynth(suspendCtx) {
+        if (chordTimer) {
+          clearInterval(chordTimer);
+          chordTimer = null;
+        }
+        applySynthVolume();
+        if (suspendCtx && ctx && ctx.state === "running") {
+          setTimeout(function () {
+            if (!playing && ctx && ctx.state === "running") {
+              ctx.suspend().catch(function () {});
+            }
+          }, 450);
+        }
+      }
+
+      function startCustom() {
+        var el = ensureCustomAudio();
+        if (!el) {
+          startSynth();
+          return;
+        }
+        el.muted = muted;
+        if (muted) {
+          try {
+            el.pause();
+          } catch (_e) {}
+          return;
+        }
+        try {
+          el.volume = Math.min(el.volume || 0, 0.85);
+        } catch (_e) {}
+        var p = el.play();
+        if (p && typeof p.then === "function") {
+          p.then(function () {
+            if (playing && !muted) fadeCustomAudio(0.85, 850);
+          }).catch(function (err) {
+            // Fall back to felt-piano if the audio source fails to decode/load
+            if (err && err.name !== "NotAllowedError" && err.name !== "AbortError") {
+              customFailed = true;
+              if (playing && !muted) startSynth();
+            }
+          });
+        } else {
+          fadeCustomAudio(0.85, 850);
+        }
+      }
+
+      function pauseCustom(resetTime) {
+        if (!customAudio) return;
+        var el = customAudio;
+        fadeCustomAudio(0, 260, function () {
+          if (!playing || muted) {
+            try {
+              el.pause();
+              if (resetTime) el.currentTime = 0;
+            } catch (_e) {}
+          }
+        });
+      }
+
+      return {
+        start: function () {
+          playing = true;
+          if (isCustomTrack && !customFailed) {
+            startCustom();
+          } else if (!muted) {
+            startSynth();
+          }
+        },
+        pause: function () {
+          playing = false;
+          if (isCustomTrack && !customFailed) pauseCustom(false);
+          stopSynth(false);
+        },
+        stop: function () {
+          playing = false;
+          if (isCustomTrack && !customFailed) pauseCustom(true);
+          stopSynth(true);
+        },
+        setMuted: function (nextMuted) {
+          muted = Boolean(nextMuted);
+          if (isCustomTrack && !customFailed) {
+            var el = ensureCustomAudio();
+            if (el) {
+              el.muted = muted;
+              if (muted) {
+                pauseCustom(false);
+              } else if (playing) {
+                startCustom();
+              }
+            }
+          } else {
+            if (!muted && playing && !chordTimer) {
+              startSynth();
+            } else {
+              applySynthVolume();
+            }
+          }
+        },
+        isMuted: function () {
+          return muted;
+        },
+        getTrackLabel: function () {
+          if (isCustomTrack && !customFailed) {
+            return cleanTitle || tStage("Nhạc sự kiện", "Event Score");
+          }
+          if (cleanTitle) return cleanTitle;
+          if (lowerUrl.startsWith("preset:") && lowerUrl !== "preset:silent") {
+            return PRESET_LABELS[effectivePillar] || tStage("Nhạc nền", "Sound");
+          }
+          return tStage("Nhạc nền", "Sound");
+        },
+      };
+    }
+
     if (reelDlg && reelImg && thumbs.length > 0) {
       var REEL_DURATION_MS = 5200;
+      var soundtrack = createMemorySoundtrack(
+        stageRoot.getAttribute("data-pillar") || "holaheart",
+        stageRoot.getAttribute("data-reel-audio-url") || "",
+        stageRoot.getAttribute("data-reel-audio-title") || ""
+      );
       var reelSlides = thumbs.map(function (el) {
         var src = el.getAttribute("data-lightbox-src") || "";
         return {
@@ -3375,6 +4249,43 @@
       var PLAY_SVG =
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
 
+      function syncAudioUi() {
+        if (!reelAudioBtn) return;
+        var isOff = soundtrack.isMuted() || reelPaused;
+        reelAudioBtn.classList.toggle("is-muted", isOff);
+        reelAudioBtn.setAttribute("aria-pressed", soundtrack.isMuted() ? "false" : "true");
+        var trackLabel = typeof soundtrack.getTrackLabel === "function" ? soundtrack.getTrackLabel() : tStage("Nhạc nền", "Sound");
+        reelAudioBtn.title = soundtrack.isMuted()
+          ? tStage("Bật nhạc nền", "Unmute soundtrack")
+          : trackLabel;
+        var lbl = reelAudioBtn.querySelector(".memory-audio-label");
+        if (lbl) {
+          lbl.textContent = soundtrack.isMuted()
+            ? tStage("Đang tắt nhạc", "Muted")
+            : trackLabel;
+        }
+      }
+
+      var reelScrubber = document.getElementById("memory-reel-scrubber");
+      var reelScrubberFill = document.getElementById("memory-reel-scrubber-fill");
+      var uiIdleTimer = null;
+
+      function wakeReelChrome() {
+        if (!reelDlg) return;
+        reelDlg.classList.remove("is-ui-idle");
+        if (uiIdleTimer) {
+          clearTimeout(uiIdleTimer);
+          uiIdleTimer = null;
+        }
+        if (reelDlg.open && !reelPaused) {
+          uiIdleTimer = setTimeout(function () {
+            if (reelDlg.open && !reelPaused) {
+              reelDlg.classList.add("is-ui-idle");
+            }
+          }, 2600);
+        }
+      }
+
       function clearReelTimer() {
         if (reelTimer) {
           clearTimeout(reelTimer);
@@ -3392,40 +4303,32 @@
         reelVideo.hidden = true;
       }
 
-      function buildReelProgress() {
-        if (!reelProgress) return;
-        var cap = Math.min(reelSlides.length, 30);
-        reelProgress.innerHTML = "";
-        for (var i = 0; i < cap; i += 1) {
-          var seg = document.createElement("span");
-          seg.className = "memory-reel-seg";
-          seg.innerHTML = '<i class="memory-reel-seg-fill"></i>';
-          reelProgress.appendChild(seg);
+      function updateProgressBars(idx, durationMs) {
+        var total = Math.max(1, reelSlides.length);
+        var startRatio = idx / total;
+        var endRatio = (idx + 1) / total;
+        if (reelScrubber) {
+          reelScrubber.setAttribute("aria-valuenow", String(Math.round(endRatio * 100)));
+        }
+        if (reelScrubberFill) {
+          reelScrubberFill.style.transition = "none";
+          reelScrubberFill.style.transform = "scaleX(" + startRatio.toFixed(4) + ")";
+          if (!reelPaused) {
+            void reelScrubberFill.offsetWidth;
+            reelScrubberFill.style.transition = "transform " + durationMs + "ms linear";
+            reelScrubberFill.style.transform = "scaleX(" + endRatio.toFixed(4) + ")";
+          }
         }
       }
 
-      function updateProgressBars(idx, durationMs) {
-        if (!reelProgress) return;
-        var segs = reelProgress.querySelectorAll(".memory-reel-seg");
-        if (!segs.length) return;
-        var mapped = Math.min(segs.length - 1, Math.floor((idx / Math.max(1, reelSlides.length)) * segs.length));
-        segs.forEach(function (seg, i) {
-          var fill = seg.querySelector(".memory-reel-seg-fill");
-          seg.classList.remove("is-done", "is-active");
-          if (fill) {
-            fill.style.transition = "none";
-            fill.style.transform = i < mapped ? "scaleX(1)" : "scaleX(0)";
-          }
-          if (i < mapped) {
-            seg.classList.add("is-done");
-          } else if (i === mapped) {
-            seg.classList.add("is-active");
-            if (fill && !reelPaused) {
-              void fill.offsetWidth;
-              fill.style.transition = "transform " + durationMs + "ms linear";
-              fill.style.transform = "scaleX(1)";
-            }
-          }
+      if (reelScrubber) {
+        reelScrubber.addEventListener("click", function (e) {
+          var rect = reelScrubber.getBoundingClientRect();
+          if (!rect.width) return;
+          var pct = Math.max(0, Math.min(0.9999, (e.clientX - rect.left) / rect.width));
+          var targetIdx = Math.floor(pct * reelSlides.length);
+          wakeReelChrome();
+          showReelSlide(targetIdx);
         });
       }
 
@@ -3489,30 +4392,265 @@
         }
         if (reelPaused) {
           clearReelTimer();
+          soundtrack.pause();
         } else {
+          soundtrack.start();
           showReelSlide(reelIdx);
         }
+        syncAudioUi();
+        wakeReelChrome();
+      }
+
+      var reelExpandBtn = document.getElementById("memory-reel-expand");
+      var reelViewport = document.getElementById("memory-reel-viewport");
+      var reelRefTrack = document.getElementById("memory-reel-ref-track");
+      var reelRefCount = document.getElementById("memory-reel-ref-count");
+      var reelRefDots = document.getElementById("memory-reel-ref-dots");
+      var reelWriteBtn = document.getElementById("memory-reel-write-btn");
+
+      function setReelSplitMode(enabled) {
+        var on = Boolean(enabled);
+        reelDlg.classList.toggle("is-split-mode", on);
+        if (reelExpandBtn) {
+          reelExpandBtn.classList.toggle("is-active", on);
+          reelExpandBtn.setAttribute("aria-pressed", on ? "true" : "false");
+        }
+        if (on) {
+          reelDlg.classList.remove("is-ui-idle");
+        } else {
+          wakeReelChrome();
+        }
+      }
+
+      function populateReelReflections() {
+        if (!reelRefTrack) return;
+        var sourceCards = gbListEl
+          ? Array.prototype.slice.call(gbListEl.querySelectorAll(".gb-card"))
+          : [];
+        reelRefTrack.innerHTML = "";
+        if (reelRefDots) reelRefDots.innerHTML = "";
+
+        if (reelRefCount) {
+          reelRefCount.textContent = sourceCards.length
+            ? isEnStage
+              ? sourceCards.length + (sourceCards.length === 1 ? " note" : " notes")
+              : sourceCards.length + " chia sẻ"
+            : "";
+        }
+
+        if (!sourceCards.length) {
+          var empty = document.createElement("div");
+          empty.className = "apple-reel-ref-empty";
+          empty.textContent = tStage(
+            "Chưa có hương khí nào — hãy viết đôi dòng đọng lại sau buổi gặp nhé.",
+            "No reflections yet — share the first note from this gathering."
+          );
+          reelRefTrack.appendChild(empty);
+          return;
+        }
+
+        sourceCards.forEach(function (srcCard, idx) {
+          var info = readCardSummary(srcCard);
+          var refId = srcCard.getAttribute("data-reflection-id") || "";
+          var card = document.createElement("article");
+          card.className = "apple-reel-ref-card";
+          card.setAttribute("data-reel-ref-idx", String(idx));
+
+          if (info.quote) {
+            var q = document.createElement("p");
+            q.className = "apple-reel-ref-quote";
+            q.textContent = info.quote;
+            card.appendChild(q);
+          }
+
+          var body = document.createElement("p");
+          body.className = "apple-reel-ref-body";
+          body.textContent = info.body;
+          card.appendChild(body);
+
+          var foot = document.createElement("div");
+          foot.className = "apple-reel-ref-foot";
+
+          var authWrap = document.createElement("div");
+          authWrap.className = "apple-reel-ref-author";
+
+          var av = document.createElement("span");
+          av.className = "apple-reel-ref-av";
+          av.setAttribute("aria-hidden", "true");
+          if (info.avatarSrc) {
+            var im = document.createElement("img");
+            im.src = info.avatarSrc;
+            im.alt = "";
+            av.appendChild(im);
+          } else {
+            av.textContent = info.initials;
+          }
+          authWrap.appendChild(av);
+
+          var txt = document.createElement("div");
+          txt.className = "apple-reel-ref-author-txt";
+          var nm = document.createElement("strong");
+          nm.textContent = info.name;
+          txt.appendChild(nm);
+          if (info.sub) {
+            var sp = document.createElement("span");
+            sp.textContent = info.sub;
+            txt.appendChild(sp);
+          }
+          authWrap.appendChild(txt);
+          foot.appendChild(authWrap);
+
+          // Mirror live 3-emotion reactions so users can react while watching the reel
+          var origReacts = srcCard.querySelectorAll(".gb-react-btn");
+          if (origReacts.length) {
+            var rWrap = document.createElement("div");
+            rWrap.className = "apple-reel-ref-reacts";
+            origReacts.forEach(function (origBtn) {
+              var rType = origBtn.getAttribute("data-reaction-type") || "";
+              var cntEl = origBtn.querySelector(".gb-react-count");
+              var cntVal = cntEl && !cntEl.hidden ? cntEl.textContent.trim() : "";
+              var iconEl = origBtn.querySelector(".gb-react-icon");
+              var pill = document.createElement("button");
+              pill.type = "button";
+              pill.className = "apple-reel-react-pill" + (origBtn.classList.contains("is-active") ? " is-active" : "");
+              pill.setAttribute("data-reel-react-id", refId);
+              pill.setAttribute("data-reel-react-type", rType);
+              pill.setAttribute("aria-label", origBtn.getAttribute("aria-label") || rType);
+              pill.innerHTML = (iconEl ? iconEl.innerHTML : "") + (cntVal ? "<span>" + cntVal + "</span>" : "");
+              pill.addEventListener("click", function () {
+                origBtn.click();
+                setTimeout(function () {
+                  // Refresh mirrored reaction counts after toggle
+                  var siblings = rWrap.querySelectorAll(".apple-reel-react-pill");
+                  origReacts.forEach(function (ob, bi) {
+                    var sb = siblings[bi];
+                    if (!sb) return;
+                    sb.classList.toggle("is-active", ob.classList.contains("is-active"));
+                    var oc = ob.querySelector(".gb-react-count");
+                    var cv = oc && !oc.hidden ? oc.textContent.trim() : "";
+                    var oi = ob.querySelector(".gb-react-icon");
+                    sb.innerHTML = (oi ? oi.innerHTML : "") + (cv ? "<span>" + cv + "</span>" : "");
+                  });
+                }, 80);
+              });
+              rWrap.appendChild(pill);
+            });
+            foot.appendChild(rWrap);
+          }
+
+          card.appendChild(foot);
+          reelRefTrack.appendChild(card);
+
+          if (reelRefDots && sourceCards.length > 1 && idx < 12) {
+            var dot = document.createElement("span");
+            dot.className = "apple-reel-ref-dot" + (idx === 0 ? " is-active" : "");
+            reelRefDots.appendChild(dot);
+          }
+        });
+      }
+
+      if (reelRefTrack && reelRefDots) {
+        var refScrollTick = null;
+        reelRefTrack.addEventListener(
+          "scroll",
+          function () {
+            if (refScrollTick) return;
+            refScrollTick = requestAnimationFrame(function () {
+              refScrollTick = null;
+              var cards = reelRefTrack.querySelectorAll(".apple-reel-ref-card");
+              var dots = reelRefDots.querySelectorAll(".apple-reel-ref-dot");
+              if (!cards.length || !dots.length) return;
+              var center = reelRefTrack.scrollLeft + reelRefTrack.clientWidth / 2;
+              var bestIdx = 0;
+              var bestDist = Infinity;
+              cards.forEach(function (c, i) {
+                var cMid = c.offsetLeft + c.offsetWidth / 2;
+                var d = Math.abs(cMid - center);
+                if (d < bestDist) {
+                  bestDist = d;
+                  bestIdx = i;
+                }
+              });
+              var mapped = Math.min(dots.length - 1, bestIdx);
+              dots.forEach(function (dot, i) {
+                dot.classList.toggle("is-active", i === mapped);
+              });
+            });
+          },
+          { passive: true }
+        );
+      }
+
+      if (reelExpandBtn) {
+        reelExpandBtn.addEventListener("click", function () {
+          setReelSplitMode(!reelDlg.classList.contains("is-split-mode"));
+        });
+      }
+
+      if (reelWriteBtn) {
+        reelWriteBtn.addEventListener("click", function () {
+          closeReel();
+          var targetSec = document.getElementById("huong-khi") || document.getElementById("reflections");
+          if (targetSec) {
+            targetSec.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          setTimeout(function () {
+            var ta = document.getElementById("pr-content");
+            if (ta && !ta.closest("[hidden]")) {
+              try {
+                ta.focus({ preventScroll: true });
+              } catch (_e) {}
+            }
+          }, 420);
+        });
       }
 
       function openReel(startIdx) {
         reelPaused = false;
         if (reelToggleBtn) reelToggleBtn.innerHTML = PAUSE_SVG;
-        buildReelProgress();
+        if (sheetDlg && sheetDlg.open) sheetDlg.close();
+        populateReelReflections();
         if (!reelDlg.open) reelDlg.showModal();
+        // On mobile, open in Split-Theater (movie top + swipeable Hương khí bottom); desktop starts full cinema
+        setReelSplitMode(window.innerWidth <= 768);
+        soundtrack.start();
+        syncAudioUi();
         showReelSlide(startIdx || 0);
+        wakeReelChrome();
       }
 
       function closeReel() {
         clearReelTimer();
+        if (uiIdleTimer) {
+          clearTimeout(uiIdleTimer);
+          uiIdleTimer = null;
+        }
+        reelDlg.classList.remove("is-ui-idle");
         stopReelVideo();
+        soundtrack.stop();
         if (reelDlg.open) reelDlg.close();
       }
+
+      reelDlg.addEventListener("pointermove", wakeReelChrome, { passive: true });
+      reelDlg.addEventListener("pointerdown", wakeReelChrome, { passive: true });
 
       reelBtns.forEach(function (btn) {
         btn.addEventListener("click", function () {
           openReel(0);
         });
       });
+      if (sheetPlayBtn) {
+        sheetPlayBtn.addEventListener("click", function () {
+          openReel(0);
+        });
+      }
+      if (reelAudioBtn) {
+        reelAudioBtn.addEventListener("click", function () {
+          soundtrack.setMuted(!soundtrack.isMuted());
+          syncAudioUi();
+          wakeReelChrome();
+        });
+      }
       if (reelCloseBtn) reelCloseBtn.addEventListener("click", closeReel);
       if (reelToggleBtn) {
         reelToggleBtn.addEventListener("click", function () {
@@ -3521,20 +4659,29 @@
       }
       if (reelPrevBtn) {
         reelPrevBtn.addEventListener("click", function () {
+          wakeReelChrome();
           showReelSlide(reelIdx - 1);
         });
       }
       if (reelNextBtn) {
         reelNextBtn.addEventListener("click", function () {
+          wakeReelChrome();
           showReelSlide(reelIdx + 1);
         });
       }
       reelDlg.addEventListener("close", function () {
         clearReelTimer();
+        if (uiIdleTimer) {
+          clearTimeout(uiIdleTimer);
+          uiIdleTimer = null;
+        }
+        reelDlg.classList.remove("is-ui-idle");
         stopReelVideo();
+        soundtrack.stop();
       });
       reelDlg.addEventListener("keydown", function (e) {
         if (!reelDlg.open) return;
+        wakeReelChrome();
         if (e.key === "ArrowLeft") {
           e.preventDefault();
           showReelSlide(reelIdx - 1);
@@ -3544,18 +4691,24 @@
         } else if (e.key === " ") {
           e.preventDefault();
           setReelPaused(!reelPaused);
+        } else if (e.key === "m" || e.key === "M") {
+          e.preventDefault();
+          soundtrack.setMuted(!soundtrack.isMuted());
+          syncAudioUi();
         }
       });
 
+      // Scope slide-flip touch swipe strictly to upper theater viewport so bottom Hương khí sheet swipes independently!
       var rTouchX = 0;
-      reelDlg.addEventListener(
+      var swipeSurface = reelViewport || reelDlg;
+      swipeSurface.addEventListener(
         "touchstart",
         function (e) {
           if (e.touches && e.touches.length) rTouchX = e.touches[0].clientX;
         },
         { passive: true }
       );
-      reelDlg.addEventListener(
+      swipeSurface.addEventListener(
         "touchend",
         function (e) {
           if (!e.changedTouches || !e.changedTouches.length) return;

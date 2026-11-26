@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=da608294a8">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=407c658ca9">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -88,7 +88,8 @@
     "addressCountry": "VN"
   },
   "sameAs": [
-    "https://www.youtube.com/@holarise-az"
+    "https://www.youtube.com/@holarise-az",
+    "https://www.instagram.com/holarise_az/"
   ]
 }
 </script>
@@ -168,180 +169,189 @@
   </div>
 
   <main id="main-content">
-    <div class="memory-stage-root memory-stage-root--cinema" data-pillar="__SSR_EVENT_PILLAR__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-album-id="__SSR_MEMORY_ALBUM_ID__">
+    <div class="memory-stage-root memory-stage-root--cinema memory-stage-root--apple" data-pillar="__SSR_EVENT_PILLAR__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-album-id="__SSR_MEMORY_ALBUM_ID__" data-reel-audio-url="__SSR_MEMORY_REEL_AUDIO_URL__" data-reel-audio-title="__SSR_MEMORY_REEL_AUDIO_TITLE__">
   <!-- =======================================================================
-       ACT 1: OBSIDIAN CINEMA STAGE (APPLE PHOTOS MEMORIES HERO + GALLERY)
+       ACT 1: FULL-BLEED APPLE CINEMA HERO (ZERO BOXES, ZERO CHROME CLUTTER)
        ======================================================================= -->
-  <div class="memory-cinema-band">
-    <section class="memory-hero memory-hero--cinema" aria-label="Gathering Memories">
-      <div class="container memory-stage-container">
-        <div class="memory-cinema-poster" data-memory-hero-poster>
-          <div class="memory-cinema-backdrop" aria-hidden="true">
-            <img src="__SSR_MEMORY_COVER_IMAGE__" alt="" width="1280" height="720" fetchpriority="high" decoding="async" class="memory-cinema-img">
-          </div>
-          <div class="memory-cinema-scrim" aria-hidden="true"></div>
+  <section class="apple-hero" data-memory-hero-poster aria-label="Gathering Memories">
+    <div class="apple-hero-media" aria-hidden="true">
+      <img src="__SSR_MEMORY_COVER_IMAGE__" alt="" width="1600" height="900" fetchpriority="high" decoding="async" class="apple-hero-img">
+    </div>
+    <div class="apple-hero-scrim" aria-hidden="true"></div>
 
-          <!-- Top Glass Bar -->
-          <div class="memory-cinema-top">
-            <div class="memory-cinema-pill">
-              <span class="memory-stage-dot" aria-hidden="true"></span>
-              <span>Concluded</span>
-              <span class="memory-pill-sep" aria-hidden="true">·</span>
-              <span class="memory-eyebrow-pillar">__SSR_EVENT_PILLAR_LABEL__</span>
-            </div>
+    <div class="container apple-stage-container apple-hero-content">
+      <p class="apple-hero-meta">
+        <span>__SSR_EVENT_PILLAR_LABEL__</span>
+        <span aria-hidden="true">·</span>
+        <span>Concluded</span>
+        <span aria-hidden="true">·</span>
+        <time datetime="__SSR_EVENT_DATE__">__SSR_EVENT_DATE_DISPLAY__</time>
+        <span aria-hidden="true">·</span>
+        <span>__SSR_EVENT_LOCATION__</span>
+      </p>
 
-            <div class="memory-cinema-top-actions">
-              <button
-                class="memory-glass-icon-btn"
-                type="button"
-                data-memory-share
-                data-share-title="__SSR_EVENT_TITLE__ · HolaRise Memories"
-                aria-label="Share memory stage"
-                title="Share memory stage"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-                <span>Share</span>
-              </button>
-              <button
-                class="memory-glass-icon-btn"
-                type="button"
-                aria-label="View full cover photo for __SSR_EVENT_TITLE__"
-                title="Expand cover photo"
-                data-lightbox-src="__SSR_MEMORY_COVER_IMAGE__"
-                data-lightbox-alt="__SSR_EVENT_TITLE__"
-                data-lightbox-caption="__SSR_EVENT_TITLE__ · __SSR_EVENT_DATE_DISPLAY__ at __SSR_EVENT_LOCATION__"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-              </button>
-            </div>
-          </div>
+      <h1 class="apple-hero-title">__SSR_EVENT_TITLE__</h1>
+      <p class="apple-hero-lead">__SSR_EVENT_SUMMARY__</p>
 
-          <!-- Bottom Editorial Copy & Primary Actions -->
-          <div class="memory-cinema-bottom">
-            <div class="memory-cinema-copy">
-              <h1 class="memory-title memory-title--cinema">__SSR_EVENT_TITLE__</h1>
-              <div class="memory-meta-row memory-meta-row--cinema">
-                <time datetime="__SSR_EVENT_DATE__">__SSR_EVENT_DATE_DISPLAY__</time>
-                <span aria-hidden="true">·</span>
-                <span>__SSR_EVENT_LOCATION__</span>
-                __SSR_MEMORY_STATS_INLINE_HTML__
-              </div>
-              <p class="memory-lead memory-lead--cinema">__SSR_EVENT_SUMMARY__</p>
-            </div>
+      <div class="apple-hero-actions">
+        <button class="apple-btn apple-btn--white" type="button" data-memory-play-reel hidden>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+          <span>Play Memory Reel</span>
+        </button>
 
-            <div class="memory-hero-actions memory-hero-actions--cinema">
-              <button class="memory-btn-apple memory-btn-apple--primary" type="button" data-memory-play-reel hidden>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
-                <span>Play Memory Reel</span>
-              </button>
-              <a class="memory-btn-apple memory-btn-apple--glass" href="#reflections" data-memory-jump-write>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                <span>Write a reflection</span>
-              </a>
-              <button
-                class="memory-btn-apple memory-btn-apple--ghost"
-                type="button"
-                data-open-event-contribute
-                data-contribute-tab="photos"
-                data-event-id="__SSR_EVENT_ID__"
-                data-event-slug="__SSR_EVENT_SLUG__"
-                data-event-title="__SSR_EVENT_TITLE__"
-                data-album-id="__SSR_MEMORY_ALBUM_ID__"
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <span>Contribute</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <a class="apple-btn apple-btn--glass" href="#reflections" data-memory-jump-write>
+          <span>Write a reflection</span>
+        </a>
+
+        <button
+          class="apple-btn-icon"
+          type="button"
+          data-memory-share
+          data-share-title="__SSR_EVENT_TITLE__ · HolaRise Memories"
+          aria-label="Share memory stage"
+          title="Share memory stage"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          <span class="visually-hidden">Share</span>
+        </button>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- CURATED APPLE PHOTOS BENTO GALLERY -->
-    <section class="memory-gallery-section memory-gallery-section--cinema" id="gathering-moments" aria-labelledby="memory-gallery-heading">
-      <div class="container memory-stage-container">
-        <div class="memory-sec-head memory-sec-head--cinema">
-          <div>
-            <span class="memory-sec-kicker memory-sec-kicker--cinema">Moments Captured</span>
-            <h2 id="memory-gallery-heading" class="memory-sec-title memory-sec-title--cinema">Exhibition Gallery</h2>
+  <!-- =======================================================================
+       ACT 2: APPLE PHOTOS GALLERY (PURE WHITE CANVAS, BORDERLESS PHOTOGRAPHY)
+       ======================================================================= -->
+  <section class="apple-photos-section" id="gathering-moments" aria-labelledby="memory-gallery-heading">
+    <div class="container apple-stage-container">
+      <div class="apple-sec-head">
+        <div class="apple-sec-title-row">
+          <h2 id="memory-gallery-heading" class="apple-sec-title">Moments</h2>
+          <span class="apple-sec-count" id="memory-photo-count"></span>
+        </div>
+
+        <button
+          class="apple-link-action"
+          type="button"
+          data-open-event-contribute
+          data-contribute-tab="photos"
+          data-event-id="__SSR_EVENT_ID__"
+          data-event-slug="__SSR_EVENT_SLUG__"
+          data-event-title="__SSR_EVENT_TITLE__"
+          data-album-id="__SSR_MEMORY_ALBUM_ID__"
+        >
+          <span>Contribute photos &amp; video</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <!-- Interactive Apple Physical Photo Stack Deck (hydrated from gallery below) -->
+      <div class="apple-deck-layout" id="apple-deck-layout" hidden>
+        <div class="apple-deck-stage" id="apple-photo-deck" role="region" aria-roledescription="carousel" aria-label="Gathering moments photo stack" tabindex="0"></div>
+
+        <div class="apple-deck-panel">
+          <div class="apple-deck-counter" aria-live="polite">
+            <strong id="apple-deck-cur">01</strong>
+            <span aria-hidden="true">/</span>
+            <span id="apple-deck-total">01</span>
           </div>
+          <p class="apple-deck-caption" id="apple-deck-caption"></p>
+          <p class="apple-deck-hint">Tap or swipe the stack to flip through moments</p>
 
-          <div class="memory-gallery-controls">
-            <div class="memory-seg-control" data-memory-media-filter role="group" aria-label="Filter media type" hidden>
-              <button type="button" class="memory-seg-btn is-active" data-filter="all" aria-pressed="true">All</button>
-              <button type="button" class="memory-seg-btn" data-filter="image" aria-pressed="false">Photos</button>
-              <button type="button" class="memory-seg-btn" data-filter="video" aria-pressed="false">Videos</button>
+          <div class="apple-deck-controls">
+            <div class="apple-deck-nav-group">
+              <button type="button" class="apple-deck-circle-btn" id="apple-deck-prev" aria-label="Previous photo" title="Previous photo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button type="button" class="apple-deck-circle-btn" id="apple-deck-next" aria-label="Flip to next photo" title="Flip to next photo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+              <button type="button" class="apple-deck-circle-btn" id="apple-deck-zoom" aria-label="Expand current photo" title="Expand current photo">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+              </button>
             </div>
 
-            <button
-              class="memory-cinema-add-btn"
-              type="button"
-              data-open-event-contribute
-              data-contribute-tab="photos"
-              data-event-id="__SSR_EVENT_ID__"
-              data-event-slug="__SSR_EVENT_SLUG__"
-              data-event-title="__SSR_EVENT_TITLE__"
-              data-album-id="__SSR_MEMORY_ALBUM_ID__"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>Submit original media</span>
+            <button class="apple-deck-all-btn" type="button" id="memory-open-all-btn" hidden>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              <span id="memory-open-all-label">All moments</span>
             </button>
           </div>
         </div>
+      </div>
 
-        <div class="memory-gallery-wrap" id="memory-gallery-group" data-lightbox-group>
+      <div class="apple-mosaic-frame" id="apple-gallery-fallback">
+        <div class="memory-gallery-wrap memory-mosaic-wrap" id="memory-gallery-group" data-lightbox-group>
           __SSR_MEMORY_GALLERY_HTML__
         </div>
       </div>
-    </section>
-  </div>
+    </div>
+  </section>
+
+  <!-- APPLE PHOTOS FULL CONTACT SHEET MODAL (LIGHT FROSTED LIBRARY FOR 40–120+ PHOTOS) -->
+  <dialog class="memory-sheet-dialog apple-sheet-dialog" id="memory-all-photos-dialog" closedby="any" aria-labelledby="memory-sheet-title">
+    <div class="memory-sheet-shell">
+      <header class="memory-sheet-head apple-sheet-head">
+        <div class="apple-sheet-title-wrap">
+          <h2 id="memory-sheet-title" class="memory-sheet-title">__SSR_EVENT_TITLE__</h2>
+          <span class="apple-sheet-sub">__SSR_EVENT_DATE_DISPLAY__ · __SSR_EVENT_LOCATION__</span>
+        </div>
+        <div class="memory-sheet-head-actions">
+          <div class="memory-seg-control apple-seg-control" data-memory-media-filter role="group" aria-label="Filter media type" hidden>
+            <button type="button" class="memory-seg-btn is-active" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" class="memory-seg-btn" data-filter="image" aria-pressed="false">Photos</button>
+            <button type="button" class="memory-seg-btn" data-filter="video" aria-pressed="false">Videos</button>
+          </div>
+          <button type="button" class="apple-sheet-play-btn" id="memory-sheet-play-reel">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            <span>Play Reel</span>
+          </button>
+          <button type="button" class="apple-sheet-close-btn" id="memory-sheet-close" aria-label="Close gallery">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </header>
+      <div class="memory-sheet-body apple-sheet-body">
+        <div class="memory-sheet-grid apple-sheet-grid" id="memory-sheet-grid" data-lightbox-group></div>
+      </div>
+    </div>
+  </dialog>
 
   <!-- =======================================================================
-       ACT 2: APPLE JOURNAL REFLECTION WALL (WARM PAPER EDITORIAL SPACE)
+       ACT 3: APPLE JOURNAL REFLECTION WALL (#F5F5F7 SURFACE + PURE WHITE CARDS)
        ======================================================================= -->
-  <section class="section memory-guestbook-section memory-journal-band" id="reflections">
-    <div class="container memory-stage-container">
+  <section class="apple-journal-section memory-guestbook-section" id="reflections">
+    <div class="container apple-stage-container">
       <section class="guestbook-section memory-gb-shell" id="activity-guestbook" data-guestbook-slug="__SSR_EVENT_SLUG__" aria-labelledby="guestbook-heading">
-        <div class="memory-sec-head memory-sec-head--journal">
-          <div>
-            <span class="memory-sec-kicker">Community Keepsake</span>
-            <h2 id="guestbook-heading" class="memory-sec-title memory-sec-title--journal">Reflections from the Gathering</h2>
+        <div class="apple-sec-head">
+          <div class="apple-sec-title-row">
+            <h2 id="guestbook-heading" class="apple-sec-title">Reflections</h2>
+            <span class="apple-sec-count" id="guestbook-count-pill"></span>
           </div>
-          <div class="memory-journal-head-right">
-            <span class="guestbook-count-pill" id="guestbook-count-pill">Loading...</span>
-            <button
-              class="memory-text-action"
-              type="button"
-              data-open-event-contribute
-              data-contribute-tab="feedback"
-              data-event-id="__SSR_EVENT_ID__"
-              data-event-slug="__SSR_EVENT_SLUG__"
-              data-event-title="__SSR_EVENT_TITLE__"
-              data-album-id="__SSR_MEMORY_ALBUM_ID__"
-            >Private feedback →</button>
-          </div>
+
+          <button
+            class="apple-link-action"
+            type="button"
+            data-open-event-contribute
+            data-contribute-tab="feedback"
+            data-event-id="__SSR_EVENT_ID__"
+            data-event-slug="__SSR_EVENT_SLUG__"
+            data-event-title="__SSR_EVENT_TITLE__"
+            data-album-id="__SSR_MEMORY_ALBUM_ID__"
+          >
+            <span>Private feedback</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
         </div>
 
-        <div class="memory-mood-filter" id="memory-mood-filter" role="group" aria-label="Filter by reflection mood" hidden></div>
+        <div class="memory-mood-filter apple-mood-filter" id="memory-mood-filter" role="group" aria-label="Filter by mood" hidden></div>
 
-        <div class="guestbook-composer-wrap gb-composer-card memory-composer-card" id="public-reflection-wrap">
-          <div class="gb-member-gate" id="pr-auth-gate">
-            <div class="gb-member-gate-copy">
-              <strong>Sign in as a Hola Member to write a reflection</strong>
-              <p>Share what stayed with you along with up to 7 photos or short clips. Private feedback for coordinators requires no sign-in.</p>
+        <div class="guestbook-composer-wrap gb-composer-card apple-composer-card" id="public-reflection-wrap">
+          <div class="gb-member-gate apple-member-gate" id="pr-auth-gate">
+            <div class="apple-gate-copy">
+              <strong>Capture what stayed with you from this gathering.</strong>
+              <p>Hola Members can post a reflection with up to 7 photos or short videos.</p>
             </div>
-            <div class="gb-member-gate-actions">
-              <button type="button" class="btn btn--primary btn--sm" data-open-member-auth>Member Sign In</button>
-              <button
-                type="button"
-                class="btn btn--outline btn--sm"
-                data-open-event-contribute
-                data-contribute-tab="feedback"
-                data-event-id="__SSR_EVENT_ID__"
-                data-event-slug="__SSR_EVENT_SLUG__"
-                data-event-title="__SSR_EVENT_TITLE__"
-                data-album-id="__SSR_MEMORY_ALBUM_ID__"
-              >Private feedback</button>
+            <div class="apple-gate-actions">
+              <button type="button" class="apple-btn apple-btn--dark" data-open-member-auth>Write a reflection</button>
             </div>
           </div>
 
@@ -358,11 +368,11 @@
               <span class="gb-member-avatar" id="pr-member-avatar" aria-hidden="true">H</span>
               <div class="gb-member-info">
                 <strong id="pr-member-name">HolaRise Member</strong>
-                <span id="pr-member-sub">Writing a reflection with your member account</span>
+                <span id="pr-member-sub">Posting with your HolaRise account</span>
               </div>
             </div>
 
-            <div class="gb-mood-pills" role="radiogroup" aria-label="Choose a reflection mood">
+            <div class="gb-mood-pills" role="radiogroup" aria-label="Choose a mood">
               <label class="gb-mood-pill"><input type="radio" name="mood" value="am-long" checked><span data-mood="am-long"><i class="mood-dot" aria-hidden="true"></i>Heartwarming</span></label>
               <label class="gb-mood-pill"><input type="radio" name="mood" value="cham-sau"><span data-mood="cham-sau"><i class="mood-dot" aria-hidden="true"></i>Deeply moving</span></label>
               <label class="gb-mood-pill"><input type="radio" name="mood" value="biet-on"><span data-mood="biet-on"><i class="mood-dot" aria-hidden="true"></i>Grateful</span></label>
@@ -372,7 +382,7 @@
 
             <div class="gb-textarea-wrap">
               <label for="pr-content" class="visually-hidden">Your reflection</label>
-              <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="What stayed with you after this gathering? (paste images with Ctrl+V / Cmd+V)"></textarea>
+              <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="What stayed with you after this gathering? (paste photos with Ctrl+V / ⌘V)"></textarea>
             </div>
 
             <input id="pr-photo-file" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" multiple hidden>
@@ -391,76 +401,118 @@
               <div class="gb-composer-tools">
                 <button type="button" class="gb-attach-btn" id="pr-photo-trigger">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="m21 15-4.5-4.5a1.5 1.5 0 0 0-2.1 0L7 18"></path></svg>
-                  <span>Photos / Videos (up to 7)</span>
+                  <span>Add photos / video (up to 7)</span>
                 </button>
-                <span class="gb-composer-hint">Paste images Ctrl+V · Video &lt;= 25 MB · Published after review</span>
+                <span class="gb-composer-hint">Paste images with Ctrl+V · Video &lt;= 25 MB · Published after review</span>
               </div>
-              <button class="btn btn--primary btn--sm" type="submit" id="pr-submit-btn">Post reflection</button>
+              <button class="apple-btn apple-btn--dark apple-btn--sm" type="submit" id="pr-submit-btn">Post reflection</button>
             </div>
           </form>
         </div>
 
-        <div class="guestbook-grid memory-gb-grid memory-journal-masonry" id="guestbook-list" aria-live="polite"></div>
+        <div class="apple-postcard-shell" id="apple-postcard-shell">
+          <div class="guestbook-grid memory-gb-grid apple-postcard-stage" id="guestbook-list" aria-live="polite"></div>
+
+          <div class="apple-postcard-bar" id="apple-postcard-bar" hidden>
+            <div class="apple-avatar-dock" id="apple-avatar-dock" role="tablist" aria-label="Select reflection author"></div>
+
+            <div class="apple-postcard-controls">
+              <span class="apple-postcard-counter" id="apple-postcard-counter" aria-live="polite">01 / 01</span>
+              <button type="button" class="apple-deck-circle-btn apple-pc-btn" id="apple-pc-prev" aria-label="Previous postcard" title="Previous postcard">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button type="button" class="apple-deck-circle-btn apple-pc-btn" id="apple-pc-next" aria-label="Next postcard" title="Next postcard">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+              <button type="button" class="apple-pc-all-btn" id="apple-pc-open-all" hidden>
+                <span>View all</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   </section>
 
-  <!-- FLOATING APPLE FROSTED GLASS DOCK -->
-  <nav class="memory-float-dock" id="memory-float-dock" aria-label="Quick memory actions" hidden>
-    <button type="button" class="memory-dock-btn" data-memory-play-reel hidden>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
-      <span>Reel</span>
-    </button>
-    <a class="memory-dock-btn memory-dock-btn--primary" href="#reflections" data-memory-jump-write>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-      <span>Reflect</span>
-    </a>
-    <button
-      type="button"
-      class="memory-dock-btn"
-      data-open-event-contribute
-      data-contribute-tab="photos"
-      data-event-id="__SSR_EVENT_ID__"
-      data-event-slug="__SSR_EVENT_SLUG__"
-      data-event-title="__SSR_EVENT_TITLE__"
-      data-album-id="__SSR_MEMORY_ALBUM_ID__"
-    >
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      <span>Submit</span>
-    </button>
-  </nav>
-
-  <!-- APPLE PHOTOS MEMORIES KEN BURNS REEL PLAYER -->
-  <dialog class="memory-reel-dialog" id="memory-reel-dialog" closedby="any" aria-label="Memory Reel Player">
-    <div class="memory-reel-shell">
-      <div class="memory-reel-progress" id="memory-reel-progress" aria-hidden="true"></div>
-
-      <header class="memory-reel-top">
-        <div class="memory-reel-title-group">
-          <span class="memory-reel-kicker">__SSR_EVENT_PILLAR_LABEL__ · __SSR_EVENT_DATE_DISPLAY__</span>
-          <strong class="memory-reel-heading">__SSR_EVENT_TITLE__</strong>
+  <!-- APPLE JOURNAL ALL-REFLECTIONS SHEET (QUICK SCAN WHEN 10–100+ REFLECTIONS) -->
+  <dialog class="memory-sheet-dialog apple-sheet-dialog" id="memory-all-reflections-dialog" closedby="any" aria-labelledby="apple-ref-sheet-title">
+    <div class="memory-sheet-shell">
+      <header class="memory-sheet-head apple-sheet-head">
+        <div class="apple-sheet-title-wrap">
+          <h2 id="apple-ref-sheet-title" class="memory-sheet-title">All Reflections · __SSR_EVENT_TITLE__</h2>
+          <span class="apple-sheet-sub" id="apple-ref-sheet-sub">__SSR_EVENT_DATE_DISPLAY__ · __SSR_EVENT_LOCATION__</span>
         </div>
-        <div class="memory-reel-top-btns">
-          <button type="button" class="memory-reel-icon-btn" id="memory-reel-toggle" aria-label="Pause memory reel" title="Play / Pause (Space)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-          </button>
-          <button type="button" class="memory-reel-icon-btn" id="memory-reel-close" aria-label="Close memory reel">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <div class="memory-sheet-head-actions">
+          <button type="button" class="apple-sheet-close-btn" id="apple-ref-sheet-close" aria-label="Close reflections list">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
       </header>
+      <div class="memory-sheet-body apple-sheet-body apple-ref-sheet-body">
+        <div class="apple-ref-sheet-list" id="apple-ref-sheet-list"></div>
+      </div>
+    </div>
+  </dialog>
 
-      <div class="memory-reel-viewport" id="memory-reel-viewport">
-        <button type="button" class="memory-reel-tap memory-reel-tap--prev" id="memory-reel-prev" aria-label="Previous moment"></button>
-        <button type="button" class="memory-reel-tap memory-reel-tap--next" id="memory-reel-next" aria-label="Next moment"></button>
-        <img id="memory-reel-img" class="memory-reel-media" alt="">
-        <video id="memory-reel-video" class="memory-reel-media" playsinline muted hidden></video>
+  <!-- APPLE PHOTOS MEMORIES REEL PLAYER (MOBILE SPLIT-THEATER + SWIPEABLE REFLECTIONS) -->
+  <dialog class="memory-reel-dialog apple-reel-dialog" id="memory-reel-dialog" closedby="any" aria-label="Gathering Memory Reel">
+    <div class="memory-reel-shell" id="memory-reel-shell">
+      <div class="apple-reel-theater" id="apple-reel-theater">
+        <header class="memory-reel-top apple-reel-chrome">
+          <div class="memory-reel-title-group">
+            <strong class="memory-reel-heading">__SSR_EVENT_TITLE__</strong>
+            <span class="memory-reel-kicker">__SSR_EVENT_DATE_DISPLAY__ · __SSR_EVENT_LOCATION__</span>
+          </div>
+          <div class="memory-reel-top-btns">
+            <button type="button" class="memory-reel-audio-btn" id="memory-reel-audio" aria-label="Mute or unmute soundtrack" title="Soundtrack (M)" aria-pressed="true">
+              <span class="memory-eq-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="memory-audio-label">Sound</span>
+            </button>
+            <button type="button" class="memory-reel-icon-btn" id="memory-reel-toggle" aria-label="Pause memory reel" title="Pause / Resume (Space)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            </button>
+            <button type="button" class="memory-reel-icon-btn" id="memory-reel-expand" aria-label="Toggle fullscreen or reflections" title="Show / hide reflections">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </button>
+            <button type="button" class="memory-reel-icon-btn" id="memory-reel-close" aria-label="Close memory reel">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="memory-reel-viewport" id="memory-reel-viewport">
+          <button type="button" class="memory-reel-tap memory-reel-tap--prev" id="memory-reel-prev" aria-label="Previous moment"></button>
+          <button type="button" class="memory-reel-tap memory-reel-tap--next" id="memory-reel-next" aria-label="Next moment"></button>
+          <img id="memory-reel-img" class="memory-reel-media" alt="">
+          <video id="memory-reel-video" class="memory-reel-media" playsinline muted hidden></video>
+        </div>
+
+        <footer class="memory-reel-foot apple-reel-chrome">
+          <div class="apple-reel-foot-meta">
+            <p class="memory-reel-caption" id="memory-reel-caption"></p>
+            <span class="memory-reel-counter" id="memory-reel-counter" aria-live="polite"></span>
+          </div>
+          <div class="apple-reel-scrubber" id="memory-reel-scrubber" role="progressbar" aria-label="Memory reel progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span class="apple-reel-scrubber-fill" id="memory-reel-scrubber-fill"></span>
+          </div>
+        </footer>
       </div>
 
-      <footer class="memory-reel-foot">
-        <p class="memory-reel-caption" id="memory-reel-caption"></p>
-        <span class="memory-reel-counter" id="memory-reel-counter" aria-live="polite"></span>
-      </footer>
+      <!-- Live Swipeable Reflections Companion Sheet -->
+      <aside class="apple-reel-sheet" id="apple-reel-sheet" aria-label="Gathering reflections">
+        <div class="apple-reel-sheet-head">
+          <div class="apple-reel-sheet-meta">
+            <strong>Reflections</strong>
+            <span id="memory-reel-ref-count"></span>
+          </div>
+          <button type="button" class="apple-reel-write-link" id="memory-reel-write-btn">
+            <span>Write a reflection</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div class="apple-reel-ref-track" id="memory-reel-ref-track" aria-live="polite"></div>
+        <div class="apple-reel-ref-dots" id="memory-reel-ref-dots" aria-hidden="true"></div>
+      </aside>
     </div>
   </dialog>
 </div>
@@ -476,6 +528,7 @@
           </a>
           <p class="footer-web-only footer-brand-name">HolaRise – Youth Community &amp; Social Impact Initiative</p>
           <p class="footer-web-only footer-brand-motto">Hola · Together We Rise, Together We Serve.</p>
+          <div class="footer-social" role="group" aria-label="Official channels"><a class="footer-social-link" href="https://www.youtube.com/@holarise-az" target="_blank" rel="noopener noreferrer me" aria-label="HolaRise on YouTube" title="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="4"></rect><path d="M10 9.4 15.2 12 10 14.6z" fill="currentColor" stroke="none"></path></svg><span class="footer-social-label">YouTube</span></a><a class="footer-social-link" href="https://www.instagram.com/holarise_az/" target="_blank" rel="noopener noreferrer me" aria-label="HolaRise on Instagram" title="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"></circle></svg><span class="footer-social-label">Instagram</span></a></div>
         </div>
 
         <div>
@@ -514,7 +567,6 @@
             <li>Tan Xa, Hoa Lac, Thach That, Hanoi, Vietnam</li>
             <li><a href="tel:0777771948">077.777.1948</a></li>
             <li><a href="mailto:phungsu@holarise.org">phungsu@holarise.org</a></li>
-            <li><a href="https://www.youtube.com/@holarise-az" target="_blank" rel="noopener noreferrer me">Official YouTube ↗</a></li>
           </ul>
         </div>
       </div>
@@ -1153,10 +1205,10 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=da608294a8" defer></script>
-  <script src="/assets/js/main.js?v=da608294a8" defer></script>
-  <script src="/assets/js/join-pass.js?v=da608294a8" defer></script>
-  <script src="/assets/js/member.js?v=da608294a8" defer></script>
-  <script src="/assets/js/pwa.js?v=da608294a8" defer></script>
+  <script src="/assets/js/motion.js?v=407c658ca9" defer></script>
+  <script src="/assets/js/main.js?v=407c658ca9" defer></script>
+  <script src="/assets/js/join-pass.js?v=407c658ca9" defer></script>
+  <script src="/assets/js/member.js?v=407c658ca9" defer></script>
+  <script src="/assets/js/pwa.js?v=407c658ca9" defer></script>
 </body>
 </html>

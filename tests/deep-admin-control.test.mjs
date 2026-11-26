@@ -655,3 +655,35 @@ test("Event Command Center: rsvpClosed (409), stageOverride (memory/invite), add
   ).json();
   assert.equal(cmdAfterRevoke.album.grantedMembers.length, 0);
 });
+
+test("Admin members list auto-heals missing registrations.member_id and events.zalo_group_url columns", async () => {
+  const { env, d1, adminCookie } = await setupEnvAndActors();
+
+  // Simulate legacy production D1 where migration 0006/0018 columns were not applied on registrations/events
+  d1.rawDb.exec("DROP INDEX IF EXISTS idx_registrations_member;");
+  d1.rawDb.exec("DROP INDEX IF EXISTS idx_registrations_member_event;");
+  d1.rawDb.exec("ALTER TABLE registrations DROP COLUMN member_id;");
+  d1.rawDb.exec("ALTER TABLE events DROP COLUMN zalo_group_url;");
+
+  // Use a fresh wrapper object so WeakSet cache in ensureDeepControlSchema runs against the degraded schema
+  const freshDb = {
+    prepare: (sql) => d1.prepare(sql),
+    batch: (stmts) => d1.batch(stmts),
+  };
+  const freshEnv = { ...env, DB: freshDb };
+
+  const res = await adminMembersList({
+    request: makeReq("/api/admin/members", { cookie: adminCookie }),
+    env: freshEnv,
+  });
+  assert.equal(res.status, 200);
+  const data = await res.json();
+  assert.equal(data.ok, true);
+  assert.ok(Array.isArray(data.items));
+  assert.ok(data.items.length >= 2);
+
+  const regCols = d1.rawDb.prepare("PRAGMA table_info(registrations)").all().map((c) => c.name);
+  const eventCols = d1.rawDb.prepare("PRAGMA table_info(events)").all().map((c) => c.name);
+  assert.ok(regCols.includes("member_id"));
+  assert.ok(eventCols.includes("zalo_group_url"));
+});

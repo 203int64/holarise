@@ -298,7 +298,7 @@ export async function uploadImageToDrive(
  * Fetch image or video binary from Google Drive for Edge CDN proxy (/api/media/drive/:id).
  * Supports HTTP Range forwarding (206 Partial Content) for smooth iOS Safari & Zalo WebView video playback.
  */
-export async function fetchDriveImage(env, fileId, fetchImpl = fetch, { range = "" } = {}) {
+export async function fetchDriveImage(env, fileId, fetchImpl = fetch, { range = "", fallbackKind = "" } = {}) {
   if (!isSafeDriveFileId(fileId)) {
     return { ok: false, status: 404, error: "INVALID_ID" };
   }
@@ -321,8 +321,20 @@ export async function fetchDriveImage(env, fileId, fetchImpl = fetch, { range = 
     return { ok: false, status: 502, error: `DRIVE_HTTP_${res.status}` };
   }
 
-  const contentType = String(res.headers.get("Content-Type") || "").toLowerCase();
-  if (!contentType.startsWith("image/") && !contentType.startsWith("video/")) {
+  let contentType = String(res.headers.get("Content-Type") || "").toLowerCase();
+  if (!contentType || contentType.startsWith("application/octet-stream")) {
+    contentType =
+      fallbackKind === "video"
+        ? "video/mp4"
+        : fallbackKind === "audio"
+          ? "audio/mpeg"
+          : "image/jpeg";
+  }
+  if (
+    !contentType.startsWith("image/") &&
+    !contentType.startsWith("video/") &&
+    !contentType.startsWith("audio/")
+  ) {
     return { ok: false, status: 415, error: "UNSUPPORTED_MEDIA" };
   }
 

@@ -193,6 +193,8 @@ export function serializeEventRow(row) {
     zaloGroupUrl: row.zalo_group_url || "",
     rsvpClosed: Number(row.rsvp_closed || 0) === 1,
     stageOverride: row.stage_override || "auto",
+    reelAudioUrl: row.reel_audio_url || "",
+    reelAudioTitle: row.reel_audio_title || "",
     status: row.status,
     sortOrder: row.sort_order,
     createdAt: row.created_at,

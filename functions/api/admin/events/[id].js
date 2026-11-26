@@ -222,6 +222,16 @@ export async function onRequestPut(context) {
     }
   }
 
+  // Keep linked media_albums title & event_date in sync when an event is renamed
+  await context.env.DB.prepare(
+    `UPDATE media_albums
+     SET title = ?, event_date = ?, updated_at = ?
+     WHERE event_id = ?`
+  )
+    .bind(v.title, v.date, now, id)
+    .run()
+    .catch(() => {});
+
   const updated = await context.env.DB.prepare("SELECT * FROM events WHERE id = ?").bind(id).first();
   return jsonResponse({ ok: true, item: serializeEventRow(updated) });
 }

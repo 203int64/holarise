@@ -683,6 +683,25 @@ html.is-standalone .media-topbar {
   border-radius: 6px;
 }
 
+.photo-tile.is-broken {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-hover);
+}
+
+.photo-tile.is-broken img {
+  display: none;
+}
+
+.photo-tile.is-broken::after {
+  content: "Không tải được ảnh";
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  padding: 6px 10px;
+}
+
 .photo-tile-markers {
   position: absolute;
   top: 7px;

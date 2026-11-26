@@ -40,9 +40,10 @@ export async function onRequestGet(context) {
     if (cached) return cached;
   }
 
+  const kindHint = String(reqUrl.searchParams.get("kind") || "").toLowerCase();
   let fetched;
   try {
-    fetched = await fetchDriveImage(env, id, fetch, { range: rangeHeader });
+    fetched = await fetchDriveImage(env, id, fetch, { range: rangeHeader, fallbackKind: kindHint });
   } catch {
     return new Response("Unable to reach Google Drive", { status: 502 });
   }
@@ -54,6 +55,7 @@ export async function onRequestGet(context) {
   }
 
   const isVideo = fetched.contentType.startsWith("video/");
+  const isAudio = fetched.contentType.startsWith("audio/");
   const headers = {
     "Content-Type": fetched.contentType,
     "Cache-Control": access.restricted ? "private, no-store" : "public, max-age=31536000, immutable",
@@ -70,17 +72,25 @@ export async function onRequestGet(context) {
     headers["Content-Range"] = fetched.contentRange;
   }
   if (isDownload) {
-    const ext = fetched.contentType.includes("mp4")
-      ? "mp4"
-      : fetched.contentType.includes("quicktime")
-        ? "mov"
-        : fetched.contentType.includes("webm")
-          ? "webm"
-          : fetched.contentType.includes("png")
-            ? "png"
-            : fetched.contentType.includes("webp")
-              ? "webp"
-              : "jpg";
+    const ext = isAudio
+      ? fetched.contentType.includes("mpeg")
+        ? "mp3"
+        : fetched.contentType.includes("ogg")
+          ? "ogg"
+          : fetched.contentType.includes("wav")
+            ? "wav"
+            : "m4a"
+      : fetched.contentType.includes("mp4")
+        ? "mp4"
+        : fetched.contentType.includes("quicktime")
+          ? "mov"
+          : fetched.contentType.includes("webm")
+            ? "webm"
+            : fetched.contentType.includes("png")
+              ? "png"
+              : fetched.contentType.includes("webp")
+                ? "webp"
+                : "jpg";
     headers["Content-Disposition"] = `attachment; filename="holarise-${id.slice(0, 12)}.${ext}"`;
   }
 
@@ -92,6 +102,7 @@ export async function onRequestGet(context) {
     !access.restricted &&
     !isRanged &&
     !isVideo &&
+    !isAudio &&
     fetched.status === 200 &&
     typeof context.waitUntil === "function"
   ) {

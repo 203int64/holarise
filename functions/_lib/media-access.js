@@ -19,10 +19,11 @@ const ensuredDeepDbs = new WeakSet();
 export async function ensureDeepControlSchema(db) {
   if (!db || ensuredDeepDbs.has(db)) return;
   try {
-    const [mColsRes, aColsRes, eColsRes] = await Promise.all([
+    const [mColsRes, aColsRes, eColsRes, rColsRes] = await Promise.all([
       db.prepare("PRAGMA table_info(members)").all().catch(() => ({ results: [] })),
       db.prepare("PRAGMA table_info(media_albums)").all().catch(() => ({ results: [] })),
       db.prepare("PRAGMA table_info(events)").all().catch(() => ({ results: [] })),
+      db.prepare("PRAGMA table_info(registrations)").all().catch(() => ({ results: [] })),
     ]);
 
     const mCols = new Set((mColsRes.results || []).map((c) => String(c.name || "").toLowerCase()));
@@ -54,6 +55,40 @@ export async function ensureDeepControlSchema(db) {
           .run()
           .catch(() => {});
       }
+      if (!eCols.has("reel_audio_url")) {
+        await db
+          .prepare("ALTER TABLE events ADD COLUMN reel_audio_url TEXT NOT NULL DEFAULT ''")
+          .run()
+          .catch(() => {});
+      }
+      if (!eCols.has("reel_audio_title")) {
+        await db
+          .prepare("ALTER TABLE events ADD COLUMN reel_audio_title TEXT NOT NULL DEFAULT ''")
+          .run()
+          .catch(() => {});
+      }
+      if (!eCols.has("zalo_group_url")) {
+        await db
+          .prepare("ALTER TABLE events ADD COLUMN zalo_group_url TEXT NOT NULL DEFAULT ''")
+          .run()
+          .catch(() => {});
+      }
+    }
+
+    const rCols = new Set((rColsRes.results || []).map((c) => String(c.name || "").toLowerCase()));
+    if (rCols.size > 0 && !rCols.has("member_id")) {
+      await db
+        .prepare("ALTER TABLE registrations ADD COLUMN member_id TEXT NOT NULL DEFAULT ''")
+        .run()
+        .catch(() => {});
+      await db
+        .prepare("CREATE INDEX IF NOT EXISTS idx_registrations_member ON registrations(member_id, created_at DESC)")
+        .run()
+        .catch(() => {});
+      await db
+        .prepare("CREATE INDEX IF NOT EXISTS idx_registrations_member_event ON registrations(member_id, event_id)")
+        .run()
+        .catch(() => {});
     }
 
     await db

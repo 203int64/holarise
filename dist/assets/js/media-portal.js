@@ -619,8 +619,19 @@
           markers.push('<span class="tile-pill tile-pill--cover">Bìa</span>');
         }
 
+        const isVideo =
+          String(p.mediaType || "image").toLowerCase() === "video" ||
+          /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(p.displayUrl || p.url || ""));
+        const mediaSrc = p.displayUrl || p.url;
+        if (isVideo) {
+          markers.push('<span class="tile-pill tile-pill--video">Video</span>');
+        }
+        const mediaMarkup = isVideo
+          ? `<video src="${esc(mediaSrc)}#t=0.1" muted playsinline preload="metadata"></video>`
+          : `<img src="${esc(mediaSrc)}" alt="${esc(p.alt || p.caption || a.title)}" loading="lazy" decoding="async" onerror="this.parentElement&&this.parentElement.classList.add('is-broken')">`;
+
         return `<article class="photo-tile ${isSelected ? "is-selected" : ""}" data-photo-id="${esc(p.id)}">
-          <img src="${esc(p.displayUrl || p.url)}" alt="${esc(p.alt || p.caption || a.title)}" loading="lazy" decoding="async">
+          ${mediaMarkup}
           ${markers.length ? `<div class="photo-tile-markers">${markers.join("")}</div>` : ""}
           <button class="photo-tile-check" type="button" data-check-photo="${esc(p.id)}" aria-label="${isSelected ? "Bỏ chọn ảnh" : "Chọn ảnh"}" aria-pressed="${isSelected ? "true" : "false"}">
             ${isSelected ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ""}
@@ -839,9 +850,26 @@
     pill.textContent = isApproved ? (photo.webUrl ? "Đã duyệt · WebP" : "Đã lên web") : status === "rejected" ? "Đã ẩn" : "Chờ duyệt";
     pill.className = `lb-status-pill ${isApproved ? "lb-status-pill--approved" : "lb-status-pill--pending"}`;
 
+    const isVideo =
+      String(photo.mediaType || "image").toLowerCase() === "video" ||
+      /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(photo.displayUrl || photo.url || ""));
     const imgEl = $("#lb-img");
-    imgEl.src = photo.displayUrl || photo.url;
-    imgEl.alt = photo.caption || photo.alt || state.activeAlbum?.title || "Ảnh sự kiện";
+    const vidEl = $("#lb-video");
+    if (isVideo && vidEl) {
+      imgEl.hidden = true;
+      imgEl.removeAttribute("src");
+      vidEl.hidden = false;
+      vidEl.src = photo.displayUrl || photo.url;
+    } else {
+      if (vidEl) {
+        try { vidEl.pause(); } catch {}
+        vidEl.removeAttribute("src");
+        vidEl.hidden = true;
+      }
+      imgEl.hidden = false;
+      imgEl.src = photo.displayUrl || photo.url;
+      imgEl.alt = photo.caption || photo.alt || state.activeAlbum?.title || "Ảnh sự kiện";
+    }
 
     $("#lb-prev").hidden = activeList.length <= 1;
     $("#lb-next").hidden = activeList.length <= 1;

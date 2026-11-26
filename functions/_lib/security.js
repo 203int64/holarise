@@ -479,11 +479,62 @@ export function sniffImageMime(bytes) {
 }
 
 /**
- * Sniff both image (JPEG/PNG/WebP) and video (MP4/MOV/WebM) using magic bytes only.
+ * Sniff audio format (MP3, M4A, OGG, WAV) using magic bytes only (blocks SVG/HTML/JS spoofing).
+ */
+export function sniffAudioMime(bytes) {
+  if (!(bytes instanceof Uint8Array) || bytes.length < 12) return null;
+  // MP3 with ID3v2 tag: 'ID3'
+  if (bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) {
+    return { mime: "audio/mpeg", ext: "mp3", kind: "audio" };
+  }
+  // MP3 raw MPEG-1/2 Layer III frame sync: FF FB / FF F3 / FF F2 / FF E3
+  if (
+    bytes[0] === 0xff &&
+    (bytes[1] === 0xfb || bytes[1] === 0xf3 || bytes[1] === 0xf2 || bytes[1] === 0xe3)
+  ) {
+    return { mime: "audio/mpeg", ext: "mp3", kind: "audio" };
+  }
+  // M4A / M4B ISO Base Media audio: bytes[4..7] === 'ftyp' && brand === 'M4A ' or 'M4B '
+  if (
+    bytes[4] === 0x66 &&
+    bytes[5] === 0x74 &&
+    bytes[6] === 0x79 &&
+    bytes[7] === 0x70 &&
+    bytes[8] === 0x4d &&
+    bytes[9] === 0x34 &&
+    (bytes[10] === 0x41 || bytes[10] === 0x42) &&
+    bytes[11] === 0x20
+  ) {
+    return { mime: "audio/mp4", ext: "m4a", kind: "audio" };
+  }
+  // OGG container: 'OggS'
+  if (bytes[0] === 0x4f && bytes[1] === 0x67 && bytes[2] === 0x67 && bytes[3] === 0x53) {
+    return { mime: "audio/ogg", ext: "ogg", kind: "audio" };
+  }
+  // WAV: RIFF....WAVE
+  if (
+    bytes[0] === 0x52 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x46 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x41 &&
+    bytes[10] === 0x56 &&
+    bytes[11] === 0x45
+  ) {
+    return { mime: "audio/wav", ext: "wav", kind: "audio" };
+  }
+  return null;
+}
+
+/**
+ * Sniff image (JPEG/PNG/WebP), audio (MP3/M4A/OGG/WAV), and video (MP4/MOV/WebM) using magic bytes only.
  */
 export function sniffMediaMime(bytes) {
   const img = sniffImageMime(bytes);
   if (img) return { ...img, kind: "image" };
+  const aud = sniffAudioMime(bytes);
+  if (aud) return aud;
   if (!(bytes instanceof Uint8Array) || bytes.length < 12) return null;
 
   // ISO Base Media (MP4 / MOV): bytes[4..7] === 'ftyp'

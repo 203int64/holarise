@@ -170,8 +170,7 @@ export async function onRequestPost(context) {
     .first()
     .catch(() => null);
   const seqNum = String(Number(seqRow?.cnt || 0) + 1).padStart(3, "0");
-  const albumShortSlug = slugifyVi(album.slug || album.title || "su-kien").slice(0, 36) || "su-kien";
-  const standardizedFilename = `${albumShortSlug}_${stamp}_${memberCode}_${seqNum}.${detected.ext}`;
+  const standardizedFilename = `${memberCode}_${seqNum}.${detected.ext}`;
 
   let mediaKey = "";
   let photoUrl = "";

@@ -1686,15 +1686,49 @@ def write_page(
     html_lang = "en" if is_en_page else "vi"
     og_locale = "en_US" if is_en_page else "vi_VN"
     og_site_name = b.get("brandName", "HolaRise")
-    social_li_parts = []
-    for s_key, s_label in (("youtube", "YouTube"), ("facebook", "Facebook"), ("instagram", "Instagram")):
+    social_icons = {
+        "youtube": (
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+            'stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+            '<rect x="2.5" y="5.5" width="19" height="13" rx="4"></rect>'
+            '<path d="M10 9.4 15.2 12 10 14.6z" fill="currentColor" stroke="none"></path>'
+            "</svg>"
+        ),
+        "instagram": (
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+            'stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+            '<rect x="3" y="3" width="18" height="18" rx="5"></rect>'
+            '<circle cx="12" cy="12" r="4"></circle>'
+            '<circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"></circle>'
+            "</svg>"
+        ),
+        "facebook": (
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+            'stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+            '<path d="M14 9h3V5h-3a4 4 0 0 0-4 4v3H7v4h3v5h4v-5h3l1-4h-4V9a1 1 0 0 1 1-1z"></path>'
+            "</svg>"
+        ),
+    }
+    social_link_parts = []
+    for s_key, s_label in (("youtube", "YouTube"), ("instagram", "Instagram"), ("facebook", "Facebook")):
         s_url = (c.get(s_key) or "").strip()
         if s_url and urlparse(s_url).scheme in ("http", "https"):
-            link_text = f"Official {s_label} ↗" if is_en_page else f"{s_label} chính thức ↗"
-            social_li_parts.append(
-                f'\n            <li><a href="{esc(s_url)}" target="_blank" rel="noopener noreferrer me">{link_text}</a></li>'
+            aria_label = f"HolaRise on {s_label}" if is_en_page else f"{s_label} chính thức của HolaRise"
+            social_link_parts.append(
+                f'<a class="footer-social-link" href="{esc(s_url)}" target="_blank" '
+                f'rel="noopener noreferrer me" aria-label="{esc(aria_label)}" title="{esc(s_label)}">'
+                f'{social_icons[s_key]}'
+                f'<span class="footer-social-label">{esc(s_label)}</span></a>'
             )
-    contact_social_links_li = "".join(social_li_parts)
+    if social_link_parts:
+        nav_label = "Official channels" if is_en_page else "Kênh chính thức"
+        footer_social_html = (
+            f'\n          <div class="footer-social" role="group" aria-label="{esc(nav_label)}">'
+            + "".join(social_link_parts)
+            + "</div>"
+        )
+    else:
+        footer_social_html = ""
 
     vi_pair, en_pair = resolve_lang_pair(url_path)
     hreflang_links = ""
@@ -1783,7 +1817,7 @@ def write_page(
             "CONTACT_ZALO": esc(c.get("zalo", "")),
             "CONTACT_ZALO_GROUP": esc(c.get("zaloGroup") or c.get("zalo", "")),
             "CONTACT_MEETING": esc(c.get("meetingTimeEn") if is_en_page else c["meetingTime"]),
-            "CONTACT_SOCIAL_LINKS_LI": contact_social_links_li,
+            "FOOTER_SOCIAL_HTML": footer_social_html,
             "FORM_ENDPOINT": esc(c.get("formEndpoint", "")),
             "CURRENT_YEAR": str(datetime.date.today().year),
             "CACHE_BUST": resolved_cache_bust,
@@ -2707,6 +2741,8 @@ def build_site() -> list:
             "MEMORY_COVER_IMAGE": "__SSR_MEMORY_COVER_IMAGE__",
             "MEMORY_STATS_INLINE_HTML": "__SSR_MEMORY_STATS_INLINE_HTML__",
             "MEMORY_GALLERY_HTML": "__SSR_MEMORY_GALLERY_HTML__",
+            "MEMORY_REEL_AUDIO_URL": "__SSR_MEMORY_REEL_AUDIO_URL__",
+            "MEMORY_REEL_AUDIO_TITLE": "__SSR_MEMORY_REEL_AUDIO_TITLE__",
         },
     )
     write_page(
@@ -3207,6 +3243,8 @@ def build_site() -> list:
             "MEMORY_COVER_IMAGE": "__SSR_MEMORY_COVER_IMAGE__",
             "MEMORY_STATS_INLINE_HTML": "__SSR_MEMORY_STATS_INLINE_HTML__",
             "MEMORY_GALLERY_HTML": "__SSR_MEMORY_GALLERY_HTML__",
+            "MEMORY_REEL_AUDIO_URL": "__SSR_MEMORY_REEL_AUDIO_URL__",
+            "MEMORY_REEL_AUDIO_TITLE": "__SSR_MEMORY_REEL_AUDIO_TITLE__",
         },
     )
     write_page(

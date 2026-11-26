@@ -192,6 +192,8 @@ async function renderMemoryStageResponse({ request, env, matched, slug }) {
     __SSR_MEMORY_COVER_IMAGE__: escHtml(coverImage),
     __SSR_MEMORY_STATS_INLINE_HTML__: statsInlineHtml,
     __SSR_MEMORY_GALLERY_HTML__: galleryHtml,
+    __SSR_MEMORY_REEL_AUDIO_URL__: escHtml(matched.reelAudioUrl || ""),
+    __SSR_MEMORY_REEL_AUDIO_TITLE__: escHtml(matched.reelAudioTitle || ""),
   };
 
   const html = (await shellRes.text()).replace(/__SSR_[A-Z0-9_]+__/g, (token) =>

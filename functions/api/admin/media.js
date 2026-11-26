@@ -6,8 +6,10 @@ import {
 } from "../../_lib/drive.js";
 import { errorResponse, jsonResponse, requireAdmin, sniffMediaMime } from "../../_lib/security.js";
 
-const MAX_KV_UPLOAD_BYTES = 1.5 * 1024 * 1024; // 1.5 MB fallback when using MEDIA_KV
+const MAX_KV_UPLOAD_BYTES = 1.5 * 1024 * 1024; // 1.5 MB image fallback when using MEDIA_KV
+const MAX_KV_AUDIO_BYTES = 8 * 1024 * 1024; // 8 MB soundtrack audio on MEDIA_KV
 const MAX_DRIVE_UPLOAD_BYTES = 25 * 1024 * 1024; // 25 MB original uncompressed image on Google Drive
+const MAX_DRIVE_AUDIO_BYTES = 15 * 1024 * 1024; // 15 MB event soundtrack on Google Drive
 const MAX_DRIVE_VIDEO_BYTES = 50 * 1024 * 1024; // 50 MB video clip on Google Drive
 const ALLOWED_ROLES = ["super_admin", "editor", "media"];
 
@@ -37,8 +39,8 @@ export async function onRequestPost(context) {
     );
   }
 
-  const maxBytes = useDrive ? MAX_DRIVE_VIDEO_BYTES : MAX_KV_UPLOAD_BYTES;
-  const maxLabel = useDrive ? "50 MB" : "1.5 MB";
+  const maxBytes = useDrive ? MAX_DRIVE_VIDEO_BYTES : MAX_KV_AUDIO_BYTES;
+  const maxLabel = useDrive ? "50 MB" : "8 MB";
   const contentType = context.request.headers.get("Content-Type") || "";
   let bytes;
   let originalFilename = "";
@@ -50,13 +52,13 @@ export async function onRequestPost(context) {
       const formData = await context.request.formData();
       const file = formData.get("file");
       if (!file || typeof file.arrayBuffer !== "function") {
-        return errorResponse(400, "MISSING_FILE", "Không tìm thấy tệp ảnh trong yêu cầu tải lên.");
+        return errorResponse(400, "MISSING_FILE", "Không tìm thấy tệp trong yêu cầu tải lên.");
       }
       if (file.size > maxBytes) {
         return errorResponse(
           413,
           "FILE_TOO_LARGE",
-          `Ảnh vượt quá giới hạn ${maxLabel}.`
+          `Tệp vượt quá giới hạn ${maxLabel}.`
         );
       }
       originalFilename = String(file.name || "");
@@ -66,19 +68,19 @@ export async function onRequestPost(context) {
     } else {
       const buf = await context.request.arrayBuffer();
       if (buf.byteLength > maxBytes) {
-        return errorResponse(413, "FILE_TOO_LARGE", `Ảnh vượt quá giới hạn ${maxLabel}.`);
+        return errorResponse(413, "FILE_TOO_LARGE", `Tệp vượt quá giới hạn ${maxLabel}.`);
       }
       bytes = new Uint8Array(buf);
     }
   } catch {
-    return errorResponse(400, "INVALID_UPLOAD", "Không thể đọc dữ liệu tệp ảnh gửi lên.");
+    return errorResponse(400, "INVALID_UPLOAD", "Không thể đọc dữ liệu tệp gửi lên.");
   }
 
   if (!bytes || bytes.byteLength === 0) {
-    return errorResponse(400, "EMPTY_FILE", "Tệp ảnh rỗng.");
+    return errorResponse(400, "EMPTY_FILE", "Tệp gửi lên rỗng.");
   }
   if (bytes.byteLength > maxBytes) {
-    return errorResponse(413, "FILE_TOO_LARGE", `Ảnh vượt quá giới hạn ${maxLabel}.`);
+    return errorResponse(413, "FILE_TOO_LARGE", `Tệp vượt quá giới hạn ${maxLabel}.`);
   }
 
   const detected = sniffMediaMime(bytes);
@@ -86,12 +88,25 @@ export async function onRequestPost(context) {
     return errorResponse(
       415,
       "UNSUPPORTED_IMAGE",
-      "Chỉ hỗ trợ định dạng ảnh (JPEG, PNG, WebP) hoặc video (MP4, MOV, WebM) hợp lệ."
+      "Chỉ hỗ trợ định dạng ảnh (JPEG, PNG, WebP), nhạc (MP3, M4A, OGG, WAV) hoặc video (MP4, MOV, WebM) hợp lệ."
     );
   }
   const isVideo = detected.kind === "video";
-  if (!isVideo && useDrive && bytes.byteLength > MAX_DRIVE_UPLOAD_BYTES) {
-    return errorResponse(413, "FILE_TOO_LARGE", "Ảnh vượt quá giới hạn 25 MB.");
+  const isAudio = detected.kind === "audio";
+  if (isAudio) {
+    const audioLimit = useDrive ? MAX_DRIVE_AUDIO_BYTES : MAX_KV_AUDIO_BYTES;
+    if (bytes.byteLength > audioLimit) {
+      return errorResponse(413, "FILE_TOO_LARGE", `Tệp nhạc vượt quá giới hạn ${useDrive ? "15 MB" : "8 MB"}.`);
+    }
+  } else if (isVideo) {
+    if (!useDrive && bytes.byteLength > MAX_KV_UPLOAD_BYTES) {
+      return errorResponse(413, "FILE_TOO_LARGE", "Video vượt quá giới hạn 1.5 MB (hãy cấu hình Google Drive).");
+    }
+  } else {
+    const imgLimit = useDrive ? MAX_DRIVE_UPLOAD_BYTES : MAX_KV_UPLOAD_BYTES;
+    if (bytes.byteLength > imgLimit) {
+      return errorResponse(413, "FILE_TOO_LARGE", `Ảnh vượt quá giới hạn ${useDrive ? "25 MB" : "1.5 MB"}.`);
+    }
   }
 
   const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
@@ -113,7 +128,11 @@ export async function onRequestPost(context) {
         subfolder,
         description: `Người đăng: ${uploaderLabel} · Email: ${auth.user.email} · Tải lên lúc: ${new Date().toISOString()}`,
       });
-      const finalUrl = isVideo ? `${uploaded.url}?kind=video` : uploaded.url;
+      const finalUrl = isVideo
+        ? `${uploaded.url}?kind=video`
+        : isAudio
+          ? `${uploaded.url}?kind=audio`
+          : uploaded.url;
       return jsonResponse(
         { ok: true, ...uploaded, url: finalUrl, mediaType: detected.kind, uploadedBy: uploaderLabel },
         201
@@ -122,16 +141,18 @@ export async function onRequestPost(context) {
       return errorResponse(
         502,
         "DRIVE_UPLOAD_FAILED",
-        err?.message || "Không thể tải ảnh gốc lên Google Drive."
+        err?.message || "Không thể tải tệp lên Google Drive."
       );
     }
   }
 
-  const id = `img-${stamp}-${crypto.randomUUID().slice(0, 10)}.${detected.ext}`;
+  const prefix = isAudio ? "aud" : isVideo ? "vid" : "img";
+  const id = `${prefix}-${stamp}-${crypto.randomUUID().slice(0, 10)}.${detected.ext}`;
   await context.env.MEDIA_KV.put(`media:${id}`, bytes.buffer, {
     metadata: {
       contentType: detected.mime,
       size: bytes.byteLength,
+      mediaType: detected.kind,
       uploadedBy: auth.user.email,
       uploadedAt: new Date().toISOString(),
     },
@@ -143,6 +164,7 @@ export async function onRequestPost(context) {
       id,
       url: `/api/media/${id}`,
       contentType: detected.mime,
+      mediaType: detected.kind,
       size: bytes.byteLength,
       storage: "media_kv",
     },

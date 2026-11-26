@@ -492,8 +492,8 @@ test("Standardized Drive contribution folder/filename + /media/ team visibility 
     const code = regData.member.memberCode;
     assert.equal(createdFolders[0].name, "dong-gop");
     assert.equal(createdFolders[1].name, `${stamp}_${code}_le-minh-quan`);
-    assert.equal(uploadedNames[0], `dem-nhac-ky-niem_${stamp}_${code}_001.jpg`);
-    assert.equal(uploadedNames[1], `dem-nhac-ky-niem_${stamp}_${code}_002.jpg`);
+    assert.equal(uploadedNames[0], `${code}_001.jpg`);
+    assert.equal(uploadedNames[1], `${code}_002.jpg`);
     assert.equal(d1.item.sourceKind, "member_contribution");
     assert.equal(d1.item.approvalStatus, "pending");
     assert.match(d1.item.drivePath, /dong-gop\/.*_001\.jpg$/);
