@@ -1,3 +1,4 @@
+import { ensureDeepControlSchema } from "../../../_lib/media-access.js";
 import { safeJsonParse, serializeEventRow } from "../../../_lib/render.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
 import { validateEventInput } from "../../../_lib/validation.js";
@@ -65,6 +66,14 @@ export async function onRequestPut(context) {
       parsed.data.zaloGroupUrl !== undefined || parsed.data.zalo_group_url !== undefined
         ? (parsed.data.zaloGroupUrl ?? parsed.data.zalo_group_url)
         : (existing.zalo_group_url || ""),
+    reelAudioUrl:
+      parsed.data.reelAudioUrl !== undefined || parsed.data.reel_audio_url !== undefined
+        ? (parsed.data.reelAudioUrl ?? parsed.data.reel_audio_url)
+        : (existing.reel_audio_url || ""),
+    reelAudioTitle:
+      parsed.data.reelAudioTitle !== undefined || parsed.data.reel_audio_title !== undefined
+        ? (parsed.data.reelAudioTitle ?? parsed.data.reel_audio_title)
+        : (existing.reel_audio_title || ""),
   };
 
   const validated = validateEventInput(mergedBody);
@@ -231,6 +240,17 @@ export async function onRequestPut(context) {
     .bind(v.title, v.date, now, id)
     .run()
     .catch(() => {});
+
+  // Persist custom soundtrack safely (self-heals schema if migration 0023 not yet applied)
+  if (parsed.data.reelAudioUrl !== undefined || parsed.data.reelAudioTitle !== undefined || parsed.data.reel_audio_url !== undefined || parsed.data.reel_audio_title !== undefined) {
+    await ensureDeepControlSchema(context.env.DB);
+    await context.env.DB.prepare(
+      "UPDATE events SET reel_audio_url = ?, reel_audio_title = ?, updated_at = ? WHERE id = ?"
+    )
+      .bind(v.reel_audio_url, v.reel_audio_title, now, id)
+      .run()
+      .catch(() => {});
+  }
 
   const updated = await context.env.DB.prepare("SELECT * FROM events WHERE id = ?").bind(id).first();
   return jsonResponse({ ok: true, item: serializeEventRow(updated) });

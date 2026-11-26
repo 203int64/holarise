@@ -9,6 +9,21 @@ export const DEFAULT_GEMINI_IMAGE_MODEL = "gemini-nano-banana-2.1";
 export const GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
 export const GEMINI_API_REVISION = "2026-05-20";
 
+export const ALLOWED_IMAGE_SIZES = ["1K", "2K", "4K"];
+export const DEFAULT_IMAGE_SIZE = "2K";
+export const ALLOWED_ASPECT_RATIOS = ["auto", "16:9", "4:5", "3:2", "1:1", "9:16"];
+
+export function normalizeImageSize(raw) {
+  const val = String(raw || "").trim().toUpperCase();
+  return ALLOWED_IMAGE_SIZES.includes(val) ? val : DEFAULT_IMAGE_SIZE;
+}
+
+export function normalizeAspectRatio(raw) {
+  const val = String(raw || "").trim().toLowerCase();
+  if (!val || val === "auto") return "auto";
+  return ALLOWED_ASPECT_RATIOS.includes(val) ? val : "auto";
+}
+
 const STRICT_AUTHENTICITY_PREFIX =
   "STRICT DOCUMENTARY AUTHENTICITY RULES (NON-NEGOTIABLE): " +
   "Keep 100% of the exact same real people, faces, expressions, postures, clothing, furniture, architecture, trees, and objects. " +
@@ -126,8 +141,21 @@ export async function runGeminiImageEdit({
   imageBase64,
   mimeType = "image/jpeg",
   prompt,
+  imageSize = DEFAULT_IMAGE_SIZE,
+  aspectRatio = "auto",
   fetchImpl = fetch,
 }) {
+  const normSize = normalizeImageSize(imageSize);
+  const normRatio = normalizeAspectRatio(aspectRatio);
+  const responseFormat = {
+    type: "image",
+    mime_type: "image/jpeg",
+    image_size: normSize,
+  };
+  if (normRatio !== "auto") {
+    responseFormat.aspect_ratio = normRatio;
+  }
+
   const res = await fetchImpl(GEMINI_INTERACTIONS_URL, {
     method: "POST",
     headers: {
@@ -135,7 +163,7 @@ export async function runGeminiImageEdit({
       "x-goog-api-key": apiKey,
       "Api-Revision": GEMINI_API_REVISION,
     },
-    signal: AbortSignal.timeout(45000),
+    signal: AbortSignal.timeout(normSize === "4K" ? 90000 : 45000),
     body: JSON.stringify({
       model,
       input: [
@@ -146,6 +174,7 @@ export async function runGeminiImageEdit({
           data: imageBase64,
         },
       ],
+      response_format: responseFormat,
     }),
   });
 
@@ -167,22 +196,41 @@ export async function generateThreeRetouchVariants({
   model = DEFAULT_GEMINI_IMAGE_MODEL,
   imageBase64,
   mimeType = "image/jpeg",
+  imageSize = DEFAULT_IMAGE_SIZE,
+  aspectRatio = "auto",
+  presetId = "",
   fetchImpl = fetch,
 }) {
+  const normSize = normalizeImageSize(imageSize);
+  const normRatio = normalizeAspectRatio(aspectRatio);
+  const requestedId = String(presetId || "").trim();
+  let targetPresets = AI_RETOUCH_PRESETS;
+  if (requestedId) {
+    const matched = AI_RETOUCH_PRESETS.filter((p) => p.id === requestedId);
+    if (matched.length > 0) targetPresets = matched;
+  } else if (normSize === "4K") {
+    // 4K outputs are large (3-8 MB each); cap to 1 preset when unspecified to prevent Worker OOM/timeout
+    targetPresets = [AI_RETOUCH_PRESETS[0]];
+  }
+
   const settled = await Promise.allSettled(
-    AI_RETOUCH_PRESETS.map(async (preset) => {
+    targetPresets.map(async (preset) => {
       const out = await runGeminiImageEdit({
         apiKey,
         model,
         imageBase64,
         mimeType,
         prompt: preset.prompt,
+        imageSize: normSize,
+        aspectRatio: normRatio,
         fetchImpl,
       });
       return {
         id: preset.id,
         label: preset.label,
         subtitle: preset.subtitle,
+        imageSize: normSize,
+        aspectRatio: normRatio,
         mimeType: out.mimeType,
         dataUrl: `data:${out.mimeType};base64,${out.data}`,
       };
@@ -196,8 +244,8 @@ export async function generateThreeRetouchVariants({
     if (r.status === "fulfilled") {
       variants.push(r.value);
     } else {
-      errors.push(`${AI_RETOUCH_PRESETS[i].id}: ${r.reason?.message || "failed"}`);
+      errors.push(`${targetPresets[i].id}: ${r.reason?.message || "failed"}`);
     }
   }
-  return { variants, errors };
+  return { variants, errors, imageSize: normSize, aspectRatio: normRatio };
 }

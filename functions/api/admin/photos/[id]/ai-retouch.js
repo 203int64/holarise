@@ -10,8 +10,16 @@ import {
   bytesToBase64,
   decodeDataUrl,
   generateThreeRetouchVariants,
+  normalizeAspectRatio,
+  normalizeImageSize,
 } from "../../../../_lib/ai-retouch.js";
-import { fetchDriveImage, isDriveConfigured } from "../../../../_lib/drive.js";
+import {
+  buildEventFolderName,
+  extractDriveFolderId,
+  fetchDriveImage,
+  isDriveConfigured,
+  uploadImageToDrive,
+} from "../../../../_lib/drive.js";
 import { ensureMediaApprovalSchema } from "../../../../_lib/media-approval-schema.js";
 import {
   checkRateLimit,
@@ -26,6 +34,7 @@ import { serializePhotoRow } from "../../albums/[id]/index.js";
 const ALLOWED_ROLES = ["super_admin", "editor", "media"];
 const MAX_SOURCE_BYTES = 3 * 1024 * 1024; // 3 MB max for AI retouch input
 const MAX_APPLY_BYTES = 2.5 * 1024 * 1024; // 2.5 MB max for KV web display copy
+const MAX_DRIVE_4K_BYTES = 18 * 1024 * 1024; // 18 MB max for optional 4K Drive export
 
 async function loadPhotoBytesFromStorage(env, photo, fetchImpl = fetch) {
   // 1. Prefer existing KV web copy (fast, <= 1280px)
@@ -77,7 +86,7 @@ export async function onRequestPost(context) {
     return errorResponse(400, "UNSUPPORTED_MEDIA_TYPE", "Chỉnh màu AI chỉ hỗ trợ ảnh tĩnh, không áp dụng cho video.");
   }
 
-  const parsed = await readJsonBody(request, 4 * 1024 * 1024);
+  const parsed = await readJsonBody(request, 24 * 1024 * 1024);
   if (!parsed.ok) return parsed.response;
 
   const action = String(parsed.data?.action || "generate").trim().toLowerCase();
@@ -134,11 +143,17 @@ export async function onRequestPost(context) {
     }
 
     const model = String(env?.GEMINI_IMAGE_MODEL || DEFAULT_GEMINI_IMAGE_MODEL).trim();
+    const imageSize = normalizeImageSize(parsed.data?.imageSize || env?.GEMINI_IMAGE_SIZE);
+    const aspectRatio = normalizeAspectRatio(parsed.data?.aspectRatio);
+    const presetId = String(parsed.data?.presetId || "").trim().slice(0, 40);
     const { variants, errors } = await generateThreeRetouchVariants({
       apiKey,
       model,
       imageBase64: bytesToBase64(sourceBytes),
       mimeType: sourceMime,
+      imageSize,
+      aspectRatio,
+      presetId,
       fetchImpl,
     });
 
@@ -154,6 +169,8 @@ export async function onRequestPost(context) {
       ok: true,
       photoId: id,
       model,
+      imageSize,
+      aspectRatio,
       variants,
       partialErrors: errors.length > 0 ? errors : undefined,
     });
@@ -227,12 +244,48 @@ export async function onRequestPost(context) {
       await env.MEDIA_KV.delete(`media:${k}`).catch(() => {});
     }
 
+    // Optional: archive full-res 4K branded copy to Google Drive inside ai-4k/ subfolder
+    let driveExportUrl = "";
+    if (typeof parsed.data?.highResDataUrl === "string" && parsed.data.highResDataUrl && isDriveConfigured(env)) {
+      const hiRes = decodeDataUrl(parsed.data.highResDataUrl);
+      if (hiRes && hiRes.bytes.byteLength > 0 && hiRes.bytes.byteLength <= MAX_DRIVE_4K_BYTES) {
+        const hiSniffed = sniffImageMime(hiRes.bytes);
+        if (hiSniffed) {
+          try {
+            const albRow = await env.DB.prepare("SELECT id, slug, title, event_date, drive_url FROM media_albums WHERE id = ?")
+              .bind(existing.album_id)
+              .first();
+            const parentFolderId = extractDriveFolderId(albRow?.drive_url || "");
+            const eventFolderName = buildEventFolderName({
+              eventDate: albRow?.event_date || "",
+              title: albRow?.title || "",
+              fallback: albRow?.slug || existing.album_id,
+            });
+            const uploaded4k = await uploadImageToDrive(env, {
+              bytes: hiRes.bytes,
+              mimeType: hiSniffed.mime,
+              filename: `${id}_${presetId}_4K.${hiSniffed.ext}`,
+              category: "album",
+              parentFolderId,
+              subfolder: parentFolderId ? ["ai-4k"] : [eventFolderName, "ai-4k"],
+              description: `HolaRise AI Studio 4K (${presetId}) · Áp dụng bởi ${auth.user.email} · Lúc ${now}`,
+              fetchImpl,
+            });
+            driveExportUrl = uploaded4k.driveUrl || uploaded4k.url || "";
+          } catch {
+            // Non-fatal: web KV copy is already saved safely
+          }
+        }
+      }
+    }
+
     const updated = await env.DB.prepare("SELECT * FROM media_photos WHERE id = ?").bind(id).first();
     return jsonResponse({
       ok: true,
       item: serializePhotoRow(updated),
       appliedPreset: presetId,
       preservedDriveOriginal: isDriveOriginal,
+      driveExportUrl: driveExportUrl || undefined,
     });
   }
 

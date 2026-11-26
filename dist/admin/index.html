@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=407c658ca9">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=c7a95bb2e9">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
 <body data-pwa-app-name="HolaRise CMS">
@@ -758,6 +758,43 @@
         </div>
 
         <fieldset class="chip-fieldset">
+          <legend>Nhạc nền Thước phim Kỷ niệm (sau sự kiện)</legend>
+          <div class="form-row-2" style="margin-top: 8px;">
+            <div class="field">
+              <label for="ev-reel-audio-mode">Chế độ nhạc nền</label>
+              <select id="ev-reel-audio-mode" name="reelAudioMode">
+                <option value="">Tự động theo trụ cột (Piano trầm ấm)</option>
+                <option value="preset:holaheart">Preset · HolaHeart (Fmaj9 ấm áp)</option>
+                <option value="preset:holagreen">Preset · HolaGreen (Gmaj9 rừng thông)</option>
+                <option value="preset:holaconnect">Preset · HolaConnect (Cmaj9 tươi sáng)</option>
+                <option value="preset:silent">Tắt nhạc mặc định</option>
+                <option value="custom">Nhạc riêng (tải MP3/M4A/OGG/WAV hoặc dán link)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="ev-reel-audio-title">Tên bản nhạc hiển thị (tùy chọn)</label>
+              <input id="ev-reel-audio-title" name="reelAudioTitle" type="text" maxlength="120" placeholder="VD: Chiều rừng thông · Acoustic">
+            </div>
+          </div>
+          <div id="ev-reel-custom-wrap" style="margin-top: 10px;" hidden>
+            <div class="field">
+              <label for="ev-reel-audio-url">Đường dẫn tệp nhạc (MP3, M4A, OGG, WAV)</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                <input id="ev-reel-audio-url" name="reelAudioUrl" type="text" maxlength="500" placeholder="/api/media/... hoặc https://..." style="flex:1 1 220px;">
+                <label class="btn btn--outline btn--sm" style="cursor:pointer;margin:0;white-space:nowrap;">
+                  Tải tệp nhạc lên
+                  <input id="ev-reel-audio-file" type="file" accept=".mp3,.m4a,.ogg,.wav,audio/mpeg,audio/mp4,audio/ogg,audio/wav" hidden>
+                </label>
+              </div>
+              <small id="ev-reel-audio-status" class="field-hint">Hỗ trợ MP3, M4A, OGG, WAV (tối đa 15 MB qua Drive hoặc 8 MB qua KV).</small>
+            </div>
+            <div id="ev-reel-audio-player-wrap" style="margin-top:8px;" hidden>
+              <audio id="ev-reel-audio-preview" controls preload="none" style="width:100%;height:38px;"></audio>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="chip-fieldset">
           <legend>Thanh chỗ còn lại &amp; sức chứa</legend>
           <div class="form-row-3" style="margin-top: 8px;">
             <div class="field">
@@ -1377,8 +1414,8 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=407c658ca9" defer></script>
-  <script src="/assets/js/admin.js?v=407c658ca9" defer></script>
-  <script src="/assets/js/pwa.js?v=407c658ca9" defer></script>
+  <script src="/assets/js/passkey-client.js?v=c7a95bb2e9" defer></script>
+  <script src="/assets/js/admin.js?v=c7a95bb2e9" defer></script>
+  <script src="/assets/js/pwa.js?v=c7a95bb2e9" defer></script>
 </body>
 </html>

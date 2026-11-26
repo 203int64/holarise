@@ -3,6 +3,7 @@ import {
   ensureCategorySubfolder,
   isDriveConfigured,
 } from "../../../_lib/drive.js";
+import { ensureDeepControlSchema } from "../../../_lib/media-access.js";
 import { serializeEventRow } from "../../../_lib/render.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
 import { slugifyVi, validateEventInput } from "../../../_lib/validation.js";
@@ -237,6 +238,16 @@ export async function onRequestPost(context) {
     } else {
       throw err;
     }
+  }
+
+  if (v.reel_audio_url || v.reel_audio_title) {
+    await ensureDeepControlSchema(context.env.DB);
+    await context.env.DB.prepare(
+      "UPDATE events SET reel_audio_url = ?, reel_audio_title = ? WHERE id = ?"
+    )
+      .bind(v.reel_audio_url, v.reel_audio_title, id)
+      .run()
+      .catch(() => {});
   }
 
   const created = await context.env.DB.prepare("SELECT * FROM events WHERE id = ?").bind(id).first();

@@ -279,6 +279,14 @@ export function validateEventInput(body) {
   if (zaloGroupUrl && !isSafeExternalHttpsUrl(zaloGroupUrl)) {
     fields.zaloGroupUrl = "Link Nhóm Zalo phải bắt đầu bằng https://.";
   }
+  const rawReelAudioUrl = cleanStr(body.reelAudioUrl ?? body.reel_audio_url, 500);
+  if (!isSafeReelAudioUrl(rawReelAudioUrl)) {
+    fields.reelAudioUrl = "Đường dẫn nhạc nền không hợp lệ.";
+  }
+  const reelAudioUrl = rawReelAudioUrl.toLowerCase().startsWith("preset:")
+    ? rawReelAudioUrl.toLowerCase()
+    : rawReelAudioUrl;
+  const reelAudioTitle = cleanStr(body.reelAudioTitle ?? body.reel_audio_title, 120);
   const status = cleanStr(body.status, 20) || "published";
   if (!VALID_POST_STATUSES.has(status)) fields.status = "Trạng thái sự kiện chỉ nhận 'published' hoặc 'draft'.";
 
@@ -311,9 +319,11 @@ export function validateEventInput(body) {
       summary_en: summaryEn,
       highlights,
       participants,
-      image,
+      image: image,
       image_alt: imageAlt,
       zalo_group_url: zaloGroupUrl,
+      reel_audio_url: reelAudioUrl,
+      reel_audio_title: reelAudioTitle,
       status,
       sort_order: sortOrder,
     },

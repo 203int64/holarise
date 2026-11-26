@@ -3544,9 +3544,11 @@
       });
     });
 
-    // 4. Smooth focus on composer when clicking "Write reflection"
+    // 4. Smooth reveal & focus on composer when clicking "Write reflection"
     stageRoot.querySelectorAll("[data-memory-jump-write]").forEach(function (link) {
       link.addEventListener("click", function () {
+        var wrap = document.getElementById("public-reflection-wrap");
+        if (wrap) wrap.hidden = false;
         setTimeout(function () {
           var ta = document.getElementById("pr-content");
           if (ta && !ta.closest("[hidden]")) {
@@ -3571,18 +3573,59 @@
       headerObserver.observe(heroPoster);
     }
 
-    // 6. Apple Journal Mood Filter + Physical Postcard Stack + Tactile Avatar Dock
+    // 6. Interactive Apple Journal Story Rail + Collapsible Composer + Spark Reactions
     var gbListEl = document.getElementById("guestbook-list");
     var moodFilterEl = document.getElementById("memory-mood-filter");
+    var composerWrapEl = document.getElementById("public-reflection-wrap");
+    var composerFormEl = document.getElementById("public-reflection-form");
+    var toggleComposerBtn = document.getElementById("apple-toggle-composer");
     var pcBarEl = document.getElementById("apple-postcard-bar");
     var pcDockEl = document.getElementById("apple-avatar-dock");
-    var pcCounterEl = document.getElementById("apple-postcard-counter");
     var pcPrevBtn = document.getElementById("apple-pc-prev");
     var pcNextBtn = document.getElementById("apple-pc-next");
     var pcOpenAllBtn = document.getElementById("apple-pc-open-all");
     var refSheetDlg = document.getElementById("memory-all-reflections-dialog");
     var refSheetList = document.getElementById("apple-ref-sheet-list");
     var refSheetClose = document.getElementById("apple-ref-sheet-close");
+
+    function openReflectionComposer() {
+      var isSignedIn = Boolean(composerFormEl && !composerFormEl.hidden);
+      if (!isSignedIn) {
+        var authTrigger = composerWrapEl
+          ? composerWrapEl.querySelector("[data-open-member-auth]")
+          : document.querySelector("[data-open-member-auth]");
+        if (authTrigger) {
+          authTrigger.click();
+          return;
+        }
+      }
+      if (composerWrapEl) {
+        composerWrapEl.hidden = !composerWrapEl.hidden;
+        if (toggleComposerBtn) {
+          var lbl = toggleComposerBtn.querySelector("span");
+          if (lbl) {
+            lbl.textContent = composerWrapEl.hidden
+              ? tStage("Viết hương khí", "Write a reflection")
+              : tStage("Đóng khung viết", "Close");
+          }
+          toggleComposerBtn.setAttribute("aria-expanded", composerWrapEl.hidden ? "false" : "true");
+        }
+        if (!composerWrapEl.hidden) {
+          setTimeout(function () {
+            var ta = document.getElementById("pr-content");
+            if (ta && !ta.closest("[hidden]")) {
+              try {
+                ta.focus({ preventScroll: true });
+              } catch (_e) {}
+            }
+          }, 120);
+        }
+      }
+    }
+
+    if (toggleComposerBtn) {
+      toggleComposerBtn.addEventListener("click", openReflectionComposer);
+    }
 
     var MOOD_LABELS = {
       "am-long": tStage("Ấm lòng", "Heartwarming"),
@@ -3594,10 +3637,6 @@
     var activeMood = "all";
     var pcIdx = 0;
     var pcVisibleCards = [];
-
-    function padPc(n) {
-      return n < 10 ? "0" + n : String(n);
-    }
 
     function readCardSummary(card) {
       var nameEl = card.querySelector(".gb-author-meta strong");
@@ -3618,56 +3657,68 @@
       };
     }
 
-    function activatePostcard(nextIdx, dir) {
-      var total = pcVisibleCards.length;
-      if (!total) {
-        if (gbListEl) gbListEl.classList.remove("has-stack");
-        if (pcBarEl) pcBarEl.hidden = true;
-        return;
+    function syncRailArrows() {
+      if (!gbListEl) return;
+      var overflow = gbListEl.scrollWidth > gbListEl.clientWidth + 12;
+      if (pcPrevBtn) {
+        pcPrevBtn.hidden = !overflow;
+        pcPrevBtn.disabled = gbListEl.scrollLeft <= 8;
       }
-      pcIdx = ((nextIdx % total) + total) % total;
-      if (gbListEl) gbListEl.classList.toggle("has-stack", total >= 2);
-      if (pcBarEl) pcBarEl.hidden = total < 2;
-      if (pcOpenAllBtn) pcOpenAllBtn.hidden = total < 3;
-
-      var allCards = gbListEl ? Array.prototype.slice.call(gbListEl.querySelectorAll(".gb-card")) : [];
-      var targetCard = pcVisibleCards[pcIdx];
-      allCards.forEach(function (card) {
-        var isActive = card === targetCard;
-        card.classList.toggle("is-pc-active", isActive);
-        card.classList.remove("is-pc-enter-next", "is-pc-enter-prev");
-        if (isActive && dir) {
-          void card.offsetWidth;
-          card.classList.add(dir < 0 ? "is-pc-enter-prev" : "is-pc-enter-next");
-        }
-      });
-
-      if (pcCounterEl) {
-        pcCounterEl.textContent = padPc(pcIdx + 1) + " / " + padPc(total);
-      }
-
-      if (pcDockEl) {
-        var chips = pcDockEl.querySelectorAll(".apple-avatar-chip");
-        chips.forEach(function (chip, i) {
-          var active = i === pcIdx;
-          chip.classList.toggle("is-active", active);
-          chip.setAttribute("aria-selected", active ? "true" : "false");
-          if (active && dir && typeof chip.scrollIntoView === "function") {
-            try {
-              chip.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-            } catch (_e) {}
-          }
-        });
+      if (pcNextBtn) {
+        pcNextBtn.hidden = !overflow;
+        pcNextBtn.disabled = gbListEl.scrollLeft + gbListEl.clientWidth >= gbListEl.scrollWidth - 8;
       }
     }
 
-    function rebuildPostcardDeck(resetIdx) {
+    function setActiveDockChip(idx) {
+      pcIdx = Math.max(0, Math.min(idx, Math.max(0, pcVisibleCards.length - 1)));
+      if (!pcDockEl) return;
+      pcDockEl.querySelectorAll(".apple-avatar-chip").forEach(function (chip, i) {
+        var active = i === pcIdx;
+        chip.classList.toggle("is-active", active);
+        chip.setAttribute("aria-selected", active ? "true" : "false");
+      });
+    }
+
+    function scrollToRailCard(idx) {
+      var card = pcVisibleCards[idx];
+      if (!card || !gbListEl) return;
+      setActiveDockChip(idx);
+      var left = Math.max(0, card.offsetLeft - 2);
+      gbListEl.scrollTo({ left: left, behavior: "smooth" });
+    }
+
+    function attachExpandButtons() {
+      pcVisibleCards.forEach(function (card) {
+        var bodyEl = card.querySelector(".gb-card-body");
+        if (!bodyEl || card.querySelector(".apple-card-more-btn")) return;
+        if (bodyEl.scrollHeight > bodyEl.clientHeight + 4 || (bodyEl.textContent || "").length > 180) {
+          var moreBtn = document.createElement("button");
+          moreBtn.type = "button";
+          moreBtn.className = "apple-card-more-btn";
+          moreBtn.textContent = tStage("Đọc thêm", "Read more");
+          moreBtn.addEventListener("click", function () {
+            var expanded = card.classList.toggle("is-expanded");
+            moreBtn.textContent = expanded ? tStage("Thu gọn", "Show less") : tStage("Đọc thêm", "Read more");
+          });
+          bodyEl.insertAdjacentElement("afterend", moreBtn);
+        }
+      });
+    }
+
+    function rebuildStoryRail(resetScroll) {
       if (!gbListEl) return;
       var allCards = Array.prototype.slice.call(gbListEl.querySelectorAll(".gb-card"));
-      pcVisibleCards = allCards.filter(function (card) {
+      pcVisibleCards = [];
+      allCards.forEach(function (card) {
         var m = card.getAttribute("data-mood-key") || "";
-        return activeMood === "all" || m === activeMood;
+        var show = activeMood === "all" || m === activeMood;
+        card.hidden = !show;
+        if (show) pcVisibleCards.push(card);
       });
+
+      if (pcBarEl) pcBarEl.hidden = pcVisibleCards.length < 2;
+      if (pcOpenAllBtn) pcOpenAllBtn.hidden = pcVisibleCards.length < 3;
 
       if (pcDockEl) {
         pcDockEl.innerHTML = "";
@@ -3675,10 +3726,10 @@
           var info = readCardSummary(card);
           var chip = document.createElement("button");
           chip.type = "button";
-          chip.className = "apple-avatar-chip";
+          chip.className = "apple-avatar-chip" + (i === 0 ? " is-active" : "");
           chip.setAttribute("role", "tab");
           chip.setAttribute("data-pc-idx", String(i));
-          chip.setAttribute("aria-selected", "false");
+          chip.setAttribute("aria-selected", i === 0 ? "true" : "false");
 
           var av = document.createElement("span");
           av.className = "apple-avatar-chip-av";
@@ -3705,12 +3756,18 @@
             dot.setAttribute("aria-hidden", "true");
             chip.appendChild(dot);
           }
-
           pcDockEl.appendChild(chip);
         });
       }
 
-      activatePostcard(resetIdx ? 0 : Math.min(pcIdx, Math.max(0, pcVisibleCards.length - 1)), 0);
+      if (resetScroll) {
+        gbListEl.scrollTo({ left: 0, behavior: "smooth" });
+        pcIdx = 0;
+      }
+      requestAnimationFrame(function () {
+        attachExpandButtons();
+        syncRailArrows();
+      });
     }
 
     function syncMoodFilterBar() {
@@ -3743,7 +3800,7 @@
           moodFilterEl.innerHTML = pillsHtml;
         }
       }
-      rebuildPostcardDeck(false);
+      rebuildStoryRail(false);
     }
 
     if (gbListEl) {
@@ -3752,6 +3809,53 @@
         gbMut.observe(gbListEl, { childList: true });
       }
       syncMoodFilterBar();
+      window.addEventListener("resize", syncRailArrows, { passive: true });
+
+      var railScrollTick = null;
+      gbListEl.addEventListener(
+        "scroll",
+        function () {
+          if (railScrollTick) return;
+          railScrollTick = requestAnimationFrame(function () {
+            railScrollTick = null;
+            syncRailArrows();
+            if (!pcVisibleCards.length) return;
+            var curLeft = gbListEl.scrollLeft + 24;
+            var bestIdx = 0;
+            var bestDist = Infinity;
+            pcVisibleCards.forEach(function (card, i) {
+              var d = Math.abs(card.offsetLeft - curLeft);
+              if (d < bestDist) {
+                bestDist = d;
+                bestIdx = i;
+              }
+            });
+            if (bestIdx !== pcIdx) setActiveDockChip(bestIdx);
+          });
+        },
+        { passive: true }
+      );
+
+      // Smooth desktop mouse drag-to-scroll on the Story Rail
+      var railDrag = false;
+      var railStartX = 0;
+      var railStartScroll = 0;
+      gbListEl.addEventListener("mousedown", function (e) {
+        if (e.button !== 0 || e.target.closest("button, a, input, textarea, [data-gb-stack]")) return;
+        railDrag = true;
+        railStartX = e.clientX;
+        railStartScroll = gbListEl.scrollLeft;
+        gbListEl.style.scrollSnapType = "none";
+      });
+      window.addEventListener("mousemove", function (e) {
+        if (!railDrag) return;
+        gbListEl.scrollLeft = railStartScroll - (e.clientX - railStartX);
+      });
+      window.addEventListener("mouseup", function () {
+        if (!railDrag) return;
+        railDrag = false;
+        gbListEl.style.scrollSnapType = "";
+      });
 
       if (moodFilterEl) {
         moodFilterEl.addEventListener("click", function (e) {
@@ -3761,7 +3865,7 @@
           moodFilterEl.querySelectorAll("[data-mood-filter]").forEach(function (b) {
             b.classList.toggle("is-active", b === btn);
           });
-          rebuildPostcardDeck(true);
+          rebuildStoryRail(true);
         });
       }
 
@@ -3770,51 +3874,19 @@
           var chip = e.target.closest("[data-pc-idx]");
           if (!chip) return;
           var target = Number(chip.getAttribute("data-pc-idx"));
-          if (Number.isFinite(target) && target !== pcIdx) {
-            activatePostcard(target, target > pcIdx ? 1 : -1);
-          }
+          if (Number.isFinite(target)) scrollToRailCard(target);
         });
       }
       if (pcPrevBtn) {
         pcPrevBtn.addEventListener("click", function () {
-          activatePostcard(pcIdx - 1, -1);
+          gbListEl.scrollBy({ left: -402, behavior: "smooth" });
         });
       }
       if (pcNextBtn) {
         pcNextBtn.addEventListener("click", function () {
-          activatePostcard(pcIdx + 1, 1);
+          gbListEl.scrollBy({ left: 402, behavior: "smooth" });
         });
       }
-
-      // Swipe horizontally on postcard (ignoring gestures inside a card's mini photo stack)
-      var pcTouchX = 0;
-      var pcTouchActive = false;
-      gbListEl.addEventListener(
-        "touchstart",
-        function (e) {
-          if (e.target.closest("[data-gb-stack]")) {
-            pcTouchActive = false;
-            return;
-          }
-          if (e.touches && e.touches.length) {
-            pcTouchActive = true;
-            pcTouchX = e.touches[0].clientX;
-          }
-        },
-        { passive: true }
-      );
-      gbListEl.addEventListener(
-        "touchend",
-        function (e) {
-          if (!pcTouchActive || !e.changedTouches || !e.changedTouches.length) return;
-          pcTouchActive = false;
-          var dx = e.changedTouches[0].clientX - pcTouchX;
-          if (Math.abs(dx) > 52 && pcVisibleCards.length >= 2) {
-            activatePostcard(dx < 0 ? pcIdx + 1 : pcIdx - 1, dx < 0 ? 1 : -1);
-          }
-        },
-        { passive: true }
-      );
 
       // Light Apple Journal All-Reflections Sheet
       if (pcOpenAllBtn && refSheetDlg && refSheetList) {
@@ -3858,9 +3930,7 @@
           if (!item) return;
           var idx = Number(item.getAttribute("data-sheet-pc-idx"));
           if (refSheetDlg.open) refSheetDlg.close();
-          if (Number.isFinite(idx)) {
-            activatePostcard(idx, idx >= pcIdx ? 1 : -1);
-          }
+          if (Number.isFinite(idx)) scrollToRailCard(idx);
         });
       }
       if (refSheetClose && refSheetDlg) {
@@ -3870,13 +3940,23 @@
       }
     }
 
-    // Spring pop feedback when tapping reaction buttons
+    // Spring pop + floating "+1" spark particle when tapping reaction buttons
     document.addEventListener("click", function (e) {
       var rBtn = e.target.closest(".gb-react-btn");
       if (!rBtn) return;
       rBtn.classList.remove("is-popping");
       void rBtn.offsetWidth;
       rBtn.classList.add("is-popping");
+      if (!reduced) {
+        var spark = document.createElement("span");
+        spark.className = "apple-react-spark";
+        spark.setAttribute("aria-hidden", "true");
+        spark.textContent = "+1";
+        rBtn.appendChild(spark);
+        setTimeout(function () {
+          if (spark.parentNode) spark.remove();
+        }, 680);
+      }
     });
 
     // 7. Apple Photos Memories Ken Burns Reel Player + Warm Felt-Piano Ambient Soundtrack

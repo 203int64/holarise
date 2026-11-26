@@ -218,12 +218,25 @@
     });
   }
 
-  async function compressRemoteImageToWebBlob(url, maxDim = 1280, quality = 0.82) {
-    const res = await fetch(url, { credentials: "same-origin" });
+  async function compressRemoteImageToWebBlob(url, maxDim = 1280, quality = 0.82, timeoutMs = 10000) {
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+    let res;
+    try {
+      res = await fetch(url, {
+        credentials: "same-origin",
+        signal: controller ? controller.signal : undefined,
+      });
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
     if (!res.ok) {
       throw new Error(`Không thể tải ảnh gốc để nén (HTTP ${res.status}).`);
     }
     const origBlob = await res.blob();
+    if (origBlob.type && !origBlob.type.startsWith("image/")) {
+      throw new Error("Tệp không phải định dạng ảnh để nén WebP.");
+    }
     const img = await new Promise((resolve, reject) => {
       const el = new Image();
       const objUrl = URL.createObjectURL(origBlob);
@@ -266,21 +279,66 @@
     throw new Error("Trình duyệt không nén được ảnh web.");
   }
 
+  function isVideoPhotoItem(photo) {
+    return (
+      photo?.mediaType === "video" ||
+      /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(photo?.url || ""))
+    );
+  }
+
+  // Background WebP compression queue (never blocks instant photo approval!)
+  const bgOptQueue = [];
+  let bgOptRunning = false;
+
+  function enqueueBackgroundWebOptimization(photo) {
+    if (!photo || !photo.id || photo.webUrl || isVideoPhotoItem(photo)) return;
+    if (!String(photo.url || "").startsWith("/api/media/drive/")) return;
+    bgOptQueue.push(photo);
+    if (!bgOptRunning) drainBackgroundWebOptimization();
+  }
+
+  async function drainBackgroundWebOptimization() {
+    if (bgOptRunning) return;
+    bgOptRunning = true;
+    try {
+      while (bgOptQueue.length > 0) {
+        const photo = bgOptQueue.shift();
+        try {
+          const { blob, ext } = await compressRemoteImageToWebBlob(photo.url, 1280, 0.82, 10000);
+          const fd = new FormData();
+          fd.append("action", "approve");
+          fd.append("file", blob, `${photo.id}.${ext}`);
+          const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}/approve`, {
+            method: "POST",
+            body: fd,
+          });
+          if (res?.item) {
+            const idx = state.photos.findIndex((p) => p.id === photo.id);
+            if (idx !== -1) state.photos[idx] = res.item;
+          }
+        } catch {
+          // Non-fatal: photo is already approved and live via Drive proxy
+        }
+      }
+    } finally {
+      bgOptRunning = false;
+    }
+  }
+
   async function approveSinglePhoto(photo) {
-    const { blob, ext } = await compressRemoteImageToWebBlob(photo.url, 1280, 0.82);
-    const fd = new FormData();
-    fd.append("action", "approve");
-    fd.append("file", blob, `${photo.id}.${ext}`);
+    // Stage 1: Instant server-side approval (~180ms) — works for both large Drive photos & videos
     const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}/approve`, {
       method: "POST",
-      body: fd,
+      json: { action: "approve" },
     });
     const idx = state.photos.findIndex((p) => p.id === photo.id);
     if (idx !== -1) state.photos[idx] = res.item;
-    if (state.activeAlbum && !state.activeAlbum.coverUrl) {
+    if (state.activeAlbum && !state.activeAlbum.coverUrl && !isVideoPhotoItem(res.item)) {
       state.activeAlbum.coverUrl = res.item.webUrl || res.item.url;
     }
-    return { item: res.item, bytes: res.compressedBytes || blob.size };
+    // Stage 2: Silently generate WebP cache copy in background for Zalo WebView speed
+    enqueueBackgroundWebOptimization(res.item);
+    return { item: res.item, bytes: res.item?.sizeBytes || 0 };
   }
 
   /* =========================================================================
@@ -708,7 +766,7 @@
       const pct = Math.round(((done + failed) / Math.max(1, total)) * 100);
       if (fill) fill.style.width = `${pct}%`;
       if (summary) {
-        summary.textContent = `Đang duyệt & nén WebP: ${done}/${total}${failed ? ` · ${failed} lỗi` : ""}`;
+        summary.textContent = `Đang duyệt nhanh: ${done}/${total}${failed ? ` · ${failed} lỗi` : ""}`;
       }
     };
     updateProgress();
@@ -924,11 +982,36 @@
     originalUrl: "",
     busy: false,
     variants: [],
+    imageSize: "2K",
+    aspectRatio: "auto",
   };
+  let cachedBrandLogoPromise = null;
 
-  async function compressImageUrlToDataUrl(url, maxDim = 1280, quality = 0.88) {
-    const res = await fetch(url, { credentials: "same-origin" });
-    if (!res.ok) throw new Error("Không tải được ảnh gốc từ máy chủ.");
+  function loadBrandLogoImage() {
+    if (!cachedBrandLogoPromise) {
+      cachedBrandLogoPromise = new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = "/assets/images/logo-holarise.png";
+      });
+    }
+    return cachedBrandLogoPromise;
+  }
+
+  function getAiBrandOptions() {
+    return {
+      imageSize: $("#ai-opt-size")?.value || "2K",
+      aspectRatio: $("#ai-opt-ratio")?.value || "auto",
+      showLogo: Boolean($("#ai-opt-logo")?.checked),
+      slogan: String($("#ai-opt-slogan")?.value || "").trim(),
+    };
+  }
+
+  async function composeBrandedImage(sourceUrl, { showLogo = false, slogan = "", maxDim = 0, quality = 0.9 } = {}) {
+    const res = await fetch(sourceUrl, { credentials: "same-origin" });
+    if (!res.ok) throw new Error("Không tải được dữ liệu ảnh.");
     const blob = await res.blob();
     const bitmapUrl = URL.createObjectURL(blob);
     try {
@@ -938,28 +1021,104 @@
         el.onerror = () => reject(new Error("Không thể đọc định dạng ảnh này."));
         el.src = bitmapUrl;
       });
-      const scale = Math.min(1, maxDim / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
-      const w = Math.max(1, Math.round((img.naturalWidth || 1) * scale));
-      const h = Math.max(1, Math.round((img.naturalHeight || 1) * scale));
+      const natW = img.naturalWidth || 1;
+      const natH = img.naturalHeight || 1;
+      const scale = maxDim > 0 ? Math.min(1, maxDim / Math.max(natW, natH)) : 1;
+      const w = Math.max(1, Math.round(natW * scale));
+      const h = Math.max(1, Math.round(natH * scale));
       const canvas = document.createElement("canvas");
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, w, h);
-      return canvas.toDataURL("image/jpeg", quality);
+
+      const cleanSlogan = String(slogan || "").trim();
+      if (showLogo || cleanSlogan) {
+        const shortEdge = Math.min(w, h);
+        const padX = Math.round(w * 0.032);
+        const padY = Math.round(h * 0.03);
+        const scrimH = Math.round(Math.max(h * 0.14, shortEdge * 0.13));
+        const grad = ctx.createLinearGradient(0, h - scrimH, 0, h);
+        grad.addColorStop(0, "rgba(11, 17, 15, 0)");
+        grad.addColorStop(1, "rgba(11, 17, 15, 0.62)");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, h - scrimH, w, scrimH);
+
+        let logoDrawnWidth = 0;
+        if (showLogo) {
+          const logoImg = await loadBrandLogoImage();
+          if (logoImg && logoImg.naturalWidth > 0 && logoImg.naturalHeight > 0) {
+            const targetH = Math.max(20, Math.round(shortEdge * 0.048));
+            const targetW = Math.round((logoImg.naturalWidth / logoImg.naturalHeight) * targetH);
+            ctx.save();
+            ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
+            ctx.shadowBlur = Math.max(4, Math.round(targetH * 0.2));
+            ctx.drawImage(logoImg, padX, h - padY - targetH, targetW, targetH);
+            ctx.restore();
+            logoDrawnWidth = targetW;
+          }
+        }
+
+        if (cleanSlogan) {
+          const fontSize = Math.max(13, Math.round(shortEdge * 0.025));
+          ctx.save();
+          ctx.font = `600 ${fontSize}px "Be Vietnam Pro", system-ui, -apple-system, sans-serif`;
+          ctx.fillStyle = "rgba(255, 255, 255, 0.94)";
+          ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
+          ctx.shadowBlur = Math.max(4, Math.round(fontSize * 0.35));
+          ctx.textBaseline = "bottom";
+          const maxTextW = Math.max(120, w - padX * 2 - (logoDrawnWidth ? logoDrawnWidth + Math.round(w * 0.03) : 0));
+          ctx.textAlign = showLogo ? "right" : "left";
+          const textX = showLogo ? w - padX : padX;
+          ctx.fillText(cleanSlogan, textX, h - padY - Math.round(fontSize * 0.12), maxTextW);
+          ctx.restore();
+        }
+      }
+
+      return { dataUrl: canvas.toDataURL("image/jpeg", quality), width: w, height: h };
     } finally {
       URL.revokeObjectURL(bitmapUrl);
     }
   }
 
-  function renderAiRetouchSkeleton() {
+  async function compressImageUrlToDataUrl(url, maxDim = 1280, quality = 0.88) {
+    const out = await composeBrandedImage(url, { showLogo: false, slogan: "", maxDim, quality });
+    return out.dataUrl;
+  }
+
+  async function refreshAiBrandedPreviews() {
+    if (!aiRetouchState.variants.length) return;
+    const { showLogo, slogan } = getAiBrandOptions();
+    await Promise.all(
+      aiRetouchState.variants.map(async (v, idx) => {
+        const img = document.querySelector(`[data-ai-preview-img="${idx}"]`);
+        const cmpBtn = document.querySelector(`[data-ai-compare="${idx}"]`);
+        if (!img || cmpBtn?.getAttribute("data-showing-orig") === "1") return;
+        if (!showLogo && !slogan) {
+          v.previewUrl = v.dataUrl;
+          img.src = v.dataUrl;
+          return;
+        }
+        try {
+          const out = await composeBrandedImage(v.dataUrl, { showLogo, slogan, maxDim: 960, quality: 0.88 });
+          v.previewUrl = out.dataUrl;
+          img.src = out.dataUrl;
+        } catch {
+          v.previewUrl = v.dataUrl;
+          img.src = v.dataUrl;
+        }
+      })
+    );
+  }
+
+  function renderAiRetouchSkeleton(count = 3) {
     const grid = $("#ai-retouch-grid");
     if (!grid) return;
     const labels = [
       ["Mẫu 1 · Phim ấm Hòa Lạc", "Kodak Portra 400 · Đang chỉnh ánh sáng & màu gỗ ấm..."],
       ["Mẫu 2 · Sáng trong tự nhiên", "Leica Natural · Đang cân bằng trắng & khử chói..."],
       ["Mẫu 3 · Điện ảnh trầm sâu", "Classic Chrome · Đang tạo chiều sâu vùng tối..."],
-    ];
+    ].slice(0, count);
     grid.innerHTML = labels
       .map(
         ([title, sub]) => `
@@ -979,11 +1138,15 @@
     if (!grid) return;
     grid.innerHTML = aiRetouchState.variants
       .map(
-        (v, idx) => `
+        (v, idx) => {
+          const is4k = String(v.imageSize || aiRetouchState.imageSize).toUpperCase() === "4K";
+          const sizeTag = v.imageSize || aiRetouchState.imageSize || "2K";
+          const ratioTag = v.aspectRatio && v.aspectRatio !== "auto" ? ` · ${v.aspectRatio}` : "";
+          return `
         <article class="ai-variant-card" data-ai-variant-idx="${idx}">
           <div class="ai-variant-frame">
-            <img src="${esc(v.dataUrl)}" alt="${esc(v.label)}" data-ai-preview-img="${idx}">
-            <span class="ai-variant-badge" data-ai-badge="${idx}">Mẫu ${idx + 1}</span>
+            <img src="${esc(v.previewUrl || v.dataUrl)}" alt="${esc(v.label)}" data-ai-preview-img="${idx}">
+            <span class="ai-variant-badge" data-ai-badge="${idx}">Mẫu ${idx + 1} · ${esc(sizeTag)}${esc(ratioTag)}</span>
           </div>
           <div class="ai-variant-info">
             <strong>${esc(v.label)}</strong>
@@ -991,32 +1154,47 @@
           </div>
           <div class="ai-variant-actions">
             <button class="btn btn--outline btn--sm" type="button" data-ai-compare="${idx}">So ảnh gốc</button>
+            <button class="btn btn--outline btn--sm" type="button" data-ai-download="${idx}">Tải ${esc(sizeTag)}</button>
+            ${!is4k ? `<button class="btn btn--outline btn--sm" type="button" data-ai-upscale4k="${idx}">✦ Xuất 4K</button>` : ""}
             <button class="btn btn--primary btn--sm" type="button" data-ai-apply="${idx}">Chọn thay thế</button>
           </div>
-        </article>`
+        </article>`;
+        }
       )
       .join("");
+    refreshAiBrandedPreviews();
   }
 
-  async function runAiRetouchGenerate(photo) {
+  async function runAiRetouchGenerate(photo, { presetId = "", forceSize = "" } = {}) {
     if (!photo || aiRetouchState.busy) return;
     const dlg = $("#ai-retouch-dialog");
     const alertEl = $("#ai-retouch-alert");
     const statusEl = $("#ai-retouch-status");
     const regenBtn = $("#ai-retouch-regen");
     const origImg = $("#ai-retouch-orig-img");
+    const opts = getAiBrandOptions();
+    const imageSize = forceSize || opts.imageSize || "2K";
+    const aspectRatio = opts.aspectRatio || "auto";
+    const isSingle4k = imageSize === "4K" || Boolean(presetId);
 
     aiRetouchState = {
       photoId: photo.id,
       originalUrl: photo.displayUrl || photo.url,
       busy: true,
       variants: [],
+      imageSize,
+      aspectRatio,
     };
     if (origImg) origImg.src = aiRetouchState.originalUrl;
     if (alertEl) showAlert(alertEl, "");
-    if (statusEl) statusEl.textContent = "Đang tạo song song 3 bản chỉnh màu phim thật (khoảng 6–12 giây)...";
+    if (statusEl) {
+      statusEl.textContent =
+        imageSize === "4K"
+          ? `Đang xuất bản sắc nét 4K (${aspectRatio === "auto" ? "giữ tỉ lệ gốc" : aspectRatio}) — mất khoảng 15–35 giây...`
+          : `Đang tạo 3 mẫu màu phim ${imageSize} (${aspectRatio === "auto" ? "giữ tỉ lệ gốc" : aspectRatio})...`;
+    }
     if (regenBtn) regenBtn.disabled = true;
-    renderAiRetouchSkeleton();
+    renderAiRetouchSkeleton(isSingle4k ? 1 : 3);
     if (dlg && !dlg.open) dlg.showModal();
 
     try {
@@ -1026,11 +1204,16 @@
         json: {
           action: "generate",
           imageDataUrl: sourceDataUrl,
+          imageSize,
+          aspectRatio,
+          presetId,
         },
       });
       aiRetouchState.variants = Array.isArray(res.variants) ? res.variants : [];
+      aiRetouchState.imageSize = res.imageSize || imageSize;
+      aiRetouchState.aspectRatio = res.aspectRatio || aspectRatio;
       if (statusEl) {
-        statusEl.textContent = `Đã tạo xong ${aiRetouchState.variants.length} mẫu chỉnh màu thật. Bấm "So ảnh gốc" để đối chiếu hoặc "Chọn thay thế".`;
+        statusEl.textContent = `Đã tạo xong ${aiRetouchState.variants.length} mẫu (${aiRetouchState.imageSize}). Bật/tắt Logo & Slogan bên dưới để xem trực tiếp không tốn API.`;
       }
       renderAiRetouchVariants();
     } catch (err) {
@@ -1044,6 +1227,20 @@
     }
   }
 
+  async function downloadAiRetouchVariant(idx) {
+    const variant = aiRetouchState.variants[idx];
+    if (!variant) return;
+    const { showLogo, slogan } = getAiBrandOptions();
+    const out = await composeBrandedImage(variant.dataUrl, { showLogo, slogan, maxDim: 0, quality: 0.94 });
+    const a = document.createElement("a");
+    a.href = out.dataUrl;
+    const sizeTag = String(variant.imageSize || aiRetouchState.imageSize || "2K").toLowerCase();
+    a.download = `holarise_${variant.id}_${sizeTag}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
   async function applyAiRetouchVariant(idx) {
     const variant = aiRetouchState.variants[idx];
     if (!variant || aiRetouchState.busy) return;
@@ -1051,24 +1248,31 @@
     const btn = document.querySelector(`[data-ai-apply="${idx}"]`);
     const statusEl = $("#ai-retouch-status");
     const alertEl = $("#ai-retouch-alert");
+    const { showLogo, slogan } = getAiBrandOptions();
+    const is4k = String(variant.imageSize || aiRetouchState.imageSize).toUpperCase() === "4K";
 
     aiRetouchState.busy = true;
     if (btn) {
       btn.disabled = true;
-      btn.textContent = "Đang lưu thay thế...";
+      btn.textContent = is4k ? "Đang lưu Web & 4K Drive..." : "Đang lưu thay thế...";
     }
     if (alertEl) showAlert(alertEl, "");
 
     try {
-      // Re-compress chosen variant cleanly to <= 1280px JPEG so web display stays ultra-fast
-      const optimizedDataUrl = await compressImageUrlToDataUrl(variant.dataUrl, 1280, 0.88);
+      // Web display copy <= 1280px with Logo/Slogan composited cleanly
+      const webOut = await composeBrandedImage(variant.dataUrl, { showLogo, slogan, maxDim: 1280, quality: 0.88 });
+      const payload = {
+        action: "apply",
+        presetId: variant.id,
+        imageDataUrl: webOut.dataUrl,
+      };
+      if (is4k) {
+        const hiOut = await composeBrandedImage(variant.dataUrl, { showLogo, slogan, maxDim: 0, quality: 0.92 });
+        payload.highResDataUrl = hiOut.dataUrl;
+      }
       const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photoId)}/ai-retouch`, {
         method: "POST",
-        json: {
-          action: "apply",
-          presetId: variant.id,
-          imageDataUrl: optimizedDataUrl,
-        },
+        json: payload,
       });
       const pIdx = state.photos.findIndex((p) => p.id === photoId);
       if (pIdx !== -1 && res.item) state.photos[pIdx] = res.item;
@@ -1084,9 +1288,11 @@
       await loadAlbums(true);
       await closeDialogSmooth($("#ai-retouch-dialog"));
       toast(
-        res.preservedDriveOriginal
-          ? `Đã thay ảnh bằng "${variant.label}" (bản gốc Google Drive vẫn giữ nguyên).`
-          : `Đã thay ảnh bằng "${variant.label}".`,
+        res.driveExportUrl
+          ? `Đã thay ảnh "${variant.label}" & lưu bản 4K lên Google Drive.`
+          : res.preservedDriveOriginal
+            ? `Đã thay ảnh bằng "${variant.label}" (bản gốc Google Drive vẫn giữ nguyên).`
+            : `Đã thay ảnh bằng "${variant.label}".`,
         "success"
       );
     } catch (err) {
@@ -1839,18 +2045,17 @@
       if (!photo) return;
       const btn = $("#lb-btn-approve");
       btn.disabled = true;
-      btn.textContent = "Đang nén WebP...";
+      btn.textContent = "Đang duyệt...";
       try {
         const listBefore = getFilteredPhotos();
         const curIdx = listBefore.findIndex((p) => p.id === photo.id);
-        const { bytes } = await approveSinglePhoto(photo);
-        const kb = Math.max(1, Math.round(bytes / 1024));
-        toast(`Đã duyệt & nén lên web (${kb} KB).`, "success");
+        await approveSinglePhoto(photo);
+        toast("Đã duyệt lên web ngay!", "success");
         renderWorkspaceHeader();
         renderPhotosGrid();
-        await loadAlbums(true);
+        loadAlbums(true).catch(() => {});
 
-        // If viewing 'pending' tab, smoothly advance to next pending photo
+        // If viewing 'pending' tab, smoothly advance to next pending photo immediately
         if (state.photoFilter === "pending") {
           const remaining = getFilteredPhotos();
           if (remaining.length > 0) {
@@ -1864,7 +2069,7 @@
         }
       } catch (err) {
         btn.disabled = false;
-        btn.textContent = "✓ Duyệt & nén lên web";
+        btn.textContent = "✓ Duyệt lên web";
         toast(err.message || "Không thể duyệt ảnh lúc này.", "error");
       }
     });
@@ -1954,6 +2159,15 @@
       if (photo) runAiRetouchGenerate(photo);
     });
 
+    let aiSloganTimer = null;
+    $("#ai-opt-logo")?.addEventListener("change", () => {
+      refreshAiBrandedPreviews();
+    });
+    $("#ai-opt-slogan")?.addEventListener("input", () => {
+      clearTimeout(aiSloganTimer);
+      aiSloganTimer = setTimeout(() => refreshAiBrandedPreviews(), 180);
+    });
+
     $("#ai-retouch-grid")?.addEventListener("click", (e) => {
       const compareBtn = e.target.closest("[data-ai-compare]");
       if (compareBtn) {
@@ -1964,15 +2178,33 @@
         if (!variant || !img) return;
         const showingOrig = compareBtn.getAttribute("data-showing-orig") === "1";
         if (showingOrig) {
-          img.src = variant.dataUrl;
+          img.src = variant.previewUrl || variant.dataUrl;
           compareBtn.setAttribute("data-showing-orig", "0");
           compareBtn.textContent = "So ảnh gốc";
-          if (badge) badge.textContent = `Mẫu ${idx + 1}`;
+          if (badge) badge.textContent = `Mẫu ${idx + 1} · ${variant.imageSize || aiRetouchState.imageSize}`;
         } else {
           img.src = aiRetouchState.originalUrl;
           compareBtn.setAttribute("data-showing-orig", "1");
           compareBtn.textContent = "Xem lại AI";
           if (badge) badge.textContent = "Ảnh gốc";
+        }
+        return;
+      }
+      const dlBtn = e.target.closest("[data-ai-download]");
+      if (dlBtn) {
+        const idx = Number(dlBtn.getAttribute("data-ai-download"));
+        downloadAiRetouchVariant(idx);
+        return;
+      }
+      const upBtn = e.target.closest("[data-ai-upscale4k]");
+      if (upBtn) {
+        const idx = Number(upBtn.getAttribute("data-ai-upscale4k"));
+        const variant = aiRetouchState.variants[idx];
+        const photo = state.photos.find((p) => p.id === aiRetouchState.photoId);
+        if (variant && photo) {
+          const sizeSel = $("#ai-opt-size");
+          if (sizeSel) sizeSel.value = "4K";
+          runAiRetouchGenerate(photo, { presetId: variant.id, forceSize: "4K" });
         }
         return;
       }

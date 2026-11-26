@@ -143,6 +143,17 @@ export async function onRequestPost(context) {
     )
     .run();
 
+  if (nextStatus === "approved" && String(existing.media_type || "image") !== "video") {
+    const album = await context.env.DB.prepare("SELECT id, cover_url FROM media_albums WHERE id = ?")
+      .bind(existing.album_id)
+      .first();
+    if (album && !album.cover_url) {
+      await context.env.DB.prepare("UPDATE media_albums SET cover_url = ?, updated_at = ? WHERE id = ?")
+        .bind(webUrl || existing.url, now, existing.album_id)
+        .run();
+    }
+  }
+
   const updated = await context.env.DB.prepare("SELECT * FROM media_photos WHERE id = ?").bind(id).first();
   return jsonResponse({
     ok: true,

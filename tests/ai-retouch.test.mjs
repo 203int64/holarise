@@ -179,6 +179,42 @@ test("AI Photo Retouch Studio: 1-click generates 3 authentic variants & applies 
   assert.equal(seenCalls[0].headers["x-goog-api-key"], "test-gemini-key");
   assert.equal(seenCalls[0].headers["Api-Revision"], "2026-05-20");
   assert.equal(seenCalls[0].body.model, "gemini-nano-banana-2.1");
+  assert.deepEqual(seenCalls[0].body.response_format, {
+    type: "image",
+    mime_type: "image/jpeg",
+    image_size: "2K",
+  });
+
+  // 3b. Generate 4K single-preset with explicit aspect_ratio (16:9)
+  seenCalls.length = 0;
+  const gen4kRes = await aiRetouchPost({
+    request: makeReq("/api/admin/photos/pho-1/ai-retouch", {
+      cookie: adminCookie,
+      body: {
+        action: "generate",
+        imageDataUrl: VALID_JPEG_DATA_URL,
+        imageSize: "4K",
+        aspectRatio: "16:9",
+        presetId: "cinematic_deep",
+      },
+    }),
+    params: { id: "pho-1" },
+    env,
+    fetchImpl: mockGeminiFetch,
+  });
+  assert.equal(gen4kRes.status, 200);
+  const gen4kData = await gen4kRes.json();
+  assert.equal(gen4kData.imageSize, "4K");
+  assert.equal(gen4kData.aspectRatio, "16:9");
+  assert.equal(gen4kData.variants.length, 1);
+  assert.equal(gen4kData.variants[0].id, "cinematic_deep");
+  assert.equal(seenCalls.length, 1);
+  assert.deepEqual(seenCalls[0].body.response_format, {
+    type: "image",
+    mime_type: "image/jpeg",
+    image_size: "4K",
+    aspect_ratio: "16:9",
+  });
 
   // 4. Apply rejects spoofed non-image bytes (magic bytes guard)
   const badApply = await aiRetouchPost({

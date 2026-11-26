@@ -1340,6 +1340,42 @@
     $("#ev-location").value = ev ? ev.location || "" : "Hòa Lạc, Hà Nội";
     $("#ev-fee").value = ev ? ev.fee || "" : "Miễn phí tham dự · Tự túc đồ uống";
     $("#ev-zalo-url").value = ev ? ev.zaloGroupUrl || "" : "";
+
+    const savedAudioUrl = ev ? String(ev.reelAudioUrl || "").trim() : "";
+    const savedAudioTitle = ev ? String(ev.reelAudioTitle || "").trim() : "";
+    const isPresetAudio =
+      savedAudioUrl === "" ||
+      savedAudioUrl === "preset:holaheart" ||
+      savedAudioUrl === "preset:holagreen" ||
+      savedAudioUrl === "preset:holaconnect" ||
+      savedAudioUrl === "preset:silent";
+    if ($("#ev-reel-audio-mode")) {
+      $("#ev-reel-audio-mode").value = isPresetAudio ? savedAudioUrl : "custom";
+    }
+    if ($("#ev-reel-audio-title")) {
+      $("#ev-reel-audio-title").value = savedAudioTitle;
+    }
+    if ($("#ev-reel-audio-url")) {
+      $("#ev-reel-audio-url").value = isPresetAudio ? "" : savedAudioUrl;
+    }
+    if ($("#ev-reel-custom-wrap")) {
+      $("#ev-reel-custom-wrap").hidden = isPresetAudio;
+    }
+    const evAudioPreview = $("#ev-reel-audio-preview");
+    const evAudioPlayerWrap = $("#ev-reel-audio-player-wrap");
+    if (evAudioPreview) {
+      evAudioPreview.pause();
+      if (!isPresetAudio && savedAudioUrl) {
+        evAudioPreview.src = savedAudioUrl;
+        if (evAudioPlayerWrap) evAudioPlayerWrap.hidden = false;
+      } else {
+        evAudioPreview.removeAttribute("src");
+        if (evAudioPlayerWrap) evAudioPlayerWrap.hidden = true;
+      }
+    }
+    if ($("#ev-reel-audio-status")) {
+      $("#ev-reel-audio-status").textContent = "Hỗ trợ MP3, M4A, OGG, WAV (tối đa 15 MB qua Drive hoặc 8 MB qua KV).";
+    }
     $("#ev-seats").value = ev ? ev.seats || "" : "";
     $("#ev-seat-capacity").value = ev ? Number(ev.seatCapacity || 0) : 0;
     $("#ev-external-booked").value = ev ? Number(ev.externalBooked || 0) : 0;
@@ -2930,6 +2966,16 @@
         .filter(Boolean)
         .slice(0, 6);
 
+      const evAudioMode = $("#ev-reel-audio-mode")?.value || "";
+      const evCustomAudioUrl = ($("#ev-reel-audio-url")?.value || "").trim();
+      if (evAudioMode === "custom" && !evCustomAudioUrl) {
+        showAlert(alertEl, "Vui lòng tải tệp nhạc lên hoặc dán đường dẫn nhạc hợp lệ.");
+        $("#ev-reel-audio-url")?.focus();
+        return;
+      }
+      const reelAudioUrl = evAudioMode === "custom" ? evCustomAudioUrl : evAudioMode;
+      const reelAudioTitle = ($("#ev-reel-audio-title")?.value || "").trim();
+
       const body = {
         kind: $("#ev-kind").value,
         status: $("#ev-status").value,
@@ -2943,6 +2989,8 @@
         location: $("#ev-location").value.trim(),
         fee: $("#ev-fee").value.trim(),
         zaloGroupUrl: $("#ev-zalo-url").value.trim(),
+        reelAudioUrl,
+        reelAudioTitle,
         seats: $("#ev-seats").value.trim(),
         seatCapacity: Number($("#ev-seat-capacity").value || 0),
         externalBooked: Number($("#ev-external-booked").value || 0),
@@ -3490,6 +3538,74 @@
 
     $("#event-command-dialog")?.addEventListener("close", () => {
       const prev = $("#evcmd-reel-audio-preview");
+      if (prev && typeof prev.pause === "function") prev.pause();
+    });
+
+    // Event Edit Modal (#event-dialog): Per-event music mode, file upload & live preview
+    $("#ev-reel-audio-mode")?.addEventListener("change", (e) => {
+      const isCustom = e.currentTarget.value === "custom";
+      const wrap = $("#ev-reel-custom-wrap");
+      if (wrap) wrap.hidden = !isCustom;
+      if (!isCustom) {
+        const prev = $("#ev-reel-audio-preview");
+        if (prev && typeof prev.pause === "function") prev.pause();
+      }
+    });
+
+    $("#ev-reel-audio-url")?.addEventListener("input", (e) => {
+      const val = e.currentTarget.value.trim();
+      const wrap = $("#ev-reel-audio-player-wrap");
+      const prev = $("#ev-reel-audio-preview");
+      const ok = val.startsWith("/") || val.startsWith("https://");
+      if (prev) {
+        if (ok) prev.src = val;
+        else {
+          prev.pause();
+          prev.removeAttribute("src");
+        }
+      }
+      if (wrap) wrap.hidden = !ok;
+    });
+
+    $("#ev-reel-audio-file")?.addEventListener("change", async (e) => {
+      const input = e.currentTarget;
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const statusEl = $("#ev-reel-audio-status");
+      const urlEl = $("#ev-reel-audio-url");
+      const titleEl = $("#ev-reel-audio-title");
+      const wrap = $("#ev-reel-audio-player-wrap");
+      const prev = $("#ev-reel-audio-preview");
+      if (statusEl) statusEl.textContent = "Đang tải tệp nhạc lên máy chủ...";
+      input.disabled = true;
+      try {
+        const form = new FormData();
+        form.append("category", "su-kien");
+        const evTitle = ($("#ev-title")?.value || "").trim();
+        if (evTitle) form.append("subfolder", evTitle.slice(0, 100));
+        form.append("file", file, file.name || "soundtrack.mp3");
+        const up = await api("/api/admin/media", { method: "POST", body: form });
+        if (urlEl) urlEl.value = up.url || "";
+        if (titleEl && !titleEl.value.trim() && file.name) {
+          titleEl.value = file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim().slice(0, 120);
+        }
+        if (prev && up.url) {
+          prev.src = up.url;
+          if (wrap) wrap.hidden = false;
+        }
+        if (statusEl) statusEl.textContent = `Đã tải nhạc lên thành công (${formatKb(up.size)}). Bấm Lưu để áp dụng.`;
+        toast("Đã tải tệp nhạc lên — bấm Lưu để gắn vào sự kiện!", "success");
+      } catch (err) {
+        if (statusEl) statusEl.textContent = `Lỗi tải nhạc: ${err.message}`;
+        toast(formatApiError(err), "error");
+      } finally {
+        input.disabled = false;
+        input.value = "";
+      }
+    });
+
+    $("#event-dialog")?.addEventListener("close", () => {
+      const prev = $("#ev-reel-audio-preview");
       if (prev && typeof prev.pause === "function") prev.pause();
     });
 

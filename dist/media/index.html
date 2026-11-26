@@ -39,8 +39,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=407c658ca9">
-  <link rel="stylesheet" href="/assets/css/media.css?v=407c658ca9">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=c7a95bb2e9">
+  <link rel="stylesheet" href="/assets/css/media.css?v=c7a95bb2e9">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
 <body data-pwa-app-name="HolaRise Media">
@@ -416,7 +416,36 @@
             <strong>Ảnh gốc hiện tại</strong>
             <span id="ai-retouch-status">Nhấn tạo để xem 3 phương án màu phim tự nhiên...</span>
           </div>
-          <button class="btn btn--outline btn--sm" type="button" id="ai-retouch-regen">↻ Tạo lại 3 mẫu</button>
+          <button class="btn btn--outline btn--sm" type="button" id="ai-retouch-regen">↻ Tạo lại</button>
+        </div>
+        <div class="ai-retouch-controls" id="ai-retouch-controls">
+          <label class="ai-ctrl-group">
+            <span>Chất lượng</span>
+            <select id="ai-opt-size">
+              <option value="2K" selected>2K · Chuẩn Web (3 mẫu)</option>
+              <option value="1K">1K · Xem nhanh (3 mẫu)</option>
+              <option value="4K">4K · In ấn / Lưu Drive (1 mẫu)</option>
+            </select>
+          </label>
+          <label class="ai-ctrl-group">
+            <span>Tỉ lệ khung</span>
+            <select id="ai-opt-ratio">
+              <option value="auto" selected>Giữ nguyên gốc</option>
+              <option value="16:9">16:9 · Bìa Web / Ngang</option>
+              <option value="4:5">4:5 · Facebook / IG</option>
+              <option value="3:2">3:2 · Ảnh sự kiện</option>
+              <option value="1:1">1:1 · Vuông</option>
+              <option value="9:16">9:16 · Story / Reels</option>
+            </select>
+          </label>
+          <label class="ai-ctrl-check">
+            <input type="checkbox" id="ai-opt-logo" checked>
+            <span>Gắn Logo HolaRise</span>
+          </label>
+          <label class="ai-ctrl-group ai-ctrl-group--slogan">
+            <span>Slogan (đóng dấu trực tiếp, không tốn API)</span>
+            <input type="text" id="ai-opt-slogan" maxlength="90" value="Together We Rise, Together We Serve." placeholder="Để trống nếu không gắn slogan...">
+          </label>
         </div>
         <div class="form-alert" id="ai-retouch-alert" role="alert" hidden></div>
         <div class="ai-retouch-grid" id="ai-retouch-grid" aria-live="polite"></div>
@@ -579,9 +608,9 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=407c658ca9" defer></script>
-  <script src="/assets/js/gate-ui.js?v=407c658ca9" defer></script>
-  <script src="/assets/js/media-portal.js?v=407c658ca9" defer></script>
-  <script src="/assets/js/pwa.js?v=407c658ca9" defer></script>
+  <script src="/assets/js/passkey-client.js?v=c7a95bb2e9" defer></script>
+  <script src="/assets/js/gate-ui.js?v=c7a95bb2e9" defer></script>
+  <script src="/assets/js/media-portal.js?v=c7a95bb2e9" defer></script>
+  <script src="/assets/js/pwa.js?v=c7a95bb2e9" defer></script>
 </body>
 </html>

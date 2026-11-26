@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=407c658ca9">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=c7a95bb2e9">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -316,42 +316,48 @@
   </dialog>
 
   <!-- =======================================================================
-       ACT 3: APPLE JOURNAL REFLECTION WALL (#F5F5F7 SURFACE + PURE WHITE CARDS)
+       ACT 3: INTERACTIVE APPLE JOURNAL STORY RAIL (COMPACT, ZERO WASTE, ALIVE)
        ======================================================================= -->
   <section class="apple-journal-section memory-guestbook-section" id="reflections">
     <div class="container apple-stage-container">
       <section class="guestbook-section memory-gb-shell" id="activity-guestbook" data-guestbook-slug="__SSR_EVENT_SLUG__" aria-labelledby="guestbook-heading">
-        <div class="apple-sec-head">
+        <div class="apple-sec-head apple-sec-head--journal">
           <div class="apple-sec-title-row">
             <h2 id="guestbook-heading" class="apple-sec-title">Reflections</h2>
             <span class="apple-sec-count" id="guestbook-count-pill"></span>
           </div>
 
-          <button
-            class="apple-link-action"
-            type="button"
-            data-open-event-contribute
-            data-contribute-tab="feedback"
-            data-event-id="__SSR_EVENT_ID__"
-            data-event-slug="__SSR_EVENT_SLUG__"
-            data-event-title="__SSR_EVENT_TITLE__"
-            data-album-id="__SSR_MEMORY_ALBUM_ID__"
-          >
-            <span>Private feedback</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
+          <div class="apple-journal-head-actions">
+            <button type="button" class="apple-btn apple-btn--dark apple-btn--sm" id="apple-toggle-composer">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Write a reflection</span>
+            </button>
+            <button
+              class="apple-link-action"
+              type="button"
+              data-open-event-contribute
+              data-contribute-tab="feedback"
+              data-event-id="__SSR_EVENT_ID__"
+              data-event-slug="__SSR_EVENT_SLUG__"
+              data-event-title="__SSR_EVENT_TITLE__"
+              data-album-id="__SSR_MEMORY_ALBUM_ID__"
+            >
+              <span>Private feedback</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
         </div>
 
         <div class="memory-mood-filter apple-mood-filter" id="memory-mood-filter" role="group" aria-label="Filter by mood" hidden></div>
 
-        <div class="guestbook-composer-wrap gb-composer-card apple-composer-card" id="public-reflection-wrap">
+        <div class="guestbook-composer-wrap gb-composer-card apple-composer-card" id="public-reflection-wrap" hidden>
           <div class="gb-member-gate apple-member-gate" id="pr-auth-gate">
             <div class="apple-gate-copy">
-              <strong>Capture what stayed with you from this gathering.</strong>
-              <p>Hola Members can post a reflection with up to 7 photos or short videos.</p>
+              <strong>Sign in as a Hola Member to share a reflection</strong>
+              <p>Post your note with up to 7 photos or short videos.</p>
             </div>
             <div class="apple-gate-actions">
-              <button type="button" class="apple-btn apple-btn--dark" data-open-member-auth>Write a reflection</button>
+              <button type="button" class="apple-btn apple-btn--dark apple-btn--sm" data-open-member-auth>Sign in</button>
             </div>
           </div>
 
@@ -410,24 +416,23 @@
           </form>
         </div>
 
-        <div class="apple-postcard-shell" id="apple-postcard-shell">
-          <div class="guestbook-grid memory-gb-grid apple-postcard-stage" id="guestbook-list" aria-live="polite"></div>
+        <div class="apple-rail-shell" id="apple-postcard-shell">
+          <div class="apple-rail-viewport">
+            <button type="button" class="apple-rail-arrow apple-rail-arrow--prev" id="apple-pc-prev" aria-label="Previous reflections" hidden>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="guestbook-grid memory-gb-grid apple-ref-rail" id="guestbook-list" aria-live="polite"></div>
+            <button type="button" class="apple-rail-arrow apple-rail-arrow--next" id="apple-pc-next" aria-label="Next reflections" hidden>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
 
-          <div class="apple-postcard-bar" id="apple-postcard-bar" hidden>
-            <div class="apple-avatar-dock" id="apple-avatar-dock" role="tablist" aria-label="Select reflection author"></div>
-
-            <div class="apple-postcard-controls">
-              <span class="apple-postcard-counter" id="apple-postcard-counter" aria-live="polite">01 / 01</span>
-              <button type="button" class="apple-deck-circle-btn apple-pc-btn" id="apple-pc-prev" aria-label="Previous postcard" title="Previous postcard">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
-              </button>
-              <button type="button" class="apple-deck-circle-btn apple-pc-btn" id="apple-pc-next" aria-label="Next postcard" title="Next postcard">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-              </button>
-              <button type="button" class="apple-pc-all-btn" id="apple-pc-open-all" hidden>
-                <span>View all</span>
-              </button>
-            </div>
+          <div class="apple-rail-foot" id="apple-postcard-bar" hidden>
+            <div class="apple-avatar-dock" id="apple-avatar-dock" role="tablist" aria-label="Jump to reflection"></div>
+            <button type="button" class="apple-link-action apple-rail-all-link" id="apple-pc-open-all" hidden>
+              <span>View all</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
           </div>
         </div>
       </section>
@@ -1205,10 +1210,10 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=407c658ca9" defer></script>
-  <script src="/assets/js/main.js?v=407c658ca9" defer></script>
-  <script src="/assets/js/join-pass.js?v=407c658ca9" defer></script>
-  <script src="/assets/js/member.js?v=407c658ca9" defer></script>
-  <script src="/assets/js/pwa.js?v=407c658ca9" defer></script>
+  <script src="/assets/js/motion.js?v=c7a95bb2e9" defer></script>
+  <script src="/assets/js/main.js?v=c7a95bb2e9" defer></script>
+  <script src="/assets/js/join-pass.js?v=c7a95bb2e9" defer></script>
+  <script src="/assets/js/member.js?v=c7a95bb2e9" defer></script>
+  <script src="/assets/js/pwa.js?v=c7a95bb2e9" defer></script>
 </body>
 </html>
