@@ -7,8 +7,14 @@
   <meta name="description" content="Cổng lưu trữ ảnh gốc không nén trên Google Drive dành cho Ban Hình Ảnh và Ban Điều Phối Cộng đồng Thanh niên Hòa Lạc – HolaRise.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0B110F">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Hola Media">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="/media-manifest.webmanifest">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" href="/assets/images/favicon-48.png" type="image/png" sizes="48x48">
+  <link rel="icon" href="/assets/images/pwa/icon-192.png" type="image/png" sizes="192x192">
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" sizes="180x180">
 
@@ -35,8 +41,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/admin.css?v={{CACHE_BUST}}">
   <link rel="stylesheet" href="/assets/css/media.css?v={{CACHE_BUST}}">
+  <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
-<body>
+<body data-pwa-app-name="HolaRise Media">
   <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
 
   <!-- 2-STEP EDITORIAL VAULT AUTH SCREEN -->
@@ -117,7 +124,7 @@
               </div>
             </div>
 
-            <!-- VIEW B: REGISTER (REVEALED ONLY AFTER LOGIN FAILURE -> REGISTER CLICK) -->
+            <!-- VIEW B: REGISTER -->
             <div class="vault-view" data-auth-view="register" hidden>
               <button class="vault-subback" type="button" data-vault-go="login">← Quay lại Đăng nhập</button>
               <h1 class="vault-title">Đăng ký tài khoản Ban Hình Ảnh</h1>
@@ -153,7 +160,7 @@
               <button class="vault-link-btn" type="button" data-vault-go="email">Đã có tài khoản? Đăng nhập bằng Email</button>
             </div>
 
-            <!-- VIEW C: EMAIL FALLBACK (FOR EXISTING USERS ON A NEW DEVICE) -->
+            <!-- VIEW C: EMAIL FALLBACK -->
             <div class="vault-view" data-auth-view="email" hidden>
               <button class="vault-subback" type="button" data-vault-go="login">← Quay lại Đăng nhập</button>
               <h1 class="vault-title">Đăng nhập bằng Email</h1>
@@ -193,65 +200,89 @@
     </div>
   </div>
 
-  <!-- MAIN MEDIA SHELL -->
+  <!-- MAIN MEDIA APP SHELL (Compact Single-Row Topbar + Photo-First Canvas) -->
   <div class="media-shell" id="media-shell" hidden>
     <header class="media-topbar">
       <div class="media-topbar-inner">
+        <!-- Albums Mode Brand -->
         <a class="media-brand" href="/media/" id="brand-home-link">
-          <img src="/assets/images/logo-mark.png" alt="HR" width="34" height="34">
-          <div>
-            <strong>HolaRise Media</strong>
-            <span>Cổng Ban Hình Ảnh</span>
-          </div>
+          <img src="/assets/images/logo-mark.png" alt="HR" width="30" height="30">
+          <strong>HolaRise Media</strong>
         </a>
 
+        <!-- Workspace Mode Compact Title -->
+        <div class="ws-nav-head" id="ws-nav-head" hidden>
+          <button class="icon-btn ws-back-btn" type="button" id="btn-back-albums" aria-label="Quay lại danh sách Album">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="ws-nav-title-wrap">
+            <h1 class="ws-nav-title" id="ws-title">—</h1>
+            <span class="ws-nav-sub" id="ws-meta">—</span>
+          </div>
+        </div>
+
+        <!-- Single-Row Right Controls -->
         <div class="media-topbar-actions">
-          <span class="media-user-chip" id="topbar-user-chip">—</span>
-          <button class="btn btn--outline btn--sm" type="button" id="btn-setup-passkey" hidden>Gắn Face ID / Vân tay</button>
-          <a class="btn btn--ghost btn--sm" id="link-admin-cms" href="/admin/" hidden>Quản trị CMS</a>
-          <a class="btn btn--outline btn--sm" href="/hanh-trinh/#thu-vien-anh" target="_blank" rel="noopener">Xem thư viện ↗</a>
-          <button class="btn btn--ghost btn--sm" type="button" id="btn-open-pw">Đổi mật khẩu</button>
-          <button class="btn btn--ghost btn--sm" type="button" id="btn-logout">Đăng xuất</button>
+          <button class="btn btn--primary btn--sm" type="button" id="btn-new-album">+ Album</button>
+
+          <button class="btn btn--primary btn--sm" type="button" id="btn-upload-trigger" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Tải ảnh</span>
+          </button>
+
+          <!-- Workspace Overflow Menu -->
+          <details class="mp-menu" id="ws-more-menu" hidden>
+            <summary class="icon-btn" aria-label="Tùy chọn Album">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </summary>
+            <div class="mp-menu-panel" role="menu">
+              <div class="mp-menu-field">
+                <label for="default-photographer">Nhiếp ảnh gia mặc định</label>
+                <input id="default-photographer" type="text" placeholder="Ban Hình Ảnh HolaRise" maxlength="100">
+              </div>
+              <a class="mp-menu-item" id="ws-drive-link" href="https://drive.google.com" target="_blank" rel="noopener noreferrer" hidden>Mở thư mục Google Drive ↗</a>
+              <button class="mp-menu-item" type="button" id="btn-edit-album">Sửa thông tin Album</button>
+              <hr class="mp-menu-sep">
+              <button class="mp-menu-item mp-menu-item--danger" type="button" id="btn-delete-album">Xóa Album này</button>
+            </div>
+          </details>
+
+          <!-- Account & App Menu -->
+          <details class="mp-menu" id="account-menu">
+            <summary class="account-pill" aria-label="Tài khoản &amp; cài đặt">
+              <span class="account-avatar" id="topbar-user-initials">HR</span>
+              <span class="account-name" id="topbar-user-name">—</span>
+            </summary>
+            <div class="mp-menu-panel" role="menu">
+              <div class="mp-menu-user">
+                <strong id="menu-user-name">—</strong>
+                <span id="menu-user-role">—</span>
+              </div>
+              <button class="mp-menu-item mp-menu-item--accent" type="button" data-pwa-install hidden>Cài ứng dụng Hola Media</button>
+              <button class="mp-menu-item" type="button" id="btn-setup-passkey" hidden>Gắn Face ID / Vân tay</button>
+              <a class="mp-menu-item" id="link-admin-cms" href="/admin/" hidden>Mở Quản trị CMS</a>
+              <a class="mp-menu-item" href="/hanh-trinh/#thu-vien-anh" target="_blank" rel="noopener">Xem thư viện công khai ↗</a>
+              <button class="mp-menu-item" type="button" id="btn-open-pw">Đổi mật khẩu</button>
+              <hr class="mp-menu-sep">
+              <button class="mp-menu-item mp-menu-item--danger" type="button" id="btn-logout">Đăng xuất</button>
+            </div>
+          </details>
         </div>
       </div>
     </header>
 
     <main class="media-main">
-      <!-- VIEW 1: ALBUMS LIST -->
+      <!-- VIEW 1: ALBUMS GALLERY -->
       <section id="view-albums">
-        <div class="media-page-head">
-          <div>
-            <h1>Album Hình Ảnh Sự Kiện</h1>
-            <p class="media-subtitle">Ảnh tải lên sẽ tự nén nhẹ (~150 KB) và xuất bản tức thì ra trang <strong>Hành trình</strong>. Ảnh được ghim sao sẽ xuất hiện ở dải ảnh <strong>Trang chủ</strong>.</p>
-          </div>
-          <div class="media-head-actions">
-            <button class="btn btn--primary" type="button" id="btn-new-album">+ Tạo Album mới</button>
-          </div>
-        </div>
-
-        <div class="media-stats-bar" id="media-stats-bar">
-          <div class="media-stat">
-            <span class="media-stat-label">Tổng Album</span>
-            <strong class="media-stat-value" id="stat-albums">—</strong>
-          </div>
-          <div class="media-stat">
-            <span class="media-stat-label">Tổng số ảnh</span>
-            <strong class="media-stat-value" id="stat-photos">—</strong>
-          </div>
-          <div class="media-stat">
-            <span class="media-stat-label">Đang ghim Trang chủ</span>
-            <strong class="media-stat-value" id="stat-featured">—</strong>
-          </div>
-        </div>
-
         <div class="media-toolbar">
-          <div class="filter-chips" role="group" aria-label="Lọc trạng thái album">
-            <button class="chip is-active" type="button" data-album-status="">Tất cả</button>
-            <button class="chip" type="button" data-album-status="published">Công khai</button>
-            <button class="chip" type="button" data-album-status="draft">Bản nháp</button>
+          <div class="seg-pills" role="group" aria-label="Lọc Album">
+            <button class="seg-pill is-active" type="button" data-album-filter="all">Tất cả <span class="seg-count" id="cnt-alb-all">0</span></button>
+            <button class="seg-pill" type="button" data-album-filter="pending" id="chip-alb-pending" hidden>Chờ duyệt <span class="seg-count seg-count--warn" id="cnt-alb-pending">0</span></button>
+            <button class="seg-pill" type="button" data-album-filter="published">Công khai</button>
+            <button class="seg-pill" type="button" data-album-filter="draft">Nháp</button>
           </div>
           <div class="media-search-wrap">
-            <input type="search" id="album-search" placeholder="Tìm theo tên album hoặc địa điểm..." aria-label="Tìm kiếm album">
+            <input type="search" id="album-search" placeholder="Tìm album..." aria-label="Tìm kiếm album">
           </div>
         </div>
 
@@ -260,77 +291,106 @@
         <div class="albums-grid" id="albums-grid" aria-live="polite"></div>
       </section>
 
-      <!-- VIEW 2: ALBUM WORKSPACE -->
+      <!-- VIEW 2: PHOTO-FIRST ALBUM WORKSPACE -->
       <section id="view-workspace" hidden>
-        <div class="workspace-breadcrumb">
-          <button class="btn btn--ghost btn--sm" type="button" id="btn-back-albums">← Quay lại danh sách Album</button>
-        </div>
+        <input type="file" id="multi-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/*" multiple hidden>
 
-        <div class="workspace-header-card">
-          <div class="workspace-header-info">
-            <div class="workspace-badges" id="ws-badges"></div>
-            <h1 id="ws-title">—</h1>
-            <p class="workspace-meta" id="ws-meta">—</p>
-            <p class="workspace-desc" id="ws-desc" hidden></p>
-            <div class="workspace-drive-row" id="ws-drive-row" hidden>
-              <a class="btn btn--outline btn--sm" id="ws-drive-link" href="https://drive.google.com" target="_blank" rel="noopener noreferrer">Mở thư mục ảnh gốc (Google Drive) ↗</a>
-            </div>
+        <!-- Compact Status Filter & Multi-Select Bar -->
+        <div class="ws-toolbar">
+          <div class="seg-pills" role="group" aria-label="Lọc ảnh trong album" id="photo-filter-group">
+            <button class="seg-pill" type="button" data-photo-filter="pending" id="tab-photo-pending" hidden>Chờ duyệt <span class="seg-count seg-count--warn" id="cnt-photo-pending">0</span></button>
+            <button class="seg-pill" type="button" data-photo-filter="approved">Đã lên web <span class="seg-count" id="cnt-photo-approved">0</span></button>
+            <button class="seg-pill" type="button" data-photo-filter="featured">★ Trang chủ <span class="seg-count" id="cnt-photo-featured">0</span></button>
+            <button class="seg-pill is-active" type="button" data-photo-filter="all">Tất cả <span class="seg-count" id="cnt-photo-all">0</span></button>
           </div>
-          <div class="workspace-header-actions">
-            <button class="btn btn--outline btn--sm" type="button" id="btn-edit-album">Sửa thông tin Album</button>
-            <button class="btn btn--danger-ghost btn--sm" type="button" id="btn-delete-album">Xóa Album</button>
+
+          <div class="ws-toolbar-right">
+            <button class="btn btn--primary btn--sm" type="button" id="btn-approve-all" hidden>Duyệt hết chờ duyệt</button>
+            <button class="btn btn--outline btn--sm" type="button" id="btn-toggle-select">Chọn nhiều</button>
           </div>
         </div>
 
-        <!-- MULTI-UPLOAD DROPZONE -->
-        <section class="upload-zone-card" aria-label="Tải nhiều ảnh vào album">
-          <div class="upload-zone-head">
-            <div>
-              <h2>Tải ảnh lên Album</h2>
-              <p>Chọn hoặc kéo-thả nhiều ảnh cùng lúc (tối đa 30 ảnh/lượt). Hệ thống tự nén JPEG tối ưu 1280px trước khi lưu.</p>
-            </div>
-            <div class="upload-defaults">
-              <label for="default-photographer">Nhiếp ảnh gia mặc định</label>
-              <input id="default-photographer" type="text" placeholder="Ví dụ: Ban Hình Ảnh HolaRise" maxlength="100">
+        <!-- Compact Upload / Batch Progress Bar (hidden when idle) -->
+        <div class="progress-strip" id="upload-queue" hidden>
+          <div class="progress-strip-head">
+            <strong id="upload-queue-summary">Đang xử lý...</strong>
+            <div class="progress-strip-actions">
+              <button class="btn btn--outline btn--sm" type="button" id="btn-retry-failed" hidden>Thử lại ảnh lỗi</button>
+              <button class="btn btn--ghost btn--sm" type="button" id="btn-clear-queue" hidden>Đóng</button>
             </div>
           </div>
-
-          <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Chọn hoặc kéo thả ảnh từ máy tính hoặc điện thoại">
-            <input type="file" id="multi-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/*" multiple hidden>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-            <strong>Kéo thả ảnh vào đây hoặc bấm để chọn nhiều ảnh</strong>
-            <span>Hỗ trợ JPEG, PNG, WebP · Tối đa 30 ảnh/lượt · Tự nén nhẹ để tải nhanh trên 4G</span>
+          <div class="progress-track" aria-hidden="true">
+            <div class="progress-fill" id="upload-progress-fill"></div>
           </div>
-
-          <div class="upload-queue" id="upload-queue" hidden>
-            <div class="upload-queue-head">
-              <strong id="upload-queue-summary">Đang xử lý...</strong>
-              <div class="upload-queue-actions">
-                <button class="btn btn--outline btn--sm" type="button" id="btn-retry-failed" hidden>Thử lại ảnh lỗi</button>
-                <button class="btn btn--ghost btn--sm" type="button" id="btn-clear-queue" hidden>Ẩn danh sách</button>
-              </div>
-            </div>
+          <details class="progress-details" id="upload-queue-details">
+            <summary>Xem chi tiết từng tệp</summary>
             <div class="upload-queue-list" id="upload-queue-list"></div>
-          </div>
-        </section>
+          </details>
+        </div>
 
-        <!-- PHOTOS GRID -->
-        <section class="photos-section">
-          <div class="photos-section-head">
-            <h2 id="ws-photos-heading">Danh sách ảnh trong Album</h2>
-            <span class="photos-hint">Gạt <strong>Ghim Trang chủ</strong> để đưa ảnh đẹp nhất ra dải ảnh ở Trang chủ.</span>
+        <!-- Clean Apple/Google Photos Grid -->
+        <div class="photos-grid" id="ws-photos-grid" aria-live="polite"></div>
+
+        <!-- Full-Window Drag-and-Drop Overlay -->
+        <div class="drop-overlay" id="drop-overlay" hidden aria-hidden="true">
+          <div class="drop-overlay-box">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <strong>Thả ảnh vào đây để tải lên Album</strong>
+            <span>Tối đa 30 ảnh/lượt · Tự giữ nguyên ảnh gốc trên Google Drive</span>
           </div>
-          <div class="photos-grid" id="ws-photos-grid" aria-live="polite"></div>
-        </section>
+        </div>
       </section>
     </main>
+
+    <!-- STICKY BATCH ACTION BAR (Visible when selecting multiple photos) -->
+    <div class="batch-bar" id="batch-bar" hidden role="region" aria-label="Thao tác hàng loạt">
+      <div class="batch-bar-inner">
+        <div class="batch-bar-left">
+          <strong id="batch-count">Đã chọn 0 ảnh</strong>
+          <button class="batch-link" type="button" id="btn-select-visible">Chọn tất cả</button>
+          <button class="batch-link" type="button" id="btn-clear-select">Bỏ chọn</button>
+        </div>
+        <div class="batch-bar-actions">
+          <button class="btn btn--primary btn--sm" type="button" id="btn-batch-approve" hidden>✓ Duyệt &amp; nén lên web</button>
+          <button class="btn btn--outline btn--sm" type="button" id="btn-batch-unapprove" hidden>Ẩn khỏi web</button>
+          <button class="btn btn--danger-ghost btn--sm" type="button" id="btn-batch-delete">Xóa đã chọn</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- DIALOG: CREATE / EDIT ALBUM -->
+  <!-- DIALOG 1: QUICK-REVIEW PHOTO LIGHTBOX -->
+  <dialog class="lightbox-dialog" id="lightbox-dialog" closedby="any" aria-label="Xem và duyệt nhanh ảnh">
+    <div class="lb-shell">
+      <header class="lb-top">
+        <div class="lb-top-left">
+          <span class="lb-counter" id="lb-counter">1 / 1</span>
+          <span class="lb-status-pill" id="lb-status-pill">Đã lên web</span>
+        </div>
+        <button class="lb-icon-btn" type="button" data-close-dialog aria-label="Đóng xem ảnh">×</button>
+      </header>
+
+      <div class="lb-stage" id="lb-stage">
+        <button class="lb-nav lb-nav--prev" type="button" id="lb-prev" aria-label="Ảnh trước">‹</button>
+        <img id="lb-img" src="/assets/images/logo-mark.png" alt="Xem ảnh phóng lớn">
+        <button class="lb-nav lb-nav--next" type="button" id="lb-next" aria-label="Ảnh tiếp theo">›</button>
+      </div>
+
+      <footer class="lb-dock">
+        <div class="lb-meta" id="lb-meta" hidden></div>
+        <div class="lb-actions">
+          <button class="btn btn--primary btn--sm" type="button" id="lb-btn-approve" hidden>✓ Duyệt &amp; nén lên web</button>
+          <button class="lb-action-btn" type="button" id="lb-btn-unapprove" hidden>Ẩn khỏi web</button>
+          <button class="lb-action-btn" type="button" id="lb-btn-featured" hidden>☆ Ghim Trang chủ</button>
+          <button class="lb-action-btn" type="button" id="lb-btn-cover" hidden>Làm ảnh bìa</button>
+          <button class="lb-action-btn" type="button" id="lb-btn-edit">Chi tiết</button>
+          <button class="lb-action-btn lb-action-btn--danger" type="button" id="lb-btn-delete">Xóa</button>
+        </div>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 2: CREATE / EDIT ALBUM (Fast 2-Field Default + Collapsible Extras) -->
   <dialog class="cms-dialog" id="album-dialog" closedby="any" aria-labelledby="album-dialog-title">
     <div class="dialog-shell">
       <div class="dialog-head">
@@ -341,43 +401,49 @@
         <input type="hidden" name="id" id="af-id">
         <div class="field">
           <label for="af-title">Tên Album sự kiện <span aria-hidden="true">*</span></label>
-          <input id="af-title" name="title" type="text" required minlength="3" maxlength="180" placeholder="Ví dụ: HolaHeart · Đối thoại Giá trị sống — 11/2026">
+          <input id="af-title" name="title" type="text" required minlength="3" maxlength="180" placeholder="Ví dụ: HolaHeart · Cuộc đời của Cha">
         </div>
-        <div class="field-row">
+        <div class="field-row-2">
           <div class="field">
             <label for="af-date">Ngày sự kiện</label>
             <input id="af-date" name="eventDate" type="date">
           </div>
           <div class="field">
-            <label for="af-status">Trạng thái hiển thị</label>
+            <label for="af-status">Hiển thị</label>
             <select id="af-status" name="status">
-              <option value="published">Công khai (Hiển thị trên web)</option>
-              <option value="draft">Bản nháp (Chỉ nội bộ thấy)</option>
+              <option value="published">Công khai</option>
+              <option value="draft">Bản nháp (nội bộ)</option>
             </select>
           </div>
         </div>
-        <div class="field">
-          <label for="af-location">Địa điểm</label>
-          <input id="af-location" name="location" type="text" maxlength="140" placeholder="Ví dụ: Hòa Lạc – Thạch Thất, Hà Nội">
-        </div>
-        <div class="field">
-          <span class="field-label">Bộ lọc 4 giá trị HolaRise</span>
-          <div class="check-grid">
-            <label class="check-pill"><input type="checkbox" name="filters" value="sach"><span>Sạch</span></label>
-            <label class="check-pill"><input type="checkbox" name="filters" value="biet-on"><span>Biết ơn</span></label>
-            <label class="check-pill"><input type="checkbox" name="filters" value="tu-te"><span>Tử tế</span></label>
-            <label class="check-pill"><input type="checkbox" name="filters" value="se-chia"><span>Sẻ chia</span></label>
+
+        <details class="mp-details" id="af-extras">
+          <summary>Tùy chọn thêm (Địa điểm, bộ lọc, Drive, mô tả)</summary>
+          <div class="mp-details-body">
+            <div class="field">
+              <label for="af-location">Địa điểm</label>
+              <input id="af-location" name="location" type="text" maxlength="140" placeholder="Hòa Lạc, Hà Nội">
+            </div>
+            <div class="field">
+              <span class="field-label">Bộ lọc 4 giá trị HolaRise</span>
+              <div class="check-grid">
+                <label class="check-pill"><input type="checkbox" name="filters" value="sach"><span>Sạch</span></label>
+                <label class="check-pill"><input type="checkbox" name="filters" value="biet-on"><span>Biết ơn</span></label>
+                <label class="check-pill"><input type="checkbox" name="filters" value="tu-te"><span>Tử tế</span></label>
+                <label class="check-pill"><input type="checkbox" name="filters" value="se-chia"><span>Sẻ chia</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="af-drive">Link Google Drive / Photos (tùy chọn)</label>
+              <input id="af-drive" name="driveUrl" type="url" maxlength="600" placeholder="Để trống hệ thống tự tạo thư mục Drive">
+            </div>
+            <div class="field">
+              <label for="af-desc">Mô tả ngắn</label>
+              <textarea id="af-desc" name="description" rows="2" maxlength="500" placeholder="1–2 câu tóm tắt buổi hoạt động..."></textarea>
+            </div>
           </div>
-        </div>
-        <div class="field">
-          <label for="af-drive">Link Google Drive / Google Photos ảnh gốc (tùy chọn)</label>
-          <input id="af-drive" name="driveUrl" type="url" maxlength="600" placeholder="https://drive.google.com/drive/folders/...">
-          <span class="field-help">Dán link công khai để tình nguyện viên tải ảnh chất lượng gốc.</span>
-        </div>
-        <div class="field">
-          <label for="af-desc">Mô tả ngắn về Album</label>
-          <textarea id="af-desc" name="description" rows="3" maxlength="500" placeholder="Tóm tắt 1–2 câu về buổi hoạt động..."></textarea>
-        </div>
+        </details>
+
         <div class="form-alert" id="album-form-alert" role="alert" hidden></div>
         <div class="dialog-foot">
           <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
@@ -387,11 +453,11 @@
     </div>
   </dialog>
 
-  <!-- DIALOG: EDIT PHOTO METADATA -->
+  <!-- DIALOG 3: EDIT PHOTO DETAILS -->
   <dialog class="cms-dialog" id="photo-dialog" closedby="any" aria-labelledby="photo-dialog-title">
     <div class="dialog-shell">
       <div class="dialog-head">
-        <h2 id="photo-dialog-title">Sửa thông tin ảnh</h2>
+        <h2 id="photo-dialog-title">Chi tiết ảnh</h2>
         <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
       </div>
       <form class="admin-form dialog-body" id="photo-form" novalidate>
@@ -401,16 +467,16 @@
         </div>
         <div class="field">
           <label for="pf-caption">Chú thích hiển thị dưới ảnh</label>
-          <textarea id="pf-caption" name="caption" rows="2" maxlength="300" placeholder="Ví dụ: Các bạn trẻ cùng nhau lắng nghe và sẻ chia tại Hòa Lạc – Thạch Thất."></textarea>
+          <textarea id="pf-caption" name="caption" rows="2" maxlength="300" placeholder="Mô tả ngắn gọn khoảnh khắc trong ảnh..."></textarea>
         </div>
         <div class="field">
           <label for="pf-photographer">Nhiếp ảnh gia / Nguồn ảnh</label>
-          <input id="pf-photographer" name="photographer" type="text" maxlength="100" placeholder="Ví dụ: Ban Hình Ảnh HolaRise">
+          <input id="pf-photographer" name="photographer" type="text" maxlength="100" placeholder="Ban Hình Ảnh HolaRise">
         </div>
-        <div class="field">
+        <div class="field" id="pf-featured-wrap">
           <label class="check-pill">
             <input type="checkbox" id="pf-featured" name="isFeaturedHome">
-            <span>Ghim ảnh này lên dải ảnh nổi bật ở Trang chủ</span>
+            <span>Ghim lên dải ảnh nổi bật ở Trang chủ</span>
           </label>
         </div>
         <div class="form-alert" id="photo-form-alert" role="alert" hidden></div>
@@ -422,7 +488,7 @@
     </div>
   </dialog>
 
-  <!-- DIALOG: CHANGE PASSWORD -->
+  <!-- DIALOG 4: CHANGE PASSWORD -->
   <dialog class="cms-dialog" id="pw-dialog" closedby="any" aria-labelledby="pw-dialog-title">
     <div class="dialog-shell">
       <div class="dialog-head">
@@ -447,8 +513,41 @@
     </div>
   </dialog>
 
+  <!-- DIALOG 5: PWA INSTALL GUIDE (iOS Safari / Zalo WebView) -->
+  <dialog class="cms-dialog pwa-install-dialog" id="pwa-install-dialog" closedby="any" aria-labelledby="pwa-dialog-title-ios">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="pwa-dialog-title-ios">Cài HolaRise Media về màn hình chính</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <div class="dialog-body">
+        <div data-pwa-guide="ios">
+          <p class="pwa-guide-lead">Mở nhanh kho ảnh chỉ bằng một chạm để tải ảnh trực tiếp từ thư viện điện thoại.</p>
+          <ol class="pwa-guide-steps">
+            <li>Chạm biểu tượng <strong>Chia sẻ</strong> ở thanh dưới cùng Safari.</li>
+            <li>Cuộn xuống chọn <strong>Thêm vào Màn hình chính</strong>, sau đó bấm <strong>Thêm</strong>.</li>
+          </ol>
+        </div>
+        <div data-pwa-guide="webview" hidden>
+          <h3 id="pwa-dialog-title-webview" class="pwa-guide-heading">Mở bằng Safari hoặc Chrome để cài đặt</h3>
+          <p class="pwa-guide-lead">Trình duyệt mở từ Zalo hoặc Messenger chưa hỗ trợ cài ứng dụng trực tiếp.</p>
+          <ol class="pwa-guide-steps">
+            <li>Bấm biểu tượng menu <strong>⋯</strong> ở góc màn hình.</li>
+            <li>Chọn <strong>Mở bằng Safari</strong> (iPhone) hoặc <strong>Mở bằng Chrome</strong> (Android), sau đó bấm <strong>Cài ứng dụng</strong>.</li>
+          </ol>
+          <div class="pwa-copy-row">
+            <button class="btn btn--primary btn--sm" type="button" data-pwa-copy-url>Sao chép đường dẫn</button>
+            <span class="pwa-copy-feedback" data-pwa-copy-feedback role="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+  <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
+
   <script src="/assets/js/passkey-client.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/gate-ui.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/media-portal.js?v={{CACHE_BUST}}" defer></script>
+  <script src="/assets/js/pwa.js?v={{CACHE_BUST}}" defer></script>
 </body>
 </html>

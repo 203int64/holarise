@@ -7,8 +7,14 @@
   <meta name="description" content="Không gian điều phối sự kiện, xuất bản tường thuật và quản lý đăng ký dành cho Ban Điều Phối Cộng đồng Thanh niên Hòa Lạc – HolaRise.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0B110F">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Hola CMS">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="/admin-manifest.webmanifest">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" href="/assets/images/favicon-48.png" type="image/png" sizes="48x48">
+  <link rel="icon" href="/assets/images/pwa/icon-192.png" type="image/png" sizes="192x192">
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" sizes="180x180">
 
@@ -33,9 +39,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=d835dc9457">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=d0d57bf632">
+  <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
-<body>
+<body data-pwa-app-name="HolaRise CMS">
   <a class="skip-link" href="#admin-main">Chuyển tới khu vực quản trị</a>
 
   <!-- Global polite live region for form errors & toast notifications -->
@@ -289,6 +296,7 @@
           <div class="user-meta" id="sidebar-user-meta">—</div>
         </div>
         <div class="sidebar-footer-actions">
+          <button class="btn btn--outline btn--sm" type="button" data-pwa-install hidden>Cài app</button>
           <a class="btn btn--ghost btn--sm" href="/" target="_blank" rel="noopener">Xem web ↗</a>
           <button class="btn btn--ghost btn--sm" type="button" id="btn-logout">Đăng xuất</button>
         </div>
@@ -302,6 +310,12 @@
         <strong id="mobile-page-title">Đơn đăng ký</strong>
       </div>
       <div class="mobile-topbar-right">
+        <button class="icon-btn" type="button" data-pwa-install hidden aria-label="Cài ứng dụng HolaRise CMS" title="Cài ứng dụng về máy">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <a class="icon-btn" href="/media/" aria-label="Mở Cổng Ban Hình Ảnh" title="Cổng Ban Hình Ảnh">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><polyline points="21 15 16 10 5 19"/></svg>
+        </a>
         <a class="icon-btn" href="/" target="_blank" rel="noopener" aria-label="Mở website công khai">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         </a>
@@ -1137,9 +1151,42 @@
     </div>
   </dialog>
 
-  <script src="/assets/js/passkey-client.js?v=d835dc9457" defer></script>
-  <script src="/assets/js/gate-ui.js?v=d835dc9457" defer></script>
-  <script src="/assets/js/admin.js?v=d835dc9457" defer></script>
-  <script src="/assets/js/admin-studio.js?v=d835dc9457" defer></script>
+  <!-- DIALOG 9: PWA INSTALL GUIDE (iOS Safari / Zalo WebView) -->
+  <dialog class="cms-dialog pwa-install-dialog" id="pwa-install-dialog" closedby="any" aria-labelledby="pwa-dialog-title-ios">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="pwa-dialog-title-ios">Cài HolaRise CMS về màn hình chính</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <div class="dialog-body">
+        <div data-pwa-guide="ios">
+          <p class="pwa-guide-lead">Mở nhanh trang Điều phối như một ứng dụng độc lập, không bị vướng thanh địa chỉ trình duyệt.</p>
+          <ol class="pwa-guide-steps">
+            <li>Chạm biểu tượng <strong>Chia sẻ</strong> ở thanh dưới cùng Safari.</li>
+            <li>Cuộn xuống chọn <strong>Thêm vào Màn hình chính</strong>, sau đó bấm <strong>Thêm</strong>.</li>
+          </ol>
+        </div>
+        <div data-pwa-guide="webview" hidden>
+          <h3 id="pwa-dialog-title-webview" class="pwa-guide-heading">Mở bằng Safari hoặc Chrome để cài đặt</h3>
+          <p class="pwa-guide-lead">Trình duyệt mở từ Zalo hoặc Messenger chưa hỗ trợ cài ứng dụng trực tiếp.</p>
+          <ol class="pwa-guide-steps">
+            <li>Bấm biểu tượng menu <strong>⋯</strong> ở góc màn hình.</li>
+            <li>Chọn <strong>Mở bằng Safari</strong> (iPhone) hoặc <strong>Mở bằng Chrome</strong> (Android), sau đó bấm <strong>Cài ứng dụng</strong>.</li>
+          </ol>
+          <div class="pwa-copy-row">
+            <button class="btn btn--primary btn--sm" type="button" data-pwa-copy-url>Sao chép đường dẫn</button>
+            <span class="pwa-copy-feedback" data-pwa-copy-feedback role="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+  <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
+
+  <script src="/assets/js/passkey-client.js?v=d0d57bf632" defer></script>
+  <script src="/assets/js/gate-ui.js?v=d0d57bf632" defer></script>
+  <script src="/assets/js/admin.js?v=d0d57bf632" defer></script>
+  <script src="/assets/js/admin-studio.js?v=d0d57bf632" defer></script>
+  <script src="/assets/js/pwa.js?v=d0d57bf632" defer></script>
 </body>
 </html>

@@ -953,25 +953,43 @@
       const src = cur.url || slot.fallback;
       const alt = cur.alt || "";
       const isIllust = cur.isIllustration === true;
-      return `<div class="visual-slot-card" data-visual-slot="${esc(slot.key)}">
-        <div class="visual-slot-head">
-          <strong>${esc(slot.label)}</strong>
-          <span class="cell-sub">${cur.url ? "Đang dùng ảnh CMS" : "Đang dùng ảnh mặc định"}</span>
+      const isCustom = Boolean(cur.url && cur.url !== slot.fallback);
+      return `<article class="visual-slot-card" data-visual-slot="${esc(slot.key)}">
+        <div class="visual-slot-media">
+          <img id="vis-prev-${esc(slot.key)}" src="${esc(src)}" alt="Xem trước ${esc(slot.label)}" loading="lazy">
+          <span class="visual-slot-badge ${isCustom ? "is-custom" : ""}">${isCustom ? "Ảnh CMS" : "Mặc định"}</span>
         </div>
-        <div class="uploader-box">
-          <img id="vis-prev-${esc(slot.key)}" class="uploader-preview" src="${esc(src)}" alt="Xem trước ${esc(slot.label)}">
-          <div class="uploader-controls">
-            <input type="file" accept="image/*" class="file-input" data-visual-upload="${esc(slot.key)}">
-            <div class="upload-meta" id="vis-meta-${esc(slot.key)}">Chọn ảnh chụp thật (tự động nén JPEG).</div>
-            <input type="text" id="vis-url-${esc(slot.key)}" value="${esc(cur.url || "")}" placeholder="${esc(slot.fallback)}" autocorrect="off" autocapitalize="none" spellcheck="false">
-            <input type="text" id="vis-alt-${esc(slot.key)}" value="${esc(alt)}" placeholder="Mô tả ảnh (Alt text ngắn gọn)">
-            <label class="check-chip" style="margin-top:4px;">
-              <input type="checkbox" id="vis-real-${esc(slot.key)}" ${isIllust ? "" : "checked"}>
-              <span>Ảnh chụp thật (tắt nhãn Ảnh định hướng)</span>
-            </label>
+        <div class="visual-slot-body">
+          <div class="visual-slot-bar">
+            <strong>${esc(slot.label)}</strong>
+            <div class="visual-slot-actions">
+              <label class="btn btn--outline btn--sm visual-pick-btn">
+                <span>Thay ảnh</span>
+                <input type="file" accept="image/*" class="visually-hidden" data-visual-upload="${esc(slot.key)}">
+              </label>
+              <button class="btn btn--ghost btn--sm" type="button" data-visual-reset="${esc(slot.key)}" ${isCustom ? "" : "hidden"}>Về mặc định</button>
+            </div>
           </div>
+          <div class="upload-meta visual-slot-meta" id="vis-meta-${esc(slot.key)}"></div>
+          <details class="visual-slot-more">
+            <summary>Mô tả ảnh &amp; tùy chọn nâng cao</summary>
+            <div class="visual-slot-more-body">
+              <div class="field">
+                <label for="vis-alt-${esc(slot.key)}">Mô tả ảnh (Alt text)</label>
+                <input type="text" id="vis-alt-${esc(slot.key)}" value="${esc(alt)}" placeholder="Mô tả ngắn gọn nội dung ảnh">
+              </div>
+              <div class="field">
+                <label for="vis-url-${esc(slot.key)}">Đường dẫn ảnh</label>
+                <input type="text" id="vis-url-${esc(slot.key)}" value="${esc(cur.url || "")}" placeholder="${esc(slot.fallback)}" autocorrect="off" autocapitalize="none" spellcheck="false">
+              </div>
+              <label class="check-chip">
+                <input type="checkbox" id="vis-real-${esc(slot.key)}" ${isIllust ? "" : "checked"}>
+                <span>Ảnh chụp thật (ẩn nhãn Ảnh định hướng)</span>
+              </label>
+            </div>
+          </details>
         </div>
-      </div>`;
+      </article>`;
     }).join("");
   }
 
@@ -1697,6 +1715,8 @@
         const up = await api("/api/admin/media", { method: "POST", body: fd });
         if (urlEl) urlEl.value = up.url;
         if (prevEl) prevEl.src = up.url;
+        const resetBtn = document.querySelector(`button[data-visual-reset="${slot}"]`);
+        if (resetBtn) resetBtn.hidden = false;
         if (metaEl) {
           metaEl.textContent =
             up.storage === "google_drive"
@@ -1711,6 +1731,21 @@
         input.disabled = false;
         input.value = "";
       }
+    });
+
+    $("#visuals-editor-grid")?.addEventListener("click", (e) => {
+      const resetBtn = e.target.closest("button[data-visual-reset]");
+      if (!resetBtn) return;
+      const slotKey = resetBtn.getAttribute("data-visual-reset");
+      const slot = VISUAL_SLOTS.find((s) => s.key === slotKey);
+      if (!slot) return;
+      const urlEl = document.getElementById(`vis-url-${slotKey}`);
+      const prevEl = document.getElementById(`vis-prev-${slotKey}`);
+      const metaEl = document.getElementById(`vis-meta-${slotKey}`);
+      if (urlEl) urlEl.value = "";
+      if (prevEl) prevEl.src = slot.fallback;
+      if (metaEl) metaEl.textContent = "Đã khôi phục ảnh mặc định — bấm Lưu để áp dụng.";
+      resetBtn.hidden = true;
     });
 
     $("#visuals-form")?.addEventListener("submit", async (e) => {

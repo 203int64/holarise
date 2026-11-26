@@ -1125,6 +1125,10 @@ dialog.cms-dialog::backdrop {
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--line);
   }
+  html.is-standalone .mobile-topbar {
+    padding-top: env(safe-area-inset-top);
+    height: calc(58px + env(safe-area-inset-top));
+  }
   .mobile-topbar-left {
     display: flex;
     align-items: center;
@@ -1150,7 +1154,7 @@ dialog.cms-dialog::backdrop {
     bottom: 0;
     z-index: 50;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(12px);
     border-top: 1px solid var(--line);
@@ -1231,26 +1235,122 @@ dialog.cms-dialog::backdrop {
 }
 
 
-/* Site Visuals CMS Slot Grid */
+/* Site Visuals CMS Slot Grid (Visual-First Cards) */
 .visuals-editor-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
 }
 .visual-slot-card {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  padding: 14px;
-  background: var(--surface);
+  background: var(--bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.visual-slot-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--surface-hover);
+  overflow: hidden;
+}
+.visual-slot-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.visual-slot-badge {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(11, 17, 15, 0.72);
+  color: #ffffff;
+  backdrop-filter: blur(4px);
+}
+.visual-slot-badge.is-custom {
+  background: rgba(20, 90, 64, 0.92);
+}
+.visual-slot-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.visual-slot-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.visual-slot-bar strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+.visual-slot-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.visual-pick-btn {
+  cursor: pointer;
+}
+.visual-slot-meta:empty {
+  display: none;
+}
+.visual-slot-more {
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+.visual-slot-more > summary {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  user-select: none;
+}
+.visual-slot-more-body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 10px;
 }
-.visual-slot-head {
+
+/* Shared PWA Install Guide Dialog (/admin/ & /media/) */
+.pwa-guide-heading {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.pwa-guide-lead {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--ink-secondary);
+}
+.pwa-guide-steps {
+  margin: 0;
+  padding-left: 20px;
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+  flex-direction: column;
   gap: 8px;
+  font-size: 14px;
+  color: var(--ink);
+}
+.pwa-copy-row {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pwa-copy-feedback {
+  font-size: 13px;
+  color: var(--accent);
 }
 
 

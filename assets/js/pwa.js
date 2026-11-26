@@ -34,7 +34,8 @@
   var isIos =
     /iPad|iPhone|iPod/i.test(ua) ||
     (navigator.platform === "MacIntel" && typeof navigator.maxTouchPoints === "number" && navigator.maxTouchPoints > 1);
-  var isExcludedBannerRoute = /^\/(en|admin|offline)(\/|$)/i.test(pathname);
+  var isExcludedBannerRoute = /^\/(en|admin|media|offline)(\/|$)/i.test(pathname);
+  var appName = (document.body && document.body.getAttribute("data-pwa-app-name")) || "HolaRise";
   var supportsWebInstall = typeof Navigator !== "undefined" && typeof Navigator.prototype.install === "function";
 
   var deferredInstallPrompt;
@@ -195,7 +196,7 @@
   window.addEventListener("appinstalled", function () {
     deferredInstallPrompt = undefined;
     hideFloatingBanner();
-    setStatus("Ứng dụng HolaRise đã được cài đặt về thiết bị.");
+    setStatus("Ứng dụng " + appName + " đã được cài đặt về thiết bị.");
     syncInstallButtons();
   });
 
@@ -241,6 +242,10 @@
       if (typeof window.__holaRiseCloseDrawer === "function") {
         window.__holaRiseCloseDrawer();
       }
+      var parentDetails = btn.closest("details");
+      if (parentDetails) {
+        parentDetails.removeAttribute("open");
+      }
 
       if (isInAppBrowser) {
         openInstallGuide("webview");
@@ -254,7 +259,7 @@
           // Call directly during the click handler to preserve transient user activation.
           await navigator.install();
           hideFloatingBanner();
-          setStatus("Ứng dụng HolaRise đã được cài đặt hoặc mở.");
+          setStatus("Ứng dụng " + appName + " đã được cài đặt hoặc mở.");
           installButtons.forEach(function (b) {
             if (!b.classList.contains("pwa-banner-install-btn")) {
               b.hidden = true;
@@ -268,7 +273,7 @@
           var choice = await promptEvent.userChoice;
           if (choice && choice.outcome === "accepted") {
             hideFloatingBanner();
-            setStatus("Ứng dụng HolaRise đang được cài đặt.");
+            setStatus("Ứng dụng " + appName + " đang được cài đặt.");
           } else {
             setStatus("Bạn đã hủy cài đặt ứng dụng.");
           }

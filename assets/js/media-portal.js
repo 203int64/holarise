@@ -4,13 +4,6 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  const FILTER_LABELS = {
-    sach: "Sạch",
-    "biet-on": "Biết ơn",
-    "tu-te": "Tử tế",
-    "se-chia": "Sẻ chia",
-  };
-
   const ROLE_LABELS = {
     super_admin: "Quản trị chính",
     editor: "Ban Điều Phối",
@@ -23,29 +16,63 @@
   const state = {
     user: null,
     albums: [],
-    statusFilter: "",
+    albumFilter: "all", // all | pending | published | draft
     searchQuery: "",
     activeAlbum: null,
     photos: [],
+    photoFilter: "all", // pending | approved | featured | all
+    selectMode: false,
+    selectedIds: new Set(),
+    lightboxPhotoId: null,
     uploadQueue: [],
     uploading: false,
+    batchBusy: false,
     mediaStorage: null,
   };
 
-  async function resolveMediaStorage() {
-    if (state.mediaStorage) return state.mediaStorage;
-    try {
-      const info = await apiFetch("/api/admin/media", { method: "GET" });
-      state.mediaStorage = {
-        driveConfigured: Boolean(info?.driveConfigured),
-        storage: info?.storage || "media_kv",
-      };
-    } catch {
-      state.mediaStorage = { driveConfigured: false, storage: "media_kv" };
+  /* =========================================================================
+     Modern Top-Layer Exit Fallback (animate-to-from-top-layer)
+     ========================================================================= */
+  let supportsDisplayTransition;
+  function canTransitionDisplay() {
+    if (supportsDisplayTransition !== undefined) return supportsDisplayTransition;
+    if (!window.CSS?.supports?.("transition-behavior", "allow-discrete") || !document.body) {
+      return false;
     }
-    return state.mediaStorage;
+    const probe = document.createElement("div");
+    probe.style.cssText = "transition: display 1s allow-discrete !important; display: block;";
+    document.body.appendChild(probe);
+    getComputedStyle(probe).display;
+    probe.style.display = "none";
+    supportsDisplayTransition = getComputedStyle(probe).display === "block";
+    probe.remove();
+    return supportsDisplayTransition;
   }
 
+  function supportsTopLayerExit() {
+    return window.CSS?.supports?.("overlay", "auto") && canTransitionDisplay();
+  }
+
+  async function closeDialogSmooth(dlg) {
+    if (!dlg || !dlg.open) return;
+    if (!supportsTopLayerExit()) {
+      dlg.setAttribute("data-closing", "");
+      const animations = dlg.getAnimations ? dlg.getAnimations({ subtree: true }) : [];
+      if (animations.length > 0) {
+        await Promise.race([
+          Promise.allSettled(animations.map((a) => a.finished)),
+          new Promise((r) => setTimeout(r, 400)),
+        ]);
+      }
+      if (!dlg.hasAttribute("data-closing")) return;
+      dlg.removeAttribute("data-closing");
+    }
+    dlg.close();
+  }
+
+  /* =========================================================================
+     Helpers
+     ========================================================================= */
   function esc(v) {
     return String(v ?? "")
       .replace(/&/g, "&amp;")
@@ -53,6 +80,17 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#x27;");
+  }
+
+  function getInitials(name) {
+    const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return "HR";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  function isApproverRole() {
+    return state.user?.role === "super_admin" || state.user?.role === "editor";
   }
 
   function toast(message, type = "info") {
@@ -65,7 +103,7 @@
     window.setTimeout(() => {
       el.classList.add("is-leaving");
       window.setTimeout(() => el.remove(), 220);
-    }, 3400);
+    }, 3200);
   }
 
   function showAlert(el, msg) {
@@ -77,6 +115,10 @@
     }
     el.hidden = false;
     el.textContent = msg;
+  }
+
+  function closeAllMenus() {
+    $$("details.mp-menu[open]").forEach((d) => d.removeAttribute("open"));
   }
 
   async function apiFetch(url, options = {}) {
@@ -106,8 +148,22 @@
     return data;
   }
 
+  async function resolveMediaStorage() {
+    if (state.mediaStorage) return state.mediaStorage;
+    try {
+      const info = await apiFetch("/api/admin/media", { method: "GET" });
+      state.mediaStorage = {
+        driveConfigured: Boolean(info?.driveConfigured),
+        storage: info?.storage || "media_kv",
+      };
+    } catch {
+      state.mediaStorage = { driveConfigured: false, storage: "media_kv" };
+    }
+    return state.mediaStorage;
+  }
+
   /* =========================================================================
-     Client-side Image Compression (<= 1280px JPEG, ~120-200 KB)
+     Client-side Image Compression (Fallback KV upload & Admin WebP approval)
      ========================================================================= */
   function compressImageFile(file, maxDim = 1280, quality = 0.82) {
     return new Promise((resolve, reject) => {
@@ -157,103 +213,6 @@
     });
   }
 
-  /* =========================================================================
-     Auth & Shell Boot
-     ========================================================================= */
-  function showAuthScreen() {
-    $("#boot-loader").hidden = true;
-    $("#media-shell").hidden = true;
-    $("#auth-screen").hidden = false;
-    window.HolaVault?.reset?.();
-  }
-
-  async function enterMediaShell(user) {
-    state.user = user;
-    $("#boot-loader").hidden = true;
-    $("#auth-screen").hidden = true;
-    $("#media-shell").hidden = false;
-
-    const roleLabel = user.department || ROLE_LABELS[user.role] || user.role;
-    $("#topbar-user-chip").textContent = `${user.name} · ${roleLabel}${user.phone ? ` · ${user.phone}` : ""}`;
-    $("#link-admin-cms").hidden = !(user.role === "super_admin" || user.role === "editor");
-    const passkeyBtn = $("#btn-setup-passkey");
-    if (passkeyBtn) {
-      passkeyBtn.hidden = Boolean(user.hasPasskey) || !window.HolaPasskey?.isSupported?.();
-    }
-
-    const savedPhotographer =
-      user.name || localStorage.getItem("holarise_media_photographer") || "Ban Hình Ảnh HolaRise";
-    if ($("#default-photographer")) $("#default-photographer").value = savedPhotographer;
-
-    await loadAlbums();
-    const params = new URLSearchParams(window.location.search);
-    const albumId = params.get("album");
-    if (albumId) {
-      await openAlbumWorkspace(albumId, false);
-    } else {
-      showAlbumsListView(false);
-    }
-  }
-
-  async function boot() {
-    try {
-      const status = await apiFetch("/api/auth/status");
-      if (status.authenticated && status.user) {
-        await enterMediaShell(status.user);
-      } else {
-        showAuthScreen();
-      }
-    } catch (err) {
-      showAuthScreen();
-      showAlert($("#login-alert"), err.message || "Không thể kết nối máy chủ.");
-    }
-  }
-
-  /* =========================================================================
-     Albums List View
-     ========================================================================= */
-  function showAlbumsListView(updateUrl = true) {
-    state.activeAlbum = null;
-    state.photos = [];
-    $("#view-workspace").hidden = true;
-    $("#view-albums").hidden = false;
-    if (updateUrl) {
-      history.replaceState(null, "", window.location.pathname);
-    }
-    renderAlbumsGrid();
-  }
-
-  async function loadAlbums() {
-    showAlert($("#albums-error"), "");
-    $("#albums-grid").innerHTML = `
-      <div class="skeleton-card"><div class="sk sk-title"></div><div class="sk sk-line"></div></div>
-      <div class="skeleton-card"><div class="sk sk-title"></div><div class="sk sk-line"></div></div>
-      <div class="skeleton-card"><div class="sk sk-title"></div><div class="sk sk-line"></div></div>
-    `;
-    try {
-      const res = await apiFetch("/api/admin/albums");
-      state.albums = res.items || [];
-      updateStats();
-      renderAlbumsGrid();
-    } catch (err) {
-      showAlert($("#albums-error"), err.message);
-      $("#albums-grid").innerHTML = "";
-    }
-  }
-
-  function updateStats() {
-    const totalAlbums = state.albums.length;
-    const totalPhotos = state.albums.reduce((s, a) => s + Number(a.photoCount || 0), 0);
-    const totalFeatured = state.albums.reduce((s, a) => s + Number(a.featuredCount || 0), 0);
-    $("#stat-albums").textContent = String(totalAlbums);
-    $("#stat-photos").textContent = String(totalPhotos);
-    $("#stat-featured").textContent = String(totalFeatured);
-  }
-
-  function isApproverRole() {
-    return state.user?.role === "super_admin" || state.user?.role === "editor";
-  }
-
   async function compressRemoteImageToWebBlob(url, maxDim = 1280, quality = 0.82) {
     const res = await fetch(url, { credentials: "same-origin" });
     if (!res.ok) {
@@ -291,7 +250,6 @@
     const ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0, width, height);
 
-    // Prefer WebP for smallest size on Zalo WebView; fallback to JPEG if browser lacks WebP encode
     const webpBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
     if (webpBlob && webpBlob.type === "image/webp" && webpBlob.size > 0) {
       return { blob: webpBlob, ext: "webp" };
@@ -303,13 +261,152 @@
     throw new Error("Trình duyệt không nén được ảnh web.");
   }
 
+  async function approveSinglePhoto(photo) {
+    const { blob, ext } = await compressRemoteImageToWebBlob(photo.url, 1280, 0.82);
+    const fd = new FormData();
+    fd.append("action", "approve");
+    fd.append("file", blob, `${photo.id}.${ext}`);
+    const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}/approve`, {
+      method: "POST",
+      body: fd,
+    });
+    const idx = state.photos.findIndex((p) => p.id === photo.id);
+    if (idx !== -1) state.photos[idx] = res.item;
+    if (state.activeAlbum && !state.activeAlbum.coverUrl) {
+      state.activeAlbum.coverUrl = res.item.webUrl || res.item.url;
+    }
+    return { item: res.item, bytes: res.compressedBytes || blob.size };
+  }
+
+  /* =========================================================================
+     Auth & Shell Boot
+     ========================================================================= */
+  function showAuthScreen() {
+    $("#boot-loader").hidden = true;
+    $("#media-shell").hidden = true;
+    $("#auth-screen").hidden = false;
+    window.HolaVault?.reset?.();
+  }
+
+  async function enterMediaShell(user) {
+    state.user = user;
+    $("#boot-loader").hidden = true;
+    $("#auth-screen").hidden = true;
+    $("#media-shell").hidden = false;
+
+    const roleLabel = user.department || ROLE_LABELS[user.role] || user.role;
+    $("#topbar-user-initials").textContent = getInitials(user.name);
+    $("#topbar-user-name").textContent = user.name || "Thành viên";
+    $("#menu-user-name").textContent = user.name || "Thành viên";
+    $("#menu-user-role").textContent = `${roleLabel}${user.phone ? ` · ${user.phone}` : ""}`;
+    $("#link-admin-cms").hidden = !isApproverRole();
+
+    const passkeyBtn = $("#btn-setup-passkey");
+    if (passkeyBtn) {
+      passkeyBtn.hidden = Boolean(user.hasPasskey) || !window.HolaPasskey?.isSupported?.();
+    }
+
+    const savedPhotographer =
+      localStorage.getItem("holarise_media_photographer") || user.name || "Ban Hình Ảnh HolaRise";
+    if ($("#default-photographer")) $("#default-photographer").value = savedPhotographer;
+
+    await loadAlbums();
+    const params = new URLSearchParams(window.location.search);
+    const albumId = params.get("album");
+    if (albumId) {
+      await openAlbumWorkspace(albumId, false);
+    } else {
+      showAlbumsListView(false);
+    }
+  }
+
+  async function boot() {
+    try {
+      const status = await apiFetch("/api/auth/status");
+      if (status.authenticated && status.user) {
+        await enterMediaShell(status.user);
+      } else {
+        showAuthScreen();
+      }
+    } catch (err) {
+      showAuthScreen();
+      showAlert($("#login-alert"), err.message || "Không thể kết nối máy chủ.");
+    }
+  }
+
+  /* =========================================================================
+     VIEW 1: Albums Gallery
+     ========================================================================= */
+  function setTopbarMode(mode) {
+    const inWorkspace = mode === "workspace";
+    $("#brand-home-link").hidden = inWorkspace;
+    $("#ws-nav-head").hidden = !inWorkspace;
+    $("#btn-new-album").hidden = inWorkspace;
+    $("#btn-upload-trigger").hidden = !inWorkspace;
+    $("#ws-more-menu").hidden = !inWorkspace;
+  }
+
+  function showAlbumsListView(updateUrl = true) {
+    state.activeAlbum = null;
+    state.photos = [];
+    state.selectMode = false;
+    state.selectedIds.clear();
+    updateBatchBar();
+    setTopbarMode("albums");
+    $("#view-workspace").hidden = true;
+    $("#view-albums").hidden = false;
+    if (updateUrl) {
+      history.replaceState(null, "", window.location.pathname);
+    }
+    renderAlbumsGrid();
+  }
+
+  async function loadAlbums(silent = false) {
+    showAlert($("#albums-error"), "");
+    if (!silent) {
+      $("#albums-grid").innerHTML = `
+        <div class="skeleton-card"><div class="sk sk-title"></div><div class="sk sk-line"></div></div>
+        <div class="skeleton-card"><div class="sk sk-title"></div><div class="sk sk-line"></div></div>
+        <div class="skeleton-card"><div class="sk sk-title"></div><div class="sk sk-line"></div></div>
+        <div class="skeleton-card"><div class="sk sk-title"></div><div class="sk sk-line"></div></div>
+      `;
+    }
+    try {
+      const res = await apiFetch("/api/admin/albums");
+      state.albums = res.items || [];
+      syncAlbumFilterCounts();
+      renderAlbumsGrid();
+    } catch (err) {
+      showAlert($("#albums-error"), err.message);
+      if (!silent) $("#albums-grid").innerHTML = "";
+    }
+  }
+
+  function syncAlbumFilterCounts() {
+    const totalPendingPhotos = state.albums.reduce((s, a) => s + Number(a.pendingCount || 0), 0);
+    $("#cnt-alb-all").textContent = String(state.albums.length);
+    const pendingChip = $("#chip-alb-pending");
+    if (pendingChip) {
+      pendingChip.hidden = totalPendingPhotos === 0;
+      $("#cnt-alb-pending").textContent = String(totalPendingPhotos);
+      if (totalPendingPhotos === 0 && state.albumFilter === "pending") {
+        state.albumFilter = "all";
+        $$("[data-album-filter]").forEach((c) =>
+          c.classList.toggle("is-active", c.getAttribute("data-album-filter") === "all")
+        );
+      }
+    }
+  }
+
   function renderAlbumsGrid() {
     const grid = $("#albums-grid");
     if (!grid) return;
 
     const q = state.searchQuery.trim().toLowerCase();
     const list = state.albums.filter((a) => {
-      if (state.statusFilter && a.status !== state.statusFilter) return false;
+      if (state.albumFilter === "pending" && Number(a.pendingCount || 0) <= 0) return false;
+      if (state.albumFilter === "published" && a.status !== "published") return false;
+      if (state.albumFilter === "draft" && a.status !== "draft") return false;
       if (q) {
         const hay = `${a.title} ${a.location} ${a.dateDisplay}`.toLowerCase();
         if (!hay.includes(q)) return false;
@@ -319,45 +416,36 @@
 
     if (list.length === 0) {
       grid.innerHTML = `<div class="media-empty-box">
-        <h3>Chưa có Album nào phù hợp</h3>
-        <p>${state.albums.length === 0 ? "Tạo Album sự kiện đầu tiên để bắt đầu tải ảnh lên website HolaRise." : "Thử xóa bộ lọc hoặc từ khóa tìm kiếm."}</p>
-        ${state.albums.length === 0 ? '<button class="btn btn--primary" type="button" data-trigger-new-album>+ Tạo Album đầu tiên</button>' : ""}
+        <h3>Chưa có Album phù hợp</h3>
+        <p>${state.albums.length === 0 ? "Tạo Album sự kiện đầu tiên để tải ảnh gốc lên kho HolaRise." : "Thử xóa bộ lọc hoặc từ khóa tìm kiếm."}</p>
+        ${state.albums.length === 0 ? '<button class="btn btn--primary btn--sm" type="button" data-trigger-new-album>+ Tạo Album đầu tiên</button>' : ""}
       </div>`;
       return;
     }
 
     grid.innerHTML = list
       .map((a) => {
-        const statusBadge =
-          a.status === "published"
-            ? '<span class="badge badge--published">Công khai</span>'
-            : '<span class="badge badge--draft">Bản nháp</span>';
-        const driveBadge = a.driveUrl
-          ? '<span class="badge badge--info">Có link Drive</span>'
-          : "";
-        const pendingBadge =
-          a.pendingCount > 0
-            ? `<span class="badge badge--pending">${a.pendingCount} chờ duyệt</span>`
-            : "";
-        const filterBadges = (a.filters || [])
-          .map((f) => `<span class="badge">${esc(FILTER_LABELS[f] || f)}</span>`)
-          .join("");
+        const cornerPill =
+          Number(a.pendingCount || 0) > 0
+            ? `<span class="album-corner-pill album-corner-pill--pending">${a.pendingCount} chờ duyệt</span>`
+            : a.status === "draft"
+              ? '<span class="album-corner-pill album-corner-pill--draft">Nháp</span>'
+              : "";
         const coverHtml = a.coverUrl
           ? `<img src="${esc(a.coverUrl)}" alt="${esc(a.title)}" loading="lazy">`
-          : `<div class="album-card-cover--empty">Chưa có ảnh bìa</div>`;
-        return `<article class="album-card">
-          <div class="album-card-cover" data-open-album="${esc(a.id)}">
+          : `<div class="album-card-cover--empty">Chưa có ảnh</div>`;
+        const dateLabel = a.dateDisplay || a.eventDate || "Chưa ghi ngày";
+        return `<article class="album-card" data-open-album="${esc(a.id)}" tabindex="0" role="button" aria-label="Mở album ${esc(a.title)}">
+          <div class="album-card-cover">
             ${coverHtml}
-            <span class="album-cover-count">${a.photoCount} ảnh</span>
+            ${cornerPill}
+            <button class="album-edit-btn" type="button" data-edit-album="${esc(a.id)}" aria-label="Sửa album ${esc(a.title)}" title="Sửa thông tin Album">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </button>
           </div>
           <div class="album-card-body">
-            <div class="album-card-badges">${statusBadge}${pendingBadge}${driveBadge}${filterBadges}</div>
             <h3 class="album-card-title">${esc(a.title)}</h3>
-            <div class="album-card-meta">${esc(a.dateDisplay || a.eventDate || "Chưa ghi ngày")} · ${esc(a.location || "Hòa Lạc")}</div>
-            <div class="album-card-actions">
-              <button class="btn btn--primary btn--sm" type="button" data-open-album="${esc(a.id)}">Quản lý ảnh (${a.photoCount})</button>
-              <button class="btn btn--ghost btn--sm" type="button" data-edit-album="${esc(a.id)}">Sửa</button>
-            </div>
+            <div class="album-card-meta">${esc(dateLabel)} · ${a.photoCount} ảnh</div>
           </div>
         </article>`;
       })
@@ -365,11 +453,27 @@
   }
 
   /* =========================================================================
-     Album Workspace View
+     VIEW 2: Photo-First Album Workspace
      ========================================================================= */
+  function getFilteredPhotos() {
+    return state.photos.filter((p) => {
+      const status = p.approvalStatus || "approved";
+      if (state.photoFilter === "pending") return status === "pending";
+      if (state.photoFilter === "approved") return status === "approved";
+      if (state.photoFilter === "featured") return status === "approved" && Boolean(p.isFeaturedHome);
+      return true;
+    });
+  }
+
   async function openAlbumWorkspace(albumId, updateUrl = true) {
+    state.selectMode = false;
+    state.selectedIds.clear();
+    updateBatchBar();
+    setTopbarMode("workspace");
     $("#view-albums").hidden = true;
     $("#view-workspace").hidden = false;
+    $("#ws-title").textContent = "Đang tải...";
+    $("#ws-meta").textContent = "";
     $("#ws-photos-grid").innerHTML = `<div class="skeleton-card"><div class="sk sk-title"></div><div class="sk sk-line"></div></div>`;
     if (updateUrl) {
       history.replaceState(null, "", `${window.location.pathname}?album=${encodeURIComponent(albumId)}`);
@@ -379,6 +483,8 @@
       const res = await apiFetch(`/api/admin/albums/${encodeURIComponent(albumId)}`);
       state.activeAlbum = res.album;
       state.photos = res.photos || [];
+      const pendingCount = state.photos.filter((p) => p.approvalStatus === "pending").length;
+      state.photoFilter = pendingCount > 0 && isApproverRole() ? "pending" : "all";
       renderWorkspaceHeader();
       renderPhotosGrid();
     } catch (err) {
@@ -390,39 +496,56 @@
   function renderWorkspaceHeader() {
     const a = state.activeAlbum;
     if (!a) return;
+    const total = state.photos.length;
+    const pending = state.photos.filter((p) => p.approvalStatus === "pending").length;
+    const approved = state.photos.filter((p) => (p.approvalStatus || "approved") === "approved").length;
+    const featured = state.photos.filter(
+      (p) => (p.approvalStatus || "approved") === "approved" && p.isFeaturedHome
+    ).length;
+
     $("#ws-title").textContent = a.title;
-    $("#ws-meta").textContent = `${a.dateDisplay || a.eventDate || "—"} · ${a.location || "Hòa Lạc"} · ${state.photos.length} ảnh`;
+    $("#ws-meta").textContent = `${a.dateDisplay || a.eventDate || "Hòa Lạc"} · ${total} ảnh${pending > 0 ? ` · ${pending} chờ duyệt` : ""}`;
 
-    const badges = [
-      a.status === "published"
-        ? '<span class="badge badge--published">Công khai</span>'
-        : '<span class="badge badge--draft">Bản nháp</span>',
-      ...(a.filters || []).map((f) => `<span class="badge">${esc(FILTER_LABELS[f] || f)}</span>`),
-    ];
-    $("#ws-badges").innerHTML = badges.join("");
-
-    const descEl = $("#ws-desc");
-    if (a.description) {
-      descEl.textContent = a.description;
-      descEl.hidden = false;
-    } else {
-      descEl.hidden = true;
+    const driveLink = $("#ws-drive-link");
+    if (driveLink) {
+      if (a.driveUrl) {
+        driveLink.href = a.driveUrl;
+        driveLink.hidden = false;
+      } else {
+        driveLink.hidden = true;
+      }
     }
 
-    const driveRow = $("#ws-drive-row");
-    if (a.driveUrl) {
-      $("#ws-drive-link").href = a.driveUrl;
-      driveRow.hidden = false;
-    } else {
-      driveRow.hidden = true;
+    $("#cnt-photo-pending").textContent = String(pending);
+    $("#cnt-photo-approved").textContent = String(approved);
+    $("#cnt-photo-featured").textContent = String(featured);
+    $("#cnt-photo-all").textContent = String(total);
+
+    const pendingTab = $("#tab-photo-pending");
+    if (pendingTab) {
+      pendingTab.hidden = pending === 0;
+      if (pending === 0 && state.photoFilter === "pending") {
+        state.photoFilter = "all";
+      }
     }
 
-    const approvedCount = state.photos.filter((p) => (p.approvalStatus || "approved") === "approved").length;
-    const pendingCount = state.photos.filter((p) => p.approvalStatus === "pending").length;
-    $("#ws-photos-heading").textContent =
-      pendingCount > 0
-        ? `Danh sách ảnh (${state.photos.length} tổng · ${approvedCount} đã lên web · ${pendingCount} chờ duyệt)`
-        : `Danh sách ảnh trong Album (${state.photos.length})`;
+    $$("[data-photo-filter]").forEach((btn) => {
+      btn.classList.toggle("is-active", btn.getAttribute("data-photo-filter") === state.photoFilter);
+    });
+
+    const approveAllBtn = $("#btn-approve-all");
+    if (approveAllBtn) {
+      approveAllBtn.hidden = !isApproverRole() || pending === 0 || state.selectMode || state.batchBusy;
+      approveAllBtn.textContent = `✓ Duyệt hết (${pending})`;
+    }
+
+    const selectBtn = $("#btn-toggle-select");
+    if (selectBtn) {
+      selectBtn.hidden = total === 0;
+      selectBtn.textContent = state.selectMode ? "Xong" : "Chọn nhiều";
+      selectBtn.classList.toggle("btn--primary", state.selectMode);
+      selectBtn.classList.toggle("btn--outline", !state.selectMode);
+    }
   }
 
   function renderPhotosGrid() {
@@ -430,60 +553,307 @@
     const a = state.activeAlbum;
     if (!grid || !a) return;
 
+    grid.classList.toggle("is-select-mode", state.selectMode);
+
     if (state.photos.length === 0) {
-      grid.innerHTML = `<div class="media-empty-box">
-        <h3>Album này chưa có ảnh nào</h3>
-        <p>Kéo thả ảnh gốc vào khung phía trên hoặc bấm để chọn nhiều ảnh từ máy tính / điện thoại.</p>
+      grid.innerHTML = `<div class="media-empty-box media-empty-box--clickable" data-trigger-upload tabindex="0" role="button">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <h3>Album chưa có ảnh</h3>
+        <p>Chạm vào đây hoặc kéo thả ảnh trực tiếp để tải lên (tối đa 30 ảnh/lượt).</p>
+        <span class="btn btn--primary btn--sm">+ Chọn ảnh từ máy</span>
       </div>`;
       return;
     }
 
-    const canApprove = isApproverRole();
+    const visible = getFilteredPhotos();
+    if (visible.length === 0) {
+      grid.innerHTML = `<div class="media-empty-box">
+        <h3>Không có ảnh trong mục này</h3>
+        <p>Chọn bộ lọc khác hoặc bấm <strong>Tất cả</strong> để xem toàn bộ ảnh trong album.</p>
+      </div>`;
+      return;
+    }
 
-    grid.innerHTML = state.photos
+    grid.innerHTML = visible
       .map((p) => {
         const status = p.approvalStatus || "approved";
-        const isApproved = status === "approved";
         const isCover = a.coverUrl === p.url || (p.webUrl && a.coverUrl === p.webUrl);
-        const statusPill = isApproved
-          ? `<span class="photo-badge-approved">${p.webUrl ? "Đã duyệt · WebP" : "Đã lên web"}</span>`
-          : status === "rejected"
-            ? '<span class="photo-badge-rejected">Đã ẩn</span>'
-            : '<span class="photo-badge-pending">Chờ duyệt</span>';
+        const isSelected = state.selectedIds.has(p.id);
+        const markers = [];
+        if (status === "pending") {
+          markers.push('<span class="tile-pill tile-pill--pending">Chờ duyệt</span>');
+        } else if (status === "rejected") {
+          markers.push('<span class="tile-pill tile-pill--rejected">Đã ẩn</span>');
+        }
+        if (p.isFeaturedHome && status === "approved") {
+          markers.push('<span class="tile-pill tile-pill--home" title="Ghim Trang chủ">★</span>');
+        }
+        if (isCover) {
+          markers.push('<span class="tile-pill tile-pill--cover">Bìa</span>');
+        }
 
-        const approveBtnHtml = canApprove
-          ? isApproved
-            ? `<button class="btn btn--ghost btn--sm" type="button" data-unapprove-photo="${esc(p.id)}">Ẩn khỏi web</button>`
-            : `<button class="btn btn--primary btn--sm" type="button" data-approve-photo="${esc(p.id)}">✓ Duyệt &amp; nén lên web</button>`
-          : "";
-
-        return `<article class="photo-card ${isApproved ? "" : "photo-card--pending"}" data-photo-id="${esc(p.id)}">
-          <div class="photo-card-thumb">
-            <img src="${esc(p.displayUrl || p.url)}" alt="${esc(p.alt || p.caption || a.title)}" loading="lazy">
-            <div class="photo-badges">
-              ${statusPill}
-              ${isCover ? '<span class="photo-badge-cover">Ảnh bìa</span>' : ""}
-              ${p.isFeaturedHome ? '<span class="photo-badge-home">★ Trang chủ</span>' : ""}
-            </div>
-          </div>
-          <div class="photo-card-body">
-            <p class="photo-caption ${p.caption ? "" : "photo-caption--empty"}">${esc(p.caption || "Chưa có chú thích")}</p>
-            ${p.photographer ? `<div class="photo-photographer">Ảnh: ${esc(p.photographer)}</div>` : ""}
-            <div class="photo-card-actions">
-              ${approveBtnHtml}
-              <button class="btn btn--outline btn--sm" type="button" data-edit-photo="${esc(p.id)}">Sửa</button>
-              ${isApproved && canApprove ? `<button class="btn btn--sm ${p.isFeaturedHome ? "btn--primary" : "btn--ghost"}" type="button" data-toggle-featured="${esc(p.id)}" data-featured="${p.isFeaturedHome ? "1" : "0"}">${p.isFeaturedHome ? "★ Đã ghim" : "☆ Ghim Trang chủ"}</button>` : ""}
-              ${isApproved && !isCover ? `<button class="btn btn--ghost btn--sm" type="button" data-set-cover="${esc(p.id)}">Làm bìa</button>` : ""}
-              <button class="btn btn--danger-ghost btn--sm" type="button" data-delete-photo="${esc(p.id)}">Xóa</button>
-            </div>
-          </div>
+        return `<article class="photo-tile ${isSelected ? "is-selected" : ""}" data-photo-id="${esc(p.id)}">
+          <img src="${esc(p.displayUrl || p.url)}" alt="${esc(p.alt || p.caption || a.title)}" loading="lazy" decoding="async">
+          ${markers.length ? `<div class="photo-tile-markers">${markers.join("")}</div>` : ""}
+          <button class="photo-tile-check" type="button" data-check-photo="${esc(p.id)}" aria-label="${isSelected ? "Bỏ chọn ảnh" : "Chọn ảnh"}" aria-pressed="${isSelected ? "true" : "false"}">
+            ${isSelected ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ""}
+          </button>
         </article>`;
       })
       .join("");
   }
 
+  function updateBatchBar() {
+    const bar = $("#batch-bar");
+    if (!bar) return;
+    const count = state.selectedIds.size;
+    bar.hidden = count === 0;
+    if (count === 0) return;
+
+    $("#batch-count").textContent = `Đã chọn ${count} ảnh`;
+    const selectedPhotos = state.photos.filter((p) => state.selectedIds.has(p.id));
+    const pendingInSelection = selectedPhotos.filter((p) => (p.approvalStatus || "approved") !== "approved");
+    const approvedInSelection = selectedPhotos.filter((p) => (p.approvalStatus || "approved") === "approved");
+
+    const approveBtn = $("#btn-batch-approve");
+    const unapproveBtn = $("#btn-batch-unapprove");
+    const deleteBtn = $("#btn-batch-delete");
+
+    if (approveBtn) {
+      approveBtn.hidden = !isApproverRole() || pendingInSelection.length === 0;
+      approveBtn.disabled = state.batchBusy;
+      approveBtn.textContent = `✓ Duyệt & nén (${pendingInSelection.length})`;
+    }
+    if (unapproveBtn) {
+      unapproveBtn.hidden = !isApproverRole() || pendingInSelection.length > 0 || approvedInSelection.length === 0;
+      unapproveBtn.disabled = state.batchBusy;
+      unapproveBtn.textContent = `Ẩn khỏi web (${approvedInSelection.length})`;
+    }
+    if (deleteBtn) {
+      deleteBtn.disabled = state.batchBusy;
+      deleteBtn.textContent = `Xóa (${count})`;
+    }
+  }
+
+  function togglePhotoSelection(photoId) {
+    if (!state.selectMode) state.selectMode = true;
+    if (state.selectedIds.has(photoId)) {
+      state.selectedIds.delete(photoId);
+    } else {
+      state.selectedIds.add(photoId);
+    }
+    renderWorkspaceHeader();
+    renderPhotosGrid();
+    updateBatchBar();
+  }
+
+  async function runBatchApprove(photosToApprove) {
+    if (!isApproverRole() || photosToApprove.length === 0 || state.batchBusy) return;
+    state.batchBusy = true;
+    renderWorkspaceHeader();
+    updateBatchBar();
+
+    const strip = $("#upload-queue");
+    const fill = $("#upload-progress-fill");
+    const summary = $("#upload-queue-summary");
+    const details = $("#upload-queue-details");
+    const total = photosToApprove.length;
+    let done = 0;
+    let failed = 0;
+
+    if (strip) strip.hidden = false;
+    if (details) details.hidden = true;
+    $("#btn-retry-failed").hidden = true;
+    $("#btn-clear-queue").hidden = true;
+
+    const updateProgress = () => {
+      const pct = Math.round(((done + failed) / Math.max(1, total)) * 100);
+      if (fill) fill.style.width = `${pct}%`;
+      if (summary) {
+        summary.textContent = `Đang duyệt & nén WebP: ${done}/${total}${failed ? ` · ${failed} lỗi` : ""}`;
+      }
+    };
+    updateProgress();
+
+    let cursor = 0;
+    const worker = async () => {
+      while (cursor < photosToApprove.length) {
+        const current = photosToApprove[cursor++];
+        try {
+          await approveSinglePhoto(current);
+          done += 1;
+          state.selectedIds.delete(current.id);
+        } catch {
+          failed += 1;
+        }
+        updateProgress();
+      }
+    };
+
+    await Promise.all(Array.from({ length: Math.min(UPLOAD_CONCURRENCY, total) }, () => worker()));
+
+    state.batchBusy = false;
+    if (state.selectedIds.size === 0) state.selectMode = false;
+    if (strip) strip.hidden = true;
+    if (details) details.hidden = false;
+
+    renderWorkspaceHeader();
+    renderPhotosGrid();
+    updateBatchBar();
+    await loadAlbums(true);
+
+    if (failed === 0) {
+      toast(`Đã duyệt & nén ${done} ảnh lên web thành công.`, "success");
+    } else {
+      toast(`Đã duyệt ${done}/${total} ảnh (${failed} ảnh gặp lỗi).`, "error");
+    }
+  }
+
+  async function runBatchUnapprove(photosToHide) {
+    if (!isApproverRole() || photosToHide.length === 0 || state.batchBusy) return;
+    state.batchBusy = true;
+    updateBatchBar();
+    let done = 0;
+    let failed = 0;
+
+    for (const p of photosToHide) {
+      try {
+        const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(p.id)}/approve`, {
+          method: "POST",
+          json: { action: "pending" },
+        });
+        const idx = state.photos.findIndex((item) => item.id === p.id);
+        if (idx !== -1) state.photos[idx] = res.item;
+        state.selectedIds.delete(p.id);
+        done += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+
+    state.batchBusy = false;
+    if (state.selectedIds.size === 0) state.selectMode = false;
+    renderWorkspaceHeader();
+    renderPhotosGrid();
+    updateBatchBar();
+    await loadAlbums(true);
+    toast(failed ? `Đã ẩn ${done} ảnh (${failed} lỗi).` : `Đã ẩn ${done} ảnh khỏi web công khai.`, failed ? "error" : "info");
+  }
+
+  async function runBatchDelete(photosToDelete) {
+    if (photosToDelete.length === 0 || state.batchBusy) return;
+    const ok = window.confirm(`Xóa vĩnh viễn ${photosToDelete.length} ảnh đã chọn khỏi Album và kho lưu trữ?`);
+    if (!ok) return;
+
+    state.batchBusy = true;
+    updateBatchBar();
+    let done = 0;
+    let failed = 0;
+
+    for (const p of photosToDelete) {
+      try {
+        await apiFetch(`/api/admin/photos/${encodeURIComponent(p.id)}`, { method: "DELETE" });
+        state.photos = state.photos.filter((item) => item.id !== p.id);
+        state.selectedIds.delete(p.id);
+        if (state.activeAlbum && (state.activeAlbum.coverUrl === p.url || state.activeAlbum.coverUrl === p.webUrl)) {
+          state.activeAlbum.coverUrl = state.photos[0]?.displayUrl || state.photos[0]?.url || "";
+        }
+        done += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+
+    state.batchBusy = false;
+    if (state.selectedIds.size === 0) state.selectMode = false;
+    renderWorkspaceHeader();
+    renderPhotosGrid();
+    updateBatchBar();
+    await loadAlbums(true);
+    toast(failed ? `Đã xóa ${done} ảnh (${failed} lỗi).` : `Đã xóa ${done} ảnh.`, failed ? "error" : "success");
+  }
+
   /* =========================================================================
-     Multi-Image Drag-and-Drop Upload Queue (Concurrency = 2 + Retry)
+     Quick-Review Lightbox (<dialog>)
+     ========================================================================= */
+  function openLightbox(photoId) {
+    const visible = getFilteredPhotos();
+    const photo = visible.find((p) => p.id === photoId) || state.photos.find((p) => p.id === photoId);
+    if (!photo) return;
+    state.lightboxPhotoId = photo.id;
+    renderLightbox();
+    const dlg = $("#lightbox-dialog");
+    if (dlg && !dlg.open) {
+      dlg.removeAttribute("data-closing");
+      dlg.showModal();
+    }
+  }
+
+  function renderLightbox() {
+    const list = getFilteredPhotos();
+    const idx = list.findIndex((p) => p.id === state.lightboxPhotoId);
+    const photo = idx !== -1 ? list[idx] : state.photos.find((p) => p.id === state.lightboxPhotoId);
+    if (!photo) {
+      closeDialogSmooth($("#lightbox-dialog"));
+      return;
+    }
+
+    const activeList = idx !== -1 ? list : state.photos;
+    const activeIdx = activeList.findIndex((p) => p.id === photo.id);
+    const status = photo.approvalStatus || "approved";
+    const isApproved = status === "approved";
+    const canApprove = isApproverRole();
+    const isCover =
+      state.activeAlbum &&
+      (state.activeAlbum.coverUrl === photo.url || (photo.webUrl && state.activeAlbum.coverUrl === photo.webUrl));
+
+    $("#lb-counter").textContent = `${activeIdx + 1} / ${activeList.length}`;
+    const pill = $("#lb-status-pill");
+    pill.textContent = isApproved ? (photo.webUrl ? "Đã duyệt · WebP" : "Đã lên web") : status === "rejected" ? "Đã ẩn" : "Chờ duyệt";
+    pill.className = `lb-status-pill ${isApproved ? "lb-status-pill--approved" : "lb-status-pill--pending"}`;
+
+    const imgEl = $("#lb-img");
+    imgEl.src = photo.displayUrl || photo.url;
+    imgEl.alt = photo.caption || photo.alt || state.activeAlbum?.title || "Ảnh sự kiện";
+
+    $("#lb-prev").hidden = activeList.length <= 1;
+    $("#lb-next").hidden = activeList.length <= 1;
+
+    const metaEl = $("#lb-meta");
+    const metaBits = [photo.caption, photo.photographer ? `Ảnh: ${photo.photographer}` : ""].filter(Boolean);
+    metaEl.textContent = metaBits.join(" · ");
+    metaEl.hidden = metaBits.length === 0;
+
+    $("#lb-btn-approve").hidden = !canApprove || isApproved;
+    $("#lb-btn-approve").disabled = false;
+    $("#lb-btn-approve").textContent = "✓ Duyệt & nén lên web";
+
+    $("#lb-btn-unapprove").hidden = !canApprove || !isApproved;
+    $("#lb-btn-unapprove").disabled = false;
+
+    const featBtn = $("#lb-btn-featured");
+    featBtn.hidden = !canApprove || !isApproved;
+    featBtn.disabled = false;
+    featBtn.classList.toggle("is-active", Boolean(photo.isFeaturedHome));
+    featBtn.textContent = photo.isFeaturedHome ? "★ Đang ghim Trang chủ" : "☆ Ghim Trang chủ";
+
+    const coverBtn = $("#lb-btn-cover");
+    coverBtn.hidden = !isApproved || Boolean(isCover);
+    coverBtn.disabled = false;
+  }
+
+  function stepLightbox(delta) {
+    const list = getFilteredPhotos();
+    const pool = list.length > 0 ? list : state.photos;
+    if (pool.length <= 1) return;
+    const idx = pool.findIndex((p) => p.id === state.lightboxPhotoId);
+    const nextIdx = (idx + delta + pool.length) % pool.length;
+    state.lightboxPhotoId = pool[nextIdx].id;
+    renderLightbox();
+  }
+
+  /* =========================================================================
+     Multi-Image Upload Queue (Concurrency = 2 + Retry)
      ========================================================================= */
   function enqueueFiles(fileList) {
     if (!state.activeAlbum) return;
@@ -498,7 +868,7 @@
       uid: `q-${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
       file,
       name: file.name || `anh-${idx + 1}.jpg`,
-      status: "pending", // pending | compressing | uploading | done | error
+      status: "pending",
       error: "",
     }));
 
@@ -510,29 +880,34 @@
   function renderUploadQueue() {
     const box = $("#upload-queue");
     const list = $("#upload-queue-list");
+    const fill = $("#upload-progress-fill");
+    const details = $("#upload-queue-details");
     if (!box || !list) return;
     if (state.uploadQueue.length === 0) {
       box.hidden = true;
       return;
     }
     box.hidden = false;
+    if (details) details.hidden = false;
 
     const total = state.uploadQueue.length;
     const done = state.uploadQueue.filter((i) => i.status === "done").length;
     const failed = state.uploadQueue.filter((i) => i.status === "error").length;
+    const pct = Math.round(((done + failed) / Math.max(1, total)) * 100);
+    if (fill) fill.style.width = `${pct}%`;
 
     $("#upload-queue-summary").textContent = state.uploading
-      ? `Đang tải lên: ${done}/${total} hoàn tất${failed ? ` · ${failed} lỗi` : ""}`
-      : `Kết quả tải lên: ${done}/${total} thành công${failed ? ` · ${failed} lỗi` : ""}`;
+      ? `Đang tải lên: ${done}/${total}${failed ? ` · ${failed} lỗi` : ""}`
+      : `Hoàn tất: ${done}/${total} ảnh${failed ? ` · ${failed} lỗi` : ""}`;
 
     $("#btn-retry-failed").hidden = state.uploading || failed === 0;
     $("#btn-clear-queue").hidden = state.uploading;
 
     const statusText = {
-      pending: "Chờ xử lý...",
-      compressing: "Đang nén ảnh...",
-      uploading: "Đang tải lên...",
-      done: "Hoàn tất ✓",
+      pending: "Chờ...",
+      compressing: "Đang nén...",
+      uploading: "Đang tải...",
+      done: "Xong ✓",
       error: "Lỗi",
     };
 
@@ -540,7 +915,7 @@
       .map(
         (item) => `<div class="queue-item queue-item--${esc(item.status)}">
           <span class="queue-item-name" title="${esc(item.name)}">${esc(item.name)}</span>
-          <span class="queue-item-status">${esc(item.status === "error" ? item.error || "Lỗi tải lên" : statusText[item.status])}</span>
+          <span class="queue-item-status">${esc(item.status === "error" ? item.error || "Lỗi" : statusText[item.status])}</span>
         </div>`
       )
       .join("");
@@ -630,15 +1005,20 @@
       }
     };
 
-    const workers = Array.from({ length: UPLOAD_CONCURRENCY }, () => worker());
-    await Promise.all(workers);
+    await Promise.all(Array.from({ length: UPLOAD_CONCURRENCY }, () => worker()));
 
     state.uploading = false;
     renderUploadQueue();
-    await loadAlbums();
+    await loadAlbums(true);
     const failed = state.uploadQueue.filter((i) => i.status === "error").length;
     if (failed === 0) {
-      toast("Đã tải ảnh lên Album thành công!", "success");
+      toast("Đã tải ảnh lên Album thành công.", "success");
+      window.setTimeout(() => {
+        if (!state.uploading && state.uploadQueue.every((i) => i.status === "done")) {
+          state.uploadQueue = [];
+          renderUploadQueue();
+        }
+      }, 2400);
     } else {
       toast(`Có ${failed} ảnh bị lỗi. Bạn có thể bấm "Thử lại ảnh lỗi".`, "error");
     }
@@ -648,12 +1028,13 @@
      Dialogs: Create/Edit Album, Edit Photo, Change Password
      ========================================================================= */
   function openAlbumDialog(album = null) {
+    closeAllMenus();
     const dlg = $("#album-dialog");
     const form = $("#album-form");
     form.reset();
     showAlert($("#album-form-alert"), "");
 
-    $("#album-dialog-title").textContent = album ? "Cập nhật thông tin Album" : "Tạo Album sự kiện mới";
+    $("#album-dialog-title").textContent = album ? "Cập nhật Album" : "Tạo Album mới";
     $("#af-id").value = album?.id || "";
     $("#af-title").value = album?.title || "";
     $("#af-date").value = album?.eventDate || new Date().toISOString().slice(0, 10);
@@ -667,6 +1048,9 @@
       cb.checked = activeFilters.has(cb.value);
     });
 
+    const extras = $("#af-extras");
+    if (extras) extras.open = Boolean(album);
+
     dlg.showModal();
     $("#af-title").focus();
   }
@@ -675,10 +1059,14 @@
     const dlg = $("#photo-dialog");
     showAlert($("#photo-form-alert"), "");
     $("#pf-id").value = photo.id;
-    $("#pf-preview").src = photo.url;
+    $("#pf-preview").src = photo.displayUrl || photo.url;
     $("#pf-caption").value = photo.caption || "";
     $("#pf-photographer").value = photo.photographer || "";
     $("#pf-featured").checked = Boolean(photo.isFeaturedHome);
+    const featWrap = $("#pf-featured-wrap");
+    if (featWrap) {
+      featWrap.hidden = !isApproverRole() || (photo.approvalStatus || "approved") !== "approved";
+    }
     dlg.showModal();
     $("#pf-caption").focus();
   }
@@ -687,7 +1075,65 @@
      Event Binding
      ========================================================================= */
   function bindEvents() {
-    // Progressive Passkey Login (Single button -> reveal Register/Email only on failure)
+    // Close <details> menus when clicking outside or pressing Escape
+    document.addEventListener("click", (e) => {
+      $$("details.mp-menu[open]").forEach((menu) => {
+        if (!menu.contains(e.target)) {
+          menu.removeAttribute("open");
+        }
+      });
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeAllMenus();
+      }
+      const lb = $("#lightbox-dialog");
+      if (lb && lb.open && !$("#photo-dialog")?.open) {
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          stepLightbox(-1);
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          stepLightbox(1);
+        }
+      }
+    });
+
+    // Smooth top-layer close on native cancel (Esc / closedby light dismiss)
+    const lbDlg = $("#lightbox-dialog");
+    if (lbDlg) {
+      lbDlg.addEventListener("cancel", (e) => {
+        e.preventDefault();
+        closeDialogSmooth(lbDlg);
+      });
+    }
+
+    // Touch swipe inside Lightbox stage
+    const lbStage = $("#lb-stage");
+    if (lbStage) {
+      let touchStartX = 0;
+      lbStage.addEventListener(
+        "touchstart",
+        (e) => {
+          touchStartX = e.touches?.[0]?.clientX || 0;
+        },
+        { passive: true }
+      );
+      lbStage.addEventListener(
+        "touchend",
+        (e) => {
+          const endX = e.changedTouches?.[0]?.clientX || 0;
+          const dx = endX - touchStartX;
+          if (Math.abs(dx) > 48) {
+            stepLightbox(dx > 0 ? -1 : 1);
+          }
+        },
+        { passive: true }
+      );
+    }
+
+    // Progressive Passkey Login
     async function handleBiometricLogin(btnEl) {
       const alertEl = $("#vault-login-alert");
       showAlert(alertEl, "");
@@ -702,7 +1148,7 @@
       labelEl.textContent = "Đang xác thực...";
       try {
         const res = await window.HolaPasskey.loginWithPasskey("");
-        toast(`Chào mừng ${res.user.name}!`, "success");
+        toast(`Chào mừng ${res.user.name}.`, "success");
         await enterMediaShell(res.user);
       } catch (err) {
         showAlert(
@@ -716,9 +1162,7 @@
       }
     }
 
-    $("#btn-vault-login")?.addEventListener("click", (e) => {
-      handleBiometricLogin(e.currentTarget);
-    });
+    $("#btn-vault-login")?.addEventListener("click", (e) => handleBiometricLogin(e.currentTarget));
 
     $("#media-gate-form")?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -746,21 +1190,19 @@
           },
         });
         if ($("#mg-password")) $("#mg-password").value = "";
-        toast(`Chào mừng ${res.user.name}!`, "success");
+        toast(`Chào mừng ${res.user.name}.`, "success");
         if (res.requiresPasskeySetup && window.HolaPasskey?.isSupported?.()) {
           try {
             await window.HolaPasskey.registerPasskey();
             res.user.hasPasskey = true;
-            toast("Đã kích hoạt Sinh trắc học (Face ID / Touch ID) thành công!", "success");
+            toast("Đã kích hoạt Face ID / Touch ID thành công.", "success");
           } catch {
-            toast("Bạn có thể bấm “Gắn Face ID / Vân tay” trên thanh công cụ bất cứ lúc nào.", "info");
+            toast("Bạn có thể gắn Face ID / Vân tay trong menu tài khoản bất cứ lúc nào.", "info");
           }
         }
         await enterMediaShell(res.user);
       } catch (err) {
-        const detail = err?.data?.error?.fields
-          ? Object.values(err.data.error.fields).join(" ")
-          : err.message;
+        const detail = err?.data?.error?.fields ? Object.values(err.data.error.fields).join(" ") : err.message;
         showAlert(alertEl, detail || "Đăng ký thất bại.");
       } finally {
         btn.disabled = false;
@@ -769,23 +1211,22 @@
     });
 
     $("#btn-setup-passkey")?.addEventListener("click", async () => {
+      closeAllMenus();
       const btn = $("#btn-setup-passkey");
       btn.disabled = true;
-      btn.textContent = "Đang kích hoạt...";
       try {
         await window.HolaPasskey.registerPasskey();
         if (state.user) state.user.hasPasskey = true;
         btn.hidden = true;
-        toast("Đã gắn Face ID / Touch ID cho thiết bị này!", "success");
+        toast("Đã gắn Face ID / Touch ID cho thiết bị này.", "success");
       } catch (err) {
         toast(err.message || "Chưa thể gắn sinh trắc học.", "error");
       } finally {
         btn.disabled = false;
-        btn.textContent = "Gắn Face ID / Vân tay";
       }
     });
 
-    $("#login-form").addEventListener("submit", async (e) => {
+    $("#login-form")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const alertEl = $("#login-alert");
       const btn = $("#login-submit");
@@ -801,7 +1242,7 @@
           },
         });
         $("#login-password").value = "";
-        toast(`Chào mừng ${res.user.name}!`, "success");
+        toast(`Chào mừng ${res.user.name}.`, "success");
         await enterMediaShell(res.user);
       } catch (err) {
         showAlert(alertEl, err.message);
@@ -812,7 +1253,8 @@
     });
 
     // Logout
-    $("#btn-logout").addEventListener("click", async () => {
+    $("#btn-logout")?.addEventListener("click", async () => {
+      closeAllMenus();
       try {
         await apiFetch("/api/auth/logout", { method: "POST" });
       } catch {
@@ -823,67 +1265,76 @@
       toast("Đã đăng xuất.", "info");
     });
 
-    // Brand link -> back to list
-    $("#brand-home-link").addEventListener("click", (e) => {
+    // Topbar Navigation
+    $("#brand-home-link")?.addEventListener("click", (e) => {
       e.preventDefault();
       showAlbumsListView(true);
     });
 
-    // Status filter & search
-    $$("[data-album-status]").forEach((chip) => {
-      chip.addEventListener("click", () => {
-        state.statusFilter = chip.getAttribute("data-album-status") || "";
-        $$("[data-album-status]").forEach((c) => c.classList.toggle("is-active", c === chip));
-        renderAlbumsGrid();
-      });
-    });
-
-    $("#album-search").addEventListener("input", (e) => {
-      state.searchQuery = e.target.value;
-      renderAlbumsGrid();
-    });
-
-    // New album & Back button
-    $("#btn-new-album").addEventListener("click", () => openAlbumDialog(null));
-    $("#btn-back-albums").addEventListener("click", () => {
+    $("#btn-back-albums")?.addEventListener("click", () => {
       state.uploadQueue = [];
       renderUploadQueue();
       showAlbumsListView(true);
     });
 
-    // Delegated clicks on Albums grid
-    $("#albums-grid").addEventListener("click", (e) => {
+    $("#btn-new-album")?.addEventListener("click", () => openAlbumDialog(null));
+
+    // Album Filters & Search
+    $$("[data-album-filter]").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        state.albumFilter = chip.getAttribute("data-album-filter") || "all";
+        $$("[data-album-filter]").forEach((c) => c.classList.toggle("is-active", c === chip));
+        renderAlbumsGrid();
+      });
+    });
+
+    $("#album-search")?.addEventListener("input", (e) => {
+      state.searchQuery = e.target.value;
+      renderAlbumsGrid();
+    });
+
+    // Delegated clicks on Albums Grid
+    $("#albums-grid")?.addEventListener("click", (e) => {
       if (e.target.closest("[data-trigger-new-album]")) {
         openAlbumDialog(null);
         return;
       }
       const editBtn = e.target.closest("[data-edit-album]");
       if (editBtn) {
+        e.stopPropagation();
         const album = state.albums.find((a) => a.id === editBtn.getAttribute("data-edit-album"));
         if (album) openAlbumDialog(album);
         return;
       }
-      const openBtn = e.target.closest("[data-open-album]");
-      if (openBtn) {
-        openAlbumWorkspace(openBtn.getAttribute("data-open-album"), true);
+      const openCard = e.target.closest("[data-open-album]");
+      if (openCard) {
+        openAlbumWorkspace(openCard.getAttribute("data-open-album"), true);
       }
     });
 
-    // Workspace album edit / delete
-    $("#btn-edit-album").addEventListener("click", () => {
+    $("#albums-grid")?.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const openCard = e.target.closest("[data-open-album]");
+      if (openCard && !e.target.closest("button")) {
+        e.preventDefault();
+        openAlbumWorkspace(openCard.getAttribute("data-open-album"), true);
+      }
+    });
+
+    // Workspace Album Edit / Delete
+    $("#btn-edit-album")?.addEventListener("click", () => {
       if (state.activeAlbum) openAlbumDialog(state.activeAlbum);
     });
 
-    $("#btn-delete-album").addEventListener("click", async () => {
+    $("#btn-delete-album")?.addEventListener("click", async () => {
+      closeAllMenus();
       if (!state.activeAlbum) return;
       const ok = window.confirm(
         `Xóa Album "${state.activeAlbum.title}" và toàn bộ ${state.photos.length} ảnh bên trong? Hành động này không thể hoàn tác.`
       );
       if (!ok) return;
       try {
-        await apiFetch(`/api/admin/albums/${encodeURIComponent(state.activeAlbum.id)}`, {
-          method: "DELETE",
-        });
+        await apiFetch(`/api/admin/albums/${encodeURIComponent(state.activeAlbum.id)}`, { method: "DELETE" });
         toast("Đã xóa Album và dọn sạch ảnh trên kho lưu trữ.", "success");
         await loadAlbums();
         showAlbumsListView(true);
@@ -893,7 +1344,7 @@
     });
 
     // Save Album form
-    $("#album-form").addEventListener("submit", async (e) => {
+    $("#album-form")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const form = e.currentTarget;
       const alertEl = $("#album-form-alert");
@@ -924,15 +1375,15 @@
           }
           toast("Đã cập nhật Album.", "success");
           $("#album-dialog").close();
-          await loadAlbums();
+          await loadAlbums(true);
         } else {
           const res = await apiFetch("/api/admin/albums", {
             method: "POST",
             json: payload,
           });
-          toast("Đã tạo Album mới! Hãy kéo thả ảnh vào.", "success");
+          toast("Đã tạo Album mới. Bấm Tải ảnh để thêm hình.", "success");
           $("#album-dialog").close();
-          await loadAlbums();
+          await loadAlbums(true);
           await openAlbumWorkspace(res.item.id, true);
         }
       } catch (err) {
@@ -942,43 +1393,45 @@
       }
     });
 
-    // Dropzone & multi-file picker
-    const dropzone = $("#dropzone");
+    // Upload Trigger + Full-Window Drag-and-Drop in Workspace
     const fileInput = $("#multi-file-input");
+    const dropOverlay = $("#drop-overlay");
+    let dragDepth = 0;
 
-    dropzone.addEventListener("click", () => fileInput.click());
-    dropzone.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        fileInput.click();
-      }
-    });
-    fileInput.addEventListener("change", () => {
+    $("#btn-upload-trigger")?.addEventListener("click", () => fileInput?.click());
+    fileInput?.addEventListener("change", () => {
       if (fileInput.files && fileInput.files.length > 0) {
         enqueueFiles(fileInput.files);
         fileInput.value = "";
       }
     });
 
-    ["dragenter", "dragover"].forEach((evt) => {
-      dropzone.addEventListener(evt, (e) => {
-        e.preventDefault();
-        dropzone.classList.add("is-dragover");
-      });
+    window.addEventListener("dragenter", (e) => {
+      if (!state.activeAlbum || !e.dataTransfer?.types?.includes("Files")) return;
+      e.preventDefault();
+      dragDepth += 1;
+      if (dropOverlay) dropOverlay.hidden = false;
     });
-    ["dragleave", "drop"].forEach((evt) => {
-      dropzone.addEventListener(evt, (e) => {
-        e.preventDefault();
-        dropzone.classList.remove("is-dragover");
-      });
+    window.addEventListener("dragover", (e) => {
+      if (!state.activeAlbum || !e.dataTransfer?.types?.includes("Files")) return;
+      e.preventDefault();
     });
-    dropzone.addEventListener("drop", (e) => {
+    window.addEventListener("dragleave", (e) => {
+      if (!state.activeAlbum) return;
+      dragDepth = Math.max(0, dragDepth - 1);
+      if (dragDepth === 0 && dropOverlay) dropOverlay.hidden = true;
+    });
+    window.addEventListener("drop", (e) => {
+      if (!state.activeAlbum) return;
+      e.preventDefault();
+      dragDepth = 0;
+      if (dropOverlay) dropOverlay.hidden = true;
       if (e.dataTransfer?.files?.length) {
         enqueueFiles(e.dataTransfer.files);
       }
     });
 
-    $("#btn-retry-failed").addEventListener("click", () => {
+    $("#btn-retry-failed")?.addEventListener("click", () => {
       state.uploadQueue.forEach((item) => {
         if (item.status === "error") {
           item.status = "pending";
@@ -989,142 +1442,238 @@
       runUploadQueue();
     });
 
-    $("#btn-clear-queue").addEventListener("click", () => {
+    $("#btn-clear-queue")?.addEventListener("click", () => {
       state.uploadQueue = [];
       renderUploadQueue();
     });
 
-    // Delegated clicks on Photos Grid
-    $("#ws-photos-grid").addEventListener("click", async (e) => {
-      const approveBtn = e.target.closest("[data-approve-photo]");
-      if (approveBtn) {
-        const id = approveBtn.getAttribute("data-approve-photo");
-        const photo = state.photos.find((p) => p.id === id);
-        if (!photo) return;
-        const prevLabel = approveBtn.textContent;
-        approveBtn.disabled = true;
-        approveBtn.textContent = "Đang nén WebP...";
-        try {
-          const { blob, ext } = await compressRemoteImageToWebBlob(photo.url, 1280, 0.82);
-          approveBtn.textContent = "Đang duyệt...";
-          const fd = new FormData();
-          fd.append("action", "approve");
-          fd.append("file", blob, `${id}.${ext}`);
-          const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(id)}/approve`, {
-            method: "POST",
-            body: fd,
-          });
-          const idx = state.photos.findIndex((p) => p.id === id);
-          if (idx !== -1) state.photos[idx] = res.item;
-          renderWorkspaceHeader();
-          renderPhotosGrid();
-          await loadAlbums();
-          const kb = Math.max(1, Math.round((res.compressedBytes || blob.size) / 1024));
-          toast(`Đã duyệt & nén lên web (${kb} KB). Ảnh gốc vẫn giữ trên Drive.`, "success");
-        } catch (err) {
-          approveBtn.disabled = false;
-          approveBtn.textContent = prevLabel;
-          toast(err.message || "Không thể duyệt ảnh lúc này.", "error");
-        }
+    // Photo Status Filter Tabs & Select Mode
+    $$("[data-photo-filter]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.photoFilter = btn.getAttribute("data-photo-filter") || "all";
+        renderWorkspaceHeader();
+        renderPhotosGrid();
+      });
+    });
+
+    $("#btn-toggle-select")?.addEventListener("click", () => {
+      state.selectMode = !state.selectMode;
+      if (!state.selectMode) state.selectedIds.clear();
+      renderWorkspaceHeader();
+      renderPhotosGrid();
+      updateBatchBar();
+    });
+
+    $("#btn-approve-all")?.addEventListener("click", () => {
+      const pending = state.photos.filter((p) => p.approvalStatus === "pending");
+      if (pending.length === 0) return;
+      if (!window.confirm(`Duyệt và nén WebP toàn bộ ${pending.length} ảnh đang chờ duyệt lên web?`)) return;
+      runBatchApprove(pending);
+    });
+
+    // Batch Bar Actions
+    $("#btn-select-visible")?.addEventListener("click", () => {
+      getFilteredPhotos().forEach((p) => state.selectedIds.add(p.id));
+      renderPhotosGrid();
+      updateBatchBar();
+    });
+
+    $("#btn-clear-select")?.addEventListener("click", () => {
+      state.selectedIds.clear();
+      state.selectMode = false;
+      renderWorkspaceHeader();
+      renderPhotosGrid();
+      updateBatchBar();
+    });
+
+    $("#btn-batch-approve")?.addEventListener("click", () => {
+      const targets = state.photos.filter(
+        (p) => state.selectedIds.has(p.id) && (p.approvalStatus || "approved") !== "approved"
+      );
+      runBatchApprove(targets);
+    });
+
+    $("#btn-batch-unapprove")?.addEventListener("click", () => {
+      const targets = state.photos.filter(
+        (p) => state.selectedIds.has(p.id) && (p.approvalStatus || "approved") === "approved"
+      );
+      runBatchUnapprove(targets);
+    });
+
+    $("#btn-batch-delete")?.addEventListener("click", () => {
+      const targets = state.photos.filter((p) => state.selectedIds.has(p.id));
+      runBatchDelete(targets);
+    });
+
+    // Photos Grid Clicks (Check circle -> toggle select; Tile -> Lightbox or select)
+    $("#ws-photos-grid")?.addEventListener("click", (e) => {
+      if (e.target.closest("[data-trigger-upload]")) {
+        fileInput?.click();
         return;
       }
-
-      const unapproveBtn = e.target.closest("[data-unapprove-photo]");
-      if (unapproveBtn) {
-        const id = unapproveBtn.getAttribute("data-unapprove-photo");
-        unapproveBtn.disabled = true;
-        try {
-          const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(id)}/approve`, {
-            method: "POST",
-            json: { action: "pending" },
-          });
-          const idx = state.photos.findIndex((p) => p.id === id);
-          if (idx !== -1) state.photos[idx] = res.item;
-          renderWorkspaceHeader();
-          renderPhotosGrid();
-          await loadAlbums();
-          toast("Đã ẩn ảnh khỏi web công khai (ảnh gốc trên Drive vẫn giữ nguyên).", "info");
-        } catch (err) {
-          unapproveBtn.disabled = false;
-          toast(err.message || "Không thể ẩn ảnh lúc này.", "error");
-        }
+      const checkBtn = e.target.closest("[data-check-photo]");
+      if (checkBtn) {
+        e.stopPropagation();
+        togglePhotoSelection(checkBtn.getAttribute("data-check-photo"));
         return;
       }
-
-      const editBtn = e.target.closest("[data-edit-photo]");
-      if (editBtn) {
-        const photo = state.photos.find((p) => p.id === editBtn.getAttribute("data-edit-photo"));
-        if (photo) openPhotoDialog(photo);
-        return;
-      }
-
-      const featBtn = e.target.closest("[data-toggle-featured]");
-      if (featBtn) {
-        const id = featBtn.getAttribute("data-toggle-featured");
-        const nextVal = featBtn.getAttribute("data-featured") !== "1";
-        featBtn.disabled = true;
-        try {
-          const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(id)}`, {
-            method: "PATCH",
-            json: { isFeaturedHome: nextVal },
-          });
-          const idx = state.photos.findIndex((p) => p.id === id);
-          if (idx !== -1) state.photos[idx] = res.item;
-          renderPhotosGrid();
-          await loadAlbums();
-          toast(nextVal ? "Đã ghim ảnh lên Trang chủ." : "Đã bỏ ghim khỏi Trang chủ.", "success");
-        } catch (err) {
-          toast(err.message, "error");
-        }
-        return;
-      }
-
-      const coverBtn = e.target.closest("[data-set-cover]");
-      if (coverBtn) {
-        const id = coverBtn.getAttribute("data-set-cover");
-        coverBtn.disabled = true;
-        try {
-          const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(id)}`, {
-            method: "PATCH",
-            json: { setAsCover: true },
-          });
-          if (state.activeAlbum) {
-            state.activeAlbum.coverUrl = res.item.url;
-          }
-          renderPhotosGrid();
-          await loadAlbums();
-          toast("Đã đặt làm ảnh bìa Album.", "success");
-        } catch (err) {
-          toast(err.message, "error");
-        }
-        return;
-      }
-
-      const delBtn = e.target.closest("[data-delete-photo]");
-      if (delBtn) {
-        const id = delBtn.getAttribute("data-delete-photo");
-        if (!window.confirm("Xóa ảnh này khỏi Album và kho lưu trữ?")) return;
-        delBtn.disabled = true;
-        try {
-          await apiFetch(`/api/admin/photos/${encodeURIComponent(id)}`, { method: "DELETE" });
-          const removed = state.photos.find((p) => p.id === id);
-          state.photos = state.photos.filter((p) => p.id !== id);
-          if (state.activeAlbum && removed && state.activeAlbum.coverUrl === removed.url) {
-            state.activeAlbum.coverUrl = state.photos[0]?.url || "";
-          }
-          renderWorkspaceHeader();
-          renderPhotosGrid();
-          await loadAlbums();
-          toast("Đã xóa ảnh.", "success");
-        } catch (err) {
-          toast(err.message, "error");
-          delBtn.disabled = false;
-        }
+      const tile = e.target.closest("[data-photo-id]");
+      if (!tile) return;
+      const id = tile.getAttribute("data-photo-id");
+      if (state.selectMode) {
+        togglePhotoSelection(id);
+      } else {
+        openLightbox(id);
       }
     });
 
-    // Save Photo Metadata form
-    $("#photo-form").addEventListener("submit", async (e) => {
+    // Lightbox Controls
+    $("#lb-prev")?.addEventListener("click", () => stepLightbox(-1));
+    $("#lb-next")?.addEventListener("click", () => stepLightbox(1));
+
+    $("#lb-btn-approve")?.addEventListener("click", async () => {
+      const photo = state.photos.find((p) => p.id === state.lightboxPhotoId);
+      if (!photo) return;
+      const btn = $("#lb-btn-approve");
+      btn.disabled = true;
+      btn.textContent = "Đang nén WebP...";
+      try {
+        const listBefore = getFilteredPhotos();
+        const curIdx = listBefore.findIndex((p) => p.id === photo.id);
+        const { bytes } = await approveSinglePhoto(photo);
+        const kb = Math.max(1, Math.round(bytes / 1024));
+        toast(`Đã duyệt & nén lên web (${kb} KB).`, "success");
+        renderWorkspaceHeader();
+        renderPhotosGrid();
+        await loadAlbums(true);
+
+        // If viewing 'pending' tab, smoothly advance to next pending photo
+        if (state.photoFilter === "pending") {
+          const remaining = getFilteredPhotos();
+          if (remaining.length > 0) {
+            state.lightboxPhotoId = remaining[Math.min(curIdx, remaining.length - 1)].id;
+            renderLightbox();
+          } else {
+            await closeDialogSmooth($("#lightbox-dialog"));
+          }
+        } else {
+          renderLightbox();
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = "✓ Duyệt & nén lên web";
+        toast(err.message || "Không thể duyệt ảnh lúc này.", "error");
+      }
+    });
+
+    $("#lb-btn-unapprove")?.addEventListener("click", async () => {
+      const photo = state.photos.find((p) => p.id === state.lightboxPhotoId);
+      if (!photo) return;
+      const btn = $("#lb-btn-unapprove");
+      btn.disabled = true;
+      try {
+        const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}/approve`, {
+          method: "POST",
+          json: { action: "pending" },
+        });
+        const idx = state.photos.findIndex((p) => p.id === photo.id);
+        if (idx !== -1) state.photos[idx] = res.item;
+        renderWorkspaceHeader();
+        renderPhotosGrid();
+        renderLightbox();
+        await loadAlbums(true);
+        toast("Đã ẩn ảnh khỏi web công khai.", "info");
+      } catch (err) {
+        btn.disabled = false;
+        toast(err.message || "Không thể ẩn ảnh.", "error");
+      }
+    });
+
+    $("#lb-btn-featured")?.addEventListener("click", async () => {
+      const photo = state.photos.find((p) => p.id === state.lightboxPhotoId);
+      if (!photo) return;
+      const btn = $("#lb-btn-featured");
+      const nextVal = !photo.isFeaturedHome;
+      btn.disabled = true;
+      try {
+        const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}`, {
+          method: "PATCH",
+          json: { isFeaturedHome: nextVal },
+        });
+        const idx = state.photos.findIndex((p) => p.id === photo.id);
+        if (idx !== -1) state.photos[idx] = res.item;
+        renderWorkspaceHeader();
+        renderPhotosGrid();
+        renderLightbox();
+        await loadAlbums(true);
+        toast(nextVal ? "Đã ghim ảnh lên Trang chủ." : "Đã bỏ ghim khỏi Trang chủ.", "success");
+      } catch (err) {
+        btn.disabled = false;
+        toast(err.message, "error");
+      }
+    });
+
+    $("#lb-btn-cover")?.addEventListener("click", async () => {
+      const photo = state.photos.find((p) => p.id === state.lightboxPhotoId);
+      if (!photo) return;
+      const btn = $("#lb-btn-cover");
+      btn.disabled = true;
+      try {
+        const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}`, {
+          method: "PATCH",
+          json: { setAsCover: true },
+        });
+        if (state.activeAlbum) {
+          state.activeAlbum.coverUrl = res.item.webUrl || res.item.url;
+        }
+        renderPhotosGrid();
+        renderLightbox();
+        await loadAlbums(true);
+        toast("Đã đặt làm ảnh bìa Album.", "success");
+      } catch (err) {
+        btn.disabled = false;
+        toast(err.message, "error");
+      }
+    });
+
+    $("#lb-btn-edit")?.addEventListener("click", () => {
+      const photo = state.photos.find((p) => p.id === state.lightboxPhotoId);
+      if (photo) openPhotoDialog(photo);
+    });
+
+    $("#lb-btn-delete")?.addEventListener("click", async () => {
+      const photo = state.photos.find((p) => p.id === state.lightboxPhotoId);
+      if (!photo) return;
+      if (!window.confirm("Xóa ảnh này khỏi Album và kho lưu trữ?")) return;
+      try {
+        const listBefore = getFilteredPhotos();
+        const curIdx = listBefore.findIndex((p) => p.id === photo.id);
+        await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}`, { method: "DELETE" });
+        state.photos = state.photos.filter((p) => p.id !== photo.id);
+        state.selectedIds.delete(photo.id);
+        if (state.activeAlbum && (state.activeAlbum.coverUrl === photo.url || state.activeAlbum.coverUrl === photo.webUrl)) {
+          state.activeAlbum.coverUrl = state.photos[0]?.displayUrl || state.photos[0]?.url || "";
+        }
+        renderWorkspaceHeader();
+        renderPhotosGrid();
+        updateBatchBar();
+        await loadAlbums(true);
+        toast("Đã xóa ảnh.", "success");
+
+        const remaining = getFilteredPhotos();
+        if (remaining.length > 0) {
+          state.lightboxPhotoId = remaining[Math.min(curIdx, remaining.length - 1)].id;
+          renderLightbox();
+        } else {
+          await closeDialogSmooth($("#lightbox-dialog"));
+        }
+      } catch (err) {
+        toast(err.message, "error");
+      }
+    });
+
+    // Save Photo Metadata
+    $("#photo-form")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const alertEl = $("#photo-form-alert");
       const btn = $("#photo-form-submit");
@@ -1142,10 +1691,12 @@
         });
         const idx = state.photos.findIndex((p) => p.id === id);
         if (idx !== -1) state.photos[idx] = res.item;
+        renderWorkspaceHeader();
         renderPhotosGrid();
-        await loadAlbums();
+        if ($("#lightbox-dialog")?.open) renderLightbox();
+        await loadAlbums(true);
         $("#photo-dialog").close();
-        toast("Đã lưu thông tin ảnh.", "success");
+        toast("Đã lưu chi tiết ảnh.", "success");
       } catch (err) {
         showAlert(alertEl, err.message);
       } finally {
@@ -1154,14 +1705,15 @@
     });
 
     // Change Password
-    $("#btn-open-pw").addEventListener("click", () => {
+    $("#btn-open-pw")?.addEventListener("click", () => {
+      closeAllMenus();
       $("#pw-form").reset();
       showAlert($("#pw-form-alert"), "");
       $("#pw-dialog").showModal();
       $("#pw-current").focus();
     });
 
-    $("#pw-form").addEventListener("submit", async (e) => {
+    $("#pw-form")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const alertEl = $("#pw-form-alert");
       showAlert(alertEl, "");
@@ -1174,7 +1726,7 @@
           },
         });
         $("#pw-dialog").close();
-        toast("Đổi mật khẩu thành công!", "success");
+        toast("Đổi mật khẩu thành công.", "success");
       } catch (err) {
         showAlert(alertEl, err.message);
       }
@@ -1184,7 +1736,7 @@
     $$("[data-close-dialog]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const dlg = btn.closest("dialog");
-        if (dlg) dlg.close();
+        if (dlg) closeDialogSmooth(dlg);
       });
     });
   }

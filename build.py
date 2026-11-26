@@ -1787,6 +1787,16 @@ def generate_cloudflare_headers() -> str:
   Content-Type: application/manifest+json; charset=utf-8
   Cache-Control: public, max-age=3600, must-revalidate
 
+/admin-manifest.webmanifest
+  Content-Type: application/manifest+json; charset=utf-8
+  Cache-Control: public, max-age=3600, must-revalidate
+  X-Robots-Tag: noindex, nofollow
+
+/media-manifest.webmanifest
+  Content-Type: application/manifest+json; charset=utf-8
+  Cache-Control: public, max-age=3600, must-revalidate
+  X-Robots-Tag: noindex, nofollow
+
 /favicon.ico
   Content-Type: image/x-icon
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
@@ -2793,6 +2803,51 @@ Sitemap: {abs_url(b['siteUrl'], '/sitemap.xml')}
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
+    pwa_icons = manifest["icons"]
+    admin_manifest = {
+        "id": "/admin/",
+        "name": "HolaRise CMS – Cổng Điều Phối",
+        "short_name": "Hola CMS",
+        "description": "Điều phối sự kiện, đơn đăng ký, lưu bút và giao diện dành cho Ban Điều Phối HolaRise.",
+        "lang": "vi-VN",
+        "dir": "ltr",
+        "start_url": "/admin/?source=pwa",
+        "scope": "/admin/",
+        "display": "standalone",
+        "display_override": ["standalone", "minimal-ui"],
+        "orientation": "any",
+        "background_color": "#F7F7F5",
+        "theme_color": "#0B110F",
+        "categories": ["productivity", "utilities"],
+        "prefer_related_applications": False,
+        "icons": pwa_icons,
+    }
+    (DIST_DIR / "admin-manifest.webmanifest").write_text(
+        json.dumps(admin_manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    media_manifest = {
+        "id": "/media/",
+        "name": "HolaRise Media – Kho Hình Ảnh",
+        "short_name": "Hola Media",
+        "description": "Tải ảnh gốc lên Google Drive, duyệt nén WebP và quản lý album sự kiện HolaRise.",
+        "lang": "vi-VN",
+        "dir": "ltr",
+        "start_url": "/media/?source=pwa",
+        "scope": "/media/",
+        "display": "standalone",
+        "display_override": ["standalone", "minimal-ui"],
+        "orientation": "any",
+        "background_color": "#F7F7F5",
+        "theme_color": "#0B110F",
+        "categories": ["photo", "productivity"],
+        "prefer_related_applications": False,
+        "icons": pwa_icons,
+    }
+    (DIST_DIR / "media-manifest.webmanifest").write_text(
+        json.dumps(media_manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
     precache_urls = collect_precache_urls(h["imageSrcset"], h["mobileImageSrcset"])
     (DIST_DIR / "sw.js").write_text(
         generate_service_worker(CURRENT_BUILD_HASH, precache_urls), encoding="utf-8"
@@ -2828,6 +2883,9 @@ def verify_dist() -> list:
         if is_internal_portal:
             if 'content="noindex, nofollow"' not in text:
                 errors.append(f"[{rel}] Internal portal page must declare robots noindex, nofollow")
+            expected_manifest = "/admin-manifest.webmanifest" if rel == Path("admin/index.html") else "/media-manifest.webmanifest"
+            if f'href="{expected_manifest}"' not in text:
+                errors.append(f"[{rel}] Internal portal page must link manifest {expected_manifest}")
             for attr, target in re.findall(r'\b(href|src)="(/[^"]*)"', text):
                 clean = target.split("#")[0].split("?")[0]
                 if not clean or clean == "/" or clean.startswith("/api/"):
@@ -2900,7 +2958,7 @@ def verify_dist() -> list:
     if not og_cover.is_file() or read_jpeg_dimensions(og_cover) != (1200, 630):
         errors.append(f"Default sharing image must be a 1200×630 JPEG: {og_url}")
 
-    for required_file in ["favicon.ico", "sitemap.xml", "robots.txt", "llms.txt", "404.html", "chinh-sach/index.html", "site.webmanifest", "sw.js", "_headers", "offline/index.html"]:
+    for required_file in ["favicon.ico", "sitemap.xml", "robots.txt", "llms.txt", "404.html", "chinh-sach/index.html", "site.webmanifest", "admin-manifest.webmanifest", "media-manifest.webmanifest", "sw.js", "_headers", "offline/index.html"]:
         if not (DIST_DIR / required_file).exists():
             errors.append(f"Missing technical SEO/PWA file: {required_file}")
 
@@ -2933,20 +2991,22 @@ def verify_dist() -> list:
                 errors.append(f"[llms.txt] Missing canonical route: {req_route}")
 
     # Verify Web App Manifest contract & actual icon/screenshot pixel sizes
-    manifest_path = DIST_DIR / "site.webmanifest"
-    if manifest_path.exists():
+    for manifest_name in ("site.webmanifest", "admin-manifest.webmanifest", "media-manifest.webmanifest"):
+        manifest_path = DIST_DIR / manifest_name
+        if not manifest_path.exists():
+            continue
         try:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         except json.JSONDecodeError as exc:
-            errors.append(f"[site.webmanifest] Invalid JSON: {exc}")
+            errors.append(f"[{manifest_name}] Invalid JSON: {exc}")
             manifest = None
 
         if isinstance(manifest, dict):
             for field in ("id", "name", "short_name", "start_url", "scope", "display"):
                 if not manifest.get(field):
-                    errors.append(f"[site.webmanifest] Missing required field: {field}")
+                    errors.append(f"[{manifest_name}] Missing required field: {field}")
             if manifest.get("display") != "standalone":
-                errors.append("[site.webmanifest] Expected display='standalone'")
+                errors.append(f"[{manifest_name}] Expected display='standalone'")
 
             icons = manifest.get("icons", [])
             found_icon_pairs = set()
@@ -2956,35 +3016,35 @@ def verify_dist() -> list:
                 purpose = ic.get("purpose", "any")
                 ic_path = DIST_DIR / src.lstrip("/")
                 if not ic_path.is_file():
-                    errors.append(f"[site.webmanifest] Missing icon file: {src}")
+                    errors.append(f"[{manifest_name}] Missing icon file: {src}")
                     continue
                 dims = read_png_dimensions(ic_path)
                 if not dims:
-                    errors.append(f"[site.webmanifest] Icon is not a valid PNG: {src}")
+                    errors.append(f"[{manifest_name}] Icon is not a valid PNG: {src}")
                 elif f"{dims[0]}x{dims[1]}" != sizes:
-                    errors.append(f"[site.webmanifest] Icon {src} actual size {dims[0]}x{dims[1]} != declared {sizes}")
+                    errors.append(f"[{manifest_name}] Icon {src} actual size {dims[0]}x{dims[1]} != declared {sizes}")
                 found_icon_pairs.add((sizes, purpose))
 
             for req_pair in (("192x192", "any"), ("512x512", "any"), ("192x192", "maskable"), ("512x512", "maskable")):
                 if req_pair not in found_icon_pairs:
-                    errors.append(f"[site.webmanifest] Missing required icon {req_pair[0]} purpose='{req_pair[1]}'")
+                    errors.append(f"[{manifest_name}] Missing required icon {req_pair[0]} purpose='{req_pair[1]}'")
 
             for sc in manifest.get("screenshots", []):
                 sc_path = DIST_DIR / sc.get("src", "").lstrip("/")
                 if not sc_path.is_file():
-                    errors.append(f"[site.webmanifest] Missing screenshot: {sc.get('src')}")
+                    errors.append(f"[{manifest_name}] Missing screenshot: {sc.get('src')}")
                     continue
                 dims = read_jpeg_dimensions(sc_path) if sc_path.suffix.lower() in (".jpg", ".jpeg") else read_png_dimensions(sc_path)
                 if dims and f"{dims[0]}x{dims[1]}" != sc.get("sizes"):
                     errors.append(
-                        f"[site.webmanifest] Screenshot {sc.get('src')} actual {dims[0]}x{dims[1]} != declared {sc.get('sizes')}"
+                        f"[{manifest_name}] Screenshot {sc.get('src')} actual {dims[0]}x{dims[1]} != declared {sc.get('sizes')}"
                     )
 
             for sh in manifest.get("shortcuts", []):
                 sh_url = sh.get("url", "").split("?")[0].split("#")[0]
                 sh_target = DIST_DIR / sh_url.lstrip("/") / "index.html"
                 if sh_url != "/" and not sh_target.is_file():
-                    errors.append(f"[site.webmanifest] Shortcut points to missing route: {sh.get('url')}")
+                    errors.append(f"[{manifest_name}] Shortcut points to missing route: {sh.get('url')}")
 
     # Verify Service Worker precache coherence & size budget
     sw_path = DIST_DIR / "sw.js"
