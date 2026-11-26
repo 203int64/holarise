@@ -36,6 +36,10 @@ export function serializePhotoRow(row) {
     contributorMemberId: row.contributor_member_id || "",
     sourceKind: row.source_kind || (row.contributor_member_id ? "member_contribution" : "team"),
     drivePath: row.drive_path || "",
+    mediaType:
+      row.media_type === "video" || /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(row.url || ""))
+        ? "video"
+        : "image",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

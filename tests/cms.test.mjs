@@ -1031,6 +1031,10 @@ test("Workshop 'Cuộc Đời Của Cha' migration 0005, SSR links, sitemap & se
   db.exec(fs.readFileSync(path.join(ROOT, "migrations/0005_cuoc_doi_cua_cha_event.sql"), "utf8"));
   // Re-run 0005 to verify strict idempotency
   db.exec(fs.readFileSync(path.join(ROOT, "migrations/0005_cuoc_doi_cua_cha_event.sql"), "utf8"));
+  // Verify seeded dates exist, then shift in-memory dates to future so SSR upcoming assertions never flake after 2026-11-26
+  assert.equal(db.prepare("SELECT date FROM events WHERE id = 'holaheart-cuoc-doi-cua-cha-2026-11-29'").get()?.date, "2026-11-29");
+  db.exec("UPDATE events SET date = '2099-11-26' WHERE id = 'holaconnect-leo-nui-lam-nghiep-2026-11-26'");
+  db.exec("UPDATE events SET date = '2099-11-29' WHERE id = 'holaheart-cuoc-doi-cua-cha-2026-11-29'");
 
   class Stmt {
     constructor(sql, bound = []) {

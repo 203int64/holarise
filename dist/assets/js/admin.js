@@ -28,12 +28,16 @@
     postSearch: "",
     reflections: [],
     refStatus: "pending",
+    feedbacks: [],
+    fbFilter: { status: "new", eventId: "", category: "" },
     members: [],
     memberSearch: "",
     partners: [],
     users: [],
     visuals: {},
     slugTouched: false,
+    m360: { memberId: "", tab: "journey", data: null },
+    evCmd: { eventId: "", tab: "attendees", search: "", data: null },
   };
 
   const TAB_TITLES = {
@@ -71,6 +75,32 @@
     pending: "Đang đồng bộ",
     failed: "Lỗi đồng bộ",
     skipped: "Chưa nối Sheet",
+  };
+
+  const VISIBILITY_LABEL = {
+    public: "Công khai",
+    members_only: "Chỉ Thành viên",
+    attendees_only: "Người đã dự & được cấp",
+    private: "Riêng tư (chỉ người được cấp)",
+  };
+
+  const STAGE_LABEL = {
+    auto: "Tự động theo ngày",
+    invite: "Ép giữ Thư mời",
+    memory: "Ép Sân khấu Kỷ niệm",
+  };
+
+  const FB_CAT_LABEL = {
+    "cai-thien": "Cần cải thiện",
+    "dong-vien": "Lời động viên",
+    "de-xuat": "Đề xuất chặng tới",
+    khac: "Khác",
+  };
+
+  const FB_STATUS_LABEL = {
+    new: "Mới",
+    read: "Đã đọc",
+    resolved: "Đã xử lý",
   };
 
   const EVENT_PRESETS = {
@@ -954,8 +984,8 @@
                   <span class="overview-row-sub">${esc(ev.dateDisplay || ev.date)} · ${esc(ev.time || "")} · ${esc(seatText)}</span>
                 </div>
                 <div class="btn-row">
+                  <button class="btn btn--primary btn--sm" type="button" data-event-command="${esc(ev.id)}">Điều hành</button>
                   <button class="btn btn--outline btn--sm" type="button" data-copy-url="${esc(url)}">Copy link</button>
-                  <button class="btn btn--ghost btn--sm" type="button" data-go-tab="events">Sửa</button>
                 </div>
               </div>`;
             })
@@ -992,10 +1022,10 @@
             <strong class="kpi-value">${data.events?.upcomingCount || 0}</strong>
             <span class="kpi-foot">${data.events?.pastCount || 0} đã tổ chức · ${data.events?.draftCount || 0} nháp</span>
           </button>
-          <button class="kpi-card ${pendingRefs > 0 ? "kpi-card--warn" : ""}" type="button" data-go-tab="community">
-            <span class="kpi-label">Lưu bút chờ duyệt</span>
-            <strong class="kpi-value">${pendingRefs}</strong>
-            <span class="kpi-foot">${data.members?.total || 0} thành viên · ${data.posts?.published || 0} bài công khai</span>
+          <button class="kpi-card ${pendingRefs > 0 || Number(data.feedbacks?.new || 0) > 0 ? "kpi-card--warn" : ""}" type="button" data-go-tab="community">
+            <span class="kpi-label">Lưu bút &amp; Góp ý mới</span>
+            <strong class="kpi-value">${pendingRefs + Number(data.feedbacks?.new || 0)}</strong>
+            <span class="kpi-foot">${pendingRefs} lưu bút · ${Number(data.feedbacks?.new || 0)} góp ý · ${data.members?.total || 0} thành viên</span>
           </button>
           <a class="kpi-card ${pendingPhotos > 0 ? "kpi-card--warn" : ""}" href="/media/">
             <span class="kpi-label">Ảnh góp chờ duyệt (/media/)</span>
@@ -1255,6 +1285,8 @@
             <div class="item-meta">
               <span class="badge badge--${ev.kind === "upcoming" ? "new" : "past"}">${ev.kind === "upcoming" ? "Sắp diễn ra" : "Đã tổ chức"}</span>
               <span class="badge badge--${esc(ev.status)}">${ev.status === "published" ? "Công khai" : "Nháp"}</span>
+              ${ev.rsvpClosed ? `<span class="badge badge--cancelled">Khóa giữ chỗ</span>` : ""}
+              ${ev.stageOverride === "memory" ? `<span class="badge badge--attended">Ép Kỷ niệm</span>` : ev.stageOverride === "invite" ? `<span class="badge badge--pending">Ép Thư mời</span>` : ""}
               <span class="event-seat-pill ${isFull ? "is-full" : ""}">${esc(seatLabel)}</span>
               <span>${esc(ev.dateDisplay || ev.date)}</span>
               ${ev.time ? `<span>· ${esc(ev.time)}</span>` : ""}
@@ -1264,6 +1296,7 @@
             <p class="item-excerpt">${esc(ev.location || "")}${ev.summary ? ` — ${esc(ev.summary)}` : ""}</p>
           </div>
           <div class="item-actions">
+            <button class="btn btn--primary btn--sm" type="button" data-event-command="${esc(ev.id)}">Điều hành</button>
             ${ev.status === "published" ? `<button class="btn btn--outline btn--sm" type="button" data-copy-url="${esc(inviteFullUrl)}">Copy link</button>` : ""}
             ${ev.status === "published" ? `<button class="btn btn--ghost btn--sm" type="button" data-invite-personal="${esc(inviteFullUrl)}" data-invite-title="${esc(ev.title)}">Mời tên</button>` : ""}
             ${ev.status === "published" ? `<a class="btn btn--ghost btn--sm" href="${esc(invitePath)}" target="_blank" rel="noopener">Xem ↗</a>` : ""}
@@ -1487,10 +1520,10 @@
   }
 
   /* =========================================================================
-     TAB 4: COMMUNITY (REFLECTIONS & MEMBERS — FULL EDIT FIXED)
+     TAB 4: COMMUNITY (REFLECTIONS, MEMBERS & EVENT FEEDBACKS)
      ========================================================================= */
   async function loadCommunity() {
-    await Promise.all([loadAdminReflections(), loadAdminMembers()]);
+    await Promise.all([loadAdminReflections(), loadAdminMembers(), loadAdminFeedbacks()]);
   }
 
   async function loadAdminReflections() {
@@ -1631,13 +1664,16 @@
               <span class="badge badge--${m.isActive ? "published" : "cancelled"}">${m.isActive ? "Hoạt động" : "Đã khóa"}</span>
               ${m.isPublicTeam ? `<span class="badge badge--attended">Đội ngũ công khai</span>` : ""}
               ${m.roleTitle ? `<span class="badge badge--past">${esc(m.roleTitle)}</span>` : ""}
+              ${m.canViewAllMedia ? `<span class="badge badge--attended">Xem mọi Media</span>` : ""}
+              ${m.canAccessMediaPortal ? `<span class="badge badge--new">Cổng /media/</span>` : ""}
+              ${Number(m.albumGrantCount || 0) > 0 ? `<span class="badge badge--past">${Number(m.albumGrantCount)} album</span>` : ""}
               <span class="cell-sub"><code>${esc(m.memberCode)}</code> · ${esc(contact)} · ${esc(m.organization || "Hòa Lạc")} · ${esc(pillarLabel)} · ${esc(countsLabel)}</span>
             </div>
             <div class="item-actions">
-              <button class="btn btn--primary btn--sm" type="button" data-edit-member="${esc(m.id)}">Sửa</button>
+              <button class="btn btn--primary btn--sm" type="button" data-member-360="${esc(m.id)}">Hồ sơ 360°</button>
+              <button class="btn btn--outline btn--sm" type="button" data-edit-member="${esc(m.id)}">Sửa</button>
               <a class="btn btn--outline btn--sm" href="/tv/${encodeURIComponent(m.memberCode)}" target="_blank" rel="noopener noreferrer">Thẻ ↗</a>
               <button class="btn btn--outline btn--sm" type="button" data-toggle-member="${esc(m.id)}" data-active="${m.isActive ? "1" : "0"}">${m.isActive ? "Khóa" : "Mở khóa"}</button>
-              <button class="btn btn--outline btn--sm" type="button" data-reset-member-pw="${esc(m.id)}">Đổi MK</button>
               <button class="btn btn--danger-ghost btn--sm" type="button" data-delete-member="${esc(m.id)}">Xóa</button>
             </div>
           </div>`;
@@ -1666,6 +1702,575 @@
     $("#mem-avatar-preview").src = item?.avatarUrl || "/assets/images/logo-mark.png";
     $("#mem-public-team").checked = Boolean(item?.isPublicTeam);
     $("#member-dialog").showModal();
+  }
+
+  function renderFeedbackCards(items, ctx = "global") {
+    return `<div class="item-list">${items
+      .map((fb) => {
+        const badgeCls = fb.status === "resolved" ? "published" : fb.status === "read" ? "past" : "pending";
+        const authorLine = fb.isAnonymous
+          ? "Ẩn danh (bảo mật)"
+          : `${fb.authorName || "Thành viên"}${fb.authorContact ? ` · ${fb.authorContact}` : ""}`;
+        return `<article class="item-row">
+          <div class="item-body">
+            <div class="item-meta">
+              <span class="badge badge--${badgeCls}">${esc(FB_STATUS_LABEL[fb.status] || fb.status)}</span>
+              <span class="badge badge--new">${esc(FB_CAT_LABEL[fb.category] || fb.category)}</span>
+              ${ctx === "global" ? `<span>${esc(fb.eventTitle)}</span>` : ""}
+              <span>· ${esc(authorLine)}</span>
+              <span>· ${esc(formatVnDateTime(fb.createdAt))}</span>
+            </div>
+            <p class="item-excerpt" style="color:var(--ink);white-space:pre-wrap;">${esc(fb.content)}</p>
+            ${fb.adminNote ? `<p class="cell-sub" style="margin-top:6px;">Ghi chú nội bộ: ${esc(fb.adminNote)}</p>` : ""}
+          </div>
+          <div class="item-actions">
+            ${fb.status === "new" ? `<button class="btn btn--outline btn--sm" type="button" data-fb-status-set="${esc(fb.id)}" data-next-status="read" data-fb-ctx="${esc(ctx)}">Đã đọc</button>` : ""}
+            ${fb.status !== "resolved" ? `<button class="btn btn--primary btn--sm" type="button" data-fb-status-set="${esc(fb.id)}" data-next-status="resolved" data-fb-ctx="${esc(ctx)}">Đã xử lý</button>` : ""}
+            <button class="btn btn--ghost btn--sm" type="button" data-fb-note="${esc(fb.id)}" data-current-note="${esc(fb.adminNote || "")}" data-fb-ctx="${esc(ctx)}">Ghi chú</button>
+            <button class="btn btn--danger-ghost btn--sm" type="button" data-fb-delete="${esc(fb.id)}" data-fb-ctx="${esc(ctx)}">Xóa</button>
+          </div>
+        </article>`;
+      })
+      .join("")}</div>`;
+  }
+
+  async function loadAdminFeedbacks() {
+    const box = $("#feedbacks-admin-container");
+    if (!box) return;
+    renderSkeleton(box, 2);
+    try {
+      const qs = new URLSearchParams();
+      if (state.fbFilter.status) qs.set("status", state.fbFilter.status);
+      if (state.fbFilter.eventId) qs.set("eventId", state.fbFilter.eventId);
+      if (state.fbFilter.category) qs.set("category", state.fbFilter.category);
+      const data = await api(`/api/admin/event-feedback?${qs.toString()}`);
+      state.feedbacks = data.items || [];
+
+      const evSel = $("#fb-event-filter");
+      if (evSel && Array.isArray(data.events)) {
+        const cur = state.fbFilter.eventId;
+        evSel.innerHTML =
+          `<option value="">Tất cả sự kiện</option>` +
+          data.events
+            .map(
+              (ev) =>
+                `<option value="${esc(ev.eventId)}"${ev.eventId === cur ? " selected" : ""}>${esc(ev.eventTitle)} (${ev.count})</option>`
+            )
+            .join("");
+      }
+
+      if (!state.feedbacks.length) {
+        renderEmptyState(
+          box,
+          "Chưa có góp ý nào trong bộ lọc này",
+          "Khi người tham dự gửi góp ý hoặc lời động viên từ Sân khấu Kỷ niệm sau sự kiện, nội dung sẽ tập trung tại đây."
+        );
+        return;
+      }
+      box.innerHTML = renderFeedbackCards(state.feedbacks, "global");
+    } catch (err) {
+      renderErrorState(box, err.message, "community");
+    }
+  }
+
+  /* =========================================================================
+     DIALOG 10: MEMBER 360 DEEP CONTROL & MEDIA ACCESS
+     ========================================================================= */
+  function setM360Tab(tab) {
+    state.m360.tab = tab;
+    $$("[data-m360-tab]").forEach((btn) => {
+      btn.setAttribute("aria-selected", String(btn.getAttribute("data-m360-tab") === tab));
+    });
+    renderMember360Content();
+  }
+
+  async function openMember360(memberId, tab = "journey") {
+    const dialog = $("#member-360-dialog");
+    const box = $("#m360-content");
+    if (!dialog || !box) return;
+    state.m360.memberId = memberId;
+    state.m360.tab = tab;
+    state.m360.data = null;
+    $$("[data-m360-tab]").forEach((btn) => {
+      btn.setAttribute("aria-selected", String(btn.getAttribute("data-m360-tab") === tab));
+    });
+    $("#m360-title").textContent = "Đang tải hồ sơ Thành viên...";
+    $("#m360-subtitle").textContent = "—";
+    renderSkeleton(box, 3);
+    if (!dialog.open) dialog.showModal();
+
+    try {
+      const data = await api(`/api/admin/members/${encodeURIComponent(memberId)}`);
+      state.m360.data = data;
+      const m = data.member;
+      $("#m360-title").textContent = `${m.name} (${m.memberCode})`;
+      $("#m360-subtitle").textContent = [
+        m.roleTitle || "Thành viên Hola",
+        m.phoneDisplay || m.email || "Chưa có liên hệ",
+        m.organization || "Hòa Lạc",
+      ]
+        .filter(Boolean)
+        .join(" · ");
+      renderMember360Content();
+    } catch (err) {
+      box.innerHTML = `<div class="state-box"><h3>Không tải được hồ sơ</h3><p>${esc(err.message)}</p></div>`;
+    }
+  }
+
+  function renderMember360Content() {
+    const box = $("#m360-content");
+    const data = state.m360.data;
+    if (!box || !data) return;
+    const m = data.member;
+    const tab = state.m360.tab;
+
+    if (tab === "journey") {
+      const events = data.events || [];
+      const regs = data.registrations || [];
+      const refs = data.reflections || [];
+      const photos = data.photos || [];
+
+      const assignHtml = `<div class="deep-card">
+        <h3>Gán sự kiện &amp; Chấm công thủ công</h3>
+        <form id="m360-assign-form" class="inline-assign-bar">
+          <div class="field">
+            <label for="m360-assign-event">Chọn sự kiện</label>
+            <select id="m360-assign-event" required>
+              <option value="">— Chọn sự kiện —</option>
+              ${events.map((ev) => `<option value="${esc(ev.id)}">${esc(ev.title)} (${esc(ev.dateDisplay || ev.date)})</option>`).join("")}
+            </select>
+          </div>
+          <div class="field" style="max-width:190px;">
+            <label for="m360-assign-status">Trạng thái</label>
+            <select id="m360-assign-status">
+              <option value="attended">Đã tham gia (Check-in)</option>
+              <option value="contacted">Đã liên hệ</option>
+              <option value="new">Mới nhận</option>
+            </select>
+          </div>
+          <button class="btn btn--primary btn--sm" type="submit" style="min-height:40px;">Gán vào sự kiện</button>
+        </form>
+      </div>`;
+
+      const regsHtml = regs.length
+        ? `<div class="item-list">${regs
+            .map(
+              (r) => `<div class="user-row">
+                <div>
+                  <strong>${esc(r.event_title || r.activity_title)}</strong>
+                  <span class="badge badge--${esc(r.status)}">${esc(REG_STATUS_LABEL[r.status] || r.status)}</span>
+                  <span class="cell-sub">${esc(r.date_display || r.event_date || "")} · Mã đơn <code>${esc(r.id)}</code>${r.admin_note ? ` · ${esc(r.admin_note)}` : ""}</span>
+                </div>
+                <div class="item-actions">
+                  ${r.status !== "attended" ? `<button class="btn btn--primary btn--sm" type="button" data-m360-checkin-reg="${esc(r.id)}">Check-in</button>` : ""}
+                  <button class="btn btn--danger-ghost btn--sm" type="button" data-m360-remove-reg="${esc(r.id)}">Gỡ</button>
+                </div>
+              </div>`
+            )
+            .join("")}</div>`
+        : `<p class="page-sub">Thành viên chưa có lịch sử đăng ký hoặc check-in sự kiện nào.</p>`;
+
+      const refsHtml = refs.length
+        ? `<div class="item-list">${refs
+            .map(
+              (rf) => `<div class="user-row">
+                <div>
+                  <strong>${rf.pullQuote ? `“${esc(rf.pullQuote)}”` : esc(rf.activitySlug || "Lưu bút thành viên")}</strong>
+                  <span class="badge badge--${rf.status === "approved" ? "published" : rf.status === "rejected" ? "cancelled" : "pending"}">${rf.status === "approved" ? "Đã duyệt" : rf.status === "rejected" ? "Đã ẩn" : "Chờ duyệt"}</span>
+                  <span class="cell-sub">${esc((rf.content || "").slice(0, 160))}${(rf.content || "").length > 160 ? "…" : ""} · ${esc(formatVnDateTime(rf.createdAt))}</span>
+                </div>
+              </div>`
+            )
+            .join("")}</div>`
+        : `<p class="page-sub">Chưa gửi lưu bút cảm nhận nào.</p>`;
+
+      const photosHtml = photos.length
+        ? `<div class="photo-strip-mini">${photos
+            .map(
+              (p) => `<a class="photo-strip-card" href="${esc(p.url)}" target="_blank" rel="noopener">
+                <img src="${esc(p.url)}" alt="${esc(p.caption || p.album_title || "Ảnh thành viên góp")}" loading="lazy">
+                <span class="photo-strip-cap">${esc(p.album_title || "Album")} · ${p.approval_status === "pending" ? "Chờ duyệt" : "Đã duyệt"}</span>
+              </a>`
+            )
+            .join("")}</div>`
+        : `<p class="page-sub">Chưa đóng góp ảnh kỷ niệm nào.</p>`;
+
+      box.innerHTML = `<div class="deep-section">
+        ${assignHtml}
+        <div class="deep-card">
+          <h3>Lịch sử tham dự sự kiện (${regs.length})</h3>
+          ${regsHtml}
+        </div>
+        <div class="deep-card">
+          <h3>Lưu bút đã gửi (${refs.length})</h3>
+          ${refsHtml}
+        </div>
+        <div class="deep-card">
+          <h3>Ảnh đã đóng góp (${photos.length})</h3>
+          ${photosHtml}
+        </div>
+      </div>`;
+      return;
+    }
+
+    if (tab === "media") {
+      const ma = data.mediaAccess || {};
+      const albums = ma.albums || [];
+      box.innerHTML = `<form id="m360-media-form" class="deep-section">
+        <div class="deep-card">
+          <h3>Quyền Media cấp tài khoản</h3>
+          <div style="display:grid;gap:10px;">
+            <label class="check-chip">
+              <input type="checkbox" id="m360-view-all-media" ${ma.canViewAllMedia ? "checked" : ""}>
+              <span><strong>Xem mọi Album &amp; Ảnh riêng tư:</strong> Thành viên mở được tất cả kho ảnh nội bộ, bao gồm album đặt <em>Riêng tư</em> hoặc <em>Người đã dự</em>.</span>
+            </label>
+            <label class="check-chip">
+              <input type="checkbox" id="m360-media-portal" ${ma.canAccessMediaPortal ? "checked" : ""}>
+              <span><strong>Mở cổng <code>/media/</code> (Chế độ Chỉ xem):</strong> Cho phép thành viên xem &amp; tải ảnh gốc trực tiếp tại <code>/media/</code> mà không được tạo, sửa, xóa hay duyệt ảnh.</span>
+            </label>
+          </div>
+        </div>
+        <div class="deep-card">
+          <h3>Cấp quyền theo từng Album cụ thể (${albums.filter((a) => a.granted).length} / ${albums.length})</h3>
+          ${
+            albums.length
+              ? `<div class="grant-grid">${albums
+                  .map(
+                    (a) => `<label class="grant-item">
+                      <input type="checkbox" name="albumIds" value="${esc(a.id)}" ${a.granted ? "checked" : ""}>
+                      <span>
+                        <strong>${esc(a.title)}</strong>
+                        <span class="cell-sub">${esc(a.dateDisplay || a.eventDate || "")} · ${a.photoCount} ảnh · <span class="badge badge--${a.visibility === "public" ? "published" : "pending"}">${esc(VISIBILITY_LABEL[a.visibility] || a.visibility)}</span></span>
+                      </span>
+                    </label>`
+                  )
+                  .join("")}</div>`
+              : `<p class="page-sub">Chưa có album ảnh nào trên hệ thống.</p>`
+          }
+        </div>
+        <div class="dialog-foot" style="padding:0;border:0;">
+          <button class="btn btn--primary" type="submit">Lưu quyền xem Media</button>
+        </div>
+      </form>`;
+      return;
+    }
+
+    if (tab === "security") {
+      const sec = data.security || {};
+      box.innerHTML = `<div class="deep-section">
+        <div class="mini-kpi-row">
+          <div class="mini-kpi"><span>Trạng thái</span><strong>${m.isActive ? "Hoạt động" : "Đã khóa"}</strong></div>
+          <div class="mini-kpi"><span>Phiên đang mở</span><strong>${Number(sec.activeSessionCount || 0)}</strong></div>
+          <div class="mini-kpi"><span>Passkey (Face ID)</span><strong>${Number(sec.passkeyCount || 0)}</strong></div>
+          <div class="mini-kpi"><span>Đăng nhập gần nhất</span><strong style="font-size:0.9rem;">${esc(formatVnDateTime(sec.lastLoginAt))}</strong></div>
+        </div>
+        <div class="deep-card">
+          <h3>Can thiệp phiên &amp; tài khoản</h3>
+          <p class="page-sub" style="margin-bottom:12px;">Thu hồi phiên sẽ lập tức đẩy thành viên ra khỏi mọi điện thoại/trình duyệt đang đăng nhập (bao gồm phiên <code>/media/</code> Chỉ xem).</p>
+          <div class="btn-row">
+            <button class="btn btn--danger btn--sm" type="button" data-m360-revoke-sessions="${esc(m.id)}">Đăng xuất toàn bộ thiết bị</button>
+            <button class="btn btn--outline btn--sm" type="button" data-m360-toggle-active="${esc(m.id)}" data-active="${m.isActive ? "1" : "0"}">${m.isActive ? "Khóa tài khoản" : "Mở khóa tài khoản"}</button>
+            <button class="btn btn--outline btn--sm" type="button" data-reset-member-pw="${esc(m.id)}">Cấp mật khẩu tạm</button>
+            <button class="btn btn--outline btn--sm" type="button" data-m360-edit-profile="${esc(m.id)}">Sửa hồ sơ cơ bản</button>
+            <a class="btn btn--ghost btn--sm" href="/tv/${encodeURIComponent(m.memberCode)}" target="_blank" rel="noopener noreferrer">Mở Thẻ &amp; QR ↗</a>
+          </div>
+        </div>
+      </div>`;
+    }
+  }
+
+  /* =========================================================================
+     DIALOG 11: EVENT COMMAND CENTER (DEEP EVENT CONTROL)
+     ========================================================================= */
+  function setEvCmdTab(tab) {
+    state.evCmd.tab = tab;
+    $$("[data-evcmd-tab]").forEach((btn) => {
+      btn.setAttribute("aria-selected", String(btn.getAttribute("data-evcmd-tab") === tab));
+    });
+    renderEventCommandContent();
+  }
+
+  async function openEventCommand(eventId, tab = "attendees") {
+    const dialog = $("#event-command-dialog");
+    const box = $("#evcmd-content");
+    if (!dialog || !box) return;
+    state.evCmd.eventId = eventId;
+    state.evCmd.tab = tab;
+    state.evCmd.search = "";
+    state.evCmd.data = null;
+    $$("[data-evcmd-tab]").forEach((btn) => {
+      btn.setAttribute("aria-selected", String(btn.getAttribute("data-evcmd-tab") === tab));
+    });
+    $("#evcmd-title").textContent = "Đang tải Trung tâm điều hành...";
+    $("#evcmd-subtitle").textContent = "—";
+    renderSkeleton(box, 3);
+    if (!dialog.open) dialog.showModal();
+
+    try {
+      const data = await api(`/api/admin/events/${encodeURIComponent(eventId)}/command`);
+      state.evCmd.data = data;
+      const ev = data.event;
+      $("#evcmd-title").textContent = ev.title;
+      $("#evcmd-subtitle").textContent = [
+        ev.dateDisplay || ev.date,
+        ev.time,
+        ev.location,
+        ev.rsvpClosed ? "Đang khóa giữ chỗ" : "Đang mở giữ chỗ",
+        STAGE_LABEL[ev.stageOverride || "auto"],
+      ]
+        .filter(Boolean)
+        .join(" · ");
+      renderEventCommandContent();
+    } catch (err) {
+      box.innerHTML = `<div class="state-box"><h3>Không tải được dữ liệu sự kiện</h3><p>${esc(err.message)}</p></div>`;
+    }
+  }
+
+  function renderEventCommandContent() {
+    const box = $("#evcmd-content");
+    const data = state.evCmd.data;
+    if (!box || !data) return;
+    const ev = data.event;
+    const stats = data.stats || {};
+    const tab = state.evCmd.tab;
+
+    if (tab === "attendees") {
+      const q = (state.evCmd.search || "").trim().toLowerCase();
+      const regs = (data.registrations || []).filter((r) => {
+        if (!q) return true;
+        return `${r.full_name} ${r.phone} ${r.email} ${r.organization} ${r.id}`.toLowerCase().includes(q);
+      });
+      const members = data.members || [];
+      const csvUrl = `/api/admin/registrations/export?activity=${encodeURIComponent(ev.title)}`;
+      const invitePath = `/su-kien/${ev.slug || ev.id}/`;
+
+      box.innerHTML = `<div class="deep-section">
+        <div class="mini-kpi-row">
+          <div class="mini-kpi"><span>Tổng đơn</span><strong>${Number(stats.total || 0)}</strong></div>
+          <div class="mini-kpi"><span>Mới nhận</span><strong>${Number(stats.new || 0)}</strong></div>
+          <div class="mini-kpi"><span>Đã liên hệ</span><strong>${Number(stats.contacted || 0)}</strong></div>
+          <div class="mini-kpi"><span>Đã Check-in</span><strong>${Number(stats.attended || 0)}</strong></div>
+        </div>
+
+        <div class="btn-row" style="justify-content:space-between;">
+          <input id="evcmd-attendee-search" type="search" value="${esc(state.evCmd.search)}" placeholder="Tìm nhanh tên, SĐT, trường..." style="flex:1 1 220px;min-height:38px;padding:6px 12px;border:1px solid var(--line-strong);border-radius:10px;background:#fff;">
+          <div class="btn-row">
+            <a class="btn btn--outline btn--sm" href="${esc(csvUrl)}">Xuất CSV buổi này</a>
+            <a class="btn btn--ghost btn--sm" href="${esc(invitePath)}" target="_blank" rel="noopener">Mở trang sự kiện ↗</a>
+          </div>
+        </div>
+
+        <details class="deep-card">
+          <summary style="cursor:pointer;font-weight:700;font-size:0.9rem;">+ Thêm khách tại cửa / Gán thành viên vào sự kiện</summary>
+          <form id="evcmd-add-attendee-form" class="admin-form" style="margin-top:12px;">
+            <div class="form-row-2">
+              <div class="field">
+                <label for="evcmd-add-member">Chọn Thành viên sẵn có (tùy chọn)</label>
+                <select id="evcmd-add-member">
+                  <option value="">— Hoặc nhập khách walk-in bên dưới —</option>
+                  ${members.map((m) => `<option value="${esc(m.id)}">${esc(m.name)} (${esc(m.memberCode)} · ${esc(m.phoneDisplay || m.email || "—")})</option>`).join("")}
+                </select>
+              </div>
+              <div class="field">
+                <label for="evcmd-add-status">Trạng thái check-in</label>
+                <select id="evcmd-add-status">
+                  <option value="attended">Đã tham gia (Check-in)</option>
+                  <option value="contacted">Đã liên hệ</option>
+                  <option value="new">Mới nhận</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row-3">
+              <div class="field">
+                <label for="evcmd-add-name">Họ và tên (nếu khách mới)</label>
+                <input id="evcmd-add-name" type="text" placeholder="Nguyễn Minh Anh">
+              </div>
+              <div class="field">
+                <label for="evcmd-add-phone">SĐT / Zalo</label>
+                <input id="evcmd-add-phone" type="tel" placeholder="09xx...">
+              </div>
+              <div class="field">
+                <label for="evcmd-add-org">Trường / Đơn vị</label>
+                <input id="evcmd-add-org" type="text" placeholder="ĐH FPT / KCNC Hòa Lạc">
+              </div>
+            </div>
+            <button class="btn btn--primary btn--sm" type="submit">Lưu người tham dự</button>
+          </form>
+        </details>
+
+        <div class="deep-card">
+          <h3>Danh sách khách (${regs.length})</h3>
+          ${
+            regs.length
+              ? `<div class="item-list">${regs
+                  .map((r) => {
+                    const digits = String(r.phone || "").replace(/\D/g, "");
+                    return `<div class="user-row">
+                      <div>
+                        <strong>${esc(r.full_name)}</strong>
+                        <span class="badge badge--${esc(r.status)}">${esc(REG_STATUS_LABEL[r.status] || r.status)}</span>
+                        <span class="cell-sub">${esc(r.phone)}${r.organization ? ` · ${esc(r.organization)}` : ""}${r.admin_note ? ` · ${esc(r.admin_note)}` : ""}</span>
+                      </div>
+                      <div class="item-actions">
+                        ${digits ? `<a class="btn btn--ghost btn--sm" href="https://zalo.me/${esc(digits)}" target="_blank" rel="noopener">Zalo ↗</a>` : ""}
+                        ${r.status === "new" ? `<button class="btn btn--outline btn--sm" type="button" data-evcmd-reg-status="${esc(r.id)}" data-next-status="contacted">Đã liên hệ</button>` : ""}
+                        ${r.status !== "attended" ? `<button class="btn btn--primary btn--sm" type="button" data-evcmd-reg-status="${esc(r.id)}" data-next-status="attended">Check-in</button>` : ""}
+                        ${r.status !== "cancelled" ? `<button class="btn btn--danger-ghost btn--sm" type="button" data-evcmd-reg-status="${esc(r.id)}" data-next-status="cancelled">Hủy</button>` : ""}
+                      </div>
+                    </div>`;
+                  })
+                  .join("")}</div>`
+              : `<p class="page-sub">Không có khách phù hợp với bộ lọc hiện tại.</p>`
+          }
+        </div>
+      </div>`;
+      return;
+    }
+
+    if (tab === "lifecycle") {
+      box.innerHTML = `<form id="evcmd-lifecycle-form" class="deep-section">
+        <div class="deep-card">
+          <h3>Trạng thái Sân khấu &amp; Khóa giữ chỗ</h3>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="evcmd-stage-override">Chế độ hiển thị trang <code>/su-kien/${esc(ev.slug || ev.id)}/</code></label>
+              <select id="evcmd-stage-override">
+                <option value="auto" ${(ev.stageOverride || "auto") === "auto" ? "selected" : ""}>Tự động theo ngày diễn ra</option>
+                <option value="invite" ${ev.stageOverride === "invite" ? "selected" : ""}>Ép giữ giao diện Thư mời &amp; Giữ chỗ</option>
+                <option value="memory" ${ev.stageOverride === "memory" ? "selected" : ""}>Ép mở Sân khấu Kỷ niệm (Album &amp; Lưu bút)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="evcmd-status">Trạng thái công khai</label>
+              <select id="evcmd-status">
+                <option value="published" ${ev.status === "published" ? "selected" : ""}>Công khai trên website</option>
+                <option value="draft" ${ev.status === "draft" ? "selected" : ""}>Lưu nháp (ẩn)</option>
+              </select>
+            </div>
+          </div>
+          <label class="check-chip" style="margin-top:12px;">
+            <input type="checkbox" id="evcmd-rsvp-closed" ${ev.rsvpClosed ? "checked" : ""}>
+            <span><strong>Khóa nhận đơn giữ chỗ mới:</strong> Chặn biểu mẫu đăng ký (trả mã 409) ngay cả khi sự kiện chưa hết chỗ hoặc chưa qua ngày.</span>
+          </label>
+        </div>
+
+        <div class="deep-card">
+          <h3>Sức chứa &amp; Thanh hiển thị chỗ trống</h3>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="evcmd-seat-cap">Tổng sức chứa (0 = không giới hạn)</label>
+              <input id="evcmd-seat-cap" type="number" min="0" max="5000" value="${Number(ev.seatCapacity || 0)}">
+            </div>
+            <div class="field">
+              <label for="evcmd-ext-booked">Số chỗ đăng ký ngoài web</label>
+              <input id="evcmd-ext-booked" type="number" min="0" max="5000" value="${Number(ev.externalBooked || 0)}">
+            </div>
+          </div>
+          <label class="check-chip" style="margin-top:12px;">
+            <input type="checkbox" id="evcmd-show-seat-bar" ${ev.showSeatBar ? "checked" : ""}>
+            <span>Hiển thị thanh chỗ còn lại trên trang Thư mời</span>
+          </label>
+        </div>
+
+        <div class="dialog-foot" style="padding:0;border:0;">
+          <button class="btn btn--primary" type="submit">Lưu cấu hình điều hành</button>
+        </div>
+      </form>`;
+      return;
+    }
+
+    if (tab === "media") {
+      const alb = data.album;
+      if (!alb) {
+        box.innerHTML = `<div class="state-box">
+          <h3>Sự kiện này chưa gắn Album ảnh</h3>
+          <p>Bạn có thể tạo Album mới và tải ảnh gốc từ Ban Hình Ảnh tại cổng <code>/media/</code>.</p>
+          <a class="btn btn--primary" href="/media/">Mở kho ảnh /media/ ↗</a>
+        </div>`;
+        return;
+      }
+
+      const granted = alb.grantedMembers || [];
+      const grantedSet = new Set(granted.map((g) => g.memberId));
+      const availableMembers = (data.members || []).filter((m) => !grantedSet.has(m.id));
+
+      box.innerHTML = `<div class="deep-section">
+        <div class="mini-kpi-row">
+          <div class="mini-kpi"><span>Tổng ảnh</span><strong>${alb.photoCount}</strong></div>
+          <div class="mini-kpi"><span>Đã duyệt</span><strong>${alb.approvedCount}</strong></div>
+          <div class="mini-kpi"><span>Chờ duyệt</span><strong>${alb.pendingCount}</strong></div>
+          <div class="mini-kpi"><span>Quyền xem</span><strong style="font-size:0.9rem;">${esc(VISIBILITY_LABEL[alb.visibility] || alb.visibility)}</strong></div>
+        </div>
+
+        <form id="evcmd-album-form" class="deep-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <h3 style="margin:0;">Album gắn kết: ${esc(alb.title)}</h3>
+            <a class="btn btn--outline btn--sm" href="/media/?album=${encodeURIComponent(alb.id)}">Quản lý ảnh tại /media/ ↗</a>
+          </div>
+          <input type="hidden" id="evcmd-album-id" value="${esc(alb.id)}">
+          <div class="form-row-2">
+            <div class="field">
+              <label for="evcmd-album-vis">Quyền xem Album &amp; Ảnh gốc (bảo vệ cả Edge Proxy)</label>
+              <select id="evcmd-album-vis">
+                <option value="public" ${alb.visibility === "public" ? "selected" : ""}>Công khai (ai có link cũng xem được)</option>
+                <option value="members_only" ${alb.visibility === "members_only" ? "selected" : ""}>Chỉ Thành viên đăng nhập</option>
+                <option value="attendees_only" ${alb.visibility === "attendees_only" ? "selected" : ""}>Người đã đăng ký / dự buổi &amp; người được cấp quyền</option>
+                <option value="private" ${alb.visibility === "private" ? "selected" : ""}>Riêng tư tuyệt đối (chỉ Quản trị &amp; thành viên được cấp)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="evcmd-album-status">Trạng thái Album</label>
+              <select id="evcmd-album-status">
+                <option value="published" ${alb.status === "published" ? "selected" : ""}>Xuất bản</option>
+                <option value="draft" ${alb.status === "draft" ? "selected" : ""}>Ẩn (Nháp)</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <button class="btn btn--primary btn--sm" type="submit">Lưu quyền xem Album</button>
+          </div>
+        </form>
+
+        <div class="deep-card">
+          <h3>Thành viên được cấp quyền xem riêng (${granted.length})</h3>
+          <form id="evcmd-grant-member-form" class="inline-assign-bar" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="evcmd-grant-member-select">Thêm thành viên được phép xem album này</label>
+              <select id="evcmd-grant-member-select" required>
+                <option value="">— Chọn thành viên —</option>
+                ${availableMembers.map((m) => `<option value="${esc(m.id)}">${esc(m.name)} (${esc(m.memberCode)})</option>`).join("")}
+              </select>
+            </div>
+            <button class="btn btn--outline btn--sm" type="submit" style="min-height:40px;">+ Cấp quyền xem</button>
+          </form>
+          ${
+            granted.length
+              ? `<div class="item-list">${granted
+                  .map(
+                    (g) => `<div class="user-row">
+                      <div>
+                        <strong>${esc(g.name)}</strong>
+                        <span class="cell-sub"><code>${esc(g.memberCode)}</code>${g.phoneDisplay ? ` · ${esc(g.phoneDisplay)}` : ""} · Cấp lúc ${esc(formatVnDateTime(g.grantedAt))}</span>
+                      </div>
+                      <div class="item-actions">
+                        <button class="btn btn--danger-ghost btn--sm" type="button" data-evcmd-revoke-member="${esc(g.memberId)}" data-album-id="${esc(alb.id)}">Thu hồi</button>
+                      </div>
+                    </div>`
+                  )
+                  .join("")}</div>`
+              : `<p class="page-sub">Chưa cấp quyền riêng cho thành viên nào (chế độ quyền xem chung phía trên vẫn đang áp dụng).</p>`
+          }
+        </div>
+      </div>`;
+      return;
+    }
+
+    if (tab === "feedbacks") {
+      const fbs = data.feedbacks || [];
+      box.innerHTML = fbs.length
+        ? renderFeedbackCards(fbs, "evcmd")
+        : `<div class="state-box"><h3>Chưa có góp ý nào cho sự kiện này</h3><p>Góp ý gửi từ Sân khấu Kỷ niệm của buổi gặp sẽ xuất hiện trực tiếp tại đây.</p></div>`;
+    }
   }
 
   /* =========================================================================
@@ -2307,6 +2912,211 @@
       });
     });
 
+    // Community: Event Feedbacks filters
+    $$("[data-fb-status]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.fbFilter.status = btn.getAttribute("data-fb-status") || "";
+        $$("[data-fb-status]").forEach((b) => b.classList.toggle("is-active", b === btn));
+        loadAdminFeedbacks();
+      });
+    });
+    $("#fb-event-filter")?.addEventListener("change", (e) => {
+      state.fbFilter.eventId = e.target.value || "";
+      loadAdminFeedbacks();
+    });
+    $("#fb-cat-filter")?.addEventListener("change", (e) => {
+      state.fbFilter.category = e.target.value || "";
+      loadAdminFeedbacks();
+    });
+
+    // Member 360 & Event Command Center sub-tabs & dynamic forms
+    $$("[data-m360-tab]").forEach((btn) => {
+      btn.addEventListener("click", () => setM360Tab(btn.getAttribute("data-m360-tab")));
+    });
+    $$("[data-evcmd-tab]").forEach((btn) => {
+      btn.addEventListener("click", () => setEvCmdTab(btn.getAttribute("data-evcmd-tab")));
+    });
+
+    document.addEventListener("input", (e) => {
+      if (e.target && e.target.id === "evcmd-attendee-search") {
+        state.evCmd.search = e.target.value || "";
+        const cursor = e.target.selectionStart ?? state.evCmd.search.length;
+        renderEventCommandContent();
+        const nextInput = $("#evcmd-attendee-search");
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.setSelectionRange?.(cursor, cursor);
+        }
+      }
+    });
+
+    document.addEventListener("submit", async (e) => {
+      const form = e.target;
+      if (!form || !form.id) return;
+
+      if (form.id === "m360-assign-form") {
+        e.preventDefault();
+        const eventId = $("#m360-assign-event")?.value || "";
+        const status = $("#m360-assign-status")?.value || "attended";
+        if (!eventId) {
+          toast("Vui lòng chọn sự kiện cần gán.", "error");
+          return;
+        }
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
+        try {
+          await api(`/api/admin/members/${encodeURIComponent(state.m360.memberId)}/actions`, {
+            method: "POST",
+            body: { action: "assign_event", eventId, status },
+          });
+          toast("Đã gán thành viên vào sự kiện!", "success");
+          await openMember360(state.m360.memberId, "journey");
+          if (state.activeTab === "community") loadAdminMembers();
+        } catch (err) {
+          toast(formatApiError(err), "error");
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+        return;
+      }
+
+      if (form.id === "m360-media-form") {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        const canViewAllMedia = Boolean($("#m360-view-all-media")?.checked);
+        const canAccessMediaPortal = Boolean($("#m360-media-portal")?.checked);
+        const albumIds = $$('input[name="albumIds"]:checked', form).map((cb) => cb.value);
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Đang lưu...";
+        }
+        try {
+          await api(`/api/admin/members/${encodeURIComponent(state.m360.memberId)}/actions`, {
+            method: "POST",
+            body: { action: "set_album_grants", canViewAllMedia, canAccessMediaPortal, albumIds },
+          });
+          toast("Đã cập nhật quyền xem Media cho thành viên!", "success");
+          await openMember360(state.m360.memberId, "media");
+          if (state.activeTab === "community") loadAdminMembers();
+        } catch (err) {
+          toast(formatApiError(err), "error");
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Lưu quyền xem Media";
+          }
+        }
+        return;
+      }
+
+      if (form.id === "evcmd-add-attendee-form") {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        const payload = {
+          action: "add_attendee",
+          memberId: $("#evcmd-add-member")?.value || "",
+          fullName: ($("#evcmd-add-name")?.value || "").trim(),
+          phone: ($("#evcmd-add-phone")?.value || "").trim(),
+          organization: ($("#evcmd-add-org")?.value || "").trim(),
+          status: $("#evcmd-add-status")?.value || "attended",
+        };
+        if (btn) btn.disabled = true;
+        try {
+          await api(`/api/admin/events/${encodeURIComponent(state.evCmd.eventId)}/command`, {
+            method: "POST",
+            body: payload,
+          });
+          toast("Đã thêm người tham dự vào sự kiện!", "success");
+          await openEventCommand(state.evCmd.eventId, "attendees");
+          if (state.activeTab === "events") loadEvents();
+        } catch (err) {
+          toast(formatApiError(err), "error");
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+        return;
+      }
+
+      if (form.id === "evcmd-lifecycle-form") {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Đang lưu...";
+        }
+        try {
+          await api(`/api/admin/events/${encodeURIComponent(state.evCmd.eventId)}/command`, {
+            method: "PATCH",
+            body: {
+              stageOverride: $("#evcmd-stage-override")?.value || "auto",
+              rsvpClosed: Boolean($("#evcmd-rsvp-closed")?.checked),
+              status: $("#evcmd-status")?.value || "published",
+              seatCapacity: Number($("#evcmd-seat-cap")?.value || 0),
+              externalBooked: Number($("#evcmd-ext-booked")?.value || 0),
+              showSeatBar: Boolean($("#evcmd-show-seat-bar")?.checked),
+            },
+          });
+          toast("Đã cập nhật vòng đời & khóa giữ chỗ sự kiện!", "success");
+          await openEventCommand(state.evCmd.eventId, "lifecycle");
+          if (state.activeTab === "events") loadEvents();
+          else if (state.activeTab === "overview") loadOverview();
+        } catch (err) {
+          toast(formatApiError(err), "error");
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Lưu cấu hình điều hành";
+          }
+        }
+        return;
+      }
+
+      if (form.id === "evcmd-album-form") {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        const albumId = $("#evcmd-album-id")?.value || "";
+        if (!albumId) return;
+        if (btn) btn.disabled = true;
+        try {
+          await api(`/api/admin/events/${encodeURIComponent(state.evCmd.eventId)}/command`, {
+            method: "PATCH",
+            body: {
+              albumId,
+              albumVisibility: $("#evcmd-album-vis")?.value || "public",
+              albumStatus: $("#evcmd-album-status")?.value || "published",
+            },
+          });
+          toast("Đã lưu quyền xem & trạng thái Album!", "success");
+          await openEventCommand(state.evCmd.eventId, "media");
+        } catch (err) {
+          toast(formatApiError(err), "error");
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+        return;
+      }
+
+      if (form.id === "evcmd-grant-member-form") {
+        e.preventDefault();
+        const memberId = $("#evcmd-grant-member-select")?.value || "";
+        const albumId = state.evCmd.data?.album?.id || "";
+        if (!memberId || !albumId) {
+          toast("Vui lòng chọn thành viên cần cấp quyền.", "error");
+          return;
+        }
+        try {
+          await api(`/api/admin/events/${encodeURIComponent(state.evCmd.eventId)}/command`, {
+            method: "POST",
+            body: { action: "grant_album_member", albumId, memberId },
+          });
+          toast("Đã cấp quyền xem Album cho thành viên!", "success");
+          await openEventCommand(state.evCmd.eventId, "media");
+        } catch (err) {
+          toast(formatApiError(err), "error");
+        }
+      }
+    });
+
     $("#member-search-form")?.addEventListener("submit", (e) => {
       e.preventDefault();
       state.memberSearch = ($("#member-search-input")?.value || "").trim();
@@ -2644,9 +3454,205 @@
     // Global delegated click handler
     document.addEventListener("click", async (e) => {
       const btn = e.target.closest(
-        "button[data-go-tab], button[data-copy-url], button[data-invite-personal], button[data-open-crop], button[data-quick-reg-status], button[data-open-reg], button[data-dup-event], button[data-edit-event], button[data-delete-event], button[data-edit-post], button[data-delete-post], button[data-mod-ref], button[data-pin-ref], button[data-edit-ref], button[data-delete-ref], button[data-edit-member], button[data-toggle-member], button[data-reset-member-pw], button[data-delete-member], button[data-toggle-partner], button[data-edit-partner], button[data-delete-partner], button[data-toggle-user], button[data-reset-user-pw], button[data-delete-user], button[data-retry], button[data-empty-cta]"
+        "button[data-go-tab], button[data-copy-url], button[data-invite-personal], button[data-open-crop], button[data-quick-reg-status], button[data-open-reg], button[data-event-command], button[data-dup-event], button[data-edit-event], button[data-delete-event], button[data-edit-post], button[data-delete-post], button[data-mod-ref], button[data-pin-ref], button[data-edit-ref], button[data-delete-ref], button[data-fb-status-set], button[data-fb-note], button[data-fb-delete], button[data-member-360], button[data-m360-checkin-reg], button[data-m360-remove-reg], button[data-m360-revoke-sessions], button[data-m360-toggle-active], button[data-m360-edit-profile], button[data-evcmd-reg-status], button[data-evcmd-revoke-member], button[data-edit-member], button[data-toggle-member], button[data-reset-member-pw], button[data-delete-member], button[data-toggle-partner], button[data-edit-partner], button[data-delete-partner], button[data-toggle-user], button[data-reset-user-pw], button[data-delete-user], button[data-retry], button[data-empty-cta]"
       );
       if (!btn) return;
+
+      const m360Id = btn.getAttribute("data-member-360");
+      if (m360Id) {
+        openMember360(m360Id, "journey");
+        return;
+      }
+
+      if (btn.dataset.eventCommand) {
+        openEventCommand(btn.dataset.eventCommand, "attendees");
+        return;
+      }
+
+      if (btn.dataset.m360CheckinReg) {
+        try {
+          await api(`/api/admin/registrations/${encodeURIComponent(btn.dataset.m360CheckinReg)}`, {
+            method: "PATCH",
+            body: { status: "attended" },
+          });
+          toast("Đã check-in tham gia sự kiện!", "success");
+          openMember360(state.m360.memberId, "journey");
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+
+      if (btn.dataset.m360RemoveReg) {
+        const ok = await openConfirmDialog({
+          title: "Gỡ lịch sử tham dự",
+          message: `Xóa bản ghi đăng ký ${btn.dataset.m360RemoveReg} khỏi hành trình thành viên?`,
+          confirmLabel: "Gỡ bản ghi",
+          danger: true,
+        });
+        if (!ok) return;
+        try {
+          await api(`/api/admin/members/${encodeURIComponent(state.m360.memberId)}/actions`, {
+            method: "POST",
+            body: { action: "remove_registration", registrationId: btn.dataset.m360RemoveReg },
+          });
+          toast("Đã gỡ lịch sử đăng ký.");
+          openMember360(state.m360.memberId, "journey");
+          if (state.activeTab === "community") loadAdminMembers();
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+
+      if (btn.dataset.m360RevokeSessions) {
+        const ok = await openConfirmDialog({
+          title: "Đăng xuất toàn bộ thiết bị",
+          message: "Thu hồi ngay mọi phiên đăng nhập của thành viên này trên điện thoại và máy tính?",
+          confirmLabel: "Đăng xuất ngay",
+          danger: true,
+        });
+        if (!ok) return;
+        try {
+          const res = await api(`/api/admin/members/${encodeURIComponent(btn.dataset.m360RevokeSessions)}/actions`, {
+            method: "POST",
+            body: { action: "revoke_sessions" },
+          });
+          toast(res.message || "Đã thu hồi toàn bộ phiên đăng nhập.", "success");
+          openMember360(state.m360.memberId, "security");
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+
+      if (btn.dataset.m360ToggleActive) {
+        const nextActive = btn.dataset.active !== "1";
+        try {
+          await api(`/api/admin/members/${encodeURIComponent(btn.dataset.m360ToggleActive)}`, {
+            method: "PATCH",
+            body: { isActive: nextActive },
+          });
+          toast(nextActive ? "Đã mở khóa tài khoản thành viên." : "Đã khóa tài khoản thành viên.");
+          openMember360(state.m360.memberId, "security");
+          if (state.activeTab === "community") loadAdminMembers();
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+
+      if (btn.dataset.m360EditProfile) {
+        const m = state.m360.data?.member || state.members.find((x) => x.id === btn.dataset.m360EditProfile);
+        $("#member-360-dialog")?.close();
+        if (m) openMemberDialog(m);
+        return;
+      }
+
+      if (btn.dataset.evcmdRegStatus) {
+        const regId = btn.dataset.evcmdRegStatus;
+        const nextStatus = btn.dataset.nextStatus;
+        try {
+          await api(`/api/admin/registrations/${encodeURIComponent(regId)}`, {
+            method: "PATCH",
+            body: { status: nextStatus },
+          });
+          toast(
+            nextStatus === "attended"
+              ? "Đã check-in tham gia!"
+              : nextStatus === "contacted"
+                ? "Đã đánh dấu Đã liên hệ."
+                : "Đã cập nhật trạng thái đơn.",
+            "success"
+          );
+          openEventCommand(state.evCmd.eventId, "attendees");
+          if (state.activeTab === "events") loadEvents();
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+
+      if (btn.dataset.evcmdRevokeMember) {
+        const memberId = btn.dataset.evcmdRevokeMember;
+        const albumId = btn.dataset.albumId;
+        try {
+          await api(`/api/admin/events/${encodeURIComponent(state.evCmd.eventId)}/command`, {
+            method: "POST",
+            body: { action: "revoke_album_member", albumId, memberId },
+          });
+          toast("Đã thu hồi quyền xem Album của thành viên.");
+          openEventCommand(state.evCmd.eventId, "media");
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+
+      if (btn.dataset.fbStatusSet) {
+        const id = btn.dataset.fbStatusSet;
+        const nextStatus = btn.dataset.nextStatus;
+        const ctx = btn.dataset.fbCtx || "global";
+        try {
+          await api(`/api/admin/event-feedback/${encodeURIComponent(id)}`, {
+            method: "PATCH",
+            body: { status: nextStatus },
+          });
+          toast(nextStatus === "resolved" ? "Đã đánh dấu Đã xử lý góp ý." : "Đã đánh dấu Đã đọc góp ý.", "success");
+          if (ctx === "evcmd" && state.evCmd.eventId) openEventCommand(state.evCmd.eventId, "feedbacks");
+          if (state.activeTab === "community") loadAdminFeedbacks();
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+
+      if (btn.dataset.fbNote) {
+        const id = btn.dataset.fbNote;
+        const ctx = btn.dataset.fbCtx || "global";
+        const note = await openConfirmDialog({
+          title: "Ghi chú nội bộ cho góp ý",
+          message: "Ghi chú này chỉ hiển thị trong trang Quản trị, không công khai ra ngoài.",
+          confirmLabel: "Lưu ghi chú",
+          inputLabel: "Ghi chú điều phối",
+          inputValue: btn.dataset.currentNote || "",
+          inputPlaceholder: "Ví dụ: Đã trao đổi với MC để điều chỉnh âm thanh...",
+        });
+        if (note === null) return;
+        try {
+          await api(`/api/admin/event-feedback/${encodeURIComponent(id)}`, {
+            method: "PATCH",
+            body: { adminNote: note },
+          });
+          toast("Đã lưu ghi chú nội bộ.", "success");
+          if (ctx === "evcmd" && state.evCmd.eventId) openEventCommand(state.evCmd.eventId, "feedbacks");
+          if (state.activeTab === "community") loadAdminFeedbacks();
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+
+      if (btn.dataset.fbDelete) {
+        const id = btn.dataset.fbDelete;
+        const ctx = btn.dataset.fbCtx || "global";
+        const ok = await openConfirmDialog({
+          title: "Xóa góp ý sự kiện",
+          message: "Xóa vĩnh viễn góp ý này khỏi hộp thư Ban Điều Phối?",
+          confirmLabel: "Xóa góp ý",
+          danger: true,
+        });
+        if (!ok) return;
+        try {
+          await api(`/api/admin/event-feedback/${encodeURIComponent(id)}`, { method: "DELETE" });
+          toast("Đã xóa góp ý.");
+          if (ctx === "evcmd" && state.evCmd.eventId) openEventCommand(state.evCmd.eventId, "feedbacks");
+          if (state.activeTab === "community") loadAdminFeedbacks();
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
 
       if (btn.dataset.goTab) {
         if (btn.dataset.goTab === "registrations" && btn.dataset.goStatus !== undefined) {

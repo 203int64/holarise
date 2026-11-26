@@ -102,6 +102,12 @@ export async function onRequest(context) {
   if (!headers.has("X-Frame-Options")) {
     headers.set("X-Frame-Options", "SAMEORIGIN");
   }
+  if (!headers.has("Permissions-Policy")) {
+    headers.set("Permissions-Policy", "geolocation=(), payment=(), usb=(), interest-cohort=()");
+  }
+  if (url.protocol === "https:" && host === "holarise.org" && !headers.has("Strict-Transport-Security")) {
+    headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  }
 
   return new Response(response.body, {
     status: response.status,

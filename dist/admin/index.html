@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=f93132a082">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=3d5c3b1c66">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
 <body data-pwa-app-name="HolaRise CMS">
@@ -425,7 +425,8 @@
 
         <div class="subtab-bar" role="tablist" aria-label="Mục con Cộng đồng">
           <button class="subtab-btn" type="button" role="tab" id="subtab-reflections" aria-selected="true" data-comm-subtab="reflections">Lưu bút &amp; Cảm nhận</button>
-          <button class="subtab-btn" type="button" role="tab" id="subtab-members" aria-selected="false" data-comm-subtab="members">Thành viên &amp; Đội ngũ</button>
+          <button class="subtab-btn" type="button" role="tab" id="subtab-members" aria-selected="false" data-comm-subtab="members">Thành viên &amp; Quyền Media</button>
+          <button class="subtab-btn" type="button" role="tab" id="subtab-feedbacks" aria-selected="false" data-comm-subtab="feedbacks">Góp ý sự kiện</button>
         </div>
 
         <div role="tabpanel" aria-labelledby="subtab-reflections" data-comm-panel="reflections">
@@ -444,35 +445,6 @@
             </div>
             <div id="reflections-admin-container"></div>
           </section>
-
-          <section class="panel-box" style="margin-top: 20px;">
-            <div class="panel-box-head panel-box-head--row">
-              <div>
-                <h2>Góp ý &amp; Động viên sau sự kiện</h2>
-                <p>Lời đóng góp gửi kín từ Sân khấu Kỷ niệm (chỉ Ban Điều Phối &amp; Quản trị xem được; bảo toàn ẩn danh tuyệt đối nếu người gửi chọn ẩn danh).</p>
-              </div>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                <label for="ef-admin-event-filter" class="visually-hidden">Lọc theo sự kiện</label>
-                <select id="ef-admin-event-filter" style="min-height:34px;padding:4px 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;">
-                  <option value="">Tất cả sự kiện</option>
-                </select>
-                <label for="ef-admin-cat-filter" class="visually-hidden">Lọc theo phân loại</label>
-                <select id="ef-admin-cat-filter" style="min-height:34px;padding:4px 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;">
-                  <option value="">Mọi loại góp ý</option>
-                  <option value="cai-thien">Cần cải thiện</option>
-                  <option value="dong-vien">Lời động viên</option>
-                  <option value="de-xuat">Đề xuất chặng tới</option>
-                </select>
-                <div class="pill-group" role="group" aria-label="Lọc trạng thái góp ý sự kiện">
-                  <button class="pill-btn is-active" type="button" data-ef-status="new">Mới</button>
-                  <button class="pill-btn" type="button" data-ef-status="read">Đã đọc</button>
-                  <button class="pill-btn" type="button" data-ef-status="resolved">Đã xử lý</button>
-                  <button class="pill-btn" type="button" data-ef-status="">Tất cả</button>
-                </div>
-              </div>
-            </div>
-            <div id="event-feedback-admin-container"></div>
-          </section>
         </div>
 
         <div role="tabpanel" aria-labelledby="subtab-members" data-comm-panel="members" hidden>
@@ -480,7 +452,7 @@
             <div class="panel-box-head panel-box-head--row">
               <div>
                 <h2>Danh sách Thành viên Hola</h2>
-                <p>Tìm theo tên, mã <code>HR-YYMMDD-STT</code>, SĐT, email hoặc chức danh. Bấm <strong>Sửa</strong> để cập nhật hồ sơ hoặc bật hiển thị Đội ngũ công khai.</p>
+                <p>Tìm theo tên, mã <code>HR-YYMMDD-STT</code>, SĐT, email hoặc chức danh. Bấm <strong>Hồ sơ 360°</strong> để gán sự kiện, cấp quyền xem Media hoặc thu hồi phiên.</p>
               </div>
               <form id="member-search-form" class="inline-search-form">
                 <label for="member-search-input" class="visually-hidden">Tìm thành viên</label>
@@ -489,6 +461,38 @@
               </form>
             </div>
             <div id="members-admin-container"></div>
+          </section>
+        </div>
+
+        <div role="tabpanel" aria-labelledby="subtab-feedbacks" data-comm-panel="feedbacks" hidden>
+          <section class="panel-box">
+            <div class="panel-box-head panel-box-head--row">
+              <div>
+                <h2>Hộp thư Góp ý sau sự kiện</h2>
+                <p>Góp ý gửi kín từ Sân khấu Kỷ niệm — bảo toàn ẩn danh tuyệt đối nếu người gửi chọn ẩn danh.</p>
+              </div>
+              <div class="btn-row">
+                <label for="fb-event-filter" class="visually-hidden">Lọc theo sự kiện</label>
+                <select id="fb-event-filter" style="min-height:34px;padding:4px 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;">
+                  <option value="">Tất cả sự kiện</option>
+                </select>
+                <label for="fb-cat-filter" class="visually-hidden">Lọc theo phân loại</label>
+                <select id="fb-cat-filter" style="min-height:34px;padding:4px 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;">
+                  <option value="">Mọi loại góp ý</option>
+                  <option value="cai-thien">Cần cải thiện</option>
+                  <option value="dong-vien">Lời động viên</option>
+                  <option value="de-xuat">Đề xuất chặng tới</option>
+                  <option value="khac">Khác</option>
+                </select>
+                <div class="pill-group" role="group" aria-label="Lọc trạng thái góp ý">
+                  <button class="pill-btn is-active" type="button" data-fb-status="new">Mới</button>
+                  <button class="pill-btn" type="button" data-fb-status="read">Đã đọc</button>
+                  <button class="pill-btn" type="button" data-fb-status="resolved">Đã xử lý</button>
+                  <button class="pill-btn" type="button" data-fb-status="">Tất cả</button>
+                </div>
+              </div>
+            </div>
+            <div id="feedbacks-admin-container"></div>
           </section>
         </div>
       </section>
@@ -1297,7 +1301,50 @@
     </div>
   </dialog>
 
-  <!-- DIALOG 10: PWA INSTALL GUIDE (iOS Safari / Zalo WebView) -->
+  <!-- DIALOG 10: MEMBER 360 DEEP CONTROL & MEDIA ACCESS -->
+  <dialog class="cms-dialog cms-dialog--xl" id="member-360-dialog" closedby="any" aria-labelledby="m360-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <div>
+          <h2 id="m360-title">Hồ sơ Thành viên 360°</h2>
+          <p class="dialog-sub" id="m360-subtitle">—</p>
+        </div>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <div class="dialog-body">
+        <div class="subtab-bar" role="tablist" aria-label="Mục con Hồ sơ thành viên">
+          <button class="subtab-btn" type="button" role="tab" id="m360-tab-journey" aria-selected="true" data-m360-tab="journey">Hành trình &amp; Gán sự kiện</button>
+          <button class="subtab-btn" type="button" role="tab" id="m360-tab-media" aria-selected="false" data-m360-tab="media">Quyền xem Media</button>
+          <button class="subtab-btn" type="button" role="tab" id="m360-tab-security" aria-selected="false" data-m360-tab="security">Phiên &amp; Bảo mật</button>
+        </div>
+        <div id="m360-content"></div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 11: EVENT COMMAND CENTER (DEEP EVENT CONTROL) -->
+  <dialog class="cms-dialog cms-dialog--xl" id="event-command-dialog" closedby="any" aria-labelledby="evcmd-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <div>
+          <h2 id="evcmd-title">Trung tâm điều hành Sự kiện</h2>
+          <p class="dialog-sub" id="evcmd-subtitle">—</p>
+        </div>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <div class="dialog-body">
+        <div class="subtab-bar" role="tablist" aria-label="Mục con Điều hành sự kiện">
+          <button class="subtab-btn" type="button" role="tab" id="evcmd-tab-attendees" aria-selected="true" data-evcmd-tab="attendees">Khách &amp; Check-in</button>
+          <button class="subtab-btn" type="button" role="tab" id="evcmd-tab-lifecycle" aria-selected="false" data-evcmd-tab="lifecycle">Vòng đời &amp; Khóa giữ chỗ</button>
+          <button class="subtab-btn" type="button" role="tab" id="evcmd-tab-media" aria-selected="false" data-evcmd-tab="media">Kho ảnh &amp; Quyền xem</button>
+          <button class="subtab-btn" type="button" role="tab" id="evcmd-tab-feedbacks" aria-selected="false" data-evcmd-tab="feedbacks">Góp ý sau buổi</button>
+        </div>
+        <div id="evcmd-content"></div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 12: PWA INSTALL GUIDE (iOS Safari / Zalo WebView) -->
   <dialog class="cms-dialog pwa-install-dialog" id="pwa-install-dialog" closedby="any" aria-labelledby="pwa-dialog-title-ios">
     <div class="dialog-shell">
       <div class="dialog-head">
@@ -1329,8 +1376,8 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=f93132a082" defer></script>
-  <script src="/assets/js/admin.js?v=f93132a082" defer></script>
-  <script src="/assets/js/pwa.js?v=f93132a082" defer></script>
+  <script src="/assets/js/passkey-client.js?v=3d5c3b1c66" defer></script>
+  <script src="/assets/js/admin.js?v=3d5c3b1c66" defer></script>
+  <script src="/assets/js/pwa.js?v=3d5c3b1c66" defer></script>
 </body>
 </html>

@@ -21,6 +21,7 @@ export async function onRequestGet(context) {
     commRefRes,
     membersRes,
     mediaStatsRes,
+    feedbackCountsRes,
     settingsMap,
   ] = await Promise.all([
     db.prepare("SELECT status, COUNT(*) AS cnt FROM registrations GROUP BY status").all().catch(() => ({ results: [] })),
@@ -74,6 +75,7 @@ export async function onRequestGet(context) {
         .catch(() => ({ cnt: 0 })),
       db.prepare("SELECT COUNT(*) AS cnt FROM media_photos").first().catch(() => ({ cnt: 0 })),
     ]),
+    db.prepare("SELECT status, COUNT(*) AS cnt FROM event_feedbacks GROUP BY status").all().catch(() => ({ results: [] })),
     getSettingsMap(db).catch(() => ({})),
   ]);
 
@@ -111,6 +113,13 @@ export async function onRequestGet(context) {
     if (row.status in reflections) reflections[row.status] += c;
   }
 
+  const feedbacks = { new: 0, read: 0, resolved: 0, total: 0 };
+  for (const row of feedbackCountsRes.results || []) {
+    const c = Number(row.cnt || 0);
+    feedbacks.total += c;
+    if (row.status in feedbacks) feedbacks[row.status] += c;
+  }
+
   const [albumRow, pendingPhotoRow, totalPhotoRow] = mediaStatsRes;
 
   return jsonResponse({
@@ -126,6 +135,7 @@ export async function onRequestGet(context) {
     },
     posts,
     reflections,
+    feedbacks,
     members: {
       total: Number(membersRes?.total || 0),
       active: Number(membersRes?.active_cnt || 0),

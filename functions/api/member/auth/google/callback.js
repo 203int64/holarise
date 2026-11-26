@@ -1,3 +1,4 @@
+import { constantTimeStringEqual } from "../../../../_lib/gate-token.js";
 import {
   buildMemberSessionCookie,
   createMemberSession,
@@ -7,14 +8,19 @@ import {
   parseCookies,
 } from "../../../../_lib/security.js";
 
+function clearOauthStateCookie(isSecure) {
+  return `holarise_oauth_state=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${isSecure ? "; Secure" : ""}`;
+}
+
 function redirectWithError(origin, returnTo, code) {
   const target = new URL(returnTo || "/tham-gia/", origin);
   target.searchParams.set("auth_error", code);
+  const isSecure = target.protocol === "https:";
   return new Response(null, {
     status: 302,
     headers: {
       Location: target.toString(),
-      "Set-Cookie": "holarise_oauth_state=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0",
+      "Set-Cookie": clearOauthStateCookie(isSecure),
       "Cache-Control": "no-store",
     },
   });
@@ -47,7 +53,7 @@ export async function onRequestGet({ request, env }) {
 
   const code = url.searchParams.get("code") || "";
   const state = url.searchParams.get("state") || "";
-  if (!code || !state || !stored?.state || stored.state !== state) {
+  if (!code || !state || !stored?.state || !constantTimeStringEqual(String(stored.state), state)) {
     return redirectWithError(url.origin, returnTo, "google_state_invalid");
   }
 
@@ -144,7 +150,7 @@ export async function onRequestGet({ request, env }) {
       Location: dest.toString(),
       "Cache-Control": "no-store",
     });
-    headers.append("Set-Cookie", "holarise_oauth_state=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
+    headers.append("Set-Cookie", clearOauthStateCookie(url.protocol === "https:"));
     headers.append("Set-Cookie", buildMemberSessionCookie(rawToken, request));
 
     return new Response(null, { status: 302, headers });

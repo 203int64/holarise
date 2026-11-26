@@ -46,6 +46,9 @@ export async function ensureMediaApprovalSchema(db) {
     if (!photoCols.has("drive_path")) {
       alters.push("ALTER TABLE media_photos ADD COLUMN drive_path TEXT NOT NULL DEFAULT ''");
     }
+    if (!photoCols.has("media_type")) {
+      alters.push("ALTER TABLE media_photos ADD COLUMN media_type TEXT NOT NULL DEFAULT 'image'");
+    }
   }
 
   for (const sql of alters) {

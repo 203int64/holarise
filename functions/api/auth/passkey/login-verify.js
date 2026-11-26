@@ -54,16 +54,13 @@ export async function onRequestPost({ request, env }) {
 
   const nowIso = new Date().toISOString();
   const chRow = await env.DB.prepare(
-    "SELECT challenge FROM admin_passkey_challenges WHERE challenge = ? AND kind = 'login' AND expires_at > ?"
+    "DELETE FROM admin_passkey_challenges WHERE challenge = ? AND kind = 'login' AND expires_at > ? RETURNING challenge"
   )
     .bind(challenge, nowIso)
     .first();
   if (!chRow) {
     return errorResponse(400, "EXPIRED_CHALLENGE", "Phiên xác thực sinh trắc học đã hết hạn.");
   }
-  await env.DB.prepare("DELETE FROM admin_passkey_challenges WHERE challenge = ?")
-    .bind(challenge)
-    .run();
 
   const cred = await env.DB.prepare(
     `SELECT p.credential_id, p.user_id, p.public_key_spki, p.algorithm, p.sign_count, u.is_active

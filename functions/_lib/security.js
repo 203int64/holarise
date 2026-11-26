@@ -478,6 +478,31 @@ export function sniffImageMime(bytes) {
   return null;
 }
 
+/**
+ * Sniff both image (JPEG/PNG/WebP) and video (MP4/MOV/WebM) using magic bytes only.
+ */
+export function sniffMediaMime(bytes) {
+  const img = sniffImageMime(bytes);
+  if (img) return { ...img, kind: "image" };
+  if (!(bytes instanceof Uint8Array) || bytes.length < 12) return null;
+
+  // ISO Base Media (MP4 / MOV): bytes[4..7] === 'ftyp'
+  if (bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70) {
+    const isQuickTime =
+      bytes[8] === 0x71 && bytes[9] === 0x74 && bytes[10] === 0x20 && bytes[11] === 0x20;
+    return isQuickTime
+      ? { mime: "video/quicktime", ext: "mov", kind: "video" }
+      : { mime: "video/mp4", ext: "mp4", kind: "video" };
+  }
+
+  // WebM / Matroska EBML header: 1A 45 DF A3
+  if (bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3) {
+    return { mime: "video/webm", ext: "webm", kind: "video" };
+  }
+
+  return null;
+}
+
 
 /**
  * Self-healing schema guard: ensures v8 Member & Guestbook tables exist on D1

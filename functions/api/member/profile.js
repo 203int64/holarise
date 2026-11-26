@@ -109,6 +109,14 @@ export async function onRequestPatch(context) {
     )
     .run();
 
+  // Revoke all other active sessions when password changes (defense against stolen cookies)
+  if (v.new_password && member.session_id) {
+    await env.DB.prepare("DELETE FROM member_sessions WHERE member_id = ? AND id != ?")
+      .bind(member.id, member.session_id)
+      .run()
+      .catch(() => null);
+  }
+
   if (oldAvatarKey && oldAvatarKey !== nextAvatarKey && env?.MEDIA_KV?.delete) {
     await env.MEDIA_KV.delete(`media:${oldAvatarKey}`).catch(() => null);
   }

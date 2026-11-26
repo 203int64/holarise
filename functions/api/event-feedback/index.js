@@ -8,6 +8,7 @@ import {
   readJsonBody,
   verifyCsrfOrigin,
 } from "../../_lib/security.js";
+import { verifyTurnstileToken } from "../../_lib/turnstile.js";
 import { validateEventFeedbackInput } from "../../_lib/validation.js";
 
 export async function onRequestPost(context) {
@@ -32,6 +33,18 @@ export async function onRequestPost(context) {
 
   await ensureEventFeedbackSchema(env.DB);
   const sessionMember = await getSessionMember(env.DB, request).catch(() => null);
+  if (!sessionMember) {
+    const tsToken =
+      parsed.data?.["cf-turnstile-response"] ?? parsed.data?.turnstileToken ?? "";
+    const tsCheck = await verifyTurnstileToken(request, env, tsToken, "event_feedback");
+    if (!tsCheck.ok) {
+      return errorResponse(
+        403,
+        tsCheck.code || "TURNSTILE_FAILED",
+        "Xác minh chống bot chưa thành công. Vui lòng tải lại trang và thử lại."
+      );
+    }
+  }
   const ipHash = await getClientIpHash(request);
   const rlKey = sessionMember ? `ev_fb_mbr:${sessionMember.id}` : `ev_fb_ip:${ipHash}`;
   const rl = await checkRateLimit(env.DB, rlKey, 10, 15 * 60 * 1000);

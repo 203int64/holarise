@@ -111,6 +111,7 @@ export async function onRequestGet(context) {
 
   return jsonResponse({
     ok: true,
+    viewerOnly,
     items: rows.map(serializeAlbumRow),
   });
 }

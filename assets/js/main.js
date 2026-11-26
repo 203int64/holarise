@@ -419,13 +419,18 @@
     });
   });
 
-  /* 5. Lightbox v2 Trigger (Single Photos + Dynamic Guestbook Photos + Album Viewer + Prev/Next + Swipe) */
+  /* 5. Lightbox v2 Trigger (Images + Videos + Dynamic Guestbook + Album Viewer + Prev/Next + Swipe) */
   var lightbox = document.getElementById("gallery-lightbox");
   var lightboxImg = document.getElementById("lightbox-img");
+  var lightboxVideo = document.getElementById("lightbox-video");
   var lightboxCaption = document.getElementById("lightbox-caption");
   var lightboxCounter = document.getElementById("lightbox-counter");
   var lightboxPrevBtn = lightbox ? lightbox.querySelector("[data-lightbox-prev]") : null;
   var lightboxNextBtn = lightbox ? lightbox.querySelector("[data-lightbox-next]") : null;
+
+  function isVideoUrl(url) {
+    return /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(url || ""));
+  }
 
   if (lightbox && lightboxImg && lightboxCaption) {
     var activeSlides = [];
@@ -435,16 +440,46 @@
       return n < 10 ? "0" + n : String(n);
     };
 
+    var stopLightboxVideo = function () {
+      if (!lightboxVideo) return;
+      try {
+        lightboxVideo.pause();
+      } catch (_e) {}
+      lightboxVideo.removeAttribute("src");
+      try {
+        lightboxVideo.load();
+      } catch (_e) {}
+      lightboxVideo.hidden = true;
+    };
+
+    lightbox.addEventListener("close", stopLightboxVideo);
+
     var showGalleryIndex = function (idx) {
       if (!activeSlides.length) return;
       var total = activeSlides.length;
       activeGalleryIdx = ((idx % total) + total) % total;
       var item = activeSlides[activeGalleryIdx];
-      lightboxImg.src = item.src || "";
-      lightboxImg.alt = item.alt || "";
+      var isVid = item.type === "video" || isVideoUrl(item.src);
+      if (isVid && lightboxVideo) {
+        lightboxImg.hidden = true;
+        lightboxImg.removeAttribute("src");
+        lightboxVideo.hidden = false;
+        lightboxVideo.src = item.src || "";
+        lightboxVideo.setAttribute("aria-label", item.alt || "Video buổi gặp");
+        try {
+          lightboxVideo.load();
+        } catch (_e) {}
+      } else {
+        stopLightboxVideo();
+        lightboxImg.hidden = false;
+        lightboxImg.src = item.src || "";
+        lightboxImg.alt = item.alt || "";
+      }
       var captionText = item.caption || "";
       if (item.photographer) {
-        captionText = captionText ? captionText + " · Ảnh: " + item.photographer : "Ảnh: " + item.photographer;
+        captionText = captionText
+          ? captionText + " · " + (isVid ? "Video: " : "Ảnh: ") + item.photographer
+          : (isVid ? "Video: " : "Ảnh: ") + item.photographer;
       }
       lightboxCaption.textContent = captionText;
       if (lightboxCounter) {
@@ -479,8 +514,10 @@
       var scope = trigger.closest("[data-lightbox-group]") || document;
       var allTriggers = Array.prototype.slice.call(scope.querySelectorAll("[data-lightbox-src]"));
       activeSlides = allTriggers.map(function (btn) {
+        var src = btn.getAttribute("data-lightbox-src") || "";
         return {
-          src: btn.getAttribute("data-lightbox-src") || "",
+          src: src,
+          type: btn.getAttribute("data-lightbox-type") || (isVideoUrl(src) ? "video" : "image"),
           alt: btn.getAttribute("data-lightbox-alt") || "",
           caption: btn.getAttribute("data-lightbox-caption") || "",
           photographer: "",
@@ -1567,32 +1604,53 @@
       });
     }
 
+    function isReflectionVideoFile(file) {
+      if (!file) return false;
+      var mime = String(file.type || "").toLowerCase();
+      if (/^video\/(mp4|quicktime|webm)$/i.test(mime)) return true;
+      return /\.(mp4|mov|webm)$/i.test(String(file.name || ""));
+    }
+
+    function isReflectionImageFile(file) {
+      if (!file) return false;
+      var mime = String(file.type || "").toLowerCase();
+      if (/^image\/(jpeg|jpg|png|webp)$/i.test(mime)) return true;
+      return /\.(jpe?g|png|webp)$/i.test(String(file.name || ""));
+    }
+
     function renderSelectedPhotoPreviews() {
       var count = selectedPhotos.length;
       if (prPhotoWrap) prPhotoWrap.hidden = count === 0;
       if (prPhotoMeta) {
+        var vidCount = selectedPhotos.filter(function (x) { return x.mediaType === "video"; }).length;
         prPhotoMeta.textContent =
-          count + " / " + MAX_REFLECTION_PHOTOS + " ảnh đã chọn · Tự động nén gọn khi gửi";
+          count + " / " + MAX_REFLECTION_PHOTOS + " tệp đã chọn" +
+          (vidCount > 0 ? " (gồm " + vidCount + " video)" : " · Tự động nén gọn khi gửi");
       }
       if (prPhotoTrigger) {
         var span = prPhotoTrigger.querySelector("span");
         if (span) {
           span.textContent =
             count >= MAX_REFLECTION_PHOTOS
-              ? "Đã đủ " + MAX_REFLECTION_PHOTOS + " ảnh"
+              ? "Đã đủ " + MAX_REFLECTION_PHOTOS + " tệp"
               : count > 0
-                ? "Thêm ảnh (" + count + "/" + MAX_REFLECTION_PHOTOS + ")"
-                : "Thêm ảnh (tối đa " + MAX_REFLECTION_PHOTOS + ")";
+                ? "Thêm ảnh / video (" + count + "/" + MAX_REFLECTION_PHOTOS + ")"
+                : "Thêm ảnh / video (tối đa " + MAX_REFLECTION_PHOTOS + ")";
         }
         prPhotoTrigger.disabled = count >= MAX_REFLECTION_PHOTOS;
       }
       if (prPhotoGrid) {
         prPhotoGrid.innerHTML = selectedPhotos
           .map(function (item, idx) {
+            var isVid = item.mediaType === "video";
+            var mediaHtml = isVid
+              ? '<video src="' + escTxt(item.objectUrl) + '" muted playsinline preload="metadata"></video>' +
+                '<span class="gb-preview-video-badge" aria-hidden="true">Video</span>'
+              : '<img src="' + escTxt(item.objectUrl) + '" alt="Ảnh xem trước ' + (idx + 1) + '">';
             return (
-              '<div class="gb-preview-tile">' +
-              '<img src="' + escTxt(item.objectUrl) + '" alt="Ảnh xem trước ' + (idx + 1) + '">' +
-              '<button type="button" class="gb-preview-remove" data-remove-pr-photo="' + idx + '" aria-label="Gỡ ảnh ' + (idx + 1) + '">×</button>' +
+              '<div class="gb-preview-tile' + (isVid ? " is-video" : "") + '">' +
+              mediaHtml +
+              '<button type="button" class="gb-preview-remove" data-remove-pr-photo="' + idx + '" aria-label="Gỡ tệp ' + (idx + 1) + '">×</button>' +
               "</div>"
             );
           })
@@ -1635,26 +1693,32 @@
       var errors = [];
       var remaining = MAX_REFLECTION_PHOTOS - selectedPhotos.length;
       if (remaining <= 0) {
-        errors.push(t("Mỗi hương khí chỉ đính kèm tối đa " + MAX_REFLECTION_PHOTOS + " ảnh.", "Up to " + MAX_REFLECTION_PHOTOS + " photos per reflection."));
+        errors.push(t("Mỗi hương khí chỉ đính kèm tối đa " + MAX_REFLECTION_PHOTOS + " ảnh hoặc video.", "Up to " + MAX_REFLECTION_PHOTOS + " photos or videos per reflection."));
       } else if (files.length > remaining) {
-        errors.push(t("Mỗi hương khí chỉ đính kèm tối đa " + MAX_REFLECTION_PHOTOS + " ảnh.", "Up to " + MAX_REFLECTION_PHOTOS + " photos per reflection."));
+        errors.push(t("Mỗi hương khí chỉ đính kèm tối đa " + MAX_REFLECTION_PHOTOS + " ảnh hoặc video.", "Up to " + MAX_REFLECTION_PHOTOS + " photos or videos per reflection."));
       }
 
       var addedCount = 0;
       files.slice(0, Math.max(0, remaining)).forEach(function (file, idx) {
-        var mime = String(file.type || "").toLowerCase();
-        if (!/^image\/(jpeg|jpg|png|webp)$/i.test(mime)) {
-          errors.push((file.name || "Ảnh") + ": chỉ hỗ trợ JPEG, PNG hoặc WebP.");
+        var isVid = isReflectionVideoFile(file);
+        var isImg = !isVid && isReflectionImageFile(file);
+        if (!isImg && !isVid) {
+          errors.push((file.name || "Tệp") + ": chỉ hỗ trợ ảnh JPEG/PNG/WebP hoặc video MP4/MOV/WebM.");
           return;
         }
-        if (file.size > 15 * 1024 * 1024) {
+        if (isVid && file.size > 25 * 1024 * 1024) {
+          errors.push((file.name || "Video") + ": video vượt quá giới hạn 25 MB.");
+          return;
+        }
+        if (isImg && file.size > 15 * 1024 * 1024) {
           errors.push((file.name || "Ảnh") + ": ảnh vượt quá 15 MB.");
           return;
         }
         selectedPhotos.push({
           file: file,
+          mediaType: isVid ? "video" : "image",
           objectUrl: URL.createObjectURL(file),
-          name: file.name || "pasted-" + (selectedPhotos.length + idx + 1) + ".png",
+          name: file.name || (isVid ? "video-" : "pasted-") + (selectedPhotos.length + idx + 1) + (isVid ? ".mp4" : ".png"),
         });
         addedCount += 1;
       });
@@ -1715,6 +1779,18 @@
       prPhotoClear.addEventListener("click", clearSelectedPhotos);
     }
 
+    function renderCardMediaTileInner(url, altText) {
+      if (isVideoUrl(url)) {
+        return (
+          '<video src="' + escTxt(url) + '" muted playsinline preload="metadata" aria-hidden="true"></video>' +
+          '<span class="gb-video-badge" aria-hidden="true">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>' +
+          "<span>Video</span></span>"
+        );
+      }
+      return '<img src="' + escTxt(url) + '" alt="' + escTxt(altText) + '" loading="lazy" decoding="async">';
+    }
+
     function renderCardPhotosHtml(it, captionBits) {
       var photos = Array.isArray(it.photoUrls) && it.photoUrls.length
         ? it.photoUrls
@@ -1724,10 +1800,11 @@
       if (!photos.length) return "";
 
       if (photos.length === 1) {
+        var singleVid = isVideoUrl(photos[0]);
         return (
-          '<figure class="gb-card-photo">' +
-          '<button type="button" class="gb-photo-btn" data-lightbox-src="' + escTxt(photos[0]) + '" data-lightbox-alt="Khoảnh khắc của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '">' +
-          '<img src="' + escTxt(photos[0]) + '" alt="Khoảnh khắc kỷ niệm của ' + escTxt(it.authorName) + '" loading="lazy" decoding="async">' +
+          '<figure class="gb-card-photo' + (singleVid ? " is-video" : "") + '">' +
+          '<button type="button" class="gb-photo-btn" data-lightbox-src="' + escTxt(photos[0]) + '" data-lightbox-type="' + (singleVid ? "video" : "image") + '" data-lightbox-alt="Khoảnh khắc của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '">' +
+          renderCardMediaTileInner(photos[0], "Khoảnh khắc kỷ niệm của " + it.authorName) +
           "</button></figure>"
         );
       }
@@ -1737,13 +1814,14 @@
       var countAttr = photos.length <= 4 ? String(photos.length) : "many";
       var tiles = visible
         .map(function (url, idx) {
+          var isVid = isVideoUrl(url);
           var overlay =
             idx === 3 && extraCount > 0
               ? '<span class="gb-collage-more" aria-hidden="true">+' + extraCount + "</span>"
               : "";
           return (
-            '<button type="button" class="gb-collage-tile" data-lightbox-src="' + escTxt(url) + '" data-lightbox-alt="Ảnh ' + (idx + 1) + ' của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '">' +
-            '<img src="' + escTxt(url) + '" alt="Khoảnh khắc ' + (idx + 1) + ' của ' + escTxt(it.authorName) + '" loading="lazy" decoding="async">' +
+            '<button type="button" class="gb-collage-tile' + (isVid ? " is-video" : "") + '" data-lightbox-src="' + escTxt(url) + '" data-lightbox-type="' + (isVid ? "video" : "image") + '" data-lightbox-alt="' + (isVid ? "Video " : "Ảnh ") + (idx + 1) + ' của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '">' +
+            renderCardMediaTileInner(url, "Khoảnh khắc " + (idx + 1) + " của " + it.authorName) +
             overlay +
             "</button>"
           );
@@ -1754,8 +1832,9 @@
         .slice(4)
         .map(function (url, offset) {
           var idx = 4 + offset;
+          var isVid = isVideoUrl(url);
           return (
-            '<button type="button" hidden data-lightbox-src="' + escTxt(url) + '" data-lightbox-alt="Ảnh ' + (idx + 1) + ' của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '"></button>'
+            '<button type="button" hidden data-lightbox-src="' + escTxt(url) + '" data-lightbox-type="' + (isVid ? "video" : "image") + '" data-lightbox-alt="' + (isVid ? "Video " : "Ảnh ") + (idx + 1) + ' của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '"></button>'
           );
         })
         .join("");
@@ -1764,11 +1843,11 @@
     }
 
     var MOOD_META = {
-      "am-long": t("♥ Ấm lòng", "♥ Heartwarming"),
-      "cham-sau": t("✦ Chạm sâu", "✦ Deeply moving"),
-      "biet-on": t("❋ Biết ơn", "❋ Grateful"),
-      "dang-nho": t("◈ Đáng nhớ", "◈ Memorable"),
-      "tiep-suc": t("☼ Tiếp sức", "☼ Inspiring"),
+      "am-long": t("Ấm lòng", "Heartwarming"),
+      "cham-sau": t("Chạm sâu", "Deeply moving"),
+      "biet-on": t("Biết ơn", "Grateful"),
+      "dang-nho": t("Đáng nhớ", "Memorable"),
+      "tiep-suc": t("Tiếp sức", "Inspiring"),
     };
 
     var REACTION_META = [
@@ -1789,7 +1868,7 @@
         : '<span class="gb-avatar-initials" aria-hidden="true">' + escTxt(getInitialsTxt(it.authorName)) + "</span>";
       var moodLabel = it.mood && MOOD_META[it.mood] ? MOOD_META[it.mood] : "";
       var moodHtml = moodLabel
-        ? '<span class="gb-mood-tag gb-mood-tag--' + escTxt(it.mood) + '">' + escTxt(moodLabel) + "</span>"
+        ? '<span class="gb-mood-tag gb-mood-tag--' + escTxt(it.mood) + '"><i class="mood-dot" aria-hidden="true"></i>' + escTxt(moodLabel) + "</span>"
         : "";
       var pendingBannerHtml = isPendingMine
         ? '<div class="gb-pending-banner">' +
@@ -1980,20 +2059,26 @@
 
         var uploadChain = filesToUpload.reduce(function (promise, item, idx) {
           return promise.then(function () {
+            var isVid = item.mediaType === "video" || isReflectionVideoFile(item.file);
             if (prBtn) {
               prBtn.textContent = t(
-                "Đang tải ảnh " + (idx + 1) + "/" + filesToUpload.length + "...",
-                "Uploading photo " + (idx + 1) + "/" + filesToUpload.length + "..."
+                (isVid ? "Đang tải video " : "Đang tải ảnh ") + (idx + 1) + "/" + filesToUpload.length + "...",
+                "Uploading media " + (idx + 1) + "/" + filesToUpload.length + "..."
               );
             }
-            return compressReflectionImage(item.file, 1280, 0.82).then(function (blob) {
+            var prepareBlob = isVid
+              ? Promise.resolve({ blob: item.file, filename: item.name || "reflection-" + (idx + 1) + ".mp4" })
+              : compressReflectionImage(item.file, 1280, 0.82).then(function (blob) {
+                  return { blob: blob, filename: "reflection-" + (idx + 1) + ".jpg" };
+                });
+            return prepareBlob.then(function (prepared) {
               var upFd = new FormData();
-              upFd.append("file", blob, "reflection-" + (idx + 1) + ".jpg");
+              upFd.append("file", prepared.blob, prepared.filename);
               return fetch("/api/reflections/media", { method: "POST", body: upFd })
                 .then(parseJsonSafe)
                 .then(function (upRes) {
                   if (!upRes.ok || !upRes.data || !upRes.data.url) {
-                    throw new Error(extractErrMessage(upRes.data, t("Không thể tải ảnh lên lúc này.", "Could not upload photo right now.")));
+                    throw new Error(extractErrMessage(upRes.data, t("Không thể tải tệp lên lúc này.", "Could not upload media right now.")));
                   }
                   uploadedUrls.push(upRes.data.url);
                 });

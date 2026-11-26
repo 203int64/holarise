@@ -43,15 +43,14 @@ export async function onRequestPost({ request, env }) {
   const nowIso = new Date().toISOString();
 
   const chRow = await env.DB.prepare(
-    "SELECT challenge, expires_at FROM passkey_challenges WHERE challenge = ? AND kind = 'login'"
+    "DELETE FROM passkey_challenges WHERE challenge = ? AND kind = 'login' AND expires_at > ? RETURNING challenge"
   )
-    .bind(challenge)
+    .bind(challenge, nowIso)
     .first();
 
-  if (!chRow || chRow.expires_at < nowIso) {
+  if (!chRow) {
     return errorResponse(400, "INVALID_CHALLENGE", "Phiên đăng nhập Passkey đã hết hạn. Vui lòng thử lại.");
   }
-  await env.DB.prepare("DELETE FROM passkey_challenges WHERE challenge = ?").bind(challenge).run();
 
   const pkRow = await env.DB.prepare("SELECT * FROM member_passkeys WHERE credential_id = ?")
     .bind(credentialId)
@@ -75,6 +74,9 @@ export async function onRequestPost({ request, env }) {
   const rpId = resolveRpId(request);
   const authCheck = await verifyAuthenticatorData(authenticatorData, rpId);
   if (!authCheck.ok) return errorResponse(401, "INVALID_AUTH_DATA", authCheck.error);
+  if (Number(pkRow.sign_count || 0) > 0 && authCheck.signCount > 0 && authCheck.signCount <= Number(pkRow.sign_count || 0)) {
+    return errorResponse(401, "PASSKEY_REPLAY", "Phát hiện chữ ký sinh trắc học không hợp lệ.");
+  }
 
   const validSig = await verifyAssertionSignature({
     publicKeySpki: pkRow.public_key_spki,

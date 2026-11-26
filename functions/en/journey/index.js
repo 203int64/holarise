@@ -1,3 +1,4 @@
+import { canActorViewAlbum, ensureDeepControlSchema, resolveActorContext } from "../../_lib/media-access.js";
 import { ensureMediaApprovalSchema } from "../../_lib/media-approval-schema.js";
 import {
   renderNewsCardsHtml,
@@ -14,7 +15,8 @@ export async function onRequestGet({ request, env }) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
 
-  await ensureMediaApprovalSchema(env.DB);
+  await Promise.all([ensureMediaApprovalSchema(env.DB), ensureDeepControlSchema(env.DB)]);
+  const actor = await resolveActorContext(env, request);
 
   const [assetRes, postsRes, albumsRes, photosRes] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
@@ -61,6 +63,7 @@ export async function onRequestGet({ request, env }) {
     }
   }
 
+  let renderedRestricted = false;
   if (albumsRes && photosRes) {
     const photosByAlbum = new Map();
     for (const row of photosRes.results || []) {
@@ -74,8 +77,17 @@ export async function onRequestGet({ request, env }) {
       });
     }
 
-    const albumsWithPhotos = (albumsRes.results || [])
-      .map((a) => ({
+    const visibleAlbums = [];
+    for (const a of albumsRes.results || []) {
+      const photos = photosByAlbum.get(a.id) || [];
+      if (photos.length === 0) continue;
+      const vis = String(a.visibility || "public").toLowerCase();
+      if (vis !== "public") {
+        const allowed = await canActorViewAlbum(env.DB, a, actor);
+        if (!allowed) continue;
+        renderedRestricted = true;
+      }
+      visibleAlbums.push({
         id: a.id,
         slug: a.slug,
         title: a.title,
@@ -86,13 +98,13 @@ export async function onRequestGet({ request, env }) {
         filters: safeJsonParse(a.filters_json, []),
         driveUrl: a.drive_url || "",
         coverUrl: a.cover_url || "",
-        photos: photosByAlbum.get(a.id) || [],
-      }))
-      .filter((a) => a.photos.length > 0);
+        photos,
+      });
+    }
 
-    if (albumsWithPhotos.length > 0) {
-      html = replaceMarker(html, "D1_ALBUMS", renderPublicAlbumsHtml(albumsWithPhotos, "en"));
-      const hasD1Event1511 = albumsWithPhotos.some(
+    if (visibleAlbums.length > 0) {
+      html = replaceMarker(html, "D1_ALBUMS", renderPublicAlbumsHtml(visibleAlbums, "en"));
+      const hasD1Event1511 = visibleAlbums.some(
         (a) => a.id === "alb-holaheart-2026-11-15" || a.eventDate === "2026-11-15"
       );
       if (hasD1Event1511) {
@@ -103,7 +115,8 @@ export async function onRequestGet({ request, env }) {
 
   const headers = new Headers(assetRes.headers);
   headers.set("Content-Type", "text/html; charset=utf-8");
-  headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+  headers.set("Cache-Control", renderedRestricted ? "private, no-store" : "public, max-age=0, must-revalidate");
+  headers.set("Vary", "Cookie");
   headers.delete("Content-Length");
   headers.delete("ETag");
 

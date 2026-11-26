@@ -11,7 +11,7 @@ import { serializeAdminEventFeedback } from "./index.js";
 const FEEDBACK_ADMIN_ROLES = ["super_admin", "editor"];
 
 export async function onRequestPatch(context) {
-  const auth = await requireAdmin(context, { allowedRoles: FEEDBACK_ADMIN_ROLES });
+  const auth = await requireAdmin(context);
   if (!auth.ok) return auth.response;
 
   const { env, request, params } = context;
@@ -49,7 +49,7 @@ export async function onRequestPatch(context) {
 }
 
 export async function onRequestDelete(context) {
-  const auth = await requireAdmin(context, { allowedRoles: FEEDBACK_ADMIN_ROLES });
+  const auth = await requireAdmin(context);
   if (!auth.ok) return auth.response;
 
   const { env, params } = context;

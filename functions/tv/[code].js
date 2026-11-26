@@ -15,6 +15,18 @@ function formatJoinDate(iso) {
   return `${d}/${m}/${y}`;
 }
 
+function safeImgUrl(url) {
+  const s = String(url || "").trim();
+  if (!s) return "";
+  if (s.startsWith("/") && !s.startsWith("//")) return s;
+  try {
+    const parsed = new URL(s);
+    return parsed.protocol === "https:" ? s : "";
+  } catch {
+    return "";
+  }
+}
+
 function getInitials(name) {
   const parts = String(name || "HR").trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "HR";
@@ -91,15 +103,15 @@ export async function onRequestGet({ params, request, env }) {
     .all()
     .catch(() => ({ results: [] }));
 
-  // Approved reflections / memories authored by this member (public-safe only)
+  // Approved reflections authored specifically by this member_id (avoids same-name collision across members)
   const refRows = await env.DB.prepare(
     `SELECT id, pull_quote, content, photo_url, activity_slug, created_at
-     FROM community_testimonials
-     WHERE status = 'approved' AND author_name = ?
+     FROM activity_reflections
+     WHERE status = 'approved' AND member_id = ?
      ORDER BY created_at DESC
      LIMIT 6`
   )
-    .bind(member.name)
+    .bind(member.id)
     .all()
     .catch(() => ({ results: [] }));
 
@@ -117,8 +129,9 @@ export async function onRequestGet({ params, request, env }) {
   const reflections = refRows?.results || [];
   const verifiedCount = activities.length;
 
-  const avatarHtml = member.avatar_url
-    ? `<img src="${escHtml(member.avatar_url)}" alt="${escHtml(member.name)}" width="88" height="88" loading="eager" style="width:88px;height:88px;border-radius:999px;object-fit:cover;border:2px solid #fff;box-shadow:0 6px 20px rgba(11,17,15,0.1);">`
+  const safeAvatar = safeImgUrl(member.avatar_url);
+  const avatarHtml = safeAvatar
+    ? `<img src="${escHtml(safeAvatar)}" alt="${escHtml(member.name)}" width="88" height="88" loading="eager" style="width:88px;height:88px;border-radius:999px;object-fit:cover;border:2px solid #fff;box-shadow:0 6px 20px rgba(11,17,15,0.1);">`
     : `<div aria-hidden="true" style="width:88px;height:88px;border-radius:999px;display:grid;place-items:center;font-weight:700;font-size:1.5rem;letter-spacing:0.04em;color:#fff;background:${pillar.accent};box-shadow:0 6px 20px rgba(11,17,15,0.12);">${escHtml(getInitials(member.name))}</div>`;
 
   const activitiesHtml =
@@ -130,8 +143,9 @@ export async function onRequestGet({ params, request, env }) {
             const href = item.event_slug
               ? `${isEn ? "/en/events/" : "/su-kien/"}${encodeURIComponent(item.event_slug)}/`
               : "";
-            const imgHtml = item.event_image
-              ? `<img src="${escHtml(item.event_image)}" alt="${escHtml(title)}" loading="lazy">`
+            const safeEvImg = safeImgUrl(item.event_image);
+            const imgHtml = safeEvImg
+              ? `<img src="${escHtml(safeEvImg)}" alt="${escHtml(title)}" loading="lazy">`
               : `<div class="tv-event-placeholder">${escHtml(pillar.label)}</div>`;
             const statusBadge = isEn
               ? item.status === "attended"
@@ -160,14 +174,17 @@ export async function onRequestGet({ params, request, env }) {
           <div class="tv-ref-list">
             ${reflections
               .map(
-                (r) => `<article class="tv-ref-card">
-                ${r.photo_url ? `<img src="${escHtml(r.photo_url)}" alt="${isEn ? "HolaRise memory photo" : "Ảnh kỷ niệm cùng HolaRise"}" class="tv-ref-photo" loading="lazy">` : ""}
+                (r) => {
+                  const safeRefPhoto = safeImgUrl(r.photo_url);
+                  return `<article class="tv-ref-card">
+                ${safeRefPhoto ? `<img src="${escHtml(safeRefPhoto)}" alt="${isEn ? "HolaRise memory photo" : "Ảnh kỷ niệm cùng HolaRise"}" class="tv-ref-photo" loading="lazy">` : ""}
                 <div class="tv-ref-copy">
                   ${r.pull_quote ? `<blockquote>“${escHtml(r.pull_quote)}”</blockquote>` : ""}
                   <p>${escHtml(r.content)}</p>
                   <span class="tv-ref-date">${escHtml(formatJoinDate(r.created_at))}</span>
                 </div>
-              </article>`
+              </article>`;
+                }
               )
               .join("")}
           </div>

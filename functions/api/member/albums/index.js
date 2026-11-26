@@ -77,6 +77,7 @@ export async function onRequestGet(context) {
     driveConfigured,
     storage: driveConfigured ? "google_drive" : "media_kv",
     maxUploadBytes: driveConfigured ? MAX_DRIVE_UPLOAD_BYTES : MAX_KV_UPLOAD_BYTES,
+    maxVideoUploadBytes: driveConfigured ? 50 * 1024 * 1024 : 10 * 1024 * 1024,
     hourlyLimit: 60,
   });
 }

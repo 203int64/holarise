@@ -19,6 +19,13 @@ import { ensureReflectionsSchema } from "../_lib/security.js";
 
 const DEFAULT_ZALO_GROUP = "https://zalo.me/g/7fock88aizzrdkmr9ggf";
 
+function isVideoRow(p) {
+  return (
+    p?.media_type === "video" ||
+    /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(p?.url || ""))
+  );
+}
+
 function renderMemoryGalleryHtml(photos, ev, albumId) {
   const safeEventId = escHtml(ev.id || "");
   const safeSlug = escHtml(resolveEventSlug(ev) || "");
@@ -36,15 +43,26 @@ function renderMemoryGalleryHtml(photos, ev, albumId) {
       const alt = p.alt || caption;
       const credit = p.photographer ? ` · Ảnh: ${p.photographer}` : "";
       const fullCap = `${caption}${credit}`;
-      return `<button class="archive-thumb memory-stage-thumb" type="button" aria-label="Xem ảnh ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(fullImageUrl(p.url))}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCap)}">
-        <img ${imageAttrs(p.url, "(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 280px")} alt="${escHtml(alt)}" width="480" height="360" loading="lazy" decoding="async">
+      const isVideo =
+        p.media_type === "video" ||
+        /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(p.url || ""));
+      const isLead = idx === 0 && photos.length >= 3;
+      const mediaInner = isVideo
+        ? `<video src="${escHtml(p.url)}" muted playsinline preload="metadata" aria-hidden="true"></video>
+           <span class="memory-video-badge" aria-hidden="true">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+             <span>Video</span>
+           </span>`
+        : `<img ${imageAttrs(p.url, isLead ? "(max-width: 820px) 94vw, 560px" : "(max-width: 640px) 46vw, 280px")} alt="${escHtml(alt)}" width="480" height="360" loading="lazy" decoding="async">`;
+      return `<button class="archive-thumb memory-stage-thumb${isLead ? " is-lead" : ""}${isVideo ? " is-video" : ""}" type="button" aria-label="Xem ${isVideo ? "video" : "ảnh"} ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(isVideo ? p.url : fullImageUrl(p.url))}" data-lightbox-type="${isVideo ? "video" : "image"}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCap)}">
+        ${mediaInner}
         <span class="archive-thumb-idx" aria-hidden="true">${pad2(idx + 1)}</span>
-        <span class="archive-thumb-cap" aria-hidden="true">${escHtml(p.photographer ? `Ảnh: ${p.photographer}` : caption)}</span>
+        <span class="archive-thumb-cap" aria-hidden="true">${escHtml(p.photographer || caption)}</span>
       </button>`;
     })
     .join("\n        ");
 
-  return `<div class="archive-contact-sheet memory-contact-sheet">
+  return `<div class="memory-exhibition-grid">
         ${tiles}
       </div>`;
 }
@@ -98,7 +116,8 @@ async function renderMemoryStageResponse({ request, env, matched, slug }) {
   const [photosRes, refCountRow] = await Promise.all([
     albumId && canViewGallery
       ? env.DB.prepare(
-          `SELECT id, COALESCE(NULLIF(web_url, ''), url) AS url, caption, alt, photographer
+          `SELECT id, COALESCE(NULLIF(web_url, ''), url) AS url, caption, alt, photographer,
+                  COALESCE(NULLIF(media_type, ''), 'image') AS media_type
            FROM media_photos
            WHERE album_id = ? AND COALESCE(approval_status, 'approved') = 'approved'
            ORDER BY sort_order ASC, created_at DESC
@@ -120,7 +139,15 @@ async function renderMemoryStageResponse({ request, env, matched, slug }) {
   const approvedRefCount = Number(refCountRow?.cnt || 0);
   const pillarMeta = derivePillarMeta(matched);
   const canonicalUrl = absUrl(`/su-kien/${slug}/`);
-  const ogImage = (!isRestrictedAlbum && approvedPhotos[0]?.url) || (!isRestrictedAlbum && album?.cover_url) || matched.image;
+  const firstApprovedImg = !isRestrictedAlbum
+    ? approvedPhotos.find((p) => !isVideoRow(p))
+    : null;
+  const coverImage =
+    firstApprovedImg?.url ||
+    (!isRestrictedAlbum && album?.cover_url) ||
+    matched.image ||
+    "/assets/images/og-cover.jpg";
+  const ogImage = coverImage;
   const cleanDisplayTitle =
     String(matched.title || "")
       .replace(new RegExp(`^${pillarMeta.label}\\s*[·\\-–—:]\\s*`, "i"), "")
@@ -161,6 +188,7 @@ async function renderMemoryStageResponse({ request, env, matched, slug }) {
         "Những khoảnh khắc, lời chia sẻ và góc nhìn của những người đã đồng hành trong buổi gặp này."
     ),
     __SSR_MEMORY_ALBUM_ID__: escHtml(albumId),
+    __SSR_MEMORY_COVER_IMAGE__: escHtml(coverImage),
     __SSR_MEMORY_STATS_INLINE_HTML__: statsInlineHtml,
     __SSR_MEMORY_GALLERY_HTML__: galleryHtml,
   };

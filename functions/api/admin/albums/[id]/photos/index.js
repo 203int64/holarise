@@ -68,14 +68,18 @@ export async function onRequestPost(context) {
     const approvedBy = approvalStatus === "approved" ? auth.user.email : "";
     const approvedAt = approvalStatus === "approved" ? now : "";
 
+    const mediaType =
+      rawItem.mediaType === "video" || /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(p.url || ""))
+        ? "video"
+        : "image";
     stmts.push(
       context.env.DB.prepare(
         `INSERT INTO media_photos (
            id, album_id, media_key, url, caption, alt, photographer,
-           is_featured_home, sort_order, uploaded_by,
+           is_featured_home, sort_order, uploaded_by, media_type,
            approval_status, web_url, web_media_key, approved_by, approved_at,
            created_at, updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', '', ?, ?, ?, ?)`
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', '', ?, ?, ?, ?)`
       ).bind(
         id,
         albumId,
@@ -87,6 +91,7 @@ export async function onRequestPost(context) {
         isFeaturedHome,
         sortOrder,
         auth.user.email,
+        mediaType,
         approvalStatus,
         approvedBy,
         approvedAt,

@@ -13973,3 +13973,10 @@ dialog.contribute-dialog::backdrop {
   background: var(--surface, #f7f7f5);
   border: 1px solid var(--line);
 }
+
+/* Zalo WebView & Mobile Paint Optimization: defer off-screen layout/paint */
+.manifesto-section,
+.site-footer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 520px;
+}

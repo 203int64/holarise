@@ -139,6 +139,35 @@ def format_inline_pillar_tags(text: str, lang: str = "vi") -> str:
     return safe
 
 
+def minify_css(css_text: str) -> str:
+    """Safe, dependency-free CSS minifier: preserves quoted strings, url(), and calc() spacing."""
+    tokens = []
+    # Tokenize strings, url(...), and comments so we never corrupt data URIs or content values.
+    pattern = re.compile(r'("(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|url\([^)]*\)|/\*[\s\S]*?\*/)')
+    pos = 0
+    for m in pattern.finditer(css_text):
+        chunk = css_text[pos:m.start()]
+        if chunk:
+            chunk = re.sub(r"\s+", " ", chunk)
+            chunk = re.sub(r"\s*([{}:;,>~])\s*", r"\1", chunk)
+            chunk = chunk.replace(";}", "}")
+            tokens.append(chunk)
+        tok = m.group(0)
+        if not tok.startswith("/*"):
+            tokens.append(tok)
+        pos = m.end()
+    tail = css_text[pos:]
+    if tail:
+        tail = re.sub(r"\s+", " ", tail)
+        tail = re.sub(r"\s*([{}:;,>~])\s*", r"\1", tail)
+        tail = tail.replace(";}", "}")
+        tokens.append(tail)
+    # Restore required space after media-query/supports keywords like `and(` or `not(`
+    out = "".join(tokens).strip()
+    out = re.sub(r"\b(and|or|not)\(", r"\1 (", out)
+    return out
+
+
 def render_template(template: str, mapping: dict) -> str:
     result = template
     for key, val in mapping.items():
@@ -1634,6 +1663,7 @@ def write_page(
     robots: str = "index, follow",
     cache_bust: str = None,
     event_schemas: list = None,
+    preload_image: str = None,
 ):
     b = site["brand"]
     c = site["contact"]
@@ -1690,6 +1720,29 @@ def write_page(
     brand_en_name = b.get("englishName", "HolaRise – Youth Community & Social Impact Initiative")
     contact_address_en = c.get("addressEn") or "Tan Xa, Hoa Lac, Thach That, Hanoi, Vietnam"
 
+    resolved_cache_bust = esc(cache_bust or CURRENT_BUILD_HASH)
+    gsap_body_classes = {"page-home", "page-about", "page-news", "page-journey"}
+    body_tokens = set(str(body_class or "").split())
+    if body_tokens & gsap_body_classes:
+        gsap_scripts = (
+            f'  <script src="/assets/vendor/gsap.min.js?v={resolved_cache_bust}" defer></script>\n'
+            f'  <script src="/assets/vendor/ScrollTrigger.min.js?v={resolved_cache_bust}" defer></script>\n'
+        )
+    else:
+        gsap_scripts = ""
+
+    extra_head_parts = []
+    if preload_image:
+        extra_head_parts.append(
+            f'\n  <link rel="preload" as="image" href="{esc(preload_image)}" fetchpriority="high">'
+        )
+    turnstile_sitekey = (site.get("seo", {}).get("turnstileSiteKey") or "").strip()
+    if turnstile_sitekey:
+        extra_head_parts.append(
+            f'\n  <meta name="holarise-turnstile-sitekey" content="{esc(turnstile_sitekey)}">'
+        )
+    extra_head_html = "".join(extra_head_parts)
+
     rendered = render_template(
         base_tpl,
         {
@@ -1733,7 +1786,9 @@ def write_page(
             "CONTACT_SOCIAL_LINKS_LI": contact_social_links_li,
             "FORM_ENDPOINT": esc(c.get("formEndpoint", "")),
             "CURRENT_YEAR": str(datetime.date.today().year),
-            "CACHE_BUST": esc(cache_bust or CURRENT_BUILD_HASH),
+            "CACHE_BUST": resolved_cache_bust,
+            "EXTRA_HEAD_HTML": extra_head_html,
+            "GSAP_SCRIPTS": gsap_scripts,
             "JSON_LD_SCRIPTS": json_ld_html,
         },
     )
@@ -2226,6 +2281,9 @@ def build_site() -> list:
         shutil.rmtree(DIST_DIR)
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     shutil.copytree(ASSETS_DIR, DIST_DIR / "assets")
+    for css_file in (DIST_DIR / "assets" / "css").glob("*.css"):
+        raw_css = css_file.read_text(encoding="utf-8")
+        css_file.write_text(minify_css(raw_css), encoding="utf-8")
     favicon_ico_src = ASSETS_DIR / "images" / "favicon.ico"
     if favicon_ico_src.is_file():
         shutil.copy2(favicon_ico_src, DIST_DIR / "favicon.ico")
@@ -2644,6 +2702,7 @@ def build_site() -> list:
             "EVENT_LOCATION": "__SSR_EVENT_LOCATION__",
             "EVENT_SUMMARY": "__SSR_EVENT_SUMMARY__",
             "MEMORY_ALBUM_ID": "__SSR_MEMORY_ALBUM_ID__",
+            "MEMORY_COVER_IMAGE": "__SSR_MEMORY_COVER_IMAGE__",
             "MEMORY_STATS_INLINE_HTML": "__SSR_MEMORY_STATS_INLINE_HTML__",
             "MEMORY_GALLERY_HTML": "__SSR_MEMORY_GALLERY_HTML__",
         },

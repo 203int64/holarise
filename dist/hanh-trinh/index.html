@@ -48,10 +48,11 @@
   <!-- Vietnamese-native Editorial Typography: Be Vietnam Pro (UI/Display) + Lora (Manifesto/Quotes) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" crossorigin onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=f93132a082">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=3d5c3b1c66">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -911,6 +912,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <img id="lightbox-img" alt="">
+        <video id="lightbox-video" class="lightbox-video" controls playsinline preload="metadata" hidden></video>
         <button class="lightbox-nav lightbox-nav--next" type="button" data-lightbox-next aria-label="Ảnh tiếp theo">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
@@ -959,145 +961,175 @@
     </div>
   </aside>
 
-  <!-- Native HTML5 <dialog> Đóng Góp Sau Buổi Gặp (2 Tab: Góp ý kín / Động viên & Góp ảnh gốc lên Google Drive) -->
+  <!-- Native HTML5 <dialog> Đóng Góp Sau Buổi Gặp (2 Tab: Góp ý kín & Gửi ảnh/video gốc lên Google Drive) -->
   <dialog class="club-dialog contribute-dialog" id="member-contribute-dialog" closedby="any" aria-labelledby="contribute-dlg-title">
-    <div class="dialog-inner contribute-dlg-inner">
-      <form method="dialog" class="contribute-dlg-close-form">
-        <button class="modal-close" type="submit" value="cancel" aria-label="Đóng cửa sổ đóng góp">×</button>
-      </form>
+    <div class="contribute-dlg-shell">
+      <div class="contribute-dlg-header">
+        <div class="contribute-dlg-header-top">
+          <div class="contribute-dlg-title-group">
+            <h1 id="contribute-dlg-title" class="contribute-dlg-title">Đóng góp cho buổi gặp</h1>
+            <p class="contribute-dlg-sub" id="contribute-dlg-event-label" hidden></p>
+          </div>
+          <form method="dialog" class="contribute-dlg-close-form">
+            <button class="contribute-close-btn" type="submit" value="cancel" aria-label="Đóng cửa sổ đóng góp">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </form>
+        </div>
 
-      <header class="contribute-dlg-head">
-        <span class="kicker" id="contribute-dlg-kicker">Đóng góp cho buổi gặp</span>
-        <h1 id="contribute-dlg-title" class="contribute-dlg-title">Góp ý &amp; Góp ảnh kỷ niệm</h1>
-        <p class="contribute-dlg-lead" id="contribute-dlg-event-label" hidden></p>
-      </header>
-
-      <div class="contribute-tabs" role="tablist" aria-label="Hình thức đóng góp">
-        <button type="button" class="contribute-tab-btn is-active" role="tab" id="tab-btn-feedback" aria-selected="true" aria-controls="panel-contrib-feedback" data-contrib-tab-btn="feedback">Góp ý &amp; Động viên</button>
-        <button type="button" class="contribute-tab-btn" role="tab" id="tab-btn-photos" aria-selected="false" aria-controls="panel-contrib-photos" data-contrib-tab-btn="photos">Tải ảnh gốc lên Drive</button>
+        <div class="contribute-tabs" role="tablist" aria-label="Hình thức đóng góp">
+          <button type="button" class="contribute-tab-btn is-active" role="tab" id="tab-btn-feedback" aria-selected="true" aria-controls="panel-contrib-feedback" data-contrib-tab-btn="feedback">Góp ý &amp; Động viên</button>
+          <button type="button" class="contribute-tab-btn" role="tab" id="tab-btn-photos" aria-selected="false" aria-controls="panel-contrib-photos" data-contrib-tab-btn="photos">Gửi ảnh &amp; Video gốc</button>
+        </div>
       </div>
 
-      <!-- TAB 1: ĐÓNG GÓP BẰNG LỜI (MỞ CHO CẢ KHÁCH & THÀNH VIÊN, HỖ TRỢ ẨN DANH) -->
-      <div class="contribute-tab-panel" id="panel-contrib-feedback" role="tabpanel" aria-labelledby="tab-btn-feedback">
-        <form class="contribute-form" id="event-feedback-form" novalidate>
-          <input type="hidden" name="eventId" id="ef-event-id" value="">
-          <input type="hidden" name="eventSlug" id="ef-event-slug" value="">
-          <input type="hidden" name="eventTitle" id="ef-event-title" value="">
-          <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
-            <label for="ef-website">Website</label>
-            <input id="ef-website" name="website" type="text" tabindex="-1" autocomplete="off">
-          </div>
+      <div class="contribute-dlg-body">
+        <!-- TAB 1: ĐÓNG GÓP BẰNG LỜI (MỞ CHO CẢ KHÁCH & THÀNH VIÊN, HỖ TRỢ ẨN DANH) -->
+        <div class="contribute-tab-panel" id="panel-contrib-feedback" role="tabpanel" aria-labelledby="tab-btn-feedback">
+          <form class="contribute-form" id="event-feedback-form" novalidate>
+            <input type="hidden" name="eventId" id="ef-event-id" value="">
+            <input type="hidden" name="eventSlug" id="ef-event-slug" value="">
+            <input type="hidden" name="eventTitle" id="ef-event-title" value="">
+            <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
+              <label for="ef-website">Website</label>
+              <input id="ef-website" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
 
-          <fieldset class="auth-fieldset">
-            <legend class="gb-mood-legend">Bạn muốn nhắn điều gì tới Ban Điều Phối?</legend>
-            <div class="feedback-kind-pills" role="radiogroup">
-              <label class="feedback-kind-opt">
+            <div class="ef-category-pills" role="radiogroup" aria-label="Phân loại góp ý">
+              <label class="ef-cat-opt">
                 <input class="visually-hidden" type="radio" name="category" value="cai-thien" checked>
                 <span>Cần cải thiện</span>
               </label>
-              <label class="feedback-kind-opt">
+              <label class="ef-cat-opt">
                 <input class="visually-hidden" type="radio" name="category" value="dong-vien">
                 <span>Lời động viên</span>
               </label>
-              <label class="feedback-kind-opt">
+              <label class="ef-cat-opt">
                 <input class="visually-hidden" type="radio" name="category" value="de-xuat">
                 <span>Đề xuất chặng tới</span>
               </label>
             </div>
-          </fieldset>
 
-          <div class="field">
-            <label for="ef-content">Nội dung góp ý <span aria-hidden="true">*</span></label>
-            <textarea id="ef-content" name="content" rows="4" minlength="8" maxlength="1500" required placeholder="Khâu đón tiếp, âm thanh, thời lượng có điểm nào chưa ổn — hoặc một lời nhắn động viên đội ngũ..."></textarea>
-          </div>
-
-          <label class="gb-anon-toggle ef-anon-row">
-            <input type="checkbox" id="ef-anon-check" name="isAnonymous">
-            <span>Gửi ẩn danh hoàn toàn (không lưu tên hay liên hệ của bạn)</span>
-          </label>
-
-          <div class="form-row-2" id="ef-identity-row">
-            <div class="field">
-              <label for="ef-name">Tên gọi <span class="auth-hint-inline">(tùy chọn)</span></label>
-              <input id="ef-name" name="authorName" type="text" maxlength="100" placeholder="Bỏ trống để gửi ẩn danh">
+            <div class="ef-field">
+              <label for="ef-content" class="ef-label">Chia sẻ của bạn</label>
+              <textarea id="ef-content" name="content" rows="4" minlength="8" maxlength="1500" required placeholder="Khâu đón tiếp, âm thanh, thời lượng có điểm nào chưa ổn — hoặc một lời nhắn động viên đội ngũ..."></textarea>
             </div>
-            <div class="field">
-              <label for="ef-contact">Zalo / Email <span class="auth-hint-inline">(nếu muốn nhận phản hồi)</span></label>
-              <input id="ef-contact" name="authorContact" type="text" maxlength="120" placeholder="Không bắt buộc">
+
+            <!-- Compact Identity & Anonymous Switch Row (no misaligned double inputs for signed-in members) -->
+            <div class="ef-identity-card" id="ef-member-identity-bar" hidden>
+              <div class="ef-identity-left">
+                <span class="gb-member-avatar" id="ef-member-avatar" aria-hidden="true">H</span>
+                <div class="gb-member-info">
+                  <strong id="ef-member-name">Thành viên HolaRise</strong>
+                  <span id="ef-member-sub">Gửi kèm thông tin của bạn</span>
+                </div>
+              </div>
+              <label class="ef-switch-wrap">
+                <input type="checkbox" id="ef-anon-check" name="isAnonymous" class="ef-switch-input">
+                <span class="ef-switch-track" aria-hidden="true"></span>
+                <span class="ef-switch-label">Ẩn danh</span>
+              </label>
             </div>
-          </div>
 
-          <div class="form-status" id="ef-status" role="status" aria-live="polite"></div>
+            <div id="ef-guest-identity-wrap">
+              <div class="ef-guest-head">
+                <span class="ef-label">Thông tin người gửi</span>
+                <label class="ef-switch-wrap">
+                  <input type="checkbox" id="ef-guest-anon-check" class="ef-switch-input">
+                  <span class="ef-switch-track" aria-hidden="true"></span>
+                  <span class="ef-switch-label">Gửi ẩn danh</span>
+                </label>
+              </div>
+              <div class="ef-grid-2" id="ef-identity-row">
+                <div class="ef-field">
+                  <label for="ef-name" class="ef-label">Tên gọi</label>
+                  <input id="ef-name" name="authorName" type="text" maxlength="100" placeholder="Không bắt buộc">
+                </div>
+                <div class="ef-field">
+                  <label for="ef-contact" class="ef-label">Zalo hoặc Email</label>
+                  <input id="ef-contact" name="authorContact" type="text" maxlength="120" placeholder="Nếu muốn nhận phản hồi">
+                </div>
+              </div>
+            </div>
 
-          <div class="contribute-actions">
-            <button type="submit" class="btn btn--primary" id="ef-submit-btn">Gửi kín tới Ban Điều Phối</button>
-          </div>
-          <p class="contribute-safeguard-note">Góp ý bằng lời chỉ hiển thị riêng cho Ban Điều Phối trong trang quản trị — không bao giờ công khai lên website.</p>
-        </form>
-      </div>
+            <div class="form-status" id="ef-status" role="status" aria-live="polite"></div>
 
-      <!-- TAB 2: ĐÓNG GÓP ẢNH GỐC (BẮT BUỘC THÀNH VIÊN, VÀO THƯ MỤC CHUẨN HÓA + KIỂM DUYỆT /MEDIA/) -->
-      <div class="contribute-tab-panel" id="panel-contrib-photos" role="tabpanel" aria-labelledby="tab-btn-photos" hidden>
-        <div class="gb-member-gate contribute-photo-gate" id="contribute-photo-auth-gate" hidden>
-          <div class="gb-member-gate-copy">
-            <strong>Đăng nhập Thành viên Hola để tải ảnh gốc lên kho sự kiện</strong>
-            <p>Ảnh gốc (tối đa 25 MB/tấm, không giới hạn số lượng) được xếp vào thư mục chuẩn hóa riêng trên Google Drive và qua kiểm duyệt tại <code>/media/</code> trước khi hiện công khai.</p>
-          </div>
-          <div class="gb-member-gate-actions">
-            <button type="button" class="btn btn--primary btn--sm" id="contribute-photo-signin-btn">Đăng nhập Thành viên</button>
-          </div>
+            <div class="contribute-submit-stack">
+              <button type="submit" class="btn btn--primary contribute-submit-full" id="ef-submit-btn">Gửi kín tới Ban Điều Phối</button>
+              <p class="contribute-safeguard-note">Chỉ Ban Điều Phối đọc được — không hiển thị công khai.</p>
+            </div>
+          </form>
         </div>
 
-        <div id="contribute-photo-member-body">
-          <div class="contribute-member-strip" id="contribute-member-strip">
-            <span class="gb-member-avatar" id="contribute-member-avatar" aria-hidden="true">H</span>
-            <div class="gb-member-info">
-              <strong id="contribute-member-name">Thành viên HolaRise</strong>
-              <span id="contribute-member-sub">Lưu vào thư mục chuẩn hóa dong-gop/ riêng của bạn</span>
+        <!-- TAB 2: ĐÓNG GÓP ẢNH & VIDEO GỐC (BẮT BUỘC THÀNH VIÊN, VÀO THƯ MỤC CHUẨN HÓA + KIỂM DUYỆT /MEDIA/) -->
+        <div class="contribute-tab-panel" id="panel-contrib-photos" role="tabpanel" aria-labelledby="tab-btn-photos" hidden>
+          <div class="gb-member-gate contribute-photo-gate" id="contribute-photo-auth-gate" hidden>
+            <div class="gb-member-gate-copy">
+              <strong>Đăng nhập Thành viên Hola để gửi ảnh &amp; video gốc</strong>
+              <p>Tệp gốc (ảnh ≤ 25 MB, video ≤ 50 MB) được xếp vào thư mục chuẩn hóa riêng trên Google Drive và qua kiểm duyệt tại <code>/media/</code>.</p>
+            </div>
+            <div class="gb-member-gate-actions">
+              <button type="button" class="btn btn--primary btn--sm" id="contribute-photo-signin-btn">Đăng nhập Thành viên</button>
             </div>
           </div>
 
-          <form class="contribute-form" id="member-contribute-form" novalidate>
-            <div class="field">
-              <label for="contribute-album-select">Chọn sự kiện / bộ ảnh <span aria-hidden="true">*</span></label>
-              <select id="contribute-album-select" name="albumId" required>
-                <option value="">Đang tải danh sách bộ ảnh...</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="contribute-credit">Tên ghi nhận tác giả (Credit)</label>
-              <input id="contribute-credit" name="photographer" type="text" maxlength="100" placeholder="Ví dụ: Minh Anh">
-            </div>
-
-            <div class="field">
-              <label for="contribute-files">Chọn ảnh gốc (JPEG, PNG, WebP · tối đa 25 MB/tấm)</label>
-              <input id="contribute-files" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
-              <div class="contribute-dropzone" id="contribute-dropzone">
-                <button type="button" class="btn btn--outline btn--sm" id="contribute-pick-btn">Chọn ảnh từ máy</button>
-                <span class="contribute-dropzone-hint" id="contribute-files-hint">Hỗ trợ dán ảnh (Ctrl+V / ⌘V) hoặc chọn nhiều ảnh một lần — tải tuần tự để không rớt mạng.</span>
+          <div id="contribute-photo-member-body">
+            <div class="ef-identity-card" id="contribute-member-strip">
+              <div class="ef-identity-left">
+                <span class="gb-member-avatar" id="contribute-member-avatar" aria-hidden="true">H</span>
+                <div class="gb-member-info">
+                  <strong id="contribute-member-name">Thành viên HolaRise</strong>
+                  <span id="contribute-member-sub">Lưu vào thư mục chuẩn hóa dong-gop/</span>
+                </div>
               </div>
             </div>
 
-            <div class="contribute-queue" id="contribute-queue" hidden>
-              <div class="contribute-queue-head">
-                <strong id="contribute-queue-summary">0 ảnh đã chọn</strong>
-                <button type="button" class="gb-photo-clear" id="contribute-clear-btn">Xóa danh sách</button>
+            <form class="contribute-form" id="member-contribute-form" novalidate>
+              <div class="ef-grid-2">
+                <div class="ef-field">
+                  <label for="contribute-album-select" class="ef-label">Bộ ảnh sự kiện</label>
+                  <select id="contribute-album-select" name="albumId" required>
+                    <option value="">Đang tải...</option>
+                  </select>
+                </div>
+                <div class="ef-field">
+                  <label for="contribute-credit" class="ef-label">Tên tác giả (Credit)</label>
+                  <input id="contribute-credit" name="photographer" type="text" maxlength="100" placeholder="Ví dụ: Minh Anh">
+                </div>
               </div>
-              <div class="contribute-progress" id="contribute-progress" hidden>
-                <div class="contribute-progress-bar" id="contribute-progress-bar" style="width: 0%;"></div>
+
+              <div class="ef-field">
+                <label for="contribute-files" class="ef-label">Ảnh &amp; Video gốc</label>
+                <input id="contribute-files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" multiple hidden>
+                <button type="button" class="contribute-dropzone" id="contribute-pick-btn">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <span class="contribute-dropzone-title">Chọn ảnh hoặc video từ máy</span>
+                  <span class="contribute-dropzone-hint" id="contribute-files-hint">Ảnh ≤ 25 MB · Video MP4/MOV/WebM ≤ 50 MB · Hỗ trợ dán ảnh Ctrl+V</span>
+                </button>
               </div>
-              <ul class="contribute-file-list" id="contribute-file-list" aria-live="polite"></ul>
-            </div>
 
-            <div class="form-status" id="contribute-status" role="status" aria-live="polite"></div>
+              <div class="contribute-queue" id="contribute-queue" hidden>
+                <div class="contribute-queue-head">
+                  <strong id="contribute-queue-summary">0 tệp đã chọn</strong>
+                  <button type="button" class="gb-photo-clear" id="contribute-clear-btn">Xóa danh sách</button>
+                </div>
+                <div class="contribute-progress" id="contribute-progress" hidden>
+                  <div class="contribute-progress-bar" id="contribute-progress-bar" style="width: 0%;"></div>
+                </div>
+                <ul class="contribute-file-list" id="contribute-file-list" aria-live="polite"></ul>
+              </div>
 
-            <div class="contribute-actions">
-              <button type="button" class="btn btn--outline btn--sm" id="contribute-stop-btn" hidden>Dừng tải tiếp</button>
-              <button type="submit" class="btn btn--primary" id="contribute-submit-btn" disabled>Gửi ảnh vào thư mục sự kiện</button>
-            </div>
-            <p class="contribute-safeguard-note">Kiểm duyệt Media đang bật: ảnh gốc vào thẳng thư mục sự kiện trên Google Drive và chỉ hiện công khai sau khi Ban Điều Phối duyệt tại /media/.</p>
-          </form>
+              <div class="form-status" id="contribute-status" role="status" aria-live="polite"></div>
+
+              <div class="contribute-submit-stack">
+                <div class="contribute-submit-row">
+                  <button type="button" class="btn btn--outline btn--sm" id="contribute-stop-btn" hidden>Dừng tải</button>
+                  <button type="submit" class="btn btn--primary contribute-submit-full" id="contribute-submit-btn" disabled>Gửi vào thư mục sự kiện</button>
+                </div>
+                <p class="contribute-safeguard-note">Tệp gốc lưu thẳng lên Google Drive và chờ kiểm duyệt tại /media/ trước khi công khai.</p>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -1158,12 +1190,10 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/vendor/gsap.min.js?v=f93132a082" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=f93132a082" defer></script>
-  <script src="/assets/js/motion.js?v=f93132a082" defer></script>
-  <script src="/assets/js/main.js?v=f93132a082" defer></script>
-  <script src="/assets/js/join-pass.js?v=f93132a082" defer></script>
-  <script src="/assets/js/member.js?v=f93132a082" defer></script>
-  <script src="/assets/js/pwa.js?v=f93132a082" defer></script>
+  <script src="/assets/js/motion.js?v=3d5c3b1c66" defer></script>
+  <script src="/assets/js/main.js?v=3d5c3b1c66" defer></script>
+  <script src="/assets/js/join-pass.js?v=3d5c3b1c66" defer></script>
+  <script src="/assets/js/member.js?v=3d5c3b1c66" defer></script>
+  <script src="/assets/js/pwa.js?v=3d5c3b1c66" defer></script>
 </body>
 </html>

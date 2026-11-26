@@ -826,13 +826,18 @@ code {
 
 .item-row {
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px;
   align-items: center;
   padding: 14px;
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
+}
+
+.item-row:has(> .item-thumb),
+.item-row:has(> .admin-ref-thumbs) {
+  grid-template-columns: 112px minmax(0, 1fr) auto;
 }
 
 .item-thumb {
@@ -1019,6 +1024,9 @@ dialog.cms-dialog:modal {
 }
 dialog.cms-dialog--wide {
   width: min(820px, calc(100vw - 24px));
+}
+dialog.cms-dialog--xl {
+  width: min(960px, calc(100vw - 24px));
 }
 dialog.cms-dialog--sm {
   width: min(440px, calc(100vw - 24px));
@@ -1223,7 +1231,9 @@ dialog.cms-dialog::backdrop {
   .detail-list {
     grid-template-columns: 1fr;
   }
-  .item-row {
+  .item-row,
+  .item-row:has(> .item-thumb),
+  .item-row:has(> .admin-ref-thumbs) {
     grid-template-columns: 1fr;
   }
   .item-thumb,
@@ -2230,7 +2240,160 @@ dialog.cms-dialog::backdrop {
   color: var(--ink-secondary);
 }
 
+/* Deep Control Modals (Member 360 & Event Command Center) */
+.dialog-sub {
+  margin: 3px 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.deep-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.deep-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.deep-card h3 {
+  margin: 0;
+  font-size: 0.96rem;
+  font-weight: 600;
+}
+
+.mini-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.mini-kpi {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.mini-kpi span {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+}
+.mini-kpi strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 1.35rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.deep-card .check-chip {
+  border-radius: var(--radius-sm);
+  align-items: flex-start;
+  padding: 12px 14px;
+  line-height: 1.5;
+}
+.deep-card .check-chip input[type="checkbox"] {
+  margin-top: 3px;
+  flex: none;
+}
+
+.grant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.grant-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  cursor: pointer;
+}
+.grant-item:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.grant-item input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--accent);
+  flex: none;
+}
+.grant-item-body {
+  min-width: 0;
+}
+.grant-item-body strong {
+  display: block;
+  font-size: 0.88rem;
+  line-height: 1.3;
+}
+.grant-item-body span {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+}
+
+.inline-assign-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px auto;
+  gap: 10px;
+  align-items: center;
+}
+.inline-assign-bar select,
+.inline-assign-bar input {
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  font-size: 0.88rem;
+}
+
+.photo-strip-mini {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+.photo-strip-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg);
+}
+.photo-strip-card img {
+  width: 100%;
+  height: 84px;
+  object-fit: cover;
+  display: block;
+}
+.photo-strip-card span {
+  display: block;
+  padding: 5px 7px;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 @media (max-width: 920px) {
+  .mini-kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .inline-assign-bar {
+    grid-template-columns: 1fr;
+  }
   .overview-kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

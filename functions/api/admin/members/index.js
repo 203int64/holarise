@@ -1,3 +1,4 @@
+import { ensureDeepControlSchema } from "../../../_lib/media-access.js";
 import {
   errorResponse,
   generateSequentialMemberCode,
@@ -48,6 +49,9 @@ export function serializeAdminMember(row) {
     isPublicTeam: Number(row.is_public_team || 0) === 1,
     avatarUrl: row.avatar_url || "",
     isActive: Number(row.is_active) === 1,
+    canViewAllMedia: Number(row.can_view_all_media || 0) === 1,
+    canAccessMediaPortal: Number(row.can_access_media_portal || 0) === 1,
+    albumGrantCount: Number(row.grant_count || 0),
     registrationCount: Number(row.reg_count || 0),
     reflectionCount: Number(row.ref_count || 0),
     createdAt: row.created_at,
@@ -59,7 +63,10 @@ export async function onRequestGet(context) {
   const auth = await requireAdmin(context);
   if (!auth.ok) return auth.response;
 
-  await ensureMemberProfileColumns(context.env.DB);
+  await Promise.all([
+    ensureMemberProfileColumns(context.env.DB),
+    ensureDeepControlSchema(context.env.DB),
+  ]);
 
   const url = new URL(context.request.url);
   const qRaw = (url.searchParams.get("q") || "").trim();
@@ -72,7 +79,8 @@ export async function onRequestGet(context) {
     stmt = context.env.DB.prepare(
       `SELECT m.*,
               (SELECT COUNT(*) FROM registrations rg WHERE rg.member_id = m.id) AS reg_count,
-              (SELECT COUNT(*) FROM activity_reflections rf WHERE rf.member_id = m.id) AS ref_count
+              (SELECT COUNT(*) FROM activity_reflections rf WHERE rf.member_id = m.id) AS ref_count,
+              (SELECT COUNT(*) FROM member_album_grants g WHERE g.member_id = m.id) AS grant_count
        FROM members m
        WHERE m.name LIKE ? OR m.member_code LIKE ? OR m.email LIKE ? OR m.phone_display LIKE ? OR m.phone_norm LIKE ? OR m.role_title LIKE ?
        ORDER BY m.is_public_team DESC, m.created_at DESC
@@ -82,7 +90,8 @@ export async function onRequestGet(context) {
     stmt = context.env.DB.prepare(
       `SELECT m.*,
               (SELECT COUNT(*) FROM registrations rg WHERE rg.member_id = m.id) AS reg_count,
-              (SELECT COUNT(*) FROM activity_reflections rf WHERE rf.member_id = m.id) AS ref_count
+              (SELECT COUNT(*) FROM activity_reflections rf WHERE rf.member_id = m.id) AS ref_count,
+              (SELECT COUNT(*) FROM member_album_grants g WHERE g.member_id = m.id) AS grant_count
        FROM members m
        ORDER BY m.is_public_team DESC, m.created_at DESC
        LIMIT ?`

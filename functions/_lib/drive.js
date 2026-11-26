@@ -295,36 +295,45 @@ export async function uploadImageToDrive(
 }
 
 /**
- * Fetch image binary from Google Drive for Edge CDN proxy (/api/media/drive/:id).
+ * Fetch image or video binary from Google Drive for Edge CDN proxy (/api/media/drive/:id).
+ * Supports HTTP Range forwarding (206 Partial Content) for smooth iOS Safari & Zalo WebView video playback.
  */
-export async function fetchDriveImage(env, fileId, fetchImpl = fetch) {
+export async function fetchDriveImage(env, fileId, fetchImpl = fetch, { range = "" } = {}) {
   if (!isSafeDriveFileId(fileId)) {
     return { ok: false, status: 404, error: "INVALID_ID" };
   }
   const accessToken = await getDriveAccessToken(env, fetchImpl);
   const url = `${DRIVE_FILES_URL}/${encodeURIComponent(fileId)}?alt=media&supportsAllDrives=true`;
-  const res = await fetchImpl(url, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  const reqHeaders = { Authorization: `Bearer ${accessToken}` };
+  if (range && /^bytes=\d*-\d*(?:,\s*\d*-\d*)*$/i.test(String(range).trim())) {
+    reqHeaders.Range = String(range).trim();
+  }
+
+  const res = await fetchImpl(url, { headers: reqHeaders });
 
   if (res.status === 404) {
     return { ok: false, status: 404, error: "NOT_FOUND" };
   }
-  if (!res.ok) {
+  if (res.status === 416) {
+    return { ok: false, status: 416, error: "RANGE_NOT_SATISFIABLE" };
+  }
+  if (!res.ok && res.status !== 206) {
     return { ok: false, status: 502, error: `DRIVE_HTTP_${res.status}` };
   }
 
   const contentType = String(res.headers.get("Content-Type") || "").toLowerCase();
-  if (!contentType.startsWith("image/")) {
-    return { ok: false, status: 415, error: "NOT_AN_IMAGE" };
+  if (!contentType.startsWith("image/") && !contentType.startsWith("video/")) {
+    return { ok: false, status: 415, error: "UNSUPPORTED_MEDIA" };
   }
 
   return {
     ok: true,
-    status: 200,
+    status: res.status === 206 ? 206 : 200,
     contentType,
     body: res.body,
     contentLength: res.headers.get("Content-Length") || "",
+    contentRange: res.headers.get("Content-Range") || "",
+    acceptRanges: res.headers.get("Accept-Ranges") || "bytes",
   };
 }
 

@@ -557,6 +557,17 @@
       const submitBtn = form.querySelector("[data-auth-submit]");
       const statusEl = form.querySelector("[data-auth-status]");
 
+      // Privacy-safe mode toggle (no server-side account enumeration oracle)
+      let modeSwitchBtn = form.querySelector("[data-auth-mode-switch]");
+      if (!modeSwitchBtn && stepPassword) {
+        modeSwitchBtn = document.createElement("button");
+        modeSwitchBtn.type = "button";
+        modeSwitchBtn.className = "auth-change-btn";
+        modeSwitchBtn.setAttribute("data-auth-mode-switch", "");
+        modeSwitchBtn.style.cssText = "margin-top:8px;display:inline-block;padding:0;font-size:0.84rem;";
+        stepPassword.appendChild(modeSwitchBtn);
+      }
+
       function setMode(nextMode) {
         mode = nextMode;
         setStatus(statusEl, "");
@@ -587,6 +598,9 @@
           }
           if (nameInput) nameInput.required = false;
           if (submitBtn) submitBtn.textContent = t("Đăng nhập", "Sign in");
+          if (modeSwitchBtn) {
+            modeSwitchBtn.textContent = t("Chưa có Thẻ Thành Viên? Tạo thẻ mới →", "New to HolaRise? Create member pass →");
+          }
           pwInput?.focus();
         } else if (mode === "register") {
           if (idPill) idPill.hidden = false;
@@ -600,10 +614,17 @@
             pwInput.placeholder = t("Tạo mật khẩu dễ nhớ", "Choose a password");
             pwInput.required = true;
           }
-          if (submitBtn) submitBtn.textContent = t("Tiếp tục", "Continue");
+          if (submitBtn) submitBtn.textContent = t("Tạo thẻ thành viên", "Create member pass");
+          if (modeSwitchBtn) {
+            modeSwitchBtn.textContent = t("← Đã có thẻ? Quay lại đăng nhập", "← Already have a pass? Sign in");
+          }
           pwInput?.focus();
         }
       }
+
+      modeSwitchBtn?.addEventListener("click", () => {
+        setMode(mode === "login" ? "register" : "login");
+      });
 
       resetBtn?.addEventListener("click", () => setMode("identify"));
 
@@ -626,7 +647,7 @@
               body: { identifier: val },
             });
             lockedIdentifier = res.normalized || val;
-            setMode(res.exists ? "login" : "register");
+            setMode("login");
           } catch (err) {
             setStatus(statusEl, err.message, "error");
             submitBtn.textContent = t("Tiếp tục", "Continue");
@@ -1675,7 +1696,13 @@
     const efEventId = $("#ef-event-id");
     const efEventSlug = $("#ef-event-slug");
     const efEventTitle = $("#ef-event-title");
+    const efMemberBar = $("#ef-member-identity-bar");
+    const efMemberAvatar = $("#ef-member-avatar");
+    const efMemberName = $("#ef-member-name");
+    const efMemberSub = $("#ef-member-sub");
     const efAnonCheck = $("#ef-anon-check");
+    const efGuestWrap = $("#ef-guest-identity-wrap");
+    const efGuestAnonCheck = $("#ef-guest-anon-check");
     const efIdentityRow = $("#ef-identity-row");
     const efName = $("#ef-name");
     const efContact = $("#ef-contact");
@@ -1683,7 +1710,7 @@
     const efStatus = $("#ef-status");
     const efSubmitBtn = $("#ef-submit-btn");
 
-    // Tab 2: Member-only Original Photo Upload to Standardized Drive Folder
+    // Tab 2: Member-only Original Photo & Video Upload to Standardized Drive Folder
     const photoAuthGate = $("#contribute-photo-auth-gate");
     const photoMemberBody = $("#contribute-photo-member-body");
     const photoSignInBtn = $("#contribute-photo-signin-btn");
@@ -1708,16 +1735,48 @@
     let uploading = false;
     let stopRequested = false;
     let maxUploadBytes = 25 * 1024 * 1024;
+    let maxVideoUploadBytes = 50 * 1024 * 1024;
     let albumsLoadedForMember = "";
+
+    function isContribVideoFile(file) {
+      if (!file) return false;
+      const mime = String(file.type || "").toLowerCase();
+      if (/^video\/(mp4|quicktime|webm)$/i.test(mime)) return true;
+      return /\.(mp4|mov|webm)$/i.test(String(file.name || ""));
+    }
+
+    function isContribImageFile(file) {
+      if (!file) return false;
+      const mime = String(file.type || "").toLowerCase();
+      if (/^image\/(jpeg|jpg|png|webp)$/i.test(mime)) return true;
+      return /\.(jpe?g|png|webp)$/i.test(String(file.name || ""));
+    }
 
     function syncFeedbackIdentity() {
       const m = state.member;
-      if (!efIdentityRow) return;
-      const isAnon = Boolean(efAnonCheck?.checked);
-      efIdentityRow.hidden = isAnon;
-      if (!isAnon && m) {
-        if (efName && !efName.value.trim()) efName.value = m.name || "";
-        if (efContact && !efContact.value.trim()) efContact.value = m.phoneDisplay || m.email || "";
+      if (m) {
+        if (efMemberBar) efMemberBar.hidden = false;
+        if (efGuestWrap) efGuestWrap.hidden = true;
+        const isAnon = Boolean(efAnonCheck?.checked);
+        if (efMemberAvatar) {
+          efMemberAvatar.innerHTML = m.avatarUrl
+            ? `<img src="${esc(m.avatarUrl)}" alt="${esc(m.name)}">`
+            : esc((m.name || "H").trim().charAt(0).toUpperCase());
+        }
+        if (efMemberName) efMemberName.textContent = m.name || "Thành viên HolaRise";
+        if (efMemberSub) {
+          const contact = m.phoneDisplay || m.email || m.memberCode || "";
+          efMemberSub.textContent = isAnon
+            ? "Đang gửi ẩn danh hoàn toàn — không lưu tên hay liên hệ"
+            : contact
+              ? `Gửi kèm thông tin · ${contact}`
+              : "Gửi kèm thông tin tài khoản của bạn";
+        }
+      } else {
+        if (efMemberBar) efMemberBar.hidden = true;
+        if (efGuestWrap) efGuestWrap.hidden = false;
+        const isGuestAnon = Boolean(efGuestAnonCheck?.checked);
+        if (efIdentityRow) efIdentityRow.hidden = isGuestAnon;
       }
     }
 
@@ -1774,7 +1833,7 @@
       if (queueBox) queueBox.hidden = total === 0;
       if (queueSummary) {
         queueSummary.textContent =
-          done > 0 ? `Đã gửi ${done} / ${total} ảnh` : `${total} ảnh đã chọn`;
+          done > 0 ? `Đã gửi ${done} / ${total} tệp` : `${total} tệp đã chọn`;
       }
       if (progressWrap && progressBar) {
         progressWrap.hidden = !uploading && done === 0;
@@ -1788,14 +1847,15 @@
       if (submitBtn) {
         submitBtn.disabled = uploading || pending === 0 || !albumSelect?.value;
         submitBtn.textContent = uploading
-          ? `Đang gửi ảnh (${done + 1}/${total})...`
+          ? `Đang gửi (${done + 1}/${total})...`
           : done > 0 && pending > 0
-            ? `Gửi tiếp ${pending} ảnh chưa hoàn tất`
-            : `Gửi ${pending || total} ảnh vào thư mục sự kiện`;
+            ? `Gửi tiếp ${pending} tệp chưa hoàn tất`
+            : `Gửi ${pending || total} tệp vào thư mục sự kiện`;
       }
       if (fileListEl) {
         fileListEl.innerHTML = queue
           .map((item, idx) => {
+            const isVid = item.mediaType === "video";
             const stateLabel =
               item.status === "done"
                 ? item.savedName ? `✓ ${item.savedName}` : "✓ Đã vào thư mục chờ duyệt"
@@ -1803,13 +1863,13 @@
                   ? "Đang tải lên..."
                   : item.status === "error"
                     ? item.message || "Lỗi tải lên"
-                    : formatSizeMb(item.file.size);
+                    : `${isVid ? "Video · " : ""}${formatSizeMb(item.file.size)}`;
             const removeHtml =
               !uploading && item.status !== "done"
                 ? `<button type="button" class="contribute-item-remove" data-remove-contrib-idx="${idx}" aria-label="Gỡ ${esc(item.file.name)}">×</button>`
                 : "";
             return `<li class="contribute-file-item is-${item.status}">
-              <span class="contribute-file-name">${esc(item.file.name)}</span>
+              <span class="contribute-file-name">${isVid ? '<span class="contribute-kind-tag">Video</span>' : ""}${esc(item.file.name)}</span>
               <span class="contribute-file-state">${esc(stateLabel)}</span>
               ${removeHtml}
             </li>`;
@@ -1826,6 +1886,7 @@
         albumsLoadedForMember = state.member.id;
         const items = res.items || [];
         if (res.maxUploadBytes) maxUploadBytes = Number(res.maxUploadBytes);
+        if (res.maxVideoUploadBytes) maxVideoUploadBytes = Number(res.maxVideoUploadBytes);
         if (!items.length) {
           albumSelect.innerHTML = `<option value="">Chưa có bộ ảnh sự kiện nào đang mở</option>`;
           renderQueue();
@@ -1922,6 +1983,9 @@
     if (efAnonCheck) {
       efAnonCheck.addEventListener("change", syncFeedbackIdentity);
     }
+    if (efGuestAnonCheck) {
+      efGuestAnonCheck.addEventListener("change", syncFeedbackIdentity);
+    }
 
     if (efForm) {
       efForm.addEventListener("submit", async (e) => {
@@ -1944,7 +2008,8 @@
           efSubmitBtn.textContent = "Đang gửi...";
         }
         try {
-          const isAnonymous = Boolean(efAnonCheck?.checked);
+          const m = state.member;
+          const isAnonymous = m ? Boolean(efAnonCheck?.checked) : Boolean(efGuestAnonCheck?.checked);
           const payload = {
             eventId: String(fd.get("eventId") || "").trim(),
             eventSlug: String(fd.get("eventSlug") || "").trim(),
@@ -1952,8 +2017,12 @@
             category: String(fd.get("category") || "cai-thien").trim(),
             content,
             isAnonymous,
-            authorName: isAnonymous ? "" : String(fd.get("authorName") || "").trim(),
-            authorContact: isAnonymous ? "" : String(fd.get("authorContact") || "").trim(),
+            authorName: isAnonymous ? "" : m ? (m.name || "") : String(fd.get("authorName") || "").trim(),
+            authorContact: isAnonymous
+              ? ""
+              : m
+                ? (m.phoneDisplay || m.email || "")
+                : String(fd.get("authorContact") || "").trim(),
             website: String(fd.get("website") || "").trim(),
           };
           const res = await fetch("/api/event-feedback", {
@@ -2045,16 +2114,21 @@
       let firstError = "";
       let addedCount = 0;
       for (const file of files) {
-        if (!/^image\/(jpeg|jpg|png|webp)$/i.test(file.type || "")) {
-          if (!firstError) firstError = `${file.name || "Ảnh"}: chỉ hỗ trợ ảnh JPEG, PNG hoặc WebP.`;
+        const isVid = isContribVideoFile(file);
+        const isImg = !isVid && isContribImageFile(file);
+        if (!isImg && !isVid) {
+          if (!firstError) firstError = `${file.name || "Tệp"}: chỉ hỗ trợ ảnh JPEG/PNG/WebP hoặc video MP4/MOV/WebM.`;
           continue;
         }
-        if (file.size > maxUploadBytes) {
-          const maxMb = Math.round(maxUploadBytes / (1024 * 1024));
-          if (!firstError) firstError = `${file.name || "Ảnh"}: vượt quá giới hạn ${maxMb} MB mỗi ảnh.`;
+        const limit = isVid ? maxVideoUploadBytes : maxUploadBytes;
+        if (file.size > limit) {
+          const maxMb = Math.round(limit / (1024 * 1024));
+          if (!firstError) {
+            firstError = `${file.name || "Tệp"}: vượt quá giới hạn ${maxMb} MB mỗi ${isVid ? "video" : "ảnh"}.`;
+          }
           continue;
         }
-        queue.push({ file, status: "pending", message: "", savedName: "" });
+        queue.push({ file, mediaType: isVid ? "video" : "image", status: "pending", message: "", savedName: "" });
         addedCount += 1;
       }
       if (statusEl) {
@@ -2063,7 +2137,7 @@
           statusEl.textContent = firstError;
         } else if (fromPaste && addedCount > 0) {
           statusEl.className = "form-status is-success";
-          statusEl.textContent = `Đã dán ${addedCount} ảnh vào danh sách tải lên.`;
+          statusEl.textContent = `Đã dán ${addedCount} tệp vào danh sách tải lên.`;
         } else {
           statusEl.className = "form-status";
           statusEl.textContent = "";

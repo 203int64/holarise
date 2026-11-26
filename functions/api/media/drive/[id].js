@@ -31,16 +31,18 @@ export async function onRequestGet(context) {
 
   const reqUrl = new URL(request.url);
   const isDownload = reqUrl.searchParams.get("download") === "1";
+  const rangeHeader = request.headers.get("Range") || "";
+  const isRanged = Boolean(rangeHeader);
 
   const cache = typeof caches !== "undefined" ? caches.default : null;
-  if (cache && !isDownload && !access.restricted) {
+  if (cache && !isDownload && !access.restricted && !isRanged) {
     const cached = await cache.match(request);
     if (cached) return cached;
   }
 
   let fetched;
   try {
-    fetched = await fetchDriveImage(env, id);
+    fetched = await fetchDriveImage(env, id, fetch, { range: rangeHeader });
   } catch {
     return new Response("Unable to reach Google Drive", { status: 502 });
   }
@@ -51,9 +53,11 @@ export async function onRequestGet(context) {
     });
   }
 
+  const isVideo = fetched.contentType.startsWith("video/");
   const headers = {
     "Content-Type": fetched.contentType,
     "Cache-Control": access.restricted ? "private, no-store" : "public, max-age=31536000, immutable",
+    "Accept-Ranges": fetched.acceptRanges || "bytes",
     "X-Content-Type-Options": "nosniff",
   };
   if (access.restricted) {
@@ -62,18 +66,35 @@ export async function onRequestGet(context) {
   if (fetched.contentLength) {
     headers["Content-Length"] = fetched.contentLength;
   }
+  if (fetched.contentRange) {
+    headers["Content-Range"] = fetched.contentRange;
+  }
   if (isDownload) {
-    const ext = fetched.contentType.includes("png")
-      ? "png"
-      : fetched.contentType.includes("webp")
-        ? "webp"
-        : "jpg";
+    const ext = fetched.contentType.includes("mp4")
+      ? "mp4"
+      : fetched.contentType.includes("quicktime")
+        ? "mov"
+        : fetched.contentType.includes("webm")
+          ? "webm"
+          : fetched.contentType.includes("png")
+            ? "png"
+            : fetched.contentType.includes("webp")
+              ? "webp"
+              : "jpg";
     headers["Content-Disposition"] = `attachment; filename="holarise-${id.slice(0, 12)}.${ext}"`;
   }
 
-  const response = new Response(fetched.body, { status: 200, headers });
+  const response = new Response(fetched.body, { status: fetched.status || 200, headers });
 
-  if (cache && !isDownload && !access.restricted && typeof context.waitUntil === "function") {
+  if (
+    cache &&
+    !isDownload &&
+    !access.restricted &&
+    !isRanged &&
+    !isVideo &&
+    fetched.status === 200 &&
+    typeof context.waitUntil === "function"
+  ) {
     context.waitUntil(cache.put(request, response.clone()));
   }
   return response;

@@ -1,14 +1,16 @@
-# Active Plan — Can Thiệp Sâu Thành Viên, Cấp Quyền Xem Media & Trung Tâm Điều Hành Sự Kiện
+# Active Plan — HolaRise Full-Stack Hardening, Speed, AI Photo Retouch, UX & SEO (Option A)
 
-**Trạng thái:** Đang triển khai (Đã duyệt Option B)
+**Trạng thái:** Đang triển khai (Đã duyệt Option A — 6 Atomic Phases)
 
-## Mục tiêu & Quy tắc khóa
-- **Hồ sơ Thành viên 360°:** Xem lịch sử tham dự, lưu bút, ảnh đóng góp, phiên/passkey; đăng xuất cưỡng bức toàn bộ thiết bị; gán/chấm công sự kiện thủ công; cấp/thu hồi quyền xem Media (từng Album, toàn bộ Album riêng tư, và quyền xem cổng `/media/` ở chế độ chỉ-xem `media_viewer`).
-- **Phân quyền xem Media thực ở Edge:** `media_albums.visibility` (`public` | `members_only` | `attendees_only` | `private`) + bảng `member_album_grants`. Ảnh thuộc Album `public` giữ nguyên Edge Cache `immutable`; ảnh thuộc Album giới hạn kiểm tra quyền thực tại `/api/media/drive/:id`, `/api/media/:id`, `/hanh-trinh/`, `/su-kien/<slug>/`, và `/api/member/albums`.
-- **Trung tâm điều hành Sự kiện (Event Command Center):** Bấm `Điều hành` trên 1 sự kiện để kiểm soát trọn bộ: Khách đăng ký + Check-in tại cửa + Thêm khách thủ công + Xuất CSV riêng sự kiện, Vòng đời (`stage_override`: `auto`/`invite`/`memory`) & Khóa giữ chỗ (`rsvp_closed`), Kho ảnh & Quyền xem Album sự kiện, và Hộp thư Góp ý sau sự kiện (`event_feedbacks`).
+## Quy tắc khóa bắt buộc (`AGENTS.md`)
+- Đồng bộ 3 tầng: `Static Build (build.py)` ↔ `Edge SSR (functions/_lib/render.js)` ↔ `D1 Production` (cấm sửa lùi `migrations/0001..0021`; cấm sửa tay `dist/*`).
+- AI Photo Retouch: **chỉ xử lý trên ảnh thật & ảnh editorial sẵn có** (kéo ánh sáng/màu phim tự nhiên, khử nhiễu, mở rộng nền nhẹ, Safeguarding làm mờ mặt nếu cần); **tuyệt đối không bịa người/cảnh giả tư liệu sự kiện chưa diễn ra**. Phải duyệt 2–3 ảnh mẫu trước khi chạy hàng loạt.
+- Cổng nghiệm thu sau MỌI phase: `python3 build.py --check --strict-copy` + `node --test tests/*.test.mjs` + đối chiếu Tầng 1–2–3 của `AGENTS.md`.
 
 ## Atomic Phases
-- [x] **Phase 1 — Migration `0020`, `media-access.js`, Khóa Media Proxy/SSR, `rsvp_closed`/`stage_override` & `/media/` Viewer Mode**
-- [ ] **Phase 2 — API Hồ sơ Thành viên 360° (`members/[id]` + `actions.js`), Event Command Center (`events/[id]/command.js`) & Góp ý sự kiện**
-- [ ] **Phase 3 — Giao diện Hồ sơ Thành viên 360°, Trung tâm Điều hành Sự kiện & Góp ý sự kiện trong `/admin/`**
-- [ ] **Phase 4 — Tests, Rebuild `dist/` (`python3 build.py --check`) & Reality Verification Gate**
+- [x] **Phase 1 — Chốt nền & Xanh 100% test** (Archive plan cũ, xác nhận `38/38` tests pass + `build.py --check --strict-copy` PASS)
+- [x] **Phase 2 — Audit & Vá Bảo mật + Nghị định 13/2023** (Account Enumeration, CSRF/Origin, SSR XSS, quyền xem ảnh riêng tư & tâm sự ẩn danh + regression tests)
+- [x] **Phase 3 — Tốc độ Zalo In-App WebView (< 60s) & Cloudflare Turnstile** (LCP/INP/CLS, Web API gốc, cache `MEDIA_KV`, Turnstile Managed/Invisible cho form công khai)
+- [ ] **Phase 4 — AI Photo Retouch phong cách phim thật** (2–3 ảnh mẫu duyệt tone → retouch bộ ảnh thật `assets/images/` + xuất `.webp` đa kích thước + đồng bộ `data/image-widths.js`)
+- [ ] **Phase 5 — Nâng cấp UX Trang Sự kiện & `/admin/`** (Tinh gọn giữ chỗ 15s + Memory Stage + tốc độ duyệt đơn/ảnh trong `/admin/`, giữ nguyên neo `CMS:START/END`)
+- [ ] **Phase 6 — Technical SEO VN/EN & Copy 30/70** (JSON-LD, `hreflang` 2 chiều, internal links, sitemap, rà copy VN/EN vượt `--strict-copy`)

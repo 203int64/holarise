@@ -1,3 +1,4 @@
+import { ensureDeepControlSchema } from "./_lib/media-access.js";
 import { ensureMediaApprovalSchema } from "./_lib/media-approval-schema.js";
 import {
   applySiteVisualsSsr,
@@ -18,7 +19,7 @@ export async function onRequestGet({ request, env }) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
 
-  await ensureMediaApprovalSchema(env.DB);
+  await Promise.all([ensureMediaApprovalSchema(env.DB), ensureDeepControlSchema(env.DB)]);
 
   const [assetRes, eventsRes, featuredRes, partnersRow, visualsRow, testimonialsRes] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
@@ -32,6 +33,7 @@ export async function onRequestGet({ request, env }) {
        FROM media_photos p
        JOIN media_albums a ON a.id = p.album_id
        WHERE a.status = 'published'
+         AND COALESCE(a.visibility, 'public') = 'public'
          AND COALESCE(p.approval_status, 'approved') = 'approved'
          AND p.is_featured_home = 1
        ORDER BY p.sort_order ASC, p.created_at DESC
@@ -90,6 +92,7 @@ export async function onRequestGet({ request, env }) {
        FROM media_photos p
        JOIN media_albums a ON a.id = p.album_id
        WHERE a.status = 'published'
+         AND COALESCE(a.visibility, 'public') = 'public'
          AND COALESCE(p.approval_status, 'approved') = 'approved'
        ORDER BY p.created_at DESC
        LIMIT 8`

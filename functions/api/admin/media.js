@@ -4,10 +4,11 @@ import {
   normalizeDriveCategory,
   uploadImageToDrive,
 } from "../../_lib/drive.js";
-import { errorResponse, jsonResponse, requireAdmin, sniffImageMime } from "../../_lib/security.js";
+import { errorResponse, jsonResponse, requireAdmin, sniffMediaMime } from "../../_lib/security.js";
 
 const MAX_KV_UPLOAD_BYTES = 1.5 * 1024 * 1024; // 1.5 MB fallback when using MEDIA_KV
 const MAX_DRIVE_UPLOAD_BYTES = 25 * 1024 * 1024; // 25 MB original uncompressed image on Google Drive
+const MAX_DRIVE_VIDEO_BYTES = 50 * 1024 * 1024; // 50 MB video clip on Google Drive
 const ALLOWED_ROLES = ["super_admin", "editor", "media"];
 
 export async function onRequestGet(context) {
@@ -36,8 +37,8 @@ export async function onRequestPost(context) {
     );
   }
 
-  const maxBytes = useDrive ? MAX_DRIVE_UPLOAD_BYTES : MAX_KV_UPLOAD_BYTES;
-  const maxLabel = useDrive ? "25 MB" : "1.5 MB";
+  const maxBytes = useDrive ? MAX_DRIVE_VIDEO_BYTES : MAX_KV_UPLOAD_BYTES;
+  const maxLabel = useDrive ? "50 MB" : "1.5 MB";
   const contentType = context.request.headers.get("Content-Type") || "";
   let bytes;
   let originalFilename = "";
@@ -80,13 +81,17 @@ export async function onRequestPost(context) {
     return errorResponse(413, "FILE_TOO_LARGE", `Ảnh vượt quá giới hạn ${maxLabel}.`);
   }
 
-  const detected = sniffImageMime(bytes);
+  const detected = sniffMediaMime(bytes);
   if (!detected) {
     return errorResponse(
       415,
       "UNSUPPORTED_IMAGE",
-      "Chỉ hỗ trợ định dạng ảnh JPEG, PNG hoặc WebP hợp lệ."
+      "Chỉ hỗ trợ định dạng ảnh (JPEG, PNG, WebP) hoặc video (MP4, MOV, WebM) hợp lệ."
     );
+  }
+  const isVideo = detected.kind === "video";
+  if (!isVideo && useDrive && bytes.byteLength > MAX_DRIVE_UPLOAD_BYTES) {
+    return errorResponse(413, "FILE_TOO_LARGE", "Ảnh vượt quá giới hạn 25 MB.");
   }
 
   const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
@@ -108,7 +113,11 @@ export async function onRequestPost(context) {
         subfolder,
         description: `Người đăng: ${uploaderLabel} · Email: ${auth.user.email} · Tải lên lúc: ${new Date().toISOString()}`,
       });
-      return jsonResponse({ ok: true, ...uploaded, uploadedBy: uploaderLabel }, 201);
+      const finalUrl = isVideo ? `${uploaded.url}?kind=video` : uploaded.url;
+      return jsonResponse(
+        { ok: true, ...uploaded, url: finalUrl, mediaType: detected.kind, uploadedBy: uploaderLabel },
+        201
+      );
     } catch (err) {
       return errorResponse(
         502,

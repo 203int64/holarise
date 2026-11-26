@@ -1,6 +1,11 @@
 import { ensureAdminPasskeySchema } from "../../../_lib/admin-passkey-schema.js";
-import { errorResponse, jsonResponse, readJsonBody, verifyCsrfOrigin } from "../../../_lib/security.js";
-import { cleanStr } from "../../../_lib/validation.js";
+import {
+  checkRateLimit,
+  errorResponse,
+  getClientIpHash,
+  jsonResponse,
+  verifyCsrfOrigin,
+} from "../../../_lib/security.js";
 import { generateChallengeBase64Url, resolveRpId } from "../../../_lib/webauthn.js";
 
 export async function onRequestPost({ request, env }) {
@@ -11,22 +16,23 @@ export async function onRequestPost({ request, env }) {
     return errorResponse(403, "CSRF_BLOCKED", "Nguồn yêu cầu không hợp lệ.");
   }
 
-  await ensureAdminPasskeySchema(env.DB);
-  const parsed = await readJsonBody(request, 8 * 1024);
-  const email = parsed.ok ? cleanStr(parsed.data?.email, 160).toLowerCase() : "";
-
-  let allowCredentials = [];
-  if (email) {
-    const { results } = await env.DB.prepare(
-      `SELECT p.credential_id
-       FROM admin_passkeys p
-       JOIN admin_users u ON u.id = p.user_id
-       WHERE u.email = ? AND u.is_active = 1`
-    )
-      .bind(email)
-      .all();
-    allowCredentials = (results || []).map((r) => ({ type: "public-key", id: r.credential_id }));
+  const ipHash = await getClientIpHash(request);
+  const rl = await checkRateLimit(env.DB, `admin_pk_opt:${ipHash}`, 20, 15 * 60 * 1000);
+  if (!rl.allowed) {
+    return errorResponse(
+      429,
+      "RATE_LIMITED",
+      `Bạn thao tác quá nhanh. Vui lòng thử lại sau ${rl.retryAfterSec} giây.`,
+      null,
+      { "Retry-After": String(rl.retryAfterSec) }
+    );
   }
+
+  await ensureAdminPasskeySchema(env.DB);
+
+  // Use discoverable credentials only (empty allowCredentials) to prevent
+  // unauthenticated admin email / passkey enumeration.
+  const allowCredentials = [];
 
   const challenge = generateChallengeBase64Url(32);
   const now = new Date();

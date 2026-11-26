@@ -45,10 +45,11 @@
   <!-- Editorial Typography: Be Vietnam Pro (UI/Display) + Lora (Manifesto/Quotes) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" crossorigin onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v={{CACHE_BUST}}">
+  <link rel="stylesheet" href="/assets/css/styles.css?v={{CACHE_BUST}}">{{EXTRA_HEAD_HTML}}
   {{JSON_LD_SCRIPTS}}
 </head>
 <body class="{{BODY_CLASS}}">
@@ -623,9 +624,7 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/vendor/gsap.min.js?v={{CACHE_BUST}}" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v={{CACHE_BUST}}" defer></script>
-  <script src="/assets/js/motion.js?v={{CACHE_BUST}}" defer></script>
+{{GSAP_SCRIPTS}}  <script src="/assets/js/motion.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/main.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/join-pass.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/member.js?v={{CACHE_BUST}}" defer></script>

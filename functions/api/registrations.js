@@ -1,4 +1,5 @@
 import { syncRegistrationToGas } from "../_lib/gas.js";
+import { verifyTurnstileToken } from "../_lib/turnstile.js";
 import {
   checkRateLimit,
   errorResponse,
@@ -167,6 +168,22 @@ export async function onRequestPost(context) {
 
   if (validated.honeypot) {
     return jsonResponse({ ok: true, id: "accepted" }, 200);
+  }
+
+  // Optional Cloudflare Turnstile gate for unauthenticated guests (activates only when TURNSTILE_SECRET is set)
+  if (!sessionMember) {
+    const tsToken =
+      parsed.data?.["cf-turnstile-response"] ?? parsed.data?.turnstileToken ?? "";
+    const tsCheck = await verifyTurnstileToken(request, env, tsToken, "rsvp");
+    if (!tsCheck.ok) {
+      return errorResponse(
+        403,
+        tsCheck.code || "TURNSTILE_FAILED",
+        isEn
+          ? "Bot verification failed. Please refresh and try again."
+          : "Xác minh chống bot chưa thành công. Vui lòng tải lại trang và thử lại."
+      );
+    }
   }
 
   const ipHash = await getClientIpHash(request);

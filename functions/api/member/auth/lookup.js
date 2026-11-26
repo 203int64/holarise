@@ -35,21 +35,15 @@ export async function onRequestPost({ request, env }) {
   }
 
   const ipHash = await getClientIpHash(request);
-  const rl = await checkRateLimit(env.DB, `mbr_lookup:${ipHash}`, 30, 15 * 60 * 1000);
+  const rl = await checkRateLimit(env.DB, `mbr_lookup:${ipHash}`, 20, 15 * 60 * 1000);
   if (!rl.allowed) {
     return errorResponse(429, "RATE_LIMITED", "Bạn thao tác quá nhanh. Vui lòng đợi ít phút rồi thử lại.");
   }
 
-  await ensureMemberSchema(env.DB);
-
-  const row =
-    idInfo.kind === "email"
-      ? await env.DB.prepare("SELECT id, name FROM members WHERE email = ?").bind(idInfo.email).first()
-      : await env.DB.prepare("SELECT id, name FROM members WHERE phone_norm = ?").bind(idInfo.phoneNorm).first();
-
+  // Nghị định 13/2023 & Anti-Enumeration Guard:
+  // Never disclose whether an email or Vietnamese phone number exists in `members`.
   return jsonResponse({
     ok: true,
-    exists: Boolean(row),
     kind: idInfo.kind,
     normalized: idInfo.kind === "email" ? idInfo.email : idInfo.phoneDisplay,
   });

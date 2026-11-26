@@ -222,7 +222,10 @@ export async function checkMediaAssetAccess(env, request, { driveFileId = "", kv
     const driveKey = `drive:${driveFileId}`;
     const driveUrl = `/api/media/drive/${driveFileId}`;
     album = await env.DB.prepare(
-      `SELECT a.id, a.event_id, COALESCE(a.visibility, 'public') AS visibility
+      `SELECT a.id, a.event_id,
+              COALESCE(a.visibility, 'public') AS visibility,
+              COALESCE(a.status, 'published') AS album_status,
+              COALESCE(p.approval_status, 'approved') AS approval_status
        FROM media_photos p
        JOIN media_albums a ON a.id = p.album_id
        WHERE p.media_key = ? OR p.url = ?
@@ -234,7 +237,10 @@ export async function checkMediaAssetAccess(env, request, { driveFileId = "", kv
   } else if (kvMediaKey) {
     const kvUrl = `/api/media/${kvMediaKey}`;
     album = await env.DB.prepare(
-      `SELECT a.id, a.event_id, COALESCE(a.visibility, 'public') AS visibility
+      `SELECT a.id, a.event_id,
+              COALESCE(a.visibility, 'public') AS visibility,
+              COALESCE(a.status, 'published') AS album_status,
+              COALESCE(p.approval_status, 'approved') AS approval_status
        FROM media_photos p
        JOIN media_albums a ON a.id = p.album_id
        WHERE p.media_key = ? OR p.web_media_key = ? OR p.url = ? OR p.web_url = ?
@@ -245,7 +251,26 @@ export async function checkMediaAssetAccess(env, request, { driveFileId = "", kv
       .catch(() => null);
   }
 
-  if (!album || String(album.visibility || "public") === "public") {
+  if (!album) {
+    return { restricted: false, allowed: true };
+  }
+
+  // Safeguarding & moderation lock: unapproved/rejected photos or draft albums
+  // must NEVER leak publicly or be cached on CDN; only sole admin & media team may inspect.
+  const approvalStatus = String(album.approval_status || "approved").toLowerCase();
+  const albumStatus = String(album.album_status || "published").toLowerCase();
+  if (approvalStatus !== "approved" || albumStatus !== "published") {
+    const actor = await resolveActorContext(env, request);
+    const allowed = Boolean(actor.isSoleAdmin || actor.isMediaTeam);
+    return {
+      restricted: true,
+      allowed,
+      visibility: albumStatus !== "published" ? "draft" : approvalStatus,
+      albumId: album.id,
+    };
+  }
+
+  if (String(album.visibility || "public") === "public") {
     return { restricted: false, allowed: true };
   }
 

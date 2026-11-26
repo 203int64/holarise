@@ -6,19 +6,26 @@ import {
   sanitizeDriveName,
   uploadImageToDrive,
 } from "../../../../_lib/drive.js";
+import {
+  canActorViewAlbum,
+  ensureDeepControlSchema,
+  getMemberPermissions,
+} from "../../../../_lib/media-access.js";
 import { ensureMediaApprovalSchema } from "../../../../_lib/media-approval-schema.js";
 import {
   checkRateLimit,
   errorResponse,
   jsonResponse,
   requireMember,
-  sniffImageMime,
+  sniffMediaMime,
 } from "../../../../_lib/security.js";
 import { cleanStr, slugifyVi } from "../../../../_lib/validation.js";
 import { serializePhotoRow } from "../../../admin/albums/[id]/index.js";
 
-const MAX_DRIVE_UPLOAD_BYTES = 25 * 1024 * 1024; // 25 MB original uncompressed photo
+const MAX_DRIVE_IMAGE_BYTES = 25 * 1024 * 1024; // 25 MB original uncompressed photo
+const MAX_DRIVE_VIDEO_BYTES = 50 * 1024 * 1024; // 50 MB original video clip on Google Drive
 const MAX_KV_UPLOAD_BYTES = 1.5 * 1024 * 1024; // 1.5 MB fallback when Drive is unconfigured
+const MAX_KV_VIDEO_BYTES = 10 * 1024 * 1024;
 const HOURLY_MEMBER_UPLOAD_LIMIT = 60;
 
 export async function onRequestPost(context) {
@@ -26,7 +33,7 @@ export async function onRequestPost(context) {
   if (!auth.ok) return auth.response;
 
   const { request, env, params } = context;
-  await ensureMediaApprovalSchema(env.DB);
+  await Promise.all([ensureMediaApprovalSchema(env.DB), ensureDeepControlSchema(env.DB)]);
 
   const albumId = String(params?.id || "").trim();
   if (!albumId) {
@@ -34,7 +41,7 @@ export async function onRequestPost(context) {
   }
 
   const album = await env.DB.prepare(
-    `SELECT id, slug, title, event_date, drive_url, status
+    `SELECT id, slug, title, event_id, event_date, drive_url, status, COALESCE(visibility, 'public') AS visibility
      FROM media_albums
      WHERE id = ? AND status = 'published'`
   )
@@ -43,6 +50,18 @@ export async function onRequestPost(context) {
 
   if (!album) {
     return errorResponse(404, "ALBUM_NOT_FOUND", "Không tìm thấy bộ ảnh đang mở để đóng góp.");
+  }
+
+  const perms = await getMemberPermissions(env.DB, auth.member.id);
+  const canView = await canActorViewAlbum(env.DB, album, {
+    isSoleAdmin: false,
+    isMediaTeam: false,
+    isMediaViewer: perms.canAccessMediaPortal,
+    canViewAllMedia: perms.canViewAllMedia,
+    member: auth.member,
+  });
+  if (!canView) {
+    return errorResponse(403, "ALBUM_FORBIDDEN", "Bạn chưa được cấp quyền truy cập bộ ảnh riêng tư này.");
   }
 
   const useDrive = isDriveConfigured(env);
@@ -71,8 +90,8 @@ export async function onRequestPost(context) {
     );
   }
 
-  const maxBytes = useDrive ? MAX_DRIVE_UPLOAD_BYTES : MAX_KV_UPLOAD_BYTES;
-  const maxLabel = useDrive ? "25 MB" : "1.5 MB";
+  const maxReadBytes = useDrive ? MAX_DRIVE_VIDEO_BYTES : MAX_KV_VIDEO_BYTES;
+  const maxReadLabel = useDrive ? "50 MB" : "10 MB";
   const contentType = request.headers.get("Content-Type") || "";
 
   let bytes;
@@ -85,10 +104,10 @@ export async function onRequestPost(context) {
       const formData = await request.formData();
       const file = formData.get("file");
       if (!file || typeof file.arrayBuffer !== "function") {
-        return errorResponse(400, "MISSING_FILE", "Không tìm thấy tệp ảnh tải lên.");
+        return errorResponse(400, "MISSING_FILE", "Không tìm thấy tệp ảnh hoặc video tải lên.");
       }
-      if (file.size > maxBytes) {
-        return errorResponse(413, "FILE_TOO_LARGE", `Ảnh vượt quá giới hạn ${maxLabel} mỗi tệp.`);
+      if (file.size > maxReadBytes) {
+        return errorResponse(413, "FILE_TOO_LARGE", `Tệp vượt quá giới hạn tối đa ${maxReadLabel}.`);
       }
       originalFilename = String(file.name || "");
       caption = cleanStr(formData.get("caption"), 240);
@@ -96,25 +115,39 @@ export async function onRequestPost(context) {
       bytes = new Uint8Array(await file.arrayBuffer());
     } else {
       const buf = await request.arrayBuffer();
-      if (buf.byteLength > maxBytes) {
-        return errorResponse(413, "FILE_TOO_LARGE", `Ảnh vượt quá giới hạn ${maxLabel} mỗi tệp.`);
+      if (buf.byteLength > maxReadBytes) {
+        return errorResponse(413, "FILE_TOO_LARGE", `Tệp vượt quá giới hạn tối đa ${maxReadLabel}.`);
       }
       bytes = new Uint8Array(buf);
     }
   } catch {
-    return errorResponse(400, "INVALID_UPLOAD", "Không thể đọc dữ liệu tệp ảnh gửi lên.");
+    return errorResponse(400, "INVALID_UPLOAD", "Không thể đọc dữ liệu tệp gửi lên.");
   }
 
   if (!bytes || bytes.byteLength === 0) {
-    return errorResponse(400, "EMPTY_FILE", "Tệp ảnh rỗng.");
-  }
-  if (bytes.byteLength > maxBytes) {
-    return errorResponse(413, "FILE_TOO_LARGE", `Ảnh vượt quá giới hạn ${maxLabel} mỗi tệp.`);
+    return errorResponse(400, "EMPTY_FILE", "Tệp tải lên rỗng.");
   }
 
-  const detected = sniffImageMime(bytes);
+  const detected = sniffMediaMime(bytes);
   if (!detected) {
-    return errorResponse(415, "UNSUPPORTED_IMAGE", "Chỉ hỗ trợ ảnh định dạng JPEG, PNG hoặc WebP hợp lệ.");
+    return errorResponse(
+      415,
+      "UNSUPPORTED_IMAGE",
+      "Chỉ hỗ trợ ảnh (JPEG, PNG, WebP) hoặc video (MP4, MOV, WebM) hợp lệ."
+    );
+  }
+
+  const isVideo = detected.kind === "video";
+  const maxAllowed = useDrive
+    ? isVideo
+      ? MAX_DRIVE_VIDEO_BYTES
+      : MAX_DRIVE_IMAGE_BYTES
+    : isVideo
+      ? MAX_KV_VIDEO_BYTES
+      : MAX_KV_UPLOAD_BYTES;
+  if (bytes.byteLength > maxAllowed) {
+    const label = isVideo ? `${Math.round(maxAllowed / (1024 * 1024))} MB` : useDrive ? "25 MB" : "1.5 MB";
+    return errorResponse(413, "FILE_TOO_LARGE", `${isVideo ? "Video" : "Ảnh"} vượt quá giới hạn ${label}.`);
   }
 
   const now = new Date().toISOString();
@@ -176,7 +209,7 @@ export async function onRequestPost(context) {
       });
 
       mediaKey = uploaded.id; // drive:<fileId>
-      photoUrl = uploaded.url; // /api/media/drive/<fileId>
+      photoUrl = isVideo ? `${uploaded.url}?kind=video` : uploaded.url; // /api/media/drive/<fileId>
       storage = "google_drive";
       folderPath = `${eventFolderName}/dong-gop/${memberFolder}`;
       drivePath = `${folderPath}/${standardizedFilename}`;
@@ -222,10 +255,10 @@ export async function onRequestPost(context) {
       `INSERT INTO media_photos (
          id, album_id, media_key, url, caption, alt, photographer,
          is_featured_home, sort_order, uploaded_by, contributor_member_id,
-         source_kind, drive_path,
+         source_kind, drive_path, media_type,
          approval_status, web_url, web_media_key, approved_by, approved_at,
          created_at, updated_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 'member_contribution', ?, 'pending', '', '', '', '', ?, ?)`
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 'member_contribution', ?, ?, 'pending', '', '', '', '', ?, ?)`
     ).bind(
       photoId,
       album.id,
@@ -238,6 +271,7 @@ export async function onRequestPost(context) {
       uploadedByLabel,
       auth.member.id,
       drivePath,
+      detected.kind,
       now,
       now
     ),
