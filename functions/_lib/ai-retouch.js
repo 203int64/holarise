@@ -8,6 +8,8 @@
 export const DEFAULT_GEMINI_IMAGE_MODEL = "gemini-nano-banana-2.1";
 export const GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
 export const GEMINI_API_REVISION = "2026-05-20";
+export const AI_CONFIG_SETTING_KEY = "ai_image_config";
+export const DEFAULT_BRAND_SLOGAN = "Together We Rise, Together We Serve.";
 
 export const ALLOWED_IMAGE_SIZES = ["1K", "2K", "4K"];
 export const DEFAULT_IMAGE_SIZE = "2K";
@@ -22,6 +24,180 @@ export function normalizeAspectRatio(raw) {
   const val = String(raw || "").trim().toLowerCase();
   if (!val || val === "auto") return "auto";
   return ALLOWED_ASPECT_RATIOS.includes(val) ? val : "auto";
+}
+
+/**
+ * Collects all configured Gemini API keys from env without ever exposing raw secrets to the client.
+ * Supports:
+ *   - GEMINI_API_KEYS="key1,key2,key3" (comma or newline separated)
+ *   - GEMINI_API_KEY, GEMINI_API_KEY_2 .. GEMINI_API_KEY_5
+ */
+export function resolveGeminiKeyPool(env) {
+  const rawEntries = [];
+  const primary = String(env?.GEMINI_API_KEY || "").trim();
+  if (primary) rawEntries.push({ key: primary, source: "GEMINI_API_KEY" });
+
+  for (let i = 2; i <= 5; i += 1) {
+    const k = String(env?.[`GEMINI_API_KEY_${i}`] || "").trim();
+    if (k) rawEntries.push({ key: k, source: `GEMINI_API_KEY_${i}` });
+  }
+
+  const multi = String(env?.GEMINI_API_KEYS || "").trim();
+  if (multi) {
+    for (const part of multi.split(/[\r\n,;]+/)) {
+      const k = part.trim();
+      if (k) rawEntries.push({ key: k, source: "GEMINI_API_KEYS" });
+    }
+  }
+
+  const seen = new Set();
+  const pool = [];
+  for (const entry of rawEntries) {
+    if (seen.has(entry.key)) continue;
+    seen.add(entry.key);
+    const idx = pool.length + 1;
+    const tail = entry.key.length >= 4 ? entry.key.slice(-4) : "****";
+    pool.push({
+      id: `key-${idx}`,
+      label: `Gemini #${idx} (…${tail})`,
+      source: entry.source,
+      key: entry.key,
+    });
+  }
+  return pool;
+}
+
+export function getPublicKeySlots(pool) {
+  return (pool || []).map(({ id, label, source, masked, removable, addedAt }) => ({
+    id,
+    label,
+    source,
+    masked: masked || "",
+    removable: Boolean(removable),
+    addedAt: addedAt || "",
+  }));
+}
+
+export async function loadAdminAiConfig(db) {
+  const empty = {
+    keys: [],
+    model: "",
+    fallbackModel: "",
+    defaultImageSize: "",
+    defaultAspectRatio: "auto",
+    defaultSlogan: DEFAULT_BRAND_SLOGAN,
+  };
+  if (!db) return empty;
+  try {
+    const row = await db
+      .prepare("SELECT value FROM settings WHERE key = ?")
+      .bind(AI_CONFIG_SETTING_KEY)
+      .first();
+    if (!row?.value) return empty;
+    const parsed = JSON.parse(row.value);
+    if (!parsed || typeof parsed !== "object") return empty;
+    const keys = Array.isArray(parsed.keys)
+      ? parsed.keys
+          .filter((k) => k && typeof k.key === "string" && k.key.trim().length >= 8)
+          .map((k) => ({
+            id: String(k.id || `adm-${crypto.randomUUID().slice(0, 8)}`),
+            label: String(k.label || "").trim().slice(0, 60),
+            key: String(k.key).trim(),
+            addedAt: String(k.addedAt || ""),
+          }))
+      : [];
+    return {
+      keys,
+      model: String(parsed.model || "").trim().slice(0, 80),
+      fallbackModel: String(parsed.fallbackModel || "").trim().slice(0, 80),
+      defaultImageSize: parsed.defaultImageSize ? normalizeImageSize(parsed.defaultImageSize) : "",
+      defaultAspectRatio: normalizeAspectRatio(parsed.defaultAspectRatio),
+      defaultSlogan:
+        typeof parsed.defaultSlogan === "string" ? parsed.defaultSlogan.trim().slice(0, 100) : DEFAULT_BRAND_SLOGAN,
+    };
+  } catch {
+    return empty;
+  }
+}
+
+export async function saveAdminAiConfig(db, config) {
+  const now = new Date().toISOString();
+  const payload = JSON.stringify({
+    keys: Array.isArray(config?.keys) ? config.keys : [],
+    model: String(config?.model || "").trim().slice(0, 80),
+    fallbackModel: String(config?.fallbackModel || "").trim().slice(0, 80),
+    defaultImageSize: config?.defaultImageSize ? normalizeImageSize(config.defaultImageSize) : "",
+    defaultAspectRatio: normalizeAspectRatio(config?.defaultAspectRatio),
+    defaultSlogan:
+      typeof config?.defaultSlogan === "string" ? config.defaultSlogan.trim().slice(0, 100) : DEFAULT_BRAND_SLOGAN,
+  });
+  await db
+    .prepare(
+      `INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`
+    )
+    .bind(AI_CONFIG_SETTING_KEY, payload, now)
+    .run();
+}
+
+export async function resolveFullAiRuntime(env, db) {
+  const adminCfg = await loadAdminAiConfig(db);
+  const envPool = resolveGeminiKeyPool(env);
+  const seen = new Set();
+  const keyPool = [];
+
+  for (const item of adminCfg.keys) {
+    if (seen.has(item.key)) continue;
+    seen.add(item.key);
+    const idx = keyPool.length + 1;
+    const tail = item.key.length >= 4 ? item.key.slice(-4) : "****";
+    const head = item.key.length >= 8 ? item.key.slice(0, 4) : "";
+    const masked = head ? `${head}…${tail}` : `…${tail}`;
+    keyPool.push({
+      id: item.id,
+      label: item.label ? `${item.label} (…${tail})` : `Admin Key #${idx} (…${tail})`,
+      source: "admin",
+      masked,
+      removable: true,
+      addedAt: item.addedAt || "",
+      key: item.key,
+    });
+  }
+
+  for (const item of envPool) {
+    if (seen.has(item.key)) continue;
+    seen.add(item.key);
+    const tail = item.key.length >= 4 ? item.key.slice(-4) : "****";
+    const head = item.key.length >= 8 ? item.key.slice(0, 4) : "";
+    keyPool.push({
+      ...item,
+      masked: head ? `${head}…${tail}` : `…${tail}`,
+      removable: false,
+      addedAt: "",
+    });
+  }
+
+  const model = adminCfg.model || String(env?.GEMINI_IMAGE_MODEL || DEFAULT_GEMINI_IMAGE_MODEL).trim();
+  const fallbackModel = adminCfg.fallbackModel || String(env?.GEMINI_IMAGE_FALLBACK_MODEL || "").trim();
+  const defaultImageSize = normalizeImageSize(adminCfg.defaultImageSize || env?.GEMINI_IMAGE_SIZE);
+  const defaultAspectRatio = normalizeAspectRatio(adminCfg.defaultAspectRatio);
+  const defaultSlogan = adminCfg.defaultSlogan;
+
+  return {
+    keyPool,
+    slots: getPublicKeySlots(keyPool),
+    model,
+    fallbackModel,
+    defaultImageSize,
+    defaultAspectRatio,
+    defaultSlogan,
+  };
+}
+
+function isRetryableGeminiError(status, errMsg = "") {
+  if (status === 429 || status === 403 || status === 408 || status >= 500) return true;
+  if (/timeout|aborted|network|fetch failed|quota|rate/i.test(String(errMsg || ""))) return true;
+  return false;
 }
 
 const STRICT_AUTHENTICITY_PREFIX =
@@ -180,7 +356,9 @@ export async function runGeminiImageEdit({
 
   if (!res.ok) {
     const errText = await res.text().catch(() => "");
-    throw new Error(`Gemini HTTP ${res.status}: ${errText.slice(0, 160)}`);
+    const err = new Error(`Gemini HTTP ${res.status}: ${errText.slice(0, 160)}`);
+    err.httpStatus = res.status;
+    throw err;
   }
 
   const json = await res.json();
@@ -191,9 +369,78 @@ export async function runGeminiImageEdit({
   return img;
 }
 
-export async function generateThreeRetouchVariants({
-  apiKey,
+/**
+ * Runs a single Gemini image edit with automatic key rotation & fallback across the pool.
+ */
+export async function runGeminiImageEditWithFallback({
+  keyPool = [],
+  startIndex = 0,
+  preferredSlotId = "",
   model = DEFAULT_GEMINI_IMAGE_MODEL,
+  fallbackModel = "",
+  imageBase64,
+  mimeType = "image/jpeg",
+  prompt,
+  imageSize = DEFAULT_IMAGE_SIZE,
+  aspectRatio = "auto",
+  fetchImpl = fetch,
+}) {
+  if (!Array.isArray(keyPool) || keyPool.length === 0) {
+    throw new Error("Chưa cấu hình GEMINI_API_KEY.");
+  }
+
+  // Order keys: preferred slot first (if selected), otherwise rotated by startIndex
+  let ordered = [];
+  if (preferredSlotId && preferredSlotId !== "auto") {
+    const pref = keyPool.find((k) => k.id === preferredSlotId);
+    if (pref) {
+      ordered = [pref, ...keyPool.filter((k) => k.id !== preferredSlotId)];
+    }
+  }
+  if (ordered.length === 0) {
+    const offset = ((startIndex % keyPool.length) + keyPool.length) % keyPool.length;
+    ordered = [...keyPool.slice(offset), ...keyPool.slice(0, offset)];
+  }
+
+  const modelsToTry = [model];
+  const fb = String(fallbackModel || "").trim();
+  if (fb && fb !== model) modelsToTry.push(fb);
+
+  const attemptErrors = [];
+  for (const activeModel of modelsToTry) {
+    for (const slot of ordered) {
+      try {
+        const img = await runGeminiImageEdit({
+          apiKey: slot.key,
+          model: activeModel,
+          imageBase64,
+          mimeType,
+          prompt,
+          imageSize,
+          aspectRatio,
+          fetchImpl,
+        });
+        return { ...img, usedSlotId: slot.id, usedSlotLabel: slot.label, usedModel: activeModel };
+      } catch (err) {
+        const status = Number(err?.httpStatus || 0);
+        const msg = err?.message || "failed";
+        attemptErrors.push(`${slot.id}/${activeModel}: ${msg}`);
+        if (!isRetryableGeminiError(status, msg) && ordered.length === 1) {
+          throw err;
+        }
+      }
+    }
+  }
+
+  throw new Error(attemptErrors[attemptErrors.length - 1] || "Tất cả API key Gemini đều gặp lỗi.");
+}
+
+export async function generateThreeRetouchVariants({
+  apiKey = "",
+  keyPool = null,
+  preferredSlotId = "auto",
+  model = DEFAULT_GEMINI_IMAGE_MODEL,
+  fallbackModel = "",
   imageBase64,
   mimeType = "image/jpeg",
   imageSize = DEFAULT_IMAGE_SIZE,
@@ -201,6 +448,12 @@ export async function generateThreeRetouchVariants({
   presetId = "",
   fetchImpl = fetch,
 }) {
+  const pool =
+    Array.isArray(keyPool) && keyPool.length > 0
+      ? keyPool
+      : apiKey
+        ? [{ id: "key-1", label: "Gemini #1", source: "GEMINI_API_KEY", key: apiKey }]
+        : [];
   const normSize = normalizeImageSize(imageSize);
   const normRatio = normalizeAspectRatio(aspectRatio);
   const requestedId = String(presetId || "").trim();
@@ -214,10 +467,13 @@ export async function generateThreeRetouchVariants({
   }
 
   const settled = await Promise.allSettled(
-    targetPresets.map(async (preset) => {
-      const out = await runGeminiImageEdit({
-        apiKey,
+    targetPresets.map(async (preset, idx) => {
+      const out = await runGeminiImageEditWithFallback({
+        keyPool: pool,
+        startIndex: idx,
+        preferredSlotId,
         model,
+        fallbackModel,
         imageBase64,
         mimeType,
         prompt: preset.prompt,
@@ -231,6 +487,9 @@ export async function generateThreeRetouchVariants({
         subtitle: preset.subtitle,
         imageSize: normSize,
         aspectRatio: normRatio,
+        usedSlotId: out.usedSlotId,
+        usedSlotLabel: out.usedSlotLabel,
+        usedModel: out.usedModel,
         mimeType: out.mimeType,
         dataUrl: `data:${out.mimeType};base64,${out.data}`,
       };

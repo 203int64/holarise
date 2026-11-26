@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=c7a95bb2e9">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=2d64653f1d">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
 <body data-pwa-app-name="HolaRise CMS">
@@ -581,6 +581,78 @@
               <div class="btn-row">
                 <button class="btn btn--primary" type="submit">Lưu cài đặt</button>
                 <button class="btn btn--outline" type="button" id="btn-test-webhook">Gửi thử kiểm tra kết nối</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel-box" id="box-ai-api" style="margin-top: 18px;">
+            <div class="panel-box-head">
+              <div>
+                <h2>API Tạo &amp; Chỉnh Ảnh AI (Gemini Multi-Key)</h2>
+                <p>Gắn nhiều khóa Gemini API ngay tại đây để tự động xoay vòng &amp; tránh hết quota (429). Có hiệu lực tức thì trên <code>/media/</code> không cần deploy lại.</p>
+              </div>
+            </div>
+
+            <div class="health-strip" id="ai-api-health"></div>
+            <div id="ai-api-slots-list" class="users-list" style="margin-bottom: 16px;"></div>
+
+            <form class="admin-form" id="ai-key-form" novalidate>
+              <div class="field">
+                <label for="ai-key-label">Tên gợi nhớ (tùy chọn)</label>
+                <input id="ai-key-label" name="label" type="text" maxlength="50" placeholder="Ví dụ: Gemini Dự án A">
+              </div>
+              <div class="field">
+                <label for="ai-key-input">Thêm khóa Gemini API (hỗ trợ dán nhiều khóa, cách nhau bằng dấu phẩy hoặc xuống dòng)</label>
+                <span class="field-hint">Khóa được lưu an toàn trong D1 và không bao giờ hiển thị lại nguyên văn sau khi lưu.</span>
+                <textarea id="ai-key-input" name="apiKeys" rows="2" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="AIzaSy..."></textarea>
+              </div>
+              <div class="form-alert" id="ai-key-alert" role="status" hidden></div>
+              <div class="btn-row">
+                <button class="btn btn--primary" type="submit">+ Thêm API Key</button>
+              </div>
+            </form>
+
+            <hr style="border:0;border-top:1px solid var(--line,rgba(11,17,15,0.08));margin:20px 0;">
+
+            <form class="admin-form" id="ai-defaults-form" novalidate>
+              <div class="field-row-2">
+                <div class="field">
+                  <label for="ai-def-model">Model chính</label>
+                  <input id="ai-def-model" name="model" type="text" maxlength="80" placeholder="gemini-nano-banana-2.1">
+                </div>
+                <div class="field">
+                  <label for="ai-def-fallback-model">Model dự phòng (tùy chọn)</label>
+                  <input id="ai-def-fallback-model" name="fallbackModel" type="text" maxlength="80" placeholder="Để trống nếu không dùng">
+                </div>
+              </div>
+              <div class="field-row-2">
+                <div class="field">
+                  <label for="ai-def-size">Chất lượng mặc định</label>
+                  <select id="ai-def-size" name="defaultImageSize">
+                    <option value="2K">2K · Chuẩn Web</option>
+                    <option value="1K">1K · Nhanh</option>
+                    <option value="4K">4K · In ấn / Lưu Drive</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="ai-def-ratio">Tỉ lệ mặc định</label>
+                  <select id="ai-def-ratio" name="defaultAspectRatio">
+                    <option value="auto">Giữ nguyên ảnh gốc</option>
+                    <option value="16:9">16:9 · Ngang / Bìa Web</option>
+                    <option value="4:5">4:5 · Facebook / IG</option>
+                    <option value="3:2">3:2 · Ảnh sự kiện</option>
+                    <option value="1:1">1:1 · Vuông</option>
+                    <option value="9:16">9:16 · Story / Reels</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="ai-def-slogan">Slogan đóng dấu mặc định (Canvas)</label>
+                <input id="ai-def-slogan" name="defaultSlogan" type="text" maxlength="100" placeholder="Together We Rise, Together We Serve.">
+              </div>
+              <div class="form-alert" id="ai-defaults-alert" role="status" hidden></div>
+              <div class="btn-row">
+                <button class="btn btn--outline" type="submit">Lưu cấu hình AI mặc định</button>
               </div>
             </form>
           </section>
@@ -1414,8 +1486,8 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=c7a95bb2e9" defer></script>
-  <script src="/assets/js/admin.js?v=c7a95bb2e9" defer></script>
-  <script src="/assets/js/pwa.js?v=c7a95bb2e9" defer></script>
+  <script src="/assets/js/passkey-client.js?v=2d64653f1d" defer></script>
+  <script src="/assets/js/admin.js?v=2d64653f1d" defer></script>
+  <script src="/assets/js/pwa.js?v=2d64653f1d" defer></script>
 </body>
 </html>

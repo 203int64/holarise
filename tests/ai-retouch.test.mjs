@@ -6,7 +6,14 @@ import test from "node:test";
 
 import { AI_RETOUCH_PRESETS, bytesToBase64 } from "../functions/_lib/ai-retouch.js";
 import { onRequestPost as authBootstrap } from "../functions/api/auth/bootstrap.js";
-import { onRequestPost as aiRetouchPost } from "../functions/api/admin/photos/[id]/ai-retouch.js";
+import {
+  onRequestGet as aiConfigGet,
+  onRequestPost as aiConfigPost,
+} from "../functions/api/admin/ai-config.js";
+import {
+  onRequestGet as aiRetouchGet,
+  onRequestPost as aiRetouchPost,
+} from "../functions/api/admin/photos/[id]/ai-retouch.js";
 
 const ROOT = path.resolve(new URL("..", import.meta.url).pathname);
 
@@ -254,4 +261,135 @@ test("AI Photo Retouch Studio: 1-click generates 3 authentic variants & applies 
 
   const albAfter = DB.rawDb.prepare("SELECT cover_url FROM media_albums WHERE id = 'alb-ai'").get();
   assert.equal(albAfter.cover_url, applyData.item.webUrl);
+
+  // 6. Multi-key rotation + automatic 429 fallback + safe GET slots (never exposes raw keys)
+  const multiEnv = {
+    DB,
+    MEDIA_KV,
+    GEMINI_API_KEY: "key-alpha-1111",
+    GEMINI_API_KEY_2: "key-beta-2222",
+    GEMINI_API_KEYS: "key-gamma-3333, key-alpha-1111",
+  };
+  const statusRes = await aiRetouchGet({
+    request: new Request("https://holarise.org/api/admin/photos/pho-1/ai-retouch", {
+      headers: { Cookie: adminCookie },
+    }),
+    params: { id: "pho-1" },
+    env: multiEnv,
+  });
+  assert.equal(statusRes.status, 200);
+  const statusData = await statusRes.json();
+  assert.equal(statusData.keyCount, 3);
+  assert.equal(statusData.slots.length, 3);
+  assert.equal(JSON.stringify(statusData).includes("key-alpha-1111"), false);
+
+  const triedKeys = [];
+  const fallbackFetch = async (_url, init) => {
+    const k = init.headers["x-goog-api-key"];
+    triedKeys.push(k);
+    if (k === "key-alpha-1111") {
+      return new Response("RESOURCE_EXHAUSTED", { status: 429 });
+    }
+    return new Response(
+      JSON.stringify({
+        steps: [{ outputs: [{ type: "image", mime_type: "image/jpeg", data: bytesToBase64(VALID_JPEG_BYTES) }] }],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  };
+
+  const fbRes = await aiRetouchPost({
+    request: makeReq("/api/admin/photos/pho-1/ai-retouch", {
+      cookie: adminCookie,
+      body: {
+        action: "generate",
+        imageDataUrl: VALID_JPEG_DATA_URL,
+        imageSize: "4K",
+        presetId: "warm_film",
+        providerSlot: "key-1",
+      },
+    }),
+    params: { id: "pho-1" },
+    env: multiEnv,
+    fetchImpl: fallbackFetch,
+  });
+  assert.equal(fbRes.status, 200);
+  const fbData = await fbRes.json();
+  assert.deepEqual(triedKeys, ["key-alpha-1111", "key-beta-2222"]);
+  assert.equal(fbData.variants[0].usedSlotId, "key-2");
+
+  // 7. Admin D1 AI Config: add keys, never leak raw key, save defaults, retouch uses D1 key without env secret, remove key
+  const noEnv = { DB, MEDIA_KV };
+  const addKeyRes = await aiConfigPost({
+    request: makeReq("/api/admin/ai-config", {
+      cookie: adminCookie,
+      body: {
+        action: "add_key",
+        label: "Gemini Chính",
+        apiKeys: "AIzaAdminSecretKey_9999\nAIzaAdminBackupKey_8888",
+      },
+    }),
+    env: noEnv,
+  });
+  assert.equal(addKeyRes.status, 200);
+  const addKeyData = await addKeyRes.json();
+  assert.equal(addKeyData.added, 2);
+  assert.equal(addKeyData.keyCount, 2);
+
+  const cfgGetRes = await aiConfigGet({
+    request: new Request("https://holarise.org/api/admin/ai-config", { headers: { Cookie: adminCookie } }),
+    env: noEnv,
+  });
+  assert.equal(cfgGetRes.status, 200);
+  const cfgData = await cfgGetRes.json();
+  assert.equal(cfgData.keyCount, 2);
+  assert.equal(JSON.stringify(cfgData).includes("AIzaAdminSecretKey_9999"), false);
+
+  const defSaveRes = await aiConfigPost({
+    request: makeReq("/api/admin/ai-config", {
+      cookie: adminCookie,
+      body: {
+        action: "save_defaults",
+        model: "gemini-nano-banana-2.1",
+        defaultImageSize: "4K",
+        defaultAspectRatio: "4:5",
+        defaultSlogan: "HolaRise · Hòa Lạc",
+      },
+    }),
+    env: noEnv,
+  });
+  assert.equal(defSaveRes.status, 200);
+
+  let usedAdminKey = "";
+  const adminKeyFetch = async (_url, init) => {
+    usedAdminKey = init.headers["x-goog-api-key"];
+    return new Response(
+      JSON.stringify({
+        steps: [{ outputs: [{ type: "image", mime_type: "image/jpeg", data: bytesToBase64(VALID_JPEG_BYTES) }] }],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  };
+  const d1RetouchRes = await aiRetouchPost({
+    request: makeReq("/api/admin/photos/pho-1/ai-retouch", {
+      cookie: adminCookie,
+      body: { action: "generate", imageDataUrl: VALID_JPEG_DATA_URL, presetId: "warm_film" },
+    }),
+    params: { id: "pho-1" },
+    env: noEnv,
+    fetchImpl: adminKeyFetch,
+  });
+  assert.equal(d1RetouchRes.status, 200);
+  assert.equal(usedAdminKey, "AIzaAdminSecretKey_9999");
+
+  const rmRes = await aiConfigPost({
+    request: makeReq("/api/admin/ai-config", {
+      cookie: adminCookie,
+      body: { action: "remove_key", keyId: cfgData.slots[0].id },
+    }),
+    env: noEnv,
+  });
+  assert.equal(rmRes.status, 200);
+  const rmData = await rmRes.json();
+  assert.equal(rmData.keyCount, 1);
 });

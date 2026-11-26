@@ -2626,13 +2626,55 @@
       .join("");
   }
 
+  function renderAiApiConfig(cfg) {
+    const healthEl = $("#ai-api-health");
+    const listEl = $("#ai-api-slots-list");
+    const slots = Array.isArray(cfg?.slots) ? cfg.slots : [];
+    const count = Number(cfg?.keyCount || slots.length || 0);
+    if (healthEl) {
+      healthEl.innerHTML = `
+        <span class="health-pill ${count > 0 ? "is-ok" : "is-warn"}"><span class="health-dot"></span>Gemini API Pool: ${count > 0 ? `${count} khóa đang hoạt động` : "Chưa có khóa nào"}</span>
+        <span class="health-pill is-ok"><span class="health-dot"></span>Model: ${esc(cfg?.model || "gemini-nano-banana-2.1")}</span>
+        <span class="health-pill is-ok"><span class="health-dot"></span>Mặc định: ${esc(cfg?.defaultImageSize || "2K")} · ${esc(cfg?.defaultAspectRatio === "auto" ? "Giữ tỉ lệ gốc" : cfg?.defaultAspectRatio || "auto")}</span>
+      `;
+    }
+    if (listEl) {
+      if (slots.length === 0) {
+        listEl.innerHTML = '<p class="field-hint">Chưa có khóa Gemini nào được gắn. Dán khóa vào ô bên dưới để kích hoạt AI Studio trên <code>/media/</code>.</p>';
+      } else {
+        listEl.innerHTML = slots
+          .map(
+            (s) => `
+            <div class="user-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--line,rgba(11,17,15,0.1));border-radius:10px;margin-bottom:8px;background:#fff;">
+              <div style="min-width:0;">
+                <strong style="display:block;font-size:0.88rem;">${esc(s.label)}</strong>
+                <span style="font-size:0.78rem;color:var(--muted,#5c6b64);">${esc(s.masked || "")} · ${s.source === "admin" ? "Lưu trong Admin (D1)" : `Cloudflare Env (${esc(s.source)})`}</span>
+              </div>
+              ${
+                s.removable
+                  ? `<button class="btn btn--outline btn--sm" type="button" data-remove-ai-key="${esc(s.id)}">Xóa</button>`
+                  : '<span class="field-hint" style="margin:0;">Env</span>'
+              }
+            </div>`
+          )
+          .join("");
+      }
+    }
+    if ($("#ai-def-model")) $("#ai-def-model").value = cfg?.model || "gemini-nano-banana-2.1";
+    if ($("#ai-def-fallback-model")) $("#ai-def-fallback-model").value = cfg?.fallbackModel || "";
+    if ($("#ai-def-size")) $("#ai-def-size").value = cfg?.defaultImageSize || "2K";
+    if ($("#ai-def-ratio")) $("#ai-def-ratio").value = cfg?.defaultAspectRatio || "auto";
+    if ($("#ai-def-slogan")) $("#ai-def-slogan").value = cfg?.defaultSlogan ?? "Together We Rise, Together We Serve.";
+  }
+
   async function loadSettings() {
-    const [vRes, pRes, sRes, uRes, mInfo] = await Promise.allSettled([
+    const [vRes, pRes, sRes, uRes, mInfo, aiRes] = await Promise.allSettled([
       api("/api/admin/visuals"),
       api("/api/admin/partners"),
       api("/api/admin/settings"),
       api("/api/admin/users"),
       getMediaStorageInfo(),
+      api("/api/admin/ai-config"),
     ]);
 
     if (vRes.status === "fulfilled") {
@@ -2666,6 +2708,9 @@
     if (uRes.status === "fulfilled") {
       state.users = uRes.value.items || [];
       renderUsersList();
+    }
+    if (aiRes.status === "fulfilled") {
+      renderAiApiConfig(aiRes.value);
     }
   }
 
@@ -3690,6 +3735,85 @@
       } finally {
         btn.disabled = false;
         btn.textContent = "Lưu đối tác";
+      }
+    });
+
+    // Settings: AI API Keys & Defaults
+    $("#ai-key-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = e.currentTarget.querySelector('button[type="submit"]');
+      const alertEl = $("#ai-key-alert");
+      showAlert(alertEl, "");
+      btn.disabled = true;
+      btn.textContent = "Đang lưu...";
+      try {
+        const res = await api("/api/admin/ai-config", {
+          method: "POST",
+          body: {
+            action: "add_key",
+            label: $("#ai-key-label")?.value.trim() || "",
+            apiKeys: $("#ai-key-input")?.value.trim() || "",
+          },
+        });
+        if ($("#ai-key-label")) $("#ai-key-label").value = "";
+        if ($("#ai-key-input")) $("#ai-key-input").value = "";
+        showAlert(alertEl, `Đã thêm ${res.added || 0} khóa API (tổng cộng ${res.keyCount || 0} khóa đang hoạt động).`, true);
+        loadSettings();
+      } catch (err) {
+        showAlert(alertEl, formatApiError(err));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "+ Thêm API Key";
+      }
+    });
+
+    $("#ai-api-slots-list")?.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-remove-ai-key]");
+      if (!btn) return;
+      const keyId = btn.getAttribute("data-remove-ai-key");
+      const alertEl = $("#ai-key-alert");
+      btn.disabled = true;
+      btn.textContent = "Đang xóa...";
+      try {
+        await api("/api/admin/ai-config", {
+          method: "POST",
+          body: { action: "remove_key", keyId },
+        });
+        showAlert(alertEl, "Đã xóa khóa API khỏi Admin.", true);
+        loadSettings();
+      } catch (err) {
+        showAlert(alertEl, formatApiError(err));
+        btn.disabled = false;
+        btn.textContent = "Xóa";
+      }
+    });
+
+    $("#ai-defaults-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = e.currentTarget.querySelector('button[type="submit"]');
+      const alertEl = $("#ai-defaults-alert");
+      showAlert(alertEl, "");
+      btn.disabled = true;
+      btn.textContent = "Đang lưu...";
+      try {
+        const res = await api("/api/admin/ai-config", {
+          method: "POST",
+          body: {
+            action: "save_defaults",
+            model: $("#ai-def-model")?.value.trim() || "",
+            fallbackModel: $("#ai-def-fallback-model")?.value.trim() || "",
+            defaultImageSize: $("#ai-def-size")?.value || "2K",
+            defaultAspectRatio: $("#ai-def-ratio")?.value || "auto",
+            defaultSlogan: $("#ai-def-slogan")?.value ?? "",
+          },
+        });
+        renderAiApiConfig(res);
+        showAlert(alertEl, "Đã lưu cấu hình AI mặc định.", true);
+      } catch (err) {
+        showAlert(alertEl, formatApiError(err));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Lưu cấu hình AI mặc định";
       }
     });
 

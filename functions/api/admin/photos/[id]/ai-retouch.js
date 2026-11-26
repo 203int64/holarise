@@ -6,12 +6,12 @@
  */
 
 import {
-  DEFAULT_GEMINI_IMAGE_MODEL,
   bytesToBase64,
   decodeDataUrl,
   generateThreeRetouchVariants,
   normalizeAspectRatio,
   normalizeImageSize,
+  resolveFullAiRuntime,
 } from "../../../../_lib/ai-retouch.js";
 import {
   buildEventFolderName,
@@ -63,6 +63,24 @@ async function loadPhotoBytesFromStorage(env, photo, fetchImpl = fetch) {
   return null;
 }
 
+export async function onRequestGet(context) {
+  const auth = await requireAdmin(context, { allowedRoles: ALLOWED_ROLES });
+  if (!auth.ok) return auth.response;
+
+  const runtime = await resolveFullAiRuntime(context.env, context.env.DB);
+  return jsonResponse({
+    ok: true,
+    configured: runtime.keyPool.length > 0,
+    model: runtime.model,
+    fallbackModel: runtime.fallbackModel || undefined,
+    defaultImageSize: runtime.defaultImageSize,
+    defaultAspectRatio: runtime.defaultAspectRatio,
+    defaultSlogan: runtime.defaultSlogan,
+    keyCount: runtime.keyPool.length,
+    slots: runtime.slots,
+  });
+}
+
 export async function onRequestPost(context) {
   const auth = await requireAdmin(context, { allowedRoles: ALLOWED_ROLES });
   if (!auth.ok) return auth.response;
@@ -92,12 +110,12 @@ export async function onRequestPost(context) {
   const action = String(parsed.data?.action || "generate").trim().toLowerCase();
 
   if (action === "generate") {
-    const apiKey = String(env?.GEMINI_API_KEY || "").trim();
-    if (!apiKey) {
+    const runtime = await resolveFullAiRuntime(env, env.DB);
+    if (runtime.keyPool.length === 0) {
       return errorResponse(
         503,
         "GEMINI_NOT_CONFIGURED",
-        "Chưa cấu hình khóa GEMINI_API_KEY trên Cloudflare Pages (chạy: npx wrangler pages secret put GEMINI_API_KEY)."
+        "Chưa có khóa Gemini API nào. Vào /admin/ → Cài đặt → Tích hợp để thêm khóa ngay."
       );
     }
 
@@ -142,13 +160,17 @@ export async function onRequestPost(context) {
       sourceMime = loaded.mime;
     }
 
-    const model = String(env?.GEMINI_IMAGE_MODEL || DEFAULT_GEMINI_IMAGE_MODEL).trim();
-    const imageSize = normalizeImageSize(parsed.data?.imageSize || env?.GEMINI_IMAGE_SIZE);
-    const aspectRatio = normalizeAspectRatio(parsed.data?.aspectRatio);
+    const model = runtime.model;
+    const fallbackModel = runtime.fallbackModel;
+    const imageSize = normalizeImageSize(parsed.data?.imageSize || runtime.defaultImageSize);
+    const aspectRatio = normalizeAspectRatio(parsed.data?.aspectRatio || runtime.defaultAspectRatio);
     const presetId = String(parsed.data?.presetId || "").trim().slice(0, 40);
+    const preferredSlotId = String(parsed.data?.providerSlot || "auto").trim().slice(0, 24);
     const { variants, errors } = await generateThreeRetouchVariants({
-      apiKey,
+      keyPool: runtime.keyPool,
+      preferredSlotId,
       model,
+      fallbackModel,
       imageBase64: bytesToBase64(sourceBytes),
       mimeType: sourceMime,
       imageSize,
@@ -171,6 +193,8 @@ export async function onRequestPost(context) {
       model,
       imageSize,
       aspectRatio,
+      keyCount: runtime.keyPool.length,
+      slots: runtime.slots,
       variants,
       partialErrors: errors.length > 0 ? errors : undefined,
     });

@@ -1002,11 +1002,26 @@
 
   function getAiBrandOptions() {
     return {
+      providerSlot: $("#ai-opt-key")?.value || "auto",
       imageSize: $("#ai-opt-size")?.value || "2K",
       aspectRatio: $("#ai-opt-ratio")?.value || "auto",
       showLogo: Boolean($("#ai-opt-logo")?.checked),
       slogan: String($("#ai-opt-slogan")?.value || "").trim(),
     };
+  }
+
+  function populateAiKeySlots(slots) {
+    const sel = $("#ai-opt-key");
+    if (!sel || !Array.isArray(slots)) return;
+    const prev = sel.value || "auto";
+    const countLabel = slots.length > 1 ? `Tự động xoay vòng (${slots.length} key)` : `Tự động (${slots.length} key)`;
+    sel.innerHTML = [
+      `<option value="auto">${esc(countLabel)}</option>`,
+      ...slots.map((s) => `<option value="${esc(s.id)}">${esc(s.label)}</option>`),
+    ].join("");
+    if ([...sel.options].some((o) => o.value === prev)) {
+      sel.value = prev;
+    }
   }
 
   async function composeBrandedImage(sourceUrl, { showLogo = false, slogan = "", maxDim = 0, quality = 0.9 } = {}) {
@@ -1165,8 +1180,25 @@
     refreshAiBrandedPreviews();
   }
 
+  let aiDefaultsSynced = false;
+
+  async function syncAiDefaultsFromServer(photoId) {
+    if (aiDefaultsSynced || !photoId) return;
+    try {
+      const cfg = await apiFetch(`/api/admin/photos/${encodeURIComponent(photoId)}/ai-retouch`);
+      if (Array.isArray(cfg.slots)) populateAiKeySlots(cfg.slots);
+      if (cfg.defaultImageSize && $("#ai-opt-size")) $("#ai-opt-size").value = cfg.defaultImageSize;
+      if (cfg.defaultAspectRatio && $("#ai-opt-ratio")) $("#ai-opt-ratio").value = cfg.defaultAspectRatio;
+      if (typeof cfg.defaultSlogan === "string" && $("#ai-opt-slogan")) $("#ai-opt-slogan").value = cfg.defaultSlogan;
+      aiDefaultsSynced = true;
+    } catch {
+      // Non-fatal: keep local defaults
+    }
+  }
+
   async function runAiRetouchGenerate(photo, { presetId = "", forceSize = "" } = {}) {
     if (!photo || aiRetouchState.busy) return;
+    await syncAiDefaultsFromServer(photo.id);
     const dlg = $("#ai-retouch-dialog");
     const alertEl = $("#ai-retouch-alert");
     const statusEl = $("#ai-retouch-status");
@@ -1207,13 +1239,16 @@
           imageSize,
           aspectRatio,
           presetId,
+          providerSlot: opts.providerSlot || "auto",
         },
       });
+      if (Array.isArray(res.slots)) populateAiKeySlots(res.slots);
       aiRetouchState.variants = Array.isArray(res.variants) ? res.variants : [];
       aiRetouchState.imageSize = res.imageSize || imageSize;
       aiRetouchState.aspectRatio = res.aspectRatio || aspectRatio;
       if (statusEl) {
-        statusEl.textContent = `Đã tạo xong ${aiRetouchState.variants.length} mẫu (${aiRetouchState.imageSize}). Bật/tắt Logo & Slogan bên dưới để xem trực tiếp không tốn API.`;
+        const keyNote = res.keyCount > 1 ? ` · Pool ${res.keyCount} key` : "";
+        statusEl.textContent = `Đã tạo xong ${aiRetouchState.variants.length} mẫu (${aiRetouchState.imageSize}${keyNote}). Bật/tắt Logo & Slogan bên dưới để xem trực tiếp không tốn API.`;
       }
       renderAiRetouchVariants();
     } catch (err) {
