@@ -187,7 +187,7 @@ test("Unified Member Auth (Email & Phone), Strict Admin Isolation, Avatar Upload
   const bootRes = await authBootstrap({
     request: makeReq("/api/auth/bootstrap", {
       method: "POST",
-      body: { email: "admin@holarise.org", name: "Admin Hola", password: "AdminStrongPassword123!" },
+      body: { email: "203int64@holarise.org", name: "Admin Hola", password: "AdminStrongPassword123!" },
     }),
     env,
   });
@@ -400,7 +400,7 @@ test("Editorial Guestbook Lifecycle (Create -> Pending -> Admin Approve -> Heart
   const bootRes = await authBootstrap({
     request: makeReq("/api/auth/bootstrap", {
       method: "POST",
-      body: { email: "admin@holarise.org", name: "Admin", password: "AdminStrongPassword123!" },
+      body: { email: "203int64@holarise.org", name: "Admin", password: "AdminStrongPassword123!" },
     }),
     env,
   });
@@ -614,7 +614,7 @@ test("HR-YYMMDD-STT sequential member codes, QR SVG & /tv/[code] privacy-safe ac
   const bootRes = await authBootstrap({
     request: makeReq("/api/auth/bootstrap", {
       method: "POST",
-      body: { email: "admin@holarise.org", name: "Admin Hola", password: "AdminStrongPassword123!" },
+      body: { email: "203int64@holarise.org", name: "Admin Hola", password: "AdminStrongPassword123!" },
     }),
     env,
   });

@@ -45,8 +45,10 @@ function createMockDb(adminTokenHash = "") {
             return {
               session_id: "sess-1",
               user_id: "u-1",
+              email: "203int64@holarise.org",
+              name: "Admin",
               expires_at: new Date(Date.now() + 3600_000).toISOString(),
-              username: "admin",
+              username: "203int64",
               display_name: "Admin",
               role: "super_admin",
               is_active: 1,

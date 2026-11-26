@@ -40,6 +40,8 @@ import { onRequestGet as ssrJoin } from "../functions/tham-gia/index.js";
 import { onRequestGet as ssrJourneyList } from "../functions/hanh-trinh/index.js";
 import { onRequestGet as ssrPostDetail, onRequestHead as ssrPostHead } from "../functions/hanh-trinh/[slug].js";
 import { onRequestGet as partnersGet, onRequestPut as partnersPut } from "../functions/api/admin/partners.js";
+import { onRequestGet as overviewGet } from "../functions/api/admin/overview.js";
+import { onRequestGet as ssrEventInvite } from "../functions/su-kien/[slug].js";
 import { onRequestHead as mediaHead } from "../functions/api/media/[id].js";
 import { onRequestGet as ssrSitemap } from "../functions/sitemap.xml.js";
 import { callGasWebhook } from "../functions/_lib/gas.js";
@@ -51,6 +53,7 @@ function createMockD1() {
   const db = new DatabaseSync(":memory:");
   db.exec(fs.readFileSync(path.join(ROOT, "migrations/0001_init.sql"), "utf8"));
   db.exec(fs.readFileSync(path.join(ROOT, "migrations/0002_seed.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0003_media_portal.sql"), "utf8"));
 
   class Stmt {
     constructor(sql, bound = []) {
@@ -210,11 +213,11 @@ test("Full end-to-end CMS & Registration API flow on real SQLite D1 mock", async
   assert.equal(st0.initialized, false);
   assert.equal(st0.authenticated, false);
 
-  // 2. Bootstrap super admin
+  // 2. Bootstrap sole super admin (203int64)
   const bootRes = await authBootstrap({
     request: makeReq("/api/auth/bootstrap", {
       method: "POST",
-      body: { email: "admin@holarise.org", name: "Nguyễn Lan", password: "StrongPassword123" },
+      body: { email: "203int64@holarise.org", name: "Nguyễn Lan", password: "StrongPassword123" },
     }),
     env,
   });
@@ -432,12 +435,22 @@ test("Full end-to-end CMS & Registration API flow on real SQLite D1 mock", async
   assert.ok(csvText.startsWith("\uFEFF"));
   assert.ok(csvText.includes("Trần Minh Quân"));
 
-  // 8. Role isolation: create editor -> editor blocked from /users & /settings
-  const uCreate = await usersCreate({
+  // 8. Sole-admin role isolation: creating editor/super_admin is blocked (403); creating media works & is blocked from /admin/*
+  const blockedEditor = await usersCreate({
     request: makeReq("/api/admin/users", {
       method: "POST",
       cookie: adminCookie,
       body: { email: "editor@holarise.org", name: "Minh Anh", role: "editor", password: "EditorPass123" },
+    }),
+    env,
+  });
+  assert.equal(blockedEditor.status, 403);
+
+  const uCreate = await usersCreate({
+    request: makeReq("/api/admin/users", {
+      method: "POST",
+      cookie: adminCookie,
+      body: { email: "media@holarise.org", name: "Minh Anh", role: "media", password: "MediaPass123" },
     }),
     env,
   });
@@ -447,7 +460,7 @@ test("Full end-to-end CMS & Registration API flow on real SQLite D1 mock", async
   const editorLogin = await authLogin({
     request: makeReq("/api/auth/login", {
       method: "POST",
-      body: { email: "editor@holarise.org", password: "EditorPass123" },
+      body: { email: "media@holarise.org", password: "MediaPass123" },
     }),
     env,
   });
@@ -710,22 +723,22 @@ test("SSR Pages Functions inject live D1 events, brand-new articles with OG/JSON
 test("Security & reliability regressions: rate limits (429), resync, event edit preservation, session revoke on pw reset, GAS bridge, Vietnamese search & HEAD media", async () => {
   const env = { DB: createMockD1(), MEDIA_KV: createMockKV() };
 
-  // Bootstrap admin
+  // Bootstrap sole admin (203int64)
   const boot = await authBootstrap({
     request: makeReq("/api/auth/bootstrap", {
       method: "POST",
-      body: { email: "super@holarise.org", name: "Super", password: "SuperPassword123" },
+      body: { email: "203int64@holarise.org", name: "Super", password: "SuperPassword123" },
     }),
     env,
   });
   const superCookie = extractSessionCookie(boot);
 
-  // Create editor & log them in
+  // Create media user & log them in
   const edRes = await usersCreate({
     request: makeReq("/api/admin/users", {
       method: "POST",
       cookie: superCookie,
-      body: { email: "ed2@holarise.org", name: "Ed2", role: "editor", password: "EditorPass123" },
+      body: { email: "ed2@holarise.org", name: "Ed2", role: "media", password: "EditorPass123" },
     }),
     env,
   });
@@ -949,7 +962,7 @@ test("Partners CMS API & SSR strip injection on Home and About", async () => {
   const boot = await authBootstrap({
     request: makeReq("/api/auth/bootstrap", {
       method: "POST",
-      body: { email: "admin@holarise.org", name: "Admin", password: "StrongPassword123" },
+      body: { email: "203int64@holarise.org", name: "Admin", password: "StrongPassword123" },
     }),
     env,
   });
@@ -1278,4 +1291,177 @@ test("Full English mirror (/en/*): static EN purity, Edge SSR routes, sitemap & 
   const badJson = await badRes.json();
   assert.ok(badJson.error.message.includes("Please check"));
   assert.ok(badJson.error.fields.phone.includes("valid phone number"));
+});
+
+test("CMS v2: Sole-admin 203int64 lock, /api/admin/overview, migration 0018 zaloGroupUrl SSR & bug_screenshot_url", async () => {
+  const db = new DatabaseSync(":memory:");
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0001_init.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0002_seed.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0003_media_portal.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0006_member_auth_and_reflections.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0011_event_seats_and_slugs.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0016_media_approval_workflow.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0018_event_zalo_url.sql"), "utf8"));
+
+  class Stmt {
+    constructor(sql, bound = []) {
+      this.sql = sql;
+      this.bound = bound;
+    }
+    bind(...args) {
+      return new Stmt(this.sql, args);
+    }
+    async first() {
+      return db.prepare(this.sql).get(...this.bound) ?? null;
+    }
+    async all() {
+      return { results: db.prepare(this.sql).all(...this.bound) };
+    }
+    async run() {
+      const info = db.prepare(this.sql).run(...this.bound);
+      return { success: true, meta: { changes: Number(info.changes || 0) } };
+    }
+  }
+  const d1 = {
+    prepare: (sql) => new Stmt(sql),
+    async batch(stmts) {
+      const out = [];
+      for (const s of stmts) out.push(await s.run());
+      return out;
+    },
+  };
+  const assets = {
+    async fetch(req) {
+      const p = new URL(req.url).pathname.replace(/^\/+/, "");
+      const filePath = path.join(ROOT, "dist", p);
+      if (!fs.existsSync(filePath)) return new Response("Not Found", { status: 404 });
+      return new Response(fs.readFileSync(filePath, "utf8"), {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    },
+  };
+  const env = { DB: d1, MEDIA_KV: createMockKV(), ASSETS: assets };
+
+  // 1. Bootstrap sole admin 203int64
+  const boot = await authBootstrap({
+    request: makeReq("/api/auth/bootstrap", {
+      method: "POST",
+      body: { email: "203int64@gmail.com", name: "Sole Admin", password: "StrongPassword123" },
+    }),
+    env,
+  });
+  assert.equal(boot.status, 201);
+  const soleCookie = extractSessionCookie(boot);
+
+  const stSole = await (await authStatus({ request: makeReq("/api/auth/status", { cookie: soleCookie }), env })).json();
+  assert.equal(stSole.isSoleAdmin, true);
+
+  // 2. Insert a rogue super_admin with another email directly in D1 -> MUST be blocked (403)
+  const { hash, salt } = await hashPassword("RoguePass123!");
+  const now = new Date().toISOString();
+  await d1
+    .prepare(
+      "INSERT INTO admin_users (id, email, name, role, password_hash, password_salt, is_active, created_at) VALUES (?, ?, ?, 'super_admin', ?, ?, 1, ?)"
+    )
+    .bind("rogue-1", "other@holarise.org", "Other", hash, salt, now)
+    .run();
+  const rogueLogin = await authLogin({
+    request: makeReq("/api/auth/login", {
+      method: "POST",
+      ip: "7.7.7.7",
+      body: { email: "other@holarise.org", password: "RoguePass123!" },
+    }),
+    env,
+  });
+  const rogueBody = await rogueLogin.json();
+  assert.equal(rogueBody.isSoleAdmin, false);
+  const rogueCookie = extractSessionCookie(rogueLogin);
+  const rogueOverview = await overviewGet({ request: makeReq("/api/admin/overview", { cookie: rogueCookie }), env });
+  assert.equal(rogueOverview.status, 403);
+
+  // 3. Create an event with custom per-event zaloGroupUrl -> persisted & rendered on /su-kien/<slug>/
+  const evCreate = await eventsCreate({
+    request: makeReq("/api/admin/events", {
+      method: "POST",
+      cookie: soleCookie,
+      body: {
+        kind: "upcoming",
+        type: "HolaHeart · Giá trị sống",
+        title: "HolaHeart Đêm Cuối Năm",
+        date: "2027-04-10",
+        time: "19:00 – 21:00",
+        location: "Hòa Lạc",
+        fee: "Miễn phí",
+        seatCapacity: 30,
+        showSeatBar: true,
+        zaloGroupUrl: "https://zalo.me/g/custom-event-group-2027",
+        summary: "Buổi trò chuyện ấm cúng dành cho người trẻ tại Hòa Lạc.",
+        highlights: ["Đón khách", "Chia sẻ nhóm nhỏ"],
+        filters: ["biet-on"],
+      },
+    }),
+    env,
+  });
+  assert.equal(evCreate.status, 201);
+  const createdEv = (await evCreate.json()).item;
+  assert.equal(createdEv.zaloGroupUrl, "https://zalo.me/g/custom-event-group-2027");
+
+  const inviteRes = await ssrEventInvite({
+    request: makeReq(`/su-kien/${createdEv.slug}/`),
+    env,
+    params: { slug: createdEv.slug },
+  });
+  assert.equal(inviteRes.status, 200);
+  const inviteHtml = await inviteRes.text();
+  assert.ok(inviteHtml.includes("https://zalo.me/g/custom-event-group-2027"));
+
+  // 4. Add 1 registration for the event + 1 pending photo in media_photos + 1 bug screenshot note -> verify overview & registrations API
+  await publicRegister({
+    request: makeReq("/api/registrations", {
+      method: "POST",
+      ip: "7.7.7.8",
+      body: {
+        source: "event_modal",
+        eventId: createdEv.id,
+        activity: createdEv.title,
+        fullName: "Nguyễn Văn An",
+        phone: "0911222333",
+      },
+    }),
+    env,
+  });
+  await d1
+    .prepare(
+      "INSERT INTO registrations (id, source, event_id, activity_title, full_name, phone, email, role, organization, note, status, admin_note, sync_status, sync_error, ip_hash, created_at, updated_at) VALUES (?, 'join_page', '', 'Báo lỗi', 'Lan', '0900111222', '', '', '', ?, 'new', '', 'skipped', '', 'ip', ?, ?)"
+    )
+    .bind("REG-BUG-1", "Lỗi hiển thị\n\n[Ảnh màn hình lỗi (Admin)]: /api/admin/bug-screenshot/bug-261126-abc12345.jpg", now, now)
+    .run();
+
+  const albumRow = await d1.prepare("SELECT id FROM media_albums LIMIT 1").first();
+  if (albumRow) {
+    await d1
+      .prepare(
+        "INSERT INTO media_photos (id, album_id, url, web_url, media_key, caption, alt, photographer, is_featured_home, sort_order, approval_status, created_at, updated_at) VALUES ('ph-pend-1', ?, '/api/media/x.jpg', '/api/media/x.jpg', 'x.jpg', '', '', 'TV', 0, 0, 'pending', ?, ?)"
+      )
+      .bind(albumRow.id, now, now)
+      .run();
+  }
+
+  const ovRes = await overviewGet({ request: makeReq("/api/admin/overview", { cookie: soleCookie }), env });
+  assert.equal(ovRes.status, 200);
+  const ov = await ovRes.json();
+  assert.equal(ov.registrations.new, 2);
+  assert.equal(ov.media.pendingPhotoCount, albumRow ? 1 : 0);
+  const evInOv = ov.events.upcoming.find((x) => x.id === createdEv.id);
+  assert.ok(evInOv);
+  assert.equal(evInOv.webBookedCount, 1);
+
+  const bugRegsRes = await regsList({
+    request: makeReq("/api/admin/registrations?source=feedback", { cookie: soleCookie }),
+    env,
+  });
+  const bugRegs = await bugRegsRes.json();
+  assert.equal(bugRegs.items.length, 1);
+  assert.equal(bugRegs.items[0].bug_screenshot_url, "/api/admin/bug-screenshot/bug-261126-abc12345.jpg");
 });

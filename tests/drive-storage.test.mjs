@@ -442,7 +442,7 @@ test("Event & Album folder naming + auto-provision draft media album on event cr
     .prepare(
       "INSERT INTO admin_users (id, email, name, password_hash, password_salt, role, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?)"
     )
-    .bind("usr_admin_1", "admin@holarise.org", "Admin", "h", "s", "super_admin", now)
+    .bind("usr_admin_1", "203int64@holarise.org", "Admin", "h", "s", "super_admin", now)
     .run();
   const { rawToken } = await createSession(db, "usr_admin_1");
 

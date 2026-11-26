@@ -183,7 +183,7 @@ test("Migration 0003 safely preserves existing admin_users & sessions while wide
   const bootRes = await authBootstrap({
     request: makeReq("/api/auth/bootstrap", {
       method: "POST",
-      json: { name: "Admin Chính", email: "admin@holarise.org", password: "SuperPassword123!" },
+      json: { name: "Admin Chính", email: "203int64@holarise.org", password: "SuperPassword123!" },
     }),
     env,
   });
@@ -222,7 +222,7 @@ test("RBAC + Full Media Portal CRUD + KV cleanup on delete + SSR /hoat-dong/ & /
   const bootRes = await authBootstrap({
     request: makeReq("/api/auth/bootstrap", {
       method: "POST",
-      json: { name: "Admin Chính", email: "admin@holarise.org", password: "SuperPassword123!" },
+      json: { name: "Admin Chính", email: "203int64@holarise.org", password: "SuperPassword123!" },
     }),
     env,
   });
