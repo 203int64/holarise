@@ -2040,6 +2040,38 @@
       dialog.returnValue = "";
     });
 
+    function enqueueContributeFiles(files, fromPaste = false) {
+      if (!files || !files.length || uploading) return;
+      let firstError = "";
+      let addedCount = 0;
+      for (const file of files) {
+        if (!/^image\/(jpeg|jpg|png|webp)$/i.test(file.type || "")) {
+          if (!firstError) firstError = `${file.name || "Ảnh"}: chỉ hỗ trợ ảnh JPEG, PNG hoặc WebP.`;
+          continue;
+        }
+        if (file.size > maxUploadBytes) {
+          const maxMb = Math.round(maxUploadBytes / (1024 * 1024));
+          if (!firstError) firstError = `${file.name || "Ảnh"}: vượt quá giới hạn ${maxMb} MB mỗi ảnh.`;
+          continue;
+        }
+        queue.push({ file, status: "pending", message: "", savedName: "" });
+        addedCount += 1;
+      }
+      if (statusEl) {
+        if (firstError) {
+          statusEl.className = "form-status is-error";
+          statusEl.textContent = firstError;
+        } else if (fromPaste && addedCount > 0) {
+          statusEl.className = "form-status is-success";
+          statusEl.textContent = `Đã dán ${addedCount} ảnh vào danh sách tải lên.`;
+        } else {
+          statusEl.className = "form-status";
+          statusEl.textContent = "";
+        }
+      }
+      renderQueue();
+    }
+
     if (pickBtn && fileInput) {
       pickBtn.addEventListener("click", () => {
         if (!uploading) fileInput.click();
@@ -2047,32 +2079,30 @@
       fileInput.addEventListener("change", () => {
         const files = Array.from(fileInput.files || []);
         fileInput.value = "";
-        if (!files.length) return;
-        let firstError = "";
-        for (const file of files) {
-          if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
-            if (!firstError) firstError = `${file.name}: chỉ hỗ trợ ảnh JPEG, PNG hoặc WebP.`;
-            continue;
-          }
-          if (file.size > maxUploadBytes) {
-            const maxMb = Math.round(maxUploadBytes / (1024 * 1024));
-            if (!firstError) firstError = `${file.name}: vượt quá giới hạn ${maxMb} MB mỗi ảnh.`;
-            continue;
-          }
-          queue.push({ file, status: "pending", message: "", savedName: "" });
-        }
-        if (statusEl) {
-          if (firstError) {
-            statusEl.className = "form-status is-error";
-            statusEl.textContent = firstError;
-          } else {
-            statusEl.className = "form-status";
-            statusEl.textContent = "";
-          }
-        }
-        renderQueue();
+        enqueueContributeFiles(files, false);
       });
     }
+
+    dialog.addEventListener("paste", (e) => {
+      if (activeTab !== "photos" || !state.member || uploading) return;
+      const cb = e.clipboardData;
+      if (!cb) return;
+      const pasted = [];
+      for (const item of Array.from(cb.items || [])) {
+        if (item.kind === "file" && /^image\//i.test(item.type || "")) {
+          const f = item.getAsFile();
+          if (f) pasted.push(f);
+        }
+      }
+      if (!pasted.length) {
+        for (const f of Array.from(cb.files || [])) {
+          if (/^image\//i.test(f.type || "")) pasted.push(f);
+        }
+      }
+      if (!pasted.length) return;
+      e.preventDefault();
+      enqueueContributeFiles(pasted, true);
+    });
 
     if (fileListEl) {
       fileListEl.addEventListener("click", (e) => {

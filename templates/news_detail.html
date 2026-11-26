@@ -1,12 +1,5 @@
 <section class="page-hero">
   <div class="container">
-    <nav class="breadcrumb" aria-label="Đường dẫn trang">
-      <a href="/">Trang chủ</a>
-      <span aria-hidden="true">/</span>
-      <a href="/hanh-trinh/">Hành trình</a>
-      <span aria-hidden="true">/</span>
-      <span aria-current="page">{{ARTICLE_CATEGORY}}</span>
-    </nav>
     <h1>{{ARTICLE_TITLE}}</h1>
     <p style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.88rem; margin-top: 16px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">
       <span style="color: var(--accent); font-weight: 500;">{{ARTICLE_CATEGORY}}</span>
@@ -48,12 +41,12 @@
       <a class="btn btn--primary" href="/tham-gia/" data-magnetic>Tham gia chặng tiếp theo</a>
     </div>
 
-    <!-- Member-Only Editorial Reflections (up to 7 photos) -->
+    <!-- Member-Only Editorial Reflections (Hương khí, up to 7 photos) -->
     <section class="guestbook-section" id="activity-guestbook" data-guestbook-slug="{{ARTICLE_SLUG}}" aria-labelledby="guestbook-heading">
       <div class="guestbook-head">
         <div>
-          <div class="kicker">Lưu bút Thành viên</div>
-          <h2 id="guestbook-heading" class="guestbook-title">Những điều đọng lại sau buổi gặp</h2>
+          <div class="kicker">Hương khí Thành viên</div>
+          <h2 id="guestbook-heading" class="guestbook-title">Hương khí đọng lại sau buổi gặp</h2>
         </div>
         <span class="guestbook-count-pill" id="guestbook-count-pill">Đang tải...</span>
       </div>
@@ -62,8 +55,8 @@
         <!-- Member Auth Gate (shown to guests; auto-hidden by member.js once signed in) -->
         <div class="gb-member-gate" id="pr-auth-gate">
           <div class="gb-member-gate-copy">
-            <strong>Đăng nhập Thành viên Hola để viết lưu bút và đính kèm ảnh</strong>
-            <p>Mỗi lưu bút đính kèm tối đa 7 ảnh kỷ niệm. Nếu bạn chụp nhiều ảnh trong buổi gặp, hãy góp thẳng vào Kho ảnh chung.</p>
+            <strong>Đăng nhập Thành viên Hola để viết hương khí và đính kèm ảnh</strong>
+            <p>Mỗi hương khí đính kèm tối đa 7 ảnh kỷ niệm. Nếu bạn chụp nhiều ảnh trong buổi gặp, hãy góp thẳng vào Kho ảnh chung.</p>
           </div>
           <div class="gb-member-gate-actions">
             <button type="button" class="btn btn--primary btn--sm" data-open-member-auth>Đăng nhập Thành viên</button>
@@ -85,29 +78,21 @@
             <span class="gb-member-avatar" id="pr-member-avatar" aria-hidden="true">H</span>
             <div class="gb-member-info">
               <strong id="pr-member-name">Thành viên HolaRise</strong>
-              <span id="pr-member-sub">Đang viết với tài khoản của bạn</span>
+              <span id="pr-member-sub">Đang viết hương khí với tài khoản của bạn</span>
             </div>
           </div>
 
-          <fieldset class="gb-mood-fieldset">
-            <legend class="gb-mood-legend">Cảm xúc đọng lại của bạn</legend>
-            <div class="gb-mood-pills" role="radiogroup" aria-label="Chọn cảm xúc">
-              <label class="gb-mood-pill"><input type="radio" name="mood" value="am-long" checked><span>♥ Ấm lòng</span></label>
-              <label class="gb-mood-pill"><input type="radio" name="mood" value="cham-sau"><span>✦ Chạm sâu</span></label>
-              <label class="gb-mood-pill"><input type="radio" name="mood" value="biet-on"><span>❋ Biết ơn</span></label>
-              <label class="gb-mood-pill"><input type="radio" name="mood" value="dang-nho"><span>◈ Đáng nhớ</span></label>
-              <label class="gb-mood-pill"><input type="radio" name="mood" value="tiep-suc"><span>☼ Tiếp sức</span></label>
-            </div>
-          </fieldset>
-
-          <div class="gb-quote-wrap">
-            <label for="pr-quote" class="visually-hidden">Một câu ngắn đọng lại (tùy chọn)</label>
-            <input id="pr-quote" name="pullQuote" type="text" maxlength="140" placeholder="Một câu ngắn đọng lại trong bạn (tùy chọn)...">
+          <div class="gb-mood-pills" role="radiogroup" aria-label="Chọn cảm xúc">
+            <label class="gb-mood-pill"><input type="radio" name="mood" value="am-long" checked><span>♥ Ấm lòng</span></label>
+            <label class="gb-mood-pill"><input type="radio" name="mood" value="cham-sau"><span>✦ Chạm sâu</span></label>
+            <label class="gb-mood-pill"><input type="radio" name="mood" value="biet-on"><span>❋ Biết ơn</span></label>
+            <label class="gb-mood-pill"><input type="radio" name="mood" value="dang-nho"><span>◈ Đáng nhớ</span></label>
+            <label class="gb-mood-pill"><input type="radio" name="mood" value="tiep-suc"><span>☼ Tiếp sức</span></label>
           </div>
 
           <div class="gb-textarea-wrap">
-            <label for="pr-content" class="visually-hidden">Cảm nhận của bạn</label>
-            <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="Điều gì đọng lại trong bạn sau buổi gặp này? Viết vài dòng chân thật nhé..."></textarea>
+            <label for="pr-content" class="visually-hidden">Hương khí của bạn</label>
+            <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="Viết hương khí đọng lại sau buổi gặp... (có thể dán ảnh trực tiếp bằng Ctrl+V / ⌘V)"></textarea>
           </div>
 
           <input id="pr-photo-file" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
@@ -115,7 +100,7 @@
           <div class="gb-photo-preview-wrap" id="pr-photo-preview-wrap" hidden>
             <div class="gb-photo-preview-grid" id="pr-photo-grid"></div>
             <div class="gb-photo-preview-bar">
-              <span class="gb-photo-meta" id="pr-photo-meta">0 / 7 ảnh · Tự động nén gọn khi gửi</span>
+              <span class="gb-photo-meta" id="pr-photo-meta">0 / 7 ảnh</span>
               <button type="button" class="gb-photo-clear" id="pr-photo-clear">Gỡ tất cả</button>
             </div>
           </div>
@@ -125,12 +110,12 @@
           <div class="gb-composer-foot">
             <div class="gb-composer-tools">
               <button type="button" class="gb-attach-btn" id="pr-photo-trigger">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="m21 15-4.5-4.5a1.5 1.5 0 0 0-2.1 0L7 18"></path></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="m21 15-4.5-4.5a1.5 1.5 0 0 0-2.1 0L7 18"></path></svg>
                 <span>Thêm ảnh (tối đa 7)</span>
               </button>
-              <span class="gb-composer-hint">Hiển thị sau khi duyệt · <button type="button" class="gb-inline-link" data-open-album-contribute>Góp nhiều ảnh vào Kho chung →</button></span>
+              <span class="gb-composer-hint">Hỗ trợ dán ảnh Ctrl+V · Hiện sau khi duyệt</span>
             </div>
-            <button class="btn btn--primary btn--sm" type="submit" id="pr-submit-btn">Gửi lưu bút</button>
+            <button class="btn btn--primary btn--sm" type="submit" id="pr-submit-btn">Gửi hương khí</button>
           </div>
         </form>
       </div>

@@ -510,8 +510,7 @@
         });
       }
 
-      fileInput.addEventListener("change", async () => {
-        const file = fileInput.files && fileInput.files[0];
+      async function handleUploadFile(file) {
         if (!file) return;
         fileInput.disabled = true;
         if (metaEl) metaEl.textContent = "Đang tải ảnh lên...";
@@ -533,7 +532,39 @@
           fileInput.disabled = false;
           fileInput.value = "";
         }
+      }
+
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files && fileInput.files[0];
+        handleUploadFile(file);
       });
+
+      const hostDialog = fileInput.closest("dialog");
+      if (hostDialog && !hostDialog.dataset.pasteBound) {
+        hostDialog.dataset.pasteBound = "1";
+        hostDialog.addEventListener("paste", (e) => {
+          const cb = e.clipboardData;
+          if (!cb) return;
+          let imgFile = null;
+          for (const item of Array.from(cb.items || [])) {
+            if (item.kind === "file" && /^image\//i.test(item.type || "")) {
+              imgFile = item.getAsFile();
+              break;
+            }
+          }
+          if (!imgFile) {
+            for (const f of Array.from(cb.files || [])) {
+              if (/^image\//i.test(f.type || "")) {
+                imgFile = f;
+                break;
+              }
+            }
+          }
+          if (!imgFile) return;
+          e.preventDefault();
+          handleUploadFile(imgFile);
+        });
+      }
     });
   }
 

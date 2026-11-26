@@ -191,6 +191,8 @@ export function serializeEventRow(row) {
     image: row.image,
     imageAlt: row.image_alt,
     zaloGroupUrl: row.zalo_group_url || "",
+    rsvpClosed: Number(row.rsvp_closed || 0) === 1,
+    stageOverride: row.stage_override || "auto",
     status: row.status,
     sortOrder: row.sort_order,
     createdAt: row.created_at,
@@ -200,6 +202,9 @@ export function serializeEventRow(row) {
 
 export function isEventFinished(ev, now = new Date()) {
   if (!ev) return false;
+  const override = String(ev.stageOverride || ev.stage_override || "auto").toLowerCase();
+  if (override === "memory") return true;
+  if (override === "invite") return false;
   if (ev.kind === "past") return true;
   const dateStr = String(ev.date || "").trim();
   if (!ISO_DATE_RE.test(dateStr)) return false;

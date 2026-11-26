@@ -1,16 +1,14 @@
-# Active Plan — Sân Khấu Kỷ Niệm Sau Sự Kiện, Đóng Góp 2 Phần & Kiểm Duyệt `/media/`
+# Active Plan — Can Thiệp Sâu Thành Viên, Cấp Quyền Xem Media & Trung Tâm Điều Hành Sự Kiện
 
-**Trạng thái:** Hoàn tất & đã nghiệm thu (32/32 Tests PASS · JS Syntax OK · `dist/` đồng bộ)
+**Trạng thái:** Đang triển khai (Đã duyệt Option B)
 
-## Quyết định kiến trúc đã chốt
-- **Tự động chuyển hóa `/su-kien/<slug>/`:** Khi sự kiện kết thúc (`kind = 'past'` hoặc `date < todayVn`), chính đường link `/su-kien/<slug>/` tự chuyển sang **Sân khấu Kỷ niệm** (Triển lãm khoảnh khắc đã duyệt + Sân khấu Lưu bút sinh động có thẻ cảm xúc, tối đa 7 ảnh & 3 phản ứng + Nút Đóng góp).
-- **Nút Đóng góp 2 phần:**
-  - *Đóng góp bằng lời* (Cần cải thiện / Động viên / Đề xuất): mở cho cả khách chưa đăng nhập & Thành viên, hỗ trợ gửi ẩn danh tách sạch danh tính; xem và lọc theo sự kiện tại `/admin/` (chỉ `super_admin` & `editor`).
-  - *Đóng góp ảnh gốc* (không giới hạn số ảnh, `<= 25 MB/tấm`): bắt buộc Thành viên đăng nhập; ảnh gốc đẩy thẳng vào thư mục Drive chuẩn hóa riêng biệt `album/<YYYY-MM-DD - Tên sự kiện>/dong-gop/<YYYYMMDD>_<Mã TV>_<Tên-slug>/<slug>_<YYYYMMDD>_<Mã TV>_<STT>.<ext>` và vào hàng chờ `approval_status = 'pending'`.
-- **Kiểm duyệt Media luôn bật mặc định:** Mọi vai trò có quyền trong `/media/` (`super_admin`, `editor`, `media`) đều xem được ảnh đóng góp + bộ lọc riêng; chỉ `super_admin` & `editor` bấm Duyệt / Ẩn.
+## Mục tiêu & Quy tắc khóa
+- **Hồ sơ Thành viên 360°:** Xem lịch sử tham dự, lưu bút, ảnh đóng góp, phiên/passkey; đăng xuất cưỡng bức toàn bộ thiết bị; gán/chấm công sự kiện thủ công; cấp/thu hồi quyền xem Media (từng Album, toàn bộ Album riêng tư, và quyền xem cổng `/media/` ở chế độ chỉ-xem `media_viewer`).
+- **Phân quyền xem Media thực ở Edge:** `media_albums.visibility` (`public` | `members_only` | `attendees_only` | `private`) + bảng `member_album_grants`. Ảnh thuộc Album `public` giữ nguyên Edge Cache `immutable`; ảnh thuộc Album giới hạn kiểm tra quyền thực tại `/api/media/drive/:id`, `/api/media/:id`, `/hanh-trinh/`, `/su-kien/<slug>/`, và `/api/member/albums`.
+- **Trung tâm điều hành Sự kiện (Event Command Center):** Bấm `Điều hành` trên 1 sự kiện để kiểm soát trọn bộ: Khách đăng ký + Check-in tại cửa + Thêm khách thủ công + Xuất CSV riêng sự kiện, Vòng đời (`stage_override`: `auto`/`invite`/`memory`) & Khóa giữ chỗ (`rsvp_closed`), Kho ảnh & Quyền xem Album sự kiện, và Hộp thư Góp ý sau sự kiện (`event_feedbacks`).
 
 ## Atomic Phases
-- [x] **Phase 1 — Migration `0019`, Schema Guards & Backend APIs (Reactions, Mood, Event Feedback, Standardized Drive Naming)**
-- [x] **Phase 2 — Sân khấu Kỷ niệm tại `/su-kien/<slug>/` + Hộp thoại Đóng góp 2 phần**
-- [x] **Phase 3 — Nâng cấp Cổng Kiểm duyệt `/media/` & Mục Góp ý Sự kiện tại `/admin/`**
-- [x] **Phase 4 — Test tự động, Đồng bộ `dist/` & Reality Verification Gate**
+- [x] **Phase 1 — Migration `0020`, `media-access.js`, Khóa Media Proxy/SSR, `rsvp_closed`/`stage_override` & `/media/` Viewer Mode**
+- [ ] **Phase 2 — API Hồ sơ Thành viên 360° (`members/[id]` + `actions.js`), Event Command Center (`events/[id]/command.js`) & Góp ý sự kiện**
+- [ ] **Phase 3 — Giao diện Hồ sơ Thành viên 360°, Trung tâm Điều hành Sự kiện & Góp ý sự kiện trong `/admin/`**
+- [ ] **Phase 4 — Tests, Rebuild `dist/` (`python3 build.py --check`) & Reality Verification Gate**

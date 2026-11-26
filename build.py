@@ -2644,7 +2644,7 @@ def build_site() -> list:
             "EVENT_LOCATION": "__SSR_EVENT_LOCATION__",
             "EVENT_SUMMARY": "__SSR_EVENT_SUMMARY__",
             "MEMORY_ALBUM_ID": "__SSR_MEMORY_ALBUM_ID__",
-            "MEMORY_STATS_TEXT": "__SSR_MEMORY_STATS_TEXT__",
+            "MEMORY_STATS_INLINE_HTML": "__SSR_MEMORY_STATS_INLINE_HTML__",
             "MEMORY_GALLERY_HTML": "__SSR_MEMORY_GALLERY_HTML__",
         },
     )

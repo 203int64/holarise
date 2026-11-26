@@ -8,6 +8,7 @@
     super_admin: "Quản trị chính",
     editor: "Ban Điều Phối",
     media: "Ban Hình Ảnh",
+    media_viewer: "Thành viên xem Media",
   };
 
   const MAX_BATCH_FILES = 30;
@@ -91,6 +92,10 @@
 
   function isApproverRole() {
     return state.user?.role === "super_admin" || state.user?.role === "editor";
+  }
+
+  function isViewerOnly() {
+    return state.user?.role === "media_viewer";
   }
 
   function toast(message, type = "info") {
@@ -303,8 +308,10 @@
 
     const passkeyBtn = $("#btn-setup-passkey");
     if (passkeyBtn) {
-      passkeyBtn.hidden = Boolean(user.hasPasskey) || !window.HolaPasskey?.isSupported?.();
+      passkeyBtn.hidden = isViewerOnly() || Boolean(user.hasPasskey) || !window.HolaPasskey?.isSupported?.();
     }
+    const changePwBtn = $("#btn-change-pw");
+    if (changePwBtn) changePwBtn.hidden = isViewerOnly();
 
     const savedPhotographer =
       localStorage.getItem("holarise_media_photographer") || user.name || "Ban Hình Ảnh HolaRise";
@@ -325,6 +332,8 @@
       const status = await apiFetch("/api/auth/status");
       if (status.authenticated && status.user) {
         await enterMediaShell(status.user);
+      } else if (status.mediaViewer) {
+        await enterMediaShell(status.mediaViewer);
       } else {
         showAuthScreen();
       }
@@ -339,11 +348,12 @@
      ========================================================================= */
   function setTopbarMode(mode) {
     const inWorkspace = mode === "workspace";
+    const viewer = isViewerOnly();
     $("#brand-home-link").hidden = inWorkspace;
     $("#ws-nav-head").hidden = !inWorkspace;
-    $("#btn-new-album").hidden = inWorkspace;
-    $("#btn-upload-trigger").hidden = !inWorkspace;
-    $("#ws-more-menu").hidden = !inWorkspace;
+    $("#btn-new-album").hidden = viewer || inWorkspace;
+    $("#btn-upload-trigger").hidden = viewer || !inWorkspace;
+    $("#ws-more-menu").hidden = viewer || !inWorkspace;
   }
 
   function showAlbumsListView(updateUrl = true) {
@@ -439,9 +449,9 @@
           <div class="album-card-cover">
             ${coverHtml}
             ${cornerPill}
-            <button class="album-edit-btn" type="button" data-edit-album="${esc(a.id)}" aria-label="Sửa album ${esc(a.title)}" title="Sửa thông tin Album">
+            ${isViewerOnly() ? "" : `<button class="album-edit-btn" type="button" data-edit-album="${esc(a.id)}" aria-label="Sửa album ${esc(a.title)}" title="Sửa thông tin Album">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            </button>
+            </button>`}
           </div>
           <div class="album-card-body">
             <h3 class="album-card-title">${esc(a.title)}</h3>
@@ -1455,6 +1465,31 @@
       if (e.dataTransfer?.files?.length) {
         enqueueFiles(e.dataTransfer.files);
       }
+    });
+
+    // Clipboard Image Paste (Ctrl+V / Cmd+V) directly into open Album Workspace
+    window.addEventListener("paste", (e) => {
+      if (!state.activeAlbum) return;
+      const openDialog = document.querySelector("dialog[open]");
+      if (openDialog) return;
+      const cb = e.clipboardData;
+      if (!cb) return;
+      const pasted = [];
+      for (const item of Array.from(cb.items || [])) {
+        if (item.kind === "file" && /^image\//i.test(item.type || "")) {
+          const f = item.getAsFile();
+          if (f) pasted.push(f);
+        }
+      }
+      if (!pasted.length) {
+        for (const f of Array.from(cb.files || [])) {
+          if (/^image\//i.test(f.type || "")) pasted.push(f);
+        }
+      }
+      if (!pasted.length) return;
+      e.preventDefault();
+      enqueueFiles(pasted);
+      toast(`Đã dán ${pasted.length} ảnh vào hàng đợi tải lên.`, "info");
     });
 
     $("#btn-retry-failed")?.addEventListener("click", () => {

@@ -1,4 +1,5 @@
 import { autoProvisionFinishedEventAlbums } from "../_lib/albums.js";
+import { canActorViewAlbum, ensureDeepControlSchema, resolveActorContext } from "../_lib/media-access.js";
 import { ensureMediaApprovalSchema } from "../_lib/media-approval-schema.js";
 import {
   absUrl,
@@ -25,10 +26,7 @@ function renderMemoryGalleryHtml(photos, ev, albumId) {
   const safeAlbumId = escHtml(albumId || "");
 
   if (!photos || photos.length === 0) {
-    return `<div class="memory-gallery-empty">
-      <p>Những khung hình đầu tiên của buổi gặp đang được chọn lọc từ Ban Hình Ảnh và các thành viên tham dự.</p>
-      <button class="btn btn--primary btn--sm" type="button" data-open-event-contribute data-contribute-tab="photos" data-event-id="${safeEventId}" data-event-slug="${safeSlug}" data-event-title="${safeTitle}" data-album-id="${safeAlbumId}">Góp những khung hình đầu tiên</button>
-    </div>`;
+    return `<p class="memory-gallery-quiet">Những khung hình đầu tiên đang được Ban Hình Ảnh chọn lọc.</p>`;
   }
 
   const pad2 = (n) => (n < 10 ? `0${n}` : String(n));
@@ -62,12 +60,13 @@ async function renderMemoryStageResponse({ request, env, matched, slug }) {
   await Promise.all([
     ensureMediaApprovalSchema(env.DB),
     ensureReflectionsSchema(env.DB),
+    ensureDeepControlSchema(env.DB),
   ]);
   await autoProvisionFinishedEventAlbums(env);
 
   // Locate album linked to this finished event (by event_id first, then matching event_date)
   let album = await env.DB.prepare(
-    `SELECT id, slug, title, cover_url
+    `SELECT id, slug, title, cover_url, event_id, COALESCE(visibility, 'public') AS visibility
      FROM media_albums
      WHERE status = 'published' AND event_id = ?
      ORDER BY created_at DESC LIMIT 1`
@@ -78,7 +77,7 @@ async function renderMemoryStageResponse({ request, env, matched, slug }) {
 
   if (!album && matched.date) {
     album = await env.DB.prepare(
-      `SELECT id, slug, title, cover_url
+      `SELECT id, slug, title, cover_url, event_id, COALESCE(visibility, 'public') AS visibility
        FROM media_albums
        WHERE status = 'published' AND event_date = ?
        ORDER BY created_at DESC LIMIT 1`
@@ -89,8 +88,15 @@ async function renderMemoryStageResponse({ request, env, matched, slug }) {
   }
 
   const albumId = album?.id || "";
+  const isRestrictedAlbum = Boolean(album && String(album.visibility || "public") !== "public");
+  let canViewGallery = true;
+  if (isRestrictedAlbum) {
+    const actor = await resolveActorContext(env, request);
+    canViewGallery = await canActorViewAlbum(env.DB, album, actor);
+  }
+
   const [photosRes, refCountRow] = await Promise.all([
-    albumId
+    albumId && canViewGallery
       ? env.DB.prepare(
           `SELECT id, COALESCE(NULLIF(web_url, ''), url) AS url, caption, alt, photographer
            FROM media_photos
@@ -114,17 +120,30 @@ async function renderMemoryStageResponse({ request, env, matched, slug }) {
   const approvedRefCount = Number(refCountRow?.cnt || 0);
   const pillarMeta = derivePillarMeta(matched);
   const canonicalUrl = absUrl(`/su-kien/${slug}/`);
-  const ogImage = approvedPhotos[0]?.url || album?.cover_url || matched.image;
-  const pageTitle = `Kỷ niệm · ${matched.title} | ${BRAND_SHORT_NAME}`;
+  const ogImage = (!isRestrictedAlbum && approvedPhotos[0]?.url) || (!isRestrictedAlbum && album?.cover_url) || matched.image;
+  const cleanDisplayTitle =
+    String(matched.title || "")
+      .replace(new RegExp(`^${pillarMeta.label}\\s*[·\\-–—:]\\s*`, "i"), "")
+      .trim() || matched.title;
+  const pageTitle = `Kỷ niệm · ${cleanDisplayTitle} | ${BRAND_SHORT_NAME}`;
   const statsParts = [];
-  if (approvedPhotos.length > 0) statsParts.push(`${approvedPhotos.length} khoảnh khắc`);
-  if (approvedRefCount > 0) statsParts.push(`${approvedRefCount} dòng kỷ niệm`);
-  const statsText = statsParts.length ? statsParts.join(" · ") : "Đang lưu giữ kỷ niệm";
+  if (canViewGallery && approvedPhotos.length > 0) statsParts.push(`${approvedPhotos.length} khoảnh khắc`);
+  if (approvedRefCount > 0) statsParts.push(`${approvedRefCount} hương khí`);
+  const statsInlineHtml = statsParts.length
+    ? `<span aria-hidden="true">·</span><span>${escHtml(statsParts.join(" · "))}</span>`
+    : "";
+
+  const galleryHtml = !canViewGallery
+    ? `<div class="memory-gallery-empty">
+        <p>Bộ ảnh của buổi gặp này đang ở chế độ riêng tư dành cho Thành viên tham dự hoặc đã được Ban Điều Phối cấp quyền xem.</p>
+        <a class="btn btn--primary btn--sm" href="/tham-gia/?next=${encodeURIComponent(`/su-kien/${slug}/`)}">Đăng nhập Thành viên để mở khóa ảnh</a>
+      </div>`
+    : renderMemoryGalleryHtml(approvedPhotos, matched, albumId);
 
   const replacements = {
     __SSR_PAGE_TITLE__: escHtml(pageTitle),
     __SSR_PAGE_DESCRIPTION__: escHtml(
-      matched.summary || `Sân khấu kỷ niệm, hình ảnh và lưu bút sau buổi gặp ${matched.title} tại Hòa Lạc.`
+      matched.summary || `Sân khấu kỷ niệm, hình ảnh và hương khí sau buổi gặp ${cleanDisplayTitle} tại Hòa Lạc.`
     ),
     __SSR_CANONICAL_URL__: escHtml(canonicalUrl),
     __SSR_OG_IMAGE_URL__: escHtml(absUrl(ogImage)),
@@ -133,7 +152,7 @@ async function renderMemoryStageResponse({ request, env, matched, slug }) {
     __SSR_EVENT_SLUG__: escHtml(slug),
     __SSR_EVENT_PILLAR__: escHtml(pillarMeta.key),
     __SSR_EVENT_PILLAR_LABEL__: escHtml(pillarMeta.label),
-    __SSR_EVENT_TITLE__: escHtml(matched.title),
+    __SSR_EVENT_TITLE__: escHtml(cleanDisplayTitle),
     __SSR_EVENT_DATE__: escHtml(matched.date || ""),
     __SSR_EVENT_DATE_DISPLAY__: escHtml(matched.dateDisplay || matched.date || "Hòa Lạc"),
     __SSR_EVENT_LOCATION__: escHtml(matched.location || "Hòa Lạc, Hà Nội"),
@@ -142,8 +161,8 @@ async function renderMemoryStageResponse({ request, env, matched, slug }) {
         "Những khoảnh khắc, lời chia sẻ và góc nhìn của những người đã đồng hành trong buổi gặp này."
     ),
     __SSR_MEMORY_ALBUM_ID__: escHtml(albumId),
-    __SSR_MEMORY_STATS_TEXT__: escHtml(statsText),
-    __SSR_MEMORY_GALLERY_HTML__: renderMemoryGalleryHtml(approvedPhotos, matched, albumId),
+    __SSR_MEMORY_STATS_INLINE_HTML__: statsInlineHtml,
+    __SSR_MEMORY_GALLERY_HTML__: galleryHtml,
   };
 
   const html = (await shellRes.text()).replace(/__SSR_[A-Z0-9_]+__/g, (token) =>
@@ -154,7 +173,8 @@ async function renderMemoryStageResponse({ request, env, matched, slug }) {
     status: 200,
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, must-revalidate",
+      "Cache-Control": isRestrictedAlbum ? "private, no-store" : "public, max-age=0, must-revalidate",
+      ...(isRestrictedAlbum ? { Vary: "Cookie" } : {}),
     },
   });
 }

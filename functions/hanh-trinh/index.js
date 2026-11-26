@@ -1,3 +1,4 @@
+import { canActorViewAlbum, ensureDeepControlSchema, resolveActorContext } from "../_lib/media-access.js";
 import { ensureMediaApprovalSchema } from "../_lib/media-approval-schema.js";
 import {
   renderNewsCardsHtml,
@@ -14,7 +15,7 @@ export async function onRequestGet({ request, env }) {
     return env?.ASSETS ? env.ASSETS.fetch(staticAssetReq) : new Response("Not Found", { status: 404 });
   }
 
-  await ensureMediaApprovalSchema(env.DB);
+  await Promise.all([ensureMediaApprovalSchema(env.DB), ensureDeepControlSchema(env.DB)]);
 
   const [assetRes, postsRes, albumsRes, photosRes] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
@@ -50,6 +51,7 @@ export async function onRequestGet({ request, env }) {
   }
 
   let html = await assetRes.text();
+  let hasPrivateAlbumRendered = false;
 
   if (postsRes) {
     const posts = (postsRes.results || []).map(serializePostRow);
@@ -57,6 +59,21 @@ export async function onRequestGet({ request, env }) {
   }
 
   if (albumsRes && photosRes) {
+    const rawAlbums = albumsRes.results || [];
+    const needsActorCheck = rawAlbums.some((a) => String(a.visibility || "public") !== "public");
+    const actor = needsActorCheck ? await resolveActorContext(env, request) : null;
+
+    const visibleAlbums = [];
+    for (const a of rawAlbums) {
+      const vis = String(a.visibility || "public");
+      if (vis === "public") {
+        visibleAlbums.push(a);
+      } else if (actor && (await canActorViewAlbum(env.DB, a, actor))) {
+        visibleAlbums.push(a);
+        hasPrivateAlbumRendered = true;
+      }
+    }
+
     const photosByAlbum = new Map();
     for (const row of photosRes.results || []) {
       if (!photosByAlbum.has(row.album_id)) photosByAlbum.set(row.album_id, []);
@@ -69,7 +86,7 @@ export async function onRequestGet({ request, env }) {
       });
     }
 
-    const albumsWithPhotos = (albumsRes.results || [])
+    const albumsWithPhotos = visibleAlbums
       .map((a) => ({
         id: a.id,
         slug: a.slug,
@@ -98,7 +115,11 @@ export async function onRequestGet({ request, env }) {
 
   const headers = new Headers(assetRes.headers);
   headers.set("Content-Type", "text/html; charset=utf-8");
-  headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+  headers.set(
+    "Cache-Control",
+    hasPrivateAlbumRendered ? "private, no-store" : "public, max-age=0, must-revalidate"
+  );
+  if (hasPrivateAlbumRendered) headers.set("Vary", "Cookie");
   headers.delete("Content-Length");
   headers.delete("ETag");
 

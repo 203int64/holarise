@@ -187,6 +187,23 @@ export async function onRequestPost(context) {
 
   const v = validated.value;
 
+  // Enforce manual Admin RSVP close switch (rsvp_closed = 1)
+  if (v.event_id && !v.is_feedback) {
+    const evLock = await env.DB.prepare("SELECT rsvp_closed, title FROM events WHERE id = ?")
+      .bind(v.event_id)
+      .first()
+      .catch(() => null);
+    if (evLock && Number(evLock.rsvp_closed || 0) === 1) {
+      return errorResponse(
+        409,
+        "RSVP_CLOSED",
+        isEn
+          ? "Seat reservation for this gathering is currently closed. Please join our Zalo community for upcoming sessions."
+          : "Ban Điều Phối đã tạm khóa nhận giữ chỗ cho buổi gặp này. Mời bạn theo dõi lịch hoạt động tiếp theo của HolaRise."
+      );
+    }
+  }
+
   // Idempotent 1-tap duplicate protection for logged-in members on the same event
   if (sessionMember && v.event_id) {
     const existing = await env.DB.prepare(

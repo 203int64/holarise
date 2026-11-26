@@ -4,6 +4,7 @@ import {
   isDriveConfigured,
   trashDriveFile,
 } from "../../../../_lib/drive.js";
+import { ensureDeepControlSchema, resolveActorContext, VALID_ALBUM_VISIBILITIES } from "../../../../_lib/media-access.js";
 import { ensureMediaApprovalSchema } from "../../../../_lib/media-approval-schema.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../../_lib/security.js";
 import { validateAlbumInput } from "../../../../_lib/validation.js";
@@ -42,9 +43,17 @@ export function serializePhotoRow(row) {
 
 export async function onRequestGet(context) {
   const auth = await requireAdmin(context, { allowedRoles: MEDIA_ROLES });
-  if (!auth.ok) return auth.response;
+  let viewerOnly = false;
+  if (!auth.ok) {
+    const actor = await resolveActorContext(context.env, context.request);
+    if (!actor.isMediaViewer) return auth.response;
+    viewerOnly = true;
+  }
 
-  await ensureMediaApprovalSchema(context.env.DB);
+  await Promise.all([
+    ensureMediaApprovalSchema(context.env.DB),
+    ensureDeepControlSchema(context.env.DB),
+  ]);
 
   const id = String(context.params?.id || "");
   const album = await context.env.DB.prepare(
@@ -58,12 +67,12 @@ export async function onRequestGet(context) {
     .bind(id)
     .first();
 
-  if (!album) {
+  if (!album || (viewerOnly && album.status !== "published")) {
     return errorResponse(404, "NOT_FOUND", "Không tìm thấy album.");
   }
 
   // Lazy auto-provision Drive folder for pre-existing albums (e.g. 15/11) that lack drive_url
-  if (!album.drive_url && isDriveConfigured(context.env)) {
+  if (!viewerOnly && !album.drive_url && isDriveConfigured(context.env)) {
     try {
       const folderName = buildEventFolderName({
         eventDate: album.event_date,
@@ -87,14 +96,14 @@ export async function onRequestGet(context) {
     }
   }
 
-  const { results } = await context.env.DB.prepare(
-    `SELECT * FROM media_photos WHERE album_id = ? ORDER BY sort_order ASC, created_at DESC LIMIT 300`
-  )
-    .bind(id)
-    .all();
+  const photosSql = viewerOnly
+    ? "SELECT * FROM media_photos WHERE album_id = ? AND COALESCE(approval_status, 'approved') = 'approved' ORDER BY sort_order ASC, created_at DESC LIMIT 300"
+    : "SELECT * FROM media_photos WHERE album_id = ? ORDER BY sort_order ASC, created_at DESC LIMIT 300";
+  const { results } = await context.env.DB.prepare(photosSql).bind(id).all();
 
   return jsonResponse({
     ok: true,
+    viewerOnly,
     album: serializeAlbumRow(album),
     photos: (results || []).map(serializePhotoRow),
   });
@@ -155,12 +164,21 @@ export async function onRequestPatch(context) {
     }
   }
 
+  const nextVisibility =
+    parsed.data.visibility !== undefined
+      ? String(parsed.data.visibility || "").trim().toLowerCase()
+      : String(existing.visibility || "public");
+  if (!VALID_ALBUM_VISIBILITIES.has(nextVisibility)) {
+    return errorResponse(400, "INVALID_VISIBILITY", "Chế độ quyền xem album không hợp lệ.");
+  }
+
+  await ensureDeepControlSchema(context.env.DB);
   const now = new Date().toISOString();
   await context.env.DB.prepare(
     `UPDATE media_albums
      SET slug = ?, title = ?, description = ?, event_date = ?, date_display = ?,
          location = ?, filters_json = ?, drive_url = ?, cover_url = ?, status = ?,
-         sort_order = ?, updated_at = ?
+         visibility = ?, sort_order = ?, updated_at = ?
      WHERE id = ?`
   )
     .bind(
@@ -174,6 +192,7 @@ export async function onRequestPatch(context) {
       v.drive_url,
       v.cover_url,
       v.status,
+      nextVisibility,
       v.sort_order,
       now,
       id

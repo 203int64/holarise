@@ -286,7 +286,7 @@ export async function onRequestPost(context) {
       {
         ok: true,
         reflection: serializePublicReflection(created, { currentMemberId: sessionMember.id }),
-        message: "Cảm ơn bạn đã sẻ chia! Lưu bút của bạn đã được gửi tới Ban Điều Phối duyệt hiển thị.",
+        message: "Đã gửi hương khí — bài của bạn đang chờ Ban Điều Phối duyệt hiển thị.",
       },
       201
     );
