@@ -94,7 +94,17 @@ test("renderEventEmailTemplate renders all 3 bilingual templates and escapes XSS
   });
   assert.equal(thankyouVi.subject, "Cảm ơn bạn đã đồng hành · Cuộc đời của Cha");
   assert.ok(thankyouVi.html.includes("https://drive.google.com/drive/folders/abc123"));
+  assert.ok(thankyouVi.html.includes("https://holarise.org/assets/images/favicon-96.png"));
   assert.ok(thankyouVi.text.includes("https://drive.google.com/drive/folders/abc123"));
+
+  const communityVi = renderEventEmailTemplate({
+    templateType: "community_thankyou",
+    lang: "vi",
+    recipientName: "Minh Quân",
+  });
+  assert.equal(communityVi.subject, "Lời cảm ơn từ HolaRise gửi tới bạn");
+  assert.ok(communityVi.html.includes("phungsu@holarise.org"));
+  assert.ok(communityVi.html.includes("https://holarise.org/assets/images/favicon-96.png"));
 });
 
 test("sendTransactionalEmail routes via Dual-Mode (Resend for guests on Free, Cloudflare Paid when enabled, graceful fallback)", async () => {

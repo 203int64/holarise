@@ -15,11 +15,13 @@
 const SITE_ORIGIN = "https://holarise.org";
 const DEFAULT_FROM_EMAIL = "phungsu@holarise.org";
 const DEFAULT_FROM_NAME = "HolaRise";
+const DEFAULT_LOGO_URL = `${SITE_ORIGIN}/assets/images/favicon-96.png`;
 const DEFAULT_ZALO_URL = "https://zalo.me/0777771948";
 const VALID_TEMPLATE_TYPES = new Set([
   "rsvp_confirm",
   "event_reminder",
   "event_thankyou",
+  "community_thankyou",
   "test_preview",
 ]);
 
@@ -262,11 +264,20 @@ function buildEmailLayout({ lang, preheader, eyebrow, heading, bodyHtml, details
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background-color:#FFFFFF;border:1px solid #E8E3D9;border-radius:14px;overflow:hidden;">
           <tr>
-            <td style="padding:22px 28px;background-color:#1B3B2B;color:#FAF8F4;">
+            <td style="padding:20px 28px;background-color:#1B3B2B;color:#FAF8F4;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:700;letter-spacing:0.3px;color:#FAF8F4;">HolaRise</td>
-                  <td align="right" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#D6C4A1;">${escapeHtml(eyebrow)}</td>
+                  <td style="vertical-align:middle;">
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding-right:10px;vertical-align:middle;">
+                          <img src="${escapeHtml(DEFAULT_LOGO_URL)}" alt="HolaRise" width="32" height="32" style="display:block;width:32px;height:32px;border-radius:8px;background-color:#FAF8F4;border:1px solid rgba(250,248,244,0.2);">
+                        </td>
+                        <td style="vertical-align:middle;font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:700;letter-spacing:0.3px;color:#FAF8F4;">HolaRise</td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td align="right" style="vertical-align:middle;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#D6C4A1;">${escapeHtml(eyebrow)}</td>
                 </tr>
               </table>
             </td>
@@ -490,6 +501,89 @@ export function renderEventEmailTemplate({
           .join("\n");
 
     return { subject, html, text, templateType, lang: safeLang };
+  }
+
+  if (templateType === "community_thankyou") {
+    const subject = sanitizeHeaderValue(
+      isEn ? "Thank you for walking with HolaRise" : "Lời cảm ơn từ HolaRise gửi tới bạn",
+      180
+    );
+    const noteBlockHtml = trimmedNote
+      ? `<div style="margin:16px 0 0 0;padding:12px 14px;background-color:#FBF7EE;border-left:3px solid #B58342;border-radius:6px;font-size:14px;color:#2C332F;">
+           ${escapeHtml(trimmedNote).replace(/\n/g, "<br>")}
+         </div>`
+      : "";
+
+    const bodyHtml = isEn
+      ? `<p style="margin:0 0 12px 0;">Hello ${escapeHtml(name)},</p>
+         <p style="margin:0 0 12px 0;">Thank you for being part of the HolaRise community. Whether you joined a circle in Hoa Lac, left a seat reservation, or simply followed our early steps, your presence means a great deal to our coordinating team.</p>
+         <p style="margin:0 0 12px 0;">We have just opened our official email channel at <strong>phungsu@holarise.org</strong> so upcoming invitations, seat confirmations, and post-event photo albums reach you clearly and reliably.</p>
+         <p style="margin:0;">We look forward to welcoming you at our next gatherings.</p>
+         ${noteBlockHtml}`
+      : `<p style="margin:0 0 12px 0;">Chào ${escapeHtml(name)},</p>
+         <p style="margin:0 0 12px 0;">Cảm ơn bạn đã tin tưởng đăng ký và đồng hành cùng HolaRise trong những chặng khởi đầu tại Hòa Lạc. Mỗi lần bạn dành thời gian có mặt, lắng nghe hay góp một ý nhỏ đều giúp cộng đồng thêm vững và ấm áp hơn.</p>
+         <p style="margin:0 0 12px 0;">Từ hôm nay, HolaRise chính thức vận hành kênh thư <strong>phungsu@holarise.org</strong> để gửi tới bạn thư xác nhận giữ chỗ, nhắc lịch trước giờ gặp và kho ảnh kỷ niệm sau mỗi buổi một cách gọn gàng, rõ ràng.</p>
+         <p style="margin:0;">Hẹn sớm gặp lại bạn ở những buổi gặp sắp tới.</p>
+         ${noteBlockHtml}`;
+
+    const html = buildEmailLayout({
+      lang: safeLang,
+      preheader: isEn
+        ? "Thank you for being part of HolaRise."
+        : "Cảm ơn bạn đã tin tưởng và đồng hành cùng HolaRise.",
+      eyebrow: isEn ? "Community Note" : "Lời cảm ơn",
+      heading: isEn ? "Thank you for walking with us" : "Cảm ơn bạn đã đồng hành cùng HolaRise",
+      bodyHtml,
+      detailsRows: [
+        [isEn ? "Community" : "Cộng đồng", "HolaRise · HolaHeart · HolaGreen · HolaConnect"],
+        [isEn ? "Official email" : "Thư chính thức", "phungsu@holarise.org"],
+      ],
+      primaryCta: {
+        label: isEn ? "View Upcoming Gatherings" : "Xem lịch hoạt động sắp tới",
+        url: `${SITE_ORIGIN}${isEn ? "/en/schedule/" : "/lich-hoat-dong/"}`,
+      },
+      secondaryCta: {
+        label: isEn ? "Explore Our Journey" : "Xem kho ký ức hành trình",
+        url: `${SITE_ORIGIN}${isEn ? "/en/journey/" : "/hanh-trinh/"}`,
+      },
+      footerNote: isEn
+        ? "You received this note because you registered or joined as a member on holarise.org. Reply directly if you have any feedback."
+        : "Bạn nhận được thư này vì đã đăng ký hoạt động hoặc trở thành thành viên trên holarise.org. Bạn có thể bấm trả lời trực tiếp nếu muốn nhắn gửi thêm cho Ban Điều Phối.",
+    });
+
+    const text = isEn
+      ? [
+          `Hello ${name},`,
+          "",
+          "Thank you for being part of the HolaRise community.",
+          "We have just opened our official email channel at phungsu@holarise.org for seat confirmations, reminders, and photo albums.",
+          trimmedNote ? `\n${trimmedNote}` : "",
+          "",
+          `Upcoming Gatherings: ${SITE_ORIGIN}/en/schedule/`,
+          `Journey Archive: ${SITE_ORIGIN}/en/journey/`,
+          "",
+          "Warmly,",
+          "HolaRise Coordinating Team (phungsu@holarise.org)",
+        ]
+          .filter((l) => l !== "")
+          .join("\n")
+      : [
+          `Chào ${name},`,
+          "",
+          "Cảm ơn bạn đã tin tưởng đăng ký và đồng hành cùng HolaRise trong những chặng khởi đầu tại Hòa Lạc.",
+          "Từ hôm nay, HolaRise chính thức vận hành kênh thư phungsu@holarise.org để gửi thư xác nhận giữ chỗ, nhắc lịch và kho ảnh kỷ niệm sau mỗi buổi gặp.",
+          trimmedNote ? `\n${trimmedNote}` : "",
+          "",
+          `Lịch hoạt động sắp tới: ${SITE_ORIGIN}/lich-hoat-dong/`,
+          `Kho ký ức hành trình: ${SITE_ORIGIN}/hanh-trinh/`,
+          "",
+          "Thân mến,",
+          "Ban Điều Phối HolaRise (phungsu@holarise.org)",
+        ]
+          .filter((l) => l !== "")
+          .join("\n");
+
+    return { subject, html, text, templateType: "community_thankyou", lang: safeLang };
   }
 
   // Default: event_thankyou
