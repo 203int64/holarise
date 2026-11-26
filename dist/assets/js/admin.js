@@ -1560,10 +1560,12 @@
                 : [];
           const thumbsHtml = photos.length
             ? `<div class="admin-ref-thumbs">${photos
-                .map(
-                  (u, idx) =>
-                    `<a href="${esc(u)}" target="_blank" rel="noopener" title="Xem ảnh ${idx + 1}"><img class="item-thumb" src="${esc(u)}" alt="Ảnh ${idx + 1} lưu bút của ${esc(rf.authorName)}" loading="lazy"></a>`
-                )
+                .map((u, idx) => {
+                  const isVid = /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(u || ""));
+                  return isVid
+                    ? `<a href="${esc(u)}" target="_blank" rel="noopener" title="Xem video ${idx + 1}"><video class="item-thumb" src="${esc(u)}" muted playsinline preload="metadata"></video></a>`
+                    : `<a href="${esc(u)}" target="_blank" rel="noopener" title="Xem ảnh ${idx + 1}"><img class="item-thumb" src="${esc(u)}" alt="Ảnh ${idx + 1} lưu bút của ${esc(rf.authorName)}" loading="lazy"></a>`;
+                })
                 .join("")}</div>`
             : "";
           const codePart = rf.authorMemberCode ? ` (${esc(rf.authorMemberCode)})` : "";

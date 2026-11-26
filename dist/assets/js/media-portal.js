@@ -1162,10 +1162,11 @@
 
     try {
       const storageInfo = await resolveMediaStorage();
+      const isVid = isVideoFile(item.file);
       let uploadPayload = item.file;
-      let uploadFilename = item.name || "photo.jpg";
+      let uploadFilename = item.name || (isVid ? "video.mp4" : "photo.jpg");
 
-      if (!storageInfo.driveConfigured) {
+      if (!isVid && !storageInfo.driveConfigured) {
         item.status = "compressing";
         item.error = "";
         renderUploadQueue();
@@ -1198,6 +1199,7 @@
         json: {
           url: uploaded.url,
           mediaKey: uploaded.id,
+          mediaType: uploaded.mediaType || (isVid ? "video" : "image"),
           caption: "",
           alt: state.activeAlbum.title,
           photographer,
@@ -1345,6 +1347,15 @@
       lbDlg.addEventListener("cancel", (e) => {
         e.preventDefault();
         closeDialogSmooth(lbDlg);
+      });
+      lbDlg.addEventListener("close", () => {
+        const vidEl = $("#lb-video");
+        if (vidEl) {
+          try { vidEl.pause(); } catch {}
+          vidEl.removeAttribute("src");
+          try { vidEl.load(); } catch {}
+          vidEl.hidden = true;
+        }
       });
     }
 

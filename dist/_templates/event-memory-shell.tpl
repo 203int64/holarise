@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=78ebadcb82">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=da608294a8">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -169,34 +169,149 @@
   </div>
 
   <main id="main-content">
-    <div class="memory-stage-root" data-pillar="__SSR_EVENT_PILLAR__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-album-id="__SSR_MEMORY_ALBUM_ID__">
-  <!-- EDITORIAL SPLIT STAGE HERO -->
-  <section class="page-hero memory-hero">
-    <div class="container memory-stage-container">
-      <div class="memory-hero-grid">
-        <div class="memory-hero-copy">
-          <div class="memory-hero-eyebrow">
-            <span class="memory-stage-dot" aria-hidden="true"></span>
-            <span>Đã khép lại</span>
-            <span aria-hidden="true">·</span>
-            <span class="memory-eyebrow-pillar">__SSR_EVENT_PILLAR_LABEL__</span>
+    <div class="memory-stage-root memory-stage-root--cinema" data-pillar="__SSR_EVENT_PILLAR__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-album-id="__SSR_MEMORY_ALBUM_ID__">
+  <!-- =======================================================================
+       ACT 1: OBSIDIAN CINEMA STAGE (APPLE PHOTOS MEMORIES HERO + GALLERY)
+       ======================================================================= -->
+  <div class="memory-cinema-band">
+    <section class="memory-hero memory-hero--cinema" aria-label="Kỷ niệm buổi gặp">
+      <div class="container memory-stage-container">
+        <div class="memory-cinema-poster" data-memory-hero-poster>
+          <div class="memory-cinema-backdrop" aria-hidden="true">
+            <img src="__SSR_MEMORY_COVER_IMAGE__" alt="" width="1280" height="720" fetchpriority="high" decoding="async" class="memory-cinema-img">
+          </div>
+          <div class="memory-cinema-scrim" aria-hidden="true"></div>
+
+          <!-- Top Glass Bar -->
+          <div class="memory-cinema-top">
+            <div class="memory-cinema-pill">
+              <span class="memory-stage-dot" aria-hidden="true"></span>
+              <span>Đã khép lại</span>
+              <span class="memory-pill-sep" aria-hidden="true">·</span>
+              <span class="memory-eyebrow-pillar">__SSR_EVENT_PILLAR_LABEL__</span>
+            </div>
+
+            <div class="memory-cinema-top-actions">
+              <button
+                class="memory-glass-icon-btn"
+                type="button"
+                data-memory-share
+                data-share-title="__SSR_EVENT_TITLE__ · Kỷ niệm HolaRise"
+                aria-label="Chia sẻ trang kỷ niệm"
+                title="Chia sẻ trang kỷ niệm"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                <span>Chia sẻ</span>
+              </button>
+              <button
+                class="memory-glass-icon-btn"
+                type="button"
+                aria-label="Phóng lớn ảnh bìa __SSR_EVENT_TITLE__"
+                title="Xem ảnh bìa kích thước gốc"
+                data-lightbox-src="__SSR_MEMORY_COVER_IMAGE__"
+                data-lightbox-alt="__SSR_EVENT_TITLE__"
+                data-lightbox-caption="__SSR_EVENT_TITLE__ · __SSR_EVENT_DATE_DISPLAY__ tại __SSR_EVENT_LOCATION__"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+              </button>
+            </div>
           </div>
 
-          <h1 class="memory-title">__SSR_EVENT_TITLE__</h1>
+          <!-- Bottom Editorial Copy & Primary Actions -->
+          <div class="memory-cinema-bottom">
+            <div class="memory-cinema-copy">
+              <h1 class="memory-title memory-title--cinema">__SSR_EVENT_TITLE__</h1>
+              <div class="memory-meta-row memory-meta-row--cinema">
+                <time datetime="__SSR_EVENT_DATE__">__SSR_EVENT_DATE_DISPLAY__</time>
+                <span aria-hidden="true">·</span>
+                <span>__SSR_EVENT_LOCATION__</span>
+                __SSR_MEMORY_STATS_INLINE_HTML__
+              </div>
+              <p class="memory-lead memory-lead--cinema">__SSR_EVENT_SUMMARY__</p>
+            </div>
 
-          <div class="memory-meta-row">
-            <time datetime="__SSR_EVENT_DATE__">__SSR_EVENT_DATE_DISPLAY__</time>
-            <span aria-hidden="true">·</span>
-            <span>__SSR_EVENT_LOCATION__</span>
-            __SSR_MEMORY_STATS_INLINE_HTML__
+            <div class="memory-hero-actions memory-hero-actions--cinema">
+              <button class="memory-btn-apple memory-btn-apple--primary" type="button" data-memory-play-reel hidden>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                <span>Xem thước phim kỷ niệm</span>
+              </button>
+              <a class="memory-btn-apple memory-btn-apple--glass" href="#huong-khi" data-memory-jump-write>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                <span>Viết hương khí</span>
+              </a>
+              <button
+                class="memory-btn-apple memory-btn-apple--ghost"
+                type="button"
+                data-open-event-contribute
+                data-contribute-tab="photos"
+                data-event-id="__SSR_EVENT_ID__"
+                data-event-slug="__SSR_EVENT_SLUG__"
+                data-event-title="__SSR_EVENT_TITLE__"
+                data-album-id="__SSR_MEMORY_ALBUM_ID__"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Đóng góp</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CURATED APPLE PHOTOS BENTO GALLERY -->
+    <section class="memory-gallery-section memory-gallery-section--cinema" id="khoanh-khac-buoi-gap" aria-labelledby="memory-gallery-heading">
+      <div class="container memory-stage-container">
+        <div class="memory-sec-head memory-sec-head--cinema">
+          <div>
+            <span class="memory-sec-kicker memory-sec-kicker--cinema">Khoảnh khắc đã lưu giữ</span>
+            <h2 id="memory-gallery-heading" class="memory-sec-title memory-sec-title--cinema">Triển lãm buổi gặp</h2>
           </div>
 
-          <p class="memory-lead">__SSR_EVENT_SUMMARY__</p>
+          <div class="memory-gallery-controls">
+            <div class="memory-seg-control" data-memory-media-filter role="group" aria-label="Lọc định dạng khoảnh khắc" hidden>
+              <button type="button" class="memory-seg-btn is-active" data-filter="all" aria-pressed="true">Tất cả</button>
+              <button type="button" class="memory-seg-btn" data-filter="image" aria-pressed="false">Ảnh</button>
+              <button type="button" class="memory-seg-btn" data-filter="video" aria-pressed="false">Video</button>
+            </div>
 
-          <div class="memory-hero-actions">
-            <a class="btn btn--primary" href="#huong-khi">Viết hương khí</a>
             <button
-              class="btn btn--outline"
+              class="memory-cinema-add-btn"
+              type="button"
+              data-open-event-contribute
+              data-contribute-tab="photos"
+              data-event-id="__SSR_EVENT_ID__"
+              data-event-slug="__SSR_EVENT_SLUG__"
+              data-event-title="__SSR_EVENT_TITLE__"
+              data-album-id="__SSR_MEMORY_ALBUM_ID__"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Gửi ảnh &amp; video gốc</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="memory-gallery-wrap" id="memory-gallery-group" data-lightbox-group>
+          __SSR_MEMORY_GALLERY_HTML__
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- =======================================================================
+       ACT 2: APPLE JOURNAL REFLECTION WALL (WARM PAPER EDITORIAL SPACE)
+       ======================================================================= -->
+  <section class="section memory-guestbook-section memory-journal-band" id="huong-khi">
+    <div class="container memory-stage-container">
+      <section class="guestbook-section memory-gb-shell" id="activity-guestbook" data-guestbook-slug="__SSR_EVENT_SLUG__" aria-labelledby="guestbook-heading">
+        <div class="memory-sec-head memory-sec-head--journal">
+          <div>
+            <span class="memory-sec-kicker">Lưu dấu đồng hành</span>
+            <h2 id="guestbook-heading" class="memory-sec-title memory-sec-title--journal">Hương khí buổi gặp</h2>
+          </div>
+          <div class="memory-journal-head-right">
+            <span class="guestbook-count-pill" id="guestbook-count-pill">Đang tải...</span>
+            <button
+              class="memory-text-action"
               type="button"
               data-open-event-contribute
               data-contribute-tab="feedback"
@@ -204,69 +319,17 @@
               data-event-slug="__SSR_EVENT_SLUG__"
               data-event-title="__SSR_EVENT_TITLE__"
               data-album-id="__SSR_MEMORY_ALBUM_ID__"
-            >Đóng góp</button>
+            >Góp ý kín cho BĐP →</button>
           </div>
         </div>
 
-        <figure class="memory-hero-media">
-          <button
-            class="memory-hero-frame"
-            type="button"
-            aria-label="Xem ảnh bìa __SSR_EVENT_TITLE__"
-            data-lightbox-src="__SSR_MEMORY_COVER_IMAGE__"
-            data-lightbox-alt="__SSR_EVENT_TITLE__"
-            data-lightbox-caption="__SSR_EVENT_TITLE__ · __SSR_EVENT_DATE_DISPLAY__ tại __SSR_EVENT_LOCATION__"
-          >
-            <img src="__SSR_MEMORY_COVER_IMAGE__" alt="__SSR_EVENT_TITLE__" width="960" height="720" fetchpriority="high" decoding="async">
-          </button>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- TRIỂN LÃM KHOẢNH KHẮC (ẢNH + VIDEO ĐÃ DUYỆT) -->
-  <section class="section section--mist memory-gallery-section" id="khoanh-khac-buoi-gap" aria-labelledby="memory-gallery-heading">
-    <div class="container memory-stage-container">
-      <div class="memory-sec-head">
-        <div>
-          <span class="memory-sec-kicker">Khoảnh khắc đã lưu giữ</span>
-          <h2 id="memory-gallery-heading" class="memory-sec-title">Ảnh &amp; Video buổi gặp</h2>
-        </div>
-        <button
-          class="memory-text-action"
-          type="button"
-          data-open-event-contribute
-          data-contribute-tab="photos"
-          data-event-id="__SSR_EVENT_ID__"
-          data-event-slug="__SSR_EVENT_SLUG__"
-          data-event-title="__SSR_EVENT_TITLE__"
-          data-album-id="__SSR_MEMORY_ALBUM_ID__"
-        >+ Gửi ảnh &amp; video gốc</button>
-      </div>
-
-      <div class="memory-gallery-wrap" data-lightbox-group>
-        __SSR_MEMORY_GALLERY_HTML__
-      </div>
-    </div>
-  </section>
-
-  <!-- SÂN KHẤU HƯƠNG KHÍ -->
-  <section class="section memory-guestbook-section" id="huong-khi">
-    <div class="container memory-stage-container">
-      <section class="guestbook-section memory-gb-shell" id="activity-guestbook" data-guestbook-slug="__SSR_EVENT_SLUG__" aria-labelledby="guestbook-heading">
-        <div class="memory-sec-head">
-          <div>
-            <span class="memory-sec-kicker">Lưu dấu đồng hành</span>
-            <h2 id="guestbook-heading" class="memory-sec-title">Hương khí buổi gặp</h2>
-          </div>
-          <span class="guestbook-count-pill" id="guestbook-count-pill">Đang tải...</span>
-        </div>
+        <div class="memory-mood-filter" id="memory-mood-filter" role="group" aria-label="Lọc theo sắc thái cảm xúc" hidden></div>
 
         <div class="guestbook-composer-wrap gb-composer-card memory-composer-card" id="public-reflection-wrap">
           <div class="gb-member-gate" id="pr-auth-gate">
             <div class="gb-member-gate-copy">
               <strong>Đăng nhập Thành viên Hola để viết hương khí</strong>
-              <p>Ghi lại cảm xúc đọng lại kèm tối đa 7 ảnh hoặc video ngắn. Góp ý kín gửi Ban Điều Phối không cần đăng nhập.</p>
+              <p>Lưu lại điều đọng lại sau buổi gặp kèm tối đa 7 ảnh hoặc video ngắn. Góp ý kín gửi Ban Điều Phối không cần đăng nhập.</p>
             </div>
             <div class="gb-member-gate-actions">
               <button type="button" class="btn btn--primary btn--sm" data-open-member-auth>Đăng nhập Thành viên</button>
@@ -279,7 +342,7 @@
                 data-event-slug="__SSR_EVENT_SLUG__"
                 data-event-title="__SSR_EVENT_TITLE__"
                 data-album-id="__SSR_MEMORY_ALBUM_ID__"
-              >Đóng góp</button>
+              >Góp ý kín</button>
             </div>
           </div>
 
@@ -310,7 +373,7 @@
 
             <div class="gb-textarea-wrap">
               <label for="pr-content" class="visually-hidden">Hương khí của bạn</label>
-              <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="Viết hương khí đọng lại sau buổi gặp... (dán ảnh trực tiếp bằng Ctrl+V / ⌘V)"></textarea>
+              <textarea id="pr-content" name="content" rows="3" minlength="12" maxlength="1500" required placeholder="Điều gì ở buổi gặp vẫn còn đọng lại trong bạn? (dán ảnh trực tiếp bằng Ctrl+V / ⌘V)"></textarea>
             </div>
 
             <input id="pr-photo-file" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" multiple hidden>
@@ -329,19 +392,78 @@
               <div class="gb-composer-tools">
                 <button type="button" class="gb-attach-btn" id="pr-photo-trigger">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="m21 15-4.5-4.5a1.5 1.5 0 0 0-2.1 0L7 18"></path></svg>
-                  <span>Ảnh / Video (tối đa 7)</span>
+                  <span>Thêm ảnh / video (tối đa 7)</span>
                 </button>
-                <span class="gb-composer-hint">Dán ảnh Ctrl+V · Video ≤ 25 MB · Hiện sau khi duyệt</span>
+                <span class="gb-composer-hint">Dán ảnh Ctrl+V · Video &lt;= 25 MB · Hiển thị sau khi duyệt</span>
               </div>
               <button class="btn btn--primary btn--sm" type="submit" id="pr-submit-btn">Gửi hương khí</button>
             </div>
           </form>
         </div>
 
-        <div class="guestbook-grid memory-gb-grid" id="guestbook-list" aria-live="polite"></div>
+        <div class="guestbook-grid memory-gb-grid memory-journal-masonry" id="guestbook-list" aria-live="polite"></div>
       </section>
     </div>
   </section>
+
+  <!-- FLOATING APPLE FROSTED GLASS DOCK -->
+  <nav class="memory-float-dock" id="memory-float-dock" aria-label="Thao tác nhanh trên trang kỷ niệm" hidden>
+    <button type="button" class="memory-dock-btn" data-memory-play-reel hidden>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+      <span>Kỷ niệm</span>
+    </button>
+    <a class="memory-dock-btn memory-dock-btn--primary" href="#huong-khi" data-memory-jump-write>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      <span>Viết hương khí</span>
+    </a>
+    <button
+      type="button"
+      class="memory-dock-btn"
+      data-open-event-contribute
+      data-contribute-tab="photos"
+      data-event-id="__SSR_EVENT_ID__"
+      data-event-slug="__SSR_EVENT_SLUG__"
+      data-event-title="__SSR_EVENT_TITLE__"
+      data-album-id="__SSR_MEMORY_ALBUM_ID__"
+    >
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Gửi ảnh</span>
+    </button>
+  </nav>
+
+  <!-- APPLE PHOTOS MEMORIES KEN BURNS REEL PLAYER -->
+  <dialog class="memory-reel-dialog" id="memory-reel-dialog" closedby="any" aria-label="Thước phim kỷ niệm buổi gặp">
+    <div class="memory-reel-shell">
+      <div class="memory-reel-progress" id="memory-reel-progress" aria-hidden="true"></div>
+
+      <header class="memory-reel-top">
+        <div class="memory-reel-title-group">
+          <span class="memory-reel-kicker">__SSR_EVENT_PILLAR_LABEL__ · __SSR_EVENT_DATE_DISPLAY__</span>
+          <strong class="memory-reel-heading">__SSR_EVENT_TITLE__</strong>
+        </div>
+        <div class="memory-reel-top-btns">
+          <button type="button" class="memory-reel-icon-btn" id="memory-reel-toggle" aria-label="Tạm dừng thước phim" title="Tạm dừng / Tiếp tục (Space)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+          </button>
+          <button type="button" class="memory-reel-icon-btn" id="memory-reel-close" aria-label="Đóng thước phim">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="memory-reel-viewport" id="memory-reel-viewport">
+        <button type="button" class="memory-reel-tap memory-reel-tap--prev" id="memory-reel-prev" aria-label="Khoảnh khắc trước"></button>
+        <button type="button" class="memory-reel-tap memory-reel-tap--next" id="memory-reel-next" aria-label="Khoảnh khắc tiếp theo"></button>
+        <img id="memory-reel-img" class="memory-reel-media" alt="">
+        <video id="memory-reel-video" class="memory-reel-media" playsinline muted hidden></video>
+      </div>
+
+      <footer class="memory-reel-foot">
+        <p class="memory-reel-caption" id="memory-reel-caption"></p>
+        <span class="memory-reel-counter" id="memory-reel-counter" aria-live="polite"></span>
+      </footer>
+    </div>
+  </dialog>
 </div>
 
   </main>
@@ -785,9 +907,13 @@
       <div class="lightbox-bar">
         <div class="lightbox-caption" id="lightbox-caption"></div>
         <div class="lightbox-bar-right">
+          <a class="lightbox-tool-btn" id="lightbox-download" download hidden aria-label="Tải ảnh gốc" title="Tải ảnh gốc">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </a>
           <span class="lightbox-counter" id="lightbox-counter" aria-live="polite"></span>
         </div>
       </div>
+      <div class="lightbox-filmstrip" id="lightbox-filmstrip" role="listbox" aria-label="Dải thu nhỏ khoảnh khắc" hidden></div>
     </div>
   </dialog>
 
@@ -1055,10 +1181,10 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=78ebadcb82" defer></script>
-  <script src="/assets/js/main.js?v=78ebadcb82" defer></script>
-  <script src="/assets/js/join-pass.js?v=78ebadcb82" defer></script>
-  <script src="/assets/js/member.js?v=78ebadcb82" defer></script>
-  <script src="/assets/js/pwa.js?v=78ebadcb82" defer></script>
+  <script src="/assets/js/motion.js?v=da608294a8" defer></script>
+  <script src="/assets/js/main.js?v=da608294a8" defer></script>
+  <script src="/assets/js/join-pass.js?v=da608294a8" defer></script>
+  <script src="/assets/js/member.js?v=da608294a8" defer></script>
+  <script src="/assets/js/pwa.js?v=da608294a8" defer></script>
 </body>
 </html>

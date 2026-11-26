@@ -13638,7 +13638,14 @@ dialog.contribute-dialog::backdrop {
 
 .contribute-dialog input[type="text"],
 .contribute-dialog select {
+  height: 44px;
   min-height: 44px;
+}
+
+.contribute-dialog select {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .contribute-dialog textarea {
@@ -13990,8 +13997,8 @@ dialog.contribute-dialog::backdrop {
   }
 
   .ef-cat-opt span {
-    font-size: 0.78rem;
-    padding: 6px 6px;
+    font-size: 0.74rem;
+    padding: 6px 4px;
   }
 }
 
@@ -14593,4 +14600,917 @@ dialog.contribute-dialog::backdrop {
 .site-footer {
   content-visibility: auto;
   contain-intrinsic-size: auto 520px;
+}
+
+/* ==========================================================================
+ * APPLE HYBRID CINEMA x APPLE JOURNAL — POST-EVENT MEMORY STAGE (OPTION C)
+ * ========================================================================== */
+
+.memory-stage-root--cinema {
+  --cinema-bg: #0a0c0b;
+  --cinema-surface: rgba(255, 255, 255, 0.06);
+  --cinema-surface-hover: rgba(255, 255, 255, 0.12);
+  --cinema-line: rgba(255, 255, 255, 0.12);
+  --cinema-ink: #f5f5f7;
+  --cinema-muted: rgba(245, 245, 247, 0.72);
+  --cinema-glow: rgba(217, 121, 72, 0.22);
+  --journal-bg: #faf9f6;
+}
+
+.memory-stage-root--cinema[data-pillar="holagreen"] {
+  --cinema-glow: rgba(16, 132, 92, 0.24);
+}
+
+.memory-stage-root--cinema[data-pillar="holaconnect"] {
+  --cinema-glow: rgba(56, 114, 214, 0.22);
+}
+
+/* ACT 1: Obsidian Cinema Theater */
+.memory-cinema-band {
+  position: relative;
+  background:
+    radial-gradient(900px 460px at 50% 0%, var(--cinema-glow), transparent 68%),
+    var(--cinema-bg);
+  color: var(--cinema-ink);
+  padding-bottom: clamp(44px, 6vw, 80px);
+}
+
+.memory-hero--cinema {
+  padding-top: calc(var(--header-height, 74px) + clamp(16px, 3vw, 32px));
+  padding-bottom: clamp(28px, 4vw, 48px);
+  background: transparent;
+  border-bottom: 0;
+}
+
+.memory-cinema-poster {
+  position: relative;
+  min-height: clamp(430px, 68vh, 640px);
+  border-radius: 28px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #121514;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.52);
+  isolation: isolate;
+}
+
+.memory-cinema-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+}
+
+.memory-cinema-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.02);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .memory-cinema-img {
+    animation: cinemaBreath 22s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes cinemaBreath {
+  0% { transform: scale(1.01) translate3d(0, 0, 0); }
+  100% { transform: scale(1.075) translate3d(0, -1.2%, 0); }
+}
+
+.memory-cinema-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(10, 12, 11, 0.44) 0%, rgba(10, 12, 11, 0.12) 34%, rgba(10, 12, 11, 0.62) 66%, rgba(10, 12, 11, 0.94) 100%);
+  pointer-events: none;
+}
+
+.memory-cinema-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: clamp(16px, 2.5vw, 26px);
+}
+
+.memory-cinema-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(15, 18, 17, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.memory-cinema-pill .memory-eyebrow-pillar {
+  color: #ffffff;
+}
+
+.memory-cinema-top-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.memory-glass-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(15, 18, 17, 0.48);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s var(--ease-expo);
+}
+
+.memory-glass-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.memory-glass-icon-btn:active {
+  transform: scale(0.96);
+}
+
+.memory-cinema-bottom {
+  padding: clamp(22px, 3.6vw, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.memory-cinema-copy {
+  max-width: 720px;
+}
+
+.memory-title--cinema {
+  margin: 0 0 12px;
+  font-family: var(--font-serif, "Lora", Georgia, serif);
+  font-size: clamp(1.9rem, 4.4vw, 3.3rem);
+  font-weight: 500;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+.memory-meta-row--cinema {
+  color: rgba(245, 245, 247, 0.84);
+  font-size: 0.9rem;
+}
+
+.memory-lead--cinema {
+  margin: 12px 0 0;
+  color: rgba(245, 245, 247, 0.78);
+  max-width: 60ch;
+  font-size: 0.96rem;
+  line-height: 1.65;
+}
+
+.memory-hero-actions--cinema {
+  margin-top: 4px;
+  gap: 10px;
+}
+
+.memory-btn-apple {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.22s var(--ease-expo), background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.memory-btn-apple:active {
+  transform: scale(0.97);
+}
+
+.memory-btn-apple--primary {
+  background: #ffffff;
+  color: #0b110f;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+.memory-btn-apple--primary:hover {
+  background: #f0f2f1;
+}
+
+.memory-btn-apple--glass {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+.memory-btn-apple--glass:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.memory-btn-apple--ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.memory-btn-apple--ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* Curated Apple Photos Bento Gallery inside Obsidian Theater */
+.memory-gallery-section--cinema {
+  padding-top: clamp(16px, 2.5vw, 28px);
+  padding-bottom: 0;
+  background: transparent;
+}
+
+.memory-sec-head--cinema {
+  align-items: flex-end;
+  margin-bottom: 22px;
+}
+
+.memory-sec-kicker--cinema {
+  color: rgba(245, 245, 247, 0.56);
+}
+
+.memory-sec-title--cinema {
+  color: #ffffff;
+  font-size: clamp(1.45rem, 2.8vw, 2rem);
+}
+
+.memory-gallery-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.memory-seg-control {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.memory-seg-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: rgba(245, 245, 247, 0.72);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 6px 13px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.memory-seg-btn.is-active {
+  background: #ffffff;
+  color: #0b110f;
+  font-weight: 600;
+}
+
+.memory-cinema-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.92);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.memory-cinema-add-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+.memory-cinema-band .memory-exhibition-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-flow: dense;
+  gap: 14px;
+}
+
+.memory-cinema-band .memory-stage-thumb {
+  grid-column: span 4;
+  border-radius: 18px;
+  background: #171b19;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  aspect-ratio: 4 / 3;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.25s ease;
+}
+
+.memory-cinema-band .memory-stage-thumb:hover {
+  border-color: rgba(255, 255, 255, 0.26);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
+}
+
+.memory-cinema-band .memory-stage-thumb.is-lead {
+  grid-column: span 8;
+  grid-row: span 2;
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 360px;
+}
+
+.memory-cinema-band .memory-stage-thumb.is-wide {
+  grid-column: span 8;
+  aspect-ratio: 16 / 9;
+}
+
+.memory-cinema-band .memory-stage-thumb img {
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.memory-cinema-band .memory-stage-thumb:hover img {
+  transform: scale(1.04);
+}
+
+.memory-cinema-band .memory-gallery-quiet,
+.memory-cinema-band .memory-gallery-empty {
+  padding: 28px 24px;
+  border-radius: 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(245, 245, 247, 0.78);
+}
+
+.memory-cinema-band .memory-gallery-empty p {
+  margin: 0 0 14px;
+}
+
+/* ACT 2: Apple Journal Warm Paper Reflection Wall */
+.memory-journal-band {
+  background: var(--journal-bg, #faf9f6);
+  padding-top: clamp(44px, 6vw, 76px);
+  padding-bottom: clamp(88px, 10vw, 120px);
+}
+
+.memory-sec-head--journal {
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+.memory-sec-title--journal {
+  font-size: clamp(1.5rem, 3vw, 2.15rem);
+  letter-spacing: -0.02em;
+}
+
+.memory-journal-head-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.memory-mood-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.memory-mood-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(11, 17, 15, 0.1);
+  background: #ffffff;
+  color: var(--ink-secondary);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.16s ease;
+}
+
+.memory-mood-chip:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.memory-mood-chip.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+}
+
+.memory-journal-band .memory-composer-card {
+  border-radius: 24px;
+  border: 1px solid rgba(11, 17, 15, 0.07);
+  background: #ffffff;
+  box-shadow: 0 14px 40px rgba(11, 17, 15, 0.05);
+  margin-bottom: 28px;
+}
+
+.memory-journal-masonry {
+  display: block;
+  columns: 2 340px;
+  column-gap: 20px;
+}
+
+.memory-journal-masonry > .gb-card {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(11, 17, 15, 0.07);
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgba(11, 17, 15, 0.045);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+
+.memory-journal-masonry > .gb-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(11, 17, 15, 0.08);
+}
+
+.memory-journal-masonry > .guestbook-empty {
+  column-span: all;
+}
+
+/* Reaction Spring Pop Micro-Interaction */
+.gb-react-btn.is-popping .gb-react-icon {
+  animation: reactSpringPop 0.38s cubic-bezier(0.22, 1.4, 0.36, 1);
+}
+
+@keyframes reactSpringPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.34); }
+  100% { transform: scale(1); }
+}
+
+/* Floating Apple Frosted Glass Dock */
+.memory-float-dock {
+  position: fixed;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom, 18px));
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(18, 20, 19, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  transform: translate(-50%, 110px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+}
+
+.memory-float-dock.is-visible {
+  transform: translate(-50%, 0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.memory-dock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.memory-dock-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.memory-dock-btn--primary {
+  background: #ffffff;
+  color: #0b110f;
+  font-weight: 600;
+}
+
+.memory-dock-btn--primary:hover {
+  background: #eff1f0;
+  color: #0b110f;
+}
+
+/* Upgraded Apple Photos Filmstrip Lightbox */
+.lightbox-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  text-decoration: none;
+  transition: background-color 0.18s ease;
+}
+
+.lightbox-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-bar-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lightbox-filmstrip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 14px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.lightbox-filmstrip::-webkit-scrollbar {
+  display: none;
+}
+
+.lightbox-strip-thumb {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 56px;
+  height: 42px;
+  padding: 0;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.56;
+  scroll-snap-align: center;
+  display: grid;
+  place-items: center;
+  transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease;
+}
+
+.lightbox-strip-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lightbox-strip-thumb:hover {
+  opacity: 0.9;
+}
+
+.lightbox-strip-thumb.is-active {
+  opacity: 1;
+  border-color: #ffffff;
+  transform: scale(1.06);
+}
+
+/* Apple Photos Memories Ken Burns Reel Player */
+.memory-reel-dialog {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #000000;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.memory-reel-dialog::backdrop {
+  background: #000000;
+}
+
+.memory-reel-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.memory-reel-progress {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top, 12px));
+  left: 16px;
+  right: 16px;
+  z-index: 12;
+  display: flex;
+  gap: 5px;
+}
+
+.memory-reel-seg {
+  flex: 1 1 0;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+  overflow: hidden;
+}
+
+.memory-reel-seg-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+.memory-reel-top {
+  position: absolute;
+  top: max(26px, calc(env(safe-area-inset-top, 12px) + 14px));
+  left: 0;
+  right: 0;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 20px;
+}
+
+.memory-reel-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
+}
+
+.memory-reel-kicker {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.memory-reel-heading {
+  font-family: var(--font-serif, "Lora", Georgia, serif);
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
+  font-weight: 500;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memory-reel-top-btns {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.memory-reel-icon-btn {
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(15, 18, 17, 0.54);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.memory-reel-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.memory-reel-viewport {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #000000;
+}
+
+.memory-reel-media {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.memory-reel-media.kb-zoom-in {
+  animation: kbZoomIn 5.6s ease-out forwards;
+}
+
+.memory-reel-media.kb-pan-right {
+  animation: kbPanRight 5.6s ease-out forwards;
+}
+
+.memory-reel-media.kb-pan-left {
+  animation: kbPanLeft 5.6s ease-out forwards;
+}
+
+.memory-reel-media.is-paused {
+  animation-play-state: paused;
+}
+
+@keyframes kbZoomIn {
+  0% { transform: scale(1); opacity: 0.25; }
+  12% { opacity: 1; }
+  100% { transform: scale(1.07); opacity: 1; }
+}
+
+@keyframes kbPanRight {
+  0% { transform: scale(1.05) translate3d(-1.4%, 0, 0); opacity: 0.25; }
+  12% { opacity: 1; }
+  100% { transform: scale(1.05) translate3d(1.4%, 0, 0); opacity: 1; }
+}
+
+@keyframes kbPanLeft {
+  0% { transform: scale(1.06) translate3d(1.4%, 0, 0); opacity: 0.25; }
+  12% { opacity: 1; }
+  100% { transform: scale(1.02) translate3d(-1.4%, 0, 0); opacity: 1; }
+}
+
+.memory-reel-tap {
+  position: absolute;
+  top: 76px;
+  bottom: 76px;
+  z-index: 6;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.memory-reel-tap--prev {
+  left: 0;
+  width: 34%;
+}
+
+.memory-reel-tap--next {
+  right: 0;
+  width: 66%;
+}
+
+.memory-reel-foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 40px 24px max(22px, env(safe-area-inset-bottom, 22px));
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.78) 100%);
+  pointer-events: none;
+}
+
+.memory-reel-caption {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 64ch;
+}
+
+.memory-reel-counter {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+}
+
+/* Narrow Screen / Mobile Responsive Rules */
+@media (max-width: 860px) {
+  .memory-cinema-poster {
+    min-height: 460px;
+    border-radius: 22px;
+  }
+  .memory-cinema-band .memory-exhibition-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .memory-cinema-band .memory-stage-thumb {
+    grid-column: span 1;
+    border-radius: 14px;
+  }
+  .memory-cinema-band .memory-stage-thumb.is-lead,
+  .memory-cinema-band .memory-stage-thumb.is-wide {
+    grid-column: span 2;
+    grid-row: auto;
+    aspect-ratio: 16 / 10;
+    height: auto;
+    min-height: 0;
+  }
+  .memory-journal-masonry {
+    columns: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .memory-cinema-poster {
+    min-height: 440px;
+    border-radius: 18px;
+  }
+  .memory-cinema-top {
+    padding: 14px;
+  }
+  .memory-glass-icon-btn span {
+    display: none;
+  }
+  .memory-cinema-bottom {
+    padding: 18px;
+    gap: 16px;
+  }
+  .memory-hero-actions--cinema {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 8px;
+  }
+  .memory-hero-actions--cinema [data-memory-play-reel] {
+    grid-column: 1 / -1;
+  }
+  .memory-btn-apple {
+    width: 100%;
+    padding: 0 14px;
+    font-size: 0.84rem;
+  }
+  .memory-float-dock {
+    bottom: max(12px, env(safe-area-inset-bottom, 12px));
+    max-width: calc(100vw - 24px);
+  }
+  .memory-dock-btn {
+    padding: 0 11px;
+    font-size: 0.76rem;
+  }
 }

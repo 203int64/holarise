@@ -162,9 +162,9 @@ def minify_css(css_text: str) -> str:
         tail = re.sub(r"\s*([{}:;,>~])\s*", r"\1", tail)
         tail = tail.replace(";}", "}")
         tokens.append(tail)
-    # Restore required space after media-query/supports keywords like `and(` or `not(`
+    # Restore required space after media-query/supports keywords like `and(` or `not(` without breaking `:not(`
     out = "".join(tokens).strip()
-    out = re.sub(r"\b(and|or|not)\(", r"\1 (", out)
+    out = re.sub(r"(?<![:\w-])(and|or|not)\(", r"\1 (", out)
     return out
 
 

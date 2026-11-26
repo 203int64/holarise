@@ -55,14 +55,15 @@ function renderMemoryGalleryHtmlEn(photos, ev) {
       const fullCap = `${caption}${credit}`;
       const isVideo = isVideoRow(p);
       const isLead = idx === 0 && photos.length >= 3;
+      const isWide = !isLead && idx % 6 === 3 && photos.length >= 6;
       const mediaInner = isVideo
         ? `<video src="${escHtml(p.url)}" muted playsinline preload="metadata" aria-hidden="true"></video>
            <span class="memory-video-badge" aria-hidden="true">
              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
              <span>Video</span>
            </span>`
-        : `<img ${imageAttrs(p.url, isLead ? "(max-width: 820px) 94vw, 560px" : "(max-width: 640px) 46vw, 280px")} alt="${escHtml(alt)}" width="480" height="360" loading="lazy" decoding="async">`;
-      return `<button class="archive-thumb memory-stage-thumb${isLead ? " is-lead" : ""}${isVideo ? " is-video" : ""}" type="button" aria-label="View ${isVideo ? "video" : "photo"} ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(isVideo ? p.url : fullImageUrl(p.url))}" data-lightbox-type="${isVideo ? "video" : "image"}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCap)}">
+        : `<img ${imageAttrs(p.url, isLead || isWide ? "(max-width: 820px) 94vw, 680px" : "(max-width: 640px) 46vw, 340px")} alt="${escHtml(alt)}" width="480" height="360" loading="lazy" decoding="async">`;
+      return `<button class="archive-thumb memory-stage-thumb${isLead ? " is-lead" : ""}${isWide ? " is-wide" : ""}${isVideo ? " is-video" : ""}" type="button" data-media-kind="${isVideo ? "video" : "image"}" aria-label="View ${isVideo ? "video" : "photo"} ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(isVideo ? p.url : fullImageUrl(p.url))}" data-lightbox-type="${isVideo ? "video" : "image"}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCap)}">
         ${mediaInner}
         <span class="archive-thumb-idx" aria-hidden="true">${pad2(idx + 1)}</span>
         <span class="archive-thumb-cap" aria-hidden="true">${escHtml(p.photographer || caption)}</span>

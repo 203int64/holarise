@@ -425,6 +425,8 @@
   var lightboxVideo = document.getElementById("lightbox-video");
   var lightboxCaption = document.getElementById("lightbox-caption");
   var lightboxCounter = document.getElementById("lightbox-counter");
+  var lightboxFilmstrip = document.getElementById("lightbox-filmstrip");
+  var lightboxDownload = document.getElementById("lightbox-download");
   var lightboxPrevBtn = lightbox ? lightbox.querySelector("[data-lightbox-prev]") : null;
   var lightboxNextBtn = lightbox ? lightbox.querySelector("[data-lightbox-next]") : null;
 
@@ -453,6 +455,68 @@
     };
 
     lightbox.addEventListener("close", stopLightboxVideo);
+
+    var renderLightboxFilmstrip = function () {
+      if (!lightboxFilmstrip) return;
+      if (activeSlides.length <= 1) {
+        lightboxFilmstrip.hidden = true;
+        lightboxFilmstrip.innerHTML = "";
+        return;
+      }
+      lightboxFilmstrip.hidden = false;
+      lightboxFilmstrip.innerHTML = "";
+      activeSlides.forEach(function (slide, idx) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "lightbox-strip-thumb" + (idx === activeGalleryIdx ? " is-active" : "");
+        btn.setAttribute("role", "option");
+        btn.setAttribute("aria-selected", idx === activeGalleryIdx ? "true" : "false");
+        btn.setAttribute("aria-label", formatIdx(idx + 1));
+        btn.setAttribute("data-strip-idx", String(idx));
+        var isVid = slide.type === "video" || isVideoUrl(slide.src);
+        if (isVid) {
+          btn.classList.add("is-video");
+          btn.innerHTML =
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+        } else {
+          var im = document.createElement("img");
+          im.src = slide.thumb || slide.src || "";
+          im.alt = "";
+          im.loading = "lazy";
+          im.decoding = "async";
+          btn.appendChild(im);
+        }
+        lightboxFilmstrip.appendChild(btn);
+      });
+    };
+
+    var syncFilmstripActive = function () {
+      if (!lightboxFilmstrip || lightboxFilmstrip.hidden) return;
+      var btns = lightboxFilmstrip.querySelectorAll(".lightbox-strip-thumb");
+      btns.forEach(function (btn, idx) {
+        var on = idx === activeGalleryIdx;
+        btn.classList.toggle("is-active", on);
+        btn.setAttribute("aria-selected", on ? "true" : "false");
+        if (on && typeof btn.scrollIntoView === "function") {
+          try {
+            btn.scrollIntoView({
+              behavior: prefersReducedMotion ? "auto" : "smooth",
+              inline: "center",
+              block: "nearest",
+            });
+          } catch (_e) {}
+        }
+      });
+    };
+
+    if (lightboxFilmstrip) {
+      lightboxFilmstrip.addEventListener("click", function (e) {
+        var btn = e.target.closest("[data-strip-idx]");
+        if (!btn) return;
+        var idx = parseInt(btn.getAttribute("data-strip-idx") || "0", 10);
+        if (!isNaN(idx)) showGalleryIndex(idx);
+      });
+    }
 
     var showGalleryIndex = function (idx) {
       if (!activeSlides.length) return;
@@ -485,9 +549,22 @@
       if (lightboxCounter) {
         lightboxCounter.textContent = formatIdx(activeGalleryIdx + 1) + " / " + formatIdx(total);
       }
+      if (lightboxDownload) {
+        var src = String(item.src || "");
+        if (src) {
+          lightboxDownload.hidden = false;
+          lightboxDownload.href =
+            src.indexOf("/api/media/drive/") === 0 && src.indexOf("download=1") === -1
+              ? src + (src.indexOf("?") === -1 ? "?download=1" : "&download=1")
+              : src;
+        } else {
+          lightboxDownload.hidden = true;
+        }
+      }
       var multi = total > 1;
       if (lightboxPrevBtn) lightboxPrevBtn.hidden = !multi;
       if (lightboxNextBtn) lightboxNextBtn.hidden = !multi;
+      syncFilmstripActive();
     };
 
     document.addEventListener("click", function (e) {
@@ -512,11 +589,15 @@
       if (!trigger) return;
       e.preventDefault();
       var scope = trigger.closest("[data-lightbox-group]") || document;
-      var allTriggers = Array.prototype.slice.call(scope.querySelectorAll("[data-lightbox-src]"));
+      var allTriggers = Array.prototype.slice.call(scope.querySelectorAll("[data-lightbox-src]")).filter(function (btn) {
+        return !btn.hidden;
+      });
       activeSlides = allTriggers.map(function (btn) {
         var src = btn.getAttribute("data-lightbox-src") || "";
+        var innerImg = btn.querySelector("img");
         return {
           src: src,
+          thumb: (innerImg && (innerImg.currentSrc || innerImg.getAttribute("src"))) || src,
           type: btn.getAttribute("data-lightbox-type") || (isVideoUrl(src) ? "video" : "image"),
           alt: btn.getAttribute("data-lightbox-alt") || "",
           caption: btn.getAttribute("data-lightbox-caption") || "",
@@ -524,7 +605,9 @@
         };
       });
       var clickedIdx = allTriggers.indexOf(trigger);
-      showGalleryIndex(clickedIdx >= 0 ? clickedIdx : 0);
+      activeGalleryIdx = clickedIdx >= 0 ? clickedIdx : 0;
+      renderLightboxFilmstrip();
+      showGalleryIndex(activeGalleryIdx);
       openDialog(lightbox);
     });
 
@@ -559,6 +642,8 @@
               photographer: p.photographer || "",
             };
           });
+          activeGalleryIdx = 0;
+          renderLightboxFilmstrip();
           showGalleryIndex(0);
           openDialog(lightbox);
         } catch (err) {
@@ -2006,7 +2091,7 @@
           }).join("") +
           "</div>";
       return (
-        '<article class="gb-card' + (hasPhoto ? " gb-card--photo" : "") + (isPendingMine ? " gb-card--pending" : "") + '" data-reflection-id="' + escTxt(it.id) + '" data-lightbox-group>' +
+        '<article class="gb-card' + (hasPhoto ? " gb-card--photo" : "") + (isPendingMine ? " gb-card--pending" : "") + '" data-reflection-id="' + escTxt(it.id) + '" data-mood-key="' + escTxt(it.mood || "") + '" data-lightbox-group>' +
         pendingBannerHtml +
         photoHtml +
         '<div class="gb-card-inner">' +
@@ -3072,5 +3157,415 @@
         if (chip) toggleChip(chip, e);
       }
     });
+  })();
+
+  /* =========================================================================
+     Apple Hybrid Cinema Memory Stage Engine
+     - Smart Media Filter (All / Photos / Videos)
+     - Apple Photos Memories Ken Burns Reel Player (Story Progress + Swipe + Keyboard)
+     - Apple Journal Mood Filter + Reaction Spring Pop
+     - Floating Frosted Glass Action Dock + Share
+     ========================================================================= */
+  (function initAppleMemoryStage() {
+    var stageRoot = document.querySelector(".memory-stage-root--cinema");
+    if (!stageRoot) return;
+
+    var isEnStage =
+      (document.documentElement && document.documentElement.lang === "en") ||
+      /^\/en(\/|$)/i.test(window.location.pathname || "");
+    var tStage = function (vi, en) {
+      return isEnStage ? en : vi;
+    };
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // 1. Collect all gallery slides for Media Filter & Memory Reel
+    var galleryWrap = document.getElementById("memory-gallery-group");
+    var thumbs = galleryWrap
+      ? Array.prototype.slice.call(galleryWrap.querySelectorAll(".memory-stage-thumb[data-lightbox-src]"))
+      : [];
+    var photoCount = thumbs.filter(function (el) {
+      return (el.getAttribute("data-media-kind") || "image") !== "video";
+    }).length;
+    var videoCount = thumbs.length - photoCount;
+
+    // Show media filter pills only when both photos & videos exist
+    var filterBar = stageRoot.querySelector("[data-memory-media-filter]");
+    if (filterBar && photoCount > 0 && videoCount > 0) {
+      filterBar.hidden = false;
+      var allBtn = filterBar.querySelector('[data-filter="all"]');
+      var imgBtn = filterBar.querySelector('[data-filter="image"]');
+      var vidBtn = filterBar.querySelector('[data-filter="video"]');
+      if (allBtn) allBtn.textContent = tStage("Tất cả", "All") + " (" + thumbs.length + ")";
+      if (imgBtn) imgBtn.textContent = tStage("Ảnh", "Photos") + " (" + photoCount + ")";
+      if (vidBtn) vidBtn.textContent = "Video (" + videoCount + ")";
+
+      filterBar.addEventListener("click", function (e) {
+        var btn = e.target.closest("[data-filter]");
+        if (!btn) return;
+        var mode = btn.getAttribute("data-filter") || "all";
+        filterBar.querySelectorAll("[data-filter]").forEach(function (b) {
+          var active = b === btn;
+          b.classList.toggle("is-active", active);
+          b.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+        thumbs.forEach(function (tile) {
+          var kind = tile.getAttribute("data-media-kind") || "image";
+          tile.hidden = mode !== "all" && kind !== mode;
+        });
+      });
+    }
+
+    // 2. Unhide "Play Memory Reel" buttons when gallery has >= 1 item
+    var reelBtns = Array.prototype.slice.call(stageRoot.querySelectorAll("[data-memory-play-reel]"));
+    if (thumbs.length >= 1) {
+      reelBtns.forEach(function (btn) {
+        btn.hidden = false;
+      });
+    }
+
+    // 3. Share Button (native Web Share API + clipboard fallback)
+    stageRoot.querySelectorAll("[data-memory-share]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var url = window.location.href.split("#")[0];
+        var title = btn.getAttribute("data-share-title") || document.title;
+        var labelSpan = btn.querySelector("span");
+        var origText = labelSpan ? labelSpan.textContent : "";
+        if (navigator.share) {
+          navigator.share({ title: title, url: url }).catch(function () {});
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function () {
+            if (labelSpan) {
+              labelSpan.textContent = tStage("Đã sao chép", "Copied");
+              setTimeout(function () {
+                labelSpan.textContent = origText;
+              }, 2000);
+            }
+          });
+        }
+      });
+    });
+
+    // 4. Smooth focus on composer when clicking "Write reflection"
+    stageRoot.querySelectorAll("[data-memory-jump-write]").forEach(function (link) {
+      link.addEventListener("click", function () {
+        setTimeout(function () {
+          var ta = document.getElementById("pr-content");
+          if (ta && !ta.closest("[hidden]")) {
+            try {
+              ta.focus({ preventScroll: true });
+            } catch (_e) {}
+          }
+        }, 420);
+      });
+    });
+
+    // 5. Floating Frosted Glass Dock (visible after scrolling past Cinema Hero)
+    var floatDock = document.getElementById("memory-float-dock");
+    var heroPoster = stageRoot.querySelector("[data-memory-hero-poster]");
+    if (floatDock && heroPoster && "IntersectionObserver" in window) {
+      floatDock.hidden = false;
+      var dockObserver = new IntersectionObserver(
+        function (entries) {
+          var heroVisible = entries[0] && entries[0].isIntersecting;
+          floatDock.classList.toggle("is-visible", !heroVisible);
+        },
+        { threshold: 0.12 }
+      );
+      dockObserver.observe(heroPoster);
+    }
+
+    // 6. Apple Journal Mood Filter (auto-populates when guestbook renders cards)
+    var gbListEl = document.getElementById("guestbook-list");
+    var moodFilterEl = document.getElementById("memory-mood-filter");
+    var MOOD_LABELS = {
+      "am-long": tStage("Ấm lòng", "Heartwarming"),
+      "cham-sau": tStage("Chạm sâu", "Deeply moving"),
+      "biet-on": tStage("Biết ơn", "Grateful"),
+      "dang-nho": tStage("Đáng nhớ", "Memorable"),
+      "tiep-suc": tStage("Tiếp sức", "Inspiring"),
+    };
+    var activeMood = "all";
+
+    function syncMoodFilterBar() {
+      if (!gbListEl || !moodFilterEl) return;
+      var cards = Array.prototype.slice.call(gbListEl.querySelectorAll(".gb-card[data-mood-key]"));
+      var counts = {};
+      cards.forEach(function (c) {
+        var m = c.getAttribute("data-mood-key") || "";
+        if (m && MOOD_LABELS[m]) counts[m] = (counts[m] || 0) + 1;
+      });
+      var keys = Object.keys(counts);
+      if (keys.length < 2) {
+        moodFilterEl.hidden = true;
+        return;
+      }
+      moodFilterEl.hidden = false;
+      var pillsHtml =
+        '<button type="button" class="memory-mood-chip' + (activeMood === "all" ? " is-active" : "") + '" data-mood-filter="all">' +
+        tStage("Tất cả", "All") + " (" + cards.length + ")</button>" +
+        keys
+          .map(function (k) {
+            return (
+              '<button type="button" class="memory-mood-chip' + (activeMood === k ? " is-active" : "") + '" data-mood-filter="' + k + '">' +
+              '<i class="mood-dot" data-mood="' + k + '" aria-hidden="true"></i>' +
+              MOOD_LABELS[k] + " · " + counts[k] +
+              "</button>"
+            );
+          })
+          .join("");
+      moodFilterEl.innerHTML = pillsHtml;
+    }
+
+    if (gbListEl && moodFilterEl && "MutationObserver" in window) {
+      var gbMut = new MutationObserver(syncMoodFilterBar);
+      gbMut.observe(gbListEl, { childList: true });
+      moodFilterEl.addEventListener("click", function (e) {
+        var btn = e.target.closest("[data-mood-filter]");
+        if (!btn) return;
+        activeMood = btn.getAttribute("data-mood-filter") || "all";
+        moodFilterEl.querySelectorAll("[data-mood-filter]").forEach(function (b) {
+          b.classList.toggle("is-active", b === btn);
+        });
+        gbListEl.querySelectorAll(".gb-card").forEach(function (card) {
+          var m = card.getAttribute("data-mood-key") || "";
+          card.hidden = activeMood !== "all" && m !== activeMood;
+        });
+      });
+    }
+
+    // Spring pop feedback when tapping reaction buttons
+    document.addEventListener("click", function (e) {
+      var rBtn = e.target.closest(".gb-react-btn");
+      if (!rBtn) return;
+      rBtn.classList.remove("is-popping");
+      void rBtn.offsetWidth;
+      rBtn.classList.add("is-popping");
+    });
+
+    // 7. Apple Photos Memories Ken Burns Reel Player
+    var reelDlg = document.getElementById("memory-reel-dialog");
+    var reelProgress = document.getElementById("memory-reel-progress");
+    var reelImg = document.getElementById("memory-reel-img");
+    var reelVideo = document.getElementById("memory-reel-video");
+    var reelCaption = document.getElementById("memory-reel-caption");
+    var reelCounter = document.getElementById("memory-reel-counter");
+    var reelToggleBtn = document.getElementById("memory-reel-toggle");
+    var reelCloseBtn = document.getElementById("memory-reel-close");
+    var reelPrevBtn = document.getElementById("memory-reel-prev");
+    var reelNextBtn = document.getElementById("memory-reel-next");
+
+    if (reelDlg && reelImg && thumbs.length > 0) {
+      var REEL_DURATION_MS = 5200;
+      var reelSlides = thumbs.map(function (el) {
+        var src = el.getAttribute("data-lightbox-src") || "";
+        return {
+          src: src,
+          type: el.getAttribute("data-lightbox-type") || "image",
+          alt: el.getAttribute("data-lightbox-alt") || "",
+          caption: el.getAttribute("data-lightbox-caption") || "",
+        };
+      });
+      var reelIdx = 0;
+      var reelPaused = false;
+      var reelTimer = null;
+      var kbClasses = ["kb-zoom-in", "kb-pan-right", "kb-pan-left"];
+
+      var PAUSE_SVG =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+      var PLAY_SVG =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+
+      function clearReelTimer() {
+        if (reelTimer) {
+          clearTimeout(reelTimer);
+          reelTimer = null;
+        }
+      }
+
+      function stopReelVideo() {
+        if (!reelVideo) return;
+        try {
+          reelVideo.pause();
+        } catch (_e) {}
+        reelVideo.onended = null;
+        reelVideo.removeAttribute("src");
+        reelVideo.hidden = true;
+      }
+
+      function buildReelProgress() {
+        if (!reelProgress) return;
+        var cap = Math.min(reelSlides.length, 30);
+        reelProgress.innerHTML = "";
+        for (var i = 0; i < cap; i += 1) {
+          var seg = document.createElement("span");
+          seg.className = "memory-reel-seg";
+          seg.innerHTML = '<i class="memory-reel-seg-fill"></i>';
+          reelProgress.appendChild(seg);
+        }
+      }
+
+      function updateProgressBars(idx, durationMs) {
+        if (!reelProgress) return;
+        var segs = reelProgress.querySelectorAll(".memory-reel-seg");
+        if (!segs.length) return;
+        var mapped = Math.min(segs.length - 1, Math.floor((idx / Math.max(1, reelSlides.length)) * segs.length));
+        segs.forEach(function (seg, i) {
+          var fill = seg.querySelector(".memory-reel-seg-fill");
+          seg.classList.remove("is-done", "is-active");
+          if (fill) {
+            fill.style.transition = "none";
+            fill.style.transform = i < mapped ? "scaleX(1)" : "scaleX(0)";
+          }
+          if (i < mapped) {
+            seg.classList.add("is-done");
+          } else if (i === mapped) {
+            seg.classList.add("is-active");
+            if (fill && !reelPaused) {
+              void fill.offsetWidth;
+              fill.style.transition = "transform " + durationMs + "ms linear";
+              fill.style.transform = "scaleX(1)";
+            }
+          }
+        });
+      }
+
+      function showReelSlide(idx) {
+        clearReelTimer();
+        stopReelVideo();
+        var total = reelSlides.length;
+        reelIdx = ((idx % total) + total) % total;
+        var slide = reelSlides[reelIdx];
+        var pad = function (n) {
+          return n < 10 ? "0" + n : String(n);
+        };
+
+        if (reelCaption) reelCaption.textContent = slide.caption || slide.alt || "";
+        if (reelCounter) reelCounter.textContent = pad(reelIdx + 1) + " / " + pad(total);
+
+        if (slide.type === "video" && reelVideo) {
+          reelImg.hidden = true;
+          reelVideo.hidden = false;
+          reelVideo.src = slide.src;
+          reelVideo.currentTime = 0;
+          updateProgressBars(reelIdx, 8000);
+          if (!reelPaused) {
+            reelVideo.play().catch(function () {});
+          }
+          reelVideo.onended = function () {
+            if (!reelPaused && reelDlg.open) showReelSlide(reelIdx + 1);
+          };
+        } else {
+          reelImg.hidden = false;
+          reelImg.classList.remove("kb-zoom-in", "kb-pan-right", "kb-pan-left", "is-paused");
+          reelImg.src = slide.src;
+          reelImg.alt = slide.alt || "";
+          if (!reduced) {
+            void reelImg.offsetWidth;
+            reelImg.classList.add(kbClasses[reelIdx % kbClasses.length]);
+            if (reelPaused) reelImg.classList.add("is-paused");
+          }
+          updateProgressBars(reelIdx, REEL_DURATION_MS);
+          if (!reelPaused) {
+            reelTimer = setTimeout(function () {
+              if (reelDlg.open && !reelPaused) showReelSlide(reelIdx + 1);
+            }, REEL_DURATION_MS);
+          }
+        }
+      }
+
+      function setReelPaused(nextPaused) {
+        reelPaused = Boolean(nextPaused);
+        if (reelToggleBtn) {
+          reelToggleBtn.innerHTML = reelPaused ? PLAY_SVG : PAUSE_SVG;
+          reelToggleBtn.setAttribute(
+            "aria-label",
+            reelPaused ? tStage("Tiếp tục thước phim", "Resume memory reel") : tStage("Tạm dừng thước phim", "Pause memory reel")
+          );
+        }
+        reelImg.classList.toggle("is-paused", reelPaused);
+        if (reelVideo && !reelVideo.hidden) {
+          if (reelPaused) reelVideo.pause();
+          else reelVideo.play().catch(function () {});
+        }
+        if (reelPaused) {
+          clearReelTimer();
+        } else {
+          showReelSlide(reelIdx);
+        }
+      }
+
+      function openReel(startIdx) {
+        reelPaused = false;
+        if (reelToggleBtn) reelToggleBtn.innerHTML = PAUSE_SVG;
+        buildReelProgress();
+        if (!reelDlg.open) reelDlg.showModal();
+        showReelSlide(startIdx || 0);
+      }
+
+      function closeReel() {
+        clearReelTimer();
+        stopReelVideo();
+        if (reelDlg.open) reelDlg.close();
+      }
+
+      reelBtns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          openReel(0);
+        });
+      });
+      if (reelCloseBtn) reelCloseBtn.addEventListener("click", closeReel);
+      if (reelToggleBtn) {
+        reelToggleBtn.addEventListener("click", function () {
+          setReelPaused(!reelPaused);
+        });
+      }
+      if (reelPrevBtn) {
+        reelPrevBtn.addEventListener("click", function () {
+          showReelSlide(reelIdx - 1);
+        });
+      }
+      if (reelNextBtn) {
+        reelNextBtn.addEventListener("click", function () {
+          showReelSlide(reelIdx + 1);
+        });
+      }
+      reelDlg.addEventListener("close", function () {
+        clearReelTimer();
+        stopReelVideo();
+      });
+      reelDlg.addEventListener("keydown", function (e) {
+        if (!reelDlg.open) return;
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          showReelSlide(reelIdx - 1);
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          showReelSlide(reelIdx + 1);
+        } else if (e.key === " ") {
+          e.preventDefault();
+          setReelPaused(!reelPaused);
+        }
+      });
+
+      var rTouchX = 0;
+      reelDlg.addEventListener(
+        "touchstart",
+        function (e) {
+          if (e.touches && e.touches.length) rTouchX = e.touches[0].clientX;
+        },
+        { passive: true }
+      );
+      reelDlg.addEventListener(
+        "touchend",
+        function (e) {
+          if (!e.changedTouches || !e.changedTouches.length) return;
+          var dx = e.changedTouches[0].clientX - rTouchX;
+          if (Math.abs(dx) > 48) {
+            showReelSlide(dx < 0 ? reelIdx + 1 : reelIdx - 1);
+          }
+        },
+        { passive: true }
+      );
+    }
   })();
 })();

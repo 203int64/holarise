@@ -6,7 +6,7 @@ import { DatabaseSync } from "node:sqlite";
 
 import { resetDriveCachesForTest } from "../functions/_lib/drive.js";
 import { isEventFinished, splitEventsByDate } from "../functions/_lib/render.js";
-import { hashPassword, createSession } from "../functions/_lib/security.js";
+import { hashPassword, createSession, sniffMediaMime } from "../functions/_lib/security.js";
 import { onRequestGet as eventPageGet } from "../functions/su-kien/[slug].js";
 import { onRequestPost as authBootstrap } from "../functions/api/auth/bootstrap.js";
 import { onRequestPost as memberRegister } from "../functions/api/member/auth/register.js";
@@ -14,6 +14,7 @@ import {
   onRequestGet as reflectionsGet,
   onRequestPost as reflectionsCreate,
 } from "../functions/api/reflections/index.js";
+import { onRequestPost as reflectionMediaUpload } from "../functions/api/reflections/media.js";
 import { onRequestPost as reflectionReact } from "../functions/api/reflections/[id]/heart.js";
 import { onRequestPatch as adminReflectionPatch } from "../functions/api/admin/reflections/[id].js";
 import { onRequestPost as eventFeedbackCreate } from "../functions/api/event-feedback/index.js";
@@ -25,6 +26,7 @@ import {
 import { onRequestPost as memberAlbumPhotoUpload } from "../functions/api/member/albums/[id]/photos.js";
 import { onRequestGet as adminAlbumDetailGet } from "../functions/api/admin/albums/[id]/index.js";
 import { onRequestPost as adminPhotoApprove } from "../functions/api/admin/photos/[id]/approve.js";
+import { onRequestGet as driveMediaGet } from "../functions/api/media/drive/[id].js";
 
 const ROOT = path.resolve(new URL("..", import.meta.url).pathname);
 
@@ -40,6 +42,7 @@ function createMockD1() {
     "migrations/0016_media_approval_workflow.sql",
     "migrations/0017_member_photo_contributions.sql",
     "migrations/0019_event_memory_stage.sql",
+    "migrations/0021_video_media_support.sql",
   ]) {
     db.exec(fs.readFileSync(path.join(ROOT, file), "utf8"));
   }
@@ -560,4 +563,157 @@ test("Same-day event cutoff: switches to finished/past right after end time in A
   const splitAfter = splitEventsByDate([ev], afterEnd);
   assert.equal(splitAfter.upcoming.length, 0);
   assert.equal(splitAfter.past.length, 1);
+});
+
+test("Video media sniffing (MP4/MOV/WebM), reflection & album video uploads, and Drive 206 Range streaming", async () => {
+  // 1. Magic-byte sniffing for MP4, MOV, WebM, and rejection of garbage bytes
+  const mp4Bytes = new Uint8Array([
+    0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, // ftyp
+    0x69, 0x73, 0x6f, 0x6d, 0x00, 0x00, 0x02, 0x00, // isom
+    0x69, 0x73, 0x6f, 0x6d, 0x6d, 0x70, 0x34, 0x31,
+  ]);
+  const movBytes = new Uint8Array([
+    0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70, // ftyp
+    0x71, 0x74, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, // qt  
+  ]);
+  const webmBytes = new Uint8Array([0x1a, 0x45, 0xdf, 0xa3, 0x9f, 0x42, 0x86, 0x81, 0x01, 0x00, 0x00, 0x00]);
+  const badBytes = new Uint8Array([0x3c, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x3e, 0x31, 0x32, 0x33, 0x34]);
+
+  assert.deepEqual(sniffMediaMime(mp4Bytes), { mime: "video/mp4", ext: "mp4", kind: "video" });
+  assert.deepEqual(sniffMediaMime(movBytes), { mime: "video/quicktime", ext: "mov", kind: "video" });
+  assert.deepEqual(sniffMediaMime(webmBytes), { mime: "video/webm", ext: "webm", kind: "video" });
+  assert.equal(sniffMediaMime(badBytes), null);
+
+  // 2. Reflection video upload + Member album video upload + Range 206 streaming proxy
+  const DB = createMockD1();
+  const now = new Date().toISOString();
+  DB.rawDb
+    .prepare(
+      `INSERT INTO media_albums (id, slug, title, event_date, date_display, location, drive_url, status, sort_order, created_by, created_at, updated_at)
+       VALUES ('alb-vid', 'dem-nhac-video', 'Đêm Nhạc Video', '2026-11-26', '26/11/2026', 'Hòa Lạc', 'https://drive.google.com/drive/folders/EvFolderVid123456', 'published', 1, 'admin', ?, ?)`
+    )
+    .run(now, now);
+
+  const env = {
+    DB,
+    GOOGLE_DRIVE_CLIENT_ID: "cid",
+    GOOGLE_DRIVE_CLIENT_SECRET: "csec",
+    GOOGLE_DRIVE_REFRESH_TOKEN: "rtok",
+  };
+
+  const reg = await memberRegister({
+    request: makeReq("/api/member/auth/register", {
+      method: "POST",
+      body: { identifier: "video-member@holarise.org", password: "VideoPass123!", name: "Trần Gia Huy" },
+    }),
+    env,
+  });
+  const memberCookie = extractCookie(reg, "holarise_member_session");
+
+  resetDriveCachesForTest();
+  let forwardedRange = "";
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init = {}) => {
+    const u = String(url);
+    if (u.includes("oauth2.googleapis.com/token")) {
+      return new Response(JSON.stringify({ access_token: "tok", expires_in: 3600 }), { status: 200 });
+    }
+    if (u.includes("/drive/v3/files") && u.includes("alt=media")) {
+      forwardedRange = init.headers?.Range || init.headers?.range || "";
+      return new Response(mp4Bytes.slice(0, 12), {
+        status: 206,
+        headers: {
+          "Content-Type": "video/mp4",
+          "Content-Range": "bytes 0-11/24",
+          "Accept-Ranges": "bytes",
+        },
+      });
+    }
+    if (u.includes("/drive/v3/files") && (!init.method || init.method === "GET")) {
+      return new Response(JSON.stringify({ files: [] }), { status: 200 });
+    }
+    if (u.includes("/drive/v3/files") && init.method === "POST" && !u.includes("/upload/")) {
+      return new Response(JSON.stringify({ id: "DriveVidFolder_123456789" }), { status: 200 });
+    }
+    if (u.includes("/upload/drive/v3/files") && init.method === "POST") {
+      return new Response(
+        JSON.stringify({
+          id: "DriveVidFile_1234567890",
+          name: "clip.mp4",
+          mimeType: "video/mp4",
+          size: mp4Bytes.byteLength,
+        }),
+        { status: 200 }
+      );
+    }
+    throw new Error(`Unexpected fetch URL: ${u}`);
+  };
+
+  try {
+    // 2a. Reflection short video upload -> Drive URL with ?kind=video
+    const refFd = new FormData();
+    refFd.append("file", new Blob([mp4Bytes], { type: "video/mp4" }), "moment.mp4");
+    const refVidRes = await reflectionMediaUpload({
+      request: new Request("https://holarise.org/api/reflections/media", {
+        method: "POST",
+        headers: { Origin: "https://holarise.org", Cookie: memberCookie },
+        body: refFd,
+      }),
+      env,
+    });
+    assert.equal(refVidRes.status, 201);
+    const refVidJson = await refVidRes.json();
+    assert.equal(refVidJson.mediaType, "video");
+    assert.match(refVidJson.url, /\?kind=video$/);
+
+    // 2b. Member album contribution video upload -> pending + media_type='video'
+    const albFd = new FormData();
+    albFd.append("file", new Blob([mp4Bytes], { type: "video/mp4" }), "IMG_001.MP4");
+    const albVidRes = await memberAlbumPhotoUpload({
+      request: new Request("https://holarise.org/api/member/albums/alb-vid/photos", {
+        method: "POST",
+        headers: { Origin: "https://holarise.org", Cookie: memberCookie },
+        body: albFd,
+      }),
+      params: { id: "alb-vid" },
+      env,
+    });
+    assert.equal(albVidRes.status, 201);
+    const albVidJson = await albVidRes.json();
+    assert.equal(albVidJson.item.mediaType, "video");
+    assert.equal(albVidJson.item.approvalStatus, "pending");
+    assert.match(albVidJson.standardizedFilename, /\.mp4$/);
+
+    // 2c. Pending video is blocked publicly (403 safeguarding lock)
+    const blockedRes = await driveMediaGet({
+      request: new Request("https://holarise.org/api/media/drive/DriveVidFile_1234567890?kind=video", {
+        method: "GET",
+        headers: { Range: "bytes=0-11" },
+      }),
+      params: { id: "DriveVidFile_1234567890" },
+      env,
+    });
+    assert.equal(blockedRes.status, 403);
+
+    // 2d. Once approved, Drive media proxy forwards Range header and responds 206 Partial Content
+    DB.rawDb
+      .prepare("UPDATE media_photos SET approval_status = 'approved' WHERE id = ?")
+      .run(albVidJson.item.id);
+    const rangeRes = await driveMediaGet({
+      request: new Request("https://holarise.org/api/media/drive/DriveVidFile_1234567890?kind=video", {
+        method: "GET",
+        headers: { Range: "bytes=0-11" },
+      }),
+      params: { id: "DriveVidFile_1234567890" },
+      env,
+    });
+    assert.equal(forwardedRange, "bytes=0-11");
+    assert.equal(rangeRes.status, 206);
+    assert.equal(rangeRes.headers.get("Accept-Ranges"), "bytes");
+    assert.equal(rangeRes.headers.get("Content-Range"), "bytes 0-11/24");
+    assert.equal(rangeRes.headers.get("Content-Type"), "video/mp4");
+  } finally {
+    globalThis.fetch = origFetch;
+    resetDriveCachesForTest();
+  }
 });
