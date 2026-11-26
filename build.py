@@ -216,19 +216,19 @@ def resolve_lang_pair(url_path: str) -> tuple[str | None, str | None]:
             return (vi_p, en_p)
     if url_path.startswith("/su-kien/") and len(url_path) > len("/su-kien/"):
         slug = url_path[len("/su-kien/"):].strip("/")
-        if slug and "/" not in slug and not slug.startswith("__SSR"):
+        if slug and "/" not in slug:
             return (f"/su-kien/{slug}/", f"/en/events/{slug}/")
     if url_path.startswith("/en/events/") and len(url_path) > len("/en/events/"):
         slug = url_path[len("/en/events/"):].strip("/")
-        if slug and "/" not in slug and not slug.startswith("__SSR"):
+        if slug and "/" not in slug:
             return (f"/su-kien/{slug}/", f"/en/events/{slug}/")
     if url_path.startswith("/hanh-trinh/") and len(url_path) > len("/hanh-trinh/"):
         slug = url_path[len("/hanh-trinh/"):].strip("/")
-        if slug and "/" not in slug and not slug.startswith("__SSR"):
+        if slug and "/" not in slug:
             return (f"/hanh-trinh/{slug}/", f"/en/journey/{slug}/")
     if url_path.startswith("/en/journey/") and len(url_path) > len("/en/journey/"):
         slug = url_path[len("/en/journey/"):].strip("/")
-        if slug and "/" not in slug and not slug.startswith("__SSR"):
+        if slug and "/" not in slug:
             return (f"/hanh-trinh/{slug}/", f"/en/journey/{slug}/")
     return (None, None)
 
@@ -2683,6 +2683,8 @@ def build_site() -> list:
     ).replace(
         abs_url(b["siteUrl"], "/su-kien/__SSR_SLUG__/"), "__SSR_CANONICAL_URL__"
     ).replace(
+        "__SSR_SLUG__", "__SSR_EVENT_SLUG__"
+    ).replace(
         "</head>", "  __SSR_EXTRA_JSON_LD__\n</head>", 1
     )
     ev_shell_path.write_text(ev_shell_txt, encoding="utf-8")
@@ -2725,6 +2727,8 @@ def build_site() -> list:
         abs_url(b["siteUrl"], "/__SSR_OG_IMAGE_PATH__"), "__SSR_OG_IMAGE_URL__"
     ).replace(
         abs_url(b["siteUrl"], "/su-kien/__SSR_SLUG__/"), "__SSR_CANONICAL_URL__"
+    ).replace(
+        "__SSR_SLUG__", "__SSR_EVENT_SLUG__"
     ).replace(
         "</head>", "  __SSR_EXTRA_JSON_LD__\n</head>", 1
     )
@@ -2875,6 +2879,8 @@ def build_site() -> list:
         abs_url(b["siteUrl"], "/__SSR_OG_IMAGE_PATH__"), "__SSR_OG_IMAGE_URL__"
     ).replace(
         abs_url(b["siteUrl"], "/hanh-trinh/__SSR_SLUG__/"), "__SSR_CANONICAL_URL__"
+    ).replace(
+        "__SSR_SLUG__", "__SSR_ARTICLE_SLUG__"
     ).replace(
         "</head>", "  __SSR_EXTRA_JSON_LD__\n</head>", 1
     )
@@ -3177,9 +3183,56 @@ def build_site() -> list:
     ).replace(
         abs_url(b["siteUrl"], "/en/events/__SSR_SLUG__/"), "__SSR_CANONICAL_URL__"
     ).replace(
+        "__SSR_SLUG__", "__SSR_EVENT_SLUG__"
+    ).replace(
         "</head>", "  __SSR_EXTRA_JSON_LD__\n</head>", 1
     )
     en_ev_shell_path.write_text(en_ev_shell_txt, encoding="utf-8")
+
+    # 6b-4b. English Post-Event Memory Stage SSR Shell (_templates/en-event-memory-shell.tpl)
+    en_memory_tpl = load_template("en_event_memory_stage.html")
+    en_ssr_memory_main = render_template(
+        en_memory_tpl,
+        {
+            "EVENT_ID": "__SSR_EVENT_ID__",
+            "EVENT_SLUG": "__SSR_EVENT_SLUG__",
+            "EVENT_PILLAR": "__SSR_EVENT_PILLAR__",
+            "EVENT_PILLAR_LABEL": "__SSR_EVENT_PILLAR_LABEL__",
+            "EVENT_TITLE": "__SSR_EVENT_TITLE__",
+            "EVENT_DATE": "__SSR_EVENT_DATE__",
+            "EVENT_DATE_DISPLAY": "__SSR_EVENT_DATE_DISPLAY__",
+            "EVENT_LOCATION": "__SSR_EVENT_LOCATION__",
+            "EVENT_SUMMARY": "__SSR_EVENT_SUMMARY__",
+            "MEMORY_ALBUM_ID": "__SSR_MEMORY_ALBUM_ID__",
+            "MEMORY_COVER_IMAGE": "__SSR_MEMORY_COVER_IMAGE__",
+            "MEMORY_STATS_INLINE_HTML": "__SSR_MEMORY_STATS_INLINE_HTML__",
+            "MEMORY_GALLERY_HTML": "__SSR_MEMORY_GALLERY_HTML__",
+        },
+    )
+    write_page(
+        base_en_tpl,
+        site,
+        "_templates/en-event-memory-shell.tpl",
+        "/en/events/__SSR_SLUG__/",
+        "__SSR_PAGE_TITLE__",
+        "__SSR_PAGE_DESCRIPTION__",
+        en_ssr_memory_main,
+        [org_ld_en],
+        og_image="/__SSR_OG_IMAGE_PATH__",
+        body_class="is-memory-stage",
+    )
+    en_mem_shell_path = DIST_DIR / "_templates" / "en-event-memory-shell.tpl"
+    en_mem_shell_txt = en_mem_shell_path.read_text(encoding="utf-8")
+    en_mem_shell_txt = en_mem_shell_txt.replace(
+        abs_url(b["siteUrl"], "/__SSR_OG_IMAGE_PATH__"), "__SSR_OG_IMAGE_URL__"
+    ).replace(
+        abs_url(b["siteUrl"], "/en/events/__SSR_SLUG__/"), "__SSR_CANONICAL_URL__"
+    ).replace(
+        "__SSR_SLUG__", "__SSR_EVENT_SLUG__"
+    ).replace(
+        "</head>", "  __SSR_EXTRA_JSON_LD__\n</head>", 1
+    )
+    en_mem_shell_path.write_text(en_mem_shell_txt, encoding="utf-8")
 
     # 6b-5. English Journey & Photo Archive (/en/journey/)
     en_journey_main = render_template(
@@ -3330,6 +3383,8 @@ def build_site() -> list:
         abs_url(b["siteUrl"], "/__SSR_OG_IMAGE_PATH__"), "__SSR_OG_IMAGE_URL__"
     ).replace(
         abs_url(b["siteUrl"], "/en/journey/__SSR_SLUG__/"), "__SSR_CANONICAL_URL__"
+    ).replace(
+        "__SSR_SLUG__", "__SSR_ARTICLE_SLUG__"
     ).replace(
         "</head>", "  __SSR_EXTRA_JSON_LD__\n</head>", 1
     )
@@ -3489,17 +3544,29 @@ def build_site() -> list:
 
     # 8. Technical SEO & PWA files: sitemap.xml, robots.txt, site.webmanifest, sw.js, _headers
     today = datetime.date.today().isoformat()
-    url_entries = "\n".join(
-        f"""  <url>
-    <loc>{esc(abs_url(b['siteUrl'], path))}</loc>
+    sitemap_url_blocks = []
+    for path, prio, freq in sitemap_urls:
+        vi_pair, en_pair = resolve_lang_pair(path)
+        alt_lines = ""
+        if vi_pair and en_pair:
+            vi_loc = esc(abs_url(b["siteUrl"], vi_pair))
+            en_loc = esc(abs_url(b["siteUrl"], en_pair))
+            alt_lines = (
+                f'\n    <xhtml:link rel="alternate" hreflang="vi" href="{vi_loc}"/>'
+                f'\n    <xhtml:link rel="alternate" hreflang="en" href="{en_loc}"/>'
+                f'\n    <xhtml:link rel="alternate" hreflang="x-default" href="{vi_loc}"/>'
+            )
+        sitemap_url_blocks.append(
+            f"""  <url>
+    <loc>{esc(abs_url(b['siteUrl'], path))}</loc>{alt_lines}
     <lastmod>{today}</lastmod>
     <changefreq>{freq}</changefreq>
     <priority>{prio}</priority>
   </url>"""
-        for path, prio, freq in sitemap_urls
-    )
+        )
+    url_entries = "\n".join(sitemap_url_blocks)
     sitemap_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 {url_entries}
 </urlset>
 """
@@ -3928,6 +3995,7 @@ def verify_dist() -> list:
         "en/join/index.html",
         "en/privacy/index.html",
         "_templates/en-event-invitation-shell.tpl",
+        "_templates/en-event-memory-shell.tpl",
         "_templates/en-news-detail-shell.tpl",
     ]
     for req_en in required_en_files:

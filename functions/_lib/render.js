@@ -607,21 +607,34 @@ export function renderPastWorkshopsHtml(pastList, lang = "vi") {
       const photo = item.image || PAST_FALLBACK_IMAGES[idx % PAST_FALLBACK_IMAGES.length];
       const title = (isEn && item.titleEn) ? item.titleEn : item.title;
       const alt = item.imageAlt || title;
-      const fallbackEventHref = resolveEventHref(item);
+      const fallbackEventHref = isEn ? resolveEventHrefEn(item) : resolveEventHref(item);
       const baseHref =
         item.href && String(item.href).startsWith("/")
           ? item.href
           : fallbackEventHref ||
             (item.id === "holaheart-first-event-2026" ? "/hanh-trinh/tinh-yeu-thuong-cua-me/" : "");
-      const href = isEn && baseHref.startsWith("/hanh-trinh/")
-        ? baseHref.replace(/^\/hanh-trinh\//, "/en/journey/")
-        : baseHref;
-      const meta = [item.time, item.location, isEn ? "Read recap" : item.participants]
+      let href = baseHref;
+      if (isEn) {
+        if (baseHref.startsWith("/hanh-trinh/")) {
+          href = baseHref.replace(/^\/hanh-trinh\//, "/en/journey/");
+        } else if (baseHref.startsWith("/su-kien/")) {
+          href = baseHref.replace(/^\/su-kien\//, "/en/events/");
+        }
+      }
+      const dateText = isEn
+        ? compactDatePill(item.dateDisplay || item.date, "en")
+        : item.dateDisplay || item.date;
+      const actionHint = isEn
+        ? href.startsWith("/en/events/")
+          ? "View memories"
+          : "Read recap"
+        : item.participants;
+      const meta = [item.time, item.location, actionHint]
         .filter(Boolean)
         .map(escHtml)
         .join(" · ");
       return `<div class="past-item" data-stagger-item data-hover-photo="${escHtml(fullImageUrl(photo))}" data-hover-alt="${escHtml(alt)}">
-        <span class="past-item-date">${escHtml(item.dateDisplay || item.date)}</span>
+        <span class="past-item-date">${escHtml(dateText)}</span>
         <h3 class="past-item-title">${href ? `<a class="past-item-title-link" href="${escHtml(href)}">${escHtml(title)}</a>` : escHtml(title)}</h3>
         <span class="past-item-meta">${meta}</span>
         <span class="past-item-arrow" aria-hidden="true">↗</span>

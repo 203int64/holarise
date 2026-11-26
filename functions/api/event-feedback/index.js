@@ -23,12 +23,18 @@ export async function onRequestPost(context) {
   const parsed = await readJsonBody(request, 32 * 1024);
   if (!parsed.ok) return parsed.response;
 
+  const isEn = String(parsed.data?.lang || "").trim().toLowerCase() === "en";
   const checked = validateEventFeedbackInput(parsed.data || {});
   if (checked.honeypot) {
     return jsonResponse({ ok: true, id: "accepted" }, 200);
   }
   if (!checked.ok) {
-    return errorResponse(400, "VALIDATION_ERROR", "Vui lòng kiểm tra lại lời đóng góp.", checked.fields);
+    return errorResponse(
+      400,
+      "VALIDATION_ERROR",
+      isEn ? "Please check your feedback note (at least 8 characters)." : "Vui lòng kiểm tra lại lời đóng góp.",
+      checked.fields
+    );
   }
 
   await ensureEventFeedbackSchema(env.DB);
@@ -41,7 +47,9 @@ export async function onRequestPost(context) {
       return errorResponse(
         403,
         tsCheck.code || "TURNSTILE_FAILED",
-        "Xác minh chống bot chưa thành công. Vui lòng tải lại trang và thử lại."
+        isEn
+          ? "Bot verification failed. Please reload the page and try again."
+          : "Xác minh chống bot chưa thành công. Vui lòng tải lại trang và thử lại."
       );
     }
   }
@@ -52,7 +60,9 @@ export async function onRequestPost(context) {
     return errorResponse(
       429,
       "RATE_LIMITED",
-      "Bạn đã gửi nhiều góp ý liên tiếp. Vui lòng thử lại sau ít phút.",
+      isEn
+        ? "You have sent several feedback notes in a row. Please try again in a few minutes."
+        : "Bạn đã gửi nhiều góp ý liên tiếp. Vui lòng thử lại sau ít phút.",
       null,
       { "Retry-After": String(rl.retryAfterSec) }
     );
@@ -112,8 +122,11 @@ export async function onRequestPost(context) {
       ok: true,
       id,
       isAnonymous: finalIsAnon === 1,
-      message:
-        finalIsAnon === 1
+      message: isEn
+        ? finalIsAnon === 1
+          ? "Thank you for your anonymous note. It has been sent privately to our Coordinating Team."
+          : "Thank you for your thoughtful feedback. Our Coordinating Team has received it."
+        : finalIsAnon === 1
           ? "Cảm ơn bạn đã góp ý ẩn danh. Lời nhắn đã gửi kín tới Ban Điều Phối."
           : "Cảm ơn lời đóng góp chân thành của bạn. Ban Điều Phối đã tiếp nhận.",
     },

@@ -1469,3 +1469,185 @@ test("CMS v2: Sole-admin 203int64 lock, /api/admin/overview, migration 0018 zalo
   assert.equal(bugRegs.items.length, 1);
   assert.equal(bugRegs.items[0].bug_screenshot_url, "/api/admin/bug-screenshot/bug-261126-abc12345.jpg");
 });
+
+test("EN Post-Event Memory Stage: /en/schedule/ links finished events to /en/events/<slug>/, 1:1 VN<->EN switch, & EN feedback API", async () => {
+  const { onRequestGet: ssrEnSchedule } = await import("../functions/en/schedule/index.js");
+  const { onRequestGet: ssrEnEvent } = await import("../functions/en/events/[slug].js");
+  const { onRequestPost: postEventFeedback } = await import("../functions/api/event-feedback/index.js");
+
+  const db = new DatabaseSync(":memory:");
+  for (const mig of [
+    "migrations/0001_init.sql",
+    "migrations/0002_seed.sql",
+    "migrations/0003_media_portal.sql",
+    "migrations/0004_holaheart_first_event.sql",
+    "migrations/0005_cuoc_doi_cua_cha_event.sql",
+    "migrations/0006_member_auth_and_reflections.sql",
+    "migrations/0011_event_seats_and_slugs.sql",
+    "migrations/0016_media_approval_workflow.sql",
+    "migrations/0017_member_photo_contributions.sql",
+    "migrations/0018_event_zalo_url.sql",
+    "migrations/0019_event_memory_stage.sql",
+    "migrations/0020_deep_member_media_event_control.sql",
+    "migrations/0021_video_media_support.sql",
+  ]) {
+    db.exec(fs.readFileSync(path.join(ROOT, mig), "utf8"));
+  }
+  class Stmt {
+    constructor(sql, bound = []) {
+      this.sql = sql;
+      this.bound = bound;
+    }
+    bind(...args) {
+      return new Stmt(this.sql, args);
+    }
+    async first() {
+      return db.prepare(this.sql).get(...this.bound) ?? null;
+    }
+    async all() {
+      return { results: db.prepare(this.sql).all(...this.bound) };
+    }
+    async run() {
+      const info = db.prepare(this.sql).run(...this.bound);
+      return { success: true, meta: { changes: Number(info.changes || 0) } };
+    }
+  }
+  const d1 = {
+    prepare: (sql) => new Stmt(sql),
+    async batch(stmts) {
+      const out = [];
+      for (const s of stmts) out.push(await s.run());
+      return out;
+    },
+  };
+  const assets = {
+    async fetch(req) {
+      const p = new URL(req.url).pathname.replace(/^\/+/, "");
+      const filePath = path.join(ROOT, "dist", p);
+      if (!fs.existsSync(filePath)) return new Response("Not Found", { status: 404 });
+      return new Response(fs.readFileSync(filePath, "utf8"), {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    },
+  };
+  const env = { DB: d1, ASSETS: assets, MEDIA_KV: createMockKV() };
+  const now = new Date().toISOString();
+
+  // Insert a concluded trekking event with EN metadata & an album containing 1 approved + 1 pending photo
+  await d1
+    .prepare(
+      `INSERT INTO events (
+        id, kind, type, filters_json, date, date_display, time, location, fee, seats,
+        seat_capacity, external_booked, show_seat_bar, title, title_en, summary, summary_en,
+        highlights_json, participants, image, image_alt, status, sort_order, stage_override,
+        created_at, updated_at
+      ) VALUES (
+        'holaconnect-trek-2025-10-10', 'past', 'HolaConnect · Outdoor & Connection', '["holaconnect"]',
+        '2025-10-10', '10/10/2025', '14:30 – 17:30', 'Nui Luot Pine Trail, Xuan Mai', 'Free', '',
+        0, 0, 0, 'Leo Nui Luot', 'HolaConnect · Afternoon Pine-Hill Trek',
+        'Tom tat tieng Viet', 'An afternoon walk beneath the pine trees at Nui Luot.',
+        '[]', '', '/assets/images/events/activity-nature-trail.jpg', 'Pine trail',
+        'published', 1, 'memory', ?, ?
+      )`
+    )
+    .bind(now, now)
+    .run();
+
+  await d1
+    .prepare(
+      `INSERT INTO media_albums (id, slug, title, event_id, event_date, cover_url, status, visibility, created_at, updated_at)
+       VALUES ('alb-trek-en', 'holaconnect-trek-2025-10-10', 'Pine Hill Trek Memories', 'holaconnect-trek-2025-10-10', '2025-10-10', '/assets/images/events/activity-nature-trail.jpg', 'published', 'public', ?, ?)`
+    )
+    .bind(now, now)
+    .run();
+
+  await d1
+    .prepare(
+      `INSERT INTO media_photos (id, album_id, url, web_url, media_key, caption, alt, photographer, is_featured_home, sort_order, approval_status, created_at, updated_at)
+       VALUES ('ph-trek-ok', 'alb-trek-en', '/api/media/trek-ok.jpg', '/api/media/trek-ok.jpg', 'trek-ok.jpg', 'Sunset ridge', 'Sunset ridge', 'Alex', 0, 0, 'approved', ?, ?),
+              ('ph-trek-pend', 'alb-trek-en', '/api/media/trek-pend.jpg', '/api/media/trek-pend.jpg', 'trek-pend.jpg', 'Pending draft', 'Pending draft', 'Sam', 0, 1, 'pending', ?, ?)`
+    )
+    .bind(now, now, now, now)
+    .run();
+
+  // 1. /en/schedule/ MUST link finished events (both dynamic & seeded leo-nui-luot) to /en/events/<slug>/ (NEVER /su-kien/<slug>/)
+  const schedRes = await ssrEnSchedule({ request: makeReq("/en/schedule/"), env });
+  assert.equal(schedRes.status, 200);
+  const schedHtml = await schedRes.text();
+  assert.ok(schedHtml.includes('href="/en/events/holaconnect-trek-2025-10-10/"'), "Finished event on /en/schedule/ must stay on /en/events/");
+  const schedMain = schedHtml.split("<main", 2)[1] || "";
+  assert.equal(schedMain.includes('href="/su-kien/'), false, "/en/schedule/ main must never link to /su-kien/");
+
+  // 2. /en/events/<slug>/ MUST auto-transform into 100% English Post-Event Memory Stage
+  const enMemRes = await ssrEnEvent({
+    request: makeReq("/en/events/holaconnect-trek-2025-10-10/"),
+    env,
+    params: { slug: "holaconnect-trek-2025-10-10" },
+  });
+  assert.equal(enMemRes.status, 200);
+  const enMemHtml = await enMemRes.text();
+  assert.ok(enMemHtml.includes('class="is-memory-stage"'));
+  assert.ok(enMemHtml.includes("<span>Concluded</span>"));
+  assert.ok(enMemHtml.includes('id="member-contribute-dialog"'));
+  assert.ok(enMemHtml.includes('id="lightbox-video"'));
+  assert.ok(enMemHtml.includes("/api/media/trek-ok.jpg"), "Approved photo must appear");
+  assert.equal(enMemHtml.includes("/api/media/trek-pend.jpg"), false, "Pending photo must stay hidden");
+  assert.ok(enMemHtml.includes('href="/su-kien/holaconnect-trek-2025-10-10/"'), "VN switcher must point 1:1 to /su-kien/<slug>/");
+  assert.equal(
+    /[àáảãạăằắẳẵặâầấẩẫậđèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ]/i.test(enMemHtml),
+    false,
+    "EN Post-Event Memory Stage must contain 0 Vietnamese diacritics"
+  );
+
+  // 3. /su-kien/<slug>/ (VI Memory Stage) EN switcher MUST point 1:1 to /en/events/<slug>/ (NEVER /en/)
+  const viMemRes = await ssrEventInvite({
+    request: makeReq("/su-kien/holaconnect-trek-2025-10-10/"),
+    env,
+    params: { slug: "holaconnect-trek-2025-10-10" },
+  });
+  assert.equal(viMemRes.status, 200);
+  const viMemHtml = await viMemRes.text();
+  assert.ok(viMemHtml.includes('class="is-memory-stage"'));
+  assert.ok(
+    viMemHtml.includes('<a class="lang-switch" href="/en/events/holaconnect-trek-2025-10-10/"'),
+    "VI Memory Stage EN switcher must stay on the same event slug"
+  );
+
+  // 4. Seeded finished event leo-nui-luot (which also has a static dist/en/events/leo-nui-luot/index.html) MUST ALSO transform into EN Memory Stage!
+  await d1
+    .prepare("UPDATE events SET stage_override = 'memory' WHERE id = 'holaconnect-leo-nui-lam-nghiep-2026-11-26'")
+    .run();
+  const leoEnRes = await ssrEnEvent({
+    request: makeReq("/en/events/leo-nui-luot/"),
+    env,
+    params: { slug: "leo-nui-luot" },
+  });
+  assert.equal(leoEnRes.status, 200);
+  const leoEnHtml = await leoEnRes.text();
+  assert.ok(leoEnHtml.includes('class="is-memory-stage"'), "Seeded static event leo-nui-luot must transform to EN Memory Stage when finished");
+  assert.ok(leoEnHtml.includes('href="/su-kien/leo-nui-luot/"'));
+
+  // 5. POST /api/event-feedback with lang: "en" returns English confirmation message
+  const fbRes = await postEventFeedback({
+    request: makeReq("/api/event-feedback", {
+      method: "POST",
+      ip: "8.8.4.4",
+      body: {
+        eventId: "holaconnect-trek-2025-10-10",
+        eventSlug: "holaconnect-trek-2025-10-10",
+        eventTitle: "Afternoon Pine-Hill Trek",
+        category: "dong-vien",
+        content: "Wonderful afternoon walk under the pines and friendly coordinators!",
+        isAnonymous: true,
+        lang: "en",
+      },
+    }),
+    env,
+  });
+  assert.equal(fbRes.status, 201);
+  const fbJson = await fbRes.json();
+  assert.equal(fbJson.ok, true);
+  assert.equal(fbJson.isAnonymous, true);
+  assert.match(fbJson.message, /Thank you for your anonymous note/i);
+});

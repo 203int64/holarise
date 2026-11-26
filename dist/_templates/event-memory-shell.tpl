@@ -13,6 +13,9 @@
   <meta name="apple-mobile-web-app-title" content="HolaRise">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="canonical" href="__SSR_CANONICAL_URL__">
+  <link rel="alternate" hreflang="vi" href="__SSR_CANONICAL_URL__">
+  <link rel="alternate" hreflang="en" href="https://holarise.org/en/events/__SSR_EVENT_SLUG__/">
+  <link rel="alternate" hreflang="x-default" href="__SSR_CANONICAL_URL__">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" href="/assets/images/favicon-48.png" type="image/png" sizes="48x48">
   <link rel="icon" href="/assets/images/favicon-96.png" type="image/png" sizes="96x96">
@@ -49,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=3d5c3b1c66">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=eb8ca93006">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -120,7 +123,7 @@
       </nav>
 
       <div class="header-actions">
-        <a class="lang-switch" href="/en/" aria-label="Switch to English version">
+        <a class="lang-switch" href="/en/events/__SSR_EVENT_SLUG__/" aria-label="Switch to English version">
           <span class="lang-switch-opt">EN</span>
         </a>
         <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/" data-header-member-btn>
@@ -1052,10 +1055,10 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=3d5c3b1c66" defer></script>
-  <script src="/assets/js/main.js?v=3d5c3b1c66" defer></script>
-  <script src="/assets/js/join-pass.js?v=3d5c3b1c66" defer></script>
-  <script src="/assets/js/member.js?v=3d5c3b1c66" defer></script>
-  <script src="/assets/js/pwa.js?v=3d5c3b1c66" defer></script>
+  <script src="/assets/js/motion.js?v=eb8ca93006" defer></script>
+  <script src="/assets/js/main.js?v=eb8ca93006" defer></script>
+  <script src="/assets/js/join-pass.js?v=eb8ca93006" defer></script>
+  <script src="/assets/js/member.js?v=eb8ca93006" defer></script>
+  <script src="/assets/js/pwa.js?v=eb8ca93006" defer></script>
 </body>
 </html>

@@ -715,7 +715,7 @@
         }
       }
       if (modalIcsBtn) {
-        if (icsStart || (eventHref && eventHref.indexOf("/su-kien/") === 0)) {
+        if (icsStart || (eventHref && (eventHref.indexOf("/su-kien/") === 0 || eventHref.indexOf("/en/events/") === 0))) {
           modalIcsBtn.hidden = false;
           modalIcsBtn.setAttribute("data-ics-title", title);
           modalIcsBtn.setAttribute("data-ics-location", eventLocation);
@@ -776,8 +776,9 @@
       });
     });
 
-    if (window.location.hash === "#giu-cho") {
-      var hashTrigger = document.querySelector('[data-open-on-hash="giu-cho"]');
+    if (window.location.hash === "#giu-cho" || window.location.hash === "#rsvp") {
+      var hashKey = window.location.hash.slice(1);
+      var hashTrigger = document.querySelector('[data-open-on-hash="' + hashKey + '"]');
       if (hashTrigger) {
         setTimeout(function () {
           openEventModalFromTrigger(hashTrigger);
@@ -1283,7 +1284,7 @@
       var resolvedEventUrl =
         form.getAttribute("data-event-url") ||
         (modalContainer && modalContainer.dataset.eventHref) ||
-        (resolvedEventSlug ? "/su-kien/" + resolvedEventSlug + "/" : "");
+        (resolvedEventSlug ? (isEn ? "/en/events/" : "/su-kien/") + resolvedEventSlug + "/" : "");
 
       var passSnapshot = {
         id: "",
@@ -1518,7 +1519,7 @@
       if (!iso) return "";
       var d = new Date(iso);
       if (isNaN(d.getTime())) return "";
-      return d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+      return d.toLocaleDateString(isEn ? "en-GB" : "vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
     }
 
     function parseJsonSafe(res) {
@@ -1534,10 +1535,16 @@
         if (!data) {
           var fallbackMsg =
             res.status >= 500
-              ? "Hệ thống đang tạm bận (mã " + res.status + "). Bạn vui lòng thử lại sau giây lát."
+              ? t(
+                  "Hệ thống đang tạm bận (mã " + res.status + "). Bạn vui lòng thử lại sau giây lát.",
+                  "The service is temporarily busy (HTTP " + res.status + "). Please try again in a moment."
+                )
               : res.status === 413
-                ? "Ảnh tải lên vượt quá dung lượng cho phép."
-                : "Phản hồi máy chủ không hợp lệ. Vui lòng tải lại trang và thử lại.";
+                ? t("Ảnh tải lên vượt quá dung lượng cho phép.", "Uploaded file exceeds the maximum allowed size.")
+                : t(
+                    "Phản hồi máy chủ không hợp lệ. Vui lòng tải lại trang và thử lại.",
+                    "Invalid server response. Please reload the page and try again."
+                  );
           data = { ok: false, message: fallbackMsg };
         }
         return { ok: res.ok, status: res.status, data: data };
@@ -1623,15 +1630,22 @@
       if (prPhotoWrap) prPhotoWrap.hidden = count === 0;
       if (prPhotoMeta) {
         var vidCount = selectedPhotos.filter(function (x) { return x.mediaType === "video"; }).length;
-        prPhotoMeta.textContent =
-          count + " / " + MAX_REFLECTION_PHOTOS + " tệp đã chọn" +
-          (vidCount > 0 ? " (gồm " + vidCount + " video)" : " · Tự động nén gọn khi gửi");
+        prPhotoMeta.textContent = isEn
+          ? count + " / " + MAX_REFLECTION_PHOTOS + " files selected" +
+            (vidCount > 0 ? " (including " + vidCount + " video)" : " · Auto-optimized on upload")
+          : count + " / " + MAX_REFLECTION_PHOTOS + " tệp đã chọn" +
+            (vidCount > 0 ? " (gồm " + vidCount + " video)" : " · Tự động nén gọn khi gửi");
       }
       if (prPhotoTrigger) {
         var span = prPhotoTrigger.querySelector("span");
         if (span) {
-          span.textContent =
-            count >= MAX_REFLECTION_PHOTOS
+          span.textContent = isEn
+            ? count >= MAX_REFLECTION_PHOTOS
+              ? "Maximum " + MAX_REFLECTION_PHOTOS + " files reached"
+              : count > 0
+                ? "Add photos / videos (" + count + "/" + MAX_REFLECTION_PHOTOS + ")"
+                : "Photos / Videos (up to " + MAX_REFLECTION_PHOTOS + ")"
+            : count >= MAX_REFLECTION_PHOTOS
               ? "Đã đủ " + MAX_REFLECTION_PHOTOS + " tệp"
               : count > 0
                 ? "Thêm ảnh / video (" + count + "/" + MAX_REFLECTION_PHOTOS + ")"
@@ -1646,11 +1660,11 @@
             var mediaHtml = isVid
               ? '<video src="' + escTxt(item.objectUrl) + '" muted playsinline preload="metadata"></video>' +
                 '<span class="gb-preview-video-badge" aria-hidden="true">Video</span>'
-              : '<img src="' + escTxt(item.objectUrl) + '" alt="Ảnh xem trước ' + (idx + 1) + '">';
+              : '<img src="' + escTxt(item.objectUrl) + '" alt="' + escTxt(t("Ảnh xem trước ", "Preview image ") + (idx + 1)) + '">';
             return (
               '<div class="gb-preview-tile' + (isVid ? " is-video" : "") + '">' +
               mediaHtml +
-              '<button type="button" class="gb-preview-remove" data-remove-pr-photo="' + idx + '" aria-label="Gỡ tệp ' + (idx + 1) + '">×</button>' +
+              '<button type="button" class="gb-preview-remove" data-remove-pr-photo="' + idx + '" aria-label="' + escTxt(t("Gỡ tệp ", "Remove file ") + (idx + 1)) + '">×</button>' +
               "</div>"
             );
           })
@@ -1703,15 +1717,15 @@
         var isVid = isReflectionVideoFile(file);
         var isImg = !isVid && isReflectionImageFile(file);
         if (!isImg && !isVid) {
-          errors.push((file.name || "Tệp") + ": chỉ hỗ trợ ảnh JPEG/PNG/WebP hoặc video MP4/MOV/WebM.");
+          errors.push((file.name || t("Tệp", "File")) + t(": chỉ hỗ trợ ảnh JPEG/PNG/WebP hoặc video MP4/MOV/WebM.", ": only JPEG/PNG/WebP images or MP4/MOV/WebM videos are supported."));
           return;
         }
         if (isVid && file.size > 25 * 1024 * 1024) {
-          errors.push((file.name || "Video") + ": video vượt quá giới hạn 25 MB.");
+          errors.push((file.name || "Video") + t(": video vượt quá giới hạn 25 MB.", ": video exceeds the 25 MB limit."));
           return;
         }
         if (isImg && file.size > 15 * 1024 * 1024) {
-          errors.push((file.name || "Ảnh") + ": ảnh vượt quá 15 MB.");
+          errors.push((file.name || t("Ảnh", "Image")) + t(": ảnh vượt quá 15 MB.", ": image exceeds the 15 MB limit."));
           return;
         }
         selectedPhotos.push({
@@ -1884,7 +1898,14 @@
         : "";
       var captionBits = [it.authorName, it.authorOrg || it.participantRole].filter(Boolean).join(" · ");
       var photoHtml = renderCardPhotosHtml(it, captionBits);
-      var roleLabel = it.participantRole === "member" ? "Thành viên" : it.participantRole === "volunteer" ? "Tình nguyện viên" : it.participantRole === "speaker" ? "Diễn giả" : it.participantRole;
+      var roleLabel =
+        it.participantRole === "member"
+          ? t("Thành viên", "Member")
+          : it.participantRole === "volunteer"
+            ? t("Tình nguyện viên", "Volunteer")
+            : it.participantRole === "speaker"
+              ? t("Diễn giả", "Speaker")
+              : it.participantRole;
       var metaParts = [it.authorOrg || roleLabel, formatDateShortVi(it.createdAt)].filter(Boolean);
       var myReaction = it.myReaction || (it.heartedByMe ? "heart" : "");
       var reactions = it.reactions || { heart: Number(it.heartCount || 0), warm: 0, inspire: 0 };
@@ -2828,7 +2849,9 @@
     var toastCloseBtn = document.getElementById("shake-guide-close");
     var SHAKE_TIP_SEEN_KEY = "holarise_shake_tip_seen";
     var isMobileViewport = window.matchMedia && window.matchMedia("(max-width: 900px)").matches;
-    var isEventInvitationPage = (window.location.pathname || "").indexOf("/su-kien/") === 0;
+    var isEventInvitationPage =
+      (window.location.pathname || "").indexOf("/su-kien/") === 0 ||
+      (window.location.pathname || "").indexOf("/en/events/") === 0;
 
     function dismissShakeToast() {
       if (toastEl) toastEl.hidden = true;

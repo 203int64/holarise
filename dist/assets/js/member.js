@@ -715,8 +715,9 @@
             form.reset();
             const dlg = form.closest("dialog");
             if (dlg && dlg.open) dlg.close();
-            if (window.location.pathname !== "/tham-gia/") {
-              window.location.href = "/tham-gia/?onboarding=1";
+            const joinPath = isEn ? "/en/join/" : "/tham-gia/";
+            if (window.location.pathname !== joinPath) {
+              window.location.href = `${joinPath}?onboarding=1`;
               return;
             }
             onAuthChanged();
@@ -1598,14 +1599,22 @@
       if (bookingsBox) {
         if (!regs.length) {
           if (walletSummary) walletSummary.hidden = true;
-          bookingsBox.innerHTML =
-            '<p class="member-empty-hint">Ví hành trình của bạn chưa có thẻ sự kiện nào. Ghé <a href="/lich-hoat-dong/" style="color:var(--accent);font-weight:500;">Lịch hoạt động</a> để giữ chỗ 1 chạm và nhận thẻ đầu tiên.</p>';
+          bookingsBox.innerHTML = isEn
+            ? '<p class="member-empty-hint">Your journey wallet has no event passes yet. Visit the <a href="/en/schedule/" style="color:var(--accent);font-weight:500;">Schedule</a> to reserve your first seat in one tap.</p>'
+            : '<p class="member-empty-hint">Ví hành trình của bạn chưa có thẻ sự kiện nào. Ghé <a href="/lich-hoat-dong/" style="color:var(--accent);font-weight:500;">Lịch hoạt động</a> để giữ chỗ 1 chạm và nhận thẻ đầu tiên.</p>';
         } else {
           const attendedCount = regs.filter((r) => r.status === "attended").length;
           const activeCount = regs.filter((r) => r.status !== "cancelled" && r.status !== "attended").length;
           if (walletSummary) {
             walletSummary.hidden = false;
-            walletSummary.innerHTML = `
+            walletSummary.innerHTML = isEn
+              ? `
+              <span class="wallet-stat-chip"><strong>${regs.length}</strong> ${regs.length === 1 ? "pass" : "passes"} in wallet</span>
+              ${activeCount ? `<span class="wallet-stat-chip"><strong>${activeCount}</strong> upcoming</span>` : ""}
+              ${attendedCount ? `<span class="wallet-stat-chip wallet-stat-chip--attended"><strong>${attendedCount}</strong> attended</span>` : ""}
+              <span class="wallet-stat-hint">Tap a pass to view details &amp; download PNG</span>
+            `
+              : `
               <span class="wallet-stat-chip"><strong>${regs.length}</strong> thẻ trong ví</span>
               ${activeCount ? `<span class="wallet-stat-chip"><strong>${activeCount}</strong> sắp tham dự</span>` : ""}
               ${attendedCount ? `<span class="wallet-stat-chip wallet-stat-chip--attended"><strong>${attendedCount}</strong> đã hoàn thành</span>` : ""}
@@ -1617,9 +1626,9 @@
             .map((r, idx) => {
               const pillarKey = PILLAR_META[r.eventPillar] ? r.eventPillar : "holaheart";
               const pm = PILLAR_META[pillarKey];
-              const title = r.activityTitle || r.activity_title || "Hoạt động HolaRise";
+              const title = r.activityTitle || r.activity_title || t("Hoạt động HolaRise", "HolaRise Gathering");
               const schedule = getScheduleText(r);
-              const location = r.eventLocation || "Hòa Lạc, Hà Nội";
+              const location = r.eventLocation || t("Hòa Lạc, Hà Nội", "Hoa Lac, Hanoi");
               const statusText = getStatusLabel(r.status);
               const isFront = idx === regs.length - 1;
               return `<button type="button" class="wallet-card wallet-card--${esc(pillarKey)}${isFront ? " is-front" : ""}" data-wallet-idx="${idx}" style="--card-index:${idx};">
@@ -1634,7 +1643,7 @@
                 </div>
                 <div class="wallet-card-foot">
                   <code class="wallet-code">${esc(r.id)}</code>
-                  <span class="wallet-card-cta">Mở thẻ →</span>
+                  <span class="wallet-card-cta">${t("Mở thẻ →", "Open pass →")}</span>
                 </div>
               </button>`;
             })
@@ -1655,22 +1664,24 @@
       const refs = data.reflections || [];
       if (refsBox) {
         if (!refs.length) {
-          refsBox.innerHTML =
-            '<p class="member-empty-hint">Bạn chưa gửi lưu bút nào. Mở một bài trong <a href="/hanh-trinh/" style="color:var(--accent);font-weight:500;">Hành trình</a> để chia sẻ cảm nhận.</p>';
+          refsBox.innerHTML = isEn
+            ? '<p class="member-empty-hint">You have not posted any reflections yet. Open a gathering in <a href="/en/journey/" style="color:var(--accent);font-weight:500;">Journey</a> to share what stayed with you.</p>'
+            : '<p class="member-empty-hint">Bạn chưa gửi lưu bút nào. Mở một bài trong <a href="/hanh-trinh/" style="color:var(--accent);font-weight:500;">Hành trình</a> để chia sẻ cảm nhận.</p>';
         } else {
+          const refBase = isEn ? "/en/journey/" : "/hanh-trinh/";
           refsBox.innerHTML = refs
             .map(
               (rf) => `<div class="member-list-item">
                 <div>
-                  <a href="/hanh-trinh/${esc(rf.activitySlug)}/#activity-guestbook"><strong>${esc(rf.pullQuote || rf.content.slice(0, 72))}</strong></a>
+                  <a href="${refBase}${esc(rf.activitySlug)}/#activity-guestbook"><strong>${esc(rf.pullQuote || rf.content.slice(0, 72))}</strong></a>
                   <span class="member-list-meta">${esc(rf.participantRole)} · ${esc(formatDateVi(rf.createdAt))} · ♥ ${Number(rf.heartCount ?? rf.heartsCount ?? 0)}</span>
                 </div>
                 <span class="member-status-pill member-status-pill--${esc(rf.status)}">${
                   rf.status === "approved"
-                    ? "Đã xuất bản"
+                    ? t("Đã xuất bản", "Published")
                     : rf.status === "rejected"
-                      ? "Đang ẩn"
-                      : "Chờ duyệt"
+                      ? t("Đang ẩn", "Hidden")
+                      : t("Chờ duyệt", "Pending")
                 }</span>
               </div>`
             )
@@ -1763,14 +1774,17 @@
             ? `<img src="${esc(m.avatarUrl)}" alt="${esc(m.name)}">`
             : esc((m.name || "H").trim().charAt(0).toUpperCase());
         }
-        if (efMemberName) efMemberName.textContent = m.name || "Thành viên HolaRise";
+        if (efMemberName) efMemberName.textContent = m.name || t("Thành viên HolaRise", "HolaRise Member");
         if (efMemberSub) {
           const contact = m.phoneDisplay || m.email || m.memberCode || "";
           efMemberSub.textContent = isAnon
-            ? "Đang gửi ẩn danh hoàn toàn — không lưu tên hay liên hệ"
+            ? t(
+                "Đang gửi ẩn danh hoàn toàn — không lưu tên hay liên hệ",
+                "Sending fully anonymously — no name or contact stored"
+              )
             : contact
-              ? `Gửi kèm thông tin · ${contact}`
-              : "Gửi kèm thông tin tài khoản của bạn";
+              ? t(`Gửi kèm thông tin · ${contact}`, `Sending with details · ${contact}`)
+              : t("Gửi kèm thông tin tài khoản của bạn", "Sending with your member account");
         }
       } else {
         if (efMemberBar) efMemberBar.hidden = true;
@@ -1795,10 +1809,13 @@
           ? `<img src="${esc(m.avatarUrl)}" alt="${esc(m.name)}">`
           : esc((m.name || "H").trim().charAt(0).toUpperCase());
       }
-      if (nm) nm.textContent = m.name || "Thành viên HolaRise";
+      if (nm) nm.textContent = m.name || t("Thành viên HolaRise", "HolaRise Member");
       if (sub) {
         const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-        sub.textContent = `Thư mục chuẩn hóa: dong-gop/${stamp}_${m.memberCode || ""}_...`;
+        sub.textContent = t(
+          `Thư mục chuẩn hóa: dong-gop/${stamp}_${m.memberCode || ""}_...`,
+          `Standardized folder: dong-gop/${stamp}_${m.memberCode || ""}_...`
+        );
       }
       if (creditInput && !creditInput.value.trim()) {
         creditInput.value = m.name || "";
@@ -1833,7 +1850,9 @@
       if (queueBox) queueBox.hidden = total === 0;
       if (queueSummary) {
         queueSummary.textContent =
-          done > 0 ? `Đã gửi ${done} / ${total} tệp` : `${total} tệp đã chọn`;
+          done > 0
+            ? t(`Đã gửi ${done} / ${total} tệp`, `Uploaded ${done} / ${total} files`)
+            : t(`${total} tệp đã chọn`, `${total} ${total === 1 ? "file" : "files"} selected`);
       }
       if (progressWrap && progressBar) {
         progressWrap.hidden = !uploading && done === 0;
@@ -1847,10 +1866,13 @@
       if (submitBtn) {
         submitBtn.disabled = uploading || pending === 0 || !albumSelect?.value;
         submitBtn.textContent = uploading
-          ? `Đang gửi (${done + 1}/${total})...`
+          ? t(`Đang gửi (${done + 1}/${total})...`, `Uploading (${done + 1}/${total})...`)
           : done > 0 && pending > 0
-            ? `Gửi tiếp ${pending} tệp chưa hoàn tất`
-            : `Gửi ${pending || total} tệp vào thư mục sự kiện`;
+            ? t(`Gửi tiếp ${pending} tệp chưa hoàn tất`, `Retry ${pending} remaining file(s)`)
+            : t(
+                `Gửi ${pending || total} tệp vào thư mục sự kiện`,
+                `Upload ${pending || total} file(s) to event folder`
+              );
       }
       if (fileListEl) {
         fileListEl.innerHTML = queue
@@ -1858,15 +1880,17 @@
             const isVid = item.mediaType === "video";
             const stateLabel =
               item.status === "done"
-                ? item.savedName ? `✓ ${item.savedName}` : "✓ Đã vào thư mục chờ duyệt"
+                ? item.savedName
+                  ? `✓ ${item.savedName}`
+                  : t("✓ Đã vào thư mục chờ duyệt", "✓ Saved and pending review")
                 : item.status === "uploading"
-                  ? "Đang tải lên..."
+                  ? t("Đang tải lên...", "Uploading...")
                   : item.status === "error"
-                    ? item.message || "Lỗi tải lên"
+                    ? item.message || t("Lỗi tải lên", "Upload error")
                     : `${isVid ? "Video · " : ""}${formatSizeMb(item.file.size)}`;
             const removeHtml =
               !uploading && item.status !== "done"
-                ? `<button type="button" class="contribute-item-remove" data-remove-contrib-idx="${idx}" aria-label="Gỡ ${esc(item.file.name)}">×</button>`
+                ? `<button type="button" class="contribute-item-remove" data-remove-contrib-idx="${idx}" aria-label="${esc(t("Gỡ ", "Remove ") + item.file.name)}">×</button>`
                 : "";
             return `<li class="contribute-file-item is-${item.status}">
               <span class="contribute-file-name">${isVid ? '<span class="contribute-kind-tag">Video</span>' : ""}${esc(item.file.name)}</span>
@@ -1880,7 +1904,7 @@
 
     async function loadAlbumsIntoSelect(preferredAlbumId = "") {
       if (!albumSelect || !state.member) return;
-      albumSelect.innerHTML = `<option value="">Đang tải danh sách bộ ảnh...</option>`;
+      albumSelect.innerHTML = `<option value="">${t("Đang tải danh sách bộ ảnh...", "Loading event albums...")}</option>`;
       try {
         const res = await api("/api/member/albums");
         albumsLoadedForMember = state.member.id;
@@ -1888,14 +1912,20 @@
         if (res.maxUploadBytes) maxUploadBytes = Number(res.maxUploadBytes);
         if (res.maxVideoUploadBytes) maxVideoUploadBytes = Number(res.maxVideoUploadBytes);
         if (!items.length) {
-          albumSelect.innerHTML = `<option value="">Chưa có bộ ảnh sự kiện nào đang mở</option>`;
+          albumSelect.innerHTML = `<option value="">${t("Chưa có bộ ảnh sự kiện nào đang mở", "No open event albums yet")}</option>`;
           renderQueue();
           return;
         }
         albumSelect.innerHTML = items
           .map((a) => {
             const datePart = a.dateDisplay ? ` (${a.dateDisplay})` : "";
-            const myPart = a.myPendingCount > 0 ? ` · ${a.myPendingCount} ảnh của bạn chờ duyệt` : "";
+            const myPart =
+              a.myPendingCount > 0
+                ? t(
+                    ` · ${a.myPendingCount} ảnh của bạn chờ duyệt`,
+                    ` · ${a.myPendingCount} of yours pending`
+                  )
+                : "";
             return `<option value="${esc(a.id)}">${esc(a.title + datePart + myPart)}</option>`;
           })
           .join("");
@@ -1907,10 +1937,10 @@
           albumSelect.value = matchByEvent.id;
         }
       } catch (err) {
-        albumSelect.innerHTML = `<option value="">Không tải được danh sách bộ ảnh</option>`;
+        albumSelect.innerHTML = `<option value="">${t("Không tải được danh sách bộ ảnh", "Could not load albums")}</option>`;
         if (statusEl) {
           statusEl.className = "form-status is-error";
-          statusEl.textContent = err?.message || "Chưa thể tải danh sách bộ ảnh lúc này.";
+          statusEl.textContent = err?.message || t("Chưa thể tải danh sách bộ ảnh lúc này.", "Could not load event albums right now.");
         }
       }
       renderQueue();
@@ -1930,7 +1960,7 @@
       if (efEventTitle) efEventTitle.value = currentCtx.eventTitle;
       if (eventLabelEl) {
         if (currentCtx.eventTitle) {
-          eventLabelEl.textContent = `Buổi gặp: ${currentCtx.eventTitle}`;
+          eventLabelEl.textContent = t(`Buổi gặp: ${currentCtx.eventTitle}`, `Gathering: ${currentCtx.eventTitle}`);
           eventLabelEl.hidden = false;
         } else {
           eventLabelEl.textContent = "";
@@ -1975,7 +2005,7 @@
         if (authDlg && typeof authDlg.showModal === "function") {
           authDlg.showModal();
         } else {
-          window.location.href = "/tham-gia/";
+          window.location.href = isEn ? "/en/join/" : "/tham-gia/";
         }
       });
     }
@@ -1999,13 +2029,16 @@
         if (content.length < 8) {
           if (efStatus) {
             efStatus.className = "form-status is-error";
-            efStatus.textContent = "Nội dung đóng góp cần ít nhất 8 ký tự.";
+            efStatus.textContent = t(
+              "Nội dung đóng góp cần ít nhất 8 ký tự.",
+              "Please write at least 8 characters."
+            );
           }
           return;
         }
         if (efSubmitBtn) {
           efSubmitBtn.disabled = true;
-          efSubmitBtn.textContent = "Đang gửi...";
+          efSubmitBtn.textContent = t("Đang gửi...", "Sending...");
         }
         try {
           const m = state.member;
@@ -2024,6 +2057,7 @@
                 ? (m.phoneDisplay || m.email || "")
                 : String(fd.get("authorContact") || "").trim(),
             website: String(fd.get("website") || "").trim(),
+            lang: isEn ? "en" : "vi",
           };
           const res = await fetch("/api/event-feedback", {
             method: "POST",
@@ -2033,22 +2067,35 @@
           });
           const data = await res.json().catch(() => ({}));
           if (!res.ok) {
-            throw new Error(data?.error?.message || data?.message || "Chưa gửi được đóng góp lúc này.");
+            throw new Error(
+              data?.error?.message ||
+                data?.message ||
+                t("Chưa gửi được đóng góp lúc này.", "Could not send feedback right now.")
+            );
           }
           if (efContent) efContent.value = "";
           if (efStatus) {
             efStatus.className = "form-status is-success";
-            efStatus.textContent = data.message || "Cảm ơn lời đóng góp chân thành của bạn.";
+            efStatus.textContent =
+              data.message ||
+              t(
+                "Cảm ơn lời đóng góp chân thành của bạn.",
+                "Thank you for your thoughtful feedback."
+              );
           }
         } catch (err) {
           if (efStatus) {
             efStatus.className = "form-status is-error";
-            efStatus.textContent = err?.message || "Chưa gửi được đóng góp lúc này.";
+            efStatus.textContent =
+              err?.message || t("Chưa gửi được đóng góp lúc này.", "Could not send feedback right now.");
           }
         } finally {
           if (efSubmitBtn) {
             efSubmitBtn.disabled = false;
-            efSubmitBtn.textContent = "Gửi kín tới Ban Điều Phối";
+            efSubmitBtn.textContent = t(
+              "Gửi kín tới Ban Điều Phối",
+              "Send privately to Coordinators"
+            );
           }
         }
       });
@@ -2096,7 +2143,10 @@
         e.preventDefault();
         if (statusEl) {
           statusEl.className = "form-status is-error";
-          statusEl.textContent = "Đang tải ảnh lên thư mục sự kiện. Vui lòng đợi hoàn tất hoặc bấm Dừng tải tiếp.";
+          statusEl.textContent = t(
+            "Đang tải ảnh lên thư mục sự kiện. Vui lòng đợi hoàn tất hoặc bấm Dừng tải tiếp.",
+            "Upload in progress. Please wait until it finishes or click Stop upload."
+          );
         }
         if (stopBtn) {
           stopBtn.setAttribute("aria-describedby", "contribute-status");
@@ -2117,14 +2167,18 @@
         const isVid = isContribVideoFile(file);
         const isImg = !isVid && isContribImageFile(file);
         if (!isImg && !isVid) {
-          if (!firstError) firstError = `${file.name || "Tệp"}: chỉ hỗ trợ ảnh JPEG/PNG/WebP hoặc video MP4/MOV/WebM.`;
+          if (!firstError) {
+            firstError = `${file.name || t("Tệp", "File")}: ${t("chỉ hỗ trợ ảnh JPEG/PNG/WebP hoặc video MP4/MOV/WebM.", "only JPEG/PNG/WebP images or MP4/MOV/WebM videos are supported.")}`;
+          }
           continue;
         }
         const limit = isVid ? maxVideoUploadBytes : maxUploadBytes;
         if (file.size > limit) {
           const maxMb = Math.round(limit / (1024 * 1024));
           if (!firstError) {
-            firstError = `${file.name || "Tệp"}: vượt quá giới hạn ${maxMb} MB mỗi ${isVid ? "video" : "ảnh"}.`;
+            firstError = isEn
+              ? `${file.name || "File"}: exceeds the ${maxMb} MB limit per ${isVid ? "video" : "photo"}.`
+              : `${file.name || "Tệp"}: vượt quá giới hạn ${maxMb} MB mỗi ${isVid ? "video" : "ảnh"}.`;
           }
           continue;
         }
@@ -2137,7 +2191,10 @@
           statusEl.textContent = firstError;
         } else if (fromPaste && addedCount > 0) {
           statusEl.className = "form-status is-success";
-          statusEl.textContent = `Đã dán ${addedCount} tệp vào danh sách tải lên.`;
+          statusEl.textContent = t(
+            `Đã dán ${addedCount} tệp vào danh sách tải lên.`,
+            `Pasted ${addedCount} file(s) into the upload queue.`
+          );
         } else {
           statusEl.className = "form-status";
           statusEl.textContent = "";
@@ -2281,13 +2338,22 @@
         if (statusEl) {
           if (stopRequested) {
             statusEl.className = "form-status";
-            statusEl.textContent = `Đã dừng tải. ${okCount} ảnh đã lưu vào thư mục chuẩn hóa và chờ Ban Điều Phối duyệt tại /media/.`;
+            statusEl.textContent = t(
+              `Đã dừng tải. ${okCount} ảnh đã lưu vào thư mục chuẩn hóa và chờ Ban Điều Phối duyệt tại /media/.`,
+              `Upload paused. ${okCount} file(s) saved and pending review by our Media Team.`
+            );
           } else if (failCount === 0 && okCount > 0) {
             statusEl.className = "form-status is-success";
-            statusEl.textContent = `Đã gửi thành công ${okCount} ảnh gốc vào thư mục chuẩn hóa. Ảnh đang chờ kiểm duyệt tại /media/.`;
+            statusEl.textContent = t(
+              `Đã gửi thành công ${okCount} ảnh gốc vào thư mục chuẩn hóa. Ảnh đang chờ kiểm duyệt tại /media/.`,
+              `Successfully uploaded ${okCount} original file(s). They will appear once reviewed by our Media Team.`
+            );
           } else {
             statusEl.className = "form-status is-error";
-            statusEl.textContent = `Đã lưu ${okCount} ảnh, còn ${failCount} ảnh chưa tải được. Bạn có thể bấm Gửi tiếp để thử lại.`;
+            statusEl.textContent = t(
+              `Đã lưu ${okCount} ảnh, còn ${failCount} ảnh chưa tải được. Bạn có thể bấm Gửi tiếp để thử lại.`,
+              `Uploaded ${okCount} file(s), ${failCount} failed. You can click Retry to upload the remaining files.`
+            );
           }
         }
       });
