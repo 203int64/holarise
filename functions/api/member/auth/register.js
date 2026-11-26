@@ -14,6 +14,7 @@ import {
 } from "../../../_lib/security.js";
 import { verifyTurnstileToken } from "../../../_lib/turnstile.js";
 import { validateMemberRegisterInput } from "../../../_lib/validation.js";
+import { sendMemberWelcomeEmail } from "../../../_lib/email.js";
 import { createEventRegistrationForMember } from "../../registrations.js";
 
 export async function onRequestPost(context) {
@@ -136,6 +137,15 @@ export async function onRequestPost(context) {
   let autoRegistration = null;
   if (v.auto_register_event) {
     autoRegistration = await createEventRegistrationForMember(context, memberRow, v.auto_register_event, ipHash);
+  }
+
+  if (memberRow?.email) {
+    const welcomePromise = sendMemberWelcomeEmail(env, { member: memberRow, lang: "vi" });
+    if (typeof context.waitUntil === "function") {
+      context.waitUntil(welcomePromise);
+    } else {
+      await welcomePromise;
+    }
   }
 
   return jsonResponse(

@@ -1,4 +1,4 @@
-import { sendRsvpConfirmationEmail } from "../_lib/email.js";
+import { sendInquiryConfirmationEmail, sendRsvpConfirmationEmail } from "../_lib/email.js";
 import { syncRegistrationToGas } from "../_lib/gas.js";
 import { verifyTurnstileToken } from "../_lib/turnstile.js";
 import {
@@ -394,13 +394,22 @@ export async function onRequestPost(context) {
   }
 
   const bgTasks = [syncRegistrationToGas(env.DB, record)];
-  if (!v.is_feedback && record.email && record.event_id) {
-    bgTasks.push(
-      sendRsvpConfirmationEmail(env, {
-        registration: record,
-        lang: isEn ? "en" : "vi",
-      })
-    );
+  if (!v.is_feedback && record.email) {
+    if (record.event_id) {
+      bgTasks.push(
+        sendRsvpConfirmationEmail(env, {
+          registration: record,
+          lang: isEn ? "en" : "vi",
+        })
+      );
+    } else {
+      bgTasks.push(
+        sendInquiryConfirmationEmail(env, {
+          registration: record,
+          lang: isEn ? "en" : "vi",
+        })
+      );
+    }
   }
   const bgPromise = Promise.allSettled(bgTasks);
   if (typeof context.waitUntil === "function") {

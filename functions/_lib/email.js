@@ -17,13 +17,18 @@ const DEFAULT_FROM_EMAIL = "phungsu@holarise.org";
 const DEFAULT_FROM_NAME = "HolaRise - Cộng đồng Thanh niên Hoà Lạc";
 const DEFAULT_LOGO_URL = `${SITE_ORIGIN}/assets/images/favicon-96.png`;
 const DEFAULT_ZALO_URL = "https://zalo.me/0777771948";
-const VALID_TEMPLATE_TYPES = new Set([
+const DB_TEMPLATE_TYPES = new Set([
   "rsvp_confirm",
   "event_reminder",
   "event_thankyou",
-  "community_thankyou",
   "test_preview",
 ]);
+
+function mapTemplateTypeForDb(templateType) {
+  if (DB_TEMPLATE_TYPES.has(templateType)) return templateType;
+  if (templateType === "community_thankyou") return "event_thankyou";
+  return "rsvp_confirm";
+}
 
 let emailSchemaEnsured = false;
 
@@ -820,7 +825,7 @@ export async function logEmailAttempt(db, entry) {
   await ensureEmailLogsSchema(db);
   const now = new Date().toISOString();
   const id = `EML-${now.slice(2, 10).replace(/-/g, "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
-  const templateType = VALID_TEMPLATE_TYPES.has(entry.templateType) ? entry.templateType : "rsvp_confirm";
+  const templateType = mapTemplateTypeForDb(entry.templateType);
   const lang = entry.lang === "en" ? "en" : "vi";
   try {
     await db
@@ -967,6 +972,249 @@ export async function sendRsvpConfirmationEmail(env, { registration, event, lang
         recipientEmail: email,
         recipientName: registration.full_name || "",
         templateType: "rsvp_confirm",
+        lang: rendered.lang,
+        subject: rendered.subject,
+        provider: result.provider,
+        status: result.status,
+        messageId: result.messageId,
+        error: result.error,
+        sentBy: "system",
+      });
+    }
+    return result;
+  } catch (err) {
+    return { ok: false, status: "failed", provider: "none", error: String(err?.message || err).slice(0, 220) };
+  }
+}
+
+/**
+ * Render the bilingual Welcome Email sent right after a new Member creates an account
+ * (via email/password registration or first-time Google OAuth sign-in).
+ */
+export function renderMemberWelcomeEmail({ member = {}, lang = "vi" }) {
+  const safeLang = String(lang).toLowerCase() === "en" ? "en" : "vi";
+  const isEn = safeLang === "en";
+  const name = String(member.name || "").trim() || (isEn ? "friend" : "bạn");
+  const memberCode = String(member.member_code || member.memberCode || "").trim();
+  const cardUrl = memberCode ? `${SITE_ORIGIN}/tv/${encodeURIComponent(memberCode)}` : `${SITE_ORIGIN}/tham-gia/`;
+  const scheduleUrl = `${SITE_ORIGIN}${isEn ? "/en/schedule/" : "/lich-hoat-dong/"}`;
+
+  const subject = sanitizeHeaderValue(
+    isEn
+      ? `Welcome to HolaRise${memberCode ? ` · Member Card ${memberCode}` : ""}`
+      : `Chào mừng bạn đến với HolaRise${memberCode ? ` · Thẻ ${memberCode}` : ""}`,
+    180
+  );
+
+  const detailsRows = [
+    [isEn ? "Member" : "Thành viên", name],
+    ...(memberCode ? [[isEn ? "Member Code" : "Mã thẻ", memberCode]] : []),
+    [isEn ? "Pillars" : "3 Trụ cột", "HolaHeart · HolaGreen · HolaConnect"],
+  ];
+
+  const bodyHtml = isEn
+    ? `<p style="margin:0 0 12px 0;">Hello ${escapeHtml(name)},</p>
+       <p style="margin:0 0 12px 0;">Welcome to HolaRise. Your Member Card is now active, allowing you to reserve seats in one tap, keep track of the gatherings you join, and unlock full-resolution photo albums after each session.</p>
+       <p style="margin:0;">We look forward to seeing you in person at our next gathering in Hoa Lac.</p>`
+    : `<p style="margin:0 0 12px 0;">Chào ${escapeHtml(name)},</p>
+       <p style="margin:0 0 12px 0;">Chào mừng bạn chính thức trở thành thành viên của HolaRise. Thẻ Thành Viên của bạn đã sẵn sàng để giữ chỗ 1 chạm, lưu lại hành trình các buổi gặp và mở kho ảnh gốc sau mỗi chương trình.</p>
+       <p style="margin:0;">Rất mong sớm được đón bạn trực tiếp tại những buổi gặp sắp tới ở Hòa Lạc.</p>`;
+
+  const html = buildEmailLayout({
+    lang: safeLang,
+    preheader: isEn
+      ? `Your HolaRise Member Card${memberCode ? ` (${memberCode})` : ""} is ready.`
+      : `Thẻ Thành Viên HolaRise${memberCode ? ` (${memberCode})` : ""} của bạn đã sẵn sàng.`,
+    eyebrow: isEn ? "Member Card" : "Thẻ Thành Viên",
+    heading: isEn ? "Welcome to HolaRise" : "Chào mừng bạn đến với HolaRise",
+    bodyHtml,
+    detailsRows,
+    primaryCta: {
+      label: isEn ? "Open Your Member Card" : "Mở Thẻ Thành Viên của bạn",
+      url: cardUrl,
+    },
+    secondaryCta: {
+      label: isEn ? "View Upcoming Gatherings" : "Xem lịch hoạt động sắp tới",
+      url: scheduleUrl,
+    },
+    footerNote: isEn
+      ? "You received this email because you created a Member account on holarise.org. Reply directly if you need any assistance."
+      : "Bạn nhận được thư này vì vừa kích hoạt Tài khoản Thành viên trên holarise.org. Bạn có thể bấm trả lời trực tiếp nếu cần hỗ trợ.",
+  });
+
+  const text = isEn
+    ? [
+        `Hello ${name},`,
+        "",
+        "Welcome to HolaRise. Your Member Card is now active.",
+        memberCode ? `Member Code: ${memberCode}` : "",
+        `Member Card: ${cardUrl}`,
+        `Upcoming Gatherings: ${scheduleUrl}`,
+        "",
+        "Warmly,",
+        "HolaRise Coordinating Team (phungsu@holarise.org)",
+      ]
+        .filter((l) => l !== "")
+        .join("\n")
+    : [
+        `Chào ${name},`,
+        "",
+        "Chào mừng bạn chính thức trở thành thành viên của HolaRise.",
+        memberCode ? `Mã Thẻ Thành Viên: ${memberCode}` : "",
+        `Mở Thẻ Thành Viên: ${cardUrl}`,
+        `Lịch hoạt động sắp tới: ${scheduleUrl}`,
+        "",
+        "Thân mến,",
+        "Ban Điều Phối HolaRise (phungsu@holarise.org)",
+      ]
+        .filter((l) => l !== "")
+        .join("\n");
+
+  return { subject, html, text, templateType: "member_welcome", lang: safeLang };
+}
+
+/**
+ * Send Welcome Email to a newly registered Member. Never throws.
+ */
+export async function sendMemberWelcomeEmail(env, { member, lang = "vi", fetchImpl = fetch }) {
+  const email = String(member?.email || "").trim().toLowerCase();
+  if (!email) {
+    return { ok: false, status: "skipped", provider: "none", error: "Thành viên không đăng ký bằng email." };
+  }
+  try {
+    const rendered = renderMemberWelcomeEmail({ member, lang });
+    const result = await sendTransactionalEmail(env, {
+      to: email,
+      subject: rendered.subject,
+      html: rendered.html,
+      text: rendered.text,
+      fetchImpl,
+    });
+    if (env?.DB) {
+      await logEmailAttempt(env.DB, {
+        eventId: "member-welcome",
+        registrationId: member.id || "",
+        recipientEmail: email,
+        recipientName: member.name || "",
+        templateType: "member_welcome",
+        lang: rendered.lang,
+        subject: rendered.subject,
+        provider: result.provider,
+        status: result.status,
+        messageId: result.messageId,
+        error: result.error,
+        sentBy: "system",
+      });
+    }
+    return result;
+  } catch (err) {
+    return { ok: false, status: "failed", provider: "none", error: String(err?.message || err).slice(0, 220) };
+  }
+}
+
+/**
+ * Render and send confirmation email for general join/partnership inquiries (without a specific event_id).
+ */
+export function renderInquiryConfirmEmail({ registration = {}, lang = "vi" }) {
+  const safeLang = String(lang).toLowerCase() === "en" ? "en" : "vi";
+  const isEn = safeLang === "en";
+  const name = String(registration.full_name || "").trim() || (isEn ? "friend" : "bạn");
+  const topic = String(registration.activity_title || "").trim() || (isEn ? "General Inquiry" : "Đăng ký đồng hành cùng HolaRise");
+  const regId = String(registration.id || "").trim();
+  const org = String(registration.organization || "").trim();
+  const scheduleUrl = `${SITE_ORIGIN}${isEn ? "/en/schedule/" : "/lich-hoat-dong/"}`;
+
+  const subject = sanitizeHeaderValue(
+    isEn ? `We received your message · ${topic}` : `HolaRise đã tiếp nhận thông tin của bạn · ${regId || topic}`,
+    180
+  );
+
+  const detailsRows = [
+    [isEn ? "Topic" : "Nội dung", topic],
+    ...(regId ? [[isEn ? "Reference" : "Mã tiếp nhận", regId]] : []),
+    ...(org ? [[isEn ? "Organization" : "Đơn vị / Trường", org]] : []),
+  ];
+
+  const bodyHtml = isEn
+    ? `<p style="margin:0 0 12px 0;">Hello ${escapeHtml(name)},</p>
+       <p style="margin:0 0 12px 0;">Thank you for reaching out to HolaRise. We have recorded your information and our coordinating team will follow up with you shortly.</p>
+       <p style="margin:0;">If you need a quicker response, feel free to reply directly to this email or message us on Zalo.</p>`
+    : `<p style="margin:0 0 12px 0;">Chào ${escapeHtml(name)},</p>
+       <p style="margin:0 0 12px 0;">Cảm ơn bạn đã gửi thông tin đồng hành tới HolaRise. Ban Điều Phối đã ghi nhận đầy đủ và sẽ sớm liên hệ lại với bạn.</p>
+       <p style="margin:0;">Nếu cần trao đổi gấp hơn, bạn có thể bấm trả lời trực tiếp thư này hoặc nhắn qua Zalo cộng đồng.</p>`;
+
+  const html = buildEmailLayout({
+    lang: safeLang,
+    preheader: isEn ? "Thank you for contacting HolaRise." : "Ban Điều Phối HolaRise đã tiếp nhận thông tin của bạn.",
+    eyebrow: isEn ? "Confirmation" : "Xác nhận tiếp nhận",
+    heading: isEn ? "We received your inquiry" : "Đã tiếp nhận thông tin của bạn",
+    bodyHtml,
+    detailsRows,
+    primaryCta: {
+      label: isEn ? "View Upcoming Gatherings" : "Xem lịch hoạt động HolaRise",
+      url: scheduleUrl,
+    },
+    secondaryCta: {
+      label: isEn ? "Contact via Zalo" : "Nhắn qua Zalo Ban Điều Phối",
+      url: DEFAULT_ZALO_URL,
+    },
+    footerNote: isEn
+      ? "Sent automatically after your submission on holarise.org."
+      : "Thư xác nhận gửi tự động sau khi bạn đăng ký thông tin trên holarise.org.",
+  });
+
+  const text = isEn
+    ? [
+        `Hello ${name},`,
+        "",
+        `Thank you for reaching out to HolaRise (${topic}).`,
+        regId ? `Reference: ${regId}` : "",
+        "Our coordinating team will follow up shortly.",
+        `Upcoming Gatherings: ${scheduleUrl}`,
+        "",
+        "Warmly,",
+        "HolaRise Coordinating Team (phungsu@holarise.org)",
+      ]
+        .filter((l) => l !== "")
+        .join("\n")
+    : [
+        `Chào ${name},`,
+        "",
+        `Cảm ơn bạn đã gửi thông tin đồng hành tới HolaRise (${topic}).`,
+        regId ? `Mã tiếp nhận: ${regId}` : "",
+        "Ban Điều Phối sẽ sớm liên hệ lại với bạn.",
+        `Lịch hoạt động: ${scheduleUrl}`,
+        "",
+        "Thân mến,",
+        "Ban Điều Phối HolaRise (phungsu@holarise.org)",
+      ]
+        .filter((l) => l !== "")
+        .join("\n");
+
+  return { subject, html, text, templateType: "inquiry_confirm", lang: safeLang };
+}
+
+export async function sendInquiryConfirmationEmail(env, { registration, lang = "vi", fetchImpl = fetch }) {
+  const email = String(registration?.email || "").trim().toLowerCase();
+  if (!email) {
+    return { ok: false, status: "skipped", provider: "none", error: "Khách không để lại email." };
+  }
+  try {
+    const rendered = renderInquiryConfirmEmail({ registration, lang });
+    const result = await sendTransactionalEmail(env, {
+      to: email,
+      subject: rendered.subject,
+      html: rendered.html,
+      text: rendered.text,
+      fetchImpl,
+    });
+    if (env?.DB) {
+      await logEmailAttempt(env.DB, {
+        eventId: "general-inquiry",
+        registrationId: registration.id || "",
+        recipientEmail: email,
+        recipientName: registration.full_name || "",
+        templateType: "inquiry_confirm",
         lang: rendered.lang,
         subject: rendered.subject,
         provider: result.provider,

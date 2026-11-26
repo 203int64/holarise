@@ -1,3 +1,4 @@
+import { sendMemberWelcomeEmail } from "../../../../_lib/email.js";
 import { constantTimeStringEqual } from "../../../../_lib/gate-token.js";
 import {
   buildMemberSessionCookie,
@@ -144,6 +145,17 @@ export async function onRequestGet({ request, env }) {
     }
 
     const { rawToken } = await createMemberSession(env.DB, memberRow.id);
+
+    if (isNewMember && memberRow?.email) {
+      const welcomeLang = String(returnTo || "").startsWith("/en") ? "en" : "vi";
+      const welcomePromise = sendMemberWelcomeEmail(env, { member: memberRow, lang: welcomeLang });
+      if (typeof context.waitUntil === "function") {
+        context.waitUntil(welcomePromise);
+      } else {
+        await welcomePromise;
+      }
+    }
+
     const dest = new URL(isNewMember ? "/tham-gia/?onboarding=1" : returnTo, url.origin);
 
     const headers = new Headers({

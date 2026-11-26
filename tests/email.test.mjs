@@ -5,6 +5,8 @@ import {
   buildGoogleCalendarUrl,
   getEmailProviderStatus,
   renderEventEmailTemplate,
+  renderInquiryConfirmEmail,
+  renderMemberWelcomeEmail,
   sendRsvpConfirmationEmail,
   sendTransactionalEmail,
 } from "../functions/_lib/email.js";
@@ -209,4 +211,29 @@ test("sendRsvpConfirmationEmail skips cleanly when guest did not enter an email"
   });
   assert.equal(res.ok, false);
   assert.equal(res.status, "skipped");
+});
+
+test("renderMemberWelcomeEmail and renderInquiryConfirmEmail render bilingual confirmation emails with logo", () => {
+  const welcomeVi = renderMemberWelcomeEmail({
+    member: { name: "Ngọc Anh", member_code: "HR-261126-012" },
+    lang: "vi",
+  });
+  assert.equal(welcomeVi.subject, "Chào mừng bạn đến với HolaRise · Thẻ HR-261126-012");
+  assert.ok(welcomeVi.html.includes("https://holarise.org/tv/HR-261126-012"));
+  assert.ok(welcomeVi.html.includes("https://holarise.org/assets/images/favicon-96.png"));
+  assert.ok(welcomeVi.text.includes("HR-261126-012"));
+
+  const welcomeEn = renderMemberWelcomeEmail({
+    member: { name: "Alex", member_code: "HR-261126-013" },
+    lang: "en",
+  });
+  assert.equal(welcomeEn.subject, "Welcome to HolaRise · Member Card HR-261126-013");
+
+  const inquiryVi = renderInquiryConfirmEmail({
+    registration: { id: "REG-261126-XYZ", full_name: "Minh Khôi", activity_title: "Đồng hành đối tác", organization: "ĐH FPT" },
+    lang: "vi",
+  });
+  assert.ok(inquiryVi.subject.includes("REG-261126-XYZ"));
+  assert.ok(inquiryVi.html.includes("ĐH FPT"));
+  assert.ok(inquiryVi.html.includes("https://holarise.org/assets/images/favicon-96.png"));
 });
