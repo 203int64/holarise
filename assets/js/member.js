@@ -5,6 +5,13 @@
 (function () {
   "use strict";
 
+  const isEn =
+    (document.documentElement &&
+      (document.documentElement.lang === "en" ||
+        document.documentElement.dataset.lang === "en")) ||
+    /^\/en(\/|$)/i.test((window.location && window.location.pathname) || "");
+  const t = (vi, en) => (isEn ? en : vi);
+
   const state = {
     member: null,
     googleEnabled: false,
@@ -21,21 +28,30 @@
   const PILLAR_META = {
     holaheart: {
       theme: "sunrise",
-      badge: "HolaHeart · Nội lực",
+      badge: t("HolaHeart · Nội lực", "HolaHeart · Stillness"),
       label: "HolaHeart",
-      greeting: "Hẹn gặp bạn trong những buổi đối thoại giá trị sống và âm nhạc sâu lắng tại Hòa Lạc.",
+      greeting: t(
+        "Hẹn gặp bạn trong những buổi đối thoại giá trị sống và âm nhạc sâu lắng tại Hòa Lạc.",
+        "See you at our peer-listening circles and acoustic evenings in Hoa Lac."
+      ),
     },
     holagreen: {
       theme: "emerald",
-      badge: "HolaGreen · Sinh thái",
+      badge: t("HolaGreen · Sinh thái", "HolaGreen · Ecology"),
       label: "HolaGreen",
-      greeting: "Cùng nhau giữ xanh cảnh quan Hòa Lạc bằng những hành động bền bỉ và thiết thực.",
+      greeting: t(
+        "Cùng nhau giữ xanh cảnh quan Hòa Lạc bằng những hành động bền bỉ và thiết thực.",
+        "Keeping Hoa Lac green together through quiet, consistent ecological action."
+      ),
     },
     holaconnect: {
       theme: "slate",
-      badge: "HolaConnect · Phụng sự",
+      badge: t("HolaConnect · Phụng sự", "HolaConnect · Service"),
       label: "HolaConnect",
-      greeting: "Đưa tri thức và lòng trắc ẩn hòa vào đời sống cộng đồng địa phương tại Hòa Lạc.",
+      greeting: t(
+        "Đưa tri thức và lòng trắc ẩn hòa vào đời sống cộng đồng địa phương tại Hòa Lạc.",
+        "Sharing knowledge, outdoor treks, and children's bookshelves across our community."
+      ),
     },
   };
 
@@ -189,23 +205,19 @@
       if (m) {
         headerBtn.classList.add("is-member-signed-in");
         headerLabel.textContent = `${getShortName(m.name)} · ${m.memberCode.slice(-4)}`;
-        headerBtn.setAttribute("aria-label", `Thẻ Thành Viên ${m.name} (${m.memberCode})`);
+        headerBtn.setAttribute("aria-label", t(`Thẻ Thành Viên ${m.name} (${m.memberCode})`, `Member Pass ${m.name} (${m.memberCode})`));
       } else {
         headerBtn.classList.remove("is-member-signed-in");
-        headerLabel.textContent =
-          document.documentElement.dataset.lang === "en" ? "Sign in" : "Đăng nhập";
+        headerLabel.textContent = t("Đăng nhập", "Sign in");
         headerBtn.removeAttribute("aria-label");
       }
     }
 
     if (drawerLabel) {
       if (m) {
-        drawerLabel.textContent = `Thẻ Thành Viên · ${m.name}`;
+        drawerLabel.textContent = t(`Thẻ Thành Viên · ${m.name}`, `Member Pass · ${m.name}`);
       } else {
-        drawerLabel.textContent =
-          document.documentElement.dataset.lang === "en"
-            ? "Join & Member Pass"
-            : "Tham gia & Thẻ Thành Viên";
+        drawerLabel.textContent = t("Tham gia & Thẻ Thành Viên", "Join & Member Pass");
       }
     }
 
@@ -308,15 +320,16 @@
       }
     }
 
-    // 1-Tap Guestbook Composer Identity Sync (hide redundant Name input for signed-in members)
+    // Member-only Guestbook Composer Identity Sync
+    const prAuthGate = $("#pr-auth-gate");
+    const prFormEl = $("#public-reflection-form");
     const prMemberBar = $("#pr-member-bar");
-    const prGuestRow = $("#pr-guest-row");
-    const prNameInput = $("#pr-name");
     const prOrgInput = $("#pr-org");
-    if (prMemberBar && prGuestRow) {
+    if (prAuthGate && prFormEl) {
       if (m) {
-        prMemberBar.hidden = false;
-        prGuestRow.hidden = true;
+        prAuthGate.hidden = true;
+        prFormEl.hidden = false;
+        if (prMemberBar) prMemberBar.hidden = false;
         const avEl = $("#pr-member-avatar");
         const nmEl = $("#pr-member-name");
         const subEl = $("#pr-member-sub");
@@ -326,16 +339,15 @@
             : esc((m.name || "H").trim().charAt(0).toUpperCase());
         }
         if (nmEl) nmEl.textContent = m.name || "Thành viên HolaRise";
-        if (subEl) subEl.textContent = m.organization ? `${m.organization} · Thành viên HolaRise` : "Đang viết với tài khoản của bạn";
-        if (prNameInput) {
-          prNameInput.value = m.name || "";
-          prNameInput.removeAttribute("required");
+        if (subEl) {
+          subEl.textContent = m.organization
+            ? `${m.organization} · Thành viên HolaRise`
+            : "Đang viết với tài khoản của bạn";
         }
         if (prOrgInput) prOrgInput.value = m.organization || "";
       } else {
-        prMemberBar.hidden = true;
-        prGuestRow.hidden = false;
-        if (prNameInput) prNameInput.setAttribute("required", "");
+        prAuthGate.hidden = false;
+        prFormEl.hidden = true;
       }
     }
 
@@ -351,8 +363,14 @@
         if (modalBarTitle) modalBarTitle.textContent = `${m.name} · ${m.memberCode}`;
         if (modalBarSub) {
           modalBarSub.textContent = hasValidPhone
-            ? `${mPhone} — chỉ cần bấm xác nhận để giữ chỗ.`
-            : "Bổ sung SĐT / Zalo 1 lần bên dưới để nhận nhắc lịch và mở khóa giữ chỗ 1 chạm.";
+            ? t(
+                `${mPhone} — chỉ cần bấm xác nhận để giữ chỗ.`,
+                `${mPhone} — click below to reserve in one tap.`
+              )
+            : t(
+                "Bổ sung SĐT / Zalo 1 lần bên dưới để nhận nhắc lịch và mở khóa giữ chỗ 1 chạm.",
+                "Add your phone, Zalo, or email once below to receive updates and enable 1-tap RSVP."
+              );
         }
         if (modalOneTapBtn) modalOneTapBtn.hidden = !hasValidPhone;
         const fName = modalForm.querySelector('[name="fullName"]');
@@ -417,19 +435,20 @@
       const statusEl = modalForm.querySelector(".form-status");
 
       oneTapBtn.disabled = true;
-      oneTapBtn.textContent = "Đang giữ chỗ...";
+      oneTapBtn.textContent = t("Đang giữ chỗ...", "Reserving...");
       try {
         const res = await api("/api/registrations", {
           method: "POST",
           body: {
             source: "event_modal",
+            lang: isEn ? "en" : "vi",
             eventId,
-            activity: activity || "Hoạt động HolaRise",
+            activity: activity || t("Hoạt động HolaRise", "HolaRise Gathering"),
             fullName: state.member.name,
             phone: state.member.phoneDisplay || "",
             email: state.member.email || "",
             organization: state.member.organization || "",
-            note: `[${seatsLabel}] Đăng ký 1 chạm bằng Thẻ ${state.member.memberCode}`,
+            note: `[${seatsLabel}] ${t("Đăng ký 1 chạm bằng Thẻ", "1-tap RSVP with Member Pass")} ${state.member.memberCode}`,
           },
         });
         document.dispatchEvent(
@@ -439,9 +458,9 @@
                 id: res.id || state.member.memberCode,
                 source: "event_modal",
                 fullName: state.member.name,
-                organization: state.member.organization || "Hòa Lạc",
+                organization: state.member.organization || t("Hòa Lạc", "Hoa Lac"),
                 eventId,
-                eventTitle: activity || "Hoạt động HolaRise",
+                eventTitle: activity || t("Hoạt động HolaRise", "HolaRise Gathering"),
                 vibe: seatsLabel,
               },
             },
@@ -451,7 +470,7 @@
         setStatus(statusEl, err.message, "error");
       } finally {
         oneTapBtn.disabled = false;
-        oneTapBtn.textContent = "Giữ chỗ 1 chạm";
+        oneTapBtn.textContent = t("Giữ chỗ 1 chạm", "1-Tap RSVP");
       }
     });
 
@@ -497,13 +516,24 @@
     if (authErr) {
       const oauthAlert = $("#join-oauth-alert");
       const msgMap = {
-        google_not_configured:
+        google_not_configured: t(
           "Đăng nhập Google chưa được gắn khóa GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET trên Cloudflare Pages. Bạn có thể tiếp tục ngay bằng Email hoặc SĐT bên dưới.",
-        google_cancelled: "Bạn đã hủy đăng nhập Google. Bạn có thể thử lại hoặc dùng Email / SĐT.",
-        google_state_invalid: "Phiên xác thực Google đã hết hạn. Vui lòng thử lại.",
-        account_disabled: "Tài khoản này đang tạm khóa. Vui lòng liên hệ Ban Điều Phối.",
+          "Google sign-in is not yet configured on this deployment. You can continue immediately with your email below."
+        ),
+        google_cancelled: t(
+          "Bạn đã hủy đăng nhập Google. Bạn có thể thử lại hoặc dùng Email / SĐT.",
+          "Google sign-in was cancelled. You can try again or continue with your email."
+        ),
+        google_state_invalid: t(
+          "Phiên xác thực Google đã hết hạn. Vui lòng thử lại.",
+          "Your Google sign-in session expired. Please try again."
+        ),
+        account_disabled: t(
+          "Tài khoản này đang tạm khóa. Vui lòng liên hệ Ban Điều Phối.",
+          "This account is currently paused. Please contact our coordinating team."
+        ),
       };
-      setStatus(oauthAlert, msgMap[authErr] || "Không thể đăng nhập bằng Google lúc này. Vui lòng thử lại.", "error");
+      setStatus(oauthAlert, msgMap[authErr] || t("Không thể đăng nhập bằng Google lúc này. Vui lòng thử lại.", "Could not sign in with Google right now. Please try again."), "error");
     }
 
     if (params.get("onboarding") === "1") {
@@ -541,7 +571,7 @@
             pwInput.required = false;
           }
           if (nameInput) nameInput.required = false;
-          if (submitBtn) submitBtn.textContent = "Tiếp tục";
+          if (submitBtn) submitBtn.textContent = t("Tiếp tục", "Continue");
           idInput?.focus();
         } else if (mode === "login") {
           if (idPill) idPill.hidden = false;
@@ -549,28 +579,28 @@
           if (stepIdentify) stepIdentify.hidden = true;
           if (stepNewOnly) stepNewOnly.hidden = true;
           if (stepPassword) stepPassword.hidden = false;
-          if (pwLabel) pwLabel.textContent = "Nhập mật khẩu để đăng nhập";
+          if (pwLabel) pwLabel.textContent = t("Nhập mật khẩu để đăng nhập", "Enter your password to sign in");
           if (pwInput) {
             pwInput.setAttribute("autocomplete", "current-password");
             pwInput.placeholder = "••••••••";
             pwInput.required = true;
           }
           if (nameInput) nameInput.required = false;
-          if (submitBtn) submitBtn.textContent = "Đăng nhập";
+          if (submitBtn) submitBtn.textContent = t("Đăng nhập", "Sign in");
           pwInput?.focus();
         } else if (mode === "register") {
           if (idPill) idPill.hidden = false;
-          if (idPillText) idPillText.textContent = `${lockedIdentifier} · Tài khoản mới`;
+          if (idPillText) idPillText.textContent = `${lockedIdentifier} · ${t("Tài khoản mới", "New account")}`;
           if (stepIdentify) stepIdentify.hidden = true;
           if (stepNewOnly) stepNewOnly.hidden = true;
           if (stepPassword) stepPassword.hidden = false;
-          if (pwLabel) pwLabel.innerHTML = 'Tạo mật khẩu <span class="auth-hint-inline">(tối thiểu 6 ký tự)</span>';
+          if (pwLabel) pwLabel.innerHTML = t('Tạo mật khẩu <span class="auth-hint-inline">(tối thiểu 6 ký tự)</span>', 'Create a password <span class="auth-hint-inline">(at least 6 characters)</span>');
           if (pwInput) {
             pwInput.setAttribute("autocomplete", "new-password");
-            pwInput.placeholder = "Tạo mật khẩu dễ nhớ";
+            pwInput.placeholder = t("Tạo mật khẩu dễ nhớ", "Choose a password");
             pwInput.required = true;
           }
-          if (submitBtn) submitBtn.textContent = "Tiếp tục";
+          if (submitBtn) submitBtn.textContent = t("Tiếp tục", "Continue");
           pwInput?.focus();
         }
       }
@@ -584,12 +614,12 @@
         if (mode === "identify") {
           const val = (idInput?.value || "").trim();
           if (!val) {
-            setStatus(statusEl, "Vui lòng nhập Email hoặc Số điện thoại.", "error");
+            setStatus(statusEl, t("Vui lòng nhập Email hoặc Số điện thoại.", "Please enter your email address."), "error");
             idInput?.focus();
             return;
           }
           submitBtn.disabled = true;
-          submitBtn.textContent = "Đang kiểm tra...";
+          submitBtn.textContent = t("Đang kiểm tra...", "Checking...");
           try {
             const res = await api("/api/member/auth/lookup", {
               method: "POST",
@@ -599,7 +629,7 @@
             setMode(res.exists ? "login" : "register");
           } catch (err) {
             setStatus(statusEl, err.message, "error");
-            submitBtn.textContent = "Tiếp tục";
+            submitBtn.textContent = t("Tiếp tục", "Continue");
           } finally {
             submitBtn.disabled = false;
           }
@@ -609,12 +639,12 @@
         if (mode === "login") {
           const pw = pwInput?.value || "";
           if (!pw) {
-            setStatus(statusEl, "Vui lòng nhập mật khẩu.", "error");
+            setStatus(statusEl, t("Vui lòng nhập mật khẩu.", "Please enter your password."), "error");
             pwInput?.focus();
             return;
           }
           submitBtn.disabled = true;
-          submitBtn.textContent = "Đang đăng nhập...";
+          submitBtn.textContent = t("Đang đăng nhập...", "Signing in...");
           try {
             const res = await api("/api/member/auth/login", {
               method: "POST",
@@ -1263,10 +1293,10 @@
     const totalExp = profileExp + eventsCount * 100 + reflectionsCount * 40;
 
     const tiers = [
-      { level: 1, name: "Khởi hành", min: 0, next: 150 },
-      { level: 2, name: "Đồng hành", min: 150, next: 400 },
-      { level: 3, name: "Gắn bó", min: 400, next: 800 },
-      { level: 4, name: "Lan tỏa", min: 800, next: 800 },
+      { level: 1, name: t("Khởi hành", "First Step"), min: 0, next: 150 },
+      { level: 2, name: t("Đồng hành", "Companion"), min: 150, next: 400 },
+      { level: 3, name: t("Gắn bó", "Dedicated"), min: 400, next: 800 },
+      { level: 4, name: t("Lan tỏa", "Steward"), min: 800, next: 800 },
     ];
     let current = tiers[0];
     for (let i = tiers.length - 1; i >= 0; i -= 1) {
@@ -1290,8 +1320,10 @@
       progressPct,
       eventsCount,
       reflectionsCount,
-      expText: isMax ? `${totalExp} EXP · Tối đa` : `${totalExp} / ${current.next} EXP`,
-      breakdownText: `${eventsCount} hoạt động · ${reflectionsCount} lưu bút`,
+      expText: isMax ? `${totalExp} EXP · ${t("Tối đa", "Max")}` : `${totalExp} / ${current.next} EXP`,
+      breakdownText: isEn
+        ? `${eventsCount} gatherings · ${reflectionsCount} reflections`
+        : `${eventsCount} hoạt động · ${reflectionsCount} lưu bút`,
     };
   }
 
@@ -1318,10 +1350,10 @@
 
     if ($("#dash-pass-badge")) $("#dash-pass-badge").textContent = pillar.badge;
     if ($("#dash-pass-name")) $("#dash-pass-name").textContent = m.name;
-    if ($("#dash-pass-org")) $("#dash-pass-org").textContent = m.organization || "Cộng đồng Hòa Lạc";
+    if ($("#dash-pass-org")) $("#dash-pass-org").textContent = m.organization || t("Cộng đồng Hòa Lạc", "HolaRise Community");
     if ($("#dash-pass-bio")) {
       $("#dash-pass-bio").textContent =
-        m.bio || "Sống sâu hơn, xanh hơn và bền bỉ sẻ chia cùng HolaRise.";
+        m.bio || t("Sống sâu hơn, xanh hơn và bền bỉ sẻ chia cùng HolaRise.", "Living grounded, greener, and serving with consistency at HolaRise.");
     }
     if ($("#dash-pass-code")) $("#dash-pass-code").textContent = m.memberCode;
     if ($("#dash-pass-pillar")) $("#dash-pass-pillar").textContent = pillar.label;
@@ -1338,24 +1370,30 @@
     let pct = 40;
     const missing = [];
     if (m.avatarUrl) pct += 20;
-    else missing.push("ảnh đại diện");
+    else missing.push(t("ảnh đại diện", "avatar"));
     if (m.organization) pct += 20;
-    else missing.push("trường/đơn vị");
+    else missing.push(t("trường/đơn vị", "organization"));
     if (m.bio) pct += 20;
-    else missing.push("châm ngôn");
+    else missing.push(t("châm ngôn", "motto"));
     if ($("#dash-completion-pct")) $("#dash-completion-pct").textContent = `${pct}%`;
     if ($("#dash-completion-fill")) $("#dash-completion-fill").style.width = `${pct}%`;
     if ($("#dash-completion-hint")) {
       $("#dash-completion-hint").textContent =
         pct >= 100
-          ? "Thẻ Thành Viên của bạn đã hoàn thiện 100% — sẵn sàng tải PNG và check-in."
-          : `Bổ sung ${missing.join(", ")} để hoàn thiện 100% Thẻ Thành Viên.`;
+          ? t(
+              "Thẻ Thành Viên của bạn đã hoàn thiện 100% — sẵn sàng tải PNG và check-in.",
+              "Your Member Pass is 100% complete — ready to save as PNG and check in."
+            )
+          : t(
+              `Bổ sung ${missing.join(", ")} để hoàn thiện 100% Thẻ Thành Viên.`,
+              `Add your ${missing.join(", ")} to complete your Member Pass.`
+            );
     }
 
     // Update Luxe Card EXP & Tier
     const exp = computeMemberExp(m, state.dashboard);
     if ($("#dash-pass-tier")) $("#dash-pass-tier").textContent = exp.tierBadge;
-    if ($("#dash-exp-rank")) $("#dash-exp-rank").textContent = `Hành trình · ${exp.tierName}`;
+    if ($("#dash-exp-rank")) $("#dash-exp-rank").textContent = `${t("Hành trình", "Journey")} · ${exp.tierName}`;
     if ($("#dash-exp-val")) $("#dash-exp-val").textContent = exp.expText;
     if ($("#dash-exp-fill")) $("#dash-exp-fill").style.width = `${exp.progressPct}%`;
     if ($("#dash-exp-breakdown")) $("#dash-exp-breakdown").textContent = exp.breakdownText;
@@ -1403,16 +1441,16 @@
       const regs = data.registrations || [];
 
       const PILLAR_META = {
-        holaheart: { label: "HolaHeart", sub: "Tĩnh tại & Lắng nghe" },
-        holagreen: { label: "HolaGreen", sub: "Sinh thái & Cảnh quan" },
-        holaconnect: { label: "HolaConnect", sub: "Tri thức & Phụng sự" },
+        holaheart: { label: "HolaHeart", sub: t("Tĩnh tại & Lắng nghe", "Stillness & Listening") },
+        holagreen: { label: "HolaGreen", sub: t("Sinh thái & Cảnh quan", "Ecology & Landscapes") },
+        holaconnect: { label: "HolaConnect", sub: t("Tri thức & Phụng sự", "Knowledge & Service") },
       };
 
       function getStatusLabel(st) {
-        if (st === "attended") return "Đã tham dự";
-        if (st === "contacted") return "Đã xác nhận";
-        if (st === "cancelled") return "Đã hủy";
-        return "Đã giữ chỗ";
+        if (st === "attended") return t("Đã tham dự", "Attended");
+        if (st === "contacted") return t("Đã xác nhận", "Confirmed");
+        if (st === "cancelled") return t("Đã hủy", "Cancelled");
+        return t("Đã giữ chỗ", "Reserved");
       }
 
       function getScheduleText(r) {
@@ -1427,16 +1465,16 @@
         return {
           id: r.id,
           eventId: r.eventId || r.event_id || "",
-          eventTitle: r.activityTitle || r.activity_title || "Hoạt động HolaRise",
+          eventTitle: r.activityTitle || r.activity_title || t("Hoạt động HolaRise", "HolaRise Gathering"),
           eventType: r.eventType || `${pm.label} · ${pm.sub}`,
           badge: r.eventType || `${pm.label} · ${pm.sub}`,
           pillar: pillarKey,
           eventDate: r.eventDateDisplay || r.eventDate || "",
           eventTime: r.eventTime || "",
-          eventLocation: r.eventLocation || "Hòa Lạc, Hà Nội",
+          eventLocation: r.eventLocation || t("Hòa Lạc, Hà Nội", "Hoa Lac, Hanoi"),
           eventSummary: r.eventSummary || "",
-          fullName: r.fullName || m.name || "Thành viên Hola",
-          organization: r.organization || m.organization || "Cộng đồng HolaRise",
+          fullName: r.fullName || m.name || t("Thành viên Hola", "Hola Member"),
+          organization: r.organization || m.organization || t("Cộng đồng HolaRise", "HolaRise Community"),
           status: r.status || "new",
         };
       }
@@ -1453,20 +1491,20 @@
         state.activeWalletReg = reg;
         const pillarKey = PILLAR_META[reg.eventPillar] ? reg.eventPillar : "holaheart";
         const pm = PILLAR_META[pillarKey];
-        const title = reg.activityTitle || reg.activity_title || "Hoạt động HolaRise";
+        const title = reg.activityTitle || reg.activity_title || t("Hoạt động HolaRise", "HolaRise Gathering");
         const schedule = getScheduleText(reg);
-        const location = reg.eventLocation || "Hòa Lạc, Hà Nội";
+        const location = reg.eventLocation || t("Hòa Lạc, Hà Nội", "Hoa Lac, Hanoi");
         const statusText = getStatusLabel(reg.status);
-        const holderName = reg.fullName || state.member?.name || "Thành viên Hola";
-        const holderOrg = reg.organization || state.member?.organization || "Cộng đồng HolaRise";
+        const holderName = reg.fullName || state.member?.name || t("Thành viên Hola", "Hola Member");
+        const holderOrg = reg.organization || state.member?.organization || t("Cộng đồng HolaRise", "HolaRise Community");
 
         if (walletDlgKicker) {
-          walletDlgKicker.textContent = `${pm.label} · Thẻ sự kiện`;
+          walletDlgKicker.textContent = `${pm.label} · ${t("Thẻ sự kiện", "Event Pass")}`;
         }
 
         walletDlgBody.innerHTML = `<article class="wallet-full-pass wallet-full-pass--${esc(pillarKey)}">
           <div class="wallet-full-head">
-            <span class="wallet-full-brand">HOLARISE · HÒA LẠC</span>
+            <span class="wallet-full-brand">${t("HOLARISE · HÒA LẠC", "HOLARISE · HOA LAC")}</span>
             <span class="wallet-status-chip wallet-status-chip--${esc(reg.status || "new")}">${esc(statusText)}</span>
           </div>
           <span class="wallet-pillar-pill">${esc(reg.eventType || `${pm.label} · ${pm.sub}`)}</span>
@@ -1475,32 +1513,34 @@
           <div class="wallet-full-divider" aria-hidden="true"></div>
           <dl class="wallet-full-grid">
             <div>
-              <dt>Thời gian</dt>
+              <dt>${t("Thời gian", "When")}</dt>
               <dd>${esc(schedule)}</dd>
             </div>
             <div>
-              <dt>Địa điểm</dt>
+              <dt>${t("Địa điểm", "Where")}</dt>
               <dd>${esc(location)}</dd>
             </div>
             <div>
-              <dt>Mã giữ chỗ</dt>
+              <dt>${t("Mã giữ chỗ", "Booking Ref")}</dt>
               <dd class="wallet-code">${esc(reg.id)}</dd>
             </div>
             <div>
-              <dt>Ngày đăng ký</dt>
+              <dt>${t("Ngày đăng ký", "Reserved on")}</dt>
               <dd>${esc(formatDateVi(reg.createdAt || reg.created_at))}</dd>
             </div>
           </dl>
-          ${reg.note ? `<p class="wallet-full-note">Ghi chú: ${esc(reg.note)}</p>` : ""}
+          ${reg.note ? `<p class="wallet-full-note">${t("Ghi chú:", "Note:")} ${esc(reg.note)}</p>` : ""}
           <div class="wallet-full-foot">
             <span>HOLARISE.ORG</span>
-            <span>${reg.status === "attended" ? "ĐÃ ĐÓNG DẤU THAM DỰ" : "THẺ GIỮ CHỖ ĐIỆN TỬ"}</span>
+            <span>${reg.status === "attended" ? t("ĐÃ ĐÓNG DẤU THAM DỰ", "ATTENDANCE VERIFIED") : t("THẺ GIỮ CHỖ ĐIỆN TỬ", "DIGITAL EVENT PASS")}</span>
           </div>
         </article>`;
 
         if (walletDlgLink) {
           if (reg.eventHref) {
-            walletDlgLink.href = reg.eventHref;
+            walletDlgLink.href = isEn && reg.eventHref.startsWith("/su-kien/")
+              ? reg.eventHref.replace(/^\/su-kien\//, "/en/events/")
+              : reg.eventHref;
             walletDlgLink.hidden = false;
           } else {
             walletDlgLink.hidden = true;
@@ -1619,10 +1659,546 @@
     } catch (_err) {}
   }
 
+  let pendingContributeCtx = null;
+
+  function initAlbumContributeDialog() {
+    const dialog = $("#member-contribute-dialog");
+    if (!dialog) return;
+
+    const eventLabelEl = $("#contribute-dlg-event-label");
+    const tabBtns = $$("[data-contrib-tab-btn]", dialog);
+    const panelFeedback = $("#panel-contrib-feedback");
+    const panelPhotos = $("#panel-contrib-photos");
+
+    // Tab 1: Event Feedback (open to guests & members, supports strict anonymization)
+    const efForm = $("#event-feedback-form");
+    const efEventId = $("#ef-event-id");
+    const efEventSlug = $("#ef-event-slug");
+    const efEventTitle = $("#ef-event-title");
+    const efAnonCheck = $("#ef-anon-check");
+    const efIdentityRow = $("#ef-identity-row");
+    const efName = $("#ef-name");
+    const efContact = $("#ef-contact");
+    const efContent = $("#ef-content");
+    const efStatus = $("#ef-status");
+    const efSubmitBtn = $("#ef-submit-btn");
+
+    // Tab 2: Member-only Original Photo Upload to Standardized Drive Folder
+    const photoAuthGate = $("#contribute-photo-auth-gate");
+    const photoMemberBody = $("#contribute-photo-member-body");
+    const photoSignInBtn = $("#contribute-photo-signin-btn");
+    const form = $("#member-contribute-form");
+    const albumSelect = $("#contribute-album-select");
+    const creditInput = $("#contribute-credit");
+    const fileInput = $("#contribute-files");
+    const pickBtn = $("#contribute-pick-btn");
+    const queueBox = $("#contribute-queue");
+    const queueSummary = $("#contribute-queue-summary");
+    const fileListEl = $("#contribute-file-list");
+    const clearBtn = $("#contribute-clear-btn");
+    const progressWrap = $("#contribute-progress");
+    const progressBar = $("#contribute-progress-bar");
+    const statusEl = $("#contribute-status");
+    const submitBtn = $("#contribute-submit-btn");
+    const stopBtn = $("#contribute-stop-btn");
+
+    let activeTab = "feedback";
+    let currentCtx = { eventId: "", eventSlug: "", eventTitle: "", albumId: "" };
+    let queue = [];
+    let uploading = false;
+    let stopRequested = false;
+    let maxUploadBytes = 25 * 1024 * 1024;
+    let albumsLoadedForMember = "";
+
+    function syncFeedbackIdentity() {
+      const m = state.member;
+      if (!efIdentityRow) return;
+      const isAnon = Boolean(efAnonCheck?.checked);
+      efIdentityRow.hidden = isAnon;
+      if (!isAnon && m) {
+        if (efName && !efName.value.trim()) efName.value = m.name || "";
+        if (efContact && !efContact.value.trim()) efContact.value = m.phoneDisplay || m.email || "";
+      }
+    }
+
+    function syncContributeIdentity() {
+      const m = state.member;
+      if (photoAuthGate && photoMemberBody) {
+        photoAuthGate.hidden = Boolean(m);
+        photoMemberBody.hidden = !m;
+      }
+      if (!m) return;
+      const av = $("#contribute-member-avatar");
+      const nm = $("#contribute-member-name");
+      const sub = $("#contribute-member-sub");
+      if (av) {
+        av.innerHTML = m.avatarUrl
+          ? `<img src="${esc(m.avatarUrl)}" alt="${esc(m.name)}">`
+          : esc((m.name || "H").trim().charAt(0).toUpperCase());
+      }
+      if (nm) nm.textContent = m.name || "Thành viên HolaRise";
+      if (sub) {
+        const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+        sub.textContent = `Thư mục chuẩn hóa: dong-gop/${stamp}_${m.memberCode || ""}_...`;
+      }
+      if (creditInput && !creditInput.value.trim()) {
+        creditInput.value = m.name || "";
+      }
+    }
+
+    function setActiveTab(nextTab) {
+      activeTab = nextTab === "photos" ? "photos" : "feedback";
+      tabBtns.forEach((btn) => {
+        const isOn = btn.getAttribute("data-contrib-tab-btn") === activeTab;
+        btn.classList.toggle("is-active", isOn);
+        btn.setAttribute("aria-selected", isOn ? "true" : "false");
+      });
+      if (panelFeedback) panelFeedback.hidden = activeTab !== "feedback";
+      if (panelPhotos) panelPhotos.hidden = activeTab !== "photos";
+      syncContributeIdentity();
+      if (activeTab === "photos" && state.member && albumsLoadedForMember !== state.member.id) {
+        loadAlbumsIntoSelect(currentCtx.albumId || "");
+      }
+    }
+
+    function formatSizeMb(bytes) {
+      const mb = bytes / (1024 * 1024);
+      return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+    }
+
+    function renderQueue() {
+      const total = queue.length;
+      const done = queue.filter((q) => q.status === "done").length;
+      const pending = queue.filter((q) => q.status === "pending" || q.status === "error").length;
+
+      if (queueBox) queueBox.hidden = total === 0;
+      if (queueSummary) {
+        queueSummary.textContent =
+          done > 0 ? `Đã gửi ${done} / ${total} ảnh` : `${total} ảnh đã chọn`;
+      }
+      if (progressWrap && progressBar) {
+        progressWrap.hidden = !uploading && done === 0;
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        progressBar.style.width = `${pct}%`;
+      }
+      if (clearBtn) clearBtn.disabled = uploading;
+      if (pickBtn) pickBtn.disabled = uploading;
+      if (albumSelect) albumSelect.disabled = uploading;
+      if (stopBtn) stopBtn.hidden = !uploading;
+      if (submitBtn) {
+        submitBtn.disabled = uploading || pending === 0 || !albumSelect?.value;
+        submitBtn.textContent = uploading
+          ? `Đang gửi ảnh (${done + 1}/${total})...`
+          : done > 0 && pending > 0
+            ? `Gửi tiếp ${pending} ảnh chưa hoàn tất`
+            : `Gửi ${pending || total} ảnh vào thư mục sự kiện`;
+      }
+      if (fileListEl) {
+        fileListEl.innerHTML = queue
+          .map((item, idx) => {
+            const stateLabel =
+              item.status === "done"
+                ? item.savedName ? `✓ ${item.savedName}` : "✓ Đã vào thư mục chờ duyệt"
+                : item.status === "uploading"
+                  ? "Đang tải lên..."
+                  : item.status === "error"
+                    ? item.message || "Lỗi tải lên"
+                    : formatSizeMb(item.file.size);
+            const removeHtml =
+              !uploading && item.status !== "done"
+                ? `<button type="button" class="contribute-item-remove" data-remove-contrib-idx="${idx}" aria-label="Gỡ ${esc(item.file.name)}">×</button>`
+                : "";
+            return `<li class="contribute-file-item is-${item.status}">
+              <span class="contribute-file-name">${esc(item.file.name)}</span>
+              <span class="contribute-file-state">${esc(stateLabel)}</span>
+              ${removeHtml}
+            </li>`;
+          })
+          .join("");
+      }
+    }
+
+    async function loadAlbumsIntoSelect(preferredAlbumId = "") {
+      if (!albumSelect || !state.member) return;
+      albumSelect.innerHTML = `<option value="">Đang tải danh sách bộ ảnh...</option>`;
+      try {
+        const res = await api("/api/member/albums");
+        albumsLoadedForMember = state.member.id;
+        const items = res.items || [];
+        if (res.maxUploadBytes) maxUploadBytes = Number(res.maxUploadBytes);
+        if (!items.length) {
+          albumSelect.innerHTML = `<option value="">Chưa có bộ ảnh sự kiện nào đang mở</option>`;
+          renderQueue();
+          return;
+        }
+        albumSelect.innerHTML = items
+          .map((a) => {
+            const datePart = a.dateDisplay ? ` (${a.dateDisplay})` : "";
+            const myPart = a.myPendingCount > 0 ? ` · ${a.myPendingCount} ảnh của bạn chờ duyệt` : "";
+            return `<option value="${esc(a.id)}">${esc(a.title + datePart + myPart)}</option>`;
+          })
+          .join("");
+        const matchByAlbum = preferredAlbumId && items.find((a) => a.id === preferredAlbumId);
+        const matchByEvent = !matchByAlbum && currentCtx.eventId && items.find((a) => a.eventId === currentCtx.eventId);
+        if (matchByAlbum) {
+          albumSelect.value = matchByAlbum.id;
+        } else if (matchByEvent) {
+          albumSelect.value = matchByEvent.id;
+        }
+      } catch (err) {
+        albumSelect.innerHTML = `<option value="">Không tải được danh sách bộ ảnh</option>`;
+        if (statusEl) {
+          statusEl.className = "form-status is-error";
+          statusEl.textContent = err?.message || "Chưa thể tải danh sách bộ ảnh lúc này.";
+        }
+      }
+      renderQueue();
+    }
+
+    async function openContributeDialog(opts = {}) {
+      const tab = opts.tab === "photos" ? "photos" : "feedback";
+      currentCtx = {
+        eventId: opts.eventId || "",
+        eventSlug: opts.eventSlug || "",
+        eventTitle: opts.eventTitle || "",
+        albumId: opts.albumId || "",
+      };
+
+      if (efEventId) efEventId.value = currentCtx.eventId;
+      if (efEventSlug) efEventSlug.value = currentCtx.eventSlug;
+      if (efEventTitle) efEventTitle.value = currentCtx.eventTitle;
+      if (eventLabelEl) {
+        if (currentCtx.eventTitle) {
+          eventLabelEl.textContent = `Buổi gặp: ${currentCtx.eventTitle}`;
+          eventLabelEl.hidden = false;
+        } else {
+          eventLabelEl.textContent = "";
+          eventLabelEl.hidden = true;
+        }
+      }
+
+      if (efStatus) {
+        efStatus.className = "form-status";
+        efStatus.textContent = "";
+      }
+      if (statusEl) {
+        statusEl.className = "form-status";
+        statusEl.textContent = "";
+      }
+
+      syncFeedbackIdentity();
+      setActiveTab(tab);
+
+      if (typeof dialog.showModal === "function" && !dialog.open) {
+        dialog.showModal();
+      }
+      if (tab === "photos" && state.member) {
+        await loadAlbumsIntoSelect(currentCtx.albumId || "");
+      }
+    }
+
+    window.__openMemberContributeDialog = openContributeDialog;
+
+    tabBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (uploading) return;
+        setActiveTab(btn.getAttribute("data-contrib-tab-btn") || "feedback");
+      });
+    });
+
+    if (photoSignInBtn) {
+      photoSignInBtn.addEventListener("click", () => {
+        pendingContributeCtx = { ...currentCtx, tab: "photos" };
+        if (dialog.open) dialog.close();
+        const authDlg = $("#member-auth-modal");
+        if (authDlg && typeof authDlg.showModal === "function") {
+          authDlg.showModal();
+        } else {
+          window.location.href = "/tham-gia/";
+        }
+      });
+    }
+
+    if (efAnonCheck) {
+      efAnonCheck.addEventListener("change", syncFeedbackIdentity);
+    }
+
+    if (efForm) {
+      efForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (efStatus) {
+          efStatus.className = "form-status";
+          efStatus.textContent = "";
+        }
+        const fd = new FormData(efForm);
+        const content = String(fd.get("content") || "").trim();
+        if (content.length < 8) {
+          if (efStatus) {
+            efStatus.className = "form-status is-error";
+            efStatus.textContent = "Nội dung đóng góp cần ít nhất 8 ký tự.";
+          }
+          return;
+        }
+        if (efSubmitBtn) {
+          efSubmitBtn.disabled = true;
+          efSubmitBtn.textContent = "Đang gửi...";
+        }
+        try {
+          const isAnonymous = Boolean(efAnonCheck?.checked);
+          const payload = {
+            eventId: String(fd.get("eventId") || "").trim(),
+            eventSlug: String(fd.get("eventSlug") || "").trim(),
+            eventTitle: String(fd.get("eventTitle") || "").trim(),
+            category: String(fd.get("category") || "cai-thien").trim(),
+            content,
+            isAnonymous,
+            authorName: isAnonymous ? "" : String(fd.get("authorName") || "").trim(),
+            authorContact: isAnonymous ? "" : String(fd.get("authorContact") || "").trim(),
+            website: String(fd.get("website") || "").trim(),
+          };
+          const res = await fetch("/api/event-feedback", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data?.error?.message || data?.message || "Chưa gửi được đóng góp lúc này.");
+          }
+          if (efContent) efContent.value = "";
+          if (efStatus) {
+            efStatus.className = "form-status is-success";
+            efStatus.textContent = data.message || "Cảm ơn lời đóng góp chân thành của bạn.";
+          }
+        } catch (err) {
+          if (efStatus) {
+            efStatus.className = "form-status is-error";
+            efStatus.textContent = err?.message || "Chưa gửi được đóng góp lúc này.";
+          }
+        } finally {
+          if (efSubmitBtn) {
+            efSubmitBtn.disabled = false;
+            efSubmitBtn.textContent = "Gửi kín tới Ban Điều Phối";
+          }
+        }
+      });
+    }
+
+    document.addEventListener("click", (e) => {
+      const eventTrigger = e.target.closest("[data-open-event-contribute]");
+      if (eventTrigger) {
+        const requestedTab = eventTrigger.getAttribute("data-contribute-tab") || "feedback";
+        const ctx = {
+          tab: requestedTab,
+          eventId: eventTrigger.getAttribute("data-event-id") || "",
+          eventSlug: eventTrigger.getAttribute("data-event-slug") || "",
+          eventTitle: eventTrigger.getAttribute("data-event-title") || "",
+          albumId: eventTrigger.getAttribute("data-album-id") || "",
+        };
+        openContributeDialog(ctx);
+        return;
+      }
+
+      const albumTrigger = e.target.closest("[data-open-album-contribute]");
+      if (!albumTrigger) return;
+      const albumId = albumTrigger.getAttribute("data-open-album-contribute") || "";
+      const albumTitle = albumTrigger.getAttribute("data-album-title") || "";
+      openContributeDialog({ tab: "photos", albumId, eventTitle: albumTitle });
+    });
+
+    // Safari fallback for declarative closedby="any" light dismiss
+    if (!("closedBy" in HTMLDialogElement.prototype)) {
+      const isOutside = (ev) => {
+        const r = dialog.getBoundingClientRect();
+        return ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom;
+      };
+      let pressedOutside = false;
+      dialog.addEventListener("pointerdown", (ev) => {
+        pressedOutside = !uploading && isOutside(ev);
+      });
+      dialog.addEventListener("pointerup", (ev) => {
+        if (pressedOutside && !uploading && isOutside(ev)) dialog.close();
+      });
+    }
+
+    dialog.addEventListener("cancel", (e) => {
+      if (uploading) {
+        e.preventDefault();
+        if (statusEl) {
+          statusEl.className = "form-status is-error";
+          statusEl.textContent = "Đang tải ảnh lên thư mục sự kiện. Vui lòng đợi hoàn tất hoặc bấm Dừng tải tiếp.";
+        }
+        if (stopBtn) {
+          stopBtn.setAttribute("aria-describedby", "contribute-status");
+          stopBtn.focus();
+        }
+      }
+    });
+
+    dialog.addEventListener("close", () => {
+      dialog.returnValue = "";
+    });
+
+    if (pickBtn && fileInput) {
+      pickBtn.addEventListener("click", () => {
+        if (!uploading) fileInput.click();
+      });
+      fileInput.addEventListener("change", () => {
+        const files = Array.from(fileInput.files || []);
+        fileInput.value = "";
+        if (!files.length) return;
+        let firstError = "";
+        for (const file of files) {
+          if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
+            if (!firstError) firstError = `${file.name}: chỉ hỗ trợ ảnh JPEG, PNG hoặc WebP.`;
+            continue;
+          }
+          if (file.size > maxUploadBytes) {
+            const maxMb = Math.round(maxUploadBytes / (1024 * 1024));
+            if (!firstError) firstError = `${file.name}: vượt quá giới hạn ${maxMb} MB mỗi ảnh.`;
+            continue;
+          }
+          queue.push({ file, status: "pending", message: "", savedName: "" });
+        }
+        if (statusEl) {
+          if (firstError) {
+            statusEl.className = "form-status is-error";
+            statusEl.textContent = firstError;
+          } else {
+            statusEl.className = "form-status";
+            statusEl.textContent = "";
+          }
+        }
+        renderQueue();
+      });
+    }
+
+    if (fileListEl) {
+      fileListEl.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-remove-contrib-idx]");
+        if (!btn || uploading) return;
+        const idx = Number(btn.getAttribute("data-remove-contrib-idx"));
+        if (Number.isInteger(idx) && idx >= 0 && idx < queue.length) {
+          queue.splice(idx, 1);
+          renderQueue();
+        }
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        if (uploading) return;
+        queue = [];
+        if (statusEl) {
+          statusEl.className = "form-status";
+          statusEl.textContent = "";
+        }
+        renderQueue();
+      });
+    }
+
+    if (stopBtn) {
+      stopBtn.addEventListener("click", () => {
+        stopRequested = true;
+        if (statusEl) {
+          statusEl.className = "form-status";
+          statusEl.textContent = "Đang dừng sau khi hoàn tất ảnh hiện tại...";
+        }
+      });
+    }
+
+    if (albumSelect) {
+      albumSelect.addEventListener("change", renderQueue);
+    }
+
+    if (form) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (uploading) return;
+        const albumId = String(albumSelect?.value || "").trim();
+        if (!albumId) {
+          if (statusEl) {
+            statusEl.className = "form-status is-error";
+            statusEl.textContent = "Vui lòng chọn bộ ảnh sự kiện.";
+          }
+          return;
+        }
+        const toSend = queue.filter((q) => q.status === "pending" || q.status === "error");
+        if (!toSend.length) return;
+
+        uploading = true;
+        stopRequested = false;
+        dialog.setAttribute("closedby", "none");
+        if (statusEl) {
+          statusEl.className = "form-status";
+          statusEl.textContent = "";
+        }
+        renderQueue();
+
+        const credit = String(creditInput?.value || "").trim();
+        let okCount = 0;
+        let failCount = 0;
+
+        for (const item of toSend) {
+          if (stopRequested) break;
+          item.status = "uploading";
+          item.message = "";
+          renderQueue();
+
+          try {
+            const fd = new FormData();
+            fd.append("file", item.file, item.file.name || "photo.jpg");
+            if (credit) fd.append("photographer", credit);
+            const res = await fetch(`/api/member/albums/${encodeURIComponent(albumId)}/photos`, {
+              method: "POST",
+              credentials: "same-origin",
+              body: fd,
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              throw new Error(data?.error?.message || data?.message || `Lỗi HTTP ${res.status}`);
+            }
+            item.status = "done";
+            item.savedName = data.standardizedFilename || "";
+            okCount += 1;
+          } catch (err) {
+            item.status = "error";
+            item.message = err?.message || "Tải ảnh thất bại";
+            failCount += 1;
+          }
+          renderQueue();
+        }
+
+        uploading = false;
+        dialog.setAttribute("closedby", "any");
+        renderQueue();
+
+        if (statusEl) {
+          if (stopRequested) {
+            statusEl.className = "form-status";
+            statusEl.textContent = `Đã dừng tải. ${okCount} ảnh đã lưu vào thư mục chuẩn hóa và chờ Ban Điều Phối duyệt tại /media/.`;
+          } else if (failCount === 0 && okCount > 0) {
+            statusEl.className = "form-status is-success";
+            statusEl.textContent = `Đã gửi thành công ${okCount} ảnh gốc vào thư mục chuẩn hóa. Ảnh đang chờ kiểm duyệt tại /media/.`;
+          } else {
+            statusEl.className = "form-status is-error";
+            statusEl.textContent = `Đã lưu ${okCount} ảnh, còn ${failCount} ảnh chưa tải được. Bạn có thể bấm Gửi tiếp để thử lại.`;
+          }
+        }
+      });
+    }
+  }
+
   function onAuthChanged() {
     syncHeaderAndRsvp();
     refreshJoinDashboard();
     window.dispatchEvent(new CustomEvent("hola:member-changed", { detail: { member: state.member } }));
+    if (state.member && pendingContributeCtx && typeof window.__openMemberContributeDialog === "function") {
+      const ctx = pendingContributeCtx;
+      pendingContributeCtx = null;
+      window.__openMemberContributeDialog(ctx);
+    }
   }
 
   async function boot() {
@@ -1630,6 +2206,7 @@
     initUnifiedAuthForms();
     initPasskeyAuth();
     initMemberAuthModal();
+    initAlbumContributeDialog();
     initOnboardingWizard();
     initOneTapModalButton();
     initJoinHub();

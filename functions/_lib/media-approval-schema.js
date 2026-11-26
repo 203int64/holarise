@@ -37,6 +37,15 @@ export async function ensureMediaApprovalSchema(db) {
     if (!photoCols.has("approved_at")) {
       alters.push("ALTER TABLE media_photos ADD COLUMN approved_at TEXT NOT NULL DEFAULT ''");
     }
+    if (!photoCols.has("contributor_member_id")) {
+      alters.push("ALTER TABLE media_photos ADD COLUMN contributor_member_id TEXT NOT NULL DEFAULT ''");
+    }
+    if (!photoCols.has("source_kind")) {
+      alters.push("ALTER TABLE media_photos ADD COLUMN source_kind TEXT NOT NULL DEFAULT 'team'");
+    }
+    if (!photoCols.has("drive_path")) {
+      alters.push("ALTER TABLE media_photos ADD COLUMN drive_path TEXT NOT NULL DEFAULT ''");
+    }
   }
 
   for (const sql of alters) {

@@ -1,0 +1,85 @@
+<section class="page-hero page-hero--editorial">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/en/">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Schedule</span>
+    </nav>
+    <h1>{{WORKSHOP_INTRO_TITLE}}</h1>
+    <p>{{WORKSHOP_INTRO_DESC}}</p>
+  </div>
+</section>
+
+<section class="section" id="upcoming-schedule">
+  <div class="container">
+    <div class="section-header--split section-header--editorial">
+      <div>
+        <div class="kicker">Weekly Rhythm</div>
+        <h2 class="section-title">Upcoming Gatherings</h2>
+      </div>
+      <a class="arrow-link" href="/en/join/">
+        <span>Member Pass &amp; Join</span>
+        <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
+    </div>
+
+    <div class="filter-bar-row">
+      <div class="filter-bar" data-filter-group="[data-workshop-card]" role="group" aria-label="Filter schedule by pillar">
+        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">All</button>
+        <button class="filter-btn" type="button" data-filter="holaheart" data-pillar="holaheart" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          <span>HolaHeart</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="holagreen" data-pillar="holagreen" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+          <span>HolaGreen</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="holaconnect" data-pillar="holaconnect" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>HolaConnect</span>
+        </button>
+      </div>
+      <span class="filter-count" data-filter-count="[data-workshop-card]" aria-live="polite"></span>
+    </div>
+
+    <!-- CMS:SCHEDULE_UPCOMING:START -->
+    {{SCHEDULE_UPCOMING_HTML}}
+    <!-- CMS:SCHEDULE_UPCOMING:END -->
+  </div>
+</section>
+
+<section class="section section--mist">
+  <div class="container">
+    <div class="section-header--split section-header--editorial">
+      <div>
+        <div class="kicker">Past Milestones</div>
+        <h2 class="section-title">Gatherings Already Held</h2>
+      </div>
+      <a class="arrow-link" href="/en/journey/">
+        <span>Browse Journey</span>
+        <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
+    </div>
+
+    <div class="past-list" data-stagger-group>
+      <!-- CMS:PAST_WORKSHOPS:START -->
+      {{PAST_WORKSHOPS_HTML}}
+      <!-- CMS:PAST_WORKSHOPS:END -->
+    </div>
+  </div>
+</section>
+
+<section class="section section--compact">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h2>Co-Host with HolaRise</h2>
+        <p>Transparent collaboration with university clubs, international programs, schools, and cultural venues.</p>
+      </div>
+      <div class="cta-band-actions">
+        <a class="btn btn--light" href="/en/join/?tab=partner" data-magnetic>Propose a Partnership</a>
+        <a class="btn btn--ghost-dark" href="/en/about/#pillars">Three Pillars</a>
+      </div>
+    </div>
+  </div>
+</section>

@@ -237,6 +237,18 @@ export async function getSessionUser(db, request) {
   return row || null;
 }
 
+export function getSoleAdminPrefix(env) {
+  return String(env?.SOLE_ADMIN_PREFIX || "203int64").trim().toLowerCase() || "203int64";
+}
+
+export function isSoleAdminAccount(user, env) {
+  if (!user || user.role !== "super_admin") return false;
+  const email = String(user.email || "").trim().toLowerCase();
+  const atIdx = email.indexOf("@");
+  const localPart = atIdx > 0 ? email.slice(0, atIdx) : email;
+  return Boolean(localPart) && localPart === getSoleAdminPrefix(env);
+}
+
 export async function requireAdmin(
   context,
   { superAdminOnly = false, allowedRoles = null } = {}
@@ -252,18 +264,28 @@ export async function requireAdmin(
   if (!user) {
     return { ok: false, response: errorResponse(401, "UNAUTHORIZED", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.") };
   }
-  const roles = Array.isArray(allowedRoles) && allowedRoles.length > 0
-    ? allowedRoles
-    : superAdminOnly
-      ? ["super_admin"]
-      : ["super_admin", "editor"];
-  if (!roles.includes(user.role)) {
-    const msg = superAdminOnly
-      ? "Chỉ Quản trị viên chính (Super Admin) mới được thực hiện thao tác này."
-      : "Tài khoản của bạn không có quyền truy cập khu vực này.";
-    return { ok: false, response: errorResponse(403, "FORBIDDEN", msg) };
+  const soleAdmin = isSoleAdminAccount(user, env);
+  const allowsMediaPortal = !superAdminOnly && Array.isArray(allowedRoles) && allowedRoles.includes("media");
+  if (allowsMediaPortal) {
+    if (!soleAdmin && user.role !== "media") {
+      return {
+        ok: false,
+        response: errorResponse(403, "FORBIDDEN", "Tài khoản của bạn không có quyền truy cập Cổng Ban Hình Ảnh."),
+      };
+    }
+    return { ok: true, user, isSoleAdmin: soleAdmin };
   }
-  return { ok: true, user };
+  if (!soleAdmin) {
+    return {
+      ok: false,
+      response: errorResponse(
+        403,
+        "FORBIDDEN",
+        "Khu vực quản trị CMS chỉ mở cho duy nhất tài khoản Quản trị chính (203int64)."
+      ),
+    };
+  }
+  return { ok: true, user, isSoleAdmin: true };
 }
 
 export function formatVnDateYYMMDD(nowDate = new Date()) {
@@ -521,6 +543,7 @@ export async function ensureMemberSchema(db) {
       content TEXT NOT NULL,
       photo_url TEXT NOT NULL DEFAULT '',
       photo_media_key TEXT NOT NULL DEFAULT '',
+      photos_json TEXT NOT NULL DEFAULT '[]',
       heart_count INTEGER NOT NULL DEFAULT 0,
       status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
       admin_note TEXT NOT NULL DEFAULT '',
@@ -583,6 +606,8 @@ export async function ensureReflectionsSchema(db) {
             content TEXT NOT NULL,
             photo_url TEXT NOT NULL DEFAULT '',
             photo_media_key TEXT NOT NULL DEFAULT '',
+            photos_json TEXT NOT NULL DEFAULT '[]',
+            mood TEXT NOT NULL DEFAULT '',
             heart_count INTEGER NOT NULL DEFAULT 0,
             status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
             admin_note TEXT NOT NULL DEFAULT '',
@@ -617,8 +642,54 @@ export async function ensureReflectionsSchema(db) {
     if (!cols.has("photo_media_key")) {
       await db.prepare("ALTER TABLE activity_reflections ADD COLUMN photo_media_key TEXT NOT NULL DEFAULT ''").run().catch(() => {});
     }
+    if (!cols.has("photos_json")) {
+      await db.prepare("ALTER TABLE activity_reflections ADD COLUMN photos_json TEXT NOT NULL DEFAULT '[]'").run().catch(() => {});
+    }
+    if (!cols.has("mood")) {
+      await db.prepare("ALTER TABLE activity_reflections ADD COLUMN mood TEXT NOT NULL DEFAULT ''").run().catch(() => {});
+    }
+    const heartInfo = await db.prepare("PRAGMA table_info(reflection_hearts)").all().catch(() => ({ results: [] }));
+    const heartCols = new Set((heartInfo?.results || []).map((c) => String(c.name || "").toLowerCase()));
+    if (heartCols.size > 0 && !heartCols.has("reaction_type")) {
+      await db.prepare("ALTER TABLE reflection_hearts ADD COLUMN reaction_type TEXT NOT NULL DEFAULT 'heart'").run().catch(() => {});
+    }
   } catch (_err) {
     // Non-fatal: let caller surface concrete DB error cleanly
   }
   ensuredReflectionsDbs.add(db);
+}
+
+const ensuredEventFeedbackDbs = new WeakSet();
+
+export async function ensureEventFeedbackSchema(db) {
+  if (!db || ensuredEventFeedbackDbs.has(db)) return;
+  try {
+    await db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS event_feedbacks (
+          id TEXT PRIMARY KEY,
+          event_id TEXT NOT NULL DEFAULT '',
+          event_slug TEXT NOT NULL DEFAULT '',
+          event_title TEXT NOT NULL DEFAULT '',
+          category TEXT NOT NULL DEFAULT 'cai-thien' CHECK(category IN ('cai-thien', 'dong-vien', 'de-xuat', 'khac')),
+          content TEXT NOT NULL,
+          author_name TEXT NOT NULL DEFAULT 'Ẩn danh',
+          author_contact TEXT NOT NULL DEFAULT '',
+          member_id TEXT NOT NULL DEFAULT '',
+          is_anonymous INTEGER NOT NULL DEFAULT 1,
+          status TEXT NOT NULL DEFAULT 'new' CHECK(status IN ('new', 'read', 'resolved')),
+          admin_note TEXT NOT NULL DEFAULT '',
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )`
+      )
+      .run();
+    await db
+      .prepare("CREATE INDEX IF NOT EXISTS idx_event_feedbacks_event_status ON event_feedbacks(event_id, status, created_at DESC)")
+      .run()
+      .catch(() => {});
+  } catch (_err) {
+    // Non-fatal
+  }
+  ensuredEventFeedbackDbs.add(db);
 }

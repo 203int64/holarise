@@ -1,9 +1,10 @@
-import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
+import { ensureReflectionsSchema, errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
 import {
   VALID_REFLECTION_STATUSES,
   cleanStr,
   extractMediaKeyFromUrl,
   isSafeMediaUrl,
+  parseReflectionPhotos,
   slugifyVi,
 } from "../../../_lib/validation.js";
 import { ensureCommunityTestimonialsTable, serializeAdminReflection } from "./index.js";
@@ -153,8 +154,9 @@ export async function onRequestDelete(context) {
     return jsonResponse({ ok: true, id });
   }
 
+  await ensureReflectionsSchema(context.env.DB);
   const existing = await context.env.DB.prepare(
-    "SELECT id, photo_media_key FROM activity_reflections WHERE id = ?"
+    "SELECT id, photo_url, photo_media_key, photos_json FROM activity_reflections WHERE id = ?"
   )
     .bind(id)
     .first();
@@ -164,8 +166,14 @@ export async function onRequestDelete(context) {
   }
 
   await context.env.DB.prepare("DELETE FROM activity_reflections WHERE id = ?").bind(id).run();
-  if (existing.photo_media_key && context.env?.MEDIA_KV?.delete) {
-    await context.env.MEDIA_KV.delete(`media:${existing.photo_media_key}`).catch(() => null);
+  if (context.env?.MEDIA_KV?.delete) {
+    const keys = new Set(
+      [
+        existing.photo_media_key,
+        ...parseReflectionPhotos(existing.photos_json, existing.photo_url || "").map(extractMediaKeyFromUrl),
+      ].filter(Boolean)
+    );
+    await Promise.allSettled([...keys].map((k) => context.env.MEDIA_KV.delete(`media:${k}`)));
   }
 
   return jsonResponse({ ok: true, id });

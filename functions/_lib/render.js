@@ -74,7 +74,7 @@ function imageVariant(src, width) {
   return `/assets/images/web/${stem}-${width}.webp`;
 }
 
-function fullImageUrl(src) {
+export function fullImageUrl(src) {
   const widths = Object.hasOwn(imageWidths, src) && imageWidths[src];
   return widths ? imageVariant(src, widths.at(-1)) : src;
 }
@@ -165,8 +165,10 @@ export function serializeEventRow(row) {
   if (!row) return null;
   const filters = safeJsonParse(row.filters_json, []);
   const pillar = derivePillarFilter(row.type, filters);
+  const slug = resolveEventSlug({ id: row.id, slug: row.slug, href: row.href });
   return {
     id: row.id,
+    slug,
     kind: row.kind,
     type: row.type,
     filters,
@@ -188,6 +190,7 @@ export function serializeEventRow(row) {
     participants: row.participants,
     image: row.image,
     imageAlt: row.image_alt,
+    zaloGroupUrl: row.zalo_group_url || "",
     status: row.status,
     sortOrder: row.sort_order,
     createdAt: row.created_at,
@@ -256,9 +259,30 @@ export function renderHeroUpcomingBar(upcoming) {
 </div>`;
 }
 
-function compactDatePill(dateDisplay) {
+export function resolveEventHrefEn(ev) {
+  const slug = resolveEventSlug(ev);
+  return slug ? `/en/events/${slug}/` : "";
+}
+
+function compactDatePill(dateDisplay, lang = "vi") {
   const raw = String(dateDisplay || "").trim();
   if (!raw) return "";
+  const lower = raw.toLowerCase();
+  if (lang === "en") {
+    const dayMapEn = [
+      ["sunday", "Sun"], ["monday", "Mon"], ["tuesday", "Tue"],
+      ["wednesday", "Wed"], ["thursday", "Thu"], ["friday", "Fri"], ["saturday", "Sat"],
+      ["chủ nhật", "Sun"], ["thứ hai", "Mon"], ["thứ ba", "Tue"],
+      ["thứ tư", "Wed"], ["thứ năm", "Thu"], ["thứ sáu", "Fri"], ["thứ bảy", "Sat"],
+    ];
+    const matchEn = raw.match(/(\d{1,2}\s+[A-Za-z]{3})/);
+    const matchNum = raw.match(/(\d{1,2}\/\d{1,2})(?:\/\d{2,4})?/);
+    const shortDate = matchEn ? matchEn[1] : matchNum ? matchNum[1] : raw;
+    for (const [fullDay, shortDay] of dayMapEn) {
+      if (lower.includes(fullDay)) return `${shortDay} · ${shortDate}`;
+    }
+    return shortDate;
+  }
   const dayMap = [
     ["chủ nhật", "CN"],
     ["thứ hai", "T2"],
@@ -268,7 +292,6 @@ function compactDatePill(dateDisplay) {
     ["thứ sáu", "T6"],
     ["thứ bảy", "T7"],
   ];
-  const lower = raw.toLowerCase();
   const match = raw.match(/(\d{1,2}\/\d{1,2})(?:\/\d{2,4})?/);
   const shortDate = match ? match[1] : raw;
   for (const [fullDay, shortDay] of dayMap) {
@@ -285,23 +308,27 @@ function compactPillarLabel(typeStr) {
   return raw.split("·")[0].trim() || raw;
 }
 
-function compactFeeLabel(feeStr) {
+function compactFeeLabel(feeStr, lang = "vi") {
   const raw = String(feeStr || "").trim();
-  if (!raw) return "Miễn phí";
+  if (!raw) return lang === "en" ? "Free" : "Miễn phí";
   const head = raw.split("·")[0].trim();
-  if (head.toLowerCase().includes("miễn phí") || head.toLowerCase().includes("0đ")) return "Miễn phí";
+  const lower = head.toLowerCase();
+  if (lower.includes("miễn phí") || lower.includes("0đ") || lower.includes("free")) {
+    return lang === "en" ? "Free" : "Miễn phí";
+  }
   return head.slice(0, 20);
 }
 
-function compactSeatsLabel(seatsStr) {
+function compactSeatsLabel(seatsStr, lang = "vi") {
   const raw = String(seatsStr || "").trim();
   const m = raw.match(/(\d+)/);
-  if (m) return `${m[1]} chỗ`;
+  if (m) return lang === "en" ? `${m[1]} seats` : `${m[1]} chỗ`;
   return raw.slice(0, 16);
 }
 
-export function renderSeatBarHtml(ev, webBookedCount = 0) {
+export function renderSeatBarHtml(ev, webBookedCount = 0, lang = "vi") {
   if (!ev || !ev.showSeatBar) return "";
+  const isEn = lang === "en";
   const cap = Math.max(0, Number(ev.seatCapacity || 0));
   if (cap <= 0) return "";
   const ext = Math.max(0, Number(ev.externalBooked || 0));
@@ -309,12 +336,19 @@ export function renderSeatBarHtml(ev, webBookedCount = 0) {
   const booked = Math.min(cap, web + ext);
   const remaining = Math.max(0, cap - booked);
   const pct = Math.min(100, Math.round((booked / cap) * 100));
-  const statusText = remaining === 0 ? "Đã đủ chỗ tham dự" : `Còn ${remaining} / ${cap} chỗ`;
+  const statusText = isEn
+    ? remaining === 0
+      ? "All seats filled"
+      : `${remaining} / ${cap} seats left`
+    : remaining === 0
+      ? "Đã đủ chỗ tham dự"
+      : `Còn ${remaining} / ${cap} chỗ`;
+  const pctText = isEn ? `${pct}% reserved` : `${pct}% đã giữ chỗ`;
   const urgentClass = remaining <= Math.max(3, Math.round(cap * 0.15)) ? " is-urgent" : "";
   return `<div class="invite-seat-meter${urgentClass}" aria-label="${escHtml(statusText)}">
         <div class="invite-seat-meter-row">
           <span class="invite-seat-meter-label">${escHtml(statusText)}</span>
-          <span class="invite-seat-meter-pct">${pct}% đã giữ chỗ</span>
+          <span class="invite-seat-meter-pct">${pctText}</span>
         </div>
         <div class="invite-seat-meter-track" role="progressbar" aria-valuenow="${booked}" aria-valuemin="0" aria-valuemax="${cap}">
           <span class="invite-seat-meter-fill" style="width: ${pct}%;"></span>
@@ -330,8 +364,10 @@ export function renderWorkshopsHtml(upcoming) {
     .map((ws) => {
       const pillar = ws.pillar || derivePillarFilter(ws.type, ws.filters);
       const tokenSet = new Set([pillar, ...(ws.filters || [])]);
-      const catAttr = ` data-workshop-card data-pillar="${escHtml(pillar)}" data-category="${escHtml(Array.from(tokenSet).join(" "))}"`;
       const eventHref = resolveEventHref(ws);
+      const eventIdAttr = ws.id ? ` data-event-id="${escHtml(ws.id)}"` : "";
+      const eventHrefAttr = eventHref ? ` data-event-href="${escHtml(eventHref)}"` : "";
+      const catAttr = ` data-workshop-card data-pillar="${escHtml(pillar)}" data-category="${escHtml(Array.from(tokenSet).join(" "))}"${eventIdAttr}${eventHrefAttr}`;
       const titleEnAttr = ws.titleEn ? ` data-title-en="${escHtml(ws.titleEn)}"` : "";
       const summaryEnAttr = ws.summaryEn ? ` data-summary-en="${escHtml(ws.summaryEn)}"` : "";
       const datePill = compactDatePill(ws.dateDisplay);
@@ -388,65 +424,137 @@ export function renderWorkshopsHtml(upcoming) {
     .join("\n      ");
 }
 
-export function renderHomeUpcomingSectionHtml(upcoming) {
+function compactLocation(raw) {
+  const loc = String(raw || "").trim();
+  if (!loc) return "";
+  return loc.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s{2,}/g, " ").trim();
+}
+
+export function renderHomeUpcomingCardsHtml(upcoming, keepFullLocation = false, lang = "vi") {
   if (!upcoming || upcoming.length === 0) return "";
-  return `<section class="section" id="lich-hen">
+  const isEn = lang === "en";
+  return upcoming
+    .map((ws) => {
+      const pillar = ws.pillar || derivePillarFilter(ws.type, ws.filters);
+      const tokenSet = new Set([pillar, ...(ws.filters || [])]);
+      const eventHref = isEn ? resolveEventHrefEn(ws) : resolveEventHref(ws);
+      const eventIdAttr = ws.id ? ` data-event-id="${escHtml(ws.id)}"` : "";
+      const eventHrefAttr = eventHref ? ` data-event-href="${escHtml(eventHref)}"` : "";
+      const catAttr = ` data-workshop-card data-pillar="${escHtml(pillar)}" data-category="${escHtml(Array.from(tokenSet).join(" "))}"${eventIdAttr}${eventHrefAttr}`;
+      const displayTitle = (isEn && ws.titleEn) ? ws.titleEn : ws.title;
+      const datePill = compactDatePill(ws.dateDisplay, lang);
+      const pillarLabel = compactPillarLabel(ws.type);
+      const feeLabel = compactFeeLabel(ws.fee, lang);
+      const seatsLabel = compactSeatsLabel(ws.seats, lang);
+      const langTag = isEn && !ws.titleEn ? "VI Session" : "";
+      const metaRight = [feeLabel, seatsLabel, langTag].filter(Boolean).join(" · ");
+      const locText = keepFullLocation ? String(ws.location || "").trim() : compactLocation(ws.location);
+      const infoLine = [ws.time || "", locText].filter(Boolean).join(" · ");
+
+      const titleHtml = eventHref
+        ? `<h3 class="card-title"><a class="card-link" href="${escHtml(eventHref)}">${escHtml(displayTitle)}</a></h3>`
+        : `<h3 class="card-title"><button class="card-link card-link--btn" type="button" data-register-event="${escHtml(displayTitle)}" data-event-id="${escHtml(ws.id)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-fee="${escHtml(ws.fee)}" data-event-type="${escHtml(ws.type)}">${escHtml(displayTitle)}</button></h3>`;
+
+      return `<article class="event-card event-card--editorial" data-stagger-item${catAttr}>
+        <div class="event-card-media" data-curtain>
+          <img ${imageAttrs(ws.image, "(max-width: 820px) 84vw, 560px")} alt="${escHtml(ws.imageAlt || displayTitle)}" width="640" height="420" loading="lazy" decoding="async">
+          <div class="event-card-badges">
+            <span class="glass-badge">${escHtml(datePill)}</span>
+          </div>
+        </div>
+        <div class="event-card-body">
+          <div class="event-card-eyebrow">
+            <span class="cat">${escHtml(pillarLabel)}</span>
+            <span class="event-card-meta-pill">${escHtml(metaRight)}</span>
+          </div>
+          ${titleHtml}
+          <div class="event-card-foot">
+            <span class="event-card-loc">${escHtml(infoLine)}</span>
+            <span class="circle-go" aria-hidden="true">→</span>
+          </div>
+        </div>
+      </article>`;
+    })
+    .join("\n      ");
+}
+
+export function renderHomeUpcomingSectionHtml(upcoming, lang = "vi") {
+  if (!upcoming || upcoming.length === 0) return "";
+  const isEn = lang === "en";
+  const railMod = upcoming.length === 2 ? " events-rail--duo" : upcoming.length === 1 ? " events-rail--solo" : "";
+  return `<section class="section section--editorial-upcoming" id="${isEn ? "upcoming" : "lich-hen"}">
   <div class="container">
-    <div class="section-header--split" style="margin-bottom: 28px;" data-reveal>
+    <div class="section-header--split section-header--editorial" data-reveal>
       <div>
-        <div class="kicker" data-i18n="home.upcoming.kicker">Lịch tuần này</div>
-        <h2 class="section-title" style="margin-bottom: 6px;" data-i18n="home.upcoming.title">Hoạt động sắp diễn ra tại Hòa Lạc</h2>
-        <p class="section-lead" data-i18n="home.upcoming.lead">Giữ chỗ trực tiếp ngay trên từng buổi gặp mặt.</p>
+        <div class="kicker">${isEn ? "This Week" : "Lịch tuần này"}</div>
+        <h2 class="section-title">${isEn ? "Upcoming in Hoa Lac" : "Sắp diễn ra tại Hòa Lạc"}</h2>
       </div>
-      <a class="arrow-link" href="/lich-hoat-dong/">
-        <span data-i18n="home.upcoming.all">Xem toàn bộ lịch</span>
+      <a class="arrow-link" href="${isEn ? "/en/schedule/" : "/lich-hoat-dong/"}">
+        <span>${isEn ? "Full schedule" : "Tất cả lịch"}</span>
         <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
       </a>
     </div>
 
-    <div class="events-rail" data-stagger-group>
-      ${renderWorkshopsHtml(upcoming)}
+    <div class="events-rail${railMod}" data-stagger-group>
+      ${renderHomeUpcomingCardsHtml(upcoming, false, lang)}
     </div>
   </div>
 </section>`;
 }
 
-export function renderScheduleUpcomingContentHtml(upcoming) {
+export function renderScheduleUpcomingContentHtml(upcoming, lang = "vi") {
+  const isEn = lang === "en";
   if (!upcoming || upcoming.length === 0) {
-    return `<div class="schedule-empty-flagship" role="status">
+    if (isEn) {
+      return `<div class="schedule-empty-flagship" role="status">
       <div class="schedule-empty-copy">
-        <span class="kicker" data-i18n="schedule.empty.kicker">Nhịp hoạt động định kỳ</span>
-        <h3 data-i18n="schedule.empty.title">Ban Điều Phối đang chuẩn bị cho những cuộc gặp tiếp theo tại Hòa Lạc</h3>
-        <p data-i18n="schedule.empty.desc">Các buổi HolaHeart, HolaGreen và HolaConnect diễn ra luân phiên 1–2 buổi mỗi tuần theo tinh thần phi lợi nhuận.</p>
+        <span class="kicker">Weekly Rhythm</span>
+        <h3>Our coordinating team is preparing the next gatherings in Hoa Lac</h3>
+        <p>HolaHeart, HolaGreen, and HolaConnect sessions rotate 1–2 times per week on a non-profit basis.</p>
       </div>
       <div class="schedule-empty-actions">
-        <a class="btn btn--primary" href="/tham-gia/" data-i18n="schedule.empty.cta">Tạo Thẻ Thành Viên nhận lịch mới →</a>
-        <a class="btn btn--outline" href="/gioi-thieu/#chuong-trinh" data-i18n="schedule.empty.secondary">Tìm hiểu 3 trụ cột</a>
+        <a class="btn btn--primary" href="/en/join/">Get your Member Pass for updates →</a>
+        <a class="btn btn--outline" href="/en/about/#pillars">Explore 3 Pillars</a>
+      </div>
+    </div>`;
+    }
+    return `<div class="schedule-empty-flagship" role="status">
+      <div class="schedule-empty-copy">
+        <span class="kicker">Nhịp hoạt động định kỳ</span>
+        <h3>Ban Điều Phối đang chuẩn bị cho những cuộc gặp tiếp theo tại Hòa Lạc</h3>
+        <p>Các buổi HolaHeart, HolaGreen và HolaConnect diễn ra luân phiên 1–2 buổi mỗi tuần theo tinh thần phi lợi nhuận.</p>
+      </div>
+      <div class="schedule-empty-actions">
+        <a class="btn btn--primary" href="/tham-gia/">Tạo Thẻ Thành Viên nhận lịch mới →</a>
+        <a class="btn btn--outline" href="/gioi-thieu/#chuong-trinh">Tìm hiểu 3 trụ cột</a>
       </div>
     </div>`;
   }
 
-  return `<div class="grid-3" data-stagger-group>
-      ${renderWorkshopsHtml(upcoming)}
+  const railMod = upcoming.length === 2 ? " events-rail--duo" : upcoming.length === 1 ? " events-rail--solo" : "";
+  return `<div class="events-rail${railMod}" data-stagger-group>
+      ${renderHomeUpcomingCardsHtml(upcoming, true, lang)}
     </div>
     <div class="filter-empty" data-filter-empty="[data-workshop-card]" hidden>
-      <p data-i18n="schedule.filterEmpty">Hiện chưa có buổi sắp tới nào thuộc nhóm này trong tuần.</p>
-      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-workshop-card]" data-i18n="schedule.filterReset">Xem tất cả lịch hoạt động</button>
+      <p>${isEn ? "No upcoming gathering in this pillar this week." : "Hiện chưa có buổi sắp tới nào thuộc nhóm này trong tuần."}</p>
+      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-workshop-card]">${isEn ? "View all gatherings" : "Xem tất cả lịch hoạt động"}</button>
     </div>`;
 }
 
-export function renderJoinEventOptionsHtml(upcoming) {
+export function renderJoinEventOptionsHtml(upcoming, lang = "vi") {
+  const isEn = lang === "en";
   const cards = [];
   for (const ws of upcoming || []) {
     const safeId = escHtml(ws.id);
+    const title = (isEn && ws.titleEn) ? ws.titleEn : ws.title;
     cards.push(`<div class="join-event-option">
-        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-${safeId}" value="${safeId}" data-event-title="${escHtml(ws.title)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-type="${escHtml(ws.type)}" data-event-seats="${escHtml(ws.seats)}">
+        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-${safeId}" value="${safeId}" data-event-title="${escHtml(title)}" data-event-date="${escHtml(ws.dateDisplay)}" data-event-time="${escHtml(ws.time)}" data-event-location="${escHtml(ws.location)}" data-event-type="${escHtml(ws.type)}" data-event-seats="${escHtml(ws.seats)}">
         <label class="join-event-card" for="join-ev-${safeId}">
           <span class="join-event-top">
             <span class="join-event-date">${escHtml(ws.dateDisplay)}</span>
             <span class="join-event-seats">${escHtml(ws.seats)}</span>
           </span>
-          <span class="join-event-title">${escHtml(ws.title)}</span>
+          <span class="join-event-title">${escHtml(title)}</span>
           <span class="join-event-meta">${escHtml(ws.time)} · ${escHtml(ws.location)}</span>
         </label>
       </div>`);
@@ -455,11 +563,11 @@ export function renderJoinEventOptionsHtml(upcoming) {
   return `<div class="join-event-grid">\n      ${cards.join("\n      ")}\n    </div>`;
 }
 
-export function renderJoinEventsSectionHtml(upcoming) {
-  const inner = renderJoinEventOptionsHtml(upcoming);
+export function renderJoinEventsSectionHtml(upcoming, lang = "vi") {
+  const inner = renderJoinEventOptionsHtml(upcoming, lang);
   if (!inner) return "";
   return `<fieldset class="join-fieldset" data-join-events-step>
-          <legend class="join-legend">02 · Chọn hoạt động bạn muốn tham gia</legend>
+          <legend class="join-legend">${lang === "en" ? "Select a gathering to attend" : "02 · Chọn hoạt động bạn muốn tham gia"}</legend>
           ${inner}
         </fieldset>`;
 }
@@ -470,25 +578,30 @@ const PAST_FALLBACK_IMAGES = [
   "/assets/images/editorial-holaconnect.jpg",
 ];
 
-export function renderPastWorkshopsHtml(pastList) {
+export function renderPastWorkshopsHtml(pastList, lang = "vi") {
   if (!pastList || pastList.length === 0) return "";
+  const isEn = lang === "en";
   return pastList
     .map((item, idx) => {
       const photo = item.image || PAST_FALLBACK_IMAGES[idx % PAST_FALLBACK_IMAGES.length];
-      const alt = item.imageAlt || item.title;
-      const href =
+      const title = (isEn && item.titleEn) ? item.titleEn : item.title;
+      const alt = item.imageAlt || title;
+      const fallbackEventHref = resolveEventHref(item);
+      const baseHref =
         item.href && String(item.href).startsWith("/")
           ? item.href
-          : item.id === "holaheart-first-event-2026"
-            ? "/hanh-trinh/tinh-yeu-thuong-cua-me/"
-            : "";
-      const meta = [item.time, item.location, item.participants]
+          : fallbackEventHref ||
+            (item.id === "holaheart-first-event-2026" ? "/hanh-trinh/tinh-yeu-thuong-cua-me/" : "");
+      const href = isEn && baseHref.startsWith("/hanh-trinh/")
+        ? baseHref.replace(/^\/hanh-trinh\//, "/en/journey/")
+        : baseHref;
+      const meta = [item.time, item.location, isEn ? "Read recap" : item.participants]
         .filter(Boolean)
         .map(escHtml)
         .join(" · ");
       return `<div class="past-item" data-stagger-item data-hover-photo="${escHtml(fullImageUrl(photo))}" data-hover-alt="${escHtml(alt)}">
         <span class="past-item-date">${escHtml(item.dateDisplay || item.date)}</span>
-        <h3 class="past-item-title">${href ? `<a class="past-item-title-link" href="${escHtml(href)}">${escHtml(item.title)}</a>` : escHtml(item.title)}</h3>
+        <h3 class="past-item-title">${href ? `<a class="past-item-title-link" href="${escHtml(href)}">${escHtml(title)}</a>` : escHtml(title)}</h3>
         <span class="past-item-meta">${meta}</span>
         <span class="past-item-arrow" aria-hidden="true">↗</span>
       </div>`;
@@ -496,10 +609,11 @@ export function renderPastWorkshopsHtml(pastList) {
     .join("\n      ");
 }
 
-export function renderNewsCardsHtml(articles, filterable = false) {
+export function renderNewsCardsHtml(articles, filterable = false, lang = "vi") {
+  const isEn = lang === "en";
   if (!articles || articles.length === 0) {
     return `<div style="grid-column: 1 / -1; padding: 36px 24px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); text-align: center;">
-      <p style="margin: 0; color: var(--ink-secondary);">Các câu chuyện tiếp theo đang được Ban Điều Phối hoàn thiện.</p>
+      <p style="margin: 0; color: var(--ink-secondary);">${isEn ? "Upcoming community stories are being prepared." : "Các câu chuyện tiếp theo đang được Ban Điều Phối hoàn thiện."}</p>
     </div>`;
   }
   return articles
@@ -508,20 +622,23 @@ export function renderNewsCardsHtml(articles, filterable = false) {
       const tokenSet = new Set([pillar, ...(a.filters || [])]);
       if (a.categorySlug) tokenSet.add(a.categorySlug);
       const attr = filterable ? ` data-news-card data-category="${escHtml(Array.from(tokenSet).join(" "))}"` : "";
-      const href = `/hanh-trinh/${escHtml(a.slug)}/`;
-      return `<article class="editorial-card" data-stagger-item${attr}>
-        <a class="plate-media" data-curtain href="${href}" aria-label="${escHtml(a.title)}">
-          <img ${imageAttrs(a.image, "(max-width: 640px) calc(100vw - 40px), 420px")} alt="${escHtml(a.imageAlt || a.title)}" width="640" height="420" loading="lazy" decoding="async">
-        </a>
-        <div class="card-meta">
-          <span class="cat">${escHtml(a.category)}</span>
-          <span>·</span>
-          <time datetime="${escHtml(a.date)}">${escHtml(a.dateDisplay)}</time>
+      const href = isEn ? `/en/journey/${escHtml(a.slug)}/` : `/hanh-trinh/${escHtml(a.slug)}/`;
+      return `<article class="editorial-card editorial-card--clean" data-stagger-item${attr}>
+        <div class="plate-media" data-curtain>
+          <img ${imageAttrs(a.image, "(max-width: 640px) calc(100vw - 40px), 560px")} alt="${escHtml(a.imageAlt || a.title)}" width="640" height="420" loading="lazy" decoding="async">
         </div>
-        <h3 class="card-title"><a href="${href}">${escHtml(a.title)}</a></h3>
-        <p class="card-text">${escHtml(a.excerpt)}</p>
-        <div class="card-footer">
-          <a class="arrow-link" href="${href}">Xem tường thuật &amp; hình ảnh →</a>
+        <div class="editorial-card-body">
+          <div class="card-meta">
+            <span class="cat">${escHtml(a.category)}</span>
+            <span aria-hidden="true">·</span>
+            <time datetime="${escHtml(a.date)}">${escHtml(a.dateDisplay)}</time>
+          </div>
+          <h3 class="card-title"><a class="card-link" href="${href}">${escHtml(a.title)}</a></h3>
+          <p class="card-text">${escHtml(a.excerpt)}</p>
+          <div class="event-card-foot">
+            <span class="pillar-editorial-more">${isEn ? "Read story" : "Đọc tường thuật"}</span>
+            <span class="circle-go" aria-hidden="true">→</span>
+          </div>
         </div>
       </article>`;
     })
@@ -594,8 +711,9 @@ export function safeJsonLdScript(obj) {
   return `<script type="application/ld+json">\n${payload}\n</script>`;
 }
 
-export function buildArticleSchemas(article) {
-  const slugPath = `/hanh-trinh/${article.slug}/`;
+export function buildArticleSchemas(article, lang = "vi") {
+  const isEn = lang === "en";
+  const slugPath = isEn ? `/en/journey/${article.slug}/` : `/hanh-trinh/${article.slug}/`;
   const orgId = `${SITE_URL}/#organization`;
   const articleSchema = {
     "@context": "https://schema.org",
@@ -605,12 +723,12 @@ export function buildArticleSchemas(article) {
     image: [absUrl(article.image)],
     datePublished: article.date,
     dateModified: (article.updatedAt || article.date || "").slice(0, 10),
-    inLanguage: "vi-VN",
-    author: { "@type": "Organization", "@id": orgId, name: article.author },
+    inLanguage: isEn ? "en" : "vi-VN",
+    author: { "@type": "Organization", "@id": orgId, name: isEn ? "HolaRise Coordinating Team" : article.author },
     publisher: {
       "@type": "Organization",
       "@id": orgId,
-      name: BRAND_FULL_NAME,
+      name: isEn ? "HolaRise – Youth Community & Social Impact Initiative" : BRAND_FULL_NAME,
       logo: { "@type": "ImageObject", url: LOGO_MARK_URL, width: 512, height: 512 },
     },
     mainEntityOfPage: absUrl(slugPath),
@@ -618,39 +736,46 @@ export function buildArticleSchemas(article) {
   const breadcrumb = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Trang chủ", item: absUrl("/") },
-      { "@type": "ListItem", position: 2, name: "Hành trình", item: absUrl("/hanh-trinh/") },
-      { "@type": "ListItem", position: 3, name: article.title, item: absUrl(slugPath) },
-    ],
+    itemListElement: isEn
+      ? [
+          { "@type": "ListItem", position: 1, name: "Home", item: absUrl("/en/") },
+          { "@type": "ListItem", position: 2, name: "Journey", item: absUrl("/en/journey/") },
+          { "@type": "ListItem", position: 3, name: article.title, item: absUrl(slugPath) },
+        ]
+      : [
+          { "@type": "ListItem", position: 1, name: "Trang chủ", item: absUrl("/") },
+          { "@type": "ListItem", position: 2, name: "Hành trình", item: absUrl("/hanh-trinh/") },
+          { "@type": "ListItem", position: 3, name: article.title, item: absUrl(slugPath) },
+        ],
   };
   return `${safeJsonLdScript(articleSchema)}\n  ${safeJsonLdScript(breadcrumb)}`;
 }
 
-export function buildEventsJsonLd(upcoming) {
+export function buildEventsJsonLd(upcoming, lang = "vi") {
+  const isEn = lang === "en";
   const orgId = `${SITE_URL}/#organization`;
   return (upcoming || [])
     .map((ws) => {
-      const eventHref = resolveEventHref(ws);
-      const eventUrl = eventHref ? absUrl(eventHref) : absUrl("/lich-hoat-dong/");
+      const eventHref = isEn ? resolveEventHrefEn(ws) : resolveEventHref(ws);
+      const eventUrl = eventHref ? absUrl(eventHref) : absUrl(isEn ? "/en/schedule/" : "/lich-hoat-dong/");
       const times = buildEventIsoTimes(ws.date, ws.time);
       const schemaObj = {
         "@context": "https://schema.org",
         "@type": "Event",
-        name: ws.title,
+        name: (isEn && ws.titleEn) ? ws.titleEn : ws.title,
         startDate: times.startIso || ws.date,
         eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
         eventStatus: "https://schema.org/EventScheduled",
         isAccessibleForFree: true,
         image: [absUrl(ws.image)],
-        description: ws.summary,
+        description: (isEn && ws.summaryEn) ? ws.summaryEn : ws.summary,
         location: {
           "@type": "Place",
           name: ws.location,
           address: {
             "@type": "PostalAddress",
-            addressLocality: "Hòa Lạc – Thạch Thất",
-            addressRegion: "Hà Nội",
+            addressLocality: isEn ? "Hoa Lac, Thach That" : "Hòa Lạc – Thạch Thất",
+            addressRegion: isEn ? "Hanoi" : "Hà Nội",
             addressCountry: "VN",
           },
         },
@@ -664,7 +789,7 @@ export function buildEventsJsonLd(upcoming) {
         organizer: {
           "@type": "NGO",
           "@id": orgId,
-          name: BRAND_FULL_NAME,
+          name: isEn ? "HolaRise – Youth Community & Social Impact Initiative" : BRAND_FULL_NAME,
           url: SITE_URL,
         },
       };
@@ -709,15 +834,16 @@ function isSafeHttpsLink(url) {
   }
 }
 
-export function renderHorizontalGalleryHtml(photos) {
+export function renderHorizontalGalleryHtml(photos, lang = "vi") {
   if (!photos || photos.length === 0) return "";
+  const isEn = lang === "en";
   const total = photos.length;
   const pad2 = (n) => (n < 10 ? `0${n}` : String(n));
   return photos
     .map((p, idx) => {
-      const caption = p.caption || p.albumTitle || "Khoảnh khắc Hola tại Hòa Lạc";
+      const caption = p.caption || p.albumTitle || (isEn ? "HolaRise Moment in Hoa Lac" : "Khoảnh khắc Hola tại Hòa Lạc");
       const alt = p.alt || caption;
-      const photographer = p.photographer ? ` · Ảnh: ${p.photographer}` : "";
+      const photographer = p.photographer ? (isEn ? ` · Photo: ${p.photographer}` : ` · Ảnh: ${p.photographer}`) : "";
       return `<button class="horizontal-card" type="button" data-lightbox-src="${escHtml(fullImageUrl(p.url))}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(caption + photographer)}">
         <div class="horizontal-frame">
           <img ${imageAttrs(p.url, "(max-width: 640px) 82vw, 620px")} alt="${escHtml(alt)}" width="960" height="600" loading="lazy" decoding="async">
@@ -731,8 +857,9 @@ export function renderHorizontalGalleryHtml(photos) {
     .join("\n      ");
 }
 
-export function renderPublicAlbumsHtml(albumsWithPhotos) {
+export function renderPublicAlbumsHtml(albumsWithPhotos, lang = "vi") {
   if (!albumsWithPhotos || albumsWithPhotos.length === 0) return "";
+  const isEn = lang === "en";
 
   const pad2 = (n) => (n < 10 ? `0${n}` : String(n));
   const stackClasses = ["is-front", "is-mid", "is-back"];
@@ -748,12 +875,12 @@ export function renderPublicAlbumsHtml(albumsWithPhotos) {
 
       const previewList = [];
       if (album.coverUrl) {
-        previewList.push({ url: album.coverUrl, alt: album.title || "Ảnh bìa bộ ảnh HolaRise" });
+        previewList.push({ url: album.coverUrl, alt: album.title || (isEn ? "HolaRise album cover" : "Ảnh bìa bộ ảnh HolaRise") });
       }
       for (const p of photos) {
         if (previewList.length >= 3) break;
         if (p.url && !previewList.some((item) => item.url === p.url)) {
-          previewList.push({ url: p.url, alt: p.alt || p.caption || album.title || "Khoảnh khắc HolaRise" });
+          previewList.push({ url: p.url, alt: p.alt || p.caption || album.title || (isEn ? "HolaRise moment" : "Khoảnh khắc HolaRise") });
         }
       }
       const stackHtml = previewList
@@ -770,11 +897,11 @@ export function renderPublicAlbumsHtml(albumsWithPhotos) {
 
       const thumbsHtml = photos
         .map((p, idx) => {
-          const caption = p.caption || album.title || "Khoảnh khắc HolaRise";
+          const caption = p.caption || album.title || (isEn ? "HolaRise moment" : "Khoảnh khắc HolaRise");
           const alt = p.alt || caption;
-          const photographer = p.photographer ? ` · Ảnh: ${p.photographer}` : "";
+          const photographer = p.photographer ? (isEn ? ` · Photo: ${p.photographer}` : ` · Ảnh: ${p.photographer}`) : "";
           const fullCaption = `${caption}${photographer}`;
-          return `<button class="archive-thumb" type="button" aria-label="Xem ảnh ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(fullImageUrl(p.url))}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCaption)}">
+          return `<button class="archive-thumb" type="button" aria-label="${isEn ? "View photo" : "Xem ảnh"} ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(fullImageUrl(p.url))}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCaption)}">
             <img ${imageAttrs(p.url, "(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 280px")} alt="${escHtml(alt)}" width="480" height="360" loading="lazy" decoding="async">
             <span class="archive-thumb-idx" aria-hidden="true">${pad2(idx + 1)}</span>
             <span class="archive-thumb-cap" aria-hidden="true">${escHtml(caption)}</span>
@@ -784,7 +911,7 @@ export function renderPublicAlbumsHtml(albumsWithPhotos) {
 
       const descHtml = album.description ? `\n          <p class="archive-drawer-desc">${escHtml(album.description)}</p>` : "";
 
-      return `<details class="archive-drawer" name="journey-gallery" data-album-card data-pillar="${escHtml(pillar)}" data-category="${escHtml(filtersAttr)}" data-lightbox-group>
+      return `<details class="archive-drawer" name="journey-gallery" data-album-card data-album-id="${escHtml(album.id)}" data-pillar="${escHtml(pillar)}" data-category="${escHtml(filtersAttr)}" data-lightbox-group>
       <summary class="archive-drawer-head">
         <div class="archive-drawer-stack" aria-hidden="true">
           ${stackHtml}
@@ -792,13 +919,13 @@ export function renderPublicAlbumsHtml(albumsWithPhotos) {
         <div class="archive-drawer-info">
           <div class="archive-drawer-meta">
             ${metaText ? `<span class="archive-drawer-date">${escHtml(metaText)}</span>` : ""}
-            <span class="archive-drawer-count">${photos.length} ảnh</span>
+            <span class="archive-drawer-count">${photos.length} ${isEn ? "photos" : "ảnh"}</span>
           </div>
           <h3 class="archive-drawer-title">${escHtml(album.title)}</h3>${descHtml}
         </div>
         <span class="archive-drawer-toggle" aria-hidden="true">
-          <span class="archive-toggle-closed">Mở bộ ảnh</span>
-          <span class="archive-toggle-open">Thu gọn</span>
+          <span class="archive-toggle-closed">${isEn ? "Open album" : "Mở bộ ảnh"}</span>
+          <span class="archive-toggle-open">${isEn ? "Collapse" : "Thu gọn"}</span>
           <svg class="archive-toggle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </span>
       </summary>
@@ -807,8 +934,8 @@ export function renderPublicAlbumsHtml(albumsWithPhotos) {
           ${thumbsHtml}
         </div>
         <div class="archive-drawer-foot">
-          <span></span>
-          <button class="btn btn--outline btn--sm" type="button" data-drawer-close>Thu gọn bộ ảnh ↑</button>
+          <button class="btn btn--primary btn--sm" type="button" data-open-album-contribute="${escHtml(album.id)}" data-album-title="${escHtml(album.title)}">${isEn ? "Contribute photos" : "Góp ảnh vào bộ ảnh này"}</button>
+          <button class="btn btn--outline btn--sm" type="button" data-drawer-close>${isEn ? "Collapse album ↑" : "Thu gọn bộ ảnh ↑"}</button>
         </div>
       </div>
     </details>`;
@@ -834,42 +961,46 @@ export function parsePartnersJson(raw) {
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
-export function renderPartnersStripHtml(partners) {
+export function renderPartnersStripHtml(partners, lang = "vi") {
+  const isEn = lang === "en";
   const active = (Array.isArray(partners) ? partners : []).filter((p) => p && p.isActive !== false && p.name);
   if (active.length === 0) return "";
 
+  const partnerSuffix = isEn ? "Community Partner" : "Đơn vị đồng hành";
   const items = active
     .map((p) => {
       const logo = p.logoUrl
-        ? `<img class="partner-colophon-logo" src="${escHtml(p.logoUrl)}" alt="Logo ${escHtml(p.name)}" width="20" height="20" loading="lazy" decoding="async">`
+        ? `<img class="partner-colophon-logo" src="${escHtml(p.logoUrl)}" alt="${escHtml(p.name)} logo" width="20" height="20" loading="lazy" decoding="async">`
         : "";
       const label = `<span class="partner-colophon-name">${escHtml(p.name)}</span>`;
       if (p.websiteUrl && isSafeExternalHttpsUrl(p.websiteUrl)) {
-        return `<a class="partner-colophon-link" href="${escHtml(p.websiteUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escHtml(p.name)} — Đơn vị đồng hành">${logo}${label}<span class="partner-colophon-arrow" aria-hidden="true">↗</span></a>`;
+        return `<a class="partner-colophon-link" href="${escHtml(p.websiteUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escHtml(p.name)} — ${partnerSuffix}">${logo}${label}<span class="partner-colophon-arrow" aria-hidden="true">↗</span></a>`;
       }
       return `<span class="partner-colophon-link">${logo}${label}</span>`;
     })
     .join('<span class="partner-colophon-dot" aria-hidden="true">·</span>');
 
-  return `<div class="partner-colophon" id="doi-tac" aria-label="Đơn vị đồng hành">
+  return `<div class="partner-colophon" id="${isEn ? "partners" : "doi-tac"}" aria-label="${isEn ? "Community partners" : "Đơn vị đồng hành"}">
   <div class="container partner-colophon-inner">
-    <span class="partner-colophon-label" data-i18n="partner.colophonLabel">Đồng hành không gian</span>
+    <span class="partner-colophon-label">${isEn ? "Space & Venue Partner" : "Đồng hành không gian"}</span>
     <span class="partner-colophon-dot" aria-hidden="true">·</span>
     <div class="partner-colophon-list">${items}</div>
   </div>
 </div>`;
 }
 
-export function applySiteVisualsSsr(html, rawVisualsJson) {
+export function applySiteVisualsSsr(html, rawVisualsJson, lang = "vi") {
   if (!rawVisualsJson) return html;
   const parsed = safeJsonParse(rawVisualsJson, null);
   if (!parsed || typeof parsed !== "object") return html;
+  const isEn = lang === "en";
+  const orientLabel = isEn ? "Concept Visual" : "Ảnh định hướng";
 
   let out = html;
   if (parsed.heroImage && isSafeMediaUrl(parsed.heroImage)) {
-    const heroAlt = escHtml(parsed.heroImageAlt || "HolaRise tại Hòa Lạc");
+    const heroAlt = escHtml(parsed.heroImageAlt || (isEn ? "HolaRise in Hoa Lac" : "HolaRise tại Hòa Lạc"));
     const badgeHtml = parsed.heroIsIllustration
-      ? '<span class="visual-orientation-chip" data-i18n="media.orientation">Ảnh định hướng</span>'
+      ? `<span class="visual-orientation-chip">${orientLabel}</span>`
       : "";
     out = replaceMarker(
       out,
@@ -879,9 +1010,9 @@ export function applySiteVisualsSsr(html, rawVisualsJson) {
   }
 
   if (parsed.aboutImage && isSafeMediaUrl(parsed.aboutImage)) {
-    const aboutAlt = escHtml(parsed.aboutImageAlt || "Bình minh tại Hòa Lạc");
+    const aboutAlt = escHtml(parsed.aboutImageAlt || (isEn ? "Sunrise over Hoa Lac" : "Bình minh tại Hòa Lạc"));
     const badgeHtml = parsed.aboutIsIllustration
-      ? '<span class="visual-orientation-chip" data-i18n="media.orientation">Ảnh định hướng</span>'
+      ? `<span class="visual-orientation-chip">${orientLabel}</span>`
       : "";
     out = replaceMarker(
       out,
@@ -895,9 +1026,9 @@ export function applySiteVisualsSsr(html, rawVisualsJson) {
   for (const [key, idx] of Object.entries(pillarIndices)) {
     const p = pillars[key];
     if (!p || !p.image || !isSafeMediaUrl(p.image)) continue;
-    const alt = escHtml(p.imageAlt || `Hoạt động ${key}`);
+    const alt = escHtml(p.imageAlt || `${key} visual`);
     const orientChip = p.isIllustration
-      ? '<span class="visual-orientation-chip" data-i18n="media.orientation">Ảnh định hướng</span>'
+      ? `<span class="visual-orientation-chip">${orientLabel}</span>`
       : "";
     out = replaceMarker(
       out,
@@ -913,16 +1044,17 @@ export function applySiteVisualsSsr(html, rawVisualsJson) {
   return out;
 }
 
-export function renderPublicTestimonialsHtml(rows) {
+export function renderPublicTestimonialsHtml(rows, lang = "vi") {
   const list = (rows || []).filter((r) => r && r.content);
   if (list.length === 0) return "";
+  const isEn = lang === "en";
   const cards = list
     .map((r) => {
       const quote = r.pull_quote || r.content;
       const meta = [r.author_role, r.author_org].filter(Boolean).join(" · ");
       const photoHtml =
         r.photo_url && isSafeMediaUrl(r.photo_url)
-          ? `<figure style="margin:0 0 14px;border-radius:10px;overflow:hidden;"><img src="${escHtml(r.photo_url)}" alt="Kỷ niệm từ ${escHtml(r.author_name)}" loading="lazy" style="width:100%;height:180px;object-fit:cover;display:block;"></figure>`
+          ? `<figure style="margin:0 0 14px;border-radius:10px;overflow:hidden;"><img src="${escHtml(r.photo_url)}" alt="${isEn ? "Memory from" : "Kỷ niệm từ"} ${escHtml(r.author_name)}" loading="lazy" style="width:100%;height:180px;object-fit:cover;display:block;"></figure>`
           : "";
       return `<article class="testimonial-card">
         ${photoHtml}
@@ -935,11 +1067,11 @@ export function renderPublicTestimonialsHtml(rows) {
     })
     .join("\n      ");
 
-  return `<section class="section section--mist" aria-label="Cảm nhận người tham dự">
+  return `<section class="section section--mist" aria-label="${isEn ? "Participant voices" : "Cảm nhận người tham dự"}">
   <div class="container">
     <div class="section-header" style="margin-bottom: 28px;">
-      <div class="kicker">Tiếng nói từ các buổi gặp</div>
-      <h2 class="section-title">Cảm nhận của người đồng hành</h2>
+      <div class="kicker">${isEn ? "Voices from Gatherings" : "Tiếng nói từ các buổi gặp"}</div>
+      <h2 class="section-title">${isEn ? "Reflections from Participants" : "Cảm nhận của người đồng hành"}</h2>
     </div>
     <div class="grid-3">
       ${cards}
@@ -948,14 +1080,15 @@ export function renderPublicTestimonialsHtml(rows) {
 </section>`;
 }
 
-export function renderPublicTeamHtml(rows) {
+export function renderPublicTeamHtml(rows, lang = "vi") {
   const list = (rows || []).filter((m) => m && m.name);
   if (list.length === 0) return "";
+  const isEn = lang === "en";
   const cards = list
     .map((m) => {
       const avatarHtml =
         m.avatar_url && isSafeMediaUrl(m.avatar_url)
-          ? `<img src="${escHtml(m.avatar_url)}" alt="Chân dung ${escHtml(m.name)}" width="72" height="72" loading="lazy" style="width:68px;height:68px;border-radius:50%;object-fit:cover;">`
+          ? `<img src="${escHtml(m.avatar_url)}" alt="${isEn ? "Portrait of" : "Chân dung"} ${escHtml(m.name)}" width="72" height="72" loading="lazy" style="width:68px;height:68px;border-radius:50%;object-fit:cover;">`
           : `<span style="width:68px;height:68px;border-radius:50%;background:var(--accent-soft, #eef2ef);color:var(--ink);display:grid;place-items:center;font-weight:600;font-size:1.1rem;">${escHtml(String(m.name).trim().slice(0, 2).toUpperCase())}</span>`;
       const meta = [m.role_title, m.organization].filter(Boolean).join(" · ");
       return `<article class="value-col" style="display:flex;flex-direction:column;gap:12px;">
@@ -971,11 +1104,11 @@ export function renderPublicTeamHtml(rows) {
     })
     .join("\n      ");
 
-  return `<section class="section" id="doi-ngu" aria-label="Đội ngũ điều phối HolaRise">
+  return `<section class="section" id="${isEn ? "team" : "doi-ngu"}" aria-label="${isEn ? "HolaRise Coordinating Team" : "Đội ngũ điều phối HolaRise"}">
   <div class="container">
     <div class="section-header" style="margin-bottom: 28px;">
-      <div class="kicker">Con người đứng sau</div>
-      <h2 class="section-title">Đội ngũ Điều phối &amp; Người dẫn dắt</h2>
+      <div class="kicker">${isEn ? "People Behind HolaRise" : "Con người đứng sau"}</div>
+      <h2 class="section-title">${isEn ? "Coordinators &amp; Hosts" : "Đội ngũ Điều phối &amp; Người dẫn dắt"}</h2>
     </div>
     <div class="grid-3">
       ${cards}

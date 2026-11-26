@@ -4,6 +4,7 @@ import {
   createSession,
   errorResponse,
   getClientIpHash,
+  isSoleAdminAccount,
   jsonResponse,
   readJsonBody,
   verifyCsrfOrigin,
@@ -71,6 +72,7 @@ export async function onRequestPost({ request, env }) {
   return jsonResponse(
     {
       ok: true,
+      isSoleAdmin: isSoleAdminAccount(user, env),
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
     },
     200,

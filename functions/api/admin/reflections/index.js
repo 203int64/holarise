@@ -4,6 +4,7 @@ import {
   cleanStr,
   extractMediaKeyFromUrl,
   isSafeMediaUrl,
+  parseReflectionPhotos,
   slugifyVi,
 } from "../../../_lib/validation.js";
 
@@ -36,6 +37,7 @@ export async function ensureCommunityTestimonialsTable(db) {
 }
 
 export function serializeAdminReflection(row, kind = "member") {
+  const photoUrls = parseReflectionPhotos(row.photos_json, row.photo_url || "");
   if (kind === "community") {
     return {
       id: row.id,
@@ -45,7 +47,8 @@ export function serializeAdminReflection(row, kind = "member") {
       participantRole: row.author_role || "Thành viên tham dự",
       pullQuote: row.pull_quote || "",
       content: row.content || "",
-      photoUrl: row.photo_url || "",
+      photoUrl: photoUrls[0] || "",
+      photoUrls,
       isFeaturedHome: Number(row.is_featured_home || 0) === 1,
       heartCount: Number(row.heart_count || 0),
       status: row.status,
@@ -71,7 +74,8 @@ export function serializeAdminReflection(row, kind = "member") {
     participantRole: row.participant_role || "member",
     pullQuote: row.pull_quote || "",
     content: row.content || "",
-    photoUrl: row.photo_url || "",
+    photoUrl: photoUrls[0] || "",
+    photoUrls,
     isFeaturedHome: false,
     heartCount: Number(row.heart_count || 0),
     status: row.status,

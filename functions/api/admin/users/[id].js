@@ -20,10 +20,14 @@ export async function onRequestPatch(context) {
 
   const isActive =
     parsed.data.is_active !== undefined ? (parsed.data.is_active ? 1 : 0) : target.is_active;
-  const role =
-    parsed.data.role === "super_admin" || parsed.data.role === "editor" || parsed.data.role === "media"
-      ? parsed.data.role
-      : target.role;
+  if (parsed.data.role !== undefined && parsed.data.role !== target.role && parsed.data.role !== "media") {
+    return errorResponse(
+      403,
+      "ADMIN_LOCKED",
+      "Hệ thống chỉ cho phép duy nhất 1 tài khoản Quản trị chính (203int64). Không thể nâng quyền tài khoản khác."
+    );
+  }
+  const role = parsed.data.role === "media" ? "media" : target.role;
   const name = parsed.data.name !== undefined ? cleanStr(parsed.data.name, 100) || target.name : target.name;
 
   if (id === auth.user.id && (isActive === 0 || role !== "super_admin")) {

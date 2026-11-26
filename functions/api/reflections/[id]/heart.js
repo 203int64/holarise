@@ -7,6 +7,7 @@ import {
   resolveHeartActor,
   verifyCsrfOrigin,
 } from "../../../_lib/security.js";
+import { VALID_REACTION_TYPES, cleanStr } from "../../../_lib/validation.js";
 
 export async function onRequestPost(context) {
   const { request, env, params } = context;
@@ -20,6 +21,21 @@ export async function onRequestPost(context) {
   const id = String(params?.id || "").trim();
   if (!id) {
     return errorResponse(400, "MISSING_ID", "Thiếu mã lưu bút.");
+  }
+
+  // Optional reaction type: 'heart' | 'warm' | 'inspire' (defaults to 'heart' for backwards compatibility)
+  let requestedReaction = "heart";
+  const ct = String(request.headers.get("Content-Type") || "");
+  if (ct.includes("application/json")) {
+    try {
+      const body = await request.json();
+      const raw = cleanStr(body?.reaction || body?.reactionType, 24).toLowerCase();
+      if (VALID_REACTION_TYPES.has(raw)) {
+        requestedReaction = raw;
+      }
+    } catch {
+      // Ignore empty/malformed optional JSON body
+    }
   }
 
   const ipHash = await getClientIpHash(request);
@@ -62,12 +78,15 @@ export async function onRequestPost(context) {
     )
       .bind(id)
       .first();
+    const nextCnt = Math.max(0, Number(refreshedComm?.heart_count || 0));
     return jsonResponse(
       {
         ok: true,
         id,
         hearted: true,
-        heartCount: Math.max(0, Number(refreshedComm?.heart_count || 0)),
+        heartCount: nextCnt,
+        myReaction: requestedReaction,
+        reactions: { heart: nextCnt, warm: 0, inspire: 0 },
       },
       200
     );
@@ -79,15 +98,16 @@ export async function onRequestPost(context) {
 
   const { actorKey, setCookie } = await resolveHeartActor(context);
   const existingHeart = await env.DB.prepare(
-    "SELECT reflection_id FROM reflection_hearts WHERE reflection_id = ? AND actor_key = ?"
+    "SELECT reflection_id, COALESCE(NULLIF(reaction_type, ''), 'heart') AS reaction_type FROM reflection_hearts WHERE reflection_id = ? AND actor_key = ?"
   )
     .bind(id, actorKey)
     .first();
 
   const now = new Date().toISOString();
-  let hearted = false;
+  let myReaction = "";
 
-  if (existingHeart) {
+  if (existingHeart && existingHeart.reaction_type === requestedReaction) {
+    // Clicking the same reaction toggles it off
     await env.DB.batch([
       env.DB.prepare("DELETE FROM reflection_hearts WHERE reflection_id = ? AND actor_key = ?").bind(id, actorKey),
       env.DB.prepare(
@@ -96,32 +116,63 @@ export async function onRequestPost(context) {
          WHERE id = ?`
       ).bind(id, id),
     ]);
-    hearted = false;
-  } else {
+    myReaction = "";
+  } else if (existingHeart) {
+    // Switching from one reaction to another
     await env.DB.batch([
       env.DB.prepare(
-        "INSERT OR IGNORE INTO reflection_hearts (reflection_id, actor_key, created_at) VALUES (?, ?, ?)"
-      ).bind(id, actorKey, now),
+        "UPDATE reflection_hearts SET reaction_type = ?, created_at = ? WHERE reflection_id = ? AND actor_key = ?"
+      ).bind(requestedReaction, now, id, actorKey),
       env.DB.prepare(
         `UPDATE activity_reflections
          SET heart_count = (SELECT COUNT(*) FROM reflection_hearts WHERE reflection_id = ?)
          WHERE id = ?`
       ).bind(id, id),
     ]);
-    hearted = true;
+    myReaction = requestedReaction;
+  } else {
+    // Adding a new reaction
+    await env.DB.batch([
+      env.DB.prepare(
+        "INSERT OR IGNORE INTO reflection_hearts (reflection_id, actor_key, reaction_type, created_at) VALUES (?, ?, ?, ?)"
+      ).bind(id, actorKey, requestedReaction, now),
+      env.DB.prepare(
+        `UPDATE activity_reflections
+         SET heart_count = (SELECT COUNT(*) FROM reflection_hearts WHERE reflection_id = ?)
+         WHERE id = ?`
+      ).bind(id, id),
+    ]);
+    myReaction = requestedReaction;
   }
 
-  const refreshed = await env.DB.prepare("SELECT heart_count FROM activity_reflections WHERE id = ?")
-    .bind(id)
-    .first();
+  const [refreshed, summaryRes] = await Promise.all([
+    env.DB.prepare("SELECT heart_count FROM activity_reflections WHERE id = ?").bind(id).first(),
+    env.DB.prepare(
+      `SELECT COALESCE(NULLIF(reaction_type, ''), 'heart') AS reaction_type, COUNT(*) AS cnt
+       FROM reflection_hearts
+       WHERE reflection_id = ?
+       GROUP BY COALESCE(NULLIF(reaction_type, ''), 'heart')`
+    )
+      .bind(id)
+      .all()
+      .catch(() => ({ results: [] })),
+  ]);
+
+  const reactions = { heart: 0, warm: 0, inspire: 0 };
+  for (const r of summaryRes.results || []) {
+    const k = r.reaction_type in reactions ? r.reaction_type : "heart";
+    reactions[k] += Number(r.cnt || 0);
+  }
 
   const headers = setCookie ? { "Set-Cookie": setCookie } : {};
   return jsonResponse(
     {
       ok: true,
       id,
-      hearted,
+      hearted: Boolean(myReaction),
       heartCount: Math.max(0, Number(refreshed?.heart_count || 0)),
+      myReaction,
+      reactions,
     },
     200,
     headers

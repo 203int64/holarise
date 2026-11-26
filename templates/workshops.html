@@ -1,29 +1,31 @@
-<section class="page-hero">
+<section class="page-hero page-hero--editorial">
   <div class="container">
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
-      <a href="/" data-i18n="nav.home">Trang chủ</a>
+      <a href="/">Trang chủ</a>
       <span aria-hidden="true">/</span>
-      <span aria-current="page" data-i18n="nav.schedule">Lịch hoạt động</span>
+      <span aria-current="page">Lịch hoạt động</span>
     </nav>
-    <h1 data-i18n="schedule.hero.title">{{WORKSHOP_INTRO_TITLE}}</h1>
-    <p data-i18n="schedule.hero.desc">{{WORKSHOP_INTRO_DESC}}</p>
+    <h1>{{WORKSHOP_INTRO_TITLE}}</h1>
+    <p>{{WORKSHOP_INTRO_DESC}}</p>
   </div>
 </section>
 
 <section class="section" id="lich-su-kien">
   <div class="container">
-    <div class="section-header--split" style="margin-bottom: 24px;">
+    <div class="section-header--split section-header--editorial">
       <div>
         <div class="kicker">Lịch gặp gỡ định kỳ</div>
-        <h2 class="section-title" style="margin-bottom: 6px;">Các buổi đối thoại &amp; hoạt động sắp mở</h2>
-        <p class="section-lead">Lọc theo 3 trụ cột để chọn buổi gặp phù hợp với lịch trình của bạn — giữ chỗ nhanh trong 15 giây, không cần mật khẩu.</p>
+        <h2 class="section-title">Các buổi sắp diễn ra</h2>
       </div>
-      <a class="arrow-link" href="/tham-gia/">Giữ chỗ &amp; Vào Nhóm Zalo →</a>
+      <a class="arrow-link" href="/tham-gia/">
+        <span>Giữ chỗ &amp; Nhóm Zalo</span>
+        <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
     </div>
 
     <div class="filter-bar-row">
       <div class="filter-bar" data-filter-group="[data-workshop-card]" role="group" aria-label="Lọc lịch theo 3 trụ cột">
-        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true" data-i18n="filter.all">Tất cả</button>
+        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Tất cả</button>
         <button class="filter-btn" type="button" data-filter="holaheart" data-pillar="holaheart" aria-pressed="false">
           <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
           <span>HolaHeart</span>
@@ -48,13 +50,15 @@
 
 <section class="section section--mist">
   <div class="container">
-    <div class="section-header--split" style="margin-bottom: 28px;">
+    <div class="section-header--split section-header--editorial">
       <div>
-        <div class="kicker" data-i18n="schedule.past.kicker">Dấu mốc đã qua</div>
-        <h2 class="section-title" style="margin-bottom: 6px;" data-i18n="schedule.past.title">Những chương trình đã tổ chức</h2>
-        <p class="section-lead" data-i18n="schedule.past.lead">Các buổi gặp gỡ, đêm nhạc và đối thoại đã diễn ra kèm lưu bút cảm nhận của thành viên tại Hành trình.</p>
+        <div class="kicker">Dấu mốc đã qua</div>
+        <h2 class="section-title">Chương trình đã tổ chức</h2>
       </div>
-      <a class="arrow-link" href="/hanh-trinh/" data-i18n="schedule.past.link">Xem Hành trình &amp; Lưu bút →</a>
+      <a class="arrow-link" href="/hanh-trinh/">
+        <span>Xem Hành trình</span>
+        <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
     </div>
 
     <div class="past-list" data-stagger-group>
@@ -69,12 +73,12 @@
   <div class="container">
     <div class="cta-band">
       <div>
-        <h2 data-i18n="schedule.partner.title">Muốn đồng tổ chức một buổi tại trường hoặc không gian của bạn?</h2>
-        <p data-i18n="schedule.partner.desc">Hola sẵn sàng phối hợp cùng các CLB sinh viên, nhà trường và không gian văn hóa tại Hòa Lạc.</p>
+        <h2>Đồng tổ chức cùng HolaRise</h2>
+        <p>Phối hợp minh bạch cùng CLB sinh viên, nhà trường và không gian văn hóa.</p>
       </div>
       <div class="cta-band-actions">
-        <a class="btn btn--light" href="/tham-gia/?chuong-trinh=hoptac" data-magnetic data-i18n="schedule.partner.cta">Đề xuất hợp tác</a>
-        <a class="btn btn--ghost-dark" href="/gioi-thieu/#mo-hinh-tac-dong" data-i18n="schedule.empty.secondary">Tìm hiểu 3 trụ cột</a>
+        <a class="btn btn--light" href="/tham-gia/?chuong-trinh=hoptac" data-magnetic>Đề xuất hợp tác</a>
+        <a class="btn btn--ghost-dark" href="/gioi-thieu/#mo-hinh-tac-dong">Ba trụ cột</a>
       </div>
     </div>
   </div>

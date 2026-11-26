@@ -1,16 +1,171 @@
+import { autoProvisionFinishedEventAlbums } from "../_lib/albums.js";
+import { ensureMediaApprovalSchema } from "../_lib/media-approval-schema.js";
 import {
   absUrl,
   BRAND_SHORT_NAME,
   buildEventIsoTimes,
   buildEventsJsonLd,
   escHtml,
+  fullImageUrl,
+  getTodayVnIso,
+  imageAttrs,
   renderSeatBarHtml,
   replaceMarker,
   resolveEventSlug,
   serializeEventRow,
 } from "../_lib/render.js";
+import { ensureReflectionsSchema } from "../_lib/security.js";
 
 const DEFAULT_ZALO_GROUP = "https://zalo.me/g/7fock88aizzrdkmr9ggf";
+
+function isEventFinished(ev) {
+  if (!ev) return false;
+  if (ev.kind === "past") return true;
+  const dateStr = String(ev.date || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  return dateStr < getTodayVnIso(new Date());
+}
+
+function renderMemoryGalleryHtml(photos, ev, albumId) {
+  const safeEventId = escHtml(ev.id || "");
+  const safeSlug = escHtml(resolveEventSlug(ev) || "");
+  const safeTitle = escHtml(ev.title || "Buổi gặp HolaRise");
+  const safeAlbumId = escHtml(albumId || "");
+
+  if (!photos || photos.length === 0) {
+    return `<div class="memory-gallery-empty">
+      <p>Những khung hình đầu tiên của buổi gặp đang được chọn lọc từ Ban Hình Ảnh và các thành viên tham dự.</p>
+      <button class="btn btn--primary btn--sm" type="button" data-open-event-contribute data-contribute-tab="photos" data-event-id="${safeEventId}" data-event-slug="${safeSlug}" data-event-title="${safeTitle}" data-album-id="${safeAlbumId}">Góp những khung hình đầu tiên</button>
+    </div>`;
+  }
+
+  const pad2 = (n) => (n < 10 ? `0${n}` : String(n));
+  const tiles = photos
+    .map((p, idx) => {
+      const caption = p.caption || ev.title || "Khoảnh khắc HolaRise";
+      const alt = p.alt || caption;
+      const credit = p.photographer ? ` · Ảnh: ${p.photographer}` : "";
+      const fullCap = `${caption}${credit}`;
+      return `<button class="archive-thumb memory-stage-thumb" type="button" aria-label="Xem ảnh ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(fullImageUrl(p.url))}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCap)}">
+        <img ${imageAttrs(p.url, "(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 280px")} alt="${escHtml(alt)}" width="480" height="360" loading="lazy" decoding="async">
+        <span class="archive-thumb-idx" aria-hidden="true">${pad2(idx + 1)}</span>
+        <span class="archive-thumb-cap" aria-hidden="true">${escHtml(p.photographer ? `Ảnh: ${p.photographer}` : caption)}</span>
+      </button>`;
+    })
+    .join("\n        ");
+
+  return `<div class="archive-contact-sheet memory-contact-sheet">
+        ${tiles}
+      </div>`;
+}
+
+async function renderMemoryStageResponse({ request, env, matched, slug }) {
+  const shellRes = await env.ASSETS.fetch(
+    new Request(new URL("/_templates/event-memory-shell.tpl", request.url))
+  );
+  if (!shellRes || !shellRes.ok) {
+    return null;
+  }
+
+  await Promise.all([
+    ensureMediaApprovalSchema(env.DB),
+    ensureReflectionsSchema(env.DB),
+  ]);
+  await autoProvisionFinishedEventAlbums(env);
+
+  // Locate album linked to this finished event (by event_id first, then matching event_date)
+  let album = await env.DB.prepare(
+    `SELECT id, slug, title, cover_url
+     FROM media_albums
+     WHERE status = 'published' AND event_id = ?
+     ORDER BY created_at DESC LIMIT 1`
+  )
+    .bind(matched.id)
+    .first()
+    .catch(() => null);
+
+  if (!album && matched.date) {
+    album = await env.DB.prepare(
+      `SELECT id, slug, title, cover_url
+       FROM media_albums
+       WHERE status = 'published' AND event_date = ?
+       ORDER BY created_at DESC LIMIT 1`
+    )
+      .bind(matched.date)
+      .first()
+      .catch(() => null);
+  }
+
+  const albumId = album?.id || "";
+  const [photosRes, refCountRow] = await Promise.all([
+    albumId
+      ? env.DB.prepare(
+          `SELECT id, COALESCE(NULLIF(web_url, ''), url) AS url, caption, alt, photographer
+           FROM media_photos
+           WHERE album_id = ? AND COALESCE(approval_status, 'approved') = 'approved'
+           ORDER BY sort_order ASC, created_at DESC
+           LIMIT 120`
+        )
+          .bind(albumId)
+          .all()
+          .catch(() => ({ results: [] }))
+      : Promise.resolve({ results: [] }),
+    env.DB.prepare(
+      "SELECT COUNT(*) AS cnt FROM activity_reflections WHERE activity_slug = ? AND status = 'approved'"
+    )
+      .bind(slug)
+      .first()
+      .catch(() => null),
+  ]);
+
+  const approvedPhotos = photosRes?.results || [];
+  const approvedRefCount = Number(refCountRow?.cnt || 0);
+  const pillarMeta = derivePillarMeta(matched);
+  const canonicalUrl = absUrl(`/su-kien/${slug}/`);
+  const ogImage = approvedPhotos[0]?.url || album?.cover_url || matched.image;
+  const pageTitle = `Kỷ niệm · ${matched.title} | ${BRAND_SHORT_NAME}`;
+  const statsParts = [];
+  if (approvedPhotos.length > 0) statsParts.push(`${approvedPhotos.length} khoảnh khắc`);
+  if (approvedRefCount > 0) statsParts.push(`${approvedRefCount} dòng kỷ niệm`);
+  const statsText = statsParts.length ? statsParts.join(" · ") : "Đang lưu giữ kỷ niệm";
+
+  const replacements = {
+    __SSR_PAGE_TITLE__: escHtml(pageTitle),
+    __SSR_PAGE_DESCRIPTION__: escHtml(
+      matched.summary || `Sân khấu kỷ niệm, hình ảnh và lưu bút sau buổi gặp ${matched.title} tại Hòa Lạc.`
+    ),
+    __SSR_CANONICAL_URL__: escHtml(canonicalUrl),
+    __SSR_OG_IMAGE_URL__: escHtml(absUrl(ogImage)),
+    __SSR_EXTRA_JSON_LD__: buildEventsJsonLd([matched]),
+    __SSR_EVENT_ID__: escHtml(matched.id),
+    __SSR_EVENT_SLUG__: escHtml(slug),
+    __SSR_EVENT_PILLAR__: escHtml(pillarMeta.key),
+    __SSR_EVENT_PILLAR_LABEL__: escHtml(pillarMeta.label),
+    __SSR_EVENT_TITLE__: escHtml(matched.title),
+    __SSR_EVENT_DATE__: escHtml(matched.date || ""),
+    __SSR_EVENT_DATE_DISPLAY__: escHtml(matched.dateDisplay || matched.date || "Hòa Lạc"),
+    __SSR_EVENT_LOCATION__: escHtml(matched.location || "Hòa Lạc, Hà Nội"),
+    __SSR_EVENT_SUMMARY__: escHtml(
+      matched.summary ||
+        "Những khoảnh khắc, lời chia sẻ và góc nhìn của những người đã đồng hành trong buổi gặp này."
+    ),
+    __SSR_MEMORY_ALBUM_ID__: escHtml(albumId),
+    __SSR_MEMORY_STATS_TEXT__: escHtml(statsText),
+    __SSR_MEMORY_GALLERY_HTML__: renderMemoryGalleryHtml(approvedPhotos, matched, albumId),
+  };
+
+  const html = (await shellRes.text()).replace(/__SSR_[A-Z0-9_]+__/g, (token) =>
+    Object.prototype.hasOwnProperty.call(replacements, token) ? replacements[token] : token
+  );
+
+  return new Response(html, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=0, must-revalidate",
+    },
+  });
+}
 
 function derivePillarMeta(ev) {
   const key = String(ev?.pillar || "").toLowerCase();
@@ -71,6 +226,31 @@ export async function onRequestGet({ request, env, params }) {
   const reqUrl = new URL(request.url);
   const recipientParam = (reqUrl.searchParams.get("gui") || reqUrl.searchParams.get("to") || "").trim().slice(0, 60);
 
+  // Query live D1 event first so finished events automatically transform into the Post-Event Memory Stage
+  // on the exact same /su-kien/<slug>/ URL (even if a pre-rendered static invitation exists in dist/).
+  let matchedEvent = null;
+  if (env?.DB) {
+    const eventsRes = await env.DB.prepare(
+      "SELECT * FROM events WHERE status = 'published' ORDER BY sort_order ASC, date ASC LIMIT 100"
+    )
+      .all()
+      .catch(() => ({ results: [] }));
+    matchedEvent =
+      (eventsRes.results || [])
+        .map(serializeEventRow)
+        .find((ev) => ev && (resolveEventSlug(ev) === slug || ev.id.toLowerCase() === slug)) || null;
+
+    if (matchedEvent && isEventFinished(matchedEvent) && env?.ASSETS) {
+      const memoryRes = await renderMemoryStageResponse({
+        request,
+        env,
+        matched: matchedEvent,
+        slug,
+      });
+      if (memoryRes) return memoryRes;
+    }
+  }
+
   // Serve pre-rendered static invitation if it exists, enriched with live D1 seat bar, fee & personalized title
   if (env?.ASSETS) {
     const staticRes = await env.ASSETS.fetch(new Request(new URL(`/su-kien/${slug}/index.html`, request.url)));
@@ -79,19 +259,14 @@ export async function onRequestGet({ request, env, params }) {
       if (recipientParam) {
         html = injectPersonalizedTitleTags(html, recipientParam);
       }
-      if (env?.DB) {
-        const eventsRes = await env.DB.prepare("SELECT * FROM events WHERE status = 'published' LIMIT 100")
-          .all()
-          .catch(() => ({ results: [] }));
-        const matchedStatic = (eventsRes.results || [])
-          .map(serializeEventRow)
-          .find((ev) => ev && (resolveEventSlug(ev) === slug || ev.id.toLowerCase() === slug));
-        if (matchedStatic) {
-          const webBooked = matchedStatic.showSeatBar ? await countWebRegistrations(env.DB, matchedStatic.id) : 0;
-          html = replaceMarker(html, "EVENT_SEAT_BAR", renderSeatBarHtml(matchedStatic, webBooked));
-          if (matchedStatic.fee) {
-            html = replaceMarker(html, "EVENT_FEE", escHtml(matchedStatic.fee));
-          }
+      if (matchedEvent && env?.DB) {
+        const webBooked = matchedEvent.showSeatBar ? await countWebRegistrations(env.DB, matchedEvent.id) : 0;
+        html = replaceMarker(html, "EVENT_SEAT_BAR", renderSeatBarHtml(matchedEvent, webBooked));
+        if (matchedEvent.fee) {
+          html = replaceMarker(html, "EVENT_FEE", escHtml(matchedEvent.fee));
+        }
+        if (matchedEvent.zaloGroupUrl) {
+          html = html.replaceAll(DEFAULT_ZALO_GROUP, escHtml(matchedEvent.zaloGroupUrl));
         }
       }
       const headers = new Headers(staticRes.headers);
@@ -107,20 +282,14 @@ export async function onRequestGet({ request, env, params }) {
     return new Response("Not Found", { status: 404 });
   }
 
-  const [shellRes, eventsRes] = await Promise.all([
-    env.ASSETS.fetch(new Request(new URL("/_templates/event-invitation-shell.tpl", request.url))),
-    env.DB.prepare("SELECT * FROM events WHERE status = 'published' ORDER BY sort_order ASC, date ASC LIMIT 100")
-      .all()
-      .catch(() => ({ results: [] })),
-  ]);
-
+  const shellRes = await env.ASSETS.fetch(
+    new Request(new URL("/_templates/event-invitation-shell.tpl", request.url))
+  );
   if (!shellRes || !shellRes.ok) {
     return new Response("Not Found", { status: 404 });
   }
 
-  const matched = (eventsRes.results || [])
-    .map(serializeEventRow)
-    .find((ev) => ev && (resolveEventSlug(ev) === slug || ev.id.toLowerCase() === slug));
+  const matched = matchedEvent;
 
   if (!matched) {
     const notFound = await env.ASSETS.fetch(new Request(new URL("/404.html", request.url)));
@@ -180,7 +349,7 @@ export async function onRequestGet({ request, env, params }) {
     __SSR_EVENT_SEAT_BAR_HTML__: seatBarHtml,
     __SSR_EVENT_IMAGE__: escHtml(matched.image),
     __SSR_EVENT_IMAGE_ALT__: escHtml(matched.imageAlt || matched.title),
-    __SSR_EVENT_ZALO_GROUP__: escHtml(DEFAULT_ZALO_GROUP),
+    __SSR_EVENT_ZALO_GROUP__: escHtml(matched.zaloGroupUrl || DEFAULT_ZALO_GROUP),
     __SSR_EVENT_HOST_SIGNATURE__: escHtml(`${(matched.type || "HolaRise").split("·")[0].trim()} · ${BRAND_SHORT_NAME}`),
     __SSR_EVENT_RSVP_HEADING__: escHtml(`Giữ chỗ cho ${matched.dateDisplay || matched.date}`),
     __SSR_INVITE_HEADLINE__: escHtml(matched.title),

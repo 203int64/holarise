@@ -1,0 +1,486 @@
+<section class="page-hero page-hero--compact join-page-hero">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/en/">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Join &amp; Partner</span>
+    </nav>
+    <h1>Join {{BRAND_NAME}}</h1>
+    <p>Sign in without passwords to activate your Member Pass for 1-tap RSVP, or submit an institutional partnership proposal.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 24px;">
+  <div class="container">
+    <div class="join-invite-banner" id="join-invite-banner" hidden role="status" aria-live="polite">
+      <span class="join-invite-dot" aria-hidden="true"></span>
+      <p class="join-invite-text" id="join-invite-text"></p>
+    </div>
+  </div>
+
+  <!-- STEP 1: UNIFIED SINGLE-FLOW AUTH -->
+  <div class="container" id="member-guest-view">
+    <div class="auth-center-stage">
+      <div class="auth-card-surface">
+        <div id="join-pane-auth" data-join-pane="auth">
+          <div class="auth-dialog-brand" style="margin-bottom: 18px; padding-right: 0;">
+            <img src="/assets/images/logo-mark.png" alt="HolaRise emblem" width="34" height="34">
+            <div>
+              <h2 id="join-member-heading" class="auth-heading" style="font-size: 1.32rem; margin: 0;">Sign in to HolaRise</h2>
+              <p class="auth-dialog-sub">Continue with Google, Passkey, or Email.</p>
+            </div>
+          </div>
+
+          <div class="form-status" id="join-oauth-alert" role="status" aria-live="polite" style="margin-bottom: 12px;"></div>
+
+          <div class="auth-provider-stack">
+            <a class="auth-google-btn" href="/api/member/auth/google?returnTo=/en/join/" data-google-auth-link>
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.54-5.17 3.54-8.87Z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.91l-3.88-3c-1.07.72-2.45 1.16-4.06 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.1A12 12 0 0 0 12 24Z"/>
+                <path fill="#FBBC05" d="M5.28 14.29A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.38-2.29v-3.1H1.29a12 12 0 0 0 0 10.78l3.99-3.1Z"/>
+                <path fill="#EA4335" d="M12 4.75c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.69 1.29 6.61l3.99 3.1C6.23 6.86 8.88 4.75 12 4.75Z"/>
+              </svg>
+              <span>Continue with Google</span>
+            </a>
+
+            <button class="auth-google-btn" type="button" data-passkey-login>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M2 21v-2a4 4 0 0 1 4-4h6"/>
+                <circle cx="17.5" cy="15.5" r="2.5"/>
+                <path d="M19.5 17.5 22 20"/>
+              </svg>
+              <span>Sign in with Passkey</span>
+            </button>
+          </div>
+
+          <div class="auth-divider" style="margin: 18px 0;"><span>or</span></div>
+
+          <form class="auth-form" id="join-unified-auth-form" data-unified-auth aria-labelledby="join-member-heading" novalidate>
+            <div class="auth-identified-pill" data-auth-id-pill hidden>
+              <span data-auth-id-text></span>
+              <button type="button" class="auth-change-btn" data-auth-reset>Change</button>
+            </div>
+
+            <div class="auth-field" data-auth-step="identify">
+              <label for="m-auth-id">Email</label>
+              <input id="m-auth-id" name="identifier" type="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="you@example.com" required enterkeyhint="next">
+            </div>
+
+            <div class="auth-field" data-auth-step="password" hidden>
+              <label for="m-auth-pw" data-auth-pw-label>Password</label>
+              <div class="auth-pw-wrap">
+                <input id="m-auth-pw" name="password" type="password" autocomplete="current-password" minlength="6" placeholder="••••••••" enterkeyhint="done">
+                <button type="button" class="auth-pw-eye" data-member-pw-toggle="m-auth-pw" aria-pressed="false" aria-label="Show password">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-status" data-auth-status role="status" aria-live="polite"></div>
+
+            <button class="auth-submit-btn" type="submit" data-auth-submit>Continue</button>
+
+            <div class="auth-footer-links">
+              <p class="auth-legal">By continuing, you agree to HolaRise's <a href="/en/privacy/">Transparency &amp; Privacy Standards</a>.</p>
+              <div class="auth-divider"><span>or</span></div>
+              <div class="auth-alt-row">
+                <button type="button" class="auth-text-link" data-join-tab="partner">University / Club / NGO Partnership →</button>
+                <a class="auth-text-link auth-text-link--muted" href="mailto:{{CONTACT_EMAIL}}">Email {{CONTACT_EMAIL}} ↗</a>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- PARTNER / ORGANIZATION PROPOSAL -->
+        <div id="join-pane-partner" data-join-pane="partner" hidden>
+          <button type="button" class="auth-back-link" data-join-tab="auth">← Back to Sign in</button>
+          <h2 id="join-form-heading" class="auth-heading">Institutional &amp; Venue Partnership</h2>
+          <p class="auth-lead">For universities, student clubs, NGOs, and cultural spaces interested in transparent collaboration with HolaRise.</p>
+
+          <form class="auth-form" action="/api/registrations" method="POST" aria-labelledby="join-form-heading" data-club-form data-join-studio data-join-mode="partner" data-draft-key="join-partner-en" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" novalidate>
+            <input type="hidden" name="source" value="join_page">
+            <input type="hidden" name="role" value="Institutional Partnership Inquiry (EN)">
+            <input type="hidden" name="activity" id="join-activity-input" value="Institutional Partnership Inquiry (EN)">
+            <input type="hidden" name="eventId" id="join-event-id-input" value="">
+            <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
+              <label for="join-website">Website</label>
+              <input id="join-website" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
+
+            <div class="auth-row-2">
+              <div class="auth-field">
+                <label for="join-name" id="join-name-label">Contact person <span aria-hidden="true">*</span></label>
+                <input id="join-name" name="fullName" type="text" autocomplete="name" placeholder="e.g. Sarah Tran" required minlength="2" data-error="join-name-error">
+                <div id="join-name-error" class="field-error">
+                  <span data-error-text>Please enter the contact person's name (at least 2 characters).</span>
+                </div>
+              </div>
+              <div class="auth-field">
+                <label for="join-phone">Email or Phone / Zalo <span aria-hidden="true">*</span></label>
+                <input id="join-phone" name="phone" type="text" autocomplete="email" placeholder="partner@org.org or +84..." required minlength="6" data-error="join-phone-error">
+                <div id="join-phone-error" class="field-error">
+                  <span data-error-text>Please enter a valid email address or phone number (8+ digits).</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="auth-row-2">
+              <div class="auth-field">
+                <label for="join-org" id="join-org-label">Organization / University</label>
+                <input id="join-org" name="organization" type="text" autocomplete="organization" placeholder="University, NGO, Club, or Venue">
+              </div>
+              <div class="auth-field">
+                <label for="join-email">Secondary email <span class="auth-hint-inline">(optional)</span></label>
+                <input id="join-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="team@organization.org" data-error="join-email-error">
+                <div id="join-email-error" class="field-error">
+                  <span data-error-text>Please enter a valid email address.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label for="join-message" id="join-note-label">Collaboration idea &amp; proposed timeline</label>
+              <textarea id="join-message" name="note" rows="3" placeholder="Briefly describe how you would like to collaborate so our coordinators can follow up..."></textarea>
+            </div>
+
+            <div class="form-status" role="status" aria-live="polite"></div>
+
+            <button class="auth-submit-btn" type="submit" id="join-submit-btn">Send partnership inquiry</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2A: SINGLE-SCREEN PROFILE ONBOARDING -->
+  <div class="container" id="member-onboarding-wizard" hidden>
+    <div class="auth-center-stage auth-center-stage--wide">
+      <div class="auth-card-surface">
+        <div class="onboarding-top">
+          <span class="onboarding-step-label">Complete your Member Pass</span>
+          <button type="button" class="auth-text-link auth-text-link--muted" id="ob-skip-btn">Skip for now</button>
+        </div>
+
+        <form class="auth-form" id="onboarding-form" novalidate>
+          <div>
+            <h2 class="auth-heading">Welcome to HolaRise</h2>
+            <p class="auth-lead">Pick the pillar closest to you and your university or workplace to personalize your Member Pass.</p>
+          </div>
+
+          <div class="auth-field">
+            <label>Pillar you are most excited about</label>
+            <div class="auth-pillar-strip" style="margin-top: 4px;">
+              <div class="auth-pillar-item">
+                <input class="visually-hidden" type="radio" name="obPillar" id="ob-p-heart" value="holaheart" checked>
+                <label class="auth-pillar-btn" for="ob-p-heart"><span class="auth-pillar-dot" style="background:#B85D3B;"></span><span>HolaHeart</span></label>
+              </div>
+              <div class="auth-pillar-item">
+                <input class="visually-hidden" type="radio" name="obPillar" id="ob-p-green" value="holagreen">
+                <label class="auth-pillar-btn" for="ob-p-green"><span class="auth-pillar-dot" style="background:#145A40;"></span><span>HolaGreen</span></label>
+              </div>
+              <div class="auth-pillar-item">
+                <input class="visually-hidden" type="radio" name="obPillar" id="ob-p-connect" value="holaconnect">
+                <label class="auth-pillar-btn" for="ob-p-connect"><span class="auth-pillar-dot" style="background:#1F4E5F;"></span><span>HolaConnect</span></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="auth-row-2">
+            <div class="auth-field">
+              <label for="ob-name">Display name on pass <span aria-hidden="true">*</span></label>
+              <input id="ob-name" name="name" type="text" autocomplete="name" minlength="2" required placeholder="Alex Nguyen">
+            </div>
+            <div class="auth-field">
+              <label for="ob-org">University / Organization</label>
+              <input id="ob-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Search or enter your university / workplace...">
+            </div>
+          </div>
+
+          <div class="org-quick-chips" aria-label="Quick organization presets">
+            <button type="button" class="org-chip-btn" data-org-chip="FPT University Hanoi (Hoa Lac)" data-org-target="ob-org">FPT University</button>
+            <button type="button" class="org-chip-btn" data-org-chip="Vietnam National University Hanoi – Hoa Lac Campus (VNU)" data-org-target="ob-org">VNU Hoa Lac</button>
+            <button type="button" class="org-chip-btn" data-org-chip="Hoa Lac High-Tech Park (HHTP)" data-org-target="ob-org">Hoa Lac HHTP</button>
+            <button type="button" class="org-chip-btn" data-org-chip="International Exchange Student" data-org-target="ob-org">International Student</button>
+          </div>
+
+          <div class="auth-field">
+            <label for="ob-bio">Short line for your pass <span class="auth-hint-inline">(optional)</span></label>
+            <input id="ob-bio" name="bio" type="text" maxlength="160" placeholder="e.g. Living grounded, greener, and serving with consistency.">
+          </div>
+
+          <div class="form-status" id="ob-status" role="status" aria-live="polite"></div>
+
+          <div class="ob-nav-row">
+            <button type="submit" class="auth-submit-btn" id="ob-finish-btn" style="flex: 1;">Finish &amp; Open Member Pass</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: AUTHENTICATED MEMBER HUB -->
+  <div class="container" id="member-dashboard-view" hidden>
+    <div class="member-hub-shell">
+      <nav class="member-hub-tabs" role="tablist" aria-label="Member account sections">
+        <button type="button" class="member-hub-tab is-active" role="tab" aria-selected="true" data-dash-tab="profile">Pass &amp; Profile</button>
+        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="activity">Journey Wallet</button>
+        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="security">Security</button>
+      </nav>
+
+      <!-- TAB 1: MEMBER PASS & PROFILE -->
+      <div class="member-hub-pane" data-dash-pane="profile">
+        <div class="member-pass-stage">
+          <div class="member-dash-card-col">
+            <div class="member-completion-bar" id="member-completion-box">
+              <div class="member-completion-top">
+                <span>Member Pass Completion</span>
+                <strong id="dash-completion-pct">40%</strong>
+              </div>
+              <div class="member-completion-track" aria-hidden="true">
+                <span class="member-completion-fill" id="dash-completion-fill" style="width: 40%;"></span>
+              </div>
+              <p class="member-completion-hint" id="dash-completion-hint">Add your photo, university/organization, and short motto to complete your pass.</p>
+            </div>
+
+            <article class="sunrise-pass member-pass-live member-pass-luxe" id="member-live-pass" data-sunrise-pass data-pass-theme="sunrise" aria-label="Your HolaRise Member Pass">
+              <div class="member-pass-mesh" aria-hidden="true"></div>
+              <div class="member-pass-foil" aria-hidden="true"></div>
+              <div class="sunrise-pass-glare" aria-hidden="true"></div>
+
+              <div class="pass-header">
+                <div class="pass-brand">
+                  <img src="/assets/images/logo-mark.png" alt="HolaRise emblem" width="28" height="28">
+                  <span>HOLARISE · HOA LAC</span>
+                </div>
+                <span class="pass-state-pill" id="dash-pass-tier">LV.1 · FIRST STEP</span>
+              </div>
+
+              <div class="member-pass-identity">
+                <div class="member-pass-avatar-wrap">
+                  <img id="dash-avatar-img" class="member-pass-avatar" src="/assets/images/logo-mark.png" alt="HolaRise member avatar" width="64" height="64" hidden>
+                  <span id="dash-avatar-initials" class="member-pass-initials" aria-hidden="true">HR</span>
+                </div>
+                <div class="member-pass-identity-text">
+                  <span class="pass-program-tag" id="dash-pass-badge">HolaHeart · Stillness</span>
+                  <div class="pass-member-name" id="dash-pass-name">Hola Member</div>
+                  <div class="pass-member-org" id="dash-pass-org">HolaRise Community</div>
+                </div>
+              </div>
+
+              <p class="pass-greeting" id="dash-pass-bio">Living grounded, greener, and serving with consistency at HolaRise.</p>
+
+              <div class="pass-exp-panel" aria-label="Journey EXP progress">
+                <div class="pass-exp-head">
+                  <span class="pass-exp-rank" id="dash-exp-rank">Journey · First Step</span>
+                  <strong class="pass-exp-val" id="dash-exp-val">20 / 150 EXP</strong>
+                </div>
+                <div class="pass-exp-track" aria-hidden="true">
+                  <span class="pass-exp-fill" id="dash-exp-fill" style="width: 13%;"></span>
+                </div>
+                <div class="pass-exp-breakdown" id="dash-exp-breakdown">0 gatherings · 0 reflections</div>
+              </div>
+
+              <div class="pass-divider" aria-hidden="true"></div>
+
+              <div class="pass-meta-grid">
+                <div class="pass-meta-item">
+                  <span class="pass-meta-key">Member ID</span>
+                  <strong class="pass-meta-val pass-code" id="dash-pass-code">HOLA-2026-0000</strong>
+                </div>
+                <div class="pass-meta-item">
+                  <span class="pass-meta-key">Primary Pillar</span>
+                  <strong class="pass-meta-val" id="dash-pass-pillar">HolaHeart</strong>
+                </div>
+                <div class="pass-meta-item">
+                  <span class="pass-meta-key">Contact</span>
+                  <strong class="pass-meta-val pass-meta-val--ellipsis" id="dash-pass-contact">—</strong>
+                </div>
+                <div class="pass-meta-item">
+                  <span class="pass-meta-key">Status</span>
+                  <strong class="pass-meta-val">Active</strong>
+                </div>
+              </div>
+
+              <div class="pass-footer pass-footer--clean">
+                <span>HOLARISE.ORG</span>
+                <span>HOA LAC · YOUTH COMMUNITY</span>
+              </div>
+            </article>
+
+            <div class="member-pass-controls member-pass-controls--stage">
+              <button type="button" class="btn btn--primary btn--sm" id="btn-download-member-pass">Save Pass (PNG)</button>
+              <button type="button" class="btn btn--outline btn--sm" id="btn-open-profile-modal">Edit Profile</button>
+              <button type="button" class="btn btn--outline btn--sm member-avatar-upload-btn" id="btn-change-avatar">Change Photo</button>
+              <input id="dash-avatar-input" type="file" accept="image/*" class="visually-hidden" tabindex="-1">
+              <button type="button" class="btn btn--outline btn--sm" id="btn-member-logout">Sign out</button>
+            </div>
+            <div class="form-status" id="dash-avatar-status" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <dialog class="club-dialog club-dialog--auth member-profile-dialog" id="member-profile-modal" closedby="any" aria-labelledby="profile-modal-heading">
+          <div class="dialog-inner auth-dialog-inner">
+            <button class="modal-close" type="button" data-modal-close aria-label="Close dialog">×</button>
+            <div class="auth-dialog-brand">
+              <img src="/assets/images/logo-mark.png" alt="HolaRise emblem" width="32" height="32">
+              <div>
+                <h2 id="profile-modal-heading" class="auth-dialog-title">Edit Member Pass</h2>
+                <p class="auth-dialog-sub">Update your display name, contact info, and primary pillar.</p>
+              </div>
+            </div>
+            <form class="auth-form" id="member-profile-form" novalidate>
+              <div class="auth-row-2">
+                <div class="auth-field">
+                  <label for="prof-name">Full name <span aria-hidden="true">*</span></label>
+                  <input id="prof-name" name="name" type="text" autocomplete="name" minlength="2" required>
+                </div>
+                <div class="auth-field">
+                  <label for="prof-phone">Phone / Zalo <span class="auth-hint-inline">(for 1-tap RSVP)</span></label>
+                  <input id="prof-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+84...">
+                </div>
+              </div>
+              <div class="auth-field">
+                <label for="prof-org">University / Organization</label>
+                <input id="prof-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Search or enter your university / workplace...">
+              </div>
+              <div class="org-quick-chips" aria-label="Quick organization presets">
+                <button type="button" class="org-chip-btn" data-org-chip="FPT University Hanoi (Hoa Lac)" data-org-target="prof-org">FPT University</button>
+                <button type="button" class="org-chip-btn" data-org-chip="Vietnam National University Hanoi – Hoa Lac Campus (VNU)" data-org-target="prof-org">VNU Hoa Lac</button>
+                <button type="button" class="org-chip-btn" data-org-chip="Hoa Lac High-Tech Park (HHTP)" data-org-target="prof-org">Hoa Lac HHTP</button>
+                <button type="button" class="org-chip-btn" data-org-chip="International Exchange Student" data-org-target="prof-org">International Student</button>
+              </div>
+              <div class="auth-row-2">
+                <div class="auth-field">
+                  <label for="prof-pillar">Primary pillar</label>
+                  <select id="prof-pillar" name="primaryPillar">
+                    <option value="holaheart">HolaHeart · Stillness &amp; Listening</option>
+                    <option value="holagreen">HolaGreen · Ecology &amp; Landscapes</option>
+                    <option value="holaconnect">HolaConnect · Knowledge &amp; Service</option>
+                  </select>
+                </div>
+                <div class="auth-field">
+                  <label for="prof-bio">Pass motto <span class="auth-hint-inline">(max 160 chars)</span></label>
+                  <input id="prof-bio" name="bio" type="text" maxlength="160" placeholder="A short line about your journey...">
+                </div>
+              </div>
+              <div class="form-status" id="prof-status" role="status" aria-live="polite"></div>
+              <div class="member-profile-modal-actions">
+                <button class="auth-submit-btn" type="submit" id="prof-submit-btn">Save changes</button>
+              </div>
+            </form>
+          </div>
+        </dialog>
+      </div>
+
+      <!-- TAB 2: MY JOURNEY WALLET -->
+      <div class="member-hub-pane" data-dash-pane="activity" hidden>
+        <div class="member-hub-stack">
+          <section class="member-panel-box">
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">Personal Journey Wallet</span>
+                <h2>My Event Passes</h2>
+              </div>
+              <a class="arrow-link" href="/en/schedule/">This Week's Schedule →</a>
+            </div>
+            <div id="member-wallet-summary" class="member-wallet-summary" hidden></div>
+            <div id="member-bookings-list" class="member-wallet-stack">
+              <p class="member-empty-hint">Loading your event passes...</p>
+            </div>
+          </section>
+
+          <dialog id="member-wallet-dialog" class="wallet-pass-dialog" aria-labelledby="wallet-dlg-title">
+            <div class="wallet-dlg-shell">
+              <div class="wallet-dlg-topbar">
+                <span class="kicker" id="wallet-dlg-kicker">Event Pass</span>
+                <button type="button" class="wallet-dlg-close" id="wallet-dlg-close" aria-label="Close event pass">✕</button>
+              </div>
+              <div id="wallet-dlg-body"></div>
+              <div class="wallet-dlg-actions">
+                <button type="button" class="btn btn--primary btn--sm" id="wallet-dlg-download">Save Event Pass (PNG)</button>
+                <a class="btn btn--outline btn--sm" id="wallet-dlg-link" href="/en/schedule/" hidden>Open event invitation →</a>
+              </div>
+            </div>
+          </dialog>
+
+          <section class="member-panel-box">
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">Community Guestbook</span>
+                <h2>Reflections &amp; Memories Shared</h2>
+              </div>
+              <a class="arrow-link" href="/en/journey/">Write a reflection →</a>
+            </div>
+            <div id="member-reflections-list" class="member-list-stack">
+              <p class="member-empty-hint">Loading your reflections...</p>
+            </div>
+          </section>
+
+          <details class="member-panel-box member-quick-book-details" id="member-quick-events-box">
+            <summary class="member-quick-book-summary">
+              <span>Quick 1-Tap RSVP for Upcoming Gatherings</span>
+              <span class="member-quick-book-hint">Expand</span>
+            </summary>
+            <div style="margin-top: 16px;">
+              <!-- CMS:JOIN_EVENTS_SECTION:START -->
+              {{JOIN_EVENTS_SECTION_HTML}}
+              <!-- CMS:JOIN_EVENTS_SECTION:END -->
+              <div class="form-status" id="dash-event-book-status" role="status" aria-live="polite"></div>
+              <div style="margin-top: 12px;">
+                <button type="button" class="auth-submit-btn" style="width:auto;min-height:42px;padding:0 22px;" id="btn-dash-book-event">1-Tap RSVP</button>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- TAB 3: SECURITY (Passkey Management) -->
+      <div class="member-hub-pane" data-dash-pane="security" hidden>
+        <div class="member-hub-stack">
+          <section class="member-panel-box">
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">Passwordless Sign In</span>
+                <h2>Passkeys (Face ID · Touch ID)</h2>
+              </div>
+              <button type="button" class="btn btn--outline btn--sm" id="btn-add-passkey">+ Add Passkey</button>
+            </div>
+            <div class="form-status" id="passkey-dash-status" role="status" aria-live="polite" style="margin-bottom: 10px;"></div>
+            <div id="member-passkeys-list" class="member-list-stack">
+              <p class="member-empty-hint">Add a Passkey to sign in to HolaRise with one tap using Face ID or Touch ID on this device.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section faq-editorial-section" id="faq" aria-labelledby="join-faq-heading">
+  <div class="container">
+    <div class="faq-editorial-grid">
+      <div class="faq-editorial-aside" data-reveal>
+        <div class="kicker">Clear &amp; Welcoming</div>
+        <h2 class="section-title" id="join-faq-heading">Frequently Asked Questions</h2>
+        <p class="section-lead">How RSVP works, upfront costs, language support, and institutional partnerships.</p>
+
+        <div class="faq-editorial-links">
+          <a class="arrow-link" href="mailto:{{CONTACT_EMAIL}}">
+            <span>Email {{CONTACT_EMAIL}}</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+          <button type="button" class="faq-text-trigger" data-open-feedback-modal>
+            <span>Ask HolaRise another question</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="faq-editorial-list" data-faq-accordion data-reveal>
+        {{FAQ_HTML}}
+      </div>
+    </div>
+  </div>
+</section>

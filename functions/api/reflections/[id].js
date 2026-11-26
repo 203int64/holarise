@@ -5,7 +5,11 @@ import {
   readJsonBody,
   requireMember,
 } from "../../_lib/security.js";
-import { validateReflectionInput } from "../../_lib/validation.js";
+import {
+  extractMediaKeyFromUrl,
+  parseReflectionPhotos,
+  validateReflectionInput,
+} from "../../_lib/validation.js";
 import { serializePublicReflection } from "./index.js";
 
 export async function onRequestPatch(context) {
@@ -33,12 +37,22 @@ export async function onRequestPatch(context) {
   const parsed = await readJsonBody(request, 64 * 1024);
   if (!parsed.ok) return parsed.response;
 
+  const existingPhotos = parseReflectionPhotos(existing.photos_json, existing.photo_url || "");
+  const hasPhotoUrlsInput =
+    parsed.data.photoUrls !== undefined ||
+    parsed.data.photo_urls !== undefined ||
+    parsed.data.photos !== undefined;
   const merged = {
     activitySlug: existing.activity_slug,
     participantRole: parsed.data.participantRole ?? parsed.data.participant_role ?? existing.participant_role,
     pullQuote: parsed.data.pullQuote !== undefined ? parsed.data.pullQuote : existing.pull_quote,
+    mood: parsed.data.mood !== undefined ? parsed.data.mood : existing.mood || "",
     content: parsed.data.content !== undefined ? parsed.data.content : existing.content,
-    photoUrl: parsed.data.photoUrl !== undefined ? parsed.data.photoUrl : existing.photo_url,
+    ...(hasPhotoUrlsInput
+      ? { photoUrls: parsed.data.photoUrls ?? parsed.data.photo_urls ?? parsed.data.photos }
+      : parsed.data.photoUrl !== undefined || parsed.data.photo_url !== undefined
+        ? { photoUrl: parsed.data.photoUrl ?? parsed.data.photo_url }
+        : { photoUrls: existingPhotos }),
   };
 
   const validated = validateReflectionInput(merged, { requireSlug: false });
@@ -47,30 +61,41 @@ export async function onRequestPatch(context) {
   }
 
   const v = validated.value;
-  const oldKey = existing.photo_media_key || "";
+  const oldKeys = new Set(
+    [existing.photo_media_key, ...existingPhotos.map(extractMediaKeyFromUrl)].filter(Boolean)
+  );
+  const nextKeys = new Set(
+    [v.photo_media_key, ...v.photo_urls.map(extractMediaKeyFromUrl)].filter(Boolean)
+  );
   const now = new Date().toISOString();
 
   // Any edit to an approved or rejected reflection automatically returns to 'pending' moderation!
   await env.DB.prepare(
     `UPDATE activity_reflections
-     SET participant_role = ?, pull_quote = ?, content = ?, photo_url = ?, photo_media_key = ?,
+     SET participant_role = ?, pull_quote = ?, mood = ?, content = ?, photo_url = ?, photo_media_key = ?, photos_json = ?,
          status = 'pending', admin_note = '', reviewed_by = '', reviewed_at = NULL, updated_at = ?
      WHERE id = ? AND member_id = ?`
   )
     .bind(
       v.participant_role,
       v.pull_quote,
+      v.mood,
       v.content,
       v.photo_url,
       v.photo_media_key,
+      v.photos_json,
       now,
       id,
       auth.member.id
     )
     .run();
 
-  if (oldKey && oldKey !== v.photo_media_key && env?.MEDIA_KV?.delete) {
-    await env.MEDIA_KV.delete(`media:${oldKey}`).catch(() => null);
+  if (env?.MEDIA_KV?.delete) {
+    for (const key of oldKeys) {
+      if (!nextKeys.has(key)) {
+        await env.MEDIA_KV.delete(`media:${key}`).catch(() => null);
+      }
+    }
   }
 
   const updated = await env.DB.prepare(
@@ -104,8 +129,9 @@ export async function onRequestDelete(context) {
     return errorResponse(400, "MISSING_ID", "Thiếu mã lưu bút.");
   }
 
+  await ensureReflectionsSchema(env.DB);
   const existing = await env.DB.prepare(
-    "SELECT id, photo_media_key FROM activity_reflections WHERE id = ? AND member_id = ?"
+    "SELECT id, photo_url, photo_media_key, photos_json FROM activity_reflections WHERE id = ? AND member_id = ?"
   )
     .bind(id, auth.member.id)
     .first();
@@ -118,8 +144,14 @@ export async function onRequestDelete(context) {
     .bind(id, auth.member.id)
     .run();
 
-  if (existing.photo_media_key && env?.MEDIA_KV?.delete) {
-    await env.MEDIA_KV.delete(`media:${existing.photo_media_key}`).catch(() => null);
+  if (env?.MEDIA_KV?.delete) {
+    const keys = new Set(
+      [
+        existing.photo_media_key,
+        ...parseReflectionPhotos(existing.photos_json, existing.photo_url || "").map(extractMediaKeyFromUrl),
+      ].filter(Boolean)
+    );
+    await Promise.allSettled([...keys].map((k) => env.MEDIA_KV.delete(`media:${k}`)));
   }
 
   return jsonResponse({

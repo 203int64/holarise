@@ -21,10 +21,15 @@ export async function onRequestPost(context) {
 
   const email = cleanStr(parsed.data.email, 160).toLowerCase();
   const name = cleanStr(parsed.data.name, 100);
-  const role =
-    parsed.data.role === "super_admin" || parsed.data.role === "media"
-      ? parsed.data.role
-      : "editor";
+  const requestedRole = cleanStr(parsed.data.role, 32) || "media";
+  if (requestedRole !== "media") {
+    return errorResponse(
+      403,
+      "ADMIN_LOCKED",
+      "Hệ thống chỉ cho phép duy nhất 1 tài khoản Quản trị chính (203int64). Chỉ có thể tạo thêm tài khoản Ban Hình Ảnh (/media/)."
+    );
+  }
+  const role = "media";
   const password = String(parsed.data.password || "");
 
   const fields = {};

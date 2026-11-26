@@ -1,41 +1,31 @@
 import {
   checkRateLimit,
   errorResponse,
-  getClientIpHash,
-  getSessionMember,
   jsonResponse,
+  requireMember,
   sniffImageMime,
-  verifyCsrfOrigin,
 } from "../../_lib/security.js";
 
 const MAX_REFLECTION_UPLOAD_BYTES = 1.2 * 1024 * 1024; // 1.2 MB (client pre-compresses photo <= 1280px)
 
 export async function onRequestPost(context) {
-  const { request, env } = context;
+  const auth = await requireMember(context);
+  if (!auth.ok) return auth.response;
 
-  if (!verifyCsrfOrigin(request)) {
-    return errorResponse(403, "CSRF_BLOCKED", "Nguồn tải ảnh không hợp lệ.");
-  }
+  const { request, env } = context;
   if (!env?.MEDIA_KV) {
     return errorResponse(503, "KV_UNAVAILABLE", "Kho lưu ảnh chưa sẵn sàng.");
   }
 
-  const sessionMember = env?.DB ? await getSessionMember(env.DB, request).catch(() => null) : null;
-  if (env?.DB) {
-    const rateKey = sessionMember
-      ? `ref_media_mbr:${sessionMember.id}`
-      : `ref_media_ip:${await getClientIpHash(request)}`;
-    const maxHits = sessionMember ? 12 : 8;
-    const rl = await checkRateLimit(env.DB, rateKey, maxHits, 15 * 60 * 1000);
-    if (!rl.allowed) {
-      return errorResponse(
-        429,
-        "RATE_LIMITED",
-        "Bạn đã tải nhiều ảnh liên tiếp. Vui lòng thử lại sau ít phút.",
-        null,
-        { "Retry-After": String(rl.retryAfterSec) }
-      );
-    }
+  const rl = await checkRateLimit(env.DB, `ref_media_mbr:${auth.member.id}`, 21, 15 * 60 * 1000);
+  if (!rl.allowed) {
+    return errorResponse(
+      429,
+      "RATE_LIMITED",
+      "Bạn đã tải nhiều ảnh liên tiếp. Vui lòng thử lại sau ít phút.",
+      null,
+      { "Retry-After": String(rl.retryAfterSec) }
+    );
   }
 
   const contentType = request.headers.get("Content-Type") || "";
@@ -83,7 +73,7 @@ export async function onRequestPost(context) {
       contentType: detected.mime,
       size: bytes.byteLength,
       scope: "reflection",
-      uploadedByMember: sessionMember ? sessionMember.id : "",
+      uploadedByMember: auth.member.id,
       uploadedAt: new Date().toISOString(),
     },
   });

@@ -39,8 +39,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=d0d57bf632">
-  <link rel="stylesheet" href="/assets/css/media.css?v=d0d57bf632">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=9c1994eb4d">
+  <link rel="stylesheet" href="/assets/css/media.css?v=9c1994eb4d">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
 <body data-pwa-app-name="HolaRise Media">
@@ -295,10 +295,17 @@
       <section id="view-workspace" hidden>
         <input type="file" id="multi-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/*" multiple hidden>
 
+        <!-- Media Moderation Status Strip -->
+        <div class="ws-moderation-strip" id="ws-moderation-strip">
+          <span class="ws-mod-dot" aria-hidden="true"></span>
+          <span><strong>Kiểm duyệt Media: ĐANG BẬT</strong> · Ảnh đóng góp của thành viên lưu vào thư mục chuẩn hóa trên Google Drive và chờ Admin / Ban Điều Phối duyệt trước khi hiện lên Sân khấu Kỷ niệm.</span>
+        </div>
+
         <!-- Compact Status Filter & Multi-Select Bar -->
         <div class="ws-toolbar">
           <div class="seg-pills" role="group" aria-label="Lọc ảnh trong album" id="photo-filter-group">
             <button class="seg-pill" type="button" data-photo-filter="pending" id="tab-photo-pending" hidden>Chờ duyệt <span class="seg-count seg-count--warn" id="cnt-photo-pending">0</span></button>
+            <button class="seg-pill" type="button" data-photo-filter="contributions" id="tab-photo-contrib" hidden>Đóng góp <span class="seg-count" id="cnt-photo-contrib">0</span></button>
             <button class="seg-pill" type="button" data-photo-filter="approved">Đã lên web <span class="seg-count" id="cnt-photo-approved">0</span></button>
             <button class="seg-pill" type="button" data-photo-filter="featured">★ Trang chủ <span class="seg-count" id="cnt-photo-featured">0</span></button>
             <button class="seg-pill is-active" type="button" data-photo-filter="all">Tất cả <span class="seg-count" id="cnt-photo-all">0</span></button>
@@ -545,9 +552,9 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=d0d57bf632" defer></script>
-  <script src="/assets/js/gate-ui.js?v=d0d57bf632" defer></script>
-  <script src="/assets/js/media-portal.js?v=d0d57bf632" defer></script>
-  <script src="/assets/js/pwa.js?v=d0d57bf632" defer></script>
+  <script src="/assets/js/passkey-client.js?v=9c1994eb4d" defer></script>
+  <script src="/assets/js/gate-ui.js?v=9c1994eb4d" defer></script>
+  <script src="/assets/js/media-portal.js?v=9c1994eb4d" defer></script>
+  <script src="/assets/js/pwa.js?v=9c1994eb4d" defer></script>
 </body>
 </html>

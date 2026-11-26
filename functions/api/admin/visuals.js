@@ -60,7 +60,7 @@ export function mergeSiteVisuals(rawValue) {
 }
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context, { allowedRoles: ["super_admin", "editor", "media"] });
+  const auth = await requireAdmin(context);
   if (!auth.ok) return auth.response;
 
   const row = await context.env.DB.prepare("SELECT value FROM settings WHERE key = 'site_visuals_json'")
@@ -74,7 +74,7 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPut(context) {
-  const auth = await requireAdmin(context, { allowedRoles: ["super_admin", "editor", "media"] });
+  const auth = await requireAdmin(context);
   if (!auth.ok) return auth.response;
 
   const parsed = await readJsonBody(context.request, 32 * 1024);

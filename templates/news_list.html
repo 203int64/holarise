@@ -1,28 +1,31 @@
-<section class="page-hero">
+<section class="page-hero page-hero--editorial">
   <div class="container">
     <nav class="breadcrumb" aria-label="Đường dẫn trang">
-      <a href="/" data-i18n="nav.home">Trang chủ</a>
+      <a href="/">Trang chủ</a>
       <span aria-hidden="true">/</span>
-      <span aria-current="page" data-i18n="nav.journey">Hành trình</span>
+      <span aria-current="page">Hành trình</span>
     </nav>
     <h1>Hành trình HolaRise</h1>
-    <p>Từ những đêm nhạc mộc cùng MusicSpace đến các vòng tròn đối thoại lắng nghe — nơi lưu giữ những dấu mốc đã đi qua và cảm nhận của người đồng hành.</p>
+    <p>Những cuộc gặp đã đi qua, kho ảnh thực tế và cảm nhận từ người đồng hành.</p>
   </div>
 </section>
 
 <section class="section" id="cau-chuyen">
   <div class="container">
-    <div class="section-header--split" style="margin-bottom: 24px;">
+    <div class="section-header--split section-header--editorial">
       <div>
-        <div class="kicker" data-i18n="journey.stories.kicker">Tường thuật &amp; Lưu bút</div>
-        <h2 class="section-title" style="margin-bottom: 0;" data-i18n="journey.stories.title">Các hoạt động đã diễn ra</h2>
+        <div class="kicker">Tường thuật &amp; Lưu bút</div>
+        <h2 class="section-title">Hoạt động đã diễn ra</h2>
       </div>
-      <a class="arrow-link" href="/lich-hoat-dong/" data-i18n="journey.stories.scheduleLink">Xem lịch hoạt động tuần này →</a>
+      <a class="arrow-link" href="/lich-hoat-dong/">
+        <span>Lịch tuần này</span>
+        <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
     </div>
 
     <div class="filter-bar-row">
       <div class="filter-bar" data-filter-group="[data-news-card]" role="group" aria-label="Lọc câu chuyện theo 3 trụ cột">
-        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true" data-i18n="filter.all">Tất cả</button>
+        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Tất cả</button>
         <button class="filter-btn" type="button" data-filter="holaheart" data-pillar="holaheart" aria-pressed="false">
           <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
           <span>HolaHeart</span>
@@ -39,25 +42,27 @@
       <span class="filter-count" data-filter-count="[data-news-card]" aria-live="polite"></span>
     </div>
 
-    <div class="grid-3" data-stagger-group>
+    <div class="grid-editorial-stories" data-stagger-group>
       <!-- CMS:NEWS_LIST:START -->
       {{NEWS_LIST_HTML}}
       <!-- CMS:NEWS_LIST:END -->
     </div>
 
     <div class="filter-empty" data-filter-empty="[data-news-card]" hidden>
-      <p data-i18n="journey.filterEmpty">Các bài tường thuật tiếp theo cho trụ cột này đang được cập nhật.</p>
-      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-news-card]" data-i18n="journey.filterReset">Xem tất cả câu chuyện</button>
+      <p>Các bài tường thuật tiếp theo cho trụ cột này đang được cập nhật.</p>
+      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-news-card]">Xem tất cả câu chuyện</button>
     </div>
   </div>
 </section>
 
 <section class="section section--mist" id="thu-vien-anh">
   <div class="container">
-    <div class="section-header" style="margin-bottom: 28px;">
-      <div class="kicker" data-i18n="journey.gallery.kicker">Kho lưu trữ khoảnh khắc · Chạm từng chặng để mở ảnh</div>
-      <h2 class="section-title" data-i18n="journey.gallery.title">Những cuộc gặp gỡ tại Hòa Lạc</h2>
-      <p class="section-lead" data-i18n="journey.gallery.lead">Mỗi bộ ảnh được gấp gọn theo từng buổi gặp để bạn mở xem khi muốn, chạm vào ảnh để xem lớn.</p>
+    <div class="section-header--editorial archive-section-head">
+      <div>
+        <div class="kicker">Kho ảnh theo từng buổi</div>
+        <h2 class="section-title">Những cuộc gặp tại Hòa Lạc</h2>
+      </div>
+      <button type="button" class="btn btn--primary btn--sm" data-open-album-contribute>Góp ảnh buổi gặp</button>
     </div>
 
     <div class="archive-drawers-list">
@@ -72,7 +77,7 @@
     </div>
 
     <p class="privacy-photo-note">
-      <strong data-i18n="journey.privacyLabel">Quyền riêng tư hình ảnh:</strong> <span data-i18n="journey.privacyBody">Hola không mở tải ảnh gốc đại trà nhằm tôn trọng thành viên. Nếu bạn muốn cập nhật hoặc gỡ hình ảnh có mặt mình, vui lòng nhắn Ban Điều Phối qua</span> <a href="mailto:{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</a> · <a href="/chinh-sach/" data-i18n="footer.transparency">Chuẩn mực Minh bạch &amp; An toàn</a>.
+      <strong>Quyền riêng tư hình ảnh:</strong> <span>Cần cập nhật hoặc gỡ ảnh có mặt bạn, vui lòng nhắn qua</span> <a href="mailto:{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</a> · <a href="/chinh-sach/">Minh bạch &amp; Quy tắc</a>.
     </p>
   </div>
 </section>
@@ -81,12 +86,12 @@
   <div class="container">
     <div class="cta-band">
       <div>
-        <h2>Góp mặt trong những cuộc gặp tiếp theo</h2>
-        <p>Giữ chỗ tham dự trong 15 giây không cần mật khẩu và để lại cảm nhận của riêng bạn sau mỗi chặng đường đồng hành.</p>
+        <h2>Góp mặt trong chặng tiếp theo</h2>
+        <p>Giữ chỗ trong 15 giây không cần mật khẩu và để lại lưu bút sau buổi gặp.</p>
       </div>
       <div class="cta-band-actions">
         <a class="btn btn--light" href="/tham-gia/" data-magnetic>Giữ chỗ tham gia</a>
-        <a class="btn btn--ghost-dark" href="/lich-hoat-dong/">Xem lịch sắp mở</a>
+        <a class="btn btn--ghost-dark" href="/lich-hoat-dong/">Lịch sắp mở</a>
       </div>
     </div>
   </div>

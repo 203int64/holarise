@@ -61,6 +61,10 @@ export async function onRequestPut(context) {
       parsed.data.showSeatBar !== undefined || parsed.data.show_seat_bar !== undefined
         ? (parsed.data.showSeatBar ?? parsed.data.show_seat_bar)
         : Boolean(existing.show_seat_bar),
+    zaloGroupUrl:
+      parsed.data.zaloGroupUrl !== undefined || parsed.data.zalo_group_url !== undefined
+        ? (parsed.data.zaloGroupUrl ?? parsed.data.zalo_group_url)
+        : (existing.zalo_group_url || ""),
   };
 
   const validated = validateEventInput(mergedBody);
@@ -77,7 +81,7 @@ export async function onRequestPut(context) {
        SET kind = ?, type = ?, filters_json = ?, date = ?, date_display = ?, time = ?, location = ?,
            fee = ?, seats = ?, seat_capacity = ?, external_booked = ?, show_seat_bar = ?,
            title = ?, title_en = ?, summary = ?, summary_en = ?, highlights_json = ?, participants = ?,
-           image = ?, image_alt = ?, status = ?, sort_order = ?, updated_at = ?
+           image = ?, image_alt = ?, zalo_group_url = ?, status = ?, sort_order = ?, updated_at = ?
        WHERE id = ?`
     )
       .bind(
@@ -101,6 +105,7 @@ export async function onRequestPut(context) {
         v.participants,
         v.image,
         v.image_alt,
+        v.zalo_group_url,
         v.status,
         v.sort_order,
         now,
@@ -109,7 +114,80 @@ export async function onRequestPut(context) {
       .run();
   } catch (err) {
     const msg = String(err?.message || "");
-    if (msg.includes("seat_capacity") || msg.includes("title_en")) {
+    if (msg.includes("zalo_group_url")) {
+      try {
+        await context.env.DB.prepare(
+          `UPDATE events
+           SET kind = ?, type = ?, filters_json = ?, date = ?, date_display = ?, time = ?, location = ?,
+               fee = ?, seats = ?, seat_capacity = ?, external_booked = ?, show_seat_bar = ?,
+               title = ?, title_en = ?, summary = ?, summary_en = ?, highlights_json = ?, participants = ?,
+               image = ?, image_alt = ?, status = ?, sort_order = ?, updated_at = ?
+           WHERE id = ?`
+        )
+          .bind(
+            v.kind,
+            v.type,
+            JSON.stringify(v.filters),
+            v.date,
+            v.date_display,
+            v.time,
+            v.location,
+            v.fee,
+            v.seats,
+            v.seat_capacity,
+            v.external_booked,
+            v.show_seat_bar,
+            v.title,
+            v.title_en,
+            v.summary,
+            v.summary_en,
+            JSON.stringify(v.highlights),
+            v.participants,
+            v.image,
+            v.image_alt,
+            v.status,
+            v.sort_order,
+            now,
+            id
+          )
+          .run();
+      } catch (err2) {
+        const msg2 = String(err2?.message || "");
+        if (msg2.includes("seat_capacity") || msg2.includes("title_en")) {
+          await context.env.DB.prepare(
+            `UPDATE events
+             SET kind = ?, type = ?, filters_json = ?, date = ?, date_display = ?, time = ?, location = ?,
+                 fee = ?, seats = ?, title = ?, summary = ?, highlights_json = ?, participants = ?,
+                 image = ?, image_alt = ?, status = ?, sort_order = ?, updated_at = ?
+             WHERE id = ?`
+          )
+            .bind(
+              v.kind,
+              v.type,
+              JSON.stringify(v.filters),
+              v.date,
+              v.date_display,
+              v.time,
+              v.location,
+              v.fee,
+              v.seats,
+              v.title,
+              v.summary,
+              JSON.stringify(v.highlights),
+              v.participants,
+              v.image,
+              v.image_alt,
+              v.status,
+              v.sort_order,
+              now,
+              id
+            )
+            .run();
+        } else {
+          throw err2;
+        }
+      }
+    } else if (msg.includes("seat_capacity") || msg.includes("title_en")) {
       await context.env.DB.prepare(
         `UPDATE events
          SET kind = ?, type = ?, filters_json = ?, date = ?, date_display = ?, time = ?, location = ?,

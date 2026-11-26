@@ -1,5 +1,12 @@
 import { resolveEventHref } from "../../_lib/render.js";
-import { errorResponse, getSessionMember, jsonResponse, serializePublicMember } from "../../_lib/security.js";
+import {
+  ensureReflectionsSchema,
+  errorResponse,
+  getSessionMember,
+  jsonResponse,
+  serializePublicMember,
+} from "../../_lib/security.js";
+import { parseReflectionPhotos } from "../../_lib/validation.js";
 
 function inferEventPillar(eventType, eventId, title) {
   const hay = `${eventType || ""} ${eventId || ""} ${title || ""}`.toLowerCase();
@@ -82,10 +89,11 @@ export async function onRequestGet(context) {
     LIMIT 60
   `;
 
+  await ensureReflectionsSchema(env.DB);
   const [regsRes, refsRes] = await Promise.all([
     env.DB.prepare(regQuery).bind(...bindParams).all(),
     env.DB.prepare(
-      `SELECT id, activity_slug, participant_role, pull_quote, content, photo_url, heart_count, status, admin_note, created_at, updated_at
+      `SELECT id, activity_slug, participant_role, pull_quote, content, photo_url, photos_json, heart_count, status, admin_note, created_at, updated_at
        FROM activity_reflections
        WHERE member_id = ?
        ORDER BY created_at DESC
@@ -128,19 +136,23 @@ export async function onRequestGet(context) {
     });
   }
 
-  const reflections = (refsRes.results || []).map((r) => ({
-    id: r.id,
-    activitySlug: r.activity_slug,
-    participantRole: r.participant_role,
-    pullQuote: r.pull_quote || "",
-    content: r.content,
-    photoUrl: r.photo_url || "",
-    heartCount: Number(r.heart_count || 0),
-    status: r.status,
-    adminNote: r.admin_note || "",
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-  }));
+  const reflections = (refsRes.results || []).map((r) => {
+    const photoUrls = parseReflectionPhotos(r.photos_json, r.photo_url || "");
+    return {
+      id: r.id,
+      activitySlug: r.activity_slug,
+      participantRole: r.participant_role,
+      pullQuote: r.pull_quote || "",
+      content: r.content,
+      photoUrl: photoUrls[0] || "",
+      photoUrls,
+      heartCount: Number(r.heart_count || 0),
+      status: r.status,
+      adminNote: r.admin_note || "",
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    };
+  });
 
   return jsonResponse({
     ok: true,

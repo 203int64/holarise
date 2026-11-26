@@ -5,6 +5,7 @@ import {
   createSession,
   errorResponse,
   getClientIpHash,
+  isSoleAdminAccount,
   jsonResponse,
   readJsonBody,
   verifyCsrfOrigin,
@@ -118,7 +119,11 @@ export async function onRequestPost({ request, env }) {
   ]);
 
   return jsonResponse(
-    { ok: true, user: profile },
+    {
+      ok: true,
+      isSoleAdmin: isSoleAdminAccount(profile, env),
+      user: profile,
+    },
     200,
     { "Set-Cookie": buildSessionCookie(rawToken, request, false) }
   );

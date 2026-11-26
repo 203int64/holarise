@@ -6,10 +6,9 @@
 import { errorResponse, requireAdmin } from "../../../_lib/security.js";
 
 const SAFE_ID_RE = /^[a-zA-Z0-9._-]{6,96}$/;
-const ALLOWED_ROLES = ["super_admin", "editor", "media"];
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context, { allowedRoles: ALLOWED_ROLES });
+  const auth = await requireAdmin(context);
   if (!auth.ok) return auth.response;
 
   const { env, params } = context;

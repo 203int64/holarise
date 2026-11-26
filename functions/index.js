@@ -3,7 +3,6 @@ import {
   applySiteVisualsSsr,
   buildEventsJsonLd,
   parsePartnersJson,
-  renderHeroUpcomingBar,
   renderHomeUpcomingSectionHtml,
   renderHorizontalGalleryHtml,
   renderPartnersStripHtml,
@@ -65,7 +64,6 @@ export async function onRequestGet({ request, env }) {
   const partners = parsePartnersJson(partnersRow?.value || "[]");
 
   let html = await assetRes.text();
-  html = replaceMarker(html, "HERO_UPCOMING_BAR", renderHeroUpcomingBar(upcoming));
   html = replaceMarker(html, "HOME_UPCOMING_SECTION", renderHomeUpcomingSectionHtml(upcoming));
   html = replaceMarker(html, "EVENTS_JSON_LD", buildEventsJsonLd(upcoming.slice(0, 1)));
   if (partnersRow) {

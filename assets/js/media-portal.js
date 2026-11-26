@@ -455,10 +455,15 @@
   /* =========================================================================
      VIEW 2: Photo-First Album Workspace
      ========================================================================= */
+  function isContributionPhoto(p) {
+    return p?.sourceKind === "member_contribution" || Boolean(p?.contributorMemberId);
+  }
+
   function getFilteredPhotos() {
     return state.photos.filter((p) => {
       const status = p.approvalStatus || "approved";
       if (state.photoFilter === "pending") return status === "pending";
+      if (state.photoFilter === "contributions") return isContributionPhoto(p);
       if (state.photoFilter === "approved") return status === "approved";
       if (state.photoFilter === "featured") return status === "approved" && Boolean(p.isFeaturedHome);
       return true;
@@ -498,13 +503,14 @@
     if (!a) return;
     const total = state.photos.length;
     const pending = state.photos.filter((p) => p.approvalStatus === "pending").length;
+    const contributions = state.photos.filter(isContributionPhoto).length;
     const approved = state.photos.filter((p) => (p.approvalStatus || "approved") === "approved").length;
     const featured = state.photos.filter(
       (p) => (p.approvalStatus || "approved") === "approved" && p.isFeaturedHome
     ).length;
 
     $("#ws-title").textContent = a.title;
-    $("#ws-meta").textContent = `${a.dateDisplay || a.eventDate || "Hòa Lạc"} · ${total} ảnh${pending > 0 ? ` · ${pending} chờ duyệt` : ""}`;
+    $("#ws-meta").textContent = `${a.dateDisplay || a.eventDate || "Hòa Lạc"} · ${total} ảnh${contributions > 0 ? ` · ${contributions} ảnh đóng góp` : ""}${pending > 0 ? ` · ${pending} chờ duyệt` : ""}`;
 
     const driveLink = $("#ws-drive-link");
     if (driveLink) {
@@ -517,6 +523,7 @@
     }
 
     $("#cnt-photo-pending").textContent = String(pending);
+    if ($("#cnt-photo-contrib")) $("#cnt-photo-contrib").textContent = String(contributions);
     $("#cnt-photo-approved").textContent = String(approved);
     $("#cnt-photo-featured").textContent = String(featured);
     $("#cnt-photo-all").textContent = String(total);
@@ -525,6 +532,13 @@
     if (pendingTab) {
       pendingTab.hidden = pending === 0;
       if (pending === 0 && state.photoFilter === "pending") {
+        state.photoFilter = "all";
+      }
+    }
+    const contribTab = $("#tab-photo-contrib");
+    if (contribTab) {
+      contribTab.hidden = contributions === 0;
+      if (contributions === 0 && state.photoFilter === "contributions") {
         state.photoFilter = "all";
       }
     }
@@ -584,6 +598,9 @@
           markers.push('<span class="tile-pill tile-pill--pending">Chờ duyệt</span>');
         } else if (status === "rejected") {
           markers.push('<span class="tile-pill tile-pill--rejected">Đã ẩn</span>');
+        }
+        if (isContributionPhoto(p)) {
+          markers.push('<span class="tile-pill tile-pill--contrib" title="Ảnh thành viên đóng góp">Đóng góp</span>');
         }
         if (p.isFeaturedHome && status === "approved") {
           markers.push('<span class="tile-pill tile-pill--home" title="Ghim Trang chủ">★</span>');
@@ -820,7 +837,16 @@
     $("#lb-next").hidden = activeList.length <= 1;
 
     const metaEl = $("#lb-meta");
-    const metaBits = [photo.caption, photo.photographer ? `Ảnh: ${photo.photographer}` : ""].filter(Boolean);
+    const sourceLabel = isContributionPhoto(photo)
+      ? `Đóng góp: ${photo.uploadedBy || photo.photographer || "Thành viên"}`
+      : photo.photographer
+        ? `Ảnh: ${photo.photographer}`
+        : "";
+    const metaBits = [
+      photo.caption,
+      sourceLabel,
+      photo.drivePath ? `Thư mục: ${photo.drivePath}` : "",
+    ].filter(Boolean);
     metaEl.textContent = metaBits.join(" · ");
     metaEl.hidden = metaBits.length === 0;
 

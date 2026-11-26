@@ -6,6 +6,15 @@
 (function () {
   "use strict";
 
+  var isEn =
+    (document.documentElement &&
+      (document.documentElement.lang === "en" ||
+        document.documentElement.getAttribute("data-lang") === "en")) ||
+    /^\/en(\/|$)/i.test((window.location && window.location.pathname) || "");
+  function t(vi, en) {
+    return isEn ? en : vi;
+  }
+
   /* 0. Standalone App Mode Detection (iOS Safari navigator.standalone + display-mode: standalone) */
   var isStandaloneApp =
     (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
@@ -196,7 +205,7 @@
   if (navToggle && mobileDrawer) {
     var setDrawerState = function (open) {
       navToggle.setAttribute("aria-expanded", String(open));
-      navToggle.setAttribute("aria-label", open ? "Đóng menu điều hướng" : "Mở menu điều hướng");
+      navToggle.setAttribute("aria-label", open ? t("Đóng menu điều hướng", "Close navigation menu") : t("Mở menu điều hướng", "Open navigation menu"));
       mobileDrawer.classList.toggle("is-open", open);
       mobileDrawer.setAttribute("aria-hidden", String(!open));
       document.body.style.overflow = open ? "hidden" : "";
@@ -252,7 +261,7 @@
 
     var updateMeta = function (visibleCount) {
       if (countEl) {
-        countEl.textContent = visibleCount + " / " + totalCount + " mục";
+        countEl.textContent = visibleCount + " / " + totalCount + t(" mục", " items");
       }
       if (emptyEl) {
         emptyEl.hidden = visibleCount > 0 || totalCount === 0;
@@ -586,13 +595,13 @@
   var eventIdHidden = document.getElementById("modal-event-id");
 
   if (eventModal) {
-    var defaultNoteSummary = modalNoteSummary ? modalNoteSummary.textContent : "+ Ghi chú cho người điều phối (tùy chọn)";
+    var defaultNoteSummary = modalNoteSummary ? modalNoteSummary.textContent : t("+ Ghi chú cho người điều phối (tùy chọn)", "+ Note for coordinators (optional)");
     var defaultNotePlaceholder = modalNoteInput ? modalNoteInput.getAttribute("placeholder") || "" : "";
     var defaultModalZalo = modalZaloBtn ? modalZaloBtn.getAttribute("href") || "" : "";
 
     var extractCleanVenue = function (raw) {
       var text = String(raw || "").trim();
-      if (!text) return "Hòa Lạc, Hà Nội";
+      if (!text) return t("Hòa Lạc, Hà Nội", "Hoa Lac, Hanoi");
       var clean = text.split("·")[0].replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
       return clean || text;
     };
@@ -610,16 +619,16 @@
     };
 
     var openEventModalFromTrigger = function (btn) {
-      var title = btn.getAttribute("data-register-event") || "Hoạt động cộng đồng HolaRise";
+      var title = btn.getAttribute("data-register-event") || t("Hoạt động cộng đồng HolaRise", "HolaRise Community Gathering");
       var eventId = btn.getAttribute("data-event-id") || "";
       var eventSlug = btn.getAttribute("data-event-slug") || "";
       var eventDate = btn.getAttribute("data-event-date") || "";
       var eventTime = btn.getAttribute("data-event-time") || "";
-      var eventLocation = btn.getAttribute("data-event-location") || "Hòa Lạc, Hà Nội";
+      var eventLocation = btn.getAttribute("data-event-location") || t("Hòa Lạc, Hà Nội", "Hoa Lac, Hanoi");
       var venueUrl = btn.getAttribute("data-venue-url") || "";
-      var eventFee = btn.getAttribute("data-event-fee") || "Phi lợi nhuận · Minh bạch";
+      var eventFee = btn.getAttribute("data-event-fee") || t("Phi lợi nhuận · Minh bạch", "Free admission · Non-profit");
       var eventSeats = btn.getAttribute("data-event-seats") || "";
-      var eventType = btn.getAttribute("data-event-type") || "Cộng đồng HolaRise";
+      var eventType = btn.getAttribute("data-event-type") || t("Cộng đồng HolaRise", "HolaRise Community");
       var eventHref = btn.getAttribute("data-event-href") || "";
       var eventImage = btn.getAttribute("data-event-image") || "";
       var eventZalo = btn.getAttribute("data-zalo-group") || defaultModalZalo;
@@ -630,7 +639,7 @@
       var allowAnonShare = btn.getAttribute("data-anon-share") === "true";
 
       if (modalKickerDisplay) {
-        modalKickerDisplay.textContent = eventSeats ? "Xác nhận tham dự · " + eventSeats : "Xác nhận tham dự";
+        modalKickerDisplay.textContent = eventSeats ? t("Xác nhận tham dự · ", "Event RSVP · ") + eventSeats : t("Xác nhận tham dự", "Event RSVP");
       }
       if (modalHeadingDisplay) modalHeadingDisplay.textContent = title;
       if (eventWhenDisplay) {
@@ -641,7 +650,7 @@
           timePrimary = parts[0].trim();
           dateSecondary = parts.slice(1).join(",").trim();
         }
-        renderFactLines(eventWhenDisplay, timePrimary || dateSecondary || "Công bố sau", timePrimary ? dateSecondary : "");
+        renderFactLines(eventWhenDisplay, timePrimary || dateSecondary || t("Công bố sau", "TBA"), timePrimary ? dateSecondary : "");
       }
       if (eventVenueDisplay) {
         var cleanVenue = extractCleanVenue(eventLocation);
@@ -812,22 +821,31 @@
 
     if (name === "fullName") {
       if (val.length < 2) {
-        return "Lỗi: Vui lòng nhập họ và tên đầy đủ (tối thiểu 2 ký tự).";
+        return t(
+          "Lỗi: Vui lòng nhập họ và tên đầy đủ (tối thiểu 2 ký tự).",
+          "Please enter your name (at least 2 characters)."
+        );
       }
       return "";
     }
 
     if (name === "phone" || name === "contact") {
       var digits = val.replace(/\D/g, "").length;
-      if (digits < 8) {
-        return "Lỗi: Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).";
+      if (digits < 8 && !EMAIL_REGEX.test(val)) {
+        return t(
+          "Lỗi: Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).",
+          "Please enter a valid phone number (8+ digits) or email address."
+        );
       }
       return "";
     }
 
     if (name === "email") {
       if (val && !EMAIL_REGEX.test(val)) {
-        return "Lỗi: Email chưa đúng định dạng (ví dụ: tenban@gmail.com), hoặc bạn có thể để trống.";
+        return t(
+          "Lỗi: Email chưa đúng định dạng (ví dụ: tenban@gmail.com), hoặc bạn có thể để trống.",
+          "Please enter a valid email address (e.g. name@example.com), or leave it blank."
+        );
       }
       return "";
     }
@@ -931,8 +949,10 @@
     statusEl.textContent = "";
 
     var msg = document.createElement("span");
-    msg.textContent =
-      "Bạn đang ngoại tuyến. Thông tin đăng ký đã được lưu nháp trên máy — hãy bấm gửi lại khi có mạng, hoặc liên hệ trực tiếp:";
+    msg.textContent = t(
+      "Bạn đang ngoại tuyến. Thông tin đăng ký đã được lưu nháp trên máy — hãy bấm gửi lại khi có mạng, hoặc liên hệ trực tiếp:",
+      "You are currently offline. Your draft has been saved locally — please submit again when back online, or contact us directly:"
+    );
     statusEl.appendChild(msg);
 
     var phone = form.getAttribute("data-phone") || "";
@@ -946,7 +966,7 @@
         var telLink = document.createElement("a");
         telLink.href = "tel:" + phoneRaw;
         telLink.className = "btn btn--outline btn--sm";
-        telLink.textContent = "Gọi " + (phone || phoneRaw);
+        telLink.textContent = t("Gọi ", "Call ") + (phone || phoneRaw);
         linksWrap.appendChild(telLink);
       }
       if (zalo) {
@@ -955,7 +975,7 @@
         zaloLink.target = "_blank";
         zaloLink.rel = "noopener noreferrer";
         zaloLink.className = "btn btn--outline btn--sm";
-        zaloLink.textContent = "Nhắn Zalo CLB";
+        zaloLink.textContent = t("Nhắn Zalo CLB", "Message on Zalo");
         linksWrap.appendChild(zaloLink);
       }
       statusEl.appendChild(linksWrap);
@@ -1026,7 +1046,7 @@
       }
       if (restoredAny && statusEl && !statusEl.textContent) {
         statusEl.className = "form-status is-draft";
-        statusEl.textContent = "Đã khôi phục bản nháp bạn nhập gần đây.";
+        statusEl.textContent = t("Đã khôi phục bản nháp bạn nhập gần đây.", "Restored your recent draft.");
       }
       form.dispatchEvent(new CustomEvent("holarise:draft-restored", { bubbles: true }));
     }
@@ -1090,9 +1110,9 @@
       var nameVal = ((nameEl || {}).value || "").trim();
 
       var checks = [
-        { el: nameEl, error: validateClubField(nameEl), summary: "Vui lòng nhập họ và tên đầy đủ (tối thiểu 2 ký tự)." },
-        { el: phoneEl, error: validateClubField(phoneEl), summary: "Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số) để Ban Điều Phối liên hệ." },
-        { el: emailEl, error: validateClubField(emailEl), summary: "Email chưa đúng định dạng (ví dụ: tenban@gmail.com). Bạn có thể sửa lại hoặc để trống." }
+        { el: nameEl, error: validateClubField(nameEl), summary: t("Vui lòng nhập họ và tên đầy đủ (tối thiểu 2 ký tự).", "Please enter your name (at least 2 characters).") },
+        { el: phoneEl, error: validateClubField(phoneEl), summary: t("Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số) để Ban Điều Phối liên hệ.", "Please enter a valid phone number (8+ digits) or email address so coordinators can reach you.") },
+        { el: emailEl, error: validateClubField(emailEl), summary: t("Email chưa đúng định dạng (ví dụ: tenban@gmail.com). Bạn có thể sửa lại hoặc để trống.", "Please enter a valid email address, or leave it blank.") }
       ];
 
       var firstInvalid = null;
@@ -1127,13 +1147,14 @@
         submitBtn.disabled = true;
         submitBtn.classList.add("is-loading");
         submitBtn.dataset.originalText = submitBtn.textContent;
-        submitBtn.textContent = "Đang gửi thông tin...";
+        submitBtn.textContent = t("Đang gửi thông tin...", "Sending...");
       }
 
       var payload = {};
       new FormData(form).forEach(function (value, key) {
         payload[key] = value;
       });
+      payload.lang = isEn ? "en" : "vi";
       payload.submittedAt = new Date().toISOString();
 
       var isEventStudio = form.hasAttribute("data-event-studio") || form.hasAttribute("data-father-studio");
@@ -1280,7 +1301,7 @@
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.classList.remove("is-loading");
-          submitBtn.textContent = submitBtn.dataset.originalText || "Gửi đăng ký";
+          submitBtn.textContent = submitBtn.dataset.originalText || t("Gửi đăng ký", "Submit");
         }
       };
 
@@ -1306,7 +1327,7 @@
           if (!result.ok || result.data.ok === false) {
             var errMsg =
               (result.data && result.data.error && result.data.error.message) ||
-              "Không thể gửi đăng ký lúc này. Vui lòng thử lại sau ít phút.";
+              t("Không thể gửi đăng ký lúc này. Vui lòng thử lại sau ít phút.", "Could not submit right now. Please try again in a moment.");
             throw new Error(errMsg);
           }
           clearDraft(draftKey);
@@ -1314,9 +1335,10 @@
             statusEl.className = "form-status is-success";
             statusEl.textContent =
               (result.data && result.data.message) ||
-              "Cảm ơn " +
-                nameVal +
-                "! HolaRise đã ghi nhận thông tin quan tâm của bạn. Đây chưa phải xác nhận tham dự một sự kiện.";
+              t(
+                "Cảm ơn " + nameVal + "! HolaRise đã ghi nhận thông tin quan tâm của bạn. Đây chưa phải xác nhận tham dự một sự kiện.",
+                "Thank you, " + nameVal + "! HolaRise has received your submission and will follow up soon."
+              );
           }
           passSnapshot.id = (result.data && result.data.id) || "REG-HOLARISE";
           var preservedActivity = (form.querySelector('[name="activity"]') || {}).value || "";
@@ -1366,7 +1388,10 @@
             statusEl.textContent =
               (err && err.message && err.message !== "Failed to fetch"
                 ? err.message
-                : "Không thể kết nối máy chủ gửi biểu mẫu lúc này. Thông tin đã được lưu nháp trên máy — bạn vui lòng thử lại hoặc liên hệ trực tiếp qua Hotline/Zalo HolaRise nhé.");
+                : t(
+                    "Không thể kết nối máy chủ gửi biểu mẫu lúc này. Thông tin đã được lưu nháp trên máy — bạn vui lòng thử lại hoặc liên hệ trực tiếp qua Hotline/Zalo HolaRise nhé.",
+                    "Could not reach the server right now. Your draft has been saved locally — please try again or email phungsu@holarise.org."
+                  ));
           }
           resetBtn();
         });
@@ -1418,7 +1443,7 @@
     }
   });
 
-  /* 10. Passwordless Participant Reflections on /hanh-trinh/<slug>/ */
+  /* 10. Member-Only Editorial Reflections (up to 7 photos) on /hanh-trinh/<slug>/ */
   var gbSection = document.getElementById("activity-guestbook");
   if (gbSection) {
     var gbSlug = gbSection.getAttribute("data-guestbook-slug") || "";
@@ -1431,11 +1456,11 @@
     var prPhotoInput = document.getElementById("pr-photo-file");
     var prPhotoTrigger = document.getElementById("pr-photo-trigger");
     var prPhotoWrap = document.getElementById("pr-photo-preview-wrap");
-    var prPhotoPreview = document.getElementById("pr-photo-preview");
+    var prPhotoGrid = document.getElementById("pr-photo-grid");
     var prPhotoMeta = document.getElementById("pr-photo-meta");
     var prPhotoClear = document.getElementById("pr-photo-clear");
-    var selectedPhotoFile = null;
-    var selectedPhotoObjectUrl = "";
+    var MAX_REFLECTION_PHOTOS = 7;
+    var selectedPhotos = []; // Array<{ file: File, objectUrl: string }>
 
     function escTxt(s) {
       return String(s || "")
@@ -1480,6 +1505,12 @@
         }
         return { ok: res.ok, status: res.status, data: data };
       });
+    }
+
+    function extractErrMessage(data, fallback) {
+      if (data && data.error && data.error.message) return data.error.message;
+      if (data && data.message) return data.message;
+      return fallback;
     }
 
     function compressReflectionImage(file, maxDim, quality) {
@@ -1536,67 +1567,167 @@
       });
     }
 
-    function clearSelectedPhoto() {
-      selectedPhotoFile = null;
-      if (selectedPhotoObjectUrl) {
-        URL.revokeObjectURL(selectedPhotoObjectUrl);
-        selectedPhotoObjectUrl = "";
+    function renderSelectedPhotoPreviews() {
+      var count = selectedPhotos.length;
+      if (prPhotoWrap) prPhotoWrap.hidden = count === 0;
+      if (prPhotoMeta) {
+        prPhotoMeta.textContent =
+          count + " / " + MAX_REFLECTION_PHOTOS + " ảnh đã chọn · Tự động nén gọn khi gửi";
       }
-      if (prPhotoInput) prPhotoInput.value = "";
-      if (prPhotoPreview) prPhotoPreview.removeAttribute("src");
-      if (prPhotoWrap) prPhotoWrap.hidden = true;
       if (prPhotoTrigger) {
         var span = prPhotoTrigger.querySelector("span");
-        if (span) span.textContent = "Thêm ảnh kỷ niệm";
+        if (span) {
+          span.textContent =
+            count >= MAX_REFLECTION_PHOTOS
+              ? "Đã đủ " + MAX_REFLECTION_PHOTOS + " ảnh"
+              : count > 0
+                ? "Thêm ảnh (" + count + "/" + MAX_REFLECTION_PHOTOS + ")"
+                : "Thêm ảnh (tối đa " + MAX_REFLECTION_PHOTOS + ")";
+        }
+        prPhotoTrigger.disabled = count >= MAX_REFLECTION_PHOTOS;
       }
+      if (prPhotoGrid) {
+        prPhotoGrid.innerHTML = selectedPhotos
+          .map(function (item, idx) {
+            return (
+              '<div class="gb-preview-tile">' +
+              '<img src="' + escTxt(item.objectUrl) + '" alt="Ảnh xem trước ' + (idx + 1) + '">' +
+              '<button type="button" class="gb-preview-remove" data-remove-pr-photo="' + idx + '" aria-label="Gỡ ảnh ' + (idx + 1) + '">×</button>' +
+              "</div>"
+            );
+          })
+          .join("");
+      }
+    }
+
+    function clearSelectedPhotos() {
+      selectedPhotos.forEach(function (item) {
+        if (item.objectUrl) URL.revokeObjectURL(item.objectUrl);
+      });
+      selectedPhotos = [];
+      if (prPhotoInput) prPhotoInput.value = "";
+      renderSelectedPhotoPreviews();
     }
 
     if (prPhotoTrigger && prPhotoInput) {
       prPhotoTrigger.addEventListener("click", function () {
+        if (selectedPhotos.length >= MAX_REFLECTION_PHOTOS) return;
         prPhotoInput.click();
       });
       prPhotoInput.addEventListener("change", function () {
-        var file = prPhotoInput.files && prPhotoInput.files[0];
-        if (!file) return;
-        if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
-          if (prStatus) {
-            prStatus.className = "form-status is-error";
-            prStatus.textContent = "Vui lòng chọn ảnh định dạng JPEG, PNG hoặc WebP.";
+        var files = Array.prototype.slice.call(prPhotoInput.files || []);
+        prPhotoInput.value = "";
+        if (!files.length) return;
+
+        var errors = [];
+        var remaining = MAX_REFLECTION_PHOTOS - selectedPhotos.length;
+        if (files.length > remaining) {
+          errors.push("Mỗi lưu bút chỉ đính kèm tối đa " + MAX_REFLECTION_PHOTOS + " ảnh.");
+        }
+
+        files.slice(0, Math.max(0, remaining)).forEach(function (file) {
+          if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
+            errors.push(file.name + ": chỉ hỗ trợ JPEG, PNG hoặc WebP.");
+            return;
           }
-          prPhotoInput.value = "";
-          return;
-        }
-        if (file.size > 12 * 1024 * 1024) {
-          if (prStatus) {
-            prStatus.className = "form-status is-error";
-            prStatus.textContent = "Ảnh gốc quá lớn (tối đa 12 MB). Vui lòng chọn ảnh nhẹ hơn.";
+          if (file.size > 15 * 1024 * 1024) {
+            errors.push(file.name + ": ảnh vượt quá 15 MB.");
+            return;
           }
-          prPhotoInput.value = "";
-          return;
+          selectedPhotos.push({ file: file, objectUrl: URL.createObjectURL(file) });
+        });
+
+        renderSelectedPhotoPreviews();
+        if (prStatus) {
+          if (errors.length) {
+            prStatus.className = "form-status is-error";
+            prStatus.textContent = errors[0];
+          } else if (prStatus.classList.contains("is-error")) {
+            prStatus.className = "form-status";
+            prStatus.textContent = "";
+          }
         }
-        if (selectedPhotoObjectUrl) URL.revokeObjectURL(selectedPhotoObjectUrl);
-        selectedPhotoFile = file;
-        selectedPhotoObjectUrl = URL.createObjectURL(file);
-        if (prPhotoPreview) prPhotoPreview.src = selectedPhotoObjectUrl;
-        if (prPhotoWrap) prPhotoWrap.hidden = false;
-        if (prPhotoMeta) {
-          var sizeMb = (file.size / (1024 * 1024)).toFixed(1);
-          prPhotoMeta.textContent = "Đã chọn 1 ảnh (" + sizeMb + " MB) · Tự động nén gọn khi gửi";
-        }
-        if (prPhotoTrigger) {
-          var span = prPhotoTrigger.querySelector("span");
-          if (span) span.textContent = "Đổi ảnh khác";
-        }
-        if (prStatus && prStatus.classList.contains("is-error")) {
-          prStatus.className = "form-status";
-          prStatus.textContent = "";
+      });
+    }
+
+    if (prPhotoGrid) {
+      prPhotoGrid.addEventListener("click", function (e) {
+        var btn = e.target.closest("[data-remove-pr-photo]");
+        if (!btn) return;
+        var idx = parseInt(btn.getAttribute("data-remove-pr-photo") || "-1", 10);
+        if (idx >= 0 && idx < selectedPhotos.length) {
+          var removed = selectedPhotos.splice(idx, 1)[0];
+          if (removed && removed.objectUrl) URL.revokeObjectURL(removed.objectUrl);
+          renderSelectedPhotoPreviews();
         }
       });
     }
 
     if (prPhotoClear) {
-      prPhotoClear.addEventListener("click", clearSelectedPhoto);
+      prPhotoClear.addEventListener("click", clearSelectedPhotos);
     }
+
+    function renderCardPhotosHtml(it, captionBits) {
+      var photos = Array.isArray(it.photoUrls) && it.photoUrls.length
+        ? it.photoUrls
+        : it.photoUrl
+          ? [it.photoUrl]
+          : [];
+      if (!photos.length) return "";
+
+      if (photos.length === 1) {
+        return (
+          '<figure class="gb-card-photo">' +
+          '<button type="button" class="gb-photo-btn" data-lightbox-src="' + escTxt(photos[0]) + '" data-lightbox-alt="Khoảnh khắc của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '">' +
+          '<img src="' + escTxt(photos[0]) + '" alt="Khoảnh khắc kỷ niệm của ' + escTxt(it.authorName) + '" loading="lazy" decoding="async">' +
+          "</button></figure>"
+        );
+      }
+
+      var visible = photos.slice(0, 4);
+      var extraCount = photos.length - 4;
+      var countAttr = photos.length <= 4 ? String(photos.length) : "many";
+      var tiles = visible
+        .map(function (url, idx) {
+          var overlay =
+            idx === 3 && extraCount > 0
+              ? '<span class="gb-collage-more" aria-hidden="true">+' + extraCount + "</span>"
+              : "";
+          return (
+            '<button type="button" class="gb-collage-tile" data-lightbox-src="' + escTxt(url) + '" data-lightbox-alt="Ảnh ' + (idx + 1) + ' của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '">' +
+            '<img src="' + escTxt(url) + '" alt="Khoảnh khắc ' + (idx + 1) + ' của ' + escTxt(it.authorName) + '" loading="lazy" decoding="async">' +
+            overlay +
+            "</button>"
+          );
+        })
+        .join("");
+
+      var hiddenExtras = photos
+        .slice(4)
+        .map(function (url, offset) {
+          var idx = 4 + offset;
+          return (
+            '<button type="button" hidden data-lightbox-src="' + escTxt(url) + '" data-lightbox-alt="Ảnh ' + (idx + 1) + ' của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '"></button>'
+          );
+        })
+        .join("");
+
+      return '<div class="gb-photo-collage" data-count="' + countAttr + '">' + tiles + hiddenExtras + "</div>";
+    }
+
+    var MOOD_META = {
+      "am-long": t("♥ Ấm lòng", "♥ Heartwarming"),
+      "cham-sau": t("✦ Chạm sâu", "✦ Deeply moving"),
+      "biet-on": t("❋ Biết ơn", "❋ Grateful"),
+      "dang-nho": t("◈ Đáng nhớ", "◈ Memorable"),
+      "tiep-suc": t("☼ Tiếp sức", "☼ Inspiring"),
+    };
+
+    var REACTION_META = [
+      { key: "heart", icon: "♥", label: t("Ấm lòng", "Warm") },
+      { key: "warm", icon: "✦", label: t("Đồng cảm", "Resonate") },
+      { key: "inspire", icon: "☼", label: t("Tiếp sức", "Inspire") },
+    ];
 
     function loadPublicReflections() {
       if (!gbSlug || !gbList) return;
@@ -1605,63 +1736,92 @@
         .then(function (res) {
           var data = res.data || {};
           var items = data.items || [];
-          var photoCount = items.filter(function (x) { return Boolean(x.photoUrl); }).length;
+          var photoCount = items.reduce(function (sum, x) {
+            var n = Array.isArray(x.photoUrls) ? x.photoUrls.length : x.photoUrl ? 1 : 0;
+            return sum + n;
+          }, 0);
           if (gbCount) {
             if (!items.length) {
-              gbCount.textContent = "Chưa có lưu bút công khai";
+              gbCount.textContent = t("Chưa có lưu bút công khai", "No public reflections yet");
             } else if (photoCount > 0) {
-              gbCount.textContent = items.length + " mảnh ký ức · " + photoCount + " ảnh";
+              gbCount.textContent = isEn
+                ? items.length + " reflections · " + photoCount + " photos"
+                : items.length + " mảnh ký ức · " + photoCount + " ảnh";
             } else {
-              gbCount.textContent = items.length + " cảm nhận đã xuất bản";
+              gbCount.textContent = isEn
+                ? items.length + " published reflections"
+                : items.length + " cảm nhận đã xuất bản";
             }
           }
           if (!items.length) {
             gbList.innerHTML =
-              '<div class="guestbook-empty"><p>Mời bạn là người đầu tiên lưu lại cảm nhận và một khoảnh khắc đáng nhớ sau buổi gặp này.</p></div>';
+              '<div class="guestbook-empty"><p>' +
+              t(
+                "Mời bạn đăng nhập Thành viên để lưu lại cảm nhận đầu tiên sau buổi gặp này.",
+                "Sign in as a member to leave the first reflection from this gathering."
+              ) +
+              "</p></div>";
             return;
           }
           gbList.innerHTML = items
             .map(function (it) {
-              var hasPhoto = Boolean(it.photoUrl);
+              var photos = Array.isArray(it.photoUrls) && it.photoUrls.length
+                ? it.photoUrls
+                : it.photoUrl
+                  ? [it.photoUrl]
+                  : [];
+              var hasPhoto = photos.length > 0;
               var avHtml = it.authorAvatarUrl
                 ? '<img class="gb-avatar-img" src="' + escTxt(it.authorAvatarUrl) + '" alt="Ảnh đại diện ' + escTxt(it.authorName) + '" width="38" height="38" loading="lazy">'
                 : '<span class="gb-avatar-initials" aria-hidden="true">' + escTxt(getInitialsTxt(it.authorName)) + "</span>";
+              var moodLabel = it.mood && MOOD_META[it.mood] ? MOOD_META[it.mood] : "";
+              var moodHtml = moodLabel
+                ? '<span class="gb-mood-tag gb-mood-tag--' + escTxt(it.mood) + '">' + escTxt(moodLabel) + "</span>"
+                : "";
               var quoteHtml = it.pullQuote
                 ? '<blockquote class="gb-pull-quote">“' + escTxt(it.pullQuote) + "”</blockquote>"
                 : "";
               var captionBits = [it.authorName, it.authorOrg || it.participantRole].filter(Boolean).join(" · ");
-              var photoHtml = hasPhoto
-                ? '<figure class="gb-card-photo">' +
-                  '<button type="button" class="gb-photo-btn" data-lightbox-src="' + escTxt(it.photoUrl) + '" data-lightbox-alt="Khoảnh khắc của ' + escTxt(it.authorName) + '" data-lightbox-caption="' + escTxt(captionBits) + '">' +
-                  '<img src="' + escTxt(it.photoUrl) + '" alt="Khoảnh khắc kỷ niệm của ' + escTxt(it.authorName) + '" loading="lazy" decoding="async">' +
-                  "</button></figure>"
-                : "";
+              var photoHtml = renderCardPhotosHtml(it, captionBits);
               var roleLabel = it.participantRole === "member" ? "Thành viên" : it.participantRole === "volunteer" ? "Tình nguyện viên" : it.participantRole === "speaker" ? "Diễn giả" : it.participantRole;
               var metaParts = [it.authorOrg || roleLabel, formatDateShortVi(it.createdAt)].filter(Boolean);
-              var heartCount = Number(it.heartCount || 0);
-              var isHearted = Boolean(it.heartedByMe);
+              var myReaction = it.myReaction || (it.heartedByMe ? "heart" : "");
+              var reactions = it.reactions || { heart: Number(it.heartCount || 0), warm: 0, inspire: 0 };
+              var reactionsHtml =
+                '<div class="gb-reactions-bar" role="group" aria-label="' + escTxt(t("Thả cảm xúc", "React")) + '">' +
+                REACTION_META.map(function (rm) {
+                  var isActive = myReaction === rm.key;
+                  var cnt = Number(reactions[rm.key] || 0);
+                  return (
+                    '<button type="button" class="gb-react-btn' + (isActive ? " is-active" : "") + '" data-heart-reflection="' + escTxt(it.id) + '" data-reaction-type="' + rm.key + '" aria-pressed="' + (isActive ? "true" : "false") + '" aria-label="' + escTxt(rm.label) + '">' +
+                    '<span class="gb-react-icon" aria-hidden="true">' + rm.icon + "</span>" +
+                    '<span class="gb-react-label">' + escTxt(rm.label) + "</span>" +
+                    '<span class="gb-react-count"' + (cnt > 0 ? "" : " hidden") + ">" + cnt + "</span>" +
+                    "</button>"
+                  );
+                }).join("") +
+                "</div>";
               return (
-                '<article class="gb-card' + (hasPhoto ? " gb-card--photo" : "") + '" data-reflection-id="' + escTxt(it.id) + '">' +
+                '<article class="gb-card' + (hasPhoto ? " gb-card--photo" : "") + '" data-reflection-id="' + escTxt(it.id) + '" data-lightbox-group>' +
                 photoHtml +
                 '<div class="gb-card-inner">' +
+                moodHtml +
                 quoteHtml +
                 '<p class="gb-card-body">' + escTxt(it.content) + "</p>" +
-                '<footer class="gb-card-foot">' +
+                '<footer class="gb-card-foot gb-card-foot--reactions">' +
                 '<div class="gb-author">' +
                 avHtml +
                 '<div class="gb-author-meta"><strong>' + escTxt(it.authorName) + "</strong>" +
                 (metaParts.length ? "<span>" + escTxt(metaParts.join(" · ")) + "</span>" : "") +
                 "</div></div>" +
-                '<button type="button" class="gb-heart-btn' + (isHearted ? " is-hearted" : "") + '" data-heart-reflection="' + escTxt(it.id) + '" aria-pressed="' + (isHearted ? "true" : "false") + '" aria-label="Thả tim cảm nhận này">' +
-                '<span class="gb-heart-icon" aria-hidden="true">' + (isHearted ? "♥" : "♡") + "</span>" +
-                '<span class="gb-heart-count">' + heartCount + "</span>" +
-                "</button></footer></div></article>"
+                reactionsHtml +
+                "</footer></div></article>"
               );
             })
             .join("");
         })
         .catch(function () {
-          if (gbCount) gbCount.textContent = "Cảm nhận cộng đồng";
+          if (gbCount) gbCount.textContent = t("Cảm nhận cộng đồng", "Community reflections");
         });
     }
 
@@ -1669,48 +1829,44 @@
     window.addEventListener("hola:member-changed", loadPublicReflections);
 
     gbSection.addEventListener("click", function (e) {
-      var heartBtn = e.target.closest("[data-heart-reflection]");
-      if (!heartBtn || heartBtn.disabled) return;
-      var refId = heartBtn.getAttribute("data-heart-reflection");
+      var reactBtn = e.target.closest("[data-heart-reflection]");
+      if (!reactBtn || reactBtn.disabled) return;
+      var refId = reactBtn.getAttribute("data-heart-reflection");
+      var reactionType = reactBtn.getAttribute("data-reaction-type") || "heart";
       if (!refId) return;
-      heartBtn.disabled = true;
-      fetch("/api/reflections/" + encodeURIComponent(refId) + "/heart", { method: "POST" })
+      var card = reactBtn.closest("[data-reflection-id]");
+      var allBtns = card ? Array.prototype.slice.call(card.querySelectorAll("[data-heart-reflection]")) : [reactBtn];
+      allBtns.forEach(function (b) { b.disabled = true; });
+      fetch("/api/reflections/" + encodeURIComponent(refId) + "/heart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reaction: reactionType }),
+      })
         .then(parseJsonSafe)
         .then(function (res) {
           if (!res.ok || !res.data) return;
-          var hearted = Boolean(res.data.hearted);
-          heartBtn.classList.toggle("is-hearted", hearted);
-          heartBtn.setAttribute("aria-pressed", hearted ? "true" : "false");
-          var icon = heartBtn.querySelector(".gb-heart-icon");
-          var cnt = heartBtn.querySelector(".gb-heart-count");
-          if (icon) icon.textContent = hearted ? "♥" : "♡";
-          if (cnt && typeof res.data.heartCount !== "undefined") {
-            cnt.textContent = String(res.data.heartCount);
-          }
+          var activeKey = res.data.myReaction || "";
+          var reactions = res.data.reactions || { heart: Number(res.data.heartCount || 0), warm: 0, inspire: 0 };
+          allBtns.forEach(function (b) {
+            var k = b.getAttribute("data-reaction-type") || "heart";
+            var isOn = activeKey === k;
+            var cnt = Number(reactions[k] || 0);
+            b.classList.toggle("is-active", isOn);
+            b.setAttribute("aria-pressed", isOn ? "true" : "false");
+            var cntEl = b.querySelector(".gb-react-count");
+            if (cntEl) {
+              cntEl.textContent = String(cnt);
+              cntEl.hidden = cnt <= 0;
+            }
+          });
         })
         .catch(function () {})
         .finally(function () {
-          heartBtn.disabled = false;
+          allBtns.forEach(function (b) { b.disabled = false; });
         });
     });
 
     if (prForm) {
-      var prAnonCheck = document.getElementById("pr-anon-check");
-      var prNameField = document.getElementById("pr-name");
-      if (prAnonCheck && prNameField) {
-        prAnonCheck.addEventListener("change", function () {
-          if (prAnonCheck.checked) {
-            prNameField.dataset.prevName = prNameField.value;
-            prNameField.value = "Ẩn danh";
-            prNameField.readOnly = true;
-          } else {
-            prNameField.readOnly = false;
-            prNameField.value = prNameField.dataset.prevName || "";
-            prNameField.focus();
-          }
-        });
-      }
-
       prForm.addEventListener("submit", function (e) {
         e.preventDefault();
         if (prStatus) {
@@ -1718,51 +1874,68 @@
           prStatus.textContent = "";
         }
         var fd = new FormData(prForm);
-        var rawName = String(fd.get("authorName") || "").trim();
-        var prMemberBar = document.getElementById("pr-member-bar");
-        var isMemberSignedIn = prMemberBar && !prMemberBar.hidden;
-        if (prAnonCheck && prAnonCheck.checked) rawName = "Ẩn danh";
         var contentVal = String(fd.get("content") || "").trim();
-        if ((!isMemberSignedIn && rawName.length < 2) || contentVal.length < 12) {
+        if (contentVal.length < 12) {
           if (prStatus) {
             prStatus.className = "form-status is-error";
-            prStatus.textContent = isMemberSignedIn
-              ? "Cảm nhận cần ít nhất 12 ký tự."
-              : "Vui lòng nhập tên (hoặc chọn Gửi ẩn danh) và viết ít nhất 12 ký tự.";
+            prStatus.textContent = t("Cảm nhận cần ít nhất 12 ký tự.", "Please write at least 12 characters.");
+          }
+          return;
+        }
+        if (selectedPhotos.length > MAX_REFLECTION_PHOTOS) {
+          if (prStatus) {
+            prStatus.className = "form-status is-error";
+            prStatus.textContent = t(
+              "Mỗi lưu bút chỉ đính kèm tối đa " + MAX_REFLECTION_PHOTOS + " ảnh.",
+              "You can attach up to " + MAX_REFLECTION_PHOTOS + " photos per reflection."
+            );
           }
           return;
         }
         if (prBtn) {
           prBtn.disabled = true;
-          prBtn.textContent = selectedPhotoFile ? "Đang nén & tải ảnh..." : "Đang gửi...";
+          prBtn.textContent = selectedPhotos.length
+            ? t("Đang nén & tải ảnh...", "Compressing & uploading photos...")
+            : t("Đang gửi...", "Posting...");
         }
 
-        var uploadStep = selectedPhotoFile
-          ? compressReflectionImage(selectedPhotoFile, 1280, 0.82).then(function (blob) {
+        var filesToUpload = selectedPhotos.slice();
+        var uploadedUrls = [];
+
+        var uploadChain = filesToUpload.reduce(function (promise, item, idx) {
+          return promise.then(function () {
+            if (prBtn) {
+              prBtn.textContent = t(
+                "Đang tải ảnh " + (idx + 1) + "/" + filesToUpload.length + "...",
+                "Uploading photo " + (idx + 1) + "/" + filesToUpload.length + "..."
+              );
+            }
+            return compressReflectionImage(item.file, 1280, 0.82).then(function (blob) {
               var upFd = new FormData();
-              upFd.append("file", blob, "reflection.jpg");
+              upFd.append("file", blob, "reflection-" + (idx + 1) + ".jpg");
               return fetch("/api/reflections/media", { method: "POST", body: upFd })
                 .then(parseJsonSafe)
                 .then(function (upRes) {
                   if (!upRes.ok || !upRes.data || !upRes.data.url) {
-                    throw new Error((upRes.data && upRes.data.message) || "Không thể tải ảnh lên lúc này.");
+                    throw new Error(extractErrMessage(upRes.data, t("Không thể tải ảnh lên lúc này.", "Could not upload photo right now.")));
                   }
-                  return upRes.data.url;
+                  uploadedUrls.push(upRes.data.url);
                 });
-            })
-          : Promise.resolve("");
+            });
+          });
+        }, Promise.resolve());
 
-        uploadStep
-          .then(function (uploadedPhotoUrl) {
-            if (prBtn) prBtn.textContent = "Đang gửi cảm nhận...";
+        uploadChain
+          .then(function () {
+            if (prBtn) prBtn.textContent = t("Đang gửi lưu bút...", "Submitting reflection...");
             var payload = {
               activitySlug: gbSlug,
-              authorName: rawName,
-              authorOrg: String(fd.get("authorOrg") || "").trim(),
-              participantRole: String(fd.get("participantRole") || "").trim() || "Người tham dự",
+              participantRole: String(fd.get("participantRole") || "").trim() || "member",
               pullQuote: String(fd.get("pullQuote") || "").trim(),
+              mood: String(fd.get("mood") || "").trim(),
               content: contentVal,
-              photoUrl: uploadedPhotoUrl,
+              photoUrls: uploadedUrls,
+              photoUrl: uploadedUrls[0] || "",
               website: String(fd.get("website") || "").trim(),
             };
             return fetch("/api/reflections", {
@@ -1773,31 +1946,31 @@
           })
           .then(function (res) {
             if (!res.ok) {
-              throw new Error((res.data && res.data.message) || "Không thể gửi cảm nhận lúc này.");
+              throw new Error(extractErrMessage(res.data, t("Không thể gửi lưu bút lúc này.", "Could not submit reflection right now.")));
             }
             var contentInput = document.getElementById("pr-content");
             if (contentInput) contentInput.value = "";
-            clearSelectedPhoto();
-            if (!isMemberSignedIn) {
-              prForm.reset();
-              if (prNameField) prNameField.readOnly = false;
-            }
+            var quoteInput = document.getElementById("pr-quote");
+            if (quoteInput) quoteInput.value = "";
+            clearSelectedPhotos();
             if (prStatus) {
               prStatus.className = "form-status is-success";
-              prStatus.textContent =
-                (res.data && res.data.message) || "Đã gửi cảm nhận tới Ban Điều Phối duyệt hiển thị.";
+              prStatus.textContent = t(
+                (res.data && res.data.message) || "Đã gửi lưu bút tới Ban Điều Phối duyệt hiển thị.",
+                "Thank you! Your reflection has been sent for a quick review before publishing."
+              );
             }
           })
           .catch(function (err) {
             if (prStatus) {
               prStatus.className = "form-status is-error";
-              prStatus.textContent = (err && err.message) || "Có lỗi xảy ra, vui lòng thử lại.";
+              prStatus.textContent = (err && err.message) || t("Có lỗi xảy ra, vui lòng thử lại.", "Something went wrong. Please try again.");
             }
           })
           .finally(function () {
             if (prBtn) {
               prBtn.disabled = false;
-              prBtn.textContent = "Gửi cảm nhận";
+              prBtn.textContent = t("Gửi lưu bút", "Post reflection");
             }
           });
       });
@@ -2233,10 +2406,16 @@
       setFeedbackStatus("", "");
 
       var checkedKind = form.querySelector('input[name="feedbackKind"]:checked');
-      var kind = checkedKind ? checkedKind.value : "Góp ý cộng đồng";
+      var kind = checkedKind ? checkedKind.value : t("Góp ý cộng đồng", "Community Feedback");
       var note = (noteEl && noteEl.value ? noteEl.value : "").trim();
       if (note.length < 8) {
-        setFeedbackStatus("Vui lòng chia sẻ ít nhất 8 ký tự để Ban Điều Phối nắm rõ ý của bạn.", "error");
+        setFeedbackStatus(
+          t(
+            "Vui lòng chia sẻ ít nhất 8 ký tự để Ban Điều Phối nắm rõ ý của bạn.",
+            "Please share at least 8 characters so our coordinators can understand your note."
+          ),
+          "error"
+        );
         if (noteEl) noteEl.focus();
         return;
       }
@@ -2244,7 +2423,7 @@
       var hp = form.querySelector('input[name="website"]');
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = "Đang gửi đóng góp...";
+        submitBtn.textContent = t("Đang gửi đóng góp...", "Sending feedback...");
       }
       try {
         var res = await fetch("/api/registrations", {
@@ -2252,10 +2431,11 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             source: "feedback",
+            lang: isEn ? "en" : "vi",
             website: hp ? hp.value : "",
-            activity: "Đóng góp · " + kind,
+            activity: t("Đóng góp · ", "Feedback · ") + kind,
             role: kind,
-            fullName: (nameEl && nameEl.value ? nameEl.value : "").trim() || "Thành viên đóng góp",
+            fullName: (nameEl && nameEl.value ? nameEl.value : "").trim() || t("Thành viên đóng góp", "Community contributor"),
             phone: (contactEl && contactEl.value ? contactEl.value : "").trim(),
             organization: window.location.pathname || "/",
             note: note,
@@ -2265,20 +2445,23 @@
         });
         var data = await res.json().catch(function () { return {}; });
         if (!res.ok || data.ok === false) {
-          throw new Error(data.message || "Chưa gửi được đóng góp lúc này. Vui lòng thử lại.");
+          throw new Error(data.message || t("Chưa gửi được đóng góp lúc này. Vui lòng thử lại.", "Could not send feedback right now. Please try again."));
         }
         form.reset();
         setScreenshotPreview("", "");
         setFeedbackStatus(
-          "Cảm ơn bạn đã gửi phản hồi. Ban Điều Phối HolaRise đã tiếp nhận đầy đủ thông tin.",
+          t(
+            "Cảm ơn bạn đã gửi phản hồi. Ban Điều Phối HolaRise đã tiếp nhận đầy đủ thông tin.",
+            "Thank you for your feedback. Our coordinating team has received your message."
+          ),
           "success"
         );
       } catch (err) {
-        setFeedbackStatus(err && err.message ? err.message : "Đã có lỗi xảy ra khi gửi.", "error");
+        setFeedbackStatus(err && err.message ? err.message : t("Đã có lỗi xảy ra khi gửi.", "Something went wrong while sending."), "error");
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = "Gửi đóng góp tới Ban Điều Phối";
+          submitBtn.textContent = t("Gửi đóng góp tới Ban Điều Phối", "Send feedback");
         }
       }
     });

@@ -26,10 +26,58 @@ export async function onRequestGet(context) {
     ).bind(limit);
   }
 
-  const { results } = await stmt.all();
+  const [eventsRes, bookedRes, albumsRes] = await Promise.all([
+    stmt.all(),
+    context.env.DB.prepare(
+      `SELECT event_id, COUNT(*) AS cnt
+       FROM registrations
+       WHERE status != 'cancelled' AND event_id != ''
+       GROUP BY event_id`
+    )
+      .all()
+      .catch(() => ({ results: [] })),
+    context.env.DB.prepare(
+      `SELECT a.id, a.slug, a.title, a.drive_url,
+              (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id) AS photo_count
+       FROM media_albums a
+       LIMIT 200`
+    )
+      .all()
+      .catch(() => ({ results: [] })),
+  ]);
+
+  const bookedMap = new Map();
+  for (const r of bookedRes.results || []) {
+    bookedMap.set(r.event_id, Number(r.cnt || 0));
+  }
+  const albumByTitle = new Map();
+  const albumBySlug = new Map();
+  for (const a of albumsRes.results || []) {
+    if (a.slug) albumBySlug.set(String(a.slug).toLowerCase(), a);
+    if (a.title) albumByTitle.set(String(a.title).trim().toLowerCase(), a);
+  }
+
   return jsonResponse({
     ok: true,
-    items: (results || []).map(serializeEventRow),
+    items: (eventsRes.results || []).map((row) => {
+      const ev = serializeEventRow(row);
+      const matchedAlbum =
+        albumBySlug.get(String(ev.slug || "").toLowerCase()) ||
+        albumByTitle.get(String(ev.title || "").trim().toLowerCase()) ||
+        null;
+      return {
+        ...ev,
+        webBookedCount: bookedMap.get(ev.id) || 0,
+        album: matchedAlbum
+          ? {
+              id: matchedAlbum.id,
+              slug: matchedAlbum.slug,
+              driveUrl: matchedAlbum.drive_url || "",
+              photoCount: Number(matchedAlbum.photo_count || 0),
+            }
+          : null,
+      };
+    }),
   });
 }
 
@@ -53,8 +101,8 @@ export async function onRequestPost(context) {
   try {
     await context.env.DB.prepare(
       `INSERT INTO events
-       (id, kind, type, filters_json, date, date_display, time, location, fee, seats, seat_capacity, external_booked, show_seat_bar, title, title_en, summary, summary_en, highlights_json, participants, image, image_alt, status, sort_order, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       (id, kind, type, filters_json, date, date_display, time, location, fee, seats, seat_capacity, external_booked, show_seat_bar, title, title_en, summary, summary_en, highlights_json, participants, image, image_alt, zalo_group_url, status, sort_order, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         id,
@@ -78,6 +126,7 @@ export async function onRequestPost(context) {
         v.participants,
         v.image,
         v.image_alt,
+        v.zalo_group_url,
         v.status,
         v.sort_order,
         now,
@@ -86,7 +135,77 @@ export async function onRequestPost(context) {
       .run();
   } catch (err) {
     const msg = String(err?.message || "");
-    if (msg.includes("seat_capacity") || msg.includes("title_en")) {
+    if (msg.includes("zalo_group_url")) {
+      try {
+        await context.env.DB.prepare(
+          `INSERT INTO events
+           (id, kind, type, filters_json, date, date_display, time, location, fee, seats, seat_capacity, external_booked, show_seat_bar, title, title_en, summary, summary_en, highlights_json, participants, image, image_alt, status, sort_order, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        )
+          .bind(
+            id,
+            v.kind,
+            v.type,
+            JSON.stringify(v.filters),
+            v.date,
+            v.date_display,
+            v.time,
+            v.location,
+            v.fee,
+            v.seats,
+            v.seat_capacity,
+            v.external_booked,
+            v.show_seat_bar,
+            v.title,
+            v.title_en,
+            v.summary,
+            v.summary_en,
+            JSON.stringify(v.highlights),
+            v.participants,
+            v.image,
+            v.image_alt,
+            v.status,
+            v.sort_order,
+            now,
+            now
+          )
+          .run();
+      } catch (err2) {
+        const msg2 = String(err2?.message || "");
+        if (msg2.includes("seat_capacity") || msg2.includes("title_en")) {
+          await context.env.DB.prepare(
+            `INSERT INTO events
+             (id, kind, type, filters_json, date, date_display, time, location, fee, seats, title, summary, highlights_json, participants, image, image_alt, status, sort_order, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          )
+            .bind(
+              id,
+              v.kind,
+              v.type,
+              JSON.stringify(v.filters),
+              v.date,
+              v.date_display,
+              v.time,
+              v.location,
+              v.fee,
+              v.seats,
+              v.title,
+              v.summary,
+              JSON.stringify(v.highlights),
+              v.participants,
+              v.image,
+              v.image_alt,
+              v.status,
+              v.sort_order,
+              now,
+              now
+            )
+            .run();
+        } else {
+          throw err2;
+        }
+      }
+    } else if (msg.includes("seat_capacity") || msg.includes("title_en")) {
       await context.env.DB.prepare(
         `INSERT INTO events
          (id, kind, type, filters_json, date, date_display, time, location, fee, seats, title, summary, highlights_json, participants, image, image_alt, status, sort_order, created_at, updated_at)

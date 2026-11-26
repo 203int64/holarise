@@ -262,6 +262,10 @@ export function validateEventInput(body) {
   if (!isSafeMediaUrl(image)) fields.image = "Đường dẫn ảnh sự kiện không hợp lệ.";
 
   const imageAlt = cleanStr(body.imageAlt || body.image_alt, 240) || title;
+  const zaloGroupUrl = cleanStr(body.zaloGroupUrl ?? body.zalo_group_url, 500);
+  if (zaloGroupUrl && !isSafeExternalHttpsUrl(zaloGroupUrl)) {
+    fields.zaloGroupUrl = "Link Nhóm Zalo phải bắt đầu bằng https://.";
+  }
   const status = cleanStr(body.status, 20) || "published";
   if (!VALID_POST_STATUSES.has(status)) fields.status = "Trạng thái sự kiện chỉ nhận 'published' hoặc 'draft'.";
 
@@ -296,6 +300,7 @@ export function validateEventInput(body) {
       participants,
       image,
       image_alt: imageAlt,
+      zalo_group_url: zaloGroupUrl,
       status,
       sort_order: sortOrder,
     },
@@ -310,16 +315,19 @@ export function validateRegistrationInput(body) {
 
   const sourceRaw = cleanStr(body.source, 30);
   const isFeedback = sourceRaw === "feedback";
+  const isEn = cleanStr(body.lang, 10).toLowerCase() === "en";
   const fields = {};
 
   let fullName = cleanStr(body.fullName || body.full_name, 120);
   if (isFeedback) {
-    if (!fullName) fullName = "Thành viên đóng góp";
+    if (!fullName) fullName = isEn ? "Community contributor" : "Thành viên đóng góp";
   } else if (fullName.length < 2) {
-    fields.fullName = "Vui lòng nhập họ và tên (tối thiểu 2 ký tự).";
+    fields.fullName = isEn
+      ? "Please enter your name (at least 2 characters)."
+      : "Vui lòng nhập họ và tên (tối thiểu 2 ký tự).";
   }
 
-  // Backward compatible: accept phone or legacy contact field
+  // Backward compatible: accept phone, legacy contact, or email-only for international visitors
   const rawPhone = cleanStr(body.phone || body.contact, 80);
   const rawEmail = cleanStr(body.email, 160);
 
@@ -330,16 +338,24 @@ export function validateRegistrationInput(body) {
   if (!email && isValidEmail(rawPhone)) {
     email = rawPhone;
   }
+  // If international visitor supplied valid email without phone, mirror email into contact column
+  if (!phone && isValidEmail(email)) {
+    phone = email;
+  }
 
   const digitCount = phone.replace(/\D/g, "").length;
   if (isFeedback) {
-    if (!phone) phone = email || "Ẩn danh";
+    if (!phone) phone = email || (isEn ? "Anonymous" : "Ẩn danh");
   } else if (digitCount < 8 && !isValidEmail(phone)) {
-    fields.phone = "Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).";
+    fields.phone = isEn
+      ? "Please enter a valid phone number (8+ digits) or email address."
+      : "Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).";
   }
 
   if (email && !isValidEmail(email)) {
-    fields.email = "Email không đúng định dạng (ví dụ: tenban@gmail.com).";
+    fields.email = isEn
+      ? "Please enter a valid email address (e.g. name@example.com)."
+      : "Email không đúng định dạng (ví dụ: tenban@gmail.com).";
   }
 
   const activityTitle = cleanStr(body.activity || body.activityTitle || body.activity_title, 220);
@@ -350,7 +366,9 @@ export function validateRegistrationInput(body) {
   const organization = cleanStr(body.organization, 160);
   const note = cleanStr(body.note, 1000);
   if (isFeedback && note.length < 8) {
-    fields.note = "Vui lòng chia sẻ nội dung đóng góp ít nhất 8 ký tự để Ban Điều Phối nắm rõ ý của bạn.";
+    fields.note = isEn
+      ? "Please share at least 8 characters so our coordinators can understand your feedback."
+      : "Vui lòng chia sẻ nội dung đóng góp ít nhất 8 ký tự để Ban Điều Phối nắm rõ ý của bạn.";
   }
 
   let diagnostics = "";
@@ -749,6 +767,81 @@ export function validateMemberProfileInput(body) {
   return { ok: true, value: out };
 }
 
+export const MAX_REFLECTION_PHOTOS = 7;
+export const VALID_REFLECTION_MOODS = new Set(["", "am-long", "cham-sau", "biet-on", "dang-nho", "tiep-suc"]);
+export const VALID_REACTION_TYPES = new Set(["heart", "warm", "inspire"]);
+export const VALID_EVENT_FEEDBACK_CATEGORIES = new Set(["cai-thien", "dong-vien", "de-xuat", "khac"]);
+export const VALID_EVENT_FEEDBACK_STATUSES = new Set(["new", "read", "resolved"]);
+
+export function validateEventFeedbackInput(body) {
+  if (cleanStr(body?.website || body?._hp, 100) !== "") {
+    return { ok: true, honeypot: true };
+  }
+  const fields = {};
+  const eventId = cleanStr(body?.eventId ?? body?.event_id, 120);
+  const rawSlug = cleanStr(body?.eventSlug ?? body?.event_slug, 140);
+  const eventSlug = rawSlug ? slugifyVi(rawSlug) : "";
+  const eventTitle = cleanStr(body?.eventTitle ?? body?.event_title, 200);
+
+  const rawCat = cleanStr(body?.category, 32).toLowerCase() || "cai-thien";
+  const category = VALID_EVENT_FEEDBACK_CATEGORIES.has(rawCat) ? rawCat : "cai-thien";
+
+  const content = cleanStr(body?.content ?? body?.note, 1500);
+  if (content.length < 8) {
+    fields.content = "Nội dung đóng góp cần ít nhất 8 ký tự.";
+  }
+
+  const isAnonymous = Boolean(body?.isAnonymous ?? body?.is_anonymous);
+  const authorName = isAnonymous ? "Ẩn danh" : cleanStr(body?.authorName ?? body?.author_name ?? body?.name, 100);
+  const authorContact = isAnonymous ? "" : cleanStr(body?.authorContact ?? body?.author_contact ?? body?.contact, 120);
+
+  if (Object.keys(fields).length > 0) {
+    return { ok: false, fields };
+  }
+
+  return {
+    ok: true,
+    value: {
+      event_id: eventId,
+      event_slug: eventSlug,
+      event_title: eventTitle,
+      category,
+      content,
+      author_name: authorName || "Ẩn danh",
+      author_contact: authorContact,
+      is_anonymous: isAnonymous || (!authorName && !authorContact) ? 1 : 0,
+    },
+  };
+}
+
+export function parseReflectionPhotos(rawPhotosJson, fallbackPhotoUrl = "") {
+  const out = [];
+  const seen = new Set();
+  const pushUrl = (u) => {
+    const clean = cleanStr(u, 500);
+    if (clean && !seen.has(clean)) {
+      seen.add(clean);
+      out.push(clean);
+    }
+  };
+  if (Array.isArray(rawPhotosJson)) {
+    for (const item of rawPhotosJson) pushUrl(item);
+  } else if (typeof rawPhotosJson === "string" && rawPhotosJson.trim()) {
+    try {
+      const parsed = JSON.parse(rawPhotosJson);
+      if (Array.isArray(parsed)) {
+        for (const item of parsed) pushUrl(item);
+      }
+    } catch {
+      // Ignore malformed JSON and fall back cleanly
+    }
+  }
+  if (out.length === 0 && fallbackPhotoUrl) {
+    pushUrl(fallbackPhotoUrl);
+  }
+  return out.slice(0, MAX_REFLECTION_PHOTOS);
+}
+
 export function validateReflectionInput(body, { requireSlug = true } = {}) {
   const fields = {};
   const rawSlug = cleanStr(body.activitySlug ?? body.activity_slug, 140);
@@ -761,15 +854,42 @@ export function validateReflectionInput(body, { requireSlug = true } = {}) {
   const participantRole = VALID_PARTICIPANT_ROLES.has(rawRole) ? rawRole : "member";
 
   const pullQuote = cleanStr(body.pullQuote ?? body.pull_quote, 140);
+  const rawMood = cleanStr(body.mood, 32).toLowerCase();
+  const mood = VALID_REFLECTION_MOODS.has(rawMood) ? rawMood : "";
   const content = cleanStr(body.content, 1500);
   if (content.length < 12) {
     fields.content = "Lời cảm nhận cần ít nhất 12 ký tự để chia sẻ trọn vẹn ý nghĩa.";
   }
 
-  const photoUrl = cleanStr(body.photoUrl ?? body.photo_url, 500);
-  if (photoUrl && !isSafeMediaUrl(photoUrl)) {
-    fields.photoUrl = "Đường dẫn ảnh kỷ niệm không hợp lệ.";
+  const rawPhotoList = body.photoUrls ?? body.photo_urls ?? body.photos;
+  const photoUrls = [];
+  const seenPhotos = new Set();
+  if (Array.isArray(rawPhotoList)) {
+    for (const rawItem of rawPhotoList) {
+      const u = cleanStr(rawItem, 500);
+      if (!u || seenPhotos.has(u)) continue;
+      if (!isSafeMediaUrl(u)) {
+        fields.photoUrls = "Đường dẫn ảnh kỷ niệm không hợp lệ.";
+        break;
+      }
+      seenPhotos.add(u);
+      photoUrls.push(u);
+    }
+    if (!fields.photoUrls && photoUrls.length > MAX_REFLECTION_PHOTOS) {
+      fields.photoUrls = `Mỗi lưu bút chỉ đính kèm tối đa ${MAX_REFLECTION_PHOTOS} ảnh kỷ niệm.`;
+    }
+  } else {
+    const singlePhotoUrl = cleanStr(body.photoUrl ?? body.photo_url, 500);
+    if (singlePhotoUrl) {
+      if (!isSafeMediaUrl(singlePhotoUrl)) {
+        fields.photoUrl = "Đường dẫn ảnh kỷ niệm không hợp lệ.";
+      } else {
+        photoUrls.push(singlePhotoUrl);
+      }
+    }
   }
+
+  const photoUrl = photoUrls[0] || "";
   const photoMediaKey = photoUrl ? extractMediaKeyFromUrl(photoUrl) : "";
 
   if (Object.keys(fields).length > 0) {
@@ -782,9 +902,12 @@ export function validateReflectionInput(body, { requireSlug = true } = {}) {
       activity_slug: activitySlug,
       participant_role: participantRole,
       pull_quote: pullQuote,
+      mood,
       content,
       photo_url: photoUrl,
       photo_media_key: photoMediaKey,
+      photo_urls: photoUrls,
+      photos_json: JSON.stringify(photoUrls),
     },
   };
 }

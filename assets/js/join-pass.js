@@ -6,10 +6,19 @@
 (function () {
   "use strict";
 
+  var isEn =
+    (document.documentElement &&
+      (document.documentElement.lang === "en" ||
+        document.documentElement.getAttribute("data-lang") === "en")) ||
+    /^\/en(\/|$)/i.test((window.location && window.location.pathname) || "");
+  function t(vi, en) {
+    return isEn ? en : vi;
+  }
+
   var prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var isFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   var SITE_URL = "https://holarise.org";
-  var DEFAULT_SCHEDULE = "1–2 buổi / tuần";
+  var DEFAULT_SCHEDULE = t("1–2 buổi / tuần", "1–2 sessions / week");
 
   var joinForm = document.querySelector("[data-join-studio]");
   var passEl = document.querySelector("[data-sunrise-pass]");
@@ -193,10 +202,18 @@
     var orgVal = ((orgInput || {}).value || "").trim();
 
     var checkedRole = joinForm.querySelector('input[type="radio"][name="role"]:checked');
+    var hasRoleRadios = Boolean(joinForm.querySelector('input[type="radio"][name="role"]'));
     var checkedEvent = joinForm.querySelector('input[type="radio"][name="eventChoice"]:checked');
     var activeVibe = joinForm.querySelector('[data-vibe-chip][aria-pressed="true"]');
     var activePartner = joinForm.querySelector('[data-partner-chip][aria-pressed="true"]');
-    var isPartnerMode = Boolean(checkedRole && checkedRole.getAttribute("data-mode") === "partner");
+    var isPartnerMode = hasRoleRadios
+      ? Boolean(checkedRole && checkedRole.getAttribute("data-mode") === "partner")
+      : joinForm.getAttribute("data-join-mode") === "partner";
+
+    // Modern /tham-gia/ & /en/join/ partner-only form has no role radio tabs; preserve its template labels & hidden activity
+    if (!hasRoleRadios && isPartnerMode) {
+      return;
+    }
 
     joinForm.setAttribute("data-join-mode", isPartnerMode ? "partner" : "youth");
     joinForm.querySelectorAll("[data-youth-only]").forEach(function (el) {
@@ -218,31 +235,31 @@
 
     if (orgLabelEl) {
       orgLabelEl.textContent = isPartnerMode
-        ? "Tên Nhà trường / CLB / Tổ chức / Doanh nghiệp"
-        : "Đơn vị học tập / công tác";
+        ? t("Tên Nhà trường / CLB / Tổ chức / Doanh nghiệp", "Organization / University / Club")
+        : t("Đơn vị học tập / công tác", "University / Organization");
     }
     if (orgInput) {
       orgInput.placeholder = isPartnerMode
-        ? "Ví dụ: CLB Tình nguyện ĐH FPT, MusicSpace, Doanh nghiệp..."
-        : "Ví dụ: ĐH FPT, ĐHQGHN, THPT Thạch Thất...";
+        ? t("Ví dụ: CLB Tình nguyện ĐH FPT, MusicSpace, Doanh nghiệp...", "e.g. University, Student Club, NGO, Venue...")
+        : t("Ví dụ: ĐH FPT, ĐHQGHN, THPT Thạch Thất...", "e.g. FPT University, VNU Hoa Lac, HHTP...");
     }
     if (nameLabelEl) {
       nameLabelEl.innerHTML = isPartnerMode
-        ? 'Người đại diện liên hệ <span aria-hidden="true">*</span>'
-        : 'Họ và tên <span aria-hidden="true">*</span>';
+        ? t('Người đại diện liên hệ <span aria-hidden="true">*</span>', 'Contact person <span aria-hidden="true">*</span>')
+        : t('Họ và tên <span aria-hidden="true">*</span>', 'Full name <span aria-hidden="true">*</span>');
     }
     if (howLegendEl) {
-      howLegendEl.textContent = isPartnerMode ? "Đề xuất hợp tác" : "Cách bạn muốn đồng hành";
+      howLegendEl.textContent = isPartnerMode ? t("Đề xuất hợp tác", "Partnership proposal") : t("Cách bạn muốn đồng hành", "How you want to join");
     }
     if (noteLabelEl) {
       noteLabelEl.textContent = isPartnerMode
-        ? "Nội dung đề xuất hợp tác & thời gian dự kiến"
-        : "Lời nhắn hoặc câu chuyện bạn muốn chia sẻ";
+        ? t("Nội dung đề xuất hợp tác & thời gian dự kiến", "Collaboration idea & proposed timeline")
+        : t("Lời nhắn hoặc câu chuyện bạn muốn chia sẻ", "Note or message you would like to share");
     }
     if (submitBtnEl && !submitBtnEl.classList.contains("is-loading")) {
       submitBtnEl.textContent = isPartnerMode
-        ? "Gửi đề xuất kết nối đối tác"
-        : "Tạo Thẻ Thành Viên Hola";
+        ? t("Gửi đề xuất kết nối đối tác", "Send partnership inquiry")
+        : t("Tạo Thẻ Thành Viên Hola", "Create HolaRise Member Pass");
     }
 
     var theme = (checkedRole && checkedRole.getAttribute("data-theme")) || "sunrise";
@@ -472,13 +489,15 @@
         modalPassTimeEl.textContent =
           timeDisplay && dateDisplay && timeDisplay.indexOf(dateDisplay) === -1
             ? timeDisplay + " · " + dateDisplay
-            : timeDisplay || dateDisplay || "Theo lịch buổi gặp";
+            : timeDisplay || dateDisplay || t("Theo lịch buổi gặp", "See gathering schedule");
       }
-      if (modalPassLocationEl) modalPassLocationEl.textContent = snap.eventLocation || "Hòa Lạc, Hà Nội";
-      if (modalPassSeatsEl) modalPassSeatsEl.textContent = snap.vibe || "01 chỗ · Đi một mình";
+      if (modalPassLocationEl) modalPassLocationEl.textContent = snap.eventLocation || t("Hòa Lạc, Hà Nội", "Hoa Lac, Hanoi");
+      if (modalPassSeatsEl) modalPassSeatsEl.textContent = snap.vibe || t("01 chỗ · Đi một mình", "01 seat · Coming solo");
       if (modalPassSummaryEl) {
-        modalPassSummaryEl.textContent =
-          "Mời bạn vào Nhóm Zalo buổi gặp để nhận định vị, ghép xe và lưu lịch trước giờ bắt đầu.";
+        modalPassSummaryEl.textContent = t(
+          "Mời bạn vào Nhóm Zalo buổi gặp để nhận định vị, ghép xe và lưu lịch trước giờ bắt đầu.",
+          "Join the gathering Zalo group for location pins, carpool coordination, or add the event to your calendar below."
+        );
       }
       if (modalInviteTarget) modalInviteTarget.textContent = inviteMsg;
       modalSuccessEl.hidden = false;
@@ -1785,8 +1804,9 @@
       var t = 1.1;
       var tilts = [0.4, -0.35, 0.25, -0.45, 0.3];
       var html =
-        '<div style="transform:rotate(-0.8deg)"><span class="hl-wl" style="--t:0.35s;--d:0.65s;--n:5;font-size:1.55rem;font-weight:700;"><span class="hl-ink">Gửi ' +
-        escHtmlSimple(recipient || "bạn") +
+        '<div style="transform:rotate(-0.8deg)"><span class="hl-wl" style="--t:0.35s;--d:0.65s;--n:5;font-size:1.55rem;font-weight:700;"><span class="hl-ink">' +
+        t("Gửi ", "Dear ") +
+        escHtmlSimple(recipient || t("bạn", "friend")) +
         ",</span>" +
         penSvg +
         "</span></div>";
@@ -1856,7 +1876,7 @@
     function openEnvelopeStage(data) {
       if (!envStage || !envBox || !mainFlow) return;
       activeEnvData = data || {};
-      var recipient = String(activeEnvData.recipient || "").trim() || "bạn";
+      var recipient = String(activeEnvData.recipient || "").trim() || t("bạn", "friend");
       var inviter = String(activeEnvData.inviter || "").trim() || "HolaRise";
       var initial = inviter.charAt(0).toUpperCase() || "H";
 
@@ -1864,7 +1884,7 @@
       var invEl = document.getElementById("hl-env-inviter-txt");
       var cardRecEl = document.getElementById("hl-env-card-recipient");
       var sealBtn = document.getElementById("hl-env-seal-btn");
-      if (salEl) salEl.textContent = "Gửi " + recipient + ",";
+      if (salEl) salEl.textContent = t("Gửi ", "Dear ") + recipient + ",";
       if (invEl) invEl.textContent = inviter;
       if (cardRecEl) cardRecEl.textContent = recipient;
       if (sealBtn) sealBtn.textContent = initial;
@@ -1957,7 +1977,7 @@
         inviterInput.value = window.HolaMember.member.name;
       }
       syncSharePreview();
-      if (copyBtn) copyBtn.textContent = "Sao chép";
+      if (copyBtn) copyBtn.textContent = t("Sao chép", "Copy");
       if (typeof modal.showModal === "function" && !modal.open) {
         modal.showModal();
       }
@@ -1970,9 +1990,9 @@
         var note = noteInput ? noteInput.value.trim() : "";
         if (modal.open) modal.close();
         openEnvelopeStage({
-          recipient: rec || "bạn",
+          recipient: rec || t("bạn", "friend"),
           inviter: inv || "HolaRise",
-          note: note || "Hẹn gặp bạn ở buổi sinh hoạt thật ấm cúng này nhé.",
+          note: note || t("Hẹn gặp bạn ở buổi sinh hoạt thật ấm cúng này nhé.", "Hope to see you at this warm community gathering."),
         });
       });
     }
@@ -1990,9 +2010,9 @@
           urlInput.select();
           document.execCommand("copy");
         }
-        copyBtn.textContent = "Đã chép ✓";
+        copyBtn.textContent = t("Đã chép ✓", "Copied ✓");
         setTimeout(function () {
-          copyBtn.textContent = "Sao chép";
+          copyBtn.textContent = t("Sao chép", "Copy");
         }, 2200);
       });
     }

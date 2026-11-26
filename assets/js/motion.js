@@ -958,8 +958,8 @@
 
         hCards.forEach(function (card, idx) {
           card.addEventListener("pointerenter", function (e) {
-            var lang = document.documentElement.getAttribute("data-lang") || "vi";
-            var prefix = lang === "en" ? "VIEW" : "XEM ẢNH";
+            var lang = document.documentElement.lang || document.documentElement.getAttribute("data-lang") || "vi";
+            var prefix = lang.toLowerCase().indexOf("en") === 0 ? "VIEW" : "XEM ẢNH";
             var badgeIdx =
               card.getAttribute("data-card-index") ||
               (idx + 1 < 10 ? "0" + (idx + 1) : String(idx + 1)) +

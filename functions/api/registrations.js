@@ -154,12 +154,13 @@ export async function onRequestPost(context) {
     }
   }
 
+  const isEn = cleanStr(rawBody.lang, 10).toLowerCase() === "en";
   const validated = validateRegistrationInput(rawBody);
   if (!validated.ok) {
     return errorResponse(
       400,
       "VALIDATION_ERROR",
-      "Vui lòng kiểm tra lại thông tin đăng ký.",
+      isEn ? "Please check your registration details." : "Vui lòng kiểm tra lại thông tin đăng ký.",
       validated.fields
     );
   }
@@ -176,7 +177,9 @@ export async function onRequestPost(context) {
     return errorResponse(
       429,
       "RATE_LIMITED",
-      "Bạn đã gửi nhiều đơn đăng ký liên tiếp. Vui lòng thử lại sau ít phút hoặc liên hệ Zalo 077.777.1948.",
+      isEn
+        ? "Too many submissions in a short time. Please try again in a few minutes or email phungsu@holarise.org."
+        : "Bạn đã gửi nhiều đơn đăng ký liên tiếp. Vui lòng thử lại sau ít phút hoặc liên hệ Zalo 077.777.1948.",
       null,
       { "Retry-After": String(rl.retryAfterSec) }
     );
@@ -201,7 +204,9 @@ export async function onRequestPost(context) {
           duplicate: true,
           memberCode: sessionMember.member_code,
           emailSentHint: Boolean(v.email),
-          message: `Chỗ của bạn tại ${v.activity_title} đã được giữ trước đó (mã ${existing.id}). Hẹn gặp bạn tại Hòa Lạc!`,
+          message: isEn
+            ? `Your seat for ${v.activity_title} is already confirmed (ref ${existing.id}). See you in Hoa Lac!`
+            : `Chỗ của bạn tại ${v.activity_title} đã được giữ trước đó (mã ${existing.id}). Hẹn gặp bạn tại Hòa Lạc!`,
         },
         200
       );
@@ -352,9 +357,13 @@ export async function onRequestPost(context) {
   }
 
   const hasSpecificEvent = Boolean(record.event_id);
-  const confirmationMessage = hasSpecificEvent
-    ? `Cảm ơn ${record.full_name}! Hola đã ghi nhận giữ chỗ của bạn cho ${record.activity_title} (mã ${record.id}). Hẹn gặp bạn tại Hòa Lạc!`
-    : `Cảm ơn ${record.full_name}! Hola đã ghi nhận thông tin đồng hành của bạn (mã ${record.id}). Ban Điều Phối sẽ liên hệ sớm nhất.`;
+  const confirmationMessage = isEn
+    ? hasSpecificEvent
+      ? `Thank you, ${record.full_name}! Your seat for ${record.activity_title} is confirmed (ref ${record.id}). See you in Hoa Lac!`
+      : `Thank you, ${record.full_name}! We have received your inquiry (ref ${record.id}). Our coordinating team will follow up shortly.`
+    : hasSpecificEvent
+      ? `Cảm ơn ${record.full_name}! Hola đã ghi nhận giữ chỗ của bạn cho ${record.activity_title} (mã ${record.id}). Hẹn gặp bạn tại Hòa Lạc!`
+      : `Cảm ơn ${record.full_name}! Hola đã ghi nhận thông tin đồng hành của bạn (mã ${record.id}). Ban Điều Phối sẽ liên hệ sớm nhất.`;
 
   return jsonResponse(
     {

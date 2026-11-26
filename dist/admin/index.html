@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>HolaRise CMS – Cổng Điều Phối &amp; Xuất Bản Nội Dung</title>
-  <meta name="description" content="Không gian điều phối sự kiện, xuất bản tường thuật và quản lý đăng ký dành cho Ban Điều Phối Cộng đồng Thanh niên Hòa Lạc – HolaRise.">
+  <meta name="description" content="Không gian điều phối sự kiện, xuất bản tường thuật và quản lý đăng ký dành cho Quản trị viên Cộng đồng Thanh niên Hòa Lạc – HolaRise.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0B110F">
   <meta name="mobile-web-app-capable" content="yes">
@@ -18,12 +18,11 @@
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" sizes="180x180">
 
-  <!-- Open Graph / Zalo / Messenger -->
   <meta property="og:type" content="website">
   <meta property="og:locale" content="vi_VN">
   <meta property="og:site_name" content="HolaRise – Cộng đồng Thanh niên Hòa Lạc">
   <meta property="og:title" content="HolaRise CMS – Cổng Điều Phối &amp; Xuất Bản Nội Dung">
-  <meta property="og:description" content="Không gian điều phối sự kiện, bài viết và kho ảnh gốc Google Drive dành cho Ban Điều Phối HolaRise.">
+  <meta property="og:description" content="Không gian điều phối sự kiện, bài viết, đơn đăng ký và cộng đồng của HolaRise.">
   <meta property="og:url" content="https://holarise.org/admin/">
   <meta property="og:image" content="https://holarise.org/assets/images/holarise-binh-minh-og.jpg">
   <meta property="og:image:secure_url" content="https://holarise.org/assets/images/holarise-binh-minh-og.jpg">
@@ -33,23 +32,22 @@
   <meta property="og:image:alt" content="HolaRise CMS – Cổng Điều Phối Cộng đồng Thanh niên Hòa Lạc">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HolaRise CMS – Cổng Điều Phối &amp; Xuất Bản Nội Dung">
-  <meta name="twitter:description" content="Không gian điều phối sự kiện, bài viết và đăng ký dành cho Ban Điều Phối HolaRise.">
+  <meta name="twitter:description" content="Không gian điều phối sự kiện, bài viết và đăng ký dành cho Quản trị viên HolaRise.">
   <meta name="twitter:image" content="https://holarise.org/assets/images/holarise-binh-minh-og.jpg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=d0d57bf632">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=9c1994eb4d">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
 <body data-pwa-app-name="HolaRise CMS">
   <a class="skip-link" href="#admin-main">Chuyển tới khu vực quản trị</a>
 
-  <!-- Global polite live region for form errors & toast notifications -->
   <div class="visually-hidden" id="aria-announcer" aria-live="polite"></div>
   <div class="toast-stack" id="toast-stack" role="status" aria-live="polite"></div>
 
-  <!-- 2-STEP EDITORIAL VAULT / BOOTSTRAP GATE -->
+  <!-- AUTH SCREEN (SOLE ADMIN 203int64: PASSKEY OR EMAIL+PASSWORD) -->
   <section class="vault-screen" id="auth-screen" hidden>
     <div class="vault-shell">
       <aside class="vault-aside" aria-hidden="true">
@@ -60,14 +58,14 @@
             <span>HolaRise · Hòa Lạc</span>
           </div>
           <div class="vault-aside-copy">
-            <p class="vault-kicker">Ban Điều Phối CMS</p>
+            <p class="vault-kicker">Quản trị hệ thống</p>
             <h2>Điều phối gọn gàng, minh bạch từng buổi gặp.</h2>
-            <p class="vault-quote">Quản lý thư mời sự kiện, bài tường thuật, danh sách giữ chỗ và kho ảnh gốc Google Drive tại một nơi duy nhất.</p>
+            <p class="vault-quote">Một bảng điều khiển thống nhất cho thư mời sự kiện, danh sách giữ chỗ, bài tường thuật và lưu bút thành viên.</p>
           </div>
           <ul class="vault-pillars">
-            <li>Đồng bộ trực tiếp với Google Drive &amp; Edge SSR</li>
-            <li>Bảo vệ 2 lớp: Mã cổng đội ngũ &amp; Sinh trắc học</li>
-            <li>Phân quyền rõ ràng giữa Ban Điều Phối &amp; Ban Hình Ảnh</li>
+            <li>Cập nhật tức thì lên Edge SSR &amp; Cloudflare D1</li>
+            <li>Khóa quyền truy cập duy nhất cho Quản trị chính</li>
+            <li>Liên thông trực tiếp với Cổng Ban Hình Ảnh (/media/)</li>
           </ul>
         </div>
       </aside>
@@ -78,156 +76,94 @@
             <img src="/assets/images/logo-mark.png" alt="Logo HR HolaRise" width="36" height="36">
             <div>
               <strong>HolaRise CMS</strong>
-              <span>Cổng Ban Điều Phối</span>
+              <span>Cổng Quản trị chính</span>
             </div>
           </div>
 
-          <!-- STEP 1: TEAM ACCESS CODE GATE (shown when initialized) -->
-          <div class="vault-step" id="vault-step-pin" data-vault-step="pin">
-            <span class="vault-step-badge">Bước 1 / 2 · Mã bảo mật</span>
-            <h1 class="vault-title">Nhập mã bảo mật</h1>
-            <p class="vault-subtitle">Nhập mã 4 chữ số nội bộ để mở cổng truy cập Ban Điều Phối.</p>
+          <!-- SIGN-IN VIEW (INITIALIZED DB) -->
+          <div id="auth-signin-box">
+            <span class="vault-step-badge vault-step-badge--ok">Quản trị chính</span>
+            <h1 class="vault-title" id="auth-heading">Đăng nhập HolaRise CMS</h1>
+            <p class="vault-subtitle">Xác thực nhanh bằng Face ID / Touch ID hoặc đăng nhập bằng tài khoản quản trị duy nhất.</p>
 
-            <form id="pin-gate-form" class="pin-gate-form" novalidate>
-              <div class="pin-group" role="group" aria-label="Mã bảo mật 4 chữ số">
-                <input class="pin-box" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="Chữ số thứ 1" data-pin-index="0">
-                <input class="pin-box" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Chữ số thứ 2" data-pin-index="1">
-                <input class="pin-box" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Chữ số thứ 3" data-pin-index="2">
-                <input class="pin-box" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Chữ số thứ 4" data-pin-index="3">
+            <button class="btn btn--primary btn--full btn--lg" type="button" id="btn-passkey-login">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3H5a2 2 0 0 0-2 2v2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 21h2a2 2 0 0 0 2-2v-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M9 10v.01"/><path d="M15 10v.01"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg>
+              <span>Đăng nhập bằng Face ID / Passkey</span>
+            </button>
+
+            <div class="form-alert" id="passkey-alert" role="alert" hidden style="margin-top: 12px;"></div>
+
+            <div class="auth-divider"><span>hoặc dùng Email &amp; Mật khẩu</span></div>
+
+            <form class="admin-form" id="login-form" aria-labelledby="auth-heading" novalidate>
+              <div class="field">
+                <label for="login-email">Email quản trị <span aria-hidden="true">*</span></label>
+                <input id="login-email" name="email" type="email" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="203int64@..." required data-error="login-email-err" enterkeyhint="next">
+                <div id="login-email-err" class="field-error">Vui lòng nhập địa chỉ email hợp lệ.</div>
               </div>
-              <div class="form-alert" id="pin-gate-alert" role="alert" hidden></div>
-              <button class="btn btn--primary btn--full btn--lg" type="submit" id="pin-gate-submit">Tiếp tục</button>
+
+              <div class="field">
+                <label for="login-password">Mật khẩu <span aria-hidden="true">*</span></label>
+                <div class="password-wrap">
+                  <input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" required data-error="login-pw-err" enterkeyhint="done">
+                  <button type="button" class="pw-toggle" data-pw-toggle="login-password" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
+                </div>
+                <div id="login-pw-err" class="field-error">Vui lòng nhập mật khẩu (tối thiểu 8 ký tự).</div>
+              </div>
+
+              <div class="form-alert" id="login-alert" role="alert" hidden></div>
+              <button class="btn btn--outline btn--full btn--lg" type="submit">Đăng nhập bằng Email</button>
             </form>
           </div>
 
-          <!-- STEP 2: PROGRESSIVE LOGIN -> FALLBACK REGISTER / EMAIL -->
-          <div class="vault-step" id="vault-step-auth" data-vault-step="auth" hidden>
-            <div class="vault-step-head">
-              <span class="vault-step-badge vault-step-badge--ok">Bước 2 / 2 · Đã mở cổng</span>
-              <button class="vault-back-btn" type="button" id="btn-vault-back">← Nhập lại mã</button>
+          <!-- ACCESS DENIED VIEW (AUTHENTICATED AS NON-SOLE-ADMIN) -->
+          <div id="auth-forbidden-box" hidden>
+            <span class="vault-step-badge">Không đủ quyền truy cập</span>
+            <h1 class="vault-title">Khu vực dành riêng cho Quản trị chính</h1>
+            <p class="vault-subtitle" id="auth-forbidden-msg">Tài khoản hiện tại không có quyền mở cổng Quản trị CMS.</p>
+            <div class="btn-row">
+              <a class="btn btn--primary" href="/media/">Mở Cổng Ban Hình Ảnh</a>
+              <button class="btn btn--outline" type="button" id="btn-forbidden-logout">Đăng xuất</button>
+            </div>
+          </div>
+
+          <!-- FIRST-TIME BOOTSTRAP FORM (EMPTY DB ONLY) -->
+          <form class="admin-form" id="bootstrap-form" aria-labelledby="boot-heading" novalidate hidden>
+            <h1 class="vault-title" id="boot-heading">Khởi tạo tài khoản Quản trị</h1>
+            <div class="setup-banner">
+              <strong>Khởi tạo lần đầu:</strong> Chưa có tài khoản trong D1. Tài khoản tạo ngay bây giờ sẽ là <strong>Quản trị chính duy nhất</strong> và form này sẽ tự động khóa vĩnh viễn sau khi lưu.
             </div>
 
-            <!-- VIEW A: SINGLE LOGIN BUTTON (DEFAULT) -->
-            <div class="vault-view" data-auth-view="login">
-              <h1 class="vault-title" id="auth-heading">Đăng nhập Quản trị CMS</h1>
-              <p class="vault-subtitle" id="auth-lead">Xác thực bằng Face ID, Touch ID hoặc khóa thiết bị đã đăng ký.</p>
+            <div class="field">
+              <label for="boot-name">Họ và tên <span aria-hidden="true">*</span></label>
+              <input id="boot-name" name="name" type="text" autocomplete="name" placeholder="Quản trị viên HolaRise" required minlength="2" data-error="boot-name-err" enterkeyhint="next">
+              <div id="boot-name-err" class="field-error">Vui lòng nhập họ và tên (tối thiểu 2 ký tự).</div>
+            </div>
 
-              <button class="btn btn--primary btn--full btn--lg" type="button" id="btn-vault-login">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3H5a2 2 0 0 0-2 2v2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 21h2a2 2 0 0 0 2-2v-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M9 10v.01"/><path d="M15 10v.01"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg>
-                <span>Đăng nhập</span>
-              </button>
+            <div class="field">
+              <label for="boot-email">Email quản trị chính <span aria-hidden="true">*</span></label>
+              <input id="boot-email" name="email" type="email" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="203int64@holarise.org" required data-error="boot-email-err" enterkeyhint="next">
+              <div id="boot-email-err" class="field-error">Vui lòng nhập email hợp lệ.</div>
+            </div>
 
-              <div class="form-alert" id="vault-login-alert" role="alert" hidden></div>
-
-              <!-- REVEALED ONLY AFTER LOGIN FAILS -->
-              <div class="vault-fallback" id="vault-fallback-box" hidden>
-                <p class="vault-fallback-text">Chưa có khóa sinh trắc học trên thiết bị này?</p>
-                <button class="btn btn--outline btn--full btn--lg" type="button" data-vault-go="register">Đăng ký tài khoản mới</button>
-                <button class="vault-link-btn" type="button" data-vault-go="email">Đã có tài khoản? Đăng nhập bằng Email</button>
+            <div class="field">
+              <label for="boot-password">Mật khẩu quản trị <span aria-hidden="true">*</span></label>
+              <span id="boot-pw-hint" class="field-hint">Tối thiểu 8 ký tự, nên kết hợp chữ hoa, chữ thường và số.</span>
+              <div class="password-wrap">
+                <input id="boot-password" name="password" type="password" autocomplete="new-password" minlength="8" required aria-describedby="boot-pw-hint" data-error="boot-pw-err" enterkeyhint="done">
+                <button type="button" class="pw-toggle" data-pw-toggle="boot-password" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
               </div>
+              <div id="boot-pw-err" class="field-error">Mật khẩu cần có ít nhất 8 ký tự.</div>
             </div>
 
-            <!-- VIEW B: REGISTER (REVEALED ONLY AFTER LOGIN FAILURE -> REGISTER CLICK) -->
-            <div class="vault-view" data-auth-view="register" hidden>
-              <button class="vault-subback" type="button" data-vault-go="login">← Quay lại Đăng nhập</button>
-              <h1 class="vault-title">Đăng ký tài khoản đội ngũ</h1>
-              <p class="vault-subtitle">Điền thông tin thành viên để tạo hồ sơ và bật Face ID / Touch ID cho lần sau.</p>
-
-              <form id="admin-register-form" class="admin-form" novalidate>
-                <div class="field">
-                  <label for="ar-name">Họ và tên đầy đủ <span aria-hidden="true">*</span></label>
-                  <input id="ar-name" name="fullName" type="text" autocomplete="name" required minlength="3" placeholder="Ví dụ: Nguyễn Minh Anh">
-                </div>
-                <div class="field-row-2">
-                  <div class="field">
-                    <label for="ar-phone">SĐT / Zalo <span aria-hidden="true">*</span></label>
-                    <input id="ar-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="09xxxxxxxx">
-                  </div>
-                  <div class="field">
-                    <label for="ar-dept">Ban / Vai trò <span aria-hidden="true">*</span></label>
-                    <input id="ar-dept" name="department" type="text" required minlength="2" placeholder="Ban Điều Phối">
-                  </div>
-                </div>
-                <div class="field">
-                  <label for="ar-email">Email liên hệ <span aria-hidden="true">*</span></label>
-                  <input id="ar-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="tenban@holarise.org">
-                </div>
-                <div class="field">
-                  <label for="ar-password">Mật khẩu dự phòng (tối thiểu 8 ký tự) <span aria-hidden="true">*</span></label>
-                  <input id="ar-password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="Tối thiểu 8 ký tự">
-                </div>
-                <div class="form-alert" id="ar-alert" role="alert" hidden></div>
-                <button class="btn btn--primary btn--full btn--lg" type="submit" id="ar-submit">Hoàn tất đăng ký &amp; Bật Face ID</button>
-              </form>
-
-              <button class="vault-link-btn" type="button" data-vault-go="email">Đã có tài khoản? Đăng nhập bằng Email</button>
-            </div>
-
-            <!-- VIEW C: EMAIL FALLBACK (FOR EXISTING USERS ON A NEW DEVICE) -->
-            <div class="vault-view" data-auth-view="email" hidden>
-              <button class="vault-subback" type="button" data-vault-go="login">← Quay lại Đăng nhập</button>
-              <h1 class="vault-title">Đăng nhập bằng Email</h1>
-              <p class="vault-subtitle">Dành cho thành viên đã có tài khoản khi truy cập trên thiết bị mới.</p>
-
-              <form class="admin-form" id="login-form" aria-labelledby="auth-heading" novalidate>
-                <div class="field">
-                  <label for="login-email">Email Ban Điều Phối <span aria-hidden="true">*</span></label>
-                  <input id="login-email" name="email" type="email" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@holarise.org" required data-error="login-email-err" enterkeyhint="next">
-                  <div id="login-email-err" class="field-error">Vui lòng nhập địa chỉ email hợp lệ.</div>
-                </div>
-
-                <div class="field">
-                  <label for="login-password">Mật khẩu <span aria-hidden="true">*</span></label>
-                  <div class="password-wrap">
-                    <input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" required data-error="login-pw-err" enterkeyhint="done">
-                    <button type="button" class="pw-toggle" data-pw-toggle="login-password" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
-                  </div>
-                  <div id="login-pw-err" class="field-error">Vui lòng nhập mật khẩu (tối thiểu 8 ký tự).</div>
-                </div>
-
-                <div class="form-alert" id="login-alert" role="alert" hidden></div>
-                <button class="btn btn--primary btn--full btn--lg" type="submit">Đăng nhập vào CMS</button>
-              </form>
-
-              <button class="vault-link-btn" type="button" data-vault-go="register">Chưa có tài khoản? Đăng ký mới</button>
-            </div>
-          </div>
-
-          <!-- First-Time Bootstrap Super Admin Form -->
-          <form class="admin-form" id="bootstrap-form" aria-labelledby="auth-heading" novalidate hidden>
-        <div class="setup-banner">
-          <strong>Khởi tạo lần đầu:</strong> Chưa có tài khoản Quản trị viên nào trong cơ sở dữ liệu. Tài khoản bạn tạo ngay bây giờ sẽ là <strong>Quản trị viên chính (Super Admin)</strong> và form này sẽ tự động khóa vĩnh viễn sau đó.
-        </div>
-
-        <div class="field">
-          <label for="boot-name">Họ và tên <span aria-hidden="true">*</span></label>
-          <input id="boot-name" name="name" type="text" autocomplete="name" placeholder="Ví dụ: Nguyễn Lan Anh" required minlength="2" data-error="boot-name-err" enterkeyhint="next">
-          <div id="boot-name-err" class="field-error">Vui lòng nhập họ và tên (tối thiểu 2 ký tự).</div>
-        </div>
-
-        <div class="field">
-          <label for="boot-email">Email quản trị chính <span aria-hidden="true">*</span></label>
-          <span id="boot-email-hint" class="field-hint">Dùng để đăng nhập vào trang /admin mỗi lần cập nhật bài hoặc xem đơn.</span>
-          <input id="boot-email" name="email" type="email" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="admin@holarise.org" required aria-describedby="boot-email-hint" data-error="boot-email-err" enterkeyhint="next">
-          <div id="boot-email-err" class="field-error">Vui lòng nhập email đúng định dạng (ví dụ: ten@gmail.com).</div>
-        </div>
-
-        <div class="field">
-          <label for="boot-password">Mật khẩu quản trị <span aria-hidden="true">*</span></label>
-          <span id="boot-pw-hint" class="field-hint">Tối thiểu 8 ký tự, nên kết hợp chữ hoa, chữ thường và số.</span>
-          <div class="password-wrap">
-            <input id="boot-password" name="password" type="password" autocomplete="new-password" minlength="8" required aria-describedby="boot-pw-hint" data-error="boot-pw-err" enterkeyhint="done">
-            <button type="button" class="pw-toggle" data-pw-toggle="boot-password" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
-          </div>
-          <div id="boot-pw-err" class="field-error">Mật khẩu cần có ít nhất 8 ký tự.</div>
-        </div>
-
-        <div class="form-alert" id="boot-alert" role="alert" hidden></div>
-        <button class="btn btn--primary btn--full btn--lg" type="submit">Tạo tài khoản Quản trị chính</button>
-      </form>
+            <div class="form-alert" id="boot-alert" role="alert" hidden></div>
+            <button class="btn btn--primary btn--full btn--lg" type="submit">Tạo tài khoản Quản trị chính</button>
+          </form>
 
           <div class="vault-footer">
             <a href="/">← Quay về trang chủ HolaRise</a>
+            <span aria-hidden="true"> · </span>
+            <a href="/media/">Cổng Ban Hình Ảnh ↗</a>
           </div>
         </div>
       </div>
@@ -258,35 +194,39 @@
       </div>
 
       <nav class="sidebar-nav" aria-label="Các mục quản trị">
-        <button class="nav-item is-active" type="button" data-tab="registrations">
+        <button class="nav-item is-active" type="button" data-tab="overview">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Tổng quan</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="registrations">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           <span>Đơn đăng ký</span>
           <span class="nav-badge" id="badge-new-regs" hidden>0</span>
         </button>
         <button class="nav-item" type="button" data-tab="events">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span>Sự kiện &amp; Workshop</span>
+          <span>Sự kiện</span>
         </button>
         <button class="nav-item" type="button" data-tab="posts">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          <span>Bài viết &amp; Tin tức</span>
+          <span>Bài viết</span>
         </button>
         <button class="nav-item" type="button" data-tab="community">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>Cảm nhận &amp; Thành viên</span>
+          <span>Cộng đồng</span>
           <span class="nav-badge" id="badge-pending-refs" hidden>0</span>
-        </button>
-        <button class="nav-item" type="button" id="btn-jump-visuals">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          <span>Sửa Ảnh Giao diện</span>
         </button>
         <button class="nav-item" type="button" data-tab="settings">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          <span>Đội ngũ &amp; Cài đặt</span>
+          <span>Giao diện &amp; Cài đặt</span>
         </button>
+
+        <div class="sidebar-divider" aria-hidden="true"></div>
+
         <a class="nav-item" href="/media/">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><polyline points="21 15 16 10 5 19"/></svg>
-          <span>Cổng Ban Hình Ảnh ↗</span>
+          <span>Ban Hình Ảnh ↗</span>
+          <span class="nav-badge nav-badge--warn" id="badge-pending-photos" hidden>0</span>
         </a>
       </nav>
 
@@ -307,19 +247,19 @@
     <header class="mobile-topbar">
       <div class="mobile-topbar-left">
         <img src="/assets/images/logo-mark.png" alt="HR" width="30" height="30">
-        <strong id="mobile-page-title">Đơn đăng ký</strong>
+        <strong id="mobile-page-title">Tổng quan</strong>
       </div>
       <div class="mobile-topbar-right">
         <button class="icon-btn" type="button" data-pwa-install hidden aria-label="Cài ứng dụng HolaRise CMS" title="Cài ứng dụng về máy">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </button>
-        <a class="icon-btn" href="/media/" aria-label="Mở Cổng Ban Hình Ảnh" title="Cổng Ban Hình Ảnh">
+        <button class="icon-btn" type="button" data-tab="settings" aria-label="Giao diện và Cài đặt" title="Giao diện & Cài đặt">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <a class="icon-btn" href="/media/" aria-label="Mở Cổng Ban Hình Ảnh" title="Ban Hình Ảnh">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><polyline points="21 15 16 10 5 19"/></svg>
         </a>
-        <a class="icon-btn" href="/" target="_blank" rel="noopener" aria-label="Mở website công khai">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        </a>
-        <button class="icon-btn" type="button" id="btn-logout-mobile" aria-label="Đăng xuất">
+        <button class="icon-btn" type="button" id="btn-logout-mobile" aria-label="Đăng xuất" title="Đăng xuất">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
       </div>
@@ -327,12 +267,29 @@
 
     <!-- Main Workspace -->
     <main class="admin-main" id="admin-main">
-      <!-- PANEL 1: REGISTRATIONS -->
-      <section class="tab-panel" id="panel-registrations" data-panel="registrations">
+      <!-- PANEL 0: OVERVIEW DASHBOARD -->
+      <section class="tab-panel" id="panel-overview" data-panel="overview">
         <div class="page-head">
           <div>
-            <h1>Hộp thư Đơn đăng ký</h1>
-            <p class="page-sub">Theo dõi người đăng ký tham gia sự kiện &amp; CLB, liên hệ nhanh qua Zalo và xuất danh sách Excel.</p>
+            <h1>Tổng quan điều phối</h1>
+            <p class="page-sub">Toàn cảnh đơn giữ chỗ, lịch hoạt động sắp tới, lưu bút và ảnh đóng góp đang chờ xử lý.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn--outline" type="button" id="btn-refresh-overview">Làm mới</button>
+            <button class="btn btn--outline" type="button" data-quick-action="new-post">+ Viết bài</button>
+            <button class="btn btn--primary" type="button" data-quick-action="new-event">+ Đăng sự kiện</button>
+          </div>
+        </div>
+
+        <div id="overview-container"></div>
+      </section>
+
+      <!-- PANEL 1: REGISTRATIONS -->
+      <section class="tab-panel" id="panel-registrations" data-panel="registrations" hidden>
+        <div class="page-head">
+          <div>
+            <h1>Đơn đăng ký &amp; Check-in</h1>
+            <p class="page-sub">Xử lý trạng thái 1 chạm, liên hệ Zalo nhanh, lưu thành viên và xem ảnh báo lỗi đính kèm.</p>
           </div>
           <div class="page-actions">
             <button class="btn btn--outline" type="button" id="btn-refresh-regs">Làm mới</button>
@@ -364,10 +321,10 @@
         </div>
 
         <search class="toolbar">
-          <form class="toolbar-form" id="reg-filter-form">
+          <form class="toolbar-form toolbar-form--4" id="reg-filter-form">
             <div class="toolbar-search">
               <label for="reg-search" class="visually-hidden">Tìm theo tên, số điện thoại, email hoặc mã đơn</label>
-              <input id="reg-search" type="search" name="q" placeholder="Tìm tên, SĐT, email, trường..." autocorrect="off" autocapitalize="none" spellcheck="false">
+              <input id="reg-search" type="search" name="q" placeholder="Tìm tên, SĐT, email, trường, mã đơn..." autocorrect="off" autocapitalize="none" spellcheck="false">
             </div>
             <div class="toolbar-select">
               <label for="reg-activity-filter" class="visually-hidden">Lọc theo sự kiện</label>
@@ -375,22 +332,49 @@
                 <option value="">Tất cả sự kiện &amp; hoạt động</option>
               </select>
             </div>
+            <div class="toolbar-select">
+              <label for="reg-source-filter" class="visually-hidden">Lọc theo nguồn gửi</label>
+              <select id="reg-source-filter" name="source">
+                <option value="">Mọi nguồn gửi</option>
+                <option value="event_modal">Giữ chỗ sự kiện</option>
+                <option value="join_page">Trang Tham gia</option>
+                <option value="feedback">Góp ý / Báo lỗi</option>
+              </select>
+            </div>
             <button class="btn btn--outline" type="submit">Lọc</button>
           </form>
         </search>
 
         <div id="regs-container"></div>
+        <div class="pagination-bar" id="regs-pagination" hidden>
+          <span id="regs-pagination-meta"></span>
+          <button class="btn btn--outline btn--sm" type="button" id="btn-load-more-regs">Tải thêm đơn</button>
+        </div>
       </section>
 
       <!-- PANEL 2: EVENTS -->
       <section class="tab-panel" id="panel-events" data-panel="events" hidden>
         <div class="page-head">
           <div>
-            <h1>Lịch hoạt động</h1>
-            <p class="page-sub">Đăng lịch hoạt động mới để hiển thị ngay lập tức trên Trang chủ và trang Lịch hoạt động.</p>
+            <h1>Lịch sự kiện</h1>
+            <p class="page-sub">Theo dõi số người giữ chỗ thực, sao chép link Thư mời Zalo và gắn Nhóm Zalo riêng từng buổi.</p>
           </div>
           <div class="page-actions">
+            <button class="btn btn--outline" type="button" id="btn-refresh-events">Làm mới</button>
             <button class="btn btn--primary" type="button" id="btn-new-event">+ Đăng sự kiện mới</button>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="pill-group" role="group" aria-label="Lọc danh sách sự kiện">
+            <button class="pill-btn is-active" type="button" data-ev-filter="all">Tất cả</button>
+            <button class="pill-btn" type="button" data-ev-filter="upcoming">Sắp diễn ra</button>
+            <button class="pill-btn" type="button" data-ev-filter="past">Đã tổ chức</button>
+            <button class="pill-btn" type="button" data-ev-filter="draft">Nháp</button>
+          </div>
+          <div class="filter-search">
+            <label for="event-search" class="visually-hidden">Tìm sự kiện</label>
+            <input id="event-search" type="search" placeholder="Tìm tên sự kiện, địa điểm...">
           </div>
         </div>
 
@@ -402,56 +386,105 @@
         <div class="page-head">
           <div>
             <h1>Hành trình &amp; Bài viết</h1>
-            <p class="page-sub">Bài xuất bản sẽ có ngay đường dẫn chuẩn SEO <code>/hanh-trinh/&lt;slug&gt;/</code> và ảnh preview trên Zalo/Facebook.</p>
+            <p class="page-sub">Xuất bản bài tường thuật chuẩn SEO tại <code>/hanh-trinh/&lt;slug&gt;/</code> với trình xem trước trực tiếp.</p>
           </div>
           <div class="page-actions">
+            <button class="btn btn--outline" type="button" id="btn-refresh-posts">Làm mới</button>
             <button class="btn btn--primary" type="button" id="btn-new-post">+ Viết bài mới</button>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="pill-group" role="group" aria-label="Lọc bài viết">
+            <button class="pill-btn is-active" type="button" data-post-filter="all">Tất cả</button>
+            <button class="pill-btn" type="button" data-post-filter="published">Công khai</button>
+            <button class="pill-btn" type="button" data-post-filter="draft">Nháp</button>
+          </div>
+          <div class="filter-search">
+            <label for="post-search" class="visually-hidden">Tìm bài viết</label>
+            <input id="post-search" type="search" placeholder="Tìm tiêu đề, slug, chuyên mục...">
           </div>
         </div>
 
         <div id="posts-container"></div>
       </section>
 
-      <!-- PANEL 3B: COMMUNITY (REFLECTIONS MODERATION & MEMBERS) -->
+      <!-- PANEL 4: COMMUNITY (REFLECTIONS & MEMBERS) -->
       <section class="tab-panel" id="panel-community" data-panel="community" hidden>
         <div class="page-head">
           <div>
-            <h1>Cảm nhận &amp; Thành viên HolaRise</h1>
-            <p class="page-sub">Nhập mới hoặc duyệt cảm nhận người tham gia (hiển thị trên Hành trình &amp; Trang chủ), và quản lý Thành viên / Đội ngũ Điều phối.</p>
+            <h1>Cộng đồng · Lưu bút &amp; Thành viên</h1>
+            <p class="page-sub">Duyệt, chỉnh sửa, ghim cảm nhận ra Trang chủ và quản lý hồ sơ Thành viên / Đội ngũ Điều phối.</p>
           </div>
           <div class="page-actions">
-            <button class="btn btn--primary" type="button" id="btn-new-reflection">+ Nhập cảm nhận</button>
-            <button class="btn btn--primary" type="button" id="btn-new-member">+ Thêm thành viên</button>
             <button class="btn btn--outline" type="button" id="btn-refresh-community">Làm mới</button>
+            <button class="btn btn--outline" type="button" id="btn-new-reflection">+ Nhập cảm nhận</button>
+            <button class="btn btn--primary" type="button" id="btn-new-member">+ Thêm thành viên</button>
           </div>
         </div>
 
-        <div class="settings-grid">
+        <div class="subtab-bar" role="tablist" aria-label="Mục con Cộng đồng">
+          <button class="subtab-btn" type="button" role="tab" id="subtab-reflections" aria-selected="true" data-comm-subtab="reflections">Lưu bút &amp; Cảm nhận</button>
+          <button class="subtab-btn" type="button" role="tab" id="subtab-members" aria-selected="false" data-comm-subtab="members">Thành viên &amp; Đội ngũ</button>
+        </div>
+
+        <div role="tabpanel" aria-labelledby="subtab-reflections" data-comm-panel="reflections">
           <section class="panel-box">
             <div class="panel-box-head panel-box-head--row">
               <div>
-                <h2>Hàng đợi duyệt Lưu bút</h2>
-                <p>Chỉ các lưu bút đã duyệt mới xuất hiện công khai trên trang Hành trình.</p>
+                <h2>Hàng đợi Lưu bút &amp; Cảm nhận</h2>
+                <p>Chỉ các chia sẻ ở trạng thái <strong>Đã duyệt</strong> mới hiển thị công khai trên website.</p>
               </div>
-              <div class="btn-row" role="group" aria-label="Lọc trạng thái lưu bút">
-                <button class="btn btn--sm btn--primary" type="button" data-ref-status="pending">Chờ duyệt</button>
-                <button class="btn btn--sm btn--outline" type="button" data-ref-status="approved">Đã duyệt</button>
-                <button class="btn btn--sm btn--outline" type="button" data-ref-status="rejected">Đã ẩn</button>
-                <button class="btn btn--sm btn--outline" type="button" data-ref-status="">Tất cả</button>
+              <div class="pill-group" role="group" aria-label="Lọc trạng thái lưu bút">
+                <button class="pill-btn is-active" type="button" data-ref-status="pending">Chờ duyệt</button>
+                <button class="pill-btn" type="button" data-ref-status="approved">Đã duyệt</button>
+                <button class="pill-btn" type="button" data-ref-status="rejected">Đã ẩn</button>
+                <button class="pill-btn" type="button" data-ref-status="">Tất cả</button>
               </div>
             </div>
             <div id="reflections-admin-container"></div>
           </section>
 
+          <section class="panel-box" style="margin-top: 20px;">
+            <div class="panel-box-head panel-box-head--row">
+              <div>
+                <h2>Góp ý &amp; Động viên sau sự kiện</h2>
+                <p>Lời đóng góp gửi kín từ Sân khấu Kỷ niệm (chỉ Ban Điều Phối &amp; Quản trị xem được; bảo toàn ẩn danh tuyệt đối nếu người gửi chọn ẩn danh).</p>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                <label for="ef-admin-event-filter" class="visually-hidden">Lọc theo sự kiện</label>
+                <select id="ef-admin-event-filter" style="min-height:34px;padding:4px 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;">
+                  <option value="">Tất cả sự kiện</option>
+                </select>
+                <label for="ef-admin-cat-filter" class="visually-hidden">Lọc theo phân loại</label>
+                <select id="ef-admin-cat-filter" style="min-height:34px;padding:4px 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;">
+                  <option value="">Mọi loại góp ý</option>
+                  <option value="cai-thien">Cần cải thiện</option>
+                  <option value="dong-vien">Lời động viên</option>
+                  <option value="de-xuat">Đề xuất chặng tới</option>
+                </select>
+                <div class="pill-group" role="group" aria-label="Lọc trạng thái góp ý sự kiện">
+                  <button class="pill-btn is-active" type="button" data-ef-status="new">Mới</button>
+                  <button class="pill-btn" type="button" data-ef-status="read">Đã đọc</button>
+                  <button class="pill-btn" type="button" data-ef-status="resolved">Đã xử lý</button>
+                  <button class="pill-btn" type="button" data-ef-status="">Tất cả</button>
+                </div>
+              </div>
+            </div>
+            <div id="event-feedback-admin-container"></div>
+          </section>
+        </div>
+
+        <div role="tabpanel" aria-labelledby="subtab-members" data-comm-panel="members" hidden>
           <section class="panel-box">
             <div class="panel-box-head panel-box-head--row">
               <div>
                 <h2>Danh sách Thành viên Hola</h2>
-                <p>Tìm kiếm theo tên, mã <code>HOLA-2026-XXXX</code>, email hoặc SĐT; hỗ trợ khóa hoặc cấp lại mật khẩu tạm.</p>
+                <p>Tìm theo tên, mã <code>HR-YYMMDD-STT</code>, SĐT, email hoặc chức danh. Bấm <strong>Sửa</strong> để cập nhật hồ sơ hoặc bật hiển thị Đội ngũ công khai.</p>
               </div>
-              <form id="member-search-form" style="display:flex;gap:8px;align-items:center;">
+              <form id="member-search-form" class="inline-search-form">
                 <label for="member-search-input" class="visually-hidden">Tìm thành viên</label>
-                <input id="member-search-input" type="search" placeholder="Tìm tên, mã HOLA, SĐT..." style="min-height:36px;padding:6px 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;">
+                <input id="member-search-input" type="search" placeholder="Tìm tên, mã HR, SĐT...">
                 <button class="btn btn--outline btn--sm" type="submit">Tìm</button>
               </form>
             </div>
@@ -460,22 +493,29 @@
         </div>
       </section>
 
-      <!-- PANEL 4: PARTNERS, TEAM & SETTINGS -->
+      <!-- PANEL 5: VISUALS, PARTNERS & SETTINGS (4 CLEAN SUB-TABS) -->
       <section class="tab-panel" id="panel-settings" data-panel="settings" hidden>
         <div class="page-head">
           <div>
-            <h1>Đối tác, Đội ngũ &amp; Cài đặt</h1>
-            <p class="page-sub">Quản lý đơn vị &amp; không gian đồng hành, cấu hình đồng bộ Google Sheets + Email tự động và tài khoản Ban Điều Phối.</p>
+            <h1>Giao diện &amp; Cài đặt</h1>
+            <p class="page-sub">Quản lý ảnh giao diện, đơn vị đồng hành, đồng bộ Google Sheets / Drive và bảo mật tài khoản.</p>
           </div>
         </div>
 
-        <div class="settings-grid">
-          <!-- Site Visuals CMS (Self-service replacement for Hero, About & 3 Pillars) -->
+        <div class="subtab-bar" role="tablist" aria-label="Mục con Giao diện và Cài đặt">
+          <button class="subtab-btn" type="button" role="tab" id="subtab-visuals" aria-selected="true" data-set-subtab="visuals">Ảnh giao diện</button>
+          <button class="subtab-btn" type="button" role="tab" id="subtab-partners" aria-selected="false" data-set-subtab="partners">Đối tác đồng hành</button>
+          <button class="subtab-btn" type="button" role="tab" id="subtab-integrations" aria-selected="false" data-set-subtab="integrations">Sheets &amp; Drive</button>
+          <button class="subtab-btn" type="button" role="tab" id="subtab-security" aria-selected="false" data-set-subtab="security">Bảo mật &amp; Ban Hình Ảnh</button>
+        </div>
+
+        <!-- SUB-TAB 1: SITE VISUALS -->
+        <div role="tabpanel" aria-labelledby="subtab-visuals" data-set-panel="visuals">
           <section class="panel-box" id="box-visuals">
             <div class="panel-box-head">
               <div>
-                <h2>Hình ảnh Giao diện (Tự thay ảnh chụp thật)</h2>
-                <p>Khi có ảnh chụp thực tế mới cho Trang chủ, Về HolaRise hoặc 3 trụ cột, Ban Điều Phối có thể tải lên tại đây để thay thế ngay mà không cần sửa mã nguồn.</p>
+                <h2>Hình ảnh Giao diện Website</h2>
+                <p>Thay ảnh chụp thực tế cho Trang chủ, Về HolaRise và 3 trụ cột mà không cần sửa mã nguồn.</p>
               </div>
             </div>
             <form class="admin-form" id="visuals-form" novalidate>
@@ -486,43 +526,49 @@
               </div>
             </form>
           </section>
+        </div>
 
-          <!-- Partners Management (Super Admin & Editor) -->
+        <!-- SUB-TAB 2: PARTNERS -->
+        <div role="tabpanel" aria-labelledby="subtab-partners" data-set-panel="partners" hidden>
           <section class="panel-box" id="box-partners">
             <div class="panel-box-head panel-box-head--row">
               <div>
                 <h2>Đối tác &amp; Không gian đồng hành</h2>
-                <p>Các đối tác đang bật sẽ tự động hiển thị trên Trang chủ và trang Về HolaRise; danh sách trống sẽ tự ẩn sạch sẽ.</p>
+                <p>Các đối tác đang bật sẽ tự động hiển thị trên Trang chủ và trang Về HolaRise.</p>
               </div>
               <button class="btn btn--primary btn--sm" type="button" id="btn-new-partner">+ Thêm đối tác</button>
             </div>
             <div id="partners-container"></div>
           </section>
+        </div>
 
-          <!-- Google Sheets & Email Integration (Super Admin) -->
-          <section class="panel-box" id="box-integrations" hidden>
+        <!-- SUB-TAB 3: INTEGRATIONS -->
+        <div role="tabpanel" aria-labelledby="subtab-integrations" data-set-panel="integrations" hidden>
+          <section class="panel-box" id="box-integrations">
             <div class="panel-box-head">
               <div>
-                <h2>Đồng bộ Google Sheets &amp; Gửi Email tự động (0đ)</h2>
-                <p>Mỗi đơn đăng ký mới được lưu an toàn tại trang này trước, sau đó tự động ghi vào Google Sheets, báo Email Ban Điều Phối và gửi thư xác nhận cho người đăng ký.</p>
+                <h2>Đồng bộ Google Sheets &amp; Email tự động</h2>
+                <p>Đơn đăng ký mới được lưu vào D1 trước, sau đó tự động ghi sang Google Sheets và gửi thư xác nhận qua Google Apps Script.</p>
               </div>
             </div>
 
+            <div class="health-strip" id="integration-health"></div>
+
             <form class="admin-form" id="settings-form" novalidate>
               <div class="field">
-                <label for="set-notify-email">Email Ban Điều Phối nhận thông báo</label>
+                <label for="set-notify-email">Email nhận thông báo đơn mới</label>
                 <input id="set-notify-email" name="notify_email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="phungsu@holarise.org">
               </div>
 
               <div class="field">
                 <label for="set-webhook-url">Đường dẫn Google Apps Script Web App</label>
-                <span id="set-url-hint" class="field-hint">Lấy bằng cách dán mã trong <code>docs/google-apps-script.gs</code> vào Extensions → Apps Script của Google Sheet CLB rồi Deploy dạng Web App (Anyone).</span>
+                <span id="set-url-hint" class="field-hint">Dán mã từ <code>docs/google-apps-script.gs</code> vào Extensions → Apps Script rồi Deploy dạng Web App.</span>
                 <input id="set-webhook-url" name="gas_webhook_url" type="url" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="https://script.google.com/macros/s/.../exec" aria-describedby="set-url-hint">
               </div>
 
               <div class="field">
-                <label for="set-webhook-secret">Mã bí mật Webhook (khớp với WEBHOOK_SECRET trong Apps Script)</label>
-                <span id="set-secret-hint" class="field-hint">Để trống nếu muốn giữ nguyên mã đã lưu trước đó.</span>
+                <label for="set-webhook-secret">Mã bí mật Webhook</label>
+                <span id="set-secret-hint" class="field-hint">Để trống nếu giữ nguyên mã đã lưu trước đó.</span>
                 <input id="set-webhook-secret" name="gas_webhook_secret" type="password" autocomplete="off" placeholder="Nhập mã bí mật mới (nếu thay đổi)" aria-describedby="set-secret-hint">
               </div>
 
@@ -534,53 +580,72 @@
               </div>
             </form>
           </section>
+        </div>
 
-          <!-- Team Management (Super Admin) -->
-          <section class="panel-box" id="box-users" hidden>
-            <div class="panel-box-head panel-box-head--row">
-              <div>
-                <h2>Tài khoản Ban Điều Phối</h2>
-                <p>Thêm thành viên BĐP để cùng đăng bài và theo dõi đơn đăng ký (không cần tài khoản GitHub).</p>
+        <!-- SUB-TAB 4: SECURITY & MEDIA ACCOUNTS -->
+        <div role="tabpanel" aria-labelledby="subtab-security" data-set-panel="security" hidden>
+          <div class="settings-grid">
+            <section class="panel-box">
+              <div class="panel-box-head panel-box-head--row">
+                <div>
+                  <h2>Đăng nhập sinh trắc học (Passkey)</h2>
+                  <p>Kích hoạt Face ID, Touch ID hoặc Windows Hello trên thiết bị này để mở nhanh <code>/admin/</code> không cần gõ mật khẩu.</p>
+                </div>
+                <button class="btn btn--primary btn--sm" type="button" id="btn-setup-passkey">Kích hoạt Face ID / Passkey</button>
               </div>
-              <button class="btn btn--outline btn--sm" type="button" id="btn-new-user">+ Thêm tài khoản</button>
-            </div>
-            <div id="users-container"></div>
-          </section>
+              <div class="form-alert" id="passkey-setup-alert" role="status" hidden></div>
+            </section>
 
-          <!-- Change Own Password (All Logged-in Users) -->
-          <section class="panel-box">
-            <div class="panel-box-head">
-              <div>
-                <h2>Đổi mật khẩu tài khoản của bạn</h2>
-                <p>Khuyến nghị dùng mật khẩu tối thiểu 8 ký tự và không dùng chung với email cá nhân.</p>
-              </div>
-            </div>
-            <form class="admin-form" id="change-pw-form" novalidate>
-              <div class="field">
-                <label for="cp-current">Mật khẩu hiện tại <span aria-hidden="true">*</span></label>
-                <input id="cp-current" name="currentPassword" type="password" autocomplete="current-password" required>
-              </div>
-              <div class="field">
-                <label for="cp-new">Mật khẩu mới <span aria-hidden="true">*</span></label>
-                <span id="cp-hint" class="field-hint">Tối thiểu 8 ký tự.</span>
-                <div class="password-wrap">
-                  <input id="cp-new" name="newPassword" type="password" autocomplete="new-password" minlength="8" required aria-describedby="cp-hint">
-                  <button type="button" class="pw-toggle" data-pw-toggle="cp-new" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
+            <section class="panel-box">
+              <div class="panel-box-head">
+                <div>
+                  <h2>Đổi mật khẩu tài khoản Quản trị</h2>
+                  <p>Khuyến nghị dùng mật khẩu tối thiểu 8 ký tự, khác với mật khẩu email cá nhân.</p>
                 </div>
               </div>
-              <div class="form-alert" id="cp-alert" role="status" hidden></div>
-              <div>
-                <button class="btn btn--outline" type="submit">Cập nhật mật khẩu</button>
+              <form class="admin-form" id="change-pw-form" novalidate>
+                <div class="form-row-2">
+                  <div class="field">
+                    <label for="cp-current">Mật khẩu hiện tại <span aria-hidden="true">*</span></label>
+                    <input id="cp-current" name="currentPassword" type="password" autocomplete="current-password" required>
+                  </div>
+                  <div class="field">
+                    <label for="cp-new">Mật khẩu mới <span aria-hidden="true">*</span></label>
+                    <div class="password-wrap">
+                      <input id="cp-new" name="newPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="Tối thiểu 8 ký tự">
+                      <button type="button" class="pw-toggle" data-pw-toggle="cp-new" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-alert" id="cp-alert" role="status" hidden></div>
+                <div>
+                  <button class="btn btn--outline" type="submit">Cập nhật mật khẩu</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel-box" id="box-users">
+              <div class="panel-box-head panel-box-head--row">
+                <div>
+                  <h2>Tài khoản Ban Hình Ảnh (<code>/media/</code>)</h2>
+                  <p>Hệ thống khóa duy nhất 1 Quản trị chính (<code>203int64</code>). Danh sách dưới đây giúp quản lý, khóa hoặc thu hồi quyền tài khoản Ban Hình Ảnh.</p>
+                </div>
+                <button class="btn btn--outline btn--sm" type="button" id="btn-new-media-user">+ Cấp tài khoản Ban Hình Ảnh</button>
               </div>
-            </form>
-          </section>
+              <div id="users-container"></div>
+            </section>
+          </div>
         </div>
       </section>
     </main>
 
-    <!-- Mobile Bottom Navigation -->
+    <!-- Mobile Bottom Navigation (5 primary destinations; Settings & /media/ in Topbar) -->
     <nav class="mobile-bottom-nav" aria-label="Điều hướng chính trên điện thoại">
-      <button class="bottom-nav-item is-active" type="button" data-tab="registrations">
+      <button class="bottom-nav-item is-active" type="button" data-tab="overview">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span>Tổng quan</span>
+      </button>
+      <button class="bottom-nav-item" type="button" data-tab="registrations">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         <span>Đơn</span>
         <span class="bottom-badge" id="badge-new-regs-mobile" hidden>0</span>
@@ -595,18 +660,14 @@
       </button>
       <button class="bottom-nav-item" type="button" data-tab="community">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span>Lưu bút</span>
+        <span>Cộng đồng</span>
         <span class="bottom-badge" id="badge-pending-refs-mobile" hidden>0</span>
-      </button>
-      <button class="bottom-nav-item" type="button" data-tab="settings">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Cài đặt</span>
       </button>
     </nav>
   </div>
 
   <!-- DIALOG 1: EVENT EDITOR -->
-  <dialog class="cms-dialog" id="event-dialog" closedby="any" aria-labelledby="event-dialog-title">
+  <dialog class="cms-dialog cms-dialog--wide" id="event-dialog" closedby="any" aria-labelledby="event-dialog-title">
     <div class="dialog-shell">
       <div class="dialog-head">
         <h2 id="event-dialog-title">Đăng sự kiện mới</h2>
@@ -616,17 +677,17 @@
         <input type="hidden" name="id" id="ev-id">
 
         <div class="btn-row" role="group" aria-label="Điền nhanh mẫu theo trụ cột">
-          <button class="btn btn--outline btn--sm" type="button" data-ev-preset="holaheart">Mẫu nhanh: HolaHeart</button>
-          <button class="btn btn--outline btn--sm" type="button" data-ev-preset="holagreen">Mẫu nhanh: HolaGreen</button>
-          <button class="btn btn--outline btn--sm" type="button" data-ev-preset="holaconnect">Mẫu nhanh: HolaConnect</button>
+          <button class="btn btn--outline btn--sm" type="button" data-ev-preset="holaheart">Mẫu: HolaHeart</button>
+          <button class="btn btn--outline btn--sm" type="button" data-ev-preset="holagreen">Mẫu: HolaGreen</button>
+          <button class="btn btn--outline btn--sm" type="button" data-ev-preset="holaconnect">Mẫu: HolaConnect</button>
         </div>
 
-        <div class="form-row-2">
+        <div class="form-row-3">
           <div class="field">
             <label for="ev-kind">Phân loại lịch</label>
             <select id="ev-kind" name="kind">
-              <option value="upcoming">Sắp diễn ra (mở đăng ký)</option>
-              <option value="past">Đã tổ chức (chuyên đề vừa qua)</option>
+              <option value="upcoming">Sắp diễn ra (mở giữ chỗ)</option>
+              <option value="past">Đã tổ chức</option>
             </select>
           </div>
           <div class="field">
@@ -636,16 +697,15 @@
               <option value="draft">Lưu nháp (ẩn)</option>
             </select>
           </div>
+          <div class="field">
+            <label for="ev-sort-order">Thứ tự ưu tiên</label>
+            <input id="ev-sort-order" name="sortOrder" type="number" value="0" min="-100" max="999">
+          </div>
         </div>
 
         <div class="field">
-          <label for="ev-title">Tên sự kiện / Hoạt động (Tiếng Việt) <span aria-hidden="true">*</span></label>
+          <label for="ev-title">Tên sự kiện (Tiếng Việt) <span aria-hidden="true">*</span></label>
           <input id="ev-title" name="title" type="text" required minlength="4" placeholder="Ví dụ: HolaHeart #16: Đối thoại Giá trị sống tại Hòa Lạc">
-        </div>
-
-        <div class="field">
-          <label for="ev-title-en">Event Title (English — tùy chọn cho khách quốc tế)</label>
-          <input id="ev-title-en" name="titleEn" type="text" placeholder="e.g. HolaHeart #16: Values Dialogue in Hoa Lac">
         </div>
 
         <div class="form-row-2">
@@ -682,14 +742,19 @@
             <input id="ev-location" name="location" type="text" placeholder="Hòa Lạc, Hà Nội">
           </div>
           <div class="field">
-            <label for="ev-fee">Chi phí / Hỗ trợ (nếu có)</label>
-            <span class="field-hint">Mặc định: Miễn phí tham dự · Tự túc đồ uống. Ghi rõ nếu có hỗ trợ thêm.</span>
+            <label for="ev-fee">Chi phí / Hỗ trợ</label>
             <input id="ev-fee" name="fee" type="text" placeholder="Miễn phí tham dự · Tự túc đồ uống">
           </div>
         </div>
 
+        <div class="field">
+          <label for="ev-zalo-url">Link Nhóm Zalo riêng của buổi gặp (tùy chọn)</label>
+          <span class="field-hint">Để trống sẽ tự dùng link Nhóm Zalo cộng đồng mặc định trên trang Thư mời.</span>
+          <input id="ev-zalo-url" name="zaloGroupUrl" type="url" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="https://zalo.me/g/...">
+        </div>
+
         <fieldset class="chip-fieldset">
-          <legend>Cài đặt thanh chỗ còn lại (tùy chọn)</legend>
+          <legend>Thanh chỗ còn lại &amp; sức chứa</legend>
           <div class="form-row-3" style="margin-top: 8px;">
             <div class="field">
               <label for="ev-seat-capacity">Tổng sức chứa</label>
@@ -697,53 +762,70 @@
             </div>
             <div class="field">
               <label for="ev-external-booked">Đã đăng ký ngoài web</label>
-              <span class="field-hint">Khách đăng ký qua Zalo / trực tiếp</span>
               <input id="ev-external-booked" name="externalBooked" type="number" min="0" max="5000" value="0" placeholder="0">
             </div>
             <div class="field">
-              <label for="ev-seats">Ghi chú chỗ (tùy chọn)</label>
-              <input id="ev-seats" name="seats" type="text" placeholder="Để trống nếu không cần">
+              <label for="ev-seats">Nhãn chỗ (tùy chọn)</label>
+              <input id="ev-seats" name="seats" type="text" placeholder="Mở đăng ký · 30 chỗ">
             </div>
           </div>
           <label class="check-chip" style="margin-top: 10px;">
             <input type="checkbox" id="ev-show-seat-bar" name="showSeatBar">
-            <span>Hiển thị thanh chỗ còn lại trên trang thư mời (tự trừ cả đơn đăng ký trên web &amp; ngoài web)</span>
+            <span>Hiển thị thanh chỗ còn lại trên trang thư mời (tự trừ đơn web + ngoài web)</span>
           </label>
         </fieldset>
 
-        <fieldset class="chip-fieldset">
-          <legend>Nhóm lọc phụ trợ (tuỳ chọn)</legend>
-          <div class="check-chips">
-            <label class="check-chip"><input type="checkbox" name="filters" value="sach"><span>Sạch</span></label>
-            <label class="check-chip"><input type="checkbox" name="filters" value="biet-on"><span>Biết ơn</span></label>
-            <label class="check-chip"><input type="checkbox" name="filters" value="tu-te"><span>Tử tế</span></label>
-            <label class="check-chip"><input type="checkbox" name="filters" value="se-chia"><span>Sẻ chia</span></label>
-          </div>
-        </fieldset>
-
         <div class="field">
-          <label for="ev-summary">Mô tả ngắn (Tiếng Việt · 1 câu gọn) <span aria-hidden="true">*</span></label>
+          <label for="ev-summary">Mô tả ngắn (Tiếng Việt) <span aria-hidden="true">*</span></label>
           <textarea id="ev-summary" name="summary" rows="2" placeholder="Buổi đối thoại &amp; kết nối giá trị sống dành cho người trẻ tại Hòa Lạc."></textarea>
         </div>
 
-        <div class="field">
-          <label for="ev-summary-en">Short Summary (English — tùy chọn)</label>
-          <textarea id="ev-summary-en" name="summaryEn" rows="2" placeholder="An intimate values dialogue and live acoustic evening in Hoa Lac."></textarea>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="ev-highlights">Điểm nhấn buổi gặp (mỗi dòng 1 ý, tối đa 6)</label>
+            <textarea id="ev-highlights" name="highlights" rows="3" placeholder="Đón khách &amp; trò chuyện mở đầu&#10;Đối thoại nhóm nhỏ&#10;Ghi lưu bút kỷ niệm"></textarea>
+          </div>
+          <div class="field">
+            <label for="ev-participants">Kết quả / Số người đã tham gia (sự kiện cũ)</label>
+            <input id="ev-participants" name="participants" type="text" placeholder="Ví dụ: 45 thành viên">
+            <fieldset class="chip-fieldset" style="margin-top: 8px;">
+              <legend>Nhóm lọc phụ trợ</legend>
+              <div class="check-chips">
+                <label class="check-chip"><input type="checkbox" name="filters" value="sach"><span>Sạch</span></label>
+                <label class="check-chip"><input type="checkbox" name="filters" value="biet-on"><span>Biết ơn</span></label>
+                <label class="check-chip"><input type="checkbox" name="filters" value="tu-te"><span>Tử tế</span></label>
+                <label class="check-chip"><input type="checkbox" name="filters" value="se-chia"><span>Sẻ chia</span></label>
+              </div>
+            </fieldset>
+          </div>
         </div>
 
-        <div class="field">
-          <label for="ev-participants">Số người đã tham gia (chỉ dùng cho sự kiện Đã tổ chức)</label>
-          <input id="ev-participants" name="participants" type="text" placeholder="Ví dụ: 45 thành viên">
-        </div>
+        <details class="form-collapsible">
+          <summary>Phiên bản Tiếng Anh cho trang /en/ (tùy chọn)</summary>
+          <div class="form-collapsible-body">
+            <div class="field">
+              <label for="ev-title-en">Event Title (English)</label>
+              <input id="ev-title-en" name="titleEn" type="text" placeholder="e.g. HolaHeart #16: Values Dialogue in Hoa Lac">
+            </div>
+            <div class="field">
+              <label for="ev-summary-en">Short Summary (English)</label>
+              <textarea id="ev-summary-en" name="summaryEn" rows="2" placeholder="An intimate values dialogue evening in Hoa Lac."></textarea>
+            </div>
+          </div>
+        </details>
 
         <div class="field">
-          <label for="ev-image-file">Ảnh sự kiện (tự động nén JPEG tối ưu cho điện thoại &amp; Zalo)</label>
+          <label for="ev-image-file">Ảnh sự kiện</label>
           <div class="uploader-box">
             <img id="ev-image-preview" class="uploader-preview" src="/assets/images/activity-workshop.jpg" alt="Xem trước ảnh sự kiện">
             <div class="uploader-controls">
-              <input id="ev-image-file" type="file" accept="image/*" class="file-input" data-upload-target="ev-image" data-preview-target="ev-image-preview" data-meta-target="ev-image-meta">
-              <div class="upload-meta" id="ev-image-meta">Chọn ảnh từ thư viện hoặc chụp trực tiếp.</div>
+              <input id="ev-image-file" type="file" accept="image/*" class="file-input" data-upload-target="ev-image" data-preview-target="ev-image-preview" data-meta-target="ev-image-meta" data-upload-category="su-kien">
+              <div class="upload-meta" id="ev-image-meta">Tải lên trực tiếp (giữ nguyên thư mục sự kiện trên Google Drive) hoặc bấm Cắt khung nếu cần.</div>
+              <div class="btn-row">
+                <button class="btn btn--outline btn--sm" type="button" data-open-crop="ev-image" data-crop-preview="ev-image-preview" data-crop-meta="ev-image-meta" data-crop-category="su-kien" data-default-ratio="1.7778">Cắt &amp; Căn khung</button>
+              </div>
               <input id="ev-image" name="image" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="/api/media/... hoặc /assets/images/..." value="/assets/images/activity-workshop.jpg">
+              <input id="ev-image-alt" name="imageAlt" type="text" placeholder="Mô tả ảnh (Alt text — để trống sẽ dùng tên sự kiện)">
             </div>
           </div>
         </div>
@@ -758,7 +840,7 @@
     </div>
   </dialog>
 
-  <!-- DIALOG 2: POST EDITOR -->
+  <!-- DIALOG 2: POST EDITOR WITH LIVE PREVIEW & TOOLBAR -->
   <dialog class="cms-dialog cms-dialog--wide" id="post-dialog" closedby="any" aria-labelledby="post-dialog-title">
     <div class="dialog-shell">
       <div class="dialog-head">
@@ -822,9 +904,13 @@
           <div class="uploader-box">
             <img id="post-image-preview" class="uploader-preview" src="/assets/images/activity-environment.jpg" alt="Xem trước ảnh bìa bài viết">
             <div class="uploader-controls">
-              <input id="post-image-file" type="file" accept="image/*" class="file-input" data-upload-target="post-image" data-preview-target="post-image-preview" data-meta-target="post-image-meta">
-              <div class="upload-meta" id="post-image-meta">Khuyến nghị ảnh ngang 16:9 hoặc 3:2. Ảnh tự nén gọn trước khi tải lên.</div>
+              <input id="post-image-file" type="file" accept="image/*" class="file-input" data-upload-target="post-image" data-preview-target="post-image-preview" data-meta-target="post-image-meta" data-upload-category="bai-viet">
+              <div class="upload-meta" id="post-image-meta">Khuyến nghị ảnh ngang 16:9 hoặc 3:2.</div>
+              <div class="btn-row">
+                <button class="btn btn--outline btn--sm" type="button" data-open-crop="post-image" data-crop-preview="post-image-preview" data-crop-meta="post-image-meta" data-crop-category="bai-viet" data-default-ratio="1.7778">Cắt &amp; Căn khung</button>
+              </div>
               <input id="post-image" name="image" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" value="/assets/images/activity-environment.jpg">
+              <input id="post-image-alt" name="imageAlt" type="text" placeholder="Mô tả ảnh bìa (Alt text)">
             </div>
           </div>
         </div>
@@ -835,9 +921,28 @@
         </div>
 
         <div class="field">
-          <label for="post-content">Nội dung bài viết <span aria-hidden="true">*</span></label>
-          <span class="field-hint">Xuống dòng để tách đoạn. Hỗ trợ <code>## Tiêu đề mục</code>, <code>- Gạch đầu dòng</code>, <code>&gt; Trích dẫn</code>, và <code>**in đậm**</code>.</span>
-          <textarea id="post-content" name="content" rows="10" required placeholder="Chiều cuối tuần tại Hòa Lạc – Thạch Thất, các bạn trẻ HolaRise đã cùng nhau..."></textarea>
+          <div class="editor-head">
+            <label for="post-content">Nội dung bài viết <span aria-hidden="true">*</span></label>
+            <div class="subtab-bar subtab-bar--compact" role="tablist" aria-label="Chế độ soạn thảo bài viết">
+              <button class="subtab-btn" type="button" role="tab" id="post-tab-write" aria-selected="true" data-post-mode="write">Soạn thảo</button>
+              <button class="subtab-btn" type="button" role="tab" id="post-tab-preview" aria-selected="false" data-post-mode="preview">Xem trước</button>
+            </div>
+          </div>
+
+          <div data-post-editor-pane="write">
+            <div class="md-toolbar" role="toolbar" aria-label="Chèn định dạng nhanh">
+              <button class="btn btn--ghost btn--sm" type="button" data-md-insert="h2">## Mục lớn</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-md-insert="h3">### Mục nhỏ</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-md-insert="bold">**Đậm**</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-md-insert="quote">&gt; Trích dẫn</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-md-insert="list">- Danh sách</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-md-insert="link">[Chữ](/duong-dan/)</button>
+            </div>
+            <textarea id="post-content" name="content" rows="11" required placeholder="Xuống dòng để tách đoạn. Hỗ trợ ## Tiêu đề mục, ### Tiểu mục, - Gạch đầu dòng, &gt; Trích dẫn, **in đậm** và [liên kết](/hanh-trinh/)."></textarea>
+            <span class="field-hint" id="post-word-count">0 từ · ~1 phút đọc</span>
+          </div>
+
+          <div class="md-preview" id="post-preview-pane" data-post-editor-pane="preview" hidden></div>
         </div>
 
         <div class="form-alert" id="post-alert" role="alert" hidden></div>
@@ -850,7 +955,7 @@
     </div>
   </dialog>
 
-  <!-- DIALOG 3: REGISTRATION DETAIL & NOTE -->
+  <!-- DIALOG 3: REGISTRATION DETAIL & BUG SCREENSHOT -->
   <dialog class="cms-dialog" id="reg-dialog" closedby="any" aria-labelledby="reg-dialog-title">
     <div class="dialog-shell">
       <div class="dialog-head">
@@ -860,6 +965,13 @@
       <form class="admin-form dialog-body" id="reg-detail-form" novalidate>
         <input type="hidden" id="reg-detail-id" name="id">
         <dl class="detail-list" id="reg-detail-meta"></dl>
+
+        <div id="reg-bug-shot-wrap" class="bug-shot-box" hidden>
+          <strong>Ảnh chụp màn hình báo lỗi đính kèm</strong>
+          <a id="reg-bug-shot-link" target="_blank" rel="noopener">
+            <img id="reg-bug-shot-img" src="/assets/images/logo-mark.png" alt="Ảnh chụp màn hình lỗi">
+          </a>
+        </div>
 
         <div class="field">
           <label for="reg-detail-status">Trạng thái xử lý</label>
@@ -872,31 +984,35 @@
         </div>
 
         <div class="field">
-          <label for="reg-detail-note">Ghi chú nội bộ của Ban Điều Phối</label>
-          <textarea id="reg-detail-note" name="admin_note" rows="3" placeholder="Ví dụ: Đã mời vào nhóm Zalo Nhóm 2, hẹn đón ở cổng FPT..."></textarea>
+          <label for="reg-detail-note">Ghi chú nội bộ</label>
+          <textarea id="reg-detail-note" name="admin_note" rows="3" placeholder="Ví dụ: Đã mời vào nhóm Zalo, hẹn đón ở cổng ĐH FPT..."></textarea>
         </div>
 
         <div class="form-alert" id="reg-detail-alert" role="alert" hidden></div>
 
         <div class="dialog-foot dialog-foot--split">
-          <button class="btn btn--danger-ghost" type="button" id="btn-delete-reg">Xóa đơn</button>
           <div class="btn-row">
-            <button class="btn btn--outline" type="button" id="btn-resync-reg">Đồng bộ lại Sheet</button>
-            <button class="btn btn--primary" type="submit">Lưu cập nhật</button>
+            <button class="btn btn--danger-ghost btn--sm" type="button" id="btn-delete-reg">Xóa đơn</button>
+            <button class="btn btn--outline btn--sm" type="button" id="btn-reg-to-member">+ Lưu thành viên</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn--outline btn--sm" type="button" id="btn-resync-reg">Đồng bộ lại Sheet</button>
+            <button class="btn btn--primary btn--sm" type="submit">Lưu cập nhật</button>
           </div>
         </div>
       </form>
     </div>
   </dialog>
 
-  <!-- DIALOG 4: ADD ADMIN USER -->
-  <dialog class="cms-dialog" id="user-dialog" closedby="any" aria-labelledby="user-dialog-title">
+  <!-- DIALOG 4: ADD MEDIA TEAM ACCOUNT (ONLY ROLE='media' FOR /media/) -->
+  <dialog class="cms-dialog" id="media-user-dialog" closedby="any" aria-labelledby="media-user-dialog-title">
     <div class="dialog-shell">
       <div class="dialog-head">
-        <h2 id="user-dialog-title">Thêm thành viên Ban Điều Phối</h2>
+        <h2 id="media-user-dialog-title">Cấp tài khoản Ban Hình Ảnh (/media/)</h2>
         <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
       </div>
-      <form class="admin-form dialog-body" id="user-form" novalidate>
+      <form class="admin-form dialog-body" id="media-user-form" novalidate>
+        <p class="field-hint" style="margin:0;">Tài khoản này chỉ dùng cho <code>/media/</code> (tải ảnh &amp; duyệt album), không có quyền truy cập <code>/admin/</code>.</p>
         <div class="field">
           <label for="u-name">Họ và tên <span aria-hidden="true">*</span></label>
           <input id="u-name" name="name" type="text" required minlength="2" placeholder="Ví dụ: Phạm Minh Tuấn">
@@ -906,21 +1022,13 @@
           <input id="u-email" name="email" type="email" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="tuan@holarise.org">
         </div>
         <div class="field">
-          <label for="u-role">Vai trò</label>
-          <select id="u-role" name="role">
-            <option value="editor">Biên tập / Điều phối viên (Quản lý bài, sự kiện &amp; đơn)</option>
-            <option value="media">Ban Hình Ảnh (Chỉ quản lý Album &amp; Ảnh tại /media)</option>
-            <option value="super_admin">Quản trị viên chính (Toàn quyền + Tài khoản &amp; Cài đặt)</option>
-          </select>
-        </div>
-        <div class="field">
           <label for="u-password">Mật khẩu tạm (tối thiểu 8 ký tự) <span aria-hidden="true">*</span></label>
           <input id="u-password" name="password" type="password" autocomplete="new-password" required minlength="8">
         </div>
         <div class="form-alert" id="user-alert" role="alert" hidden></div>
         <div class="dialog-foot">
           <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
-          <button class="btn btn--primary" type="submit">Tạo tài khoản</button>
+          <button class="btn btn--primary" type="submit">Tạo tài khoản /media/</button>
         </div>
       </form>
     </div>
@@ -949,22 +1057,25 @@
           </select>
         </div>
         <div class="field">
-          <label for="pn-website">Website / Liên kết giới thiệu (tùy chọn, HTTPS)</label>
+          <label for="pn-website">Website / Liên kết (tùy chọn, HTTPS)</label>
           <input id="pn-website" name="websiteUrl" type="url" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="https://musicspace.edu.vn">
         </div>
         <div class="field">
-          <label for="pn-logo-file">Logo đơn vị (tùy chọn — nếu bỏ trống sẽ hiện chữ viết tắt tinh tế)</label>
+          <label for="pn-logo-file">Logo đơn vị (tùy chọn)</label>
           <div class="uploader-box">
             <img id="pn-logo-preview" class="uploader-preview" src="/assets/images/logo-mark.png" alt="Xem trước logo đối tác">
             <div class="uploader-controls">
-              <input id="pn-logo-file" type="file" accept="image/*" class="file-input" data-upload-target="pn-logo" data-preview-target="pn-logo-preview" data-meta-target="pn-logo-meta">
+              <input id="pn-logo-file" type="file" accept="image/*" class="file-input" data-upload-target="pn-logo" data-preview-target="pn-logo-preview" data-meta-target="pn-logo-meta" data-upload-category="giao-dien">
               <div class="upload-meta" id="pn-logo-meta">Chọn ảnh logo PNG/JPG gọn nhẹ.</div>
+              <div class="btn-row">
+                <button class="btn btn--outline btn--sm" type="button" data-open-crop="pn-logo" data-crop-preview="pn-logo-preview" data-crop-meta="pn-logo-meta" data-crop-category="giao-dien" data-default-ratio="1">Cắt khung 1:1</button>
+              </div>
               <input id="pn-logo" name="logoUrl" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="/api/media/... hoặc để trống">
             </div>
           </div>
         </div>
         <div class="field">
-          <label class="check-chip"><input type="checkbox" id="pn-active" name="isActive" checked><span>Hiển thị công khai trên Website (Trang chủ &amp; Về HolaRise)</span></label>
+          <label class="check-chip"><input type="checkbox" id="pn-active" name="isActive" checked><span>Hiển thị công khai trên Trang chủ &amp; Về HolaRise</span></label>
         </div>
         <div class="form-alert" id="partner-alert" role="alert" hidden></div>
         <div class="dialog-foot">
@@ -975,39 +1086,7 @@
     </div>
   </dialog>
 
-  <!-- DIALOG 6: IMAGE CROPPER & ROTATOR (NATIVE CANVAS) -->
-  <dialog class="cms-dialog cms-dialog--wide" id="image-crop-dialog" closedby="any" aria-labelledby="crop-dialog-title">
-    <div class="dialog-shell">
-      <div class="dialog-head">
-        <h2 id="crop-dialog-title">Cắt khung &amp; Căn tâm điểm ảnh</h2>
-        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
-      </div>
-      <div class="dialog-body">
-        <div class="btn-row" style="margin-bottom: 12px; flex-wrap: wrap;" role="group" aria-label="Tỷ lệ khung hình">
-          <button class="btn btn--sm btn--primary" type="button" data-crop-ratio="1.7778">16:9 (Bìa sự kiện / Hero)</button>
-          <button class="btn btn--sm btn--outline" type="button" data-crop-ratio="1.3333">4:3 (Ảnh hoạt động)</button>
-          <button class="btn btn--sm btn--outline" type="button" data-crop-ratio="1">1:1 (Chân dung / Logo)</button>
-          <button class="btn btn--sm btn--outline" type="button" data-crop-ratio="0">Giữ nguyên tỷ lệ gốc</button>
-          <button class="btn btn--sm btn--outline" type="button" id="crop-rotate-btn">↻ Xoay 90°</button>
-        </div>
-        <div style="background:#111;border-radius:12px;overflow:hidden;display:grid;place-items:center;max-height:52vh;touch-action:none;cursor:grab;">
-          <canvas id="crop-canvas" width="960" height="540" style="max-width:100%;max-height:52vh;display:block;"></canvas>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
-          <label for="crop-zoom" style="font-size:0.85rem;font-weight:500;white-space:nowrap;">Phóng to / Thu nhỏ:</label>
-          <input id="crop-zoom" type="range" min="1" max="3" step="0.05" value="1" style="flex:1;">
-          <span id="crop-hint" style="font-size:0.8rem;color:#5f6b64;">Kéo ảnh để căn mặt người vào giữa khung</span>
-        </div>
-        <div class="form-alert" id="crop-alert" role="alert" hidden style="margin-top:10px;"></div>
-      </div>
-      <div class="dialog-foot">
-        <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
-        <button class="btn btn--primary" type="button" id="crop-confirm-btn">Cắt &amp; Tải ảnh lên</button>
-      </div>
-    </div>
-  </dialog>
-
-  <!-- DIALOG 7: MEMBER & CORE TEAM EDITOR -->
+  <!-- DIALOG 6: MEMBER & CORE TEAM EDITOR -->
   <dialog class="cms-dialog" id="member-dialog" closedby="any" aria-labelledby="member-dialog-title">
     <div class="dialog-shell">
       <div class="dialog-head">
@@ -1023,7 +1102,7 @@
           </div>
           <div class="field">
             <label for="mem-role-title">Vai trò / Chức danh</label>
-            <input id="mem-role-title" name="roleTitle" type="text" placeholder="Sáng lập, Điều phối HolaHeart, Tình nguyện viên...">
+            <input id="mem-role-title" name="roleTitle" type="text" placeholder="Điều phối HolaHeart, Tình nguyện viên...">
           </div>
         </div>
         <div class="form-row-2">
@@ -1051,16 +1130,19 @@
           </div>
         </div>
         <div class="field">
-          <label for="mem-bio">Giới thiệu ngắn (hiển thị công khai nếu bật Đội ngũ Điều phối)</label>
-          <textarea id="mem-bio" name="bio" rows="2" maxlength="300" placeholder="1–2 câu ngắn gọn về vai trò và hành trình đồng hành..."></textarea>
+          <label for="mem-bio">Giới thiệu ngắn (hiển thị nếu bật Đội ngũ công khai)</label>
+          <textarea id="mem-bio" name="bio" rows="2" maxlength="400" placeholder="1–2 câu ngắn gọn về vai trò và hành trình đồng hành..."></textarea>
         </div>
         <div class="field">
-          <label for="mem-avatar-file">Ảnh chân dung (tùy chọn · hỗ trợ cắt khung 1:1)</label>
+          <label for="mem-avatar-file">Ảnh chân dung (tùy chọn)</label>
           <div class="uploader-box">
             <img id="mem-avatar-preview" class="uploader-preview" src="/assets/images/logo-mark.png" alt="Xem trước ảnh chân dung">
             <div class="uploader-controls">
-              <input id="mem-avatar-file" type="file" accept="image/*" class="file-input" data-upload-target="mem-avatar" data-preview-target="mem-avatar-preview" data-meta-target="mem-avatar-meta" data-default-ratio="1">
-              <div class="upload-meta" id="mem-avatar-meta">Chọn ảnh chân dung để căn khung 1:1.</div>
+              <input id="mem-avatar-file" type="file" accept="image/*" class="file-input" data-upload-target="mem-avatar" data-preview-target="mem-avatar-preview" data-meta-target="mem-avatar-meta" data-upload-category="khac">
+              <div class="upload-meta" id="mem-avatar-meta">Chọn ảnh chân dung hoặc căn khung 1:1.</div>
+              <div class="btn-row">
+                <button class="btn btn--outline btn--sm" type="button" data-open-crop="mem-avatar" data-crop-preview="mem-avatar-preview" data-crop-meta="mem-avatar-meta" data-crop-category="khac" data-default-ratio="1">Cắt khung 1:1</button>
+              </div>
               <input id="mem-avatar" name="avatarUrl" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="/api/media/... hoặc để trống">
             </div>
           </div>
@@ -1069,8 +1151,8 @@
           <label class="check-chip"><input type="checkbox" id="mem-public-team" name="isPublicTeam"><span>Hiển thị công khai trong Đội ngũ Điều phối tại trang Giới thiệu (SĐT &amp; Email luôn giữ kín)</span></label>
         </div>
         <div class="field">
-          <label for="mem-notes">Ghi chú nội bộ (chỉ Ban Điều Phối thấy)</label>
-          <textarea id="mem-notes" name="notes" rows="2" maxlength="500" placeholder="Ví dụ: Đã tham dự buổi 15/11, hỗ trợ chụp ảnh..."></textarea>
+          <label for="mem-notes">Ghi chú nội bộ</label>
+          <textarea id="mem-notes" name="notes" rows="2" maxlength="800" placeholder="Ví dụ: Tham dự buổi 15/11, hỗ trợ hậu cần..."></textarea>
         </div>
         <div class="form-alert" id="member-editor-alert" role="alert" hidden></div>
         <div class="dialog-foot">
@@ -1081,7 +1163,7 @@
     </div>
   </dialog>
 
-  <!-- DIALOG 8: PARTICIPANT TESTIMONIAL / REFLECTION EDITOR -->
+  <!-- DIALOG 7: REFLECTION / TESTIMONIAL EDITOR -->
   <dialog class="cms-dialog" id="reflection-dialog" closedby="any" aria-labelledby="reflection-dialog-title">
     <div class="dialog-shell">
       <div class="dialog-head">
@@ -1090,6 +1172,10 @@
       </div>
       <form class="admin-form dialog-body" id="reflection-editor-form" novalidate>
         <input type="hidden" id="ref-id" name="id">
+        <input type="hidden" id="ref-kind" name="kind" value="community">
+        <div id="ref-member-readonly-note" class="setup-banner" hidden>
+          Lưu bút do thành viên tự viết: bạn có thể cập nhật trạng thái duyệt và ghi chú kiểm duyệt.
+        </div>
         <div class="form-row-2">
           <div class="field">
             <label for="ref-author">Tên người chia sẻ <span aria-hidden="true">*</span></label>
@@ -1097,7 +1183,7 @@
           </div>
           <div class="field">
             <label for="ref-role">Vai trò</label>
-            <input id="ref-role" name="participantRole" type="text" value="Thành viên tham dự" placeholder="Thành viên tham dự, Tình nguyện viên, Diễn giả...">
+            <input id="ref-role" name="participantRole" type="text" value="Thành viên tham dự" placeholder="Thành viên tham dự, Tình nguyện viên...">
           </div>
         </div>
         <div class="form-row-2">
@@ -1106,28 +1192,35 @@
             <input id="ref-org" name="authorOrg" type="text" placeholder="SV ĐH FPT · Buổi 15/11">
           </div>
           <div class="field">
-            <label for="ref-slug">Gắn với bài Hành trình (slug — tùy chọn)</label>
+            <label for="ref-slug">Gắn bài Hành trình (slug — tùy chọn)</label>
             <input id="ref-slug" name="activitySlug" type="text" placeholder="tinh-yeu-thuong-cua-me">
           </div>
         </div>
         <div class="field">
-          <label for="ref-quote">Câu trích dẫn đắt nhất (tùy chọn)</label>
+          <label for="ref-quote">Câu trích dẫn nổi bật (tùy chọn)</label>
           <input id="ref-quote" name="pullQuote" type="text" maxlength="180" placeholder="Một câu ngắn đọng lại sau buổi gặp...">
         </div>
         <div class="field">
           <label for="ref-content">Nội dung cảm nhận <span aria-hidden="true">*</span></label>
           <textarea id="ref-content" name="content" rows="4" required minlength="10" maxlength="1500" placeholder="Nhập lời cảm nhận thật của người tham dự..."></textarea>
         </div>
-        <div class="field">
-          <label for="ref-photo-file">Ảnh kỷ niệm đi kèm (tùy chọn · cắt khung 4:3)</label>
+        <div class="field" id="ref-photo-field">
+          <label for="ref-photo-file">Ảnh kỷ niệm đi kèm (tùy chọn)</label>
           <div class="uploader-box">
             <img id="ref-photo-preview" class="uploader-preview" src="/assets/images/logo-mark.png" alt="Xem trước ảnh cảm nhận">
             <div class="uploader-controls">
-              <input id="ref-photo-file" type="file" accept="image/*" class="file-input" data-upload-target="ref-photo" data-preview-target="ref-photo-preview" data-meta-target="ref-photo-meta" data-default-ratio="1.3333">
+              <input id="ref-photo-file" type="file" accept="image/*" class="file-input" data-upload-target="ref-photo" data-preview-target="ref-photo-preview" data-meta-target="ref-photo-meta" data-upload-category="khac">
               <div class="upload-meta" id="ref-photo-meta">Chọn 1 ảnh kỷ niệm (nếu có).</div>
+              <div class="btn-row">
+                <button class="btn btn--outline btn--sm" type="button" data-open-crop="ref-photo" data-crop-preview="ref-photo-preview" data-crop-meta="ref-photo-meta" data-crop-category="khac" data-default-ratio="1.3333">Cắt khung 4:3</button>
+              </div>
               <input id="ref-photo" name="photoUrl" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="/api/media/... hoặc để trống">
             </div>
           </div>
+        </div>
+        <div class="field" id="ref-admin-note-field" hidden>
+          <label for="ref-admin-note">Ghi chú kiểm duyệt nội bộ</label>
+          <input id="ref-admin-note" name="adminNote" type="text" maxlength="400" placeholder="Ghi chú nội bộ (không hiển thị công khai)">
         </div>
         <div class="form-row-2">
           <div class="field">
@@ -1138,8 +1231,8 @@
               <option value="rejected">Ẩn</option>
             </select>
           </div>
-          <div class="field" style="display:flex;align-items:flex-end;">
-            <label class="check-chip"><input type="checkbox" id="ref-featured" name="isFeaturedHome" checked><span>Ghim ra mục Tiếng nói người tham dự (Trang chủ &amp; Giới thiệu)</span></label>
+          <div class="field" id="ref-featured-wrap" style="display:flex;align-items:flex-end;">
+            <label class="check-chip"><input type="checkbox" id="ref-featured" name="isFeaturedHome" checked><span>Ghim ra mục Tiếng nói người tham dự (Trang chủ)</span></label>
           </div>
         </div>
         <div class="form-alert" id="reflection-editor-alert" role="alert" hidden></div>
@@ -1151,7 +1244,60 @@
     </div>
   </dialog>
 
-  <!-- DIALOG 9: PWA INSTALL GUIDE (iOS Safari / Zalo WebView) -->
+  <!-- DIALOG 8: OPTIONAL IMAGE CROPPER & ROTATOR -->
+  <dialog class="cms-dialog cms-dialog--wide" id="image-crop-dialog" closedby="any" aria-labelledby="crop-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="crop-dialog-title">Cắt khung &amp; Căn tâm điểm ảnh</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <div class="dialog-body">
+        <div class="btn-row" style="margin-bottom: 12px;" role="group" aria-label="Tỷ lệ khung hình">
+          <button class="btn btn--sm btn--primary" type="button" data-crop-ratio="1.7778">16:9 (Bìa / Hero)</button>
+          <button class="btn btn--sm btn--outline" type="button" data-crop-ratio="1.3333">4:3 (Hoạt động)</button>
+          <button class="btn btn--sm btn--outline" type="button" data-crop-ratio="1">1:1 (Chân dung / Logo)</button>
+          <button class="btn btn--sm btn--outline" type="button" data-crop-ratio="0">Tỷ lệ gốc</button>
+          <button class="btn btn--sm btn--outline" type="button" id="crop-rotate-btn">↻ Xoay 90°</button>
+        </div>
+        <div class="crop-stage">
+          <canvas id="crop-canvas" width="960" height="540"></canvas>
+        </div>
+        <div class="crop-controls">
+          <label for="crop-zoom">Thu phóng</label>
+          <input id="crop-zoom" type="range" min="1" max="3" step="0.05" value="1">
+          <span class="field-hint">Kéo ảnh để căn chủ thể vào giữa khung</span>
+        </div>
+        <div class="form-alert" id="crop-alert" role="alert" hidden style="margin-top:10px;"></div>
+      </div>
+      <div class="dialog-foot">
+        <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
+        <button class="btn btn--primary" type="button" id="crop-confirm-btn">Cắt &amp; Tải ảnh lên</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 9: NATIVE CONFIRM / PROMPT MODAL (REPLACES window.confirm & window.prompt) -->
+  <dialog class="cms-dialog cms-dialog--sm" id="confirm-dialog" aria-labelledby="confirm-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="confirm-dialog-title">Xác nhận thao tác</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <form class="admin-form dialog-body" method="dialog" id="confirm-dialog-form">
+        <p class="confirm-dialog-msg" id="confirm-dialog-msg"></p>
+        <div class="field" id="confirm-input-wrap" hidden>
+          <label for="confirm-input" id="confirm-input-label">Giá trị</label>
+          <input id="confirm-input" type="text" autocomplete="off">
+        </div>
+        <div class="dialog-foot">
+          <button class="btn btn--outline" type="submit" value="cancel" id="confirm-cancel-btn" autofocus>Hủy</button>
+          <button class="btn btn--primary" type="submit" value="confirm" id="confirm-ok-btn">Xác nhận</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 10: PWA INSTALL GUIDE (iOS Safari / Zalo WebView) -->
   <dialog class="cms-dialog pwa-install-dialog" id="pwa-install-dialog" closedby="any" aria-labelledby="pwa-dialog-title-ios">
     <div class="dialog-shell">
       <div class="dialog-head">
@@ -1183,10 +1329,8 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=d0d57bf632" defer></script>
-  <script src="/assets/js/gate-ui.js?v=d0d57bf632" defer></script>
-  <script src="/assets/js/admin.js?v=d0d57bf632" defer></script>
-  <script src="/assets/js/admin-studio.js?v=d0d57bf632" defer></script>
-  <script src="/assets/js/pwa.js?v=d0d57bf632" defer></script>
+  <script src="/assets/js/passkey-client.js?v=9c1994eb4d" defer></script>
+  <script src="/assets/js/admin.js?v=9c1994eb4d" defer></script>
+  <script src="/assets/js/pwa.js?v=9c1994eb4d" defer></script>
 </body>
 </html>

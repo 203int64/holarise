@@ -43,6 +43,11 @@ export function isSafeDriveFileId(id) {
   return typeof id === "string" && SAFE_DRIVE_ID_RE.test(id);
 }
 
+export function extractDriveFolderId(url) {
+  const m = String(url || "").match(/\/folders\/([a-zA-Z0-9_-]{10,128})(?:[/?#]|$)/);
+  return m && isSafeDriveFileId(m[1]) ? m[1] : "";
+}
+
 export function normalizeDriveCategory(raw) {
   const val = String(raw || "").trim().toLowerCase();
   return ALLOWED_CATEGORIES.has(val) ? val : "khac";
@@ -193,21 +198,45 @@ export async function ensureCategorySubfolder(
 
 /**
  * Upload original uncompressed image bytes to Google Drive via multipart/related API v3.
+ * Supports nested subfolder paths via `subfolder: ["event-folder", "dong-gop", "member-name"]`
+ * and/or uploading directly beneath an existing `parentFolderId`.
  */
 export async function uploadImageToDrive(
   env,
-  { bytes, mimeType, filename, category = "khac", subfolder = "", description = "", fetchImpl = fetch }
+  {
+    bytes,
+    mimeType,
+    filename,
+    category = "khac",
+    subfolder = "",
+    parentFolderId = "",
+    description = "",
+    fetchImpl = fetch,
+  }
 ) {
   const cfg = getDriveConfig(env);
   const accessToken = await getDriveAccessToken(env, fetchImpl);
 
-  const cat = normalizeDriveCategory(category);
-  const sub = String(subfolder || "").trim();
-  let parentId = cfg.rootFolderId || "";
-  if (parentId || sub) {
-    parentId = await ensureSubfolder(cat, parentId, accessToken, fetchImpl);
-    if (sub) {
-      parentId = await ensureSubfolder(sub, parentId, accessToken, fetchImpl);
+  const subSegments = Array.isArray(subfolder)
+    ? subfolder.map((s) => String(s || "").trim()).filter(Boolean)
+    : String(subfolder || "").trim()
+      ? [String(subfolder).trim()]
+      : [];
+
+  let parentId = "";
+  if (parentFolderId && isSafeDriveFileId(parentFolderId)) {
+    parentId = parentFolderId;
+    for (const seg of subSegments) {
+      parentId = await ensureSubfolder(seg, parentId, accessToken, fetchImpl);
+    }
+  } else {
+    const cat = normalizeDriveCategory(category);
+    parentId = cfg.rootFolderId || "";
+    if (parentId || subSegments.length > 0) {
+      parentId = await ensureSubfolder(cat, parentId, accessToken, fetchImpl);
+      for (const seg of subSegments) {
+        parentId = await ensureSubfolder(seg, parentId, accessToken, fetchImpl);
+      }
     }
   }
 

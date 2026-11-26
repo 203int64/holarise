@@ -295,10 +295,17 @@
       <section id="view-workspace" hidden>
         <input type="file" id="multi-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/*" multiple hidden>
 
+        <!-- Media Moderation Status Strip -->
+        <div class="ws-moderation-strip" id="ws-moderation-strip">
+          <span class="ws-mod-dot" aria-hidden="true"></span>
+          <span><strong>Kiểm duyệt Media: ĐANG BẬT</strong> · Ảnh đóng góp của thành viên lưu vào thư mục chuẩn hóa trên Google Drive và chờ Admin / Ban Điều Phối duyệt trước khi hiện lên Sân khấu Kỷ niệm.</span>
+        </div>
+
         <!-- Compact Status Filter & Multi-Select Bar -->
         <div class="ws-toolbar">
           <div class="seg-pills" role="group" aria-label="Lọc ảnh trong album" id="photo-filter-group">
             <button class="seg-pill" type="button" data-photo-filter="pending" id="tab-photo-pending" hidden>Chờ duyệt <span class="seg-count seg-count--warn" id="cnt-photo-pending">0</span></button>
+            <button class="seg-pill" type="button" data-photo-filter="contributions" id="tab-photo-contrib" hidden>Đóng góp <span class="seg-count" id="cnt-photo-contrib">0</span></button>
             <button class="seg-pill" type="button" data-photo-filter="approved">Đã lên web <span class="seg-count" id="cnt-photo-approved">0</span></button>
             <button class="seg-pill" type="button" data-photo-filter="featured">★ Trang chủ <span class="seg-count" id="cnt-photo-featured">0</span></button>
             <button class="seg-pill is-active" type="button" data-photo-filter="all">Tất cả <span class="seg-count" id="cnt-photo-all">0</span></button>

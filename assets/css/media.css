@@ -1190,3 +1190,30 @@ html.is-standalone .media-topbar {
     grid-template-columns: 1fr;
   }
 }
+
+.ws-moderation-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(25, 135, 84, 0.28);
+  background: rgba(25, 135, 84, 0.08);
+  font-size: 0.83rem;
+  line-height: 1.45;
+  color: inherit;
+}
+
+.ws-mod-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #1f8a58;
+  flex-shrink: 0;
+}
+
+.tile-pill--contrib {
+  background: rgba(26, 77, 143, 0.9);
+  color: #ffffff;
+}

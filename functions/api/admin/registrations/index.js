@@ -1,6 +1,18 @@
 import { jsonResponse, requireAdmin } from "../../../_lib/security.js";
 import { cleanStr, truncateUtf8Bytes, VALID_REG_STATUSES } from "../../../_lib/validation.js";
 
+const BUG_SHOT_RE = /\/api\/admin\/bug-screenshot\/[a-zA-Z0-9._-]{6,96}/;
+
+function enrichRegistrationRow(row) {
+  const note = String(row?.note || "");
+  const shotMatch = note.match(BUG_SHOT_RE);
+  return {
+    ...row,
+    member_id: row?.member_id || "",
+    bug_screenshot_url: shotMatch ? shotMatch[0] : "",
+  };
+}
+
 export async function onRequestGet(context) {
   const auth = await requireAdmin(context);
   if (!auth.ok) return auth.response;
@@ -8,6 +20,7 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const status = cleanStr(url.searchParams.get("status"), 20);
   const activity = cleanStr(url.searchParams.get("activity"), 220);
+  const source = cleanStr(url.searchParams.get("source"), 24);
   // Enforce <= 42 UTF-8 bytes after LIKE escaping so %q% stays strictly under D1's 50-byte LIKE limit
   const rawQ = cleanStr(url.searchParams.get("q"), 80);
   const escapedQ = truncateUtf8Bytes(rawQ.replace(/[\\%_]/g, (m) => `\\${m}`), 42).replace(/\\$/, "");
@@ -25,6 +38,12 @@ export async function onRequestGet(context) {
     where.push("activity_title = ?");
     binds.push(activity);
   }
+  if (source === "event_modal" || source === "join_page") {
+    where.push("source = ?");
+    binds.push(source);
+  } else if (source === "feedback") {
+    where.push("(note LIKE '%/api/admin/bug-screenshot/%' OR note LIKE '%[Ngữ cảnh kỹ thuật]:%')");
+  }
   if (escapedQ) {
     const pat = `%${escapedQ}%`;
     where.push(
@@ -35,17 +54,37 @@ export async function onRequestGet(context) {
 
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
+  const fetchList = async () => {
+    try {
+      return await context.env.DB.prepare(
+        `SELECT id, member_id, source, event_id, activity_title, full_name, phone, email, role, organization, note,
+                status, admin_note, sync_status, sync_error, created_at, updated_at
+         FROM registrations
+         ${whereSql}
+         ORDER BY created_at DESC
+         LIMIT ? OFFSET ?`
+      )
+        .bind(...binds, limit, offset)
+        .all();
+    } catch (err) {
+      if (String(err?.message || "").includes("member_id")) {
+        return await context.env.DB.prepare(
+          `SELECT id, source, event_id, activity_title, full_name, phone, email, role, organization, note,
+                  status, admin_note, sync_status, sync_error, created_at, updated_at
+           FROM registrations
+           ${whereSql}
+           ORDER BY created_at DESC
+           LIMIT ? OFFSET ?`
+        )
+          .bind(...binds, limit, offset)
+          .all();
+      }
+      throw err;
+    }
+  };
+
   const [listRes, totalRes, countsRes, activitiesRes] = await Promise.all([
-    context.env.DB.prepare(
-      `SELECT id, source, event_id, activity_title, full_name, phone, email, role, organization, note,
-              status, admin_note, sync_status, sync_error, created_at, updated_at
-       FROM registrations
-       ${whereSql}
-       ORDER BY created_at DESC
-       LIMIT ? OFFSET ?`
-    )
-      .bind(...binds, limit, offset)
-      .all(),
+    fetchList(),
     context.env.DB.prepare(`SELECT COUNT(*) AS cnt FROM registrations ${whereSql}`)
       .bind(...binds)
       .first(),
@@ -64,7 +103,7 @@ export async function onRequestGet(context) {
 
   return jsonResponse({
     ok: true,
-    items: listRes.results || [],
+    items: (listRes.results || []).map(enrichRegistrationRow),
     total: Number(totalRes?.cnt || 0),
     limit,
     offset,

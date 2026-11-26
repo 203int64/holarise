@@ -22,31 +22,33 @@ function getInitials(name) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function renderNotFoundHtml(code) {
+function renderNotFoundHtml(code, isEn = false) {
   return `<!doctype html>
-<html lang="vi">
+<html lang="${isEn ? "en" : "vi"}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Không tìm thấy thẻ thành viên | HolaRise</title>
+  <title>${isEn ? "Member Pass Not Found" : "Không tìm thấy thẻ thành viên"} | HolaRise</title>
   <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
 <body style="background: var(--surface, #F6F7F6); color: var(--ink, #0B110F); font-family: system-ui, -apple-system, sans-serif; margin: 0;">
   <main style="max-width: 520px; margin: 80px auto; padding: 32px 24px; background: #fff; border: 1px solid rgba(11,17,15,0.08); border-radius: 20px; text-align: center;">
-    <p style="font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: #5C6B64; margin: 0 0 8px;">Thẻ Thành Viên HolaRise</p>
-    <h1 style="font-size: 1.4rem; margin: 0 0 12px;">Không tìm thấy mã ${escHtml(code || "")}</h1>
-    <p style="color: #4A5550; line-height: 1.6; margin: 0 0 24px;">Thẻ thành viên được kích hoạt sau khi Ban Điều Phối xác nhận tham dự hoạt động cùng cộng đồng HolaRise.</p>
-    <a class="btn btn--primary" href="/">Về trang chủ HolaRise</a>
+    <p style="font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: #5C6B64; margin: 0 0 8px;">${isEn ? "HolaRise Member Pass" : "Thẻ Thành Viên HolaRise"}</p>
+    <h1 style="font-size: 1.4rem; margin: 0 0 12px;">${isEn ? "Pass not found:" : "Không tìm thấy mã"} ${escHtml(code || "")}</h1>
+    <p style="color: #4A5550; line-height: 1.6; margin: 0 0 24px;">${isEn ? "Member passes are activated after joining HolaRise or checking in at a community gathering." : "Thẻ thành viên được kích hoạt sau khi Ban Điều Phối xác nhận tham dự hoạt động cùng cộng đồng HolaRise."}</p>
+    <a class="btn btn--primary" href="${isEn ? "/en/" : "/"}">${isEn ? "Back to HolaRise Home" : "Về trang chủ HolaRise"}</a>
   </main>
 </body>
 </html>`;
 }
 
 export async function onRequestGet({ params, request, env }) {
+  const reqUrl = new URL(request.url);
+  const isEn = reqUrl.searchParams.get("lang") === "en";
   const rawCode = String(params?.code || "").trim().toUpperCase();
   if (!rawCode || !/^[A-Z0-9-]{4,32}$/.test(rawCode) || !env?.DB) {
-    return new Response(renderNotFoundHtml(rawCode), {
+    return new Response(renderNotFoundHtml(rawCode, isEn), {
       status: 404,
       headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
     });
@@ -64,7 +66,7 @@ export async function onRequestGet({ params, request, env }) {
     .catch(() => null);
 
   if (!member) {
-    return new Response(renderNotFoundHtml(rawCode), {
+    return new Response(renderNotFoundHtml(rawCode, isEn), {
       status: 404,
       headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
     });
@@ -125,32 +127,41 @@ export async function onRequestGet({ params, request, env }) {
           .map((item) => {
             const title = item.event_title || item.activity_title;
             const dateStr = item.date_display || formatJoinDate(item.created_at);
-            const href = item.event_slug ? `/su-kien/${encodeURIComponent(item.event_slug)}/` : "";
+            const href = item.event_slug
+              ? `${isEn ? "/en/events/" : "/su-kien/"}${encodeURIComponent(item.event_slug)}/`
+              : "";
             const imgHtml = item.event_image
               ? `<img src="${escHtml(item.event_image)}" alt="${escHtml(title)}" loading="lazy">`
               : `<div class="tv-event-placeholder">${escHtml(pillar.label)}</div>`;
+            const statusBadge = isEn
+              ? item.status === "attended"
+                ? "Attended"
+                : "Recorded"
+              : item.status === "attended"
+                ? "Đã tham dự"
+                : "Đã ghi nhận";
             const body = `<div class="tv-event-thumb">${imgHtml}</div>
               <div class="tv-event-body">
                 <span class="tv-event-date">${escHtml(dateStr)}</span>
                 <h3>${escHtml(title)}</h3>
-                <span class="tv-event-badge">${item.status === "attended" ? "Đã tham dự" : "Đã ghi nhận"}</span>
+                <span class="tv-event-badge">${statusBadge}</span>
               </div>`;
             return href
               ? `<a class="tv-event-card" href="${href}">${body}</a>`
               : `<article class="tv-event-card">${body}</article>`;
           })
           .join("")}</div>`
-      : `<div class="tv-empty">Dấu ấn các buổi hoạt động sẽ được cập nhật tự động sau mỗi lần check-in cùng HolaRise.</div>`;
+      : `<div class="tv-empty">${isEn ? "Your verified gatherings will appear here automatically after each check-in with HolaRise." : "Dấu ấn các buổi hoạt động sẽ được cập nhật tự động sau mỗi lần check-in cùng HolaRise."}</div>`;
 
   const reflectionsHtml =
     reflections.length > 0
       ? `<section class="tv-section">
-          <h2>Khoảnh khắc &amp; Cảm nhận đã chia sẻ</h2>
+          <h2>${isEn ? "Shared Reflections &amp; Moments" : "Khoảnh khắc &amp; Cảm nhận đã chia sẻ"}</h2>
           <div class="tv-ref-list">
             ${reflections
               .map(
                 (r) => `<article class="tv-ref-card">
-                ${r.photo_url ? `<img src="${escHtml(r.photo_url)}" alt="Ảnh kỷ niệm cùng HolaRise" class="tv-ref-photo" loading="lazy">` : ""}
+                ${r.photo_url ? `<img src="${escHtml(r.photo_url)}" alt="${isEn ? "HolaRise memory photo" : "Ảnh kỷ niệm cùng HolaRise"}" class="tv-ref-photo" loading="lazy">` : ""}
                 <div class="tv-ref-copy">
                   ${r.pull_quote ? `<blockquote>“${escHtml(r.pull_quote)}”</blockquote>` : ""}
                   <p>${escHtml(r.content)}</p>
@@ -164,13 +175,13 @@ export async function onRequestGet({ params, request, env }) {
       : "";
 
   const html = `<!doctype html>
-<html lang="vi">
+<html lang="${isEn ? "en" : "vi"}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, follow">
-  <title>${escHtml(member.name)} (${escHtml(member.member_code)}) | Thẻ Thành Viên HolaRise</title>
-  <meta name="description" content="Hồ sơ hành trình thành viên ${escHtml(member.name)} (${escHtml(member.member_code)}) tại HolaRise – Cộng đồng Thanh niên Hòa Lạc.">
+  <title>${escHtml(member.name)} (${escHtml(member.member_code)}) | ${isEn ? "HolaRise Member Pass" : "Thẻ Thành Viên HolaRise"}</title>
+  <meta name="description" content="${isEn ? `HolaRise Member Journey Profile for ${escHtml(member.name)} (${escHtml(member.member_code)}).` : `Hồ sơ hành trình thành viên ${escHtml(member.name)} (${escHtml(member.member_code)}) tại HolaRise – Cộng đồng Thanh niên Hòa Lạc.`}">
   <link rel="icon" type="image/png" href="/assets/images/logo-mark.png">
   <style>
     :root { --bg: #F6F7F6; --card: #FFFFFF; --ink: #0B110F; --ink-2: #4A5550; --muted: #6C7872; --line: rgba(11,17,15,0.09); --accent: ${pillar.accent}; }
@@ -229,14 +240,14 @@ export async function onRequestGet({ params, request, env }) {
 <body>
   <main class="tv-shell">
     <header class="tv-topbar">
-      <a class="tv-brand" href="/">
+      <a class="tv-brand" href="${isEn ? "/en/" : "/"}">
         <img src="/assets/images/logo-mark.png" alt="HolaRise">
         <span>HolaRise</span>
       </a>
-      <a class="tv-btn" href="/lich-hoat-dong/">Lịch hoạt động →</a>
+      <a class="tv-btn" href="${isEn ? "/en/schedule/" : "/lich-hoat-dong/"}">${isEn ? "Schedule →" : "Lịch hoạt động →"}</a>
     </header>
 
-    <section class="tv-pass" aria-label="Thẻ thành viên HolaRise">
+    <section class="tv-pass" aria-label="${isEn ? "HolaRise Member Pass" : "Thẻ thành viên HolaRise"}">
       <div>
         <div class="tv-identity">
           ${avatarHtml}
@@ -246,18 +257,18 @@ export async function onRequestGet({ params, request, env }) {
               <span class="tv-code">${escHtml(member.member_code)}</span>
             </div>
             <h1 class="tv-name">${escHtml(member.name)}</h1>
-            <p class="tv-sub">${escHtml([member.role_title || "Thành viên đồng hành", member.organization].filter(Boolean).join(" · "))}</p>
+            <p class="tv-sub">${escHtml([member.role_title || (isEn ? "Community Member" : "Thành viên đồng hành"), member.organization].filter(Boolean).join(" · "))}</p>
           </div>
         </div>
         ${member.bio ? `<p class="tv-bio">${escHtml(member.bio)}</p>` : ""}
         <div class="tv-stats">
-          <span>Gia nhập: <strong>${escHtml(formatJoinDate(member.created_at))}</strong></span>
-          <span>Hoạt động đã ghi nhận: <strong>${verifiedCount}</strong></span>
-          <span>Trụ cột: <strong>${escHtml(pillar.label)}</strong></span>
+          <span>${isEn ? "Joined:" : "Gia nhập:"} <strong>${escHtml(formatJoinDate(member.created_at))}</strong></span>
+          <span>${isEn ? "Recorded gatherings:" : "Hoạt động đã ghi nhận:"} <strong>${verifiedCount}</strong></span>
+          <span>${isEn ? "Pillar:" : "Trụ cột:"} <strong>${escHtml(pillar.label)}</strong></span>
         </div>
         <div class="tv-actions">
-          <button type="button" class="tv-btn tv-btn--primary" id="tv-share-btn">Chia sẻ thẻ thành viên</button>
-          <button type="button" class="tv-btn" onclick="window.print()">Lưu PDF / In thẻ</button>
+          <button type="button" class="tv-btn tv-btn--primary" id="tv-share-btn">${isEn ? "Share Member Pass" : "Chia sẻ thẻ thành viên"}</button>
+          <button type="button" class="tv-btn" onclick="window.print()">${isEn ? "Save PDF / Print" : "Lưu PDF / In thẻ"}</button>
         </div>
       </div>
 
@@ -268,7 +279,7 @@ export async function onRequestGet({ params, request, env }) {
     </section>
 
     <section class="tv-section">
-      <h2>Dấu ấn hành trình tại HolaRise</h2>
+      <h2>${isEn ? "Journey Milestones at HolaRise" : "Dấu ấn hành trình tại HolaRise"}</h2>
       ${activitiesHtml}
     </section>
 
@@ -280,14 +291,16 @@ export async function onRequestGet({ params, request, env }) {
       var btn = document.getElementById("tv-share-btn");
       if (!btn) return;
       var shareUrl = ${JSON.stringify(canonicalUrl)};
-      var shareTitle = ${JSON.stringify(`Thẻ thành viên HolaRise · ${member.name} (${member.member_code})`)};
+      var shareTitle = ${JSON.stringify(`${isEn ? "HolaRise Member Pass" : "Thẻ thành viên HolaRise"} · ${member.name} (${member.member_code})`)};
+      var copiedLabel = ${JSON.stringify(isEn ? "Pass link copied" : "Đã sao chép liên kết thẻ")};
+      var defaultLabel = ${JSON.stringify(isEn ? "Share Member Pass" : "Chia sẻ thẻ thành viên")};
       btn.addEventListener("click", function () {
         if (navigator.share) {
           navigator.share({ title: shareTitle, url: shareUrl }).catch(function () {});
         } else if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(shareUrl).then(function () {
-            btn.textContent = "Đã sao chép liên kết thẻ";
-            setTimeout(function () { btn.textContent = "Chia sẻ thẻ thành viên"; }, 2200);
+            btn.textContent = copiedLabel;
+            setTimeout(function () { btn.textContent = defaultLabel; }, 2200);
           });
         }
       });

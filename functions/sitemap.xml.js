@@ -1,4 +1,4 @@
-import { absUrl, escHtml, resolveEventHref, splitEventsByDate } from "./_lib/render.js";
+import { absUrl, escHtml, resolveEventHref, resolveEventHrefEn, splitEventsByDate } from "./_lib/render.js";
 
 const STATIC_ROUTES = [
   ["/", "1.0", "weekly"],
@@ -6,8 +6,13 @@ const STATIC_ROUTES = [
   ["/lich-hoat-dong/", "0.9", "weekly"],
   ["/hanh-trinh/", "0.9", "weekly"],
   ["/tham-gia/", "0.9", "monthly"],
-  ["/en/", "0.8", "monthly"],
   ["/chinh-sach/", "0.5", "yearly"],
+  ["/en/", "0.9", "weekly"],
+  ["/en/about/", "0.8", "monthly"],
+  ["/en/schedule/", "0.9", "weekly"],
+  ["/en/journey/", "0.8", "weekly"],
+  ["/en/join/", "0.8", "monthly"],
+  ["/en/privacy/", "0.5", "yearly"],
 ];
 
 export async function onRequestGet({ request, env }) {
@@ -52,14 +57,16 @@ export async function onRequestGet({ request, env }) {
   const { upcoming } = splitEventsByDate(eventsRes.results || []);
   for (const ev of upcoming) {
     const evHref = resolveEventHref(ev);
-    if (!evHref) continue;
+    const evHrefEn = resolveEventHrefEn(ev);
     const lastmod = String(ev.updatedAt || ev.date || today).slice(0, 10);
-    pushUrl(evHref, lastmod, "weekly", "0.9");
+    if (evHref) pushUrl(evHref, lastmod, "weekly", "0.9");
+    if (evHrefEn) pushUrl(evHrefEn, lastmod, "weekly", "0.8");
   }
 
   for (const row of postsRes.results || []) {
     const lastmod = String(row.updated_at || row.date || today).slice(0, 10);
     pushUrl(`/hanh-trinh/${row.slug}/`, lastmod, "monthly", "0.7");
+    pushUrl(`/en/journey/${row.slug}/`, lastmod, "monthly", "0.7");
   }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

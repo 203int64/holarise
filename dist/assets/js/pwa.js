@@ -16,6 +16,8 @@
   var BANNER_SCROLL_MIN_PX = 260;
 
   var htmlEl = document.documentElement;
+  var isEn = (htmlEl && (htmlEl.lang === "en" || htmlEl.getAttribute("data-lang") === "en"));
+  function t(vi, en) { return isEn ? en : vi; }
   var installButtons = Array.prototype.slice.call(document.querySelectorAll("[data-pwa-install]"));
   var installStatus = document.getElementById("pwa-install-status");
   var installDialog = document.getElementById("pwa-install-dialog");
@@ -196,7 +198,7 @@
   window.addEventListener("appinstalled", function () {
     deferredInstallPrompt = undefined;
     hideFloatingBanner();
-    setStatus("Ứng dụng " + appName + " đã được cài đặt về thiết bị.");
+    setStatus(t("Ứng dụng " + appName + " đã được cài đặt về thiết bị.", appName + " has been installed on your device."));
     syncInstallButtons();
   });
 
@@ -230,7 +232,7 @@
     bannerDismissBtn.addEventListener("click", function () {
       markBannerDismissed();
       hideFloatingBanner();
-      setStatus("Đã ẩn gợi ý cài đặt ứng dụng.");
+      setStatus(t("Đã ẩn gợi ý cài đặt ứng dụng.", "Install prompt dismissed."));
     });
   }
 
@@ -259,7 +261,7 @@
           // Call directly during the click handler to preserve transient user activation.
           await navigator.install();
           hideFloatingBanner();
-          setStatus("Ứng dụng " + appName + " đã được cài đặt hoặc mở.");
+          setStatus(t("Ứng dụng " + appName + " đã được cài đặt hoặc mở.", appName + " was installed or opened."));
           installButtons.forEach(function (b) {
             if (!b.classList.contains("pwa-banner-install-btn")) {
               b.hidden = true;
@@ -273,9 +275,9 @@
           var choice = await promptEvent.userChoice;
           if (choice && choice.outcome === "accepted") {
             hideFloatingBanner();
-            setStatus("Ứng dụng " + appName + " đang được cài đặt.");
+            setStatus(t("Ứng dụng " + appName + " đang được cài đặt.", "Installing " + appName + "..."));
           } else {
-            setStatus("Bạn đã hủy cài đặt ứng dụng.");
+            setStatus(t("Bạn đã hủy cài đặt ứng dụng.", "App installation cancelled."));
           }
           if (!deferredInstallPrompt) {
             syncInstallButtons();
@@ -285,9 +287,9 @@
         }
       } catch (error) {
         if (error && error.name === "AbortError") {
-          setStatus("Việc cài đặt đã bị hủy hoặc chưa thể hoàn tất.");
+          setStatus(t("Việc cài đặt đã bị hủy hoặc chưa thể hoàn tất.", "Installation was cancelled or could not be completed."));
         } else {
-          setStatus("Không thể khởi chạy cài đặt tự động lúc này.");
+          setStatus(t("Không thể khởi chạy cài đặt tự động lúc này.", "Could not launch automatic installation right now."));
           console.error(error);
           if (isIos) {
             openInstallGuide("ios");
@@ -308,7 +310,10 @@
       var urlToCopy = window.location.href;
       var onCopied = function () {
         if (copyFeedback) {
-          copyFeedback.textContent = "Đã sao chép đường dẫn — bạn hãy dán vào Safari hoặc Chrome.";
+          copyFeedback.textContent = t(
+            "Đã sao chép đường dẫn — bạn hãy dán vào Safari hoặc Chrome.",
+            "Link copied — paste it into Safari or Chrome."
+          );
         }
       };
       if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
@@ -335,7 +340,7 @@
       onDone();
     } catch (_e) {
       if (copyFeedback) {
-        copyFeedback.textContent = "Hãy sao chép địa chỉ từ thanh trình duyệt: " + text;
+        copyFeedback.textContent = t("Hãy sao chép địa chỉ từ thanh trình duyệt: ", "Please copy this address from your browser bar: ") + text;
       }
     }
   }
@@ -362,9 +367,9 @@
   document.querySelectorAll("[data-offline-retry]").forEach(function (retryBtn) {
     retryBtn.addEventListener("click", function () {
       if (typeof navigator.onLine === "boolean" && !navigator.onLine) {
-        retryBtn.textContent = "Vẫn chưa có mạng — thử lại";
+        retryBtn.textContent = t("Vẫn chưa có mạng — thử lại", "Still offline — try again");
         setTimeout(function () {
-          retryBtn.textContent = "Thử kết nối lại";
+          retryBtn.textContent = t("Thử kết nối lại", "Try reconnecting");
         }, 2000);
         return;
       }

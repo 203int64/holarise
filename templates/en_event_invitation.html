@@ -1,0 +1,216 @@
+<div class="invite-theme-root" data-pillar="{{EVENT_PILLAR}}">
+<!-- Sealed 3D Envelope Opening Stage (auto-shown when URL has ?gui= or ?moi=, or via Preview) -->
+<section class="hl-env-stage" id="hl-env-stage" hidden aria-label="Open invitation envelope">
+  <div class="hl-env-stage-inner">
+    <div class="hl-env-eyebrow">AN INVITATION FOR YOU · {{EVENT_PILLAR_LABEL}}</div>
+    <div class="hl-env-salutation" id="hl-env-salutation">Dear friend,</div>
+    <p class="hl-env-sub"><strong id="hl-env-inviter-txt">HolaRise</strong> invites you to join<br>{{INVITE_HEADLINE}}.</p>
+
+    <div class="hl-env-wrap">
+      <div class="hl-env" id="hl-env-box">
+        <div class="hl-env-back"></div>
+        <div class="hl-env-letter" aria-hidden="true">
+          <div class="hl-env-letter-kicker">INVITATION · {{EVENT_PILLAR_LABEL}}</div>
+          <div class="hl-env-letter-title">{{INVITE_HEADLINE}}</div>
+          <div class="hl-env-letter-meta">{{INVITE_TIME_LABEL}}</div>
+          <div class="hl-env-letter-line"></div>
+          <div class="hl-env-letter-for">For <span id="hl-env-card-recipient">you</span></div>
+        </div>
+        <div class="hl-env-front"></div>
+        <div class="hl-env-flap"></div>
+        <span class="hl-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <button type="button" class="hl-env-seal" id="hl-env-seal-btn" aria-label="Tap wax seal to open invitation">H</button>
+      </div>
+    </div>
+
+    <p class="hl-env-hint">Tap the wax seal to open your invitation</p>
+    <div class="hl-env-actions">
+      <button type="button" class="hl-env-open-btn" id="hl-env-open-btn">Open invitation</button>
+      <button type="button" class="hl-env-skip-btn" id="hl-env-skip-btn">Go straight to details</button>
+    </div>
+  </div>
+</section>
+
+<div class="hl-invite-main-flow" id="hl-invite-main-flow">
+<section class="page-hero invite-hero">
+  <div class="container invite-narrow">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/en/">Home</a>
+      <span aria-hidden="true">/</span>
+      <a href="/en/schedule/">Schedule</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Invitation</span>
+    </nav>
+
+    <div class="kicker invite-pillar-kicker" style="margin-top: 18px;">{{EVENT_KICKER}} · {{EVENT_LANG_BADGE}}</div>
+    <h1 class="invite-title">{{INVITE_HEADLINE}}</h1>
+
+    <div class="invite-meta-bar">
+      <div class="invite-meta-facts">
+        <time datetime="{{INVITE_START_ISO}}">{{INVITE_TIME_LABEL}}</time>
+        <span aria-hidden="true">·</span>
+        <span>{{INVITE_VENUE_HTML}}</span>
+      </div>
+      <div class="invite-meta-links">
+        <button class="invite-text-btn invite-text-btn--accent" type="button" data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/en/events/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Reserve a seat</button>
+        <span aria-hidden="true">·</span>
+        <button class="invite-text-btn" type="button" data-open-invite-share>Share invitation</button>
+        <span aria-hidden="true">·</span>
+        <a href="{{GOOGLE_CAL_URL}}" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
+        <span aria-hidden="true">·</span>
+        <a href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Gathering Zalo Group ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section invite-letter-section" aria-label="Invitation letter">
+  <div class="container invite-narrow">
+    <div class="hl-handnote-wrap" id="hl-handnote-wrap" hidden>
+      <div class="hl-ltr" id="hl-ltr-card">
+        <div class="hl-hw-body" id="hl-hw-body"></div>
+      </div>
+    </div>
+
+    <figure class="invite-poster-figure">
+      <button class="invite-poster-btn" type="button" aria-label="View full poster for {{EVENT_TITLE}}" data-lightbox-src="{{EVENT_IMAGE}}" data-lightbox-alt="{{EVENT_IMAGE_ALT}}" data-lightbox-caption="{{EVENT_TITLE}} · {{INVITE_TIME_LABEL}} at {{INVITE_VENUE_NAME}}">
+        <img src="{{EVENT_IMAGE}}" alt="{{EVENT_IMAGE_ALT}}" width="1024" height="576" fetchpriority="high" decoding="async">
+      </button>
+    </figure>
+
+    <article class="invite-prose">
+      {{LETTER_BODY_HTML}}
+
+      <div class="invite-signature">
+        <p class="invite-signoff">{{LETTER_SIGNOFF}}</p>
+        <p class="invite-host">{{EVENT_HOST_SIGNATURE}}</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section invite-rsvp-section" id="rsvp" aria-labelledby="ws-rsvp-heading">
+  <div class="container invite-narrow">
+    <div class="join-invite-banner" id="ws-invite-banner" hidden role="status" aria-live="polite">
+      <span class="join-invite-dot" aria-hidden="true"></span>
+      <p class="join-invite-text" id="ws-invite-text"></p>
+    </div>
+
+    <div class="invite-rsvp-card">
+      <div class="invite-rsvp-card-top">
+        <span class="kicker">RSVP Confirmation</span>
+        <span class="invite-rsvp-fee"><!-- CMS:EVENT_FEE:START -->{{EVENT_FEE}}<!-- CMS:EVENT_FEE:END --></span>
+      </div>
+
+      <h2 id="ws-rsvp-heading" class="invite-rsvp-heading">{{EVENT_RSVP_HEADING}}</h2>
+
+      <!-- CMS:EVENT_SEAT_BAR:START -->{{EVENT_SEAT_BAR_HTML}}<!-- CMS:EVENT_SEAT_BAR:END -->
+
+      <div class="invite-rsvp-facts">
+        <time datetime="{{INVITE_START_ISO}}">{{INVITE_TIME_LABEL}}</time>
+        <span class="invite-rsvp-sep" aria-hidden="true">·</span>
+        <span>{{INVITE_VENUE_HTML}}</span>
+      </div>
+
+      <p class="invite-rsvp-lead">Solo and international guests are always welcomed — no pressure to speak. Just leave your name and phone, Zalo, or email so we can save your seat and share location pins.</p>
+
+      <div class="invite-rsvp-actions">
+        <button class="btn btn--primary" type="button" id="ws-open-rsvp-btn" data-open-on-hash="rsvp" data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/en/events/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Confirm attendance</button>
+        <button class="btn btn--outline" type="button" data-open-invite-share>Share invitation</button>
+        <a class="btn btn--outline" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Gathering Zalo Group ↗</a>
+      </div>
+
+      <p class="invite-rsvp-footnote">15-second RSVP, no password needed · <a href="/en/privacy/">Transparency &amp; Privacy Standards</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- Event Share & Personalized Invitation Modal -->
+<dialog class="club-dialog club-dialog--share" id="event-share-modal" closedby="any" data-pillar="{{EVENT_PILLAR}}" data-share-url="{{CANONICAL_EVENT_URL}}" data-share-title="{{EVENT_SHARE_TITLE}}" data-share-time="{{INVITE_TIME_LABEL}}" data-share-venue="{{INVITE_VENUE_NAME}}" aria-labelledby="event-share-heading">
+  <div class="dialog-inner share-dialog-inner">
+    <button class="modal-close" type="button" data-modal-close aria-label="Close share dialog">×</button>
+
+    <div class="share-dialog-head">
+      <span class="kicker invite-pillar-kicker">SHARE INVITATION · {{EVENT_PILLAR_LABEL}}</span>
+      <h2 id="event-share-heading" class="share-dialog-title">{{INVITE_HEADLINE}}</h2>
+    </div>
+
+    <div class="share-preview-card">
+      <img class="share-preview-thumb" src="{{EVENT_IMAGE}}" alt="{{EVENT_IMAGE_ALT}}" width="76" height="76" loading="lazy">
+      <div class="share-preview-body">
+        <span class="share-preview-eyebrow">{{EVENT_PILLAR_LABEL}} — Gathering · holarise.org</span>
+        <strong class="share-preview-title" id="share-preview-title">{{EVENT_SHARE_TITLE}}</strong>
+        <p class="share-preview-meta">{{INVITE_TIME_LABEL}} · {{INVITE_VENUE_NAME}}</p>
+      </div>
+    </div>
+
+    <div class="share-inviter-grid" id="share-inviter-grid">
+      <div class="share-inviter-field">
+        <label for="share-recipient-name">To <span class="auth-hint-inline">(guest name)</span></label>
+        <input id="share-recipient-name" type="text" maxlength="60" placeholder="e.g. Sarah">
+      </div>
+      <div class="share-inviter-field" id="share-inviter-field-wrap">
+        <label for="share-inviter-name">From <span class="auth-hint-inline">(your name)</span></label>
+        <input id="share-inviter-name" type="text" maxlength="60" placeholder="e.g. Alex">
+      </div>
+    </div>
+    <p class="share-inviter-signed-hint" id="share-inviter-signed-bar" hidden>Inviting as <strong id="share-inviter-signed-name"></strong></p>
+
+    <div class="share-inviter-field">
+      <label for="share-personal-note">Personal note on card <span class="auth-hint-inline">(optional)</span></label>
+      <input id="share-personal-note" type="text" maxlength="140" placeholder="e.g. Come join me this weekend, it is a warm small circle...">
+    </div>
+
+    <div class="share-platforms-block">
+      <span class="share-section-label">Send via</span>
+      <div class="share-platforms-grid">
+        <button type="button" class="share-platform-btn" data-share-platform="zalo">
+          <svg class="share-platform-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect width="24" height="24" rx="5.5" fill="#0068FF"/>
+            <path fill="#FFFFFF" transform="translate(2.64 2.64) scale(0.78)" d="M12.49 10.2722v-.4496h1.3467v6.3218h-.7704a.576.576 0 01-.5763-.5729l-.0006.0005a3.273 3.273 0 01-1.9372.6321c-1.8138 0-3.2844-1.4697-3.2844-3.2823 0-1.8125 1.4706-3.2822 3.2844-3.2822a3.273 3.273 0 011.9372.6321l.0006.0005zM6.9188 7.7896v.205c0 .3823-.051.6944-.2995 1.0605l-.03.0343c-.0542.0615-.1815.206-.2421.2843L2.024 14.8h4.8948v.7682a.5764.5764 0 01-.5767.5761H0v-.3622c0-.4436.1102-.6414.2495-.8476L4.8582 9.23H.1922V7.7896h6.7266zm8.5513 8.3548a.4805.4805 0 01-.4803-.4798v-7.875h1.4416v8.3548H15.47zM20.6934 9.6C22.52 9.6 24 11.0807 24 12.9044c0 1.8252-1.4801 3.306-3.3066 3.306-1.8264 0-3.3066-1.4808-3.3066-3.306 0-1.8237 1.4802-3.3044 3.3066-3.3044zm-10.1412 5.253c1.0675 0 1.9324-.8645 1.9324-1.9312 0-1.065-.865-1.9295-1.9324-1.9295s-1.9324.8644-1.9324 1.9295c0 1.0667.865 1.9312 1.9324 1.9312zm10.1412-.0033c1.0737 0 1.945-.8707 1.945-1.9453 0-1.073-.8713-1.9436-1.945-1.9436-1.0753 0-1.945.8706-1.945 1.9436 0 1.0746.8697 1.9453 1.945 1.9453z"/>
+          </svg>
+          <span>Zalo</span>
+        </button>
+        <button type="button" class="share-platform-btn" data-share-platform="messenger">
+          <svg class="share-platform-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <defs>
+              <radialGradient id="share-messenger-grad" cx="19.25%" cy="99.4%" r="108.96%">
+                <stop offset="0%" stop-color="#0099FF"/>
+                <stop offset="60.98%" stop-color="#A033FF"/>
+                <stop offset="93.48%" stop-color="#FF5280"/>
+                <stop offset="100%" stop-color="#FF7061"/>
+              </radialGradient>
+            </defs>
+            <path fill="url(#share-messenger-grad)" d="M12 0C5.24 0 0 4.952 0 11.64c0 3.499 1.434 6.521 3.769 8.61a.96.96 0 0 1 .323.683l.065 2.135a.96.96 0 0 0 1.347.85l2.381-1.053a.96.96 0 0 1 .641-.046A13 13 0 0 0 12 23.28c6.76 0 12-4.952 12-11.64S18.76 0 12 0m6.806 7.44c.522-.03.971.567.63 1.094l-4.178 6.457a.707.707 0 0 1-.977.208l-3.87-2.504a.44.44 0 0 0-.49.007l-4.363 3.01c-.637.438-1.415-.317-.995-.966l4.179-6.457a.706.706 0 0 1 .977-.21l3.87 2.505c.15.097.344.094.491-.007l4.362-3.008a.7.7 0 0 1 .364-.13"/>
+          </svg>
+          <span>Messenger</span>
+        </button>
+        <button type="button" class="share-platform-btn" data-share-platform="facebook">
+          <svg class="share-platform-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="#0866FF" d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/>
+          </svg>
+          <span>Facebook</span>
+        </button>
+        <button type="button" class="share-platform-btn" data-share-platform="telegram">
+          <svg class="share-platform-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="#26A5E4" d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+          </svg>
+          <span>Telegram</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="share-url-block">
+      <div class="share-url-head">
+        <label for="share-url-input" class="share-section-label">Invitation link</label>
+        <button type="button" class="share-preview-trigger" id="share-preview-env-btn">Preview envelope opening ↗</button>
+      </div>
+      <div class="share-url-row">
+        <input id="share-url-input" type="text" readonly value="{{CANONICAL_EVENT_URL}}">
+        <button type="button" class="btn btn--primary btn--sm share-copy-btn" id="share-copy-btn">Copy</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+</div>
+</div>

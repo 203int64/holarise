@@ -1,0 +1,143 @@
+<!-- PART 1: Full-Bleed Visual Editorial Hero -->
+<section class="hero-stage" aria-label="Introduction to HolaRise">
+  <div class="container">
+    <div class="hero-card" data-hero-card>
+      <!-- CMS:HERO_MEDIA:START -->
+      {{HERO_MEDIA_HTML}}
+      <!-- CMS:HERO_MEDIA:END -->
+      <div class="hero-card-scrim" aria-hidden="true"></div>
+
+      <div class="hero-card-bottom">
+        <div class="hero-card-copy">
+          <h1 class="hero-display-title">
+            {{HERO_HEADLINE_LINES}}
+          </h1>
+          <p class="hero-display-lead" data-hero-stagger>{{HERO_DESCRIPTION}}</p>
+        </div>
+
+        <div class="hero-card-actions" data-hero-stagger>
+          <a class="btn btn--light" href="{{HERO_PRIMARY_HREF}}" data-magnetic>
+            <span>{{HERO_PRIMARY_LABEL}}</span>
+            <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+          </a>
+          <a class="hero-ghost-link" href="{{HERO_SECONDARY_HREF}}">
+            <span>{{HERO_SECONDARY_LABEL}}</span>
+            <span aria-hidden="true">↓</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PART 2: Upcoming Gatherings -->
+{{HOME_UPCOMING_SECTION}}
+
+<!-- PART 3: Three Pillars (Editorial 3-Column Grid) -->
+<section class="section section--editorial-pillars" id="pillars" aria-label="Three Impact Pillars">
+  <div class="container">
+    <div class="section-header--split section-header--editorial" data-reveal>
+      <div>
+        <div class="kicker">Three Pillars</div>
+        <h2 class="section-title">From Inner Stillness to Civic Service</h2>
+      </div>
+      <a class="arrow-link" href="/en/about/#pillars">
+        <span>Our Philosophy</span>
+        <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
+    </div>
+
+    {{PILLARS_EDITORIAL_HTML}}
+  </div>
+</section>
+
+<!-- PART 4: Moments in Hoa Lac -->
+<section class="horizontal-section" id="journey-gallery" data-horizontal-section aria-label="Gatherings in Hoa Lac">
+  <div class="exhibition-cursor-pill" id="exhibition-cursor-pill" aria-hidden="true">
+    <span class="exhibition-cursor-dot"></span>
+    <span data-cursor-pill-text>VIEW</span>
+  </div>
+  <div class="horizontal-sticky-stage">
+    <div class="container">
+      <div class="section-header--split" style="margin-bottom: 0;" data-reveal>
+        <div>
+          <div class="kicker">Journey · 2025 – 2026</div>
+          <h2 class="section-title" style="margin-bottom: 0;">Gatherings in Hoa Lac</h2>
+        </div>
+        <div class="exhibition-header-right">
+          <a class="arrow-link" href="/en/journey/">
+            <span>Full Journey</span>
+            <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+          </a>
+        </div>
+      </div>
+
+      <div class="exhibition-progress-row">
+        <div class="exhibition-progress-track" aria-hidden="true">
+          <div class="exhibition-progress-fill" data-exhibition-fill></div>
+        </div>
+        <span class="exhibition-progress-count" data-exhibition-count aria-live="polite">01 / 10</span>
+        <div class="exhibition-arrows" aria-label="Gallery navigation">
+          <button class="exhibition-arrow-btn" type="button" data-exhibition-prev aria-label="Previous photo">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="exhibition-arrow-btn" type="button" data-exhibition-next aria-label="Next photo">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="horizontal-track-wrap">
+      <div class="horizontal-track" data-horizontal-track>
+        {{HORIZONTAL_GALLERY_HTML}}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PART 5: Obsidian Editorial Manifesto -->
+<section class="manifesto-section section--obsidian" aria-label="HolaRise Manifesto">
+  <div class="manifesto-glow" data-manifesto-glow aria-hidden="true"></div>
+  <div class="container">
+    <div class="manifesto-top" data-reveal>
+      <div class="kicker kicker--sunrise">Manifesto</div>
+      <span class="manifesto-coords">HOLA · HOA LAC</span>
+    </div>
+
+    <blockquote class="manifesto-quote" data-scrub-words>“{{PHILOSOPHY_QUOTE}}”</blockquote>
+
+    <div class="manifesto-meta" data-reveal>
+      <span class="manifesto-motto">{{PHILOSOPHY_MOTTO}}</span>
+      <a class="arrow-link arrow-link--dark" href="/en/about/">
+        <span>About &amp; Transparency</span>
+        <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- PART 5B: Space & Community Partners -->
+{{PARTNERS_STRIP}}
+
+<!-- PART 5C: Voices of Young Participants -->
+<!-- CMS:TESTIMONIALS:START -->
+{{TESTIMONIALS_SECTION}}
+<!-- CMS:TESTIMONIALS:END -->
+
+<!-- PART 6: Minimalist Closing CTA -->
+<section class="section section--compact">
+  <div class="container">
+    <div class="cta-band" data-reveal>
+      <div>
+        <h2>Walk with HolaRise</h2>
+        <p>Reserve a seat in 15 seconds with no password required, or reach out to co-host with us.</p>
+        <p class="cta-reassurance">Free admission · Solo &amp; international guests always welcomed</p>
+      </div>
+      <div class="cta-band-actions">
+        <a class="btn btn--light" href="/en/join/" data-magnetic>Join or Partner</a>
+        <a class="btn btn--ghost-dark" href="/en/join/#faq">FAQ &amp; Transparency</a>
+      </div>
+    </div>
+  </div>
+</section>

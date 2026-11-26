@@ -413,7 +413,10 @@
                 <span class="kicker">Lưu bút cộng đồng</span>
                 <h2>Cảm nhận &amp; Ảnh kỷ niệm đã gửi</h2>
               </div>
-              <a class="arrow-link" href="/hanh-trinh/">Viết lưu bút mới →</a>
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
+                <button type="button" class="btn btn--outline btn--sm" data-open-album-contribute>Góp ảnh vào Kho chung</button>
+                <a class="arrow-link" href="/hanh-trinh/">Viết lưu bút mới →</a>
+              </div>
             </div>
             <div id="member-reflections-list" class="member-list-stack">
               <p class="member-empty-hint">Đang tải danh sách lưu bút...</p>
@@ -455,6 +458,33 @@
             </div>
           </section>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section faq-editorial-section" id="hoi-dap" aria-labelledby="join-faq-heading">
+  <div class="container">
+    <div class="faq-editorial-grid">
+      <div class="faq-editorial-aside" data-reveal>
+        <div class="kicker">Minh bạch &amp; An tâm</div>
+        <h2 class="section-title" id="join-faq-heading">Câu hỏi thường gặp</h2>
+        <p class="section-lead">Cách giữ chỗ, chi phí và hợp tác đồng tổ chức đều minh bạch từ đầu.</p>
+
+        <div class="faq-editorial-links">
+          <a class="arrow-link" href="{{CONTACT_ZALO}}" target="_blank" rel="noopener noreferrer">
+            <span>Nhắn Zalo điều phối</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+          <button type="button" class="faq-text-trigger" data-open-feedback-modal>
+            <span>Gửi câu hỏi khác cho Hola</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="faq-editorial-list" data-faq-accordion data-reveal>
+        {{FAQ_HTML}}
       </div>
     </div>
   </div>

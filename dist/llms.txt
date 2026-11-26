@@ -16,13 +16,20 @@
 - [Lịch hoạt động](https://holarise.org/lich-hoat-dong/): Lịch 1–2 buổi/tuần lọc theo HolaHeart, HolaGreen, HolaConnect.
 - [Hành trình](https://holarise.org/hanh-trinh/): Tường thuật sự kiện, lưu bút cảm nhận thành viên và triển lãm khoảnh khắc tại Hòa Lạc.
 - [Tham gia & Thẻ Thành Viên](https://holarise.org/tham-gia/): Tạo Thẻ Thành Viên Hola (giữ chỗ 1 chạm, viết lưu bút) và cổng kết nối đối tác, nhà trường, CLB.
-- [International Profile (English)](https://holarise.org/en/): Non-profit youth community profile, 3 pillars, UN SDGs alignment, and partnership contact.
 - [Chuẩn mực Minh bạch & An toàn](https://holarise.org/chinh-sach/): Quy tắc cộng đồng và quyền riêng tư dữ liệu, hình ảnh.
 
+## English Experience (`/en/*`)
+- [Home (English)](https://holarise.org/en/): Non-profit youth community in Hoa Lac, 3 impact pillars, upcoming gatherings, and photo moments.
+- [About HolaRise (English)](https://holarise.org/en/about/): Origin story, mission & vision, 3 pillars, 4 values, 5 transparency principles, and 6 UN SDGs.
+- [Schedule (English)](https://holarise.org/en/schedule/): Live weekly gatherings with 15-second RSVP and language policy.
+- [Journey (English)](https://holarise.org/en/journey/): Past gathering stories, photo archives, and participant guestbook.
+- [Join & Partner (English)](https://holarise.org/en/join/): Member Pass sign-in, institutional partnerships, and FAQs.
+- [Transparency & Privacy (English)](https://holarise.org/en/privacy/): NGO safeguarding standards and Decree 13/2023/ND-CP data privacy.
+
 ## Mô hình Tạo Tác Động (Heart → Green → Connect)
-- **HolaHeart (Tĩnh tại, Lắng nghe & Gia đình)**: Dưới ánh đèn vàng ấm và tiếng đàn mộc, HolaHeart mở ra những vòng tròn lắng nghe đồng đẳng để người trẻ tạm đặt màn hình xuống, soi chiếu lại tình thân gia đình và tìm sự vững vàng từ bên trong.
-- **HolaGreen (Sinh thái & Cảnh quan Bền vững)**: Trưởng thành bắt đầu từ sự trân trọng mảnh đất dưới chân. HolaGreen đang chuẩn bị khởi động các buổi giữ sạch tuyến đường bộ công cộng an toàn quanh khu đại học, phân loại rác tại nguồn và ươm mảng xanh bản địa.
-- **HolaConnect (Tri thức & Phụng sự Cộng đồng)**: Đưa tri thức và bước chân người trẻ rời khỏi giảng đường để đồng hành bền bỉ cùng đời sống quanh mình: từ những buổi đi bộ dưới tán thông rèn sức bền đến hành trình xây dựng tủ sách thiếu nhi cộng đồng.
+- **HolaHeart (Tĩnh tại, Lắng nghe & Gia đình)**: Dưới ánh đèn vàng ấm và tiếng đàn mộc, HolaHeart mở những vòng tròn lắng nghe đồng đẳng để người trẻ soi chiếu lại gia đình và nuôi sự vững vàng bên trong.
+- **HolaGreen (Sinh thái & Cảnh quan Bền vững)**: HolaGreen chuẩn bị khởi động các buổi giữ sạch tuyến đường bộ công cộng an toàn quanh khu đại học, phân loại rác tại nguồn và ươm mảng xanh bản địa.
+- **HolaConnect (Tri thức & Phụng sự Cộng đồng)**: Đưa bước chân người trẻ rời khỏi giảng đường qua những chặng đi bộ dưới tán thông rèn sức bền và hành trình dựng tủ sách thiếu nhi cộng đồng.
 
 ## Lịch hoạt động sắp tới
 - Chủ Nhật, 29/11/2026 (19:15 – 21:30): [Workshop "Cuộc Đời Của Cha"](https://holarise.org/su-kien/cuoc-doi-cua-cha/) — Mây Lang Thang Cafe (ngõ 2 đường vào TTGDQP, Hòa Lạc) (Miễn phí tham dự · Tự túc đồ uống tại quán)

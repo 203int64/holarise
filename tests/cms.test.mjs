@@ -1114,3 +1114,168 @@ test("Workshop 'Cuộc Đời Của Cha' migration 0005, SSR links, sitemap & se
   assert.ok(row.note.includes("Số chỗ: Đi cùng 1 bạn (2 chỗ)"));
   assert.ok(row.note.includes("Tâm sự về Cha: Cho phép đọc ẩn danh"));
 });
+
+test("Full English mirror (/en/*): static EN purity, Edge SSR routes, sitemap & email-only international RSVP/Partnership", async () => {
+  const db = new DatabaseSync(":memory:");
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0001_init.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0002_seed.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0004_holaheart_first_event.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0005_cuoc_doi_cua_cha_event.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0006_member_auth_and_reflections.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.join(ROOT, "migrations/0011_event_seats_and_slugs.sql"), "utf8"));
+
+  class Stmt {
+    constructor(sql, bound = []) {
+      this.sql = sql;
+      this.bound = bound;
+    }
+    bind(...args) {
+      return new Stmt(this.sql, args);
+    }
+    async first() {
+      return db.prepare(this.sql).get(...this.bound) ?? null;
+    }
+    async all() {
+      return { results: db.prepare(this.sql).all(...this.bound) };
+    }
+    async run() {
+      const info = db.prepare(this.sql).run(...this.bound);
+      return { success: true, meta: { changes: Number(info.changes || 0) } };
+    }
+  }
+  const d1 = { prepare: (sql) => new Stmt(sql) };
+  const assets = {
+    async fetch(req) {
+      const p = new URL(req.url).pathname.replace(/^\/+/, "");
+      const filePath = path.join(ROOT, "dist", p);
+      if (!fs.existsSync(filePath)) return new Response("Not Found", { status: 404 });
+      return new Response(fs.readFileSync(filePath, "utf8"), {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    },
+  };
+  const env = { DB: d1, ASSETS: assets };
+
+  // 1. All core static EN routes exist and contain zero Vietnamese diacritics
+  const vnRe = /[àáảãạăằắẳẵặâầấẩẫậđèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬĐÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴ]/;
+  const enStaticPages = [
+    "dist/en/index.html",
+    "dist/en/about/index.html",
+    "dist/en/schedule/index.html",
+    "dist/en/journey/index.html",
+    "dist/en/join/index.html",
+    "dist/en/privacy/index.html",
+    "dist/en/events/cuoc-doi-cua-cha/index.html",
+    "dist/en/events/leo-nui-luot/index.html",
+    "dist/en/journey/tinh-yeu-thuong-cua-me/index.html",
+    "dist/en/journey/holaheart-musicspace/index.html",
+  ];
+  for (const rel of enStaticPages) {
+    const abs = path.join(ROOT, rel);
+    assert.ok(fs.existsSync(abs), `Missing static EN page: ${rel}`);
+    const html = fs.readFileSync(abs, "utf8");
+    assert.ok(html.includes('<html lang="en" data-lang="en">'), `${rel} missing lang=en`);
+    assert.ok(!vnRe.test(html), `${rel} leaked Vietnamese diacritics`);
+  }
+
+  // 2. Insert a live bilingual event in D1 and verify Edge SSR on /en/, /en/schedule/, /en/events/<slug>/, /en/join/
+  const futureDate = "2027-03-14";
+  await d1
+    .prepare(
+      `INSERT INTO events (id, kind, type, date, date_display, time, location, fee, seats, title, title_en, summary, summary_en, highlights_json, filters_json, image, image_alt, status, sort_order, created_at, updated_at)
+       VALUES (?, 'upcoming', 'HolaConnect · Community', ?, 'Sunday, 14 Mar 2027', '15:00 – 17:30', 'VJU Hoa Lac Campus', 'Free admission', '30 seats', ?, ?, ?, ?, '[]', '["holaconnect"]', '/assets/images/events/activity-nature-trail.jpg', 'Campus dialogue', 'published', 1, ?, ?)`
+    )
+    .bind(
+      "holaconnect-international-cafe-2027",
+      futureDate,
+      "HolaConnect · Gặp gỡ Sinh viên Quốc tế",
+      "HolaConnect · International Youth Coffee Circle",
+      "Buổi giao lưu song ngữ tại Hòa Lạc.",
+      "A welcoming bilingual coffee circle connecting Vietnamese and international students in Hoa Lac.",
+      "2026-11-26T00:00:00Z",
+      "2026-11-26T00:00:00Z"
+    )
+    .run();
+
+  const { onRequestGet: ssrEnHome } = await import("../functions/en/index.js");
+  const { onRequestGet: ssrEnAbout } = await import("../functions/en/about/index.js");
+  const { onRequestGet: ssrEnSchedule } = await import("../functions/en/schedule/index.js");
+  const { onRequestGet: ssrEnJoin } = await import("../functions/en/join/index.js");
+  const { onRequestGet: ssrEnJourney } = await import("../functions/en/journey/index.js");
+  const { onRequestGet: ssrEnEventDetail } = await import("../functions/en/events/[slug].js");
+
+  const enHomeHtml = await (await ssrEnHome({ request: makeReq("/en/"), env })).text();
+  assert.ok(enHomeHtml.includes("International Youth Coffee Circle"));
+  assert.ok(enHomeHtml.includes("/en/events/holaconnect-international-cafe-2027/"));
+
+  const enSchedHtml = await (await ssrEnSchedule({ request: makeReq("/en/schedule/"), env })).text();
+  assert.ok(enSchedHtml.includes("International Youth Coffee Circle"));
+
+  const enJoinHtml = await (await ssrEnJoin({ request: makeReq("/en/join/"), env })).text();
+  assert.ok(enJoinHtml.includes("International Youth Coffee Circle"));
+
+  const enAboutRes = await ssrEnAbout({ request: makeReq("/en/about/"), env });
+  assert.equal(enAboutRes.status, 200);
+
+  const enJourneyRes = await ssrEnJourney({ request: makeReq("/en/journey/"), env });
+  assert.equal(enJourneyRes.status, 200);
+
+  const enEvRes = await ssrEnEventDetail({
+    request: makeReq("/en/events/holaconnect-international-cafe-2027/"),
+    env,
+    params: { slug: "holaconnect-international-cafe-2027" },
+  });
+  assert.equal(enEvRes.status, 200);
+  const enEvHtml = await enEvRes.text();
+  assert.ok(enEvHtml.includes("International Youth Coffee Circle"));
+  assert.ok(enEvHtml.includes("welcoming bilingual coffee circle"));
+
+  // 3. Sitemap includes /en/* static and dynamic routes
+  const smXml = await (await ssrSitemap({ request: makeReq("/sitemap.xml"), env })).text();
+  assert.ok(smXml.includes("https://holarise.org/en/about/"));
+  assert.ok(smXml.includes("https://holarise.org/en/schedule/"));
+  assert.ok(smXml.includes("https://holarise.org/en/events/holaconnect-international-cafe-2027/"));
+
+  // 4. International email-only RSVP & Partnership submission with lang='en' returns English confirmation
+  const intlRes = await publicRegister({
+    request: makeReq("/api/registrations", {
+      method: "POST",
+      ip: "5.5.5.5",
+      body: {
+        source: "event_modal",
+        lang: "en",
+        eventId: "holaconnect-international-cafe-2027",
+        activity: "HolaConnect · International Youth Coffee Circle",
+        fullName: "Hannah Sato",
+        phone: "hannah.sato@vju.ac.vn",
+        organization: "Vietnam Japan University",
+        note: "International student excited to join!",
+      },
+    }),
+    env,
+  });
+  assert.equal(intlRes.status, 201);
+  const intlJson = await intlRes.json();
+  assert.ok(intlJson.message.includes("Thank you, Hannah Sato!"));
+  assert.ok(intlJson.message.includes("is confirmed"));
+
+  // 5. Validation error with lang='en' returns English field errors
+  const badRes = await publicRegister({
+    request: makeReq("/api/registrations", {
+      method: "POST",
+      ip: "5.5.5.6",
+      body: {
+        source: "join_page",
+        lang: "en",
+        fullName: "A",
+        phone: "123",
+      },
+    }),
+    env,
+  });
+  assert.equal(badRes.status, 400);
+  const badJson = await badRes.json();
+  assert.ok(badJson.error.message.includes("Please check"));
+  assert.ok(badJson.error.fields.phone.includes("valid phone number"));
+});

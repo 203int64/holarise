@@ -12,25 +12,46 @@ import {
 } from "../../_lib/security.js";
 import {
   cleanStr,
-  extractMediaKeyFromUrl,
-  isSafeMediaUrl,
+  parseReflectionPhotos,
   slugifyVi,
   validateReflectionInput,
 } from "../../_lib/validation.js";
 import { ensureCommunityTestimonialsTable } from "../admin/reflections/index.js";
 
-export function serializePublicReflection(row, { heartedSet = new Set(), currentMemberId = "" } = {}) {
+export function serializePublicReflection(
+  row,
+  { heartedSet = new Set(), myReactionMap = new Map(), reactionCountsMap = new Map(), currentMemberId = "" } = {}
+) {
   if (!row) return null;
   const isMine = Boolean(currentMemberId && row.member_id && row.member_id === currentMemberId);
+  const photoUrls = parseReflectionPhotos(row.photos_json, row.photo_url || "");
+  const myReaction = myReactionMap.get(row.id) || (heartedSet.has(row.id) ? "heart" : "");
+  const counts = reactionCountsMap.get(row.id) || {
+    heart: Number(row.heart_count || 0),
+    warm: 0,
+    inspire: 0,
+  };
+  const totalHearts = Math.max(
+    Number(row.heart_count || 0),
+    Number(counts.heart || 0) + Number(counts.warm || 0) + Number(counts.inspire || 0)
+  );
   return {
     id: row.id,
     activitySlug: row.activity_slug || "",
     participantRole: row.participant_role || row.author_role || "Thành viên tham dự",
     pullQuote: row.pull_quote || "",
+    mood: row.mood || "",
     content: row.content || "",
-    photoUrl: row.photo_url || "",
-    heartCount: Number(row.heart_count || 0),
-    heartedByMe: heartedSet.has(row.id),
+    photoUrl: photoUrls[0] || "",
+    photoUrls,
+    heartCount: totalHearts,
+    heartedByMe: Boolean(myReaction),
+    myReaction,
+    reactions: {
+      heart: Number(counts.heart || 0),
+      warm: Number(counts.warm || 0),
+      inspire: Number(counts.inspire || 0),
+    },
     isMine,
     status: row.status,
     adminNote: isMine ? row.admin_note || "" : undefined,
@@ -73,7 +94,7 @@ export async function onRequestGet(context) {
       ? `rdr:${readerCookie}`
       : "";
 
-  const [approvedRes, commRes, mineRow, heartsRes] = await Promise.all([
+  const [approvedRes, commRes, mineRow, heartsRes, reactionSummaryRes] = await Promise.all([
     env.DB.prepare(
       `SELECT r.*,
               m.name AS author_name,
@@ -117,7 +138,7 @@ export async function onRequestGet(context) {
       : Promise.resolve(null),
     actorKey
       ? env.DB.prepare(
-          `SELECT h.reflection_id
+          `SELECT h.reflection_id, COALESCE(NULLIF(h.reaction_type, ''), 'heart') AS reaction_type
            FROM reflection_hearts h
            JOIN activity_reflections r ON r.id = h.reflection_id
            WHERE r.activity_slug = ? AND h.actor_key = ?`
@@ -126,15 +147,39 @@ export async function onRequestGet(context) {
           .all()
           .catch(() => ({ results: [] }))
       : Promise.resolve({ results: [] }),
+    env.DB.prepare(
+      `SELECT h.reflection_id, COALESCE(NULLIF(h.reaction_type, ''), 'heart') AS reaction_type, COUNT(*) AS cnt
+       FROM reflection_hearts h
+       JOIN activity_reflections r ON r.id = h.reflection_id
+       WHERE r.activity_slug = ? AND r.status = 'approved'
+       GROUP BY h.reflection_id, COALESCE(NULLIF(h.reaction_type, ''), 'heart')`
+    )
+      .bind(slug)
+      .all()
+      .catch(() => ({ results: [] })),
   ]);
 
   const heartedSet = new Set((heartsRes.results || []).map((h) => h.reflection_id));
+  const myReactionMap = new Map(
+    (heartsRes.results || []).map((h) => [h.reflection_id, h.reaction_type || "heart"])
+  );
+  const reactionCountsMap = new Map();
+  for (const row of reactionSummaryRes.results || []) {
+    if (!reactionCountsMap.has(row.reflection_id)) {
+      reactionCountsMap.set(row.reflection_id, { heart: 0, warm: 0, inspire: 0 });
+    }
+    const bucket = reactionCountsMap.get(row.reflection_id);
+    const kind = row.reaction_type in bucket ? row.reaction_type : "heart";
+    bucket[kind] += Number(row.cnt || 0);
+  }
   const currentMemberId = sessionMember ? sessionMember.id : "";
 
   const merged = [
-    ...(commRes.results || []).map((row) => serializePublicReflection(row, { heartedSet })),
+    ...(commRes.results || []).map((row) =>
+      serializePublicReflection(row, { heartedSet, myReactionMap, reactionCountsMap })
+    ),
     ...(approvedRes.results || []).map((row) =>
-      serializePublicReflection(row, { heartedSet, currentMemberId })
+      serializePublicReflection(row, { heartedSet, myReactionMap, reactionCountsMap, currentMemberId })
     ),
   ].sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
 
@@ -142,7 +187,7 @@ export async function onRequestGet(context) {
     ok: true,
     items: merged.slice(0, limit),
     myReflection: mineRow
-      ? serializePublicReflection(mineRow, { heartedSet, currentMemberId })
+      ? serializePublicReflection(mineRow, { heartedSet, myReactionMap, reactionCountsMap, currentMemberId })
       : null,
   });
 }
@@ -166,65 +211,15 @@ export async function onRequestPost(context) {
   }
 
   const sessionMember = await getSessionMember(env.DB, request);
-
-  // Path A: Passwordless public participant reflection (no account required!)
   if (!sessionMember) {
-    await ensureCommunityTestimonialsTable(env.DB);
-    const authorName = cleanStr(d.authorName || d.fullName || d.name, 120);
-    const content = cleanStr(d.content, 1500);
-    const rawSlug = cleanStr(d.activitySlug || d.slug, 120);
-    const activitySlug = rawSlug ? slugifyVi(rawSlug) : "";
-    const photoUrl = cleanStr(d.photoUrl ?? d.photo_url, 500);
-
-    if (!authorName || authorName.length < 2) {
-      return errorResponse(400, "VALIDATION_ERROR", "Vui lòng nhập tên gọi của bạn (tối thiểu 2 ký tự).");
-    }
-    if (!content || content.length < 12) {
-      return errorResponse(400, "VALIDATION_ERROR", "Cảm nhận cần ít nhất 12 ký tự.");
-    }
-    if (photoUrl && !isSafeMediaUrl(photoUrl)) {
-      return errorResponse(400, "VALIDATION_ERROR", "Đường dẫn ảnh đính kèm không hợp lệ.");
-    }
-    const photoMediaKey = photoUrl ? extractMediaKeyFromUrl(photoUrl) : "";
-
-    const ipHash = await getClientIpHash(request);
-    const rl = await checkRateLimit(env.DB, `comm_ref:${ipHash}`, 5, 15 * 60 * 1000);
-    if (!rl.allowed) {
-      return errorResponse(429, "RATE_LIMITED", "Bạn đã gửi nhiều cảm nhận liên tiếp. Vui lòng đợi ít phút.");
-    }
-
-    const now = new Date().toISOString();
-    const id = `tst_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-    const authorRole = cleanStr(d.participantRole || d.authorRole, 80) || "Thành viên tham dự";
-    const authorOrg = cleanStr(d.authorOrg || d.organization, 160);
-    const pullQuote = cleanStr(d.pullQuote, 180);
-
-    try {
-      await env.DB.prepare(
-        `INSERT INTO community_testimonials
-         (id, activity_slug, author_name, author_role, author_org, pull_quote, content,
-          photo_url, photo_media_key, is_featured_home, heart_count, status, source,
-          reviewed_by, reviewed_at, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 'pending', 'public', '', NULL, ?, ?)`
-      )
-        .bind(id, activitySlug, authorName, authorRole, authorOrg, pullQuote, content, photoUrl, photoMediaKey, now, now)
-        .run();
-
-      const row = await env.DB.prepare("SELECT * FROM community_testimonials WHERE id = ?").bind(id).first();
-      return jsonResponse(
-        {
-          ok: true,
-          reflection: serializePublicReflection(row),
-          message: "Cảm ơn bạn đã sẻ chia. Cảm nhận đã gửi tới Ban Điều Phối để hiển thị lên trang Hành trình.",
-        },
-        201
-      );
-    } catch (_err) {
-      return errorResponse(500, "DB_WRITE_FAILED", "Chưa thể lưu cảm nhận lúc này. Vui lòng thử lại sau giây lát.");
-    }
+    return errorResponse(
+      401,
+      "MEMBER_UNAUTHORIZED",
+      "Vui lòng đăng nhập tài khoản Thành viên Hola để viết lưu bút và đính kèm ảnh."
+    );
   }
 
-  // Path B: Authenticated member reflection
+  // Authenticated member reflection (up to 7 photos)
   await ensureReflectionsSchema(env.DB);
   const validated = validateReflectionInput(d, { requireSlug: true });
   if (!validated.ok) {
@@ -253,11 +248,24 @@ export async function onRequestPost(context) {
 
     await env.DB.prepare(
       `INSERT INTO activity_reflections
-       (id, activity_slug, member_id, participant_role, pull_quote, content, photo_url, photo_media_key,
+       (id, activity_slug, member_id, participant_role, pull_quote, mood, content, photo_url, photo_media_key, photos_json,
         heart_count, status, admin_note, reviewed_by, reviewed_at, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending', '', '', NULL, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending', '', '', NULL, ?, ?)`
     )
-      .bind(id, v.activity_slug, sessionMember.id, v.participant_role, v.pull_quote, v.content, v.photo_url, v.photo_media_key, now, now)
+      .bind(
+        id,
+        v.activity_slug,
+        sessionMember.id,
+        v.participant_role,
+        v.pull_quote,
+        v.mood,
+        v.content,
+        v.photo_url,
+        v.photo_media_key,
+        v.photos_json,
+        now,
+        now
+      )
       .run();
 
     const created = await env.DB.prepare(

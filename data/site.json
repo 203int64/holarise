@@ -13,6 +13,7 @@
     "locale": "vi_VN",
     "ogImage": "/assets/images/holarise-binh-minh-og.jpg",
     "ogImageAlt": "Những người trẻ HolaRise đón ánh bình minh trên sườn đồi, dưới dòng chữ Together We Rise, Together We Serve.",
+    "ogImageAltEn": "HolaRise youth welcoming sunrise on the hills of Hoa Lac beneath Together We Rise, Together We Serve.",
     "logoLight": "/assets/images/logo-holarise.png",
     "logoDark": "/assets/images/logo-holarise.png",
     "logoMark": "/assets/images/logo-mark.png"
@@ -21,7 +22,9 @@
     "email": "phungsu@holarise.org",
     "phoneDisplay": "077.777.1948",
     "address": "Tân Xã – Hòa Lạc – Thạch Thất, Hà Nội",
+    "addressEn": "Tan Xa, Hoa Lac, Thach That, Hanoi, Vietnam",
     "meetingTime": "Sinh hoạt định kỳ: 1–2 hoạt động hàng tuần",
+    "meetingTimeEn": "Weekly gatherings: 1–2 sessions per week",
     "facebook": "",
     "zalo": "https://zalo.me/0777771948",
     "zaloGroup": "https://zalo.me/g/7fock88aizzrdkmr9ggf",
@@ -32,7 +35,7 @@
   "hero": {
     "badge": "Hola · Together We Rise, Together We Serve",
     "headline": "Tĩnh tại bên trong,\nHành động từ Hòa Lạc.",
-    "description": "HolaHeart · HolaGreen · HolaConnect — Hành trình người trẻ sống sâu, giữ xanh và phụng sự cộng đồng.",
+    "description": "Hành trình người trẻ sống tĩnh tại, giữ xanh cảnh quan và phụng sự cộng đồng.",
     "quickPills": [
       "HolaHeart · Tĩnh tại",
       "HolaGreen · Sinh thái",
@@ -59,27 +62,27 @@
   },
   "impactMetrics": [],
   "philosophy": {
-    "quote": "Mọi thay đổi bền vững đều khởi đi từ sự tĩnh tại bên trong — khi người trẻ biết giữ gốc rễ gia đình, trân trọng mảnh đất dưới chân và bền bỉ sẻ chia trên mọi chặng đường trưởng thành.",
+    "quote": "Mọi thay đổi bền vững đều khởi đi từ sự tĩnh tại bên trong — khi người trẻ trân trọng gia đình, giữ xanh mảnh đất dưới chân và bền bỉ sẻ chia.",
     "quoteAuthor": "Cộng đồng HolaRise",
-    "mission": "Đồng hành cùng thế hệ trẻ rèn sự vững vàng nội tâm (HolaHeart), gìn giữ môi trường tự nhiên (HolaGreen) và sẻ chia tri thức tới cộng đồng (HolaConnect) — bắt đầu từ Hòa Lạc để mang giá trị tử tế đi xa hơn.",
-    "vision": "Xây dựng một mạng lưới người trẻ đĩnh đạc, minh bạch và sống có chiều sâu — nơi Hòa Lạc là cái nôi thực chứng đầu tiên trước khi lan tỏa tự nhiên theo bước chân người trẻ tới nhiều vùng đất mới.",
+    "mission": "Đồng hành cùng người trẻ rèn nội lực (HolaHeart), giữ xanh cảnh quan (HolaGreen) và sẻ chia tri thức (HolaConnect) — từ Hòa Lạc lan tỏa đi xa.",
+    "vision": "Xây dựng mạng lưới người trẻ đĩnh đạc, minh bạch và sống có chiều sâu, khởi phát từ cái nôi Hòa Lạc.",
     "motto": "Hola · Together We Rise, Together We Serve",
     "coreValues": [
       {
         "title": "Lắng nghe & Đồng đẳng",
-        "description": "Mỗi cuộc gặp là một vòng tròn ngang tầm mắt: bạn có thể cất lời sẻ chia hoặc chỉ ngồi lắng nghe trọn buổi mà không chịu bất kỳ áp lực nào."
+        "description": "Vòng tròn ngang tầm mắt: chia sẻ hay chỉ ngồi lắng nghe đều tự nhiên."
       },
       {
         "title": "Gốc rễ & Lòng biết ơn",
-        "description": "Bắt đầu hành trình trưởng thành từ sự trân trọng gia đình, thầy cô và thiên nhiên nơi mình đang sống, học tập."
+        "description": "Trưởng thành từ sự trân trọng gia đình, thầy cô và thiên nhiên quanh mình."
       },
       {
         "title": "Việc nhỏ · Dấu ấn bền",
-        "description": "Tiết chế hình thức; làm trọn vẹn từng buổi đối thoại, từng tuyến đường sạch và từng kệ sách được trao tận tay."
+        "description": "Tiết chế hình thức; làm trọn từng buổi đối thoại, tuyến đường sạch và kệ sách trao tay."
       },
       {
         "title": "Minh bạch & Đối soát",
-        "description": "Công khai lịch trình, chi phí thực tế bằng con số rõ ràng và đối soát kết quả bàn giao sau mỗi chiến dịch."
+        "description": "Công khai lịch trình, chi phí từng con số và đối soát kết quả sau mỗi chiến dịch."
       }
     ]
   },
@@ -88,64 +91,64 @@
       "code": "SDG 3",
       "title": "Sức khỏe & Tinh thần",
       "color": "#4C9F38",
-      "description": "Duy trì các vòng tròn lắng nghe đồng đẳng giúp người trẻ giải tỏa áp lực học tập và chăm sóc đời sống tinh thần lành mạnh."
+      "description": "Vòng tròn lắng nghe đồng đẳng chăm sóc đời sống tinh thần người trẻ."
     },
     {
       "code": "SDG 4",
       "title": "Giáo dục chất lượng",
       "color": "#C5192D",
-      "description": "Xây dựng các chuyên đề kỹ năng sống thiết thực, văn hóa đọc và tủ sách thiếu nhi tại cộng đồng địa phương."
+      "description": "Kỹ năng sống thiết thực, văn hóa đọc và tủ sách thiếu nhi cộng đồng."
     },
     {
       "code": "SDG 11",
       "title": "Cộng đồng bền vững",
       "color": "#FD9D24",
-      "description": "Kết nối sinh viên, người trẻ đi làm cùng cư dân bản địa xây dựng nếp sống văn minh, ấm áp và gắn kết."
+      "description": "Gắn kết sinh viên, người đi làm và cư dân bản địa."
     },
     {
       "code": "SDG 13",
       "title": "Hành động vì khí hậu",
       "color": "#3F7E44",
-      "description": "Khuyến khích thói quen giảm nhựa dùng một lần và phân loại rác tái chế ngay tại nơi học tập, sinh sống."
+      "description": "Giảm nhựa dùng một lần và phân loại rác tái chế tại nguồn."
     },
     {
       "code": "SDG 15",
       "title": "Hệ sinh thái trên cạn",
       "color": "#56C02B",
-      "description": "Giữ sạch các tuyến đường bộ công cộng, không gian xanh và ươm trồng cây bản địa an toàn, bền vững."
+      "description": "Giữ sạch tuyến đường công cộng an toàn và ươm cây bản địa."
     },
     {
       "code": "SDG 17",
       "title": "Kết nối đồng hành",
       "color": "#19486A",
-      "description": "Phối hợp minh bạch cùng nhà trường, câu lạc bộ sinh viên, không gian văn hóa và các tổ chức xã hội."
+      "description": "Phối hợp minh bạch cùng nhà trường, CLB, không gian văn hóa và tổ chức xã hội."
     }
   ],
   "principles": [
     {
       "tag": "Phi lợi nhuận",
       "title": "Minh bạch chi phí từng con số",
-      "description": "HolaRise vận hành phi lợi nhuận. Mọi khoản tự túc đồ uống tại quán hoặc học cụ (nếu có) đều ghi rõ bằng con số trước khi bạn giữ chỗ."
+      "description": "Vận hành phi lợi nhuận; mọi khoản tự túc đồ uống hay học cụ đều ghi rõ trước khi giữ chỗ."
     },
     {
       "tag": "Đồng đẳng",
       "title": "Tôn trọng sự tự nguyện",
-      "description": "Các vòng tròn HolaHeart là không gian lắng nghe đồng đẳng, không phải trị liệu tâm lý lâm sàng; mọi người tham dự đều bình đẳng và tự do chọn mức độ chia sẻ."
+      "description": "HolaHeart là lắng nghe đồng đẳng, không phải trị liệu lâm sàng; bạn tự chọn mức độ chia sẻ."
     },
     {
       "tag": "Độc lập",
-      "title": "Thuần khiết phi thương mại",
-      "description": "HolaRise ưu tiên đồng hành bằng không gian, sách, hiện vật; không thu quỹ tự phát và không lồng ghép hoạt động bán hàng dưới mọi hình thức."
+      "title": "Ưu tiên đồng hành hiện vật",
+      "description": "Ưu tiên không gian, sách và học cụ; không thu quỹ tự phát hay lồng ghép bán hàng."
     },
     {
       "tag": "Trung thực",
       "title": "Tư liệu kiểm chứng rõ ràng",
-      "description": "Chỉ công bố số liệu và hình ảnh ghi nhận từ hoạt động đã diễn ra; các nhánh đang chuẩn bị khởi động luôn được ghi rõ trạng thái."
+      "description": "Chỉ công bố số liệu và ảnh từ hoạt động đã diễn ra; nhánh sắp khởi động luôn ghi rõ trạng thái."
     },
     {
       "tag": "Riêng tư",
-      "title": "Bảo vệ phẩm giá & dữ liệu cá nhân",
-      "description": "Tôn trọng tuyệt đối quyền riêng tư hình ảnh của người tham dự và trẻ em; chỉ thu thập thông tin tối thiểu phục vụ điều phối buổi gặp."
+      "title": "Bảo vệ phẩm giá & dữ liệu",
+      "description": "Tôn trọng quyền riêng tư hình ảnh thành viên và trẻ em; chỉ thu thập thông tin tối thiểu cho buổi gặp."
     }
   ],
   "testimonials": [],
@@ -186,8 +189,138 @@
     "defaultTitle": "HolaRise – Cộng đồng Thanh niên Hòa Lạc",
     "defaultDescription": "HolaRise – Cộng đồng Thanh niên Hòa Lạc phi lợi nhuận kết nối người trẻ qua 3 trụ cột: HolaHeart (tĩnh tại), HolaGreen (sinh thái) và HolaConnect (tri thức).",
     "keywords": "HolaRise, Cộng đồng Thanh niên Hòa Lạc, HolaHeart, HolaGreen, HolaConnect, tình nguyện sinh viên Hòa Lạc, workshop Hòa Lạc, cộng đồng người trẻ phi lợi nhuận",
+    "keywordsEn": "HolaRise, Hoa Lac youth community, Hanoi non-profit youth initiative, HolaHeart, HolaGreen, HolaConnect, UN SDGs Vietnam, Hoa Lac workshops, volunteer Hanoi",
     "googleSiteVerification": "",
     "bingSiteVerification": "",
     "indexNowKey": "9a6a41c8a275d9ed39b1a0e4b1df32e1"
+  },
+  "en": {
+    "hero": {
+      "headline": "Stillness within,\nAction from Hoa Lac.",
+      "description": "A non-profit youth community rooted in Hoa Lac for inner stillness, ecological care, and civic service.",
+      "primaryCta": {
+        "label": "Join HolaRise",
+        "href": "/en/join/"
+      },
+      "secondaryCta": {
+        "label": "Explore our journey",
+        "href": "#journey-gallery"
+      },
+      "imageAlt": "HolaRise young people welcoming sunrise on the hills of Hoa Lac."
+    },
+    "about": {
+      "imageAlt": "Morning sunrise over the hills and calm water — the origin emblem of HolaRise."
+    },
+    "philosophy": {
+      "quote": "Every lasting change begins with stillness within — when young people honor family, care for the land beneath their feet, and serve with quiet consistency.",
+      "mission": "Accompanying young people to cultivate inner steadiness (HolaHeart), keep local landscapes green (HolaGreen), and share knowledge in civic service (HolaConnect) — rooted in Hoa Lac and built to travel far.",
+      "vision": "Building a grounded, transparent network of young people living with depth and civic responsibility, originating from Hoa Lac.",
+      "motto": "Hola · Together We Rise, Together We Serve",
+      "coreValues": [
+        {
+          "title": "Peer Listening",
+          "description": "Eye-level circles where speaking up or simply listening are equally welcome."
+        },
+        {
+          "title": "Roots & Gratitude",
+          "description": "Growing through respect for family, teachers, and the surrounding natural landscape."
+        },
+        {
+          "title": "Small Acts · Lasting Marks",
+          "description": "Less spectacle, more follow-through: honest dialogues, clean green routes, and children's bookshelves."
+        },
+        {
+          "title": "Open Traceability",
+          "description": "Every schedule, cost, and campaign handover is published transparently."
+        }
+      ]
+    },
+    "sdgs": [
+      {
+        "code": "SDG 3",
+        "title": "Good Health & Well-Being",
+        "color": "#4C9F38",
+        "description": "Peer-listening circles supporting student emotional balance and resilience."
+      },
+      {
+        "code": "SDG 4",
+        "title": "Quality Education",
+        "color": "#C5192D",
+        "description": "Practical life-skills dialogues, reading hours, and children's community bookshelves."
+      },
+      {
+        "code": "SDG 11",
+        "title": "Sustainable Communities",
+        "color": "#FD9D24",
+        "description": "Connecting university students, young professionals, international guests, and local residents."
+      },
+      {
+        "code": "SDG 13",
+        "title": "Climate Action",
+        "color": "#3F7E44",
+        "description": "Reducing single-use plastics and sorting recyclable waste at source."
+      },
+      {
+        "code": "SDG 15",
+        "title": "Life on Land",
+        "color": "#56C02B",
+        "description": "Keeping safe public green routes clean and caring for native flora."
+      },
+      {
+        "code": "SDG 17",
+        "title": "Partnerships for the Goals",
+        "color": "#19486A",
+        "description": "Transparent, non-commercial alliances with universities, student clubs, cultural venues, and NGOs."
+      }
+    ],
+    "principles": [
+      {
+        "tag": "Non-Profit",
+        "title": "Transparent Costs Down to the Last Number",
+        "description": "Events are free to attend; any personal cafe drink or supply cost is stated clearly before you RSVP."
+      },
+      {
+        "tag": "Peer-Led",
+        "title": "Voluntary & Eye-Level Participation",
+        "description": "HolaHeart circles are peer listening spaces — never clinical therapy. You choose how much to share."
+      },
+      {
+        "tag": "Independent",
+        "title": "In-Kind First Collaboration",
+        "description": "We prioritize venues, books, saplings, and supplies over ad-hoc cash pools, with zero commercial upsells."
+      },
+      {
+        "tag": "Verified",
+        "title": "Real Documentation Only",
+        "description": "We only publish verified photos and field counts; upcoming tracks are clearly labeled as preparing to launch."
+      },
+      {
+        "tag": "Privacy",
+        "title": "Dignity-First Media & Data Protection",
+        "description": "No exploitative photos, strict minor consent rules, and minimal data collection under Vietnam Decree 13/2023/ND-CP."
+      }
+    ],
+    "faqs": [
+      {
+        "question": "Who can join HolaRise, and are international guests welcome?",
+        "answer": "HolaRise welcomes university students, international exchange students, young professionals in Hoa Lac High-Tech Park, and anyone who values grounded community. Weekly sessions are primarily in Vietnamese unless marked bilingual, and English-speaking coordinators are happy to welcome you."
+      },
+      {
+        "question": "How do I reserve a seat for an upcoming gathering?",
+        "answer": "Pick a gathering on the Schedule page, enter your name and phone, Zalo, or email in 15 seconds (no password needed), then add the event to your calendar or join the session's Zalo group for location pins and carpool updates."
+      },
+      {
+        "question": "Is it awkward to come alone for the first time?",
+        "answer": "More than half of first-time guests arrive solo. A coordinator welcomes you at the door, and you are completely free to listen without being pressured to speak."
+      },
+      {
+        "question": "Is there any attendance fee?",
+        "answer": "Admission is free. For gatherings hosted at partner cafes, you simply cover your own drink (typically 35,000–50,000 VND). Any shared material cost is always listed upfront on the invitation."
+      },
+      {
+        "question": "How can universities, clubs, NGOs, or venues collaborate with HolaRise?",
+        "answer": "Use the Institutional Partnership tab on this page, email phungsu@holarise.org directly, or message our coordinator hotline/Zalo at 077.777.1948."
+      }
+    ]
   }
 }

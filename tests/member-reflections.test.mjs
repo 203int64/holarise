@@ -5,6 +5,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
 import { parseMemberIdentifier, validateReflectionInput } from "../functions/_lib/validation.js";
+import { resetDriveCachesForTest } from "../functions/_lib/drive.js";
 import { generateQrSvg } from "../functions/_lib/qr.js";
 import { onRequestGet as memberPassGet } from "../functions/tv/[code].js";
 import { onRequestPost as adminMemberCreate } from "../functions/api/admin/members/index.js";
@@ -16,6 +17,9 @@ import { onRequestGet as memberStatus } from "../functions/api/member/auth/statu
 import { onRequestGet as memberDashboard } from "../functions/api/member/dashboard.js";
 import { onRequestPatch as memberProfilePatch } from "../functions/api/member/profile.js";
 import { onRequestPost as memberMediaUpload } from "../functions/api/member/media.js";
+import { onRequestGet as memberAlbumsGet } from "../functions/api/member/albums/index.js";
+import { onRequestPost as memberAlbumPhotoUpload } from "../functions/api/member/albums/[id]/photos.js";
+import { onRequestPost as adminPhotoApprove } from "../functions/api/admin/photos/[id]/approve.js";
 import { onRequestPost as publicRegister } from "../functions/api/registrations.js";
 import {
   onRequestGet as reflectionsGet,
@@ -746,14 +750,14 @@ test("Member Journey Wallet: joins events metadata & auto-matches unlinked guest
   assert.equal(card.status, "attended");
 });
 
-test("Public guest reflection photo upload + drifted activity_reflections schema self-heal", async () => {
+test("Member-only reflections (guest 401, up to 7 photos + KV cleanup, drifted schema self-heal)", async () => {
   const DB = createFullMockD1();
   const MEDIA_KV = createMockKV();
   const env = { DB, MEDIA_KV };
 
-  // 1. Public guest uploads a JPEG photo without logging in
+  // 1. Unauthenticated guest is blocked on both reflection photo upload and reflection submit
   const fakeJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01]);
-  const upRes = await reflectionMediaUpload({
+  const guestUpload = await reflectionMediaUpload({
     request: makeReq("/api/reflections/media", {
       method: "POST",
       body: fakeJpeg,
@@ -761,12 +765,8 @@ test("Public guest reflection photo upload + drifted activity_reflections schema
     }),
     env,
   });
-  assert.equal(upRes.status, 201);
-  const upData = await upRes.json();
-  assert.equal(upData.ok, true);
-  assert.match(upData.url, /^\/api\/media\/ref-\d{8}-[a-z0-9-]+\.jpg$/);
+  assert.equal(guestUpload.status, 401);
 
-  // Guest submits a reflection with the uploaded photoUrl
   const guestPost = await reflectionsCreate({
     request: makeReq("/api/reflections", {
       method: "POST",
@@ -774,17 +774,13 @@ test("Public guest reflection photo upload + drifted activity_reflections schema
         activitySlug: "tinh-yeu-thuong-cua-me",
         authorName: "Minh Quân",
         content: "Buổi tối rất ấm áp, mọi người lắng nghe nhau thật trọn vẹn.",
-        photoUrl: upData.url,
       },
     }),
     env,
   });
-  assert.equal(guestPost.status, 201);
-  const guestJson = await guestPost.json();
-  assert.equal(guestJson.ok, true);
-  assert.equal(guestJson.reflection.photoUrl, upData.url);
+  assert.equal(guestPost.status, 401);
 
-  // 2. Simulate legacy drifted D1 table (hearts_count instead of heart_count, missing reviewed_by/reviewed_at)
+  // 2. Simulate legacy drifted D1 table (hearts_count instead of heart_count, missing reviewed_by/photos_json)
   DB.rawDb.exec("DROP TABLE IF EXISTS reflection_hearts; DROP TABLE IF EXISTS activity_reflections;");
   DB.rawDb.exec(`
     CREATE TABLE activity_reflections (
@@ -811,7 +807,7 @@ test("Public guest reflection photo upload + drifted activity_reflections schema
       body: {
         identifier: "drifted-member@holarise.org",
         password: "DriftedPass123!",
-        name: "Church Of God",
+        name: "Nguyễn Minh Anh",
         organization: "FPTU",
       },
     }),
@@ -820,15 +816,49 @@ test("Public guest reflection photo upload + drifted activity_reflections schema
   assert.equal(regRes.status, 201);
   const memberCookie = extractCookie(regRes, "holarise_member_session");
 
-  // Must self-heal and return 201 JSON (never 500 HTML!)
+  // 3. Authenticated member uploads 7 photos
+  const uploadedUrls = [];
+  for (let i = 0; i < 7; i++) {
+    const upRes = await reflectionMediaUpload({
+      request: makeReq("/api/reflections/media", {
+        method: "POST",
+        cookie: memberCookie,
+        body: fakeJpeg,
+        headers: { "Content-Type": "image/jpeg" },
+      }),
+      env,
+    });
+    assert.equal(upRes.status, 201);
+    const upData = await upRes.json();
+    assert.match(upData.url, /^\/api\/media\/ref-\d{8}-[a-z0-9-]+\.jpg$/);
+    uploadedUrls.push(upData.url);
+  }
+  assert.equal(MEDIA_KV.store.size, 7);
+
+  // 8 photos must be rejected with 400 VALIDATION_ERROR
+  const tooMany = await reflectionsCreate({
+    request: makeReq("/api/reflections", {
+      method: "POST",
+      cookie: memberCookie,
+      body: {
+        activitySlug: "tinh-yeu-thuong-cua-me",
+        content: "Kỷ niệm đẹp cùng mọi người trong buổi gặp gỡ cuối tuần tại Hòa Lạc.",
+        photoUrls: [...uploadedUrls, "/api/media/extra-8.jpg"],
+      },
+    }),
+    env,
+  });
+  assert.equal(tooMany.status, 400);
+
+  // Exactly 7 photos must self-heal drifted schema and return 201
   const memberPost = await reflectionsCreate({
     request: makeReq("/api/reflections", {
       method: "POST",
       cookie: memberCookie,
       body: {
         activitySlug: "tinh-yeu-thuong-cua-me",
-        content: "<3 <3 <3 <3 <3 <3 <3 <3 <3",
-        photoUrl: upData.url,
+        content: "Kỷ niệm đẹp cùng mọi người trong buổi gặp gỡ cuối tuần tại Hòa Lạc.",
+        photoUrls: uploadedUrls,
       },
     }),
     env,
@@ -836,7 +866,233 @@ test("Public guest reflection photo upload + drifted activity_reflections schema
   assert.equal(memberPost.status, 201);
   const memberJson = await memberPost.json();
   assert.equal(memberJson.ok, true);
-  assert.equal(memberJson.reflection.photoUrl, upData.url);
+  assert.equal(memberJson.reflection.photoUrl, uploadedUrls[0]);
+  assert.deepEqual(memberJson.reflection.photoUrls, uploadedUrls);
+
+  // Deleting the reflection cleans up ALL 7 KV photos
+  const delRes = await reflectionDelete({
+    request: makeReq(`/api/reflections/${memberJson.reflection.id}`, {
+      method: "DELETE",
+      cookie: memberCookie,
+    }),
+    params: { id: memberJson.reflection.id },
+    env,
+  });
+  assert.equal(delRes.status, 200);
+  assert.equal(MEDIA_KV.store.size, 0);
+});
+
+test("Member album photo contribution: auth gate, Drive nested dong-gop/<member> folder, pending queue & admin approve", async () => {
+  const DB = createFullMockD1();
+  const MEDIA_KV = createMockKV();
+
+  // Bootstrap admin for final approval check
+  const bootRes = await authBootstrap({
+    request: makeReq("/api/auth/bootstrap", {
+      method: "POST",
+      body: {
+        name: "Admin HolaRise",
+        email: "203int64@holarise.org",
+        password: "AdminPassword123!",
+      },
+    }),
+    env: { DB },
+  });
+  assert.equal(bootRes.status, 201);
+  const adminCookie = extractCookie(bootRes, "holarise_session");
+
+  // Publish an album with an existing Drive folder URL
+  const now = new Date().toISOString();
+  DB.rawDb
+    .prepare(
+      `INSERT INTO media_albums (id, slug, title, event_date, date_display, location, drive_url, status, sort_order, created_by, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'published', 1, 'admin', ?, ?)`
+    )
+    .run(
+      "alb-test-event",
+      "cuoc-doi-cua-cha-2026-11-29",
+      "Workshop Cuộc Đời Của Cha",
+      "2026-11-29",
+      "29/11/2026",
+      "Mây Lang Thang, Hòa Lạc",
+      "https://drive.google.com/drive/folders/EventFolderId123456",
+      now,
+      now
+    );
+
+  const env = {
+    DB,
+    MEDIA_KV,
+    GOOGLE_DRIVE_CLIENT_ID: "cid",
+    GOOGLE_DRIVE_CLIENT_SECRET: "csec",
+    GOOGLE_DRIVE_REFRESH_TOKEN: "rtok",
+    GOOGLE_DRIVE_ROOT_FOLDER_ID: "RootFolder123456",
+  };
+
+  // 1. Guest blocked on GET /api/member/albums and POST /api/member/albums/:id/photos
+  const guestList = await memberAlbumsGet({
+    request: makeReq("/api/member/albums"),
+    env,
+  });
+  assert.equal(guestList.status, 401);
+
+  const fakeJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01]);
+  const guestUpload = await memberAlbumPhotoUpload({
+    request: makeReq("/api/member/albums/alb-test-event/photos", {
+      method: "POST",
+      body: fakeJpeg,
+      headers: { "Content-Type": "image/jpeg" },
+    }),
+    params: { id: "alb-test-event" },
+    env,
+  });
+  assert.equal(guestUpload.status, 401);
+
+  // 2. Register Member
+  const regRes = await memberRegister({
+    request: makeReq("/api/member/auth/register", {
+      method: "POST",
+      body: {
+        identifier: "photographer@holarise.org",
+        password: "PhotoPass123!",
+        name: "Trần Hải Đăng",
+        organization: "ĐH FPT",
+      },
+    }),
+    env,
+  });
+  assert.equal(regRes.status, 201);
+  const regData = await regRes.json();
+  const memberCookie = extractCookie(regRes, "holarise_member_session");
+
+  // 3. Member lists published albums
+  const listRes = await memberAlbumsGet({
+    request: makeReq("/api/member/albums", { cookie: memberCookie }),
+    env,
+  });
+  assert.equal(listRes.status, 200);
+  const listData = await listRes.json();
+  assert.equal(listData.ok, true);
+  assert.equal(listData.driveConfigured, true);
+  assert.ok(listData.items.some((a) => a.id === "alb-test-event"));
+
+  // 4. Mock Google Drive API calls and verify nested folder creation: EventFolder -> dong-gop -> <Member>
+  resetDriveCachesForTest();
+  const createdFolders = [];
+  let uploadedParents = [];
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init = {}) => {
+    const u = String(url);
+    if (u.includes("oauth2.googleapis.com/token")) {
+      return new Response(JSON.stringify({ access_token: "mock-token", expires_in: 3600 }), { status: 200 });
+    }
+    if (u.includes("/drive/v3/files") && (!init.method || init.method === "GET")) {
+      return new Response(JSON.stringify({ files: [] }), { status: 200 });
+    }
+    if (u.includes("/drive/v3/files") && init.method === "POST" && !u.includes("/upload/")) {
+      const body = JSON.parse(String(init.body || "{}"));
+      const fid = `FolderId_${createdFolders.length + 1}_abcdefghij`;
+      createdFolders.push({ id: fid, name: body.name, parents: body.parents || [] });
+      return new Response(JSON.stringify({ id: fid }), { status: 200 });
+    }
+    if (u.includes("/upload/drive/v3/files") && init.method === "POST") {
+      const rawText = new TextDecoder().decode(init.body);
+      const match = rawText.match(/"parents":\["([^"]+)"\]/);
+      uploadedParents = match ? [match[1]] : [];
+      return new Response(
+        JSON.stringify({
+          id: "DrivePhotoFile123456",
+          name: "anh-su-kien.jpg",
+          mimeType: "image/jpeg",
+          size: fakeJpeg.byteLength,
+          webViewLink: "https://drive.google.com/file/d/DrivePhotoFile123456/view",
+        }),
+        { status: 200 }
+      );
+    }
+    throw new Error(`Unexpected fetch URL: ${u}`);
+  };
+
+  try {
+    const fd = new FormData();
+    fd.append("file", new Blob([fakeJpeg], { type: "image/jpeg" }), "anh-su-kien.jpg");
+    fd.append("photographer", "Hải Đăng (FPT)");
+
+    const upRes = await memberAlbumPhotoUpload({
+      request: new Request("https://holarise.org/api/member/albums/alb-test-event/photos", {
+        method: "POST",
+        headers: {
+          Origin: "https://holarise.org",
+          Cookie: memberCookie,
+        },
+        body: fd,
+      }),
+      params: { id: "alb-test-event" },
+      env,
+    });
+
+    assert.equal(upRes.status, 201);
+    const upData = await upRes.json();
+    assert.equal(upData.ok, true);
+    assert.equal(upData.storage, "google_drive");
+    assert.equal(upData.item.approvalStatus, "pending");
+    assert.equal(upData.item.photographer, "Hải Đăng (FPT)");
+    assert.equal(upData.item.contributorMemberId, regData.member.id);
+    assert.equal(upData.item.url, "/api/media/drive/DrivePhotoFile123456");
+
+    // Verify nested Drive folder structure: EventFolderId123456 -> dong-gop -> <YYYYMMDD>_<Code>_tran-hai-dang
+    const expectedStamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    assert.equal(createdFolders.length, 2);
+    assert.equal(createdFolders[0].name, "dong-gop");
+    assert.deepEqual(createdFolders[0].parents, ["EventFolderId123456"]);
+    assert.equal(createdFolders[1].name, `${expectedStamp}_${regData.member.memberCode}_tran-hai-dang`);
+    assert.deepEqual(createdFolders[1].parents, [createdFolders[0].id]);
+    assert.deepEqual(uploadedParents, [createdFolders[1].id]);
+
+    // Non-image upload must be rejected (415)
+    const badFd = new FormData();
+    badFd.append("file", new Blob(["not an image"], { type: "text/plain" }), "notes.txt");
+    const badRes = await memberAlbumPhotoUpload({
+      request: new Request("https://holarise.org/api/member/albums/alb-test-event/photos", {
+        method: "POST",
+        headers: { Origin: "https://holarise.org", Cookie: memberCookie },
+        body: badFd,
+      }),
+      params: { id: "alb-test-event" },
+      env,
+    });
+    assert.equal(badRes.status, 415);
+
+    // Draft album cannot receive member uploads (404)
+    const draftRes = await memberAlbumPhotoUpload({
+      request: makeReq("/api/member/albums/album-khoanh-khac-hoa-lac/photos", {
+        method: "POST",
+        cookie: memberCookie,
+        body: fakeJpeg,
+        headers: { "Content-Type": "image/jpeg" },
+      }),
+      params: { id: "album-khoanh-khac-hoa-lac" },
+      env,
+    });
+    assert.equal(draftRes.status, 404);
+
+    // Admin approves the pending member photo cleanly via existing /media/ endpoint
+    const appRes = await adminPhotoApprove({
+      request: makeReq(`/api/admin/photos/${upData.item.id}/approve`, {
+        method: "POST",
+        cookie: adminCookie,
+        body: { action: "approve" },
+      }),
+      params: { id: upData.item.id },
+      env,
+    });
+    assert.equal(appRes.status, 200);
+    const appData = await appRes.json();
+    assert.equal(appData.item.approvalStatus, "approved");
+  } finally {
+    globalThis.fetch = origFetch;
+    resetDriveCachesForTest();
+  }
 });
 
 test("Member phone flow: auto-save on first RSVP + profile phone update & duplicate guard", async () => {

@@ -32,6 +32,9 @@ export function serializePhotoRow(row) {
     isFeaturedHome: Boolean(row.is_featured_home),
     sortOrder: Number(row.sort_order || 0),
     uploadedBy: row.uploaded_by || "",
+    contributorMemberId: row.contributor_member_id || "",
+    sourceKind: row.source_kind || (row.contributor_member_id ? "member_contribution" : "team"),
+    drivePath: row.drive_path || "",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

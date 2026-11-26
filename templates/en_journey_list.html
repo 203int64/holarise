@@ -1,0 +1,95 @@
+<section class="page-hero page-hero--editorial">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/en/">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Journey</span>
+    </nav>
+    <h1>HolaRise Journey</h1>
+    <p>Past gatherings, verified photo archives, and reflections from young participants in Hoa Lac.</p>
+  </div>
+</section>
+
+<section class="section" id="stories">
+  <div class="container">
+    <div class="section-header--split section-header--editorial">
+      <div>
+        <div class="kicker">Stories &amp; Guestbook</div>
+        <h2 class="section-title">Gatherings Held</h2>
+      </div>
+      <a class="arrow-link" href="/en/schedule/">
+        <span>This Week's Schedule</span>
+        <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+      </a>
+    </div>
+
+    <div class="filter-bar-row">
+      <div class="filter-bar" data-filter-group="[data-news-card]" role="group" aria-label="Filter stories by pillar">
+        <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">All</button>
+        <button class="filter-btn" type="button" data-filter="holaheart" data-pillar="holaheart" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          <span>HolaHeart</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="holagreen" data-pillar="holagreen" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+          <span>HolaGreen</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="holaconnect" data-pillar="holaconnect" aria-pressed="false">
+          <svg class="filter-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>HolaConnect</span>
+        </button>
+      </div>
+      <span class="filter-count" data-filter-count="[data-news-card]" aria-live="polite"></span>
+    </div>
+
+    <div class="grid-editorial-stories" data-stagger-group>
+      <!-- CMS:NEWS_LIST:START -->
+      {{NEWS_LIST_HTML}}
+      <!-- CMS:NEWS_LIST:END -->
+    </div>
+
+    <div class="filter-empty" data-filter-empty="[data-news-card]" hidden>
+      <p>Upcoming recaps for this pillar are being prepared.</p>
+      <button class="btn btn--outline btn--sm" type="button" data-filter-reset="[data-news-card]">View all stories</button>
+    </div>
+  </div>
+</section>
+
+<section class="section section--mist" id="photo-archive">
+  <div class="container">
+    <div class="section-header--editorial">
+      <div class="kicker">Session Photo Archive</div>
+      <h2 class="section-title">Gatherings in Hoa Lac</h2>
+    </div>
+
+    <div class="archive-drawers-list">
+      <!-- CMS:D1_ALBUMS:START -->
+      <!-- CMS:D1_ALBUMS:END -->
+
+      <!-- CMS:STATIC_1511_GALLERY:START -->
+      {{GALLERY_HTML}}
+      <!-- CMS:STATIC_1511_GALLERY:END -->
+
+      {{MUSICSPACE_GALLERY_HTML}}
+    </div>
+
+    <p class="privacy-photo-note">
+      <strong>Photo privacy:</strong> To update or remove any photo featuring you, please email <a href="mailto:{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</a> · <a href="/en/privacy/">Transparency &amp; Privacy</a>.
+    </p>
+  </div>
+</section>
+
+<section class="section section--compact">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h2>Join the Next Gathering</h2>
+        <p>Reserve your seat in 15 seconds with no password required and leave a reflection afterward.</p>
+      </div>
+      <div class="cta-band-actions">
+        <a class="btn btn--light" href="/en/join/" data-magnetic>Join HolaRise</a>
+        <a class="btn btn--ghost-dark" href="/en/schedule/">Upcoming Schedule</a>
+      </div>
+    </div>
+  </div>
+</section>

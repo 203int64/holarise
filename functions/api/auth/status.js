@@ -1,5 +1,5 @@
 import { getAdminUserProfile } from "../../_lib/admin-passkey-schema.js";
-import { errorResponse, getSessionUser, jsonResponse } from "../../_lib/security.js";
+import { errorResponse, getSessionUser, isSoleAdminAccount, jsonResponse } from "../../_lib/security.js";
 
 export async function onRequestGet({ request, env }) {
   if (!env?.DB) {
@@ -27,6 +27,7 @@ export async function onRequestGet({ request, env }) {
     ok: true,
     initialized,
     authenticated: Boolean(profile),
+    isSoleAdmin: Boolean(profile && isSoleAdminAccount(profile, env)),
     mediaGateEnabled: Boolean(String(env?.MEDIA_ACCESS_PIN || "").trim()),
     user: profile,
   });
