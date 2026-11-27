@@ -1,3 +1,4 @@
+import { sendContributionThankYouEmail } from "../../_lib/email.js";
 import {
   READER_ID_COOKIE_NAME,
   checkRateLimit,
@@ -281,6 +282,38 @@ export async function onRequestPost(context) {
     )
       .bind(id)
       .first();
+
+    if (sessionMember?.email) {
+      let targetTitle = v.activity_slug;
+      const evRow = await env.DB.prepare("SELECT title FROM events WHERE id = ? OR slug = ? LIMIT 1")
+        .bind(v.activity_slug, v.activity_slug)
+        .first()
+        .catch(() => null);
+      if (evRow?.title) {
+        targetTitle = evRow.title;
+      } else {
+        const postRow = await env.DB.prepare("SELECT title FROM posts WHERE slug = ? LIMIT 1")
+          .bind(v.activity_slug)
+          .first()
+          .catch(() => null);
+        if (postRow?.title) targetTitle = postRow.title;
+      }
+      const quoteSnippet = v.pull_quote || String(v.content || "").split(/\n+/)[0].slice(0, 180);
+      const emailTask = sendContributionThankYouEmail(env, {
+        kind: "reflection",
+        lang: "vi",
+        member: sessionMember,
+        targetKey: v.activity_slug,
+        targetTitle,
+        targetSlug: v.activity_slug,
+        pullQuote: quoteSnippet,
+      });
+      if (typeof context.waitUntil === "function") {
+        context.waitUntil(emailTask);
+      } else {
+        await emailTask;
+      }
+    }
 
     return jsonResponse(
       {

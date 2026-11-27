@@ -1,3 +1,4 @@
+import { sendContributionThankYouEmail } from "../../../../_lib/email.js";
 import {
   buildEventFolderName,
   ensureCategorySubfolder,
@@ -278,6 +279,24 @@ export async function onRequestPost(context) {
   ]);
 
   const created = await env.DB.prepare("SELECT * FROM media_photos WHERE id = ?").bind(photoId).first();
+
+  if (auth.member?.email) {
+    const emailTask = sendContributionThankYouEmail(env, {
+      kind: "media",
+      lang: "vi",
+      member: auth.member,
+      targetKey: album.id,
+      targetTitle: album.title || "Kho ảnh HolaRise",
+      targetSlug: album.slug || "",
+      creditName,
+      mediaType: detected.kind,
+    });
+    if (typeof context.waitUntil === "function") {
+      context.waitUntil(emailTask);
+    } else {
+      await emailTask;
+    }
+  }
 
   return jsonResponse(
     {

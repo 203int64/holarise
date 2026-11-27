@@ -213,21 +213,53 @@ export function buildGoogleCalendarUrl(event = {}, eventUrl = "") {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-function buildEmailLayout({ lang, preheader, eyebrow, heading, bodyHtml, detailsRows = [], primaryCta, secondaryCta, footerNote }) {
+function buildEmailLayout({
+  lang,
+  preheader,
+  eyebrow,
+  heading,
+  bodyHtml,
+  quoteText = "",
+  detailsRows = [],
+  calloutHtml = "",
+  primaryCta,
+  secondaryCta,
+  footerNote,
+}) {
   const isEn = lang === "en";
+  const quoteBlockHtml = quoteText
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0;background-color:#FBF8F1;border-left:3px solid #C59B5F;border-radius:0 8px 8px 0;">
+        <tr>
+          <td style="padding:14px 18px;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.65;font-style:italic;color:#27352D;">
+            &ldquo;${escapeHtml(quoteText)}&rdquo;
+          </td>
+        </tr>
+      </table>`
+    : "";
+
   const detailTableHtml =
     detailsRows.length > 0
       ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:22px 0;background-color:#F5F1E8;border:1px solid #E6DFD2;border-radius:10px;border-collapse:separate;">
           ${detailsRows
             .map(
               ([label, value], idx) => `<tr>
-                <td style="padding:${idx === 0 ? "14px" : "8px"} 16px ${idx === detailsRows.length - 1 ? "14px" : "8px"} 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;color:#5D645F;width:120px;vertical-align:top;${idx > 0 ? "border-top:1px solid #EAE4D8;" : ""}">${escapeHtml(label)}</td>
-                <td style="padding:${idx === 0 ? "14px" : "8px"} 16px ${idx === detailsRows.length - 1 ? "14px" : "8px"} 8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#1F2421;font-weight:600;vertical-align:top;${idx > 0 ? "border-top:1px solid #EAE4D8;" : ""}">${escapeHtml(value)}</td>
+                <td style="padding:${idx === 0 ? "14px" : "9px"} 16px ${idx === detailsRows.length - 1 ? "14px" : "9px"} 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;color:#5D645F;width:128px;vertical-align:top;${idx > 0 ? "border-top:1px solid #EAE4D8;" : ""}">${escapeHtml(label)}</td>
+                <td style="padding:${idx === 0 ? "14px" : "9px"} 16px ${idx === detailsRows.length - 1 ? "14px" : "9px"} 8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#1F2421;font-weight:600;vertical-align:top;${idx > 0 ? "border-top:1px solid #EAE4D8;" : ""}">${escapeHtml(value)}</td>
               </tr>`
             )
             .join("")}
         </table>`
       : "";
+
+  const calloutBlockHtml = calloutHtml
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0;background-color:#F8F5EE;border:1px solid #E8DFCE;border-radius:10px;">
+        <tr>
+          <td style="padding:14px 18px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13.5px;line-height:1.6;color:#35403A;">
+            ${calloutHtml}
+          </td>
+        </tr>
+      </table>`
+    : "";
 
   const ctaHtml =
     primaryCta || secondaryCta
@@ -252,8 +284,8 @@ function buildEmailLayout({ lang, preheader, eyebrow, heading, bodyHtml, details
       : "";
 
   const signOff = isEn
-    ? "Warmly,<br><strong>HolaRise Coordinating Team</strong><br><span style=\"color:#6E7570;font-size:12px;\">Hoa Lac, Hanoi · holarise.org · phungsu@holarise.org</span>"
-    : "Thân mến,<br><strong>Ban Điều Phối HolaRise</strong><br><span style=\"color:#6E7570;font-size:12px;\">Hòa Lạc, Hà Nội · holarise.org · phungsu@holarise.org</span>";
+    ? "Warmly,<br><strong>HolaRise Coordinating Team</strong><br><span style=\"color:#6E7570;font-size:12px;\">HolaHeart · HolaGreen · HolaConnect · holarise.org</span>"
+    : "Thân mến,<br><strong>Ban Điều Phối HolaRise</strong><br><span style=\"color:#6E7570;font-size:12px;\">HolaHeart · HolaGreen · HolaConnect · holarise.org</span>";
 
   return `<!DOCTYPE html>
 <html lang="${isEn ? "en" : "vi"}">
@@ -288,17 +320,22 @@ function buildEmailLayout({ lang, preheader, eyebrow, heading, bodyHtml, details
             </td>
           </tr>
           <tr>
-            <td style="padding:28px 28px 24px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#2C332F;">
+            <td style="height:3px;line-height:3px;font-size:3px;background-color:#C59B5F;">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="padding:28px 28px 24px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.68;color:#2C332F;">
               <h1 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;font-size:22px;line-height:1.35;color:#1B3B2B;font-weight:700;">${escapeHtml(heading)}</h1>
               ${bodyHtml}
+              ${quoteBlockHtml}
               ${detailTableHtml}
+              ${calloutBlockHtml}
               ${ctaHtml}
               <hr style="border:none;border-top:1px solid #ECE7DD;margin:24px 0 18px 0;">
               <p style="margin:0;font-size:14px;line-height:1.6;color:#2C332F;">${signOff}</p>
             </td>
           </tr>
           <tr>
-            <td style="padding:14px 28px;background-color:#F5F1E8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.5;color:#6E7570;">
+            <td style="padding:14px 28px;background-color:#F5F1E8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.55;color:#6E7570;">
               ${escapeHtml(footerNote)}
             </td>
           </tr>
@@ -612,6 +649,10 @@ export function renderEventEmailTemplate({
        <p style="margin:0;">Kho ảnh kỷ niệm và không gian lưu bút của buổi gặp đã sẵn sàng. Mời bạn xem lại những khung hình đẹp hoặc gửi vài dòng góp ý để chặng sau thêm chu đáo.</p>
        ${noteBlockHtml}`;
 
+  const contributeCalloutHtml = isEn
+    ? `<strong style="color:#1B3B2B;">Captured a moment from the gathering?</strong><br>If you took a few photos, a short clip, or want to leave a quiet reflection, you can add them directly to the shared memory page at <a href="${escapeHtml(eventUrl)}" style="color:#1B3B2B;font-weight:600;text-decoration:underline;">holarise.org</a>.`
+    : `<strong style="color:#1B3B2B;">Góp thêm góc nhìn của bạn vào ký ức chung</strong><br>Nếu trong máy bạn còn lưu vài khung hình đẹp, đoạn video ngắn hay đôi dòng cảm nhận sau buổi gặp, mời bạn gửi góp trực tiếp trên <a href="${escapeHtml(eventUrl)}" style="color:#1B3B2B;font-weight:600;text-decoration:underline;">trang kỷ niệm buổi gặp</a> để mọi người cùng xem lại.`;
+
   const html = buildEmailLayout({
     lang: safeLang,
     preheader: isEn ? `Memories and photos from ${title} are ready.` : `Kho ảnh và lưu bút của buổi gặp ${title} đã sẵn sàng.`,
@@ -623,13 +664,14 @@ export function renderEventEmailTemplate({
       ...(dateLabel ? [[isEn ? "Date" : "Ngày diễn ra", dateLabel]] : []),
       [isEn ? "Location" : "Địa điểm", locationLabel],
     ],
+    calloutHtml: contributeCalloutHtml,
     primaryCta: {
       label: isEn ? "Open Photo Album & Memories" : "Mở Kho ảnh & Lưu bút",
       url: resolvedAlbumUrl,
     },
     secondaryCta: {
-      label: isEn ? "Upcoming Gatherings" : "Xem lịch hoạt động tiếp theo",
-      url: `${SITE_ORIGIN}${isEn ? "/en/schedule/" : "/lich-hoat-dong/"}`,
+      label: isEn ? "Share Your Photos" : "Góp ảnh & Lưu bút của bạn",
+      url: eventUrl,
     },
     footerNote: isEn
       ? `Thank you for being part of HolaRise. View the event memory page: ${eventUrl}`
@@ -987,6 +1029,7 @@ export async function sendRsvpConfirmationEmail(env, { registration, event, lang
   }
 }
 
+
 /**
  * Render the bilingual Welcome Email sent right after a new Member creates an account
  * (via email/password registration or first-time Google OAuth sign-in).
@@ -1112,6 +1155,7 @@ export async function sendMemberWelcomeEmail(env, { member, lang = "vi", fetchIm
   }
 }
 
+
 /**
  * Render and send confirmation email for general join/partnership inquiries (without a specific event_id).
  */
@@ -1215,6 +1259,252 @@ export async function sendInquiryConfirmationEmail(env, { registration, lang = "
         recipientEmail: email,
         recipientName: registration.full_name || "",
         templateType: "inquiry_confirm",
+        lang: rendered.lang,
+        subject: rendered.subject,
+        provider: result.provider,
+        status: result.status,
+        messageId: result.messageId,
+        error: result.error,
+        sentBy: "system",
+      });
+    }
+    return result;
+  } catch (err) {
+    return { ok: false, status: "failed", provider: "none", error: String(err?.message || err).slice(0, 220) };
+  }
+}
+
+/**
+ * Render an editorial Thank-You Email when a Member contributes a photo/video to an event album
+ * or submits a reflection on an event memory page.
+ */
+export function renderContributionThankYouEmail({
+  kind = "media",
+  lang = "vi",
+  member = {},
+  targetTitle = "",
+  targetSlug = "",
+  creditName = "",
+  mediaType = "image",
+  pullQuote = "",
+}) {
+  const safeLang = String(lang).toLowerCase() === "en" ? "en" : "vi";
+  const isEn = safeLang === "en";
+  const name = String(member.name || "").trim() || (isEn ? "friend" : "bạn");
+  const memberCode = String(member.member_code || member.memberCode || "").trim();
+  const title = String(targetTitle || "").trim() || (isEn ? "HolaRise Gathering" : "Buổi gặp HolaRise");
+  const slug = String(targetSlug || "").trim();
+  const pageUrl = slug
+    ? `${SITE_ORIGIN}${isEn ? `/en/events/${slug}/` : `/su-kien/${slug}/`}`
+    : `${SITE_ORIGIN}${isEn ? "/en/journey/" : "/hanh-trinh/"}`;
+  const cardUrl = memberCode ? `${SITE_ORIGIN}/tv/${encodeURIComponent(memberCode)}` : `${SITE_ORIGIN}/tham-gia/`;
+
+  if (kind === "reflection") {
+    const cleanQuote = String(pullQuote || "").trim().slice(0, 220);
+    const subject = sanitizeHeaderValue(
+      isEn ? `Thank you for your reflection · ${title}` : `Cảm ơn những dòng lưu bút của bạn · ${title}`,
+      180
+    );
+    const bodyHtml = isEn
+      ? `<p style="margin:0 0 12px 0;">Hello ${escapeHtml(name)},</p>
+         <p style="margin:0 0 12px 0;">Thank you for taking a quiet moment to leave your reflection for <strong>${escapeHtml(title)}</strong>. Words written from genuine presence are what keep a community grounded long after the lights dim.</p>
+         <p style="margin:0;">Our coordinating team will review and publish your note on the shared memory page shortly.</p>`
+      : `<p style="margin:0 0 12px 0;">Chào ${escapeHtml(name)},</p>
+         <p style="margin:0 0 12px 0;">Cảm ơn bạn đã dành một khoảng lặng để viết lại cảm nhận cho buổi gặp <strong>${escapeHtml(title)}</strong>. Những dòng chữ chân thành sau mỗi chặng hành trình luôn là phần ký ức quý nhất mà HolaRise muốn giữ gìn.</p>
+         <p style="margin:0;">Ban Điều Phối sẽ sớm duyệt để trang lưu bút của bạn hiện diện cùng mọi người trên trang kỷ niệm.</p>`;
+
+    const html = buildEmailLayout({
+      lang: safeLang,
+      preheader: isEn ? `We received your reflection for ${title}.` : `HolaRise đã nhận được trang lưu bút của bạn cho ${title}.`,
+      eyebrow: isEn ? "Reflection Received" : "Cảm ơn Lưu bút",
+      heading: isEn ? "Thank you for leaving a reflection" : "Cảm ơn những dòng lưu bút của bạn",
+      bodyHtml,
+      quoteText: cleanQuote,
+      detailsRows: [
+        [isEn ? "Gathering" : "Hoạt động", title],
+        [isEn ? "Author" : "Người viết", name],
+        ...(memberCode ? [[isEn ? "Member Card" : "Mã thẻ", memberCode]] : []),
+        [isEn ? "Status" : "Trạng thái", isEn ? "Queued for editorial review" : "Đã tiếp nhận · Chờ duyệt hiển thị"],
+      ],
+      primaryCta: {
+        label: isEn ? "Visit Event Memory Page" : "Xem trang Kỷ niệm buổi gặp",
+        url: pageUrl,
+      },
+      secondaryCta: {
+        label: isEn ? "Your Member Card" : "Mở Thẻ Thành Viên",
+        url: cardUrl,
+      },
+      footerNote: isEn
+        ? "Thank you for contributing to HolaRise's shared memory archive. You will receive at most one thank-you note per gathering within 24 hours."
+        : "Cảm ơn bạn đã góp thêm ký ức cho HolaRise. Hệ thống chỉ gửi tối đa 1 thư cảm ơn cho mỗi buổi gặp trong 24 giờ để giữ hộp thư của bạn gọn gàng.",
+    });
+
+    const text = isEn
+      ? [
+          `Hello ${name},`,
+          "",
+          `Thank you for leaving your reflection for ${title}.`,
+          cleanQuote ? `"${cleanQuote}"` : "",
+          "Our coordinating team will review and publish it shortly.",
+          `Event Memory Page: ${pageUrl}`,
+          "",
+          "Warmly,",
+          "HolaRise Coordinating Team (phungsu@holarise.org)",
+        ]
+          .filter((l) => l !== "")
+          .join("\n")
+      : [
+          `Chào ${name},`,
+          "",
+          `Cảm ơn bạn đã viết lưu bút cho buổi gặp ${title}.`,
+          cleanQuote ? `"${cleanQuote}"` : "",
+          "Ban Điều Phối sẽ sớm duyệt hiển thị trên trang kỷ niệm.",
+          `Trang Kỷ niệm: ${pageUrl}`,
+          "",
+          "Thân mến,",
+          "Ban Điều Phối HolaRise (phungsu@holarise.org)",
+        ]
+          .filter((l) => l !== "")
+          .join("\n");
+
+    return { subject, html, text, templateType: "contribution_thankyou", lang: safeLang };
+  }
+
+  // Default: media (photo / video contribution to album)
+  const isVideo = String(mediaType).toLowerCase() === "video";
+  const mediaLabelVi = isVideo ? "đoạn video kỷ niệm" : "những khung hình kỷ niệm";
+  const mediaLabelEn = isVideo ? "your video clip" : "your photos";
+  const credited = String(creditName || name).trim();
+
+  const subject = sanitizeHeaderValue(
+    isEn ? `Thank you for sharing your lens · ${title}` : `Cảm ơn góc nhìn của bạn · ${title}`,
+    180
+  );
+
+  const bodyHtml = isEn
+    ? `<p style="margin:0 0 12px 0;">Hello ${escapeHtml(name)},</p>
+       <p style="margin:0 0 12px 0;">A gathering always feels richer when remembered through more than one pair of eyes. We have received ${mediaLabelEn} contributed to <strong>${escapeHtml(title)}</strong>.</p>
+       <p style="margin:0;">Our media team will review and add your contribution to the shared album with full credit under your name.</p>`
+    : `<p style="margin:0 0 12px 0;">Chào ${escapeHtml(name)},</p>
+       <p style="margin:0 0 12px 0;">Một buổi gặp luôn trọn vẹn hơn khi được nhìn lại qua nhiều đôi mắt khác nhau. Chúng mình vừa nhận được ${mediaLabelVi} bạn gửi góp vào kho ảnh <strong>${escapeHtml(title)}</strong>.</p>
+       <p style="margin:0;">Đội Truyền thông sẽ sớm duyệt để khung hình của bạn xuất hiện trong album chung cùng tên ghi nhận của tác giả.</p>`;
+
+  const calloutHtml = isEn
+    ? `You can keep uploading more moments from this session — we will not send extra emails within the next 24 hours so your inbox stays calm.`
+    : `Bạn có thể tiếp tục tải thêm nhiều ảnh/video khác của buổi gặp này — hệ thống sẽ <strong>không gửi thêm thư lặp lại trong 24 giờ tới</strong> để giữ hộp thư của bạn luôn gọn gàng.`;
+
+  const html = buildEmailLayout({
+    lang: safeLang,
+    preheader: isEn ? `Thank you for contributing to ${title}.` : `Cảm ơn bạn đã gửi góp khoảnh khắc cho ${title}.`,
+    eyebrow: isEn ? "Memory Contributor" : "Cảm ơn Đóng góp Ảnh",
+    heading: isEn ? "Thank you for sharing your lens" : "Cảm ơn góc nhìn bạn gửi góp",
+    bodyHtml,
+    detailsRows: [
+      [isEn ? "Album" : "Kho ảnh", title],
+      [isEn ? "Credit" : "Tên ghi nhận", credited],
+      ...(memberCode ? [[isEn ? "Member Card" : "Mã thẻ", memberCode]] : []),
+      [isEn ? "Status" : "Trạng thái", isEn ? "Received · Pending review" : "Đã tiếp nhận · Chờ duyệt lên album"],
+    ],
+    calloutHtml,
+    primaryCta: {
+      label: isEn ? "Open Event Gallery" : "Mở Kho ảnh buổi gặp",
+      url: pageUrl,
+    },
+    secondaryCta: {
+      label: isEn ? "Your Member Card" : "Mở Thẻ Thành Viên",
+      url: cardUrl,
+    },
+    footerNote: isEn
+      ? "Sent once per album within 24 hours when you contribute photos or videos on holarise.org."
+      : "Thư cảm ơn chỉ gửi tối đa 1 lần mỗi 24 giờ cho mỗi kho ảnh bạn đóng góp trên holarise.org.",
+  });
+
+  const text = isEn
+    ? [
+        `Hello ${name},`,
+        "",
+        `Thank you for sharing ${mediaLabelEn} to ${title} (credit: ${credited}).`,
+        "Our media team will review and publish your contribution to the shared album shortly.",
+        `Event Gallery: ${pageUrl}`,
+        "",
+        "Warmly,",
+        "HolaRise Coordinating Team (phungsu@holarise.org)",
+      ].join("\n")
+    : [
+        `Chào ${name},`,
+        "",
+        `Cảm ơn bạn đã gửi góp ${mediaLabelVi} vào kho ảnh ${title} (tên ghi nhận: ${credited}).`,
+        "Đội Truyền thông sẽ sớm duyệt để khung hình của bạn xuất hiện trong album chung.",
+        `Kho ảnh buổi gặp: ${pageUrl}`,
+        "",
+        "Thân mến,",
+        "Ban Điều Phối HolaRise (phungsu@holarise.org)",
+      ].join("\n");
+
+  return { subject, html, text, templateType: "contribution_thankyou", lang: safeLang };
+}
+
+/**
+ * Send Contribution Thank-You Email with a strict 24-hour anti-spam cooldown per (member email, target key).
+ * Prevents inbox flooding when a member uploads multiple photos in one session.
+ */
+export async function sendContributionThankYouEmail(
+  env,
+  { kind = "media", lang = "vi", member = {}, targetKey = "", targetTitle = "", targetSlug = "", creditName = "", mediaType = "image", pullQuote = "", fetchImpl = fetch }
+) {
+  const email = String(member?.email || "").trim().toLowerCase();
+  if (!email) {
+    return { ok: false, status: "skipped", provider: "none", error: "Thành viên không có email." };
+  }
+  const eventScopeKey = `contrib:${kind}:${String(targetKey || targetSlug || "general").slice(0, 80)}`;
+  try {
+    if (env?.DB) {
+      await ensureEmailLogsSchema(env.DB);
+      const sinceIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const recent = await env.DB.prepare(
+        `SELECT id FROM email_logs
+         WHERE event_id = ? AND recipient_email = ? AND status = 'sent' AND created_at >= ?
+         LIMIT 1`
+      )
+        .bind(eventScopeKey, email, sinceIso)
+        .first()
+        .catch(() => null);
+      if (recent) {
+        return {
+          ok: false,
+          status: "skipped",
+          provider: "none",
+          error: "Đã gửi thư cảm ơn đóng góp trong 24 giờ qua (chống spam).",
+        };
+      }
+    }
+
+    const rendered = renderContributionThankYouEmail({
+      kind,
+      lang,
+      member,
+      targetTitle,
+      targetSlug,
+      creditName,
+      mediaType,
+      pullQuote,
+    });
+
+    const result = await sendTransactionalEmail(env, {
+      to: email,
+      subject: rendered.subject,
+      html: rendered.html,
+      text: rendered.text,
+      fetchImpl,
+    });
+
+    if (env?.DB) {
+      await logEmailAttempt(env.DB, {
+        eventId: eventScopeKey,
+        registrationId: member.id || "",
+        recipientEmail: email,
+        recipientName: member.name || "",
+        templateType: "event_thankyou",
         lang: rendered.lang,
         subject: rendered.subject,
         provider: result.provider,

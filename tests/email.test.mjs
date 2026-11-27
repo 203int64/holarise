@@ -4,9 +4,12 @@ import test from "node:test";
 import {
   buildGoogleCalendarUrl,
   getEmailProviderStatus,
+  renderContributionThankYouEmail,
   renderEventEmailTemplate,
   renderInquiryConfirmEmail,
   renderMemberWelcomeEmail,
+  resetEmailSchemaCacheForTests,
+  sendContributionThankYouEmail,
   sendRsvpConfirmationEmail,
   sendTransactionalEmail,
 } from "../functions/_lib/email.js";
@@ -236,4 +239,92 @@ test("renderMemberWelcomeEmail and renderInquiryConfirmEmail render bilingual co
   assert.ok(inquiryVi.subject.includes("REG-261126-XYZ"));
   assert.ok(inquiryVi.html.includes("ĐH FPT"));
   assert.ok(inquiryVi.html.includes("https://holarise.org/assets/images/favicon-96.png"));
+});
+
+test("renderContributionThankYouEmail renders media & reflection variants and enforces 24h anti-spam cooldown", async () => {
+  const mediaMail = renderContributionThankYouEmail({
+    kind: "media",
+    lang: "vi",
+    member: { name: "Lan Anh", member_code: "HR-261126-009" },
+    targetTitle: "Cuộc Đời Của Cha",
+    targetSlug: "cuoc-doi-cua-cha",
+    creditName: "Lan Anh",
+    mediaType: "image",
+  });
+  assert.equal(mediaMail.subject, "Cảm ơn góc nhìn của bạn · Cuộc Đời Của Cha");
+  assert.ok(mediaMail.html.includes("#C59B5F"));
+  assert.ok(mediaMail.html.includes("HR-261126-009"));
+  assert.ok(mediaMail.html.includes("https://holarise.org/su-kien/cuoc-doi-cua-cha/"));
+
+  const refMail = renderContributionThankYouEmail({
+    kind: "reflection",
+    lang: "vi",
+    member: { name: "Minh Khôi", member_code: "HR-261126-010" },
+    targetTitle: "Cuộc Đời Của Cha",
+    targetSlug: "cuoc-doi-cua-cha",
+    pullQuote: "Lần đầu tiên mình ngồi im lặng nghe câu chuyện về cha mà không vội.",
+  });
+  assert.equal(refMail.subject, "Cảm ơn những dòng lưu bút của bạn · Cuộc Đời Của Cha");
+  assert.ok(refMail.html.includes("Lần đầu tiên mình ngồi im lặng"));
+
+  // Simulate 24h anti-spam cooldown in DB
+  resetEmailSchemaCacheForTests();
+  const sentRows = [];
+  const mockDb = {
+    prepare(sql) {
+      return {
+        bind(...args) {
+          return {
+            async first() {
+              if (sql.includes("SELECT id FROM email_logs")) {
+                const [evKey, recEmail] = args;
+                const found = sentRows.find((r) => r.event_id === evKey && r.recipient_email === recEmail);
+                return found ? { id: found.id } : null;
+              }
+              return null;
+            },
+            async run() {
+              if (sql.includes("INSERT INTO email_logs")) {
+                sentRows.push({ id: args[0], event_id: args[1], recipient_email: args[3] });
+              }
+              return { success: true };
+            },
+          };
+        },
+        async run() {
+          return { success: true };
+        },
+      };
+    },
+  };
+
+  let fetchCalls = 0;
+  const mockFetch = async () => {
+    fetchCalls += 1;
+    return new Response(JSON.stringify({ id: `re_contrib_${fetchCalls}` }), { status: 200 });
+  };
+  const env = { DB: mockDb, RESEND_API_KEY: "re_test_key" };
+
+  // 1st photo upload -> sends 1 thank-you email
+  const first = await sendContributionThankYouEmail(env, {
+    kind: "media",
+    member: { id: "mbr-1", name: "Lan Anh", email: "lan@example.com" },
+    targetKey: "alb-1",
+    targetTitle: "Cuộc Đời Của Cha",
+    fetchImpl: mockFetch,
+  });
+  assert.equal(first.ok, true);
+  assert.equal(fetchCalls, 1);
+
+  // 2nd photo upload to same album within 24h -> skipped cleanly (anti-spam!)
+  const second = await sendContributionThankYouEmail(env, {
+    kind: "media",
+    member: { id: "mbr-1", name: "Lan Anh", email: "lan@example.com" },
+    targetKey: "alb-1",
+    targetTitle: "Cuộc Đời Của Cha",
+    fetchImpl: mockFetch,
+  });
+  assert.equal(second.ok, false);
+  assert.equal(second.status, "skipped");
+  assert.equal(fetchCalls, 1);
 });
