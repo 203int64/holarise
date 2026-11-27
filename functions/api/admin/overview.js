@@ -1,3 +1,4 @@
+import { ensureChatAndCapabilitySchema } from "../../_lib/capabilities.js";
 import { isDriveConfigured } from "../../_lib/drive.js";
 import { getSettingsMap } from "../../_lib/gas.js";
 import { ensureMediaApprovalSchema } from "../../_lib/media-approval-schema.js";
@@ -9,7 +10,10 @@ export async function onRequestGet(context) {
   if (!auth.ok) return auth.response;
 
   const db = context.env.DB;
-  await ensureMediaApprovalSchema(db).catch(() => null);
+  await Promise.all([
+    ensureMediaApprovalSchema(db).catch(() => null),
+    ensureChatAndCapabilitySchema(db).catch(() => null),
+  ]);
 
   const [
     regCountsRes,
@@ -121,6 +125,15 @@ export async function onRequestGet(context) {
   }
 
   const [albumRow, pendingPhotoRow, totalPhotoRow] = mediaStatsRes;
+  const chatStatsRow = await db
+    .prepare(
+      `SELECT COUNT(*) AS total,
+              SUM(CASE WHEN unread_admin > 0 THEN 1 ELSE 0 END) AS unread_threads,
+              SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) AS open_threads
+       FROM chat_threads`
+    )
+    .first()
+    .catch(() => ({ total: 0, unread_threads: 0, open_threads: 0 }));
 
   return jsonResponse({
     ok: true,
@@ -136,6 +149,11 @@ export async function onRequestGet(context) {
     posts,
     reflections,
     feedbacks,
+    chat: {
+      total: Number(chatStatsRow?.total || 0),
+      unreadThreads: Number(chatStatsRow?.unread_threads || 0),
+      openThreads: Number(chatStatsRow?.open_threads || 0),
+    },
     members: {
       total: Number(membersRes?.total || 0),
       active: Number(membersRes?.active_cnt || 0),

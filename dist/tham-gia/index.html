@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=4b6f51fef1">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=381066c4c4">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -112,7 +112,7 @@
       "name": "Làm sao để giữ chỗ tham gia một buổi gặp?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Bạn chỉ cần chọn buổi muốn tham dự tại trang Lịch hoạt động hoặc Tham gia, điền tên gọi và số Zalo trong 15 giây (không cần tạo tài khoản hay mật khẩu), sau đó vào Nhóm Zalo buổi gặp để nhận định vị và ghép xe."
+        "text": "Bạn chỉ cần chọn buổi phù hợp tại Lịch hoạt động, để lại tên gọi và số Zalo (không cần tạo tài khoản), sau đó vào Nhóm Zalo buổi gặp để nhận định vị và ghép xe."
       }
     },
     {
@@ -195,7 +195,7 @@
           <span class="lang-switch-opt">EN</span>
         </a>
         <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/" data-header-member-btn>
-          <span data-header-member-label>Đăng nhập</span>
+          <span data-header-member-label>Thẻ Thành Viên</span>
         </a>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Mở menu điều hướng">
           <span class="nav-toggle-bars" aria-hidden="true">
@@ -218,7 +218,7 @@
       </nav>
       <div class="mobile-drawer-footer">
         <a class="btn btn--primary" href="/tham-gia/" data-drawer-member-btn style="width: 100%; justify-content: space-between; padding: 15px 22px;">
-          <span data-drawer-member-label>Tham gia &amp; Thẻ Thành Viên</span>
+          <span data-drawer-member-label>Thẻ Thành Viên</span>
           <span aria-hidden="true">→</span>
         </a>
         <button class="btn btn--outline pwa-install-drawer-btn" type="button" data-pwa-install hidden>
@@ -239,8 +239,8 @@
   <main id="main-content">
     <section class="page-hero page-hero--compact join-page-hero">
   <div class="container">
-    <h1>Tham gia HolaRise</h1>
-    <p>Đăng nhập không mật khẩu hoặc tạo Thẻ Thành Viên để giữ chỗ 1 chạm và lưu giữ hành trình đồng hành cùng chúng mình.</p>
+    <h1>Ở lại cùng HolaRise</h1>
+    <p>Mở Thẻ Thành Viên để giữ chỗ một chạm, cất giữ các buổi đã đi qua và nhận album ảnh gốc.</p>
   </div>
 </section>
 
@@ -261,8 +261,8 @@
           <div class="auth-dialog-brand" style="margin-bottom: 18px; padding-right: 0;">
             <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="34" height="34">
             <div>
-              <h2 id="join-member-heading" class="auth-heading" style="font-size: 1.32rem; margin: 0;">Đăng nhập HolaRise</h2>
-              <p class="auth-dialog-sub">Tiếp tục với Google, Passkey hoặc Email.</p>
+              <h2 id="join-member-heading" class="auth-heading" style="font-size: 1.32rem; margin: 0;">Thẻ Thành Viên HolaRise</h2>
+              <p class="auth-dialog-sub">Mở hoặc tạo Thẻ Thành Viên bằng Google, Passkey hoặc Email / SĐT.</p>
             </div>
           </div>
 
@@ -289,6 +289,7 @@
               <span>Đăng nhập bằng Passkey</span>
             </button>
           </div>
+          <p class="auth-webview-note" data-webview-oauth-note hidden>Đang mở trong ứng dụng chat — bạn dùng Email / SĐT bên dưới, hoặc mở bằng Safari/Chrome để đăng nhập Google.</p>
 
           <div class="auth-divider" style="margin: 18px 0;"><span>hoặc</span></div>
 
@@ -299,8 +300,8 @@
             </div>
 
             <div class="auth-field" data-auth-step="identify">
-              <label for="m-auth-id">Email</label>
-              <input id="m-auth-id" name="identifier" type="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" required enterkeyhint="next">
+              <label for="m-auth-id">Email hoặc Số điện thoại</label>
+              <input id="m-auth-id" name="identifier" type="text" inputmode="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com hoặc 09xx..." required enterkeyhint="next">
             </div>
 
             <div class="auth-field" data-auth-step="password" hidden>
@@ -346,38 +347,24 @@
 
             <div class="auth-row-2">
               <div class="auth-field">
-                <label for="join-name" id="join-name-label">Người đại diện <span aria-hidden="true">*</span></label>
-                <input id="join-name" name="fullName" type="text" autocomplete="name" placeholder="Nguyễn Lan Anh" required minlength="2" data-error="join-name-error">
+                <label for="join-name" id="join-name-label">Tên bạn &amp; Đơn vị / CLB <span aria-hidden="true">*</span></label>
+                <input id="join-name" name="fullName" type="text" autocomplete="name" placeholder="Lan Anh · CLB FPT" required minlength="2" data-error="join-name-error">
                 <div id="join-name-error" class="field-error">
-                  <span data-error-text>Vui lòng nhập họ tên người đại diện (tối thiểu 2 ký tự).</span>
+                  <span data-error-text>Vui lòng nhập tên người đại diện và đơn vị (tối thiểu 2 ký tự).</span>
                 </div>
               </div>
               <div class="auth-field">
-                <label for="join-phone">SĐT / Zalo <span aria-hidden="true">*</span></label>
-                <input id="join-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required minlength="8" data-error="join-phone-error">
+                <label for="join-phone">Số Zalo hoặc Email <span aria-hidden="true">*</span></label>
+                <input id="join-phone" name="phone" type="text" inputmode="email" autocomplete="tel" placeholder="09xx xxx xxx / email" required minlength="6" data-error="join-phone-error">
                 <div id="join-phone-error" class="field-error">
-                  <span data-error-text>Vui lòng nhập số điện thoại hợp lệ (ít nhất 8 chữ số).</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="auth-row-2">
-              <div class="auth-field">
-                <label for="join-org" id="join-org-label">Đơn vị / CLB</label>
-                <input id="join-org" name="organization" type="text" autocomplete="organization" placeholder="MusicSpace, CLB ĐH FPT...">
-              </div>
-              <div class="auth-field">
-                <label for="join-email">Email đơn vị <span class="auth-hint-inline">(tùy chọn)</span></label>
-                <input id="join-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="contact@tochuc.vn" data-error="join-email-error">
-                <div id="join-email-error" class="field-error">
-                  <span data-error-text>Email chưa đúng định dạng.</span>
+                  <span data-error-text>Vui lòng nhập số Zalo (từ 8 chữ số) hoặc email hợp lệ.</span>
                 </div>
               </div>
             </div>
 
             <div class="auth-field">
-              <label for="join-message" id="join-note-label">Nội dung đề xuất &amp; thời gian dự kiến</label>
-              <textarea id="join-message" name="note" rows="3" placeholder="Mô tả ngắn gọn đề xuất hợp tác để Ban Điều Phối liên hệ trao đổi..."></textarea>
+              <label for="join-message" id="join-note-label">Đề xuất ngắn &amp; thời gian dự kiến</label>
+              <textarea id="join-message" name="note" rows="3" placeholder="Bạn muốn cùng HolaRise tổ chức điều gì và vào khoảng thời gian nào?"></textarea>
             </div>
 
             <div class="form-status" role="status" aria-live="polite"></div>
@@ -400,12 +387,17 @@
 
         <form class="auth-form" id="onboarding-form" novalidate>
           <div>
-            <h2 class="auth-heading">Chào mừng bạn đến với HolaRise</h2>
-            <p class="auth-lead">Chọn trụ cột quan tâm và đơn vị học tập/công tác để hoàn thiện Thẻ Thành Viên của bạn.</p>
+            <h2 class="auth-heading">Đặt tên cho hành trình của bạn</h2>
+            <p class="auth-lead">Chỉ cần tên hiển thị và trụ cột bạn quan tâm để mở Thẻ Thành Viên.</p>
           </div>
 
           <div class="auth-field">
-            <label>Mảng hoạt động bạn quan tâm nhất</label>
+            <label for="ob-name">Tên hiển thị trên thẻ <span aria-hidden="true">*</span></label>
+            <input id="ob-name" name="name" type="text" autocomplete="name" minlength="2" required placeholder="Trần Quốc Bảo">
+          </div>
+
+          <div class="auth-field">
+            <label>Trụ cột bạn muốn đồng hành</label>
             <div class="auth-pillar-strip" style="margin-top: 4px;">
               <div class="auth-pillar-item">
                 <input class="visually-hidden" type="radio" name="obPillar" id="ob-p-heart" value="holaheart" checked>
@@ -422,28 +414,25 @@
             </div>
           </div>
 
-          <div class="auth-row-2">
-            <div class="auth-field">
-              <label for="ob-name">Tên hiển thị trên thẻ <span aria-hidden="true">*</span></label>
-              <input id="ob-name" name="name" type="text" autocomplete="name" minlength="2" required placeholder="Trần Quốc Bảo">
+          <details class="rsvp-optional-note">
+            <summary>+ Thêm trường, đơn vị hoặc câu ngắn cho thẻ (tùy chọn)</summary>
+            <div class="form-grid" style="margin-top: 12px;">
+              <div class="auth-field">
+                <label for="ob-org">Trường / Đơn vị</label>
+                <input id="ob-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Gõ để tìm trường hoặc đơn vị...">
+              </div>
+              <div class="org-quick-chips" aria-label="Chọn nhanh đơn vị phổ biến">
+                <button type="button" class="org-chip-btn" data-org-chip="Đại học FPT Hà Nội (Hòa Lạc)" data-org-target="ob-org">ĐH FPT</button>
+                <button type="button" class="org-chip-btn" data-org-chip="Đại học Quốc gia Hà Nội – Cơ sở Hòa Lạc (ĐHQGHN)" data-org-target="ob-org">ĐHQGHN Hòa Lạc</button>
+                <button type="button" class="org-chip-btn" data-org-chip="Khu Công nghệ cao Hòa Lạc (HHTP)" data-org-target="ob-org">KCNC Hòa Lạc</button>
+                <button type="button" class="org-chip-btn" data-org-chip="Người đi làm / Tự do" data-org-target="ob-org">Người đi làm</button>
+              </div>
+              <div class="auth-field">
+                <label for="ob-bio">Một câu ngắn cho thẻ</label>
+                <input id="ob-bio" name="bio" type="text" maxlength="160" placeholder="Ví dụ: Sống sâu hơn, xanh hơn và bền bỉ sẻ chia.">
+              </div>
             </div>
-            <div class="auth-field">
-              <label for="ob-org">Trường / Đơn vị <span class="auth-hint-inline">(48 gợi ý sẵn)</span></label>
-              <input id="ob-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Gõ để tìm trường hoặc đơn vị...">
-            </div>
-          </div>
-
-          <div class="org-quick-chips" aria-label="Chọn nhanh đơn vị phổ biến">
-            <button type="button" class="org-chip-btn" data-org-chip="Đại học FPT Hà Nội (Hòa Lạc)" data-org-target="ob-org">ĐH FPT</button>
-            <button type="button" class="org-chip-btn" data-org-chip="Đại học Quốc gia Hà Nội – Cơ sở Hòa Lạc (ĐHQGHN)" data-org-target="ob-org">ĐHQGHN Hòa Lạc</button>
-            <button type="button" class="org-chip-btn" data-org-chip="Khu Công nghệ cao Hòa Lạc (HHTP)" data-org-target="ob-org">KCNC Hòa Lạc</button>
-            <button type="button" class="org-chip-btn" data-org-chip="Người đi làm / Tự do" data-org-target="ob-org">Người đi làm</button>
-          </div>
-
-          <div class="auth-field">
-            <label for="ob-bio">Một câu ngắn cho thẻ <span class="auth-hint-inline">(tùy chọn)</span></label>
-            <input id="ob-bio" name="bio" type="text" maxlength="160" placeholder="Ví dụ: Sống sâu hơn, xanh hơn và bền bỉ sẻ chia.">
-          </div>
+          </details>
 
           <div class="form-status" id="ob-status" role="status" aria-live="polite"></div>
 
@@ -460,6 +449,7 @@
     <div class="member-hub-shell member-hub-shell--editorial">
       <nav class="member-hub-tabs" role="tablist" aria-label="Quản lý tài khoản thành viên">
         <button type="button" class="member-hub-tab is-active" role="tab" aria-selected="true" data-dash-tab="profile">Hành trình &amp; Thẻ</button>
+        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="desk">Tin nhắn &amp; Nhiệm vụ <span class="member-tab-badge" id="dash-desk-badge" hidden>0</span></button>
         <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="security">Bảo mật &amp; Đăng nhập</button>
       </nav>
 
@@ -554,7 +544,7 @@
               <div class="member-journey-hero-head">
                 <div>
                   <span class="member-editorial-kicker">Hành trình của bạn tại HolaRise</span>
-                  <h2 id="dash-welcome-heading">Chào mừng trở lại</h2>
+                  <h2 id="dash-welcome-heading">Hành trình đang mở ra</h2>
                 </div>
                 <a class="arrow-link" href="/lich-hoat-dong/">Lịch hoạt động →</a>
               </div>
@@ -761,6 +751,65 @@
         </dialog>
       </div>
 
+      <!-- TAB 2: MESSAGES, CAPABILITIES & EVENT COMPANION DESK -->
+      <div class="member-hub-pane" data-dash-pane="desk" id="hop-thoai" hidden>
+        <div class="member-hub-stack">
+          <section class="member-panel-box" id="member-capabilities-section">
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">Đồng hành &amp; Trao quyền</span>
+                <h2>Quyền &amp; Nhiệm vụ của bạn</h2>
+              </div>
+              <button type="button" class="btn btn--outline btn--sm" id="btn-refresh-member-desk">Làm mới</button>
+            </div>
+            <div id="member-capabilities-list" class="member-cap-grid">
+              <p class="member-empty-hint">Khi Ban Điều phối trao quyền Người đồng hành đón khách, Check-in buổi gặp hoặc mở khóa Album gốc, thẻ quyền sẽ hiện tại đây.</p>
+            </div>
+          </section>
+
+          <section class="member-panel-box" id="member-checkin-section" hidden>
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">Điểm danh hiện trường · Bảo mật thông tin</span>
+                <h2 id="member-checkin-title">Check-in buổi gặp</h2>
+                <p class="member-empty-hint" id="member-checkin-stats">Danh sách chỉ hiển thị tên gọi và 4 số cuối để bảo vệ dữ liệu người tham dự.</p>
+              </div>
+              <button type="button" class="btn btn--outline btn--sm" id="btn-close-member-checkin">Đóng</button>
+            </div>
+            <div class="member-checkin-toolbar">
+              <input type="search" id="member-checkin-search" placeholder="Tìm nhanh theo tên hoặc 4 số cuối..." aria-label="Tìm người tham dự">
+            </div>
+            <div id="member-checkin-list" class="member-checkin-list"></div>
+          </section>
+
+          <section class="member-panel-box member-desk-chat-box">
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">Hộp thoại hai chiều</span>
+                <h2>Tin nhắn với Ban Điều phối &amp; Khách sự kiện</h2>
+              </div>
+            </div>
+            <div class="desk-split-shell" id="member-desk-shell">
+              <aside class="desk-thread-list" id="member-desk-threads" aria-label="Danh sách cuộc trò chuyện"></aside>
+              <div class="desk-conversation-pane">
+                <div class="desk-conv-head" id="member-desk-conv-head">
+                  <strong id="member-desk-conv-title">Chọn cuộc trò chuyện</strong>
+                  <span class="desk-conv-meta" id="member-desk-conv-meta"></span>
+                </div>
+                <div class="desk-messages" id="member-desk-messages" role="log" aria-live="polite"></div>
+                <form class="desk-compose-form" id="member-desk-form" novalidate>
+                  <textarea id="member-desk-input" rows="2" maxlength="2000" placeholder="Nhập tin nhắn trao đổi với Ban Điều phối hoặc trả lời khách..." aria-label="Nội dung tin nhắn"></textarea>
+                  <div class="desk-compose-actions">
+                    <span class="form-status" id="member-desk-status" role="status" aria-live="polite"></span>
+                    <button type="submit" class="btn btn--primary btn--sm" id="member-desk-send-btn">Gửi tin nhắn</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
       <!-- TAB 3: SECURITY (Passkey Management) -->
       <div class="member-hub-pane" data-dash-pane="security" hidden>
         <div class="member-hub-stack">
@@ -781,6 +830,7 @@
       </div>
     </div>
   </div>
+<script src="/assets/js/member-desk.js" defer></script>
 </section>
 
 <section class="section faq-editorial-section" id="hoi-dap" aria-labelledby="join-faq-heading">
@@ -828,7 +878,7 @@
         <div class="faq-panel" id="faq-panel-2" role="region">
           <div class="faq-panel-inner">
             <div class="faq-panel-content">
-              <p>Bạn chỉ cần chọn buổi muốn tham dự tại trang Lịch hoạt động hoặc Tham gia, điền tên gọi và số Zalo trong 15 giây (không cần tạo tài khoản hay mật khẩu), sau đó vào Nhóm Zalo buổi gặp để nhận định vị và ghép xe.</p>
+              <p>Bạn chỉ cần chọn buổi phù hợp tại Lịch hoạt động, để lại tên gọi và số Zalo (không cần tạo tài khoản), sau đó vào Nhóm Zalo buổi gặp để nhận định vị và ghép xe.</p>
               <a class="faq-inline-link" href="/lich-hoat-dong/">Xem lịch &amp; chi phí từng buổi →</a>
             </div>
           </div>
@@ -977,14 +1027,9 @@
       <div class="modal-member-bar" id="modal-member-rsvp-bar" hidden>
         <div class="modal-member-bar-copy">
           <strong id="modal-member-bar-title">Đang giữ chỗ bằng tài khoản HolaRise</strong>
-          <span id="modal-member-bar-sub">Chỉ cần chọn số chỗ và bấm xác nhận.</span>
+          <span id="modal-member-bar-sub">Chỉ cần xác nhận bên dưới để giữ chỗ ngay.</span>
         </div>
         <button class="btn btn--primary btn--sm" type="button" id="modal-member-onetap-btn">Giữ chỗ 1 chạm</button>
-      </div>
-
-      <div class="rsvp-guest-signin-bar" data-rsvp-guest-prompt>
-        <span>Đăng nhập bằng Google / Passkey để giữ chỗ trong 1 chạm.</span>
-        <button type="button" class="btn btn--outline btn--sm" data-open-member-auth>Đăng nhập</button>
       </div>
 
       <form class="form-grid rsvp-modal-form" id="modal-rsvp-form" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register" data-endpoint="/api/registrations" data-phone="077.777.1948" data-phone-raw="0777771948" data-zalo="https://zalo.me/0777771948" data-zalo-group="https://zalo.me/g/7fock88aizzrdkmr9ggf" novalidate>
@@ -1040,7 +1085,7 @@
 
         <div class="rsvp-submit-block">
           <button class="btn btn--primary rsvp-submit-btn" type="submit" id="modal-submit-btn">Xác nhận giữ chỗ</button>
-          <p class="rsvp-trust-note">Đi một mình luôn có người đón · Không cần mật khẩu · <a href="/chinh-sach/">Minh bạch &amp; Bảo mật</a></p>
+          <p class="rsvp-trust-note">Đi một mình luôn có người đón · <a href="/chinh-sach/">Minh bạch &amp; An toàn</a><span data-rsvp-guest-prompt> · <button type="button" class="inline-text-link" data-open-member-auth>Đã có Thẻ Thành Viên?</button></span></p>
         </div>
       </form>
 
@@ -1135,16 +1180,20 @@
           <a class="btn btn--primary rsvp-submit-btn" href="https://zalo.me/g/7fock88aizzrdkmr9ggf" target="_blank" rel="noopener noreferrer" id="modal-zalo-group-btn">Vào Nhóm Zalo buổi gặp ↗</a>
           <div class="rsvp-secondary-actions">
             <button type="button" class="btn btn--outline btn--sm" data-ics-download="modal" id="modal-ics-btn" hidden>Lưu lịch (.ics)</button>
-            <button type="button" class="btn btn--outline btn--sm" data-pass-download="modal">Tải thiệp (PNG)</button>
             <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Rủ bạn cùng đi</button>
+          </div>
+          <div class="rsvp-more-links">
+            <button type="button" class="inline-text-link" data-pass-download="modal">Tải thiệp (PNG)</button>
+            <span aria-hidden="true">·</span>
             <span class="copy-control">
-              <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
+              <button type="button" class="inline-text-link" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
                 <span>Sao chép lời mời</span>
               </button>
               <span class="copy-tip" role="status"></span>
             </span>
+            <span aria-hidden="true">·</span>
+            <button type="button" class="inline-text-link" data-pass-new="modal">Giữ chỗ cho bạn</button>
           </div>
-          <button type="button" class="pass-reset-link" data-pass-new="modal">Giữ chỗ thêm cho một người bạn</button>
         </div>
       </div>
     </div>
@@ -1157,8 +1206,8 @@
       <div class="auth-dialog-brand">
         <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="32" height="32">
         <div>
-          <h2 id="member-auth-heading" class="auth-dialog-title">Đăng nhập HolaRise</h2>
-          <p class="auth-dialog-sub">Tiếp tục với Google, Passkey hoặc Email.</p>
+          <h2 id="member-auth-heading" class="auth-dialog-title">Thẻ Thành Viên HolaRise</h2>
+          <p class="auth-dialog-sub">Mở hoặc tạo thẻ bằng Google, Passkey hoặc Email / SĐT.</p>
         </div>
       </div>
 
@@ -1183,6 +1232,7 @@
           <span>Đăng nhập bằng Passkey</span>
         </button>
       </div>
+      <p class="auth-webview-note" data-webview-oauth-note hidden>Đang mở trong ứng dụng chat — bạn dùng Email / SĐT bên dưới, hoặc mở bằng Safari/Chrome để đăng nhập Google.</p>
 
       <div class="auth-divider" style="margin: 16px 0;"><span>hoặc</span></div>
 
@@ -1193,8 +1243,8 @@
         </div>
 
         <div class="auth-field" data-auth-step="identify">
-          <label for="ma-id">Email</label>
-          <input id="ma-id" name="identifier" type="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" required>
+          <label for="ma-id">Email hoặc Số điện thoại</label>
+          <input id="ma-id" name="identifier" type="text" inputmode="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com hoặc 09xx..." required>
         </div>
 
         <div class="auth-field" data-auth-step="password" hidden>
@@ -1288,16 +1338,19 @@
           <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
         </details>
 
-        <div class="auth-row-2" id="fb-guest-contact-row">
-          <div class="auth-field">
-            <label for="fb-name">Tên của bạn <span class="auth-hint-inline">(tùy chọn)</span></label>
-            <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Bỏ trống nếu ẩn danh">
+        <details class="rsvp-optional-note" id="fb-guest-contact-row">
+          <summary>+ Để lại tên hoặc liên hệ nếu muốn nhận phản hồi (tùy chọn)</summary>
+          <div class="auth-row-2" style="margin-top: 10px;">
+            <div class="auth-field">
+              <label for="fb-name">Tên của bạn</label>
+              <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Bỏ trống nếu ẩn danh">
+            </div>
+            <div class="auth-field">
+              <label for="fb-contact">Email / Zalo</label>
+              <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Để BĐP phản hồi lại">
+            </div>
           </div>
-          <div class="auth-field">
-            <label for="fb-contact">Email / Zalo <span class="auth-hint-inline">(tùy chọn)</span></label>
-            <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Để BĐP phản hồi lại">
-          </div>
-        </div>
+        </details>
 
         <div class="form-status" id="fb-status" role="status" aria-live="polite"></div>
         <div class="fb-submit-row">
@@ -1599,10 +1652,10 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/main.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/join-pass.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/member.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/pwa.js?v=4b6f51fef1" defer></script>
+  <script src="/assets/js/motion.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/main.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/join-pass.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/member.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/pwa.js?v=381066c4c4" defer></script>
 </body>
 </html>

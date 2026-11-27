@@ -45,6 +45,7 @@
     registrations: "Đơn đăng ký",
     events: "Lịch sự kiện",
     posts: "Bài viết",
+    inbox: "Hộp thoại & Trao quyền",
     community: "Cộng đồng",
     settings: "Giao diện & Cài đặt",
   };
@@ -934,8 +935,10 @@
     else if (tab === "registrations") loadRegistrations(false);
     else if (tab === "events") loadEvents();
     else if (tab === "posts") loadPosts();
+    else if (tab === "inbox") window.__holariseAdminDesk?.open();
     else if (tab === "community") loadCommunity();
     else if (tab === "settings") loadSettings();
+    if (tab !== "inbox") window.__holariseAdminDesk?.pause();
   }
 
   function switchSubtab(attr, panelAttr, value) {
@@ -964,6 +967,7 @@
       setBadgeCount(["badge-new-regs", "badge-new-regs-mobile"], data.registrations?.new || 0);
       setBadgeCount(["badge-pending-refs", "badge-pending-refs-mobile"], data.reflections?.pending || 0);
       setBadgeCount(["badge-pending-photos"], data.media?.pendingPhotoCount || 0);
+      setBadgeCount(["badge-unread-chat"], data.chat?.unreadThreads || 0);
 
       const newRegs = Number(data.registrations?.new || 0);
       const pendingRefs = Number(data.reflections?.pending || 0);

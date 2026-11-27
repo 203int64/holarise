@@ -945,7 +945,7 @@
     if (name === "fullName") {
       if (val.length < 2) {
         return t(
-          "Lỗi: Vui lòng nhập họ và tên đầy đủ (tối thiểu 2 ký tự).",
+          "Vui lòng nhập tên gọi của bạn (tối thiểu 2 ký tự).",
           "Please enter your name (at least 2 characters)."
         );
       }
@@ -956,7 +956,7 @@
       var digits = val.replace(/\D/g, "").length;
       if (digits < 8 && !EMAIL_REGEX.test(val)) {
         return t(
-          "Lỗi: Vui lòng nhập số điện thoại / Zalo hợp lệ (ít nhất 8 chữ số).",
+          "Vui lòng nhập số điện thoại / Zalo (ít nhất 8 chữ số) hoặc email hợp lệ.",
           "Please enter a valid phone number (8+ digits) or email address."
         );
       }
@@ -966,7 +966,7 @@
     if (name === "email") {
       if (val && !EMAIL_REGEX.test(val)) {
         return t(
-          "Lỗi: Email chưa đúng định dạng (ví dụ: tenban@gmail.com), hoặc bạn có thể để trống.",
+          "Email chưa đúng định dạng (ví dụ: tenban@gmail.com), hoặc bạn có thể để trống.",
           "Please enter a valid email address (e.g. name@example.com), or leave it blank."
         );
       }
@@ -4800,5 +4800,242 @@
         { passive: true }
       );
     }
+  })();
+
+  /* =========================================================================
+     HERO "BÀN GỖ ĐANG SÁNG ĐÈN" — INTERACTIVE AVATAR-TO-VOICE & REAL HEART
+     ========================================================================= */
+  (function initHeroVoiceCard() {
+    var card = document.querySelector("[data-hero-voice-card]");
+    if (!card) return;
+    var tabs = Array.prototype.slice.call(card.querySelectorAll("[data-hv-tab]"));
+    if (!tabs.length) return;
+
+    var avatarEl = card.querySelector("[data-hv-avatar]");
+    var nameEl = card.querySelector("[data-hv-name]");
+    var orgEl = card.querySelector("[data-hv-org]");
+    var quoteEl = card.querySelector("[data-hv-quote]");
+    var linkEl = card.querySelector("[data-hv-link]");
+    var sourceEl = card.querySelector("[data-hv-source]");
+    var heartBtn = card.querySelector("[data-hv-heart]");
+    var heartCountEl = card.querySelector("[data-hv-heart-count]");
+
+    var HEART_KEY = "holarise_hero_hearts_v1";
+    var heartedMap = {};
+    try {
+      heartedMap = JSON.parse(localStorage.getItem(HEART_KEY) || "{}") || {};
+    } catch (_e) {
+      heartedMap = {};
+    }
+    var countOverrides = {};
+    var currentIdx = 0;
+    var timer = null;
+    var userPaused = false;
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function syncHeartUi(voiceId, baseCount) {
+      if (!heartBtn) return;
+      if (!voiceId) {
+        heartBtn.hidden = true;
+        return;
+      }
+      heartBtn.hidden = false;
+      heartBtn.setAttribute("data-voice-id", voiceId);
+      var cnt = Object.prototype.hasOwnProperty.call(countOverrides, voiceId)
+        ? countOverrides[voiceId]
+        : Number(baseCount || 0);
+      if (heartCountEl) heartCountEl.textContent = String(Math.max(0, cnt));
+      var hearted = Boolean(heartedMap[voiceId]);
+      heartBtn.classList.toggle("is-hearted", hearted);
+      heartBtn.setAttribute("aria-pressed", hearted ? "true" : "false");
+    }
+
+    function applyTab(idx, animate) {
+      var safeIdx = ((idx % tabs.length) + tabs.length) % tabs.length;
+      currentIdx = safeIdx;
+      var btn = tabs[safeIdx];
+      tabs.forEach(function (tBtn, i) {
+        var active = i === safeIdx;
+        tBtn.classList.toggle("is-active", active);
+        tBtn.setAttribute("aria-selected", active ? "true" : "false");
+      });
+
+      var paint = function () {
+        var vId = btn.getAttribute("data-voice-id") || "";
+        var vName = btn.getAttribute("data-voice-name") || "";
+        var vOrg = btn.getAttribute("data-voice-org") || "";
+        var vQuote = btn.getAttribute("data-voice-quote") || "";
+        var vAvatar = btn.getAttribute("data-voice-avatar") || "";
+        var vInitials = btn.getAttribute("data-voice-initials") || "HR";
+        var vHearts = btn.getAttribute("data-voice-hearts") || "0";
+        var vHref = btn.getAttribute("data-voice-href") || "/hanh-trinh/";
+        var vSource = btn.getAttribute("data-voice-source") || "";
+
+        if (avatarEl) {
+          avatarEl.textContent = "";
+          if (vAvatar) {
+            var img = document.createElement("img");
+            img.src = vAvatar;
+            img.alt = "";
+            img.width = 36;
+            img.height = 36;
+            img.loading = "lazy";
+            img.decoding = "async";
+            avatarEl.classList.add("hero-voice-avatar--photo");
+            avatarEl.appendChild(img);
+          } else {
+            avatarEl.classList.remove("hero-voice-avatar--photo");
+            avatarEl.textContent = vInitials;
+          }
+        }
+        if (nameEl) nameEl.textContent = vName;
+        if (orgEl) orgEl.textContent = vOrg;
+        if (quoteEl) quoteEl.textContent = "\u201c" + vQuote + "\u201d";
+        if (linkEl) linkEl.setAttribute("href", vHref);
+        if (sourceEl) sourceEl.textContent = vSource;
+        syncHeartUi(vId, vHearts);
+      };
+
+      if (animate && !reduceMotion) {
+        card.classList.add("is-switching");
+        setTimeout(function () {
+          paint();
+          card.classList.remove("is-switching");
+        }, 160);
+      } else {
+        paint();
+      }
+    }
+
+    function stopAuto() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    function startAuto() {
+      stopAuto();
+      if (tabs.length < 2 || reduceMotion || userPaused || document.hidden) return;
+      timer = setInterval(function () {
+        applyTab(currentIdx + 1, true);
+      }, 8000);
+    }
+
+    tabs.forEach(function (tBtn, i) {
+      tBtn.addEventListener("click", function () {
+        userPaused = true;
+        stopAuto();
+        applyTab(i, true);
+      });
+    });
+
+    card.addEventListener("mouseenter", stopAuto);
+    card.addEventListener("mouseleave", startAuto);
+    card.addEventListener("focusin", stopAuto);
+    card.addEventListener("focusout", startAuto);
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) stopAuto();
+      else startAuto();
+    });
+
+    var touchStartX = 0;
+    card.addEventListener(
+      "touchstart",
+      function (e) {
+        if (e.touches && e.touches.length) touchStartX = e.touches[0].clientX;
+      },
+      { passive: true }
+    );
+    card.addEventListener(
+      "touchend",
+      function (e) {
+        if (tabs.length < 2 || !e.changedTouches || !e.changedTouches.length) return;
+        var dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 36) {
+          userPaused = true;
+          stopAuto();
+          applyTab(dx < 0 ? currentIdx + 1 : currentIdx - 1, true);
+        }
+      },
+      { passive: true }
+    );
+
+    if (heartBtn) {
+      heartBtn.addEventListener("click", function () {
+        var vId = heartBtn.getAttribute("data-voice-id") || "";
+        if (!vId || heartBtn.disabled) return;
+        userPaused = true;
+        stopAuto();
+        heartBtn.disabled = true;
+
+        var prevCnt = Number(heartCountEl ? heartCountEl.textContent : 0) || 0;
+        var wasHearted = Boolean(heartedMap[vId]);
+        var optimistic = wasHearted ? Math.max(0, prevCnt - 1) : prevCnt + 1;
+        heartedMap[vId] = !wasHearted;
+        countOverrides[vId] = optimistic;
+        syncHeartUi(vId, optimistic);
+
+        fetch("/api/reflections/" + encodeURIComponent(vId) + "/heart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reaction: "heart" }),
+        })
+          .then(function (r) {
+            return r.ok ? r.json() : null;
+          })
+          .then(function (data) {
+            if (data && data.ok) {
+              var finalCnt = Number(data.heartCount);
+              if (!isNaN(finalCnt)) countOverrides[vId] = finalCnt;
+              heartedMap[vId] = Boolean(data.hearted);
+              try {
+                localStorage.setItem(HEART_KEY, JSON.stringify(heartedMap));
+              } catch (_e) {}
+              syncHeartUi(vId, countOverrides[vId]);
+            }
+          })
+          .catch(function () {})
+          .finally(function () {
+            heartBtn.disabled = false;
+          });
+      });
+    }
+
+    syncHeartUi(tabs[0].getAttribute("data-voice-id") || "", tabs[0].getAttribute("data-voice-hearts") || "0");
+    startAuto();
+  })();
+
+  // Lazy-load Event Companion Chat Drawer ONLY when user clicks [data-open-event-chat]
+  (function initLazyEventChatTrigger() {
+    var loadingPromise = null;
+    document.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest("[data-open-event-chat]") : null;
+      if (!btn) return;
+      e.preventDefault();
+      if (typeof window.__holariseOpenEventChat === "function") {
+        window.__holariseOpenEventChat(btn);
+        return;
+      }
+      if (!loadingPromise) {
+        loadingPromise = new Promise(function (resolve, reject) {
+          var s = document.createElement("script");
+          s.src = "/assets/js/event-chat.js";
+          s.defer = true;
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      loadingPromise
+        .then(function () {
+          if (typeof window.__holariseOpenEventChat === "function") {
+            window.__holariseOpenEventChat(btn);
+          }
+        })
+        .catch(function () {
+          loadingPromise = null;
+        });
+    });
   })();
 })();

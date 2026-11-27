@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=4b6f51fef1">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=381066c4c4">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -128,7 +128,7 @@
           <span class="lang-switch-opt">EN</span>
         </a>
         <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/" data-header-member-btn>
-          <span data-header-member-label>Đăng nhập</span>
+          <span data-header-member-label>Thẻ Thành Viên</span>
         </a>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Mở menu điều hướng">
           <span class="nav-toggle-bars" aria-hidden="true">
@@ -151,7 +151,7 @@
       </nav>
       <div class="mobile-drawer-footer">
         <a class="btn btn--primary" href="/tham-gia/" data-drawer-member-btn style="width: 100%; justify-content: space-between; padding: 15px 22px;">
-          <span data-drawer-member-label>Tham gia &amp; Thẻ Thành Viên</span>
+          <span data-drawer-member-label>Thẻ Thành Viên</span>
           <span aria-hidden="true">→</span>
         </a>
         <button class="btn btn--outline pwa-install-drawer-btn" type="button" data-pwa-install hidden>
@@ -219,11 +219,7 @@
       <div class="invite-meta-links">
         <button class="invite-text-btn invite-text-btn--accent" type="button" data-register-event="__SSR_EVENT_TITLE__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-event-date="__SSR_EVENT_DATE_DISPLAY__" data-event-time="__SSR_INVITE_TIME_LABEL__" data-event-location="__SSR_EVENT_LOCATION__" data-venue-url="" data-event-fee="__SSR_EVENT_FEE__" data-event-seats="__SSR_EVENT_SEATS__" data-event-type="__SSR_EVENT_KICKER__" data-event-href="/su-kien/__SSR_EVENT_SLUG__/" data-event-image="__SSR_EVENT_IMAGE__" data-zalo-group="__SSR_EVENT_ZALO_GROUP__" data-ics-start="__SSR_INVITE_ICS_START__" data-ics-end="__SSR_INVITE_ICS_END__" data-note-summary="+ Gửi đôi dòng chia sẻ hoặc lời nhắn cho người điều phối (tùy chọn)" data-note-placeholder="Điều bạn muốn chia sẻ trước buổi gặp, hoặc để trống nếu chỉ muốn đến lắng nghe..." data-anon-share="true">Giữ chỗ tham dự</button>
         <span aria-hidden="true">·</span>
-        <button class="invite-text-btn" type="button" data-open-invite-share>Chia sẻ thư mời</button>
-        <span aria-hidden="true">·</span>
-        <a href="__SSR_GOOGLE_CAL_URL__" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
-        <span aria-hidden="true">·</span>
-        <a href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a>
+        <button class="invite-text-btn" type="button" data-open-invite-share>Gửi thiệp cho bạn</button>
       </div>
     </div>
   </div>
@@ -278,18 +274,42 @@
         <span>__SSR_INVITE_VENUE_NAME__</span>
       </div>
 
-      <p class="invite-rsvp-lead">Đi một mình luôn có người đón, không ép phát biểu. Chỉ cần tên gọi và số Zalo để chúng mình chuẩn bị chỗ ngồi và gửi định vị trước giờ gặp.</p>
+      <p class="invite-rsvp-lead">Chỉ cần tên gọi và số Zalo để chúng mình giữ chỗ và gửi định vị trước giờ gặp. Đi một mình luôn có người đón, không ép phát biểu.</p>
 
       <div class="invite-rsvp-actions">
         <button class="btn btn--primary" type="button" id="ws-open-rsvp-btn" data-open-on-hash="giu-cho" data-register-event="__SSR_EVENT_TITLE__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-event-date="__SSR_EVENT_DATE_DISPLAY__" data-event-time="__SSR_INVITE_TIME_LABEL__" data-event-location="__SSR_EVENT_LOCATION__" data-venue-url="" data-event-fee="__SSR_EVENT_FEE__" data-event-seats="__SSR_EVENT_SEATS__" data-event-type="__SSR_EVENT_KICKER__" data-event-href="/su-kien/__SSR_EVENT_SLUG__/" data-event-image="__SSR_EVENT_IMAGE__" data-zalo-group="__SSR_EVENT_ZALO_GROUP__" data-ics-start="__SSR_INVITE_ICS_START__" data-ics-end="__SSR_INVITE_ICS_END__" data-note-summary="+ Gửi đôi dòng chia sẻ hoặc lời nhắn cho người điều phối (tùy chọn)" data-note-placeholder="Điều bạn muốn chia sẻ trước buổi gặp, hoặc để trống nếu chỉ muốn đến lắng nghe..." data-anon-share="true">Xác nhận tham dự</button>
-        <button class="btn btn--outline" type="button" data-open-invite-share>Chia sẻ thư mời</button>
-        <a class="btn btn--outline" href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a>
+        <button class="btn btn--outline" type="button" data-open-invite-share>Gửi thiệp cho bạn</button>
       </div>
 
-      <p class="invite-rsvp-footnote">Giữ chỗ trong 15 giây, không cần tạo mật khẩu · <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a></p>
+      <!-- CMS:EVENT_COMPANIONS:START -->__SSR_EVENT_COMPANIONS_HTML__<!-- CMS:EVENT_COMPANIONS:END -->
+
+      <p class="invite-rsvp-footnote">Không thu vé · Không cần tài khoản · <a href="__SSR_GOOGLE_CAL_URL__" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a> · <a href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a> · <a href="/chinh-sach/">Minh bạch &amp; An toàn</a></p>
     </div>
   </div>
 </section>
+
+<dialog class="club-dialog club-dialog--chat" id="event-companion-chat-dialog" closedby="any" aria-labelledby="evchat-heading">
+  <div class="dialog-inner evchat-dialog-inner">
+    <button class="modal-close" type="button" data-modal-close aria-label="Đóng hộp thoại">×</button>
+    <div class="evchat-head">
+      <span class="kicker">HỎI NHANH NGƯỜI ĐÓN BẠN</span>
+      <h2 id="evchat-heading" class="evchat-title">Hộp thoại buổi gặp</h2>
+      <p class="evchat-sub" id="evchat-sub">Nhắn trực tiếp với người đồng hành buổi này. Nếu đang đi trên đường, bạn có thể mở nhanh <a id="evchat-zalo-escape" href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a>.</p>
+    </div>
+    <div class="evchat-messages" id="evchat-messages" role="log" aria-live="polite"></div>
+    <form class="evchat-form" id="evchat-form" novalidate>
+      <div class="evchat-guest-fields" id="evchat-guest-fields" hidden>
+        <input type="text" id="evchat-guest-name" maxlength="80" placeholder="Tên gọi của bạn" aria-label="Tên gọi của bạn">
+        <input type="text" id="evchat-guest-contact" maxlength="120" placeholder="Số Zalo hoặc email liên hệ" aria-label="Số Zalo hoặc email liên hệ">
+      </div>
+      <div class="evchat-compose-row">
+        <textarea id="evchat-input" rows="2" maxlength="1200" placeholder="Ví dụ: Mình đi một mình từ KTX, gửi xe ở đâu tiện nhất?" aria-label="Nội dung câu hỏi"></textarea>
+        <button class="btn btn--primary btn--sm" type="submit" id="evchat-send-btn">Gửi</button>
+      </div>
+      <div class="form-status" id="evchat-status" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</dialog>
 
 <!-- MusicSpace-style Event Share & Personalized Invitation Modal -->
 <dialog class="club-dialog club-dialog--share" id="event-share-modal" closedby="any" data-pillar="__SSR_EVENT_PILLAR__" data-share-url="__SSR_CANONICAL_URL__" data-share-title="__SSR_EVENT_SHARE_TITLE__" data-share-time="__SSR_INVITE_TIME_LABEL__" data-share-venue="__SSR_INVITE_VENUE_NAME__" aria-labelledby="event-share-heading">
@@ -310,25 +330,8 @@
       </div>
     </div>
 
-    <div class="share-inviter-grid" id="share-inviter-grid">
-      <div class="share-inviter-field">
-        <label for="share-recipient-name">Gửi tới <span class="auth-hint-inline">(tên người được mời)</span></label>
-        <input id="share-recipient-name" type="text" maxlength="60" placeholder="Ví dụ: Lan Anh">
-      </div>
-      <div class="share-inviter-field" id="share-inviter-field-wrap">
-        <label for="share-inviter-name">Người mời <span class="auth-hint-inline">(tên bạn)</span></label>
-        <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi">
-      </div>
-    </div>
-    <p class="share-inviter-signed-hint" id="share-inviter-signed-bar" hidden>Đang mời với tư cách <strong id="share-inviter-signed-name"></strong></p>
-
-    <div class="share-inviter-field">
-      <label for="share-personal-note">Lời nhắn viết tay trên thiệp <span class="auth-hint-inline">(tùy chọn)</span></label>
-      <input id="share-personal-note" type="text" maxlength="140" placeholder="Ví dụ: Cuối tuần này đi cùng mình nhé, có chỗ ngồi ấm lắm...">
-    </div>
-
     <div class="share-platforms-block">
-      <span class="share-section-label">Gửi qua</span>
+      <span class="share-section-label">Gửi ngay qua</span>
       <div class="share-platforms-grid">
         <button type="button" class="share-platform-btn" data-share-platform="zalo">
           <svg class="share-platform-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -369,13 +372,36 @@
     <div class="share-url-block">
       <div class="share-url-head">
         <label for="share-url-input" class="share-section-label">Đường dẫn thư mời</label>
-        <button type="button" class="share-preview-trigger" id="share-preview-env-btn">Xem thử hiệu ứng mở thiệp ↗</button>
       </div>
       <div class="share-url-row">
         <input id="share-url-input" type="text" readonly value="__SSR_CANONICAL_URL__">
         <button type="button" class="btn btn--primary btn--sm share-copy-btn" id="share-copy-btn">Sao chép</button>
       </div>
     </div>
+
+    <details class="rsvp-optional-note share-personalize-details">
+      <summary>+ Ghi tên người nhận &amp; lời nhắn viết tay lên thiệp (tùy chọn)</summary>
+      <div class="share-personalize-body">
+        <div class="share-inviter-grid" id="share-inviter-grid">
+          <div class="share-inviter-field">
+            <label for="share-recipient-name">Gửi tới <span class="auth-hint-inline">(tên người được mời)</span></label>
+            <input id="share-recipient-name" type="text" maxlength="60" placeholder="Ví dụ: Lan Anh">
+          </div>
+          <div class="share-inviter-field" id="share-inviter-field-wrap">
+            <label for="share-inviter-name">Người mời <span class="auth-hint-inline">(tên bạn)</span></label>
+            <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi">
+          </div>
+        </div>
+        <p class="share-inviter-signed-hint" id="share-inviter-signed-bar" hidden>Đang mời với tư cách <strong id="share-inviter-signed-name"></strong></p>
+
+        <div class="share-inviter-field">
+          <label for="share-personal-note">Lời nhắn viết tay trên thiệp</label>
+          <input id="share-personal-note" type="text" maxlength="140" placeholder="Ví dụ: Cuối tuần này đi cùng mình nhé...">
+        </div>
+
+        <button type="button" class="share-preview-trigger" id="share-preview-env-btn">Xem thử hiệu ứng mở thiệp ↗</button>
+      </div>
+    </details>
   </div>
 </dialog>
 </div>
@@ -474,14 +500,9 @@
       <div class="modal-member-bar" id="modal-member-rsvp-bar" hidden>
         <div class="modal-member-bar-copy">
           <strong id="modal-member-bar-title">Đang giữ chỗ bằng tài khoản HolaRise</strong>
-          <span id="modal-member-bar-sub">Chỉ cần chọn số chỗ và bấm xác nhận.</span>
+          <span id="modal-member-bar-sub">Chỉ cần xác nhận bên dưới để giữ chỗ ngay.</span>
         </div>
         <button class="btn btn--primary btn--sm" type="button" id="modal-member-onetap-btn">Giữ chỗ 1 chạm</button>
-      </div>
-
-      <div class="rsvp-guest-signin-bar" data-rsvp-guest-prompt>
-        <span>Đăng nhập bằng Google / Passkey để giữ chỗ trong 1 chạm.</span>
-        <button type="button" class="btn btn--outline btn--sm" data-open-member-auth>Đăng nhập</button>
       </div>
 
       <form class="form-grid rsvp-modal-form" id="modal-rsvp-form" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register" data-endpoint="/api/registrations" data-phone="077.777.1948" data-phone-raw="0777771948" data-zalo="https://zalo.me/0777771948" data-zalo-group="https://zalo.me/g/7fock88aizzrdkmr9ggf" novalidate>
@@ -537,7 +558,7 @@
 
         <div class="rsvp-submit-block">
           <button class="btn btn--primary rsvp-submit-btn" type="submit" id="modal-submit-btn">Xác nhận giữ chỗ</button>
-          <p class="rsvp-trust-note">Đi một mình luôn có người đón · Không cần mật khẩu · <a href="/chinh-sach/">Minh bạch &amp; Bảo mật</a></p>
+          <p class="rsvp-trust-note">Đi một mình luôn có người đón · <a href="/chinh-sach/">Minh bạch &amp; An toàn</a><span data-rsvp-guest-prompt> · <button type="button" class="inline-text-link" data-open-member-auth>Đã có Thẻ Thành Viên?</button></span></p>
         </div>
       </form>
 
@@ -632,16 +653,20 @@
           <a class="btn btn--primary rsvp-submit-btn" href="https://zalo.me/g/7fock88aizzrdkmr9ggf" target="_blank" rel="noopener noreferrer" id="modal-zalo-group-btn">Vào Nhóm Zalo buổi gặp ↗</a>
           <div class="rsvp-secondary-actions">
             <button type="button" class="btn btn--outline btn--sm" data-ics-download="modal" id="modal-ics-btn" hidden>Lưu lịch (.ics)</button>
-            <button type="button" class="btn btn--outline btn--sm" data-pass-download="modal">Tải thiệp (PNG)</button>
             <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Rủ bạn cùng đi</button>
+          </div>
+          <div class="rsvp-more-links">
+            <button type="button" class="inline-text-link" data-pass-download="modal">Tải thiệp (PNG)</button>
+            <span aria-hidden="true">·</span>
             <span class="copy-control">
-              <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
+              <button type="button" class="inline-text-link" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
                 <span>Sao chép lời mời</span>
               </button>
               <span class="copy-tip" role="status"></span>
             </span>
+            <span aria-hidden="true">·</span>
+            <button type="button" class="inline-text-link" data-pass-new="modal">Giữ chỗ cho bạn</button>
           </div>
-          <button type="button" class="pass-reset-link" data-pass-new="modal">Giữ chỗ thêm cho một người bạn</button>
         </div>
       </div>
     </div>
@@ -654,8 +679,8 @@
       <div class="auth-dialog-brand">
         <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="32" height="32">
         <div>
-          <h2 id="member-auth-heading" class="auth-dialog-title">Đăng nhập HolaRise</h2>
-          <p class="auth-dialog-sub">Tiếp tục với Google, Passkey hoặc Email.</p>
+          <h2 id="member-auth-heading" class="auth-dialog-title">Thẻ Thành Viên HolaRise</h2>
+          <p class="auth-dialog-sub">Mở hoặc tạo thẻ bằng Google, Passkey hoặc Email / SĐT.</p>
         </div>
       </div>
 
@@ -680,6 +705,7 @@
           <span>Đăng nhập bằng Passkey</span>
         </button>
       </div>
+      <p class="auth-webview-note" data-webview-oauth-note hidden>Đang mở trong ứng dụng chat — bạn dùng Email / SĐT bên dưới, hoặc mở bằng Safari/Chrome để đăng nhập Google.</p>
 
       <div class="auth-divider" style="margin: 16px 0;"><span>hoặc</span></div>
 
@@ -690,8 +716,8 @@
         </div>
 
         <div class="auth-field" data-auth-step="identify">
-          <label for="ma-id">Email</label>
-          <input id="ma-id" name="identifier" type="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" required>
+          <label for="ma-id">Email hoặc Số điện thoại</label>
+          <input id="ma-id" name="identifier" type="text" inputmode="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com hoặc 09xx..." required>
         </div>
 
         <div class="auth-field" data-auth-step="password" hidden>
@@ -785,16 +811,19 @@
           <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
         </details>
 
-        <div class="auth-row-2" id="fb-guest-contact-row">
-          <div class="auth-field">
-            <label for="fb-name">Tên của bạn <span class="auth-hint-inline">(tùy chọn)</span></label>
-            <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Bỏ trống nếu ẩn danh">
+        <details class="rsvp-optional-note" id="fb-guest-contact-row">
+          <summary>+ Để lại tên hoặc liên hệ nếu muốn nhận phản hồi (tùy chọn)</summary>
+          <div class="auth-row-2" style="margin-top: 10px;">
+            <div class="auth-field">
+              <label for="fb-name">Tên của bạn</label>
+              <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Bỏ trống nếu ẩn danh">
+            </div>
+            <div class="auth-field">
+              <label for="fb-contact">Email / Zalo</label>
+              <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Để BĐP phản hồi lại">
+            </div>
           </div>
-          <div class="auth-field">
-            <label for="fb-contact">Email / Zalo <span class="auth-hint-inline">(tùy chọn)</span></label>
-            <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Để BĐP phản hồi lại">
-          </div>
-        </div>
+        </details>
 
         <div class="form-status" id="fb-status" role="status" aria-live="polite"></div>
         <div class="fb-submit-row">
@@ -1096,10 +1125,10 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/main.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/join-pass.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/member.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/pwa.js?v=4b6f51fef1" defer></script>
+  <script src="/assets/js/motion.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/main.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/join-pass.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/member.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/pwa.js?v=381066c4c4" defer></script>
 </body>
 </html>

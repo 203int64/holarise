@@ -7,24 +7,34 @@
       <!-- CMS:HERO_MEDIA:END -->
       <div class="hero-card-scrim" aria-hidden="true"></div>
 
+      <!-- CMS:HERO_LIVE_PILL:START -->
+      {{HERO_LIVE_PILL_HTML}}
+      <!-- CMS:HERO_LIVE_PILL:END -->
+
       <div class="hero-card-bottom">
-        <div class="hero-card-copy">
-          <h1 class="hero-display-title">
-            {{HERO_HEADLINE_LINES}}
-          </h1>
-          <p class="hero-display-lead" data-hero-stagger>{{HERO_DESCRIPTION}}</p>
+        <div class="hero-card-main">
+          <div class="hero-card-copy">
+            <h1 class="hero-display-title">
+              {{HERO_HEADLINE_LINES}}
+            </h1>
+            <p class="hero-display-lead" data-hero-stagger>{{HERO_DESCRIPTION}}</p>
+          </div>
+
+          <div class="hero-card-actions" data-hero-stagger>
+            <a class="btn btn--light" href="{{HERO_PRIMARY_HREF}}" data-magnetic>
+              <span>{{HERO_PRIMARY_LABEL}}</span>
+              <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
+            </a>
+            <a class="hero-ghost-link" href="{{HERO_SECONDARY_HREF}}">
+              <span>{{HERO_SECONDARY_LABEL}}</span>
+              <span aria-hidden="true">↓</span>
+            </a>
+          </div>
         </div>
 
-        <div class="hero-card-actions" data-hero-stagger>
-          <a class="btn btn--light" href="{{HERO_PRIMARY_HREF}}" data-magnetic>
-            <span>{{HERO_PRIMARY_LABEL}}</span>
-            <span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span>
-          </a>
-          <a class="hero-ghost-link" href="{{HERO_SECONDARY_HREF}}">
-            <span>{{HERO_SECONDARY_LABEL}}</span>
-            <span aria-hidden="true">↓</span>
-          </a>
-        </div>
+        <!-- CMS:HERO_VOICE_CARD:START -->
+        {{HERO_VOICE_CARD_HTML}}
+        <!-- CMS:HERO_VOICE_CARD:END -->
       </div>
     </div>
   </div>
@@ -130,13 +140,13 @@
   <div class="container">
     <div class="cta-band" data-reveal>
       <div>
-        <h2>Walk with HolaRise</h2>
-        <p>Reserve a seat in 15 seconds with no password required, or reach out to co-host with us.</p>
-        <p class="cta-reassurance">Free admission · Solo &amp; international guests always welcomed</p>
+        <h2>A seat is kept open for you.</h2>
+        <p>Choose a gathering, leave your name and contact. Solo guests are always welcomed at the door.</p>
+        <p class="cta-reassurance">Free admission · No account required · Solo &amp; international guests welcomed</p>
       </div>
       <div class="cta-band-actions">
-        <a class="btn btn--light" href="/en/join/" data-magnetic>Join or Partner</a>
-        <a class="btn btn--ghost-dark" href="/en/join/#faq">FAQ &amp; Transparency</a>
+        <a class="btn btn--light" href="/en/schedule/" data-magnetic>Upcoming Schedule</a>
+        <a class="btn btn--ghost-dark" href="/en/join/">Member Pass</a>
       </div>
     </div>
   </div>

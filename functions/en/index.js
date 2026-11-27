@@ -4,6 +4,8 @@ import {
   applySiteVisualsSsr,
   buildEventsJsonLd,
   parsePartnersJson,
+  renderHeroLivePillHtml,
+  renderHeroVoiceCardHtml,
   renderHomeUpcomingSectionHtml,
   renderHorizontalGalleryHtml,
   renderPartnersStripHtml,
@@ -62,10 +64,12 @@ export async function onRequestGet({ request, env }) {
     return assetRes;
   }
 
-  const { upcoming } = splitEventsByDate(eventsRes.results || []);
+  const { upcoming, past } = splitEventsByDate(eventsRes.results || []);
   const partners = parsePartnersJson(partnersRow?.value || "[]");
 
   let html = await assetRes.text();
+  html = replaceMarker(html, "HERO_LIVE_PILL", renderHeroLivePillHtml(upcoming, past, "en"));
+  html = replaceMarker(html, "HERO_VOICE_CARD", renderHeroVoiceCardHtml({ voices: [], past, lang: "en" }));
   html = replaceMarker(html, "HOME_UPCOMING_SECTION", renderHomeUpcomingSectionHtml(upcoming, "en"));
   html = replaceMarker(html, "EVENTS_JSON_LD", buildEventsJsonLd(upcoming.slice(0, 1), "en"));
   if (partnersRow) {

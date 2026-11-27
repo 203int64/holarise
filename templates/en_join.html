@@ -1,7 +1,7 @@
 <section class="page-hero page-hero--compact join-page-hero">
   <div class="container">
-    <h1>Join {{BRAND_NAME}}</h1>
-    <p>Sign in without passwords to activate your Member Pass for 1-tap RSVP, or submit an institutional partnership proposal.</p>
+    <h1>Stay with {{BRAND_NAME}}</h1>
+    <p>Open your Member Pass for 1-tap RSVP, your gathering timeline, and original session photo archives.</p>
   </div>
 </section>
 
@@ -21,8 +21,8 @@
           <div class="auth-dialog-brand" style="margin-bottom: 18px; padding-right: 0;">
             <img src="/assets/images/logo-mark.png" alt="HolaRise emblem" width="34" height="34">
             <div>
-              <h2 id="join-member-heading" class="auth-heading" style="font-size: 1.32rem; margin: 0;">Sign in to HolaRise</h2>
-              <p class="auth-dialog-sub">Continue with Google, Passkey, or Email.</p>
+              <h2 id="join-member-heading" class="auth-heading" style="font-size: 1.32rem; margin: 0;">HolaRise Member Pass</h2>
+              <p class="auth-dialog-sub">Sign in or open a Member Pass with Google, Passkey, or Email.</p>
             </div>
           </div>
 
@@ -49,6 +49,7 @@
               <span>Sign in with Passkey</span>
             </button>
           </div>
+          <p class="auth-webview-note" data-webview-oauth-note hidden>In-app browser detected — continue with Email or Phone below, or open in Safari/Chrome for Google sign-in.</p>
 
           <div class="auth-divider" style="margin: 18px 0;"><span>or</span></div>
 
@@ -59,8 +60,8 @@
             </div>
 
             <div class="auth-field" data-auth-step="identify">
-              <label for="m-auth-id">Email</label>
-              <input id="m-auth-id" name="identifier" type="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="you@example.com" required enterkeyhint="next">
+              <label for="m-auth-id">Email or Phone</label>
+              <input id="m-auth-id" name="identifier" type="text" inputmode="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="you@example.com or +84..." required enterkeyhint="next">
             </div>
 
             <div class="auth-field" data-auth-step="password" hidden>
@@ -106,38 +107,24 @@
 
             <div class="auth-row-2">
               <div class="auth-field">
-                <label for="join-name" id="join-name-label">Contact person <span aria-hidden="true">*</span></label>
-                <input id="join-name" name="fullName" type="text" autocomplete="name" placeholder="e.g. Sarah Tran" required minlength="2" data-error="join-name-error">
+                <label for="join-name" id="join-name-label">Name &amp; Organization <span aria-hidden="true">*</span></label>
+                <input id="join-name" name="fullName" type="text" autocomplete="name" placeholder="Sarah · VNU Club" required minlength="2" data-error="join-name-error">
                 <div id="join-name-error" class="field-error">
-                  <span data-error-text>Please enter the contact person's name (at least 2 characters).</span>
+                  <span data-error-text>Please enter your name and organization (at least 2 characters).</span>
                 </div>
               </div>
               <div class="auth-field">
                 <label for="join-phone">Email or Phone / Zalo <span aria-hidden="true">*</span></label>
-                <input id="join-phone" name="phone" type="text" autocomplete="email" placeholder="partner@org.org or +84..." required minlength="6" data-error="join-phone-error">
+                <input id="join-phone" name="phone" type="text" inputmode="email" autocomplete="email" placeholder="email or +84..." required minlength="6" data-error="join-phone-error">
                 <div id="join-phone-error" class="field-error">
                   <span data-error-text>Please enter a valid email address or phone number (8+ digits).</span>
                 </div>
               </div>
             </div>
 
-            <div class="auth-row-2">
-              <div class="auth-field">
-                <label for="join-org" id="join-org-label">Organization / University</label>
-                <input id="join-org" name="organization" type="text" autocomplete="organization" placeholder="University, NGO, Club, or Venue">
-              </div>
-              <div class="auth-field">
-                <label for="join-email">Secondary email <span class="auth-hint-inline">(optional)</span></label>
-                <input id="join-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="team@organization.org" data-error="join-email-error">
-                <div id="join-email-error" class="field-error">
-                  <span data-error-text>Please enter a valid email address.</span>
-                </div>
-              </div>
-            </div>
-
             <div class="auth-field">
               <label for="join-message" id="join-note-label">Collaboration idea &amp; proposed timeline</label>
-              <textarea id="join-message" name="note" rows="3" placeholder="Briefly describe how you would like to collaborate so our coordinators can follow up..."></textarea>
+              <textarea id="join-message" name="note" rows="3" placeholder="Briefly describe what you would like to co-host and when..."></textarea>
             </div>
 
             <div class="form-status" role="status" aria-live="polite"></div>
@@ -160,12 +147,17 @@
 
         <form class="auth-form" id="onboarding-form" novalidate>
           <div>
-            <h2 class="auth-heading">Welcome to HolaRise</h2>
-            <p class="auth-lead">Pick the pillar closest to you and your university or workplace to personalize your Member Pass.</p>
+            <h2 class="auth-heading">Name your journey with us</h2>
+            <p class="auth-lead">Just your display name and the pillar closest to you to open your Member Pass.</p>
           </div>
 
           <div class="auth-field">
-            <label>Pillar you are most excited about</label>
+            <label for="ob-name">Display name on pass <span aria-hidden="true">*</span></label>
+            <input id="ob-name" name="name" type="text" autocomplete="name" minlength="2" required placeholder="Alex Nguyen">
+          </div>
+
+          <div class="auth-field">
+            <label>Pillar closest to you</label>
             <div class="auth-pillar-strip" style="margin-top: 4px;">
               <div class="auth-pillar-item">
                 <input class="visually-hidden" type="radio" name="obPillar" id="ob-p-heart" value="holaheart" checked>
@@ -182,28 +174,25 @@
             </div>
           </div>
 
-          <div class="auth-row-2">
-            <div class="auth-field">
-              <label for="ob-name">Display name on pass <span aria-hidden="true">*</span></label>
-              <input id="ob-name" name="name" type="text" autocomplete="name" minlength="2" required placeholder="Alex Nguyen">
+          <details class="rsvp-optional-note">
+            <summary>+ Add university, workplace, or short motto (optional)</summary>
+            <div class="form-grid" style="margin-top: 12px;">
+              <div class="auth-field">
+                <label for="ob-org">University / Organization</label>
+                <input id="ob-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Search or enter your university / workplace...">
+              </div>
+              <div class="org-quick-chips" aria-label="Quick organization presets">
+                <button type="button" class="org-chip-btn" data-org-chip="FPT University Hanoi (Hoa Lac)" data-org-target="ob-org">FPT University</button>
+                <button type="button" class="org-chip-btn" data-org-chip="Vietnam National University Hanoi – Hoa Lac Campus (VNU)" data-org-target="ob-org">VNU Hoa Lac</button>
+                <button type="button" class="org-chip-btn" data-org-chip="Hoa Lac High-Tech Park (HHTP)" data-org-target="ob-org">Hoa Lac HHTP</button>
+                <button type="button" class="org-chip-btn" data-org-chip="International Exchange Student" data-org-target="ob-org">International Student</button>
+              </div>
+              <div class="auth-field">
+                <label for="ob-bio">Short line for your pass</label>
+                <input id="ob-bio" name="bio" type="text" maxlength="160" placeholder="e.g. Living grounded, greener, and serving with consistency.">
+              </div>
             </div>
-            <div class="auth-field">
-              <label for="ob-org">University / Organization</label>
-              <input id="ob-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Search or enter your university / workplace...">
-            </div>
-          </div>
-
-          <div class="org-quick-chips" aria-label="Quick organization presets">
-            <button type="button" class="org-chip-btn" data-org-chip="FPT University Hanoi (Hoa Lac)" data-org-target="ob-org">FPT University</button>
-            <button type="button" class="org-chip-btn" data-org-chip="Vietnam National University Hanoi – Hoa Lac Campus (VNU)" data-org-target="ob-org">VNU Hoa Lac</button>
-            <button type="button" class="org-chip-btn" data-org-chip="Hoa Lac High-Tech Park (HHTP)" data-org-target="ob-org">Hoa Lac HHTP</button>
-            <button type="button" class="org-chip-btn" data-org-chip="International Exchange Student" data-org-target="ob-org">International Student</button>
-          </div>
-
-          <div class="auth-field">
-            <label for="ob-bio">Short line for your pass <span class="auth-hint-inline">(optional)</span></label>
-            <input id="ob-bio" name="bio" type="text" maxlength="160" placeholder="e.g. Living grounded, greener, and serving with consistency.">
-          </div>
+          </details>
 
           <div class="form-status" id="ob-status" role="status" aria-live="polite"></div>
 
@@ -220,6 +209,7 @@
     <div class="member-hub-shell member-hub-shell--editorial">
       <nav class="member-hub-tabs" role="tablist" aria-label="Member account sections">
         <button type="button" class="member-hub-tab is-active" role="tab" aria-selected="true" data-dash-tab="profile">Journey &amp; Passport</button>
+        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="desk">Messages &amp; Roles <span class="member-tab-badge" id="dash-desk-badge" hidden>0</span></button>
         <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="security">Security &amp; Sign-in</button>
       </nav>
 
@@ -312,7 +302,7 @@
               <div class="member-journey-hero-head">
                 <div>
                   <span class="member-editorial-kicker">Your HolaRise Journey</span>
-                  <h2 id="dash-welcome-heading">Welcome back</h2>
+                  <h2 id="dash-welcome-heading">Your journey unfolds</h2>
                 </div>
                 <a class="arrow-link" href="/en/schedule/">Schedule →</a>
               </div>
@@ -485,6 +475,65 @@
         </dialog>
       </div>
 
+      <!-- TAB 2: MESSAGES, CAPABILITIES & EVENT COMPANION DESK -->
+      <div class="member-hub-pane" data-dash-pane="desk" id="hop-thoai" hidden>
+        <div class="member-hub-stack">
+          <section class="member-panel-box" id="member-capabilities-section">
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">Companion Roles &amp; Access</span>
+                <h2>Your Active Roles &amp; Grants</h2>
+              </div>
+              <button type="button" class="btn btn--outline btn--sm" id="btn-refresh-member-desk">Refresh</button>
+            </div>
+            <div id="member-capabilities-list" class="member-cap-grid">
+              <p class="member-empty-hint">When coordinators grant you Event Companion, On-site Check-in, or Private Album access, it appears here.</p>
+            </div>
+          </section>
+
+          <section class="member-panel-box" id="member-checkin-section" hidden>
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">On-site Check-in · Privacy Protected</span>
+                <h2 id="member-checkin-title">Gathering Check-in</h2>
+                <p class="member-empty-hint" id="member-checkin-stats">Only guest names and the last 4 phone digits are shown to protect privacy.</p>
+              </div>
+              <button type="button" class="btn btn--outline btn--sm" id="btn-close-member-checkin">Close</button>
+            </div>
+            <div class="member-checkin-toolbar">
+              <input type="search" id="member-checkin-search" placeholder="Search by name or last 4 digits..." aria-label="Search attendees">
+            </div>
+            <div id="member-checkin-list" class="member-checkin-list"></div>
+          </section>
+
+          <section class="member-panel-box member-desk-chat-box">
+            <div class="member-panel-head">
+              <div>
+                <span class="kicker">Two-Way Conversation</span>
+                <h2>Messages with Coordinators &amp; Guests</h2>
+              </div>
+            </div>
+            <div class="desk-split-shell" id="member-desk-shell">
+              <aside class="desk-thread-list" id="member-desk-threads" aria-label="Conversation list"></aside>
+              <div class="desk-conversation-pane">
+                <div class="desk-conv-head" id="member-desk-conv-head">
+                  <strong id="member-desk-conv-title">Select a conversation</strong>
+                  <span class="desk-conv-meta" id="member-desk-conv-meta"></span>
+                </div>
+                <div class="desk-messages" id="member-desk-messages" role="log" aria-live="polite"></div>
+                <form class="desk-compose-form" id="member-desk-form" novalidate>
+                  <textarea id="member-desk-input" rows="2" maxlength="2000" placeholder="Write a message to HolaRise coordinators or reply to a guest..." aria-label="Message text"></textarea>
+                  <div class="desk-compose-actions">
+                    <span class="form-status" id="member-desk-status" role="status" aria-live="polite"></span>
+                    <button type="submit" class="btn btn--primary btn--sm" id="member-desk-send-btn">Send</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
       <!-- TAB 3: SECURITY (Passkey Management) -->
       <div class="member-hub-pane" data-dash-pane="security" hidden>
         <div class="member-hub-stack">
@@ -505,6 +554,7 @@
       </div>
     </div>
   </div>
+<script src="/assets/js/member-desk.js" defer></script>
 </section>
 
 <section class="section faq-editorial-section" id="faq" aria-labelledby="join-faq-heading">

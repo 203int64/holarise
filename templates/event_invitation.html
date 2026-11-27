@@ -47,11 +47,7 @@
       <div class="invite-meta-links">
         <button class="invite-text-btn invite-text-btn--accent" type="button" data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/su-kien/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Giữ chỗ tham dự</button>
         <span aria-hidden="true">·</span>
-        <button class="invite-text-btn" type="button" data-open-invite-share>Chia sẻ thư mời</button>
-        <span aria-hidden="true">·</span>
-        <a href="{{GOOGLE_CAL_URL}}" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
-        <span aria-hidden="true">·</span>
-        <a href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a>
+        <button class="invite-text-btn" type="button" data-open-invite-share>Gửi thiệp cho bạn</button>
       </div>
     </div>
   </div>
@@ -106,18 +102,42 @@
         <span>{{INVITE_VENUE_HTML}}</span>
       </div>
 
-      <p class="invite-rsvp-lead">Đi một mình luôn có người đón, không ép phát biểu. Chỉ cần tên gọi và số Zalo để chúng mình chuẩn bị chỗ ngồi và gửi định vị trước giờ gặp.</p>
+      <p class="invite-rsvp-lead">Chỉ cần tên gọi và số Zalo để chúng mình giữ chỗ và gửi định vị trước giờ gặp. Đi một mình luôn có người đón, không ép phát biểu.</p>
 
       <div class="invite-rsvp-actions">
         <button class="btn btn--primary" type="button" id="ws-open-rsvp-btn" data-open-on-hash="giu-cho" data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/su-kien/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Xác nhận tham dự</button>
-        <button class="btn btn--outline" type="button" data-open-invite-share>Chia sẻ thư mời</button>
-        <a class="btn btn--outline" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a>
+        <button class="btn btn--outline" type="button" data-open-invite-share>Gửi thiệp cho bạn</button>
       </div>
 
-      <p class="invite-rsvp-footnote">Giữ chỗ trong 15 giây, không cần tạo mật khẩu · <a href="/chinh-sach/">Chuẩn mực Minh bạch &amp; An toàn</a></p>
+      <!-- CMS:EVENT_COMPANIONS:START -->{{EVENT_COMPANIONS_HTML}}<!-- CMS:EVENT_COMPANIONS:END -->
+
+      <p class="invite-rsvp-footnote">Không thu vé · Không cần tài khoản · <a href="{{GOOGLE_CAL_URL}}" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a> · <a href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a> · <a href="/chinh-sach/">Minh bạch &amp; An toàn</a></p>
     </div>
   </div>
 </section>
+
+<dialog class="club-dialog club-dialog--chat" id="event-companion-chat-dialog" closedby="any" aria-labelledby="evchat-heading">
+  <div class="dialog-inner evchat-dialog-inner">
+    <button class="modal-close" type="button" data-modal-close aria-label="Đóng hộp thoại">×</button>
+    <div class="evchat-head">
+      <span class="kicker">HỎI NHANH NGƯỜI ĐÓN BẠN</span>
+      <h2 id="evchat-heading" class="evchat-title">Hộp thoại buổi gặp</h2>
+      <p class="evchat-sub" id="evchat-sub">Nhắn trực tiếp với người đồng hành buổi này. Nếu đang đi trên đường, bạn có thể mở nhanh <a id="evchat-zalo-escape" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Nhóm Zalo buổi gặp ↗</a>.</p>
+    </div>
+    <div class="evchat-messages" id="evchat-messages" role="log" aria-live="polite"></div>
+    <form class="evchat-form" id="evchat-form" novalidate>
+      <div class="evchat-guest-fields" id="evchat-guest-fields" hidden>
+        <input type="text" id="evchat-guest-name" maxlength="80" placeholder="Tên gọi của bạn" aria-label="Tên gọi của bạn">
+        <input type="text" id="evchat-guest-contact" maxlength="120" placeholder="Số Zalo hoặc email liên hệ" aria-label="Số Zalo hoặc email liên hệ">
+      </div>
+      <div class="evchat-compose-row">
+        <textarea id="evchat-input" rows="2" maxlength="1200" placeholder="Ví dụ: Mình đi một mình từ KTX, gửi xe ở đâu tiện nhất?" aria-label="Nội dung câu hỏi"></textarea>
+        <button class="btn btn--primary btn--sm" type="submit" id="evchat-send-btn">Gửi</button>
+      </div>
+      <div class="form-status" id="evchat-status" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</dialog>
 
 <!-- MusicSpace-style Event Share & Personalized Invitation Modal -->
 <dialog class="club-dialog club-dialog--share" id="event-share-modal" closedby="any" data-pillar="{{EVENT_PILLAR}}" data-share-url="{{CANONICAL_EVENT_URL}}" data-share-title="{{EVENT_SHARE_TITLE}}" data-share-time="{{INVITE_TIME_LABEL}}" data-share-venue="{{INVITE_VENUE_NAME}}" aria-labelledby="event-share-heading">
@@ -138,25 +158,8 @@
       </div>
     </div>
 
-    <div class="share-inviter-grid" id="share-inviter-grid">
-      <div class="share-inviter-field">
-        <label for="share-recipient-name">Gửi tới <span class="auth-hint-inline">(tên người được mời)</span></label>
-        <input id="share-recipient-name" type="text" maxlength="60" placeholder="Ví dụ: Lan Anh">
-      </div>
-      <div class="share-inviter-field" id="share-inviter-field-wrap">
-        <label for="share-inviter-name">Người mời <span class="auth-hint-inline">(tên bạn)</span></label>
-        <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi">
-      </div>
-    </div>
-    <p class="share-inviter-signed-hint" id="share-inviter-signed-bar" hidden>Đang mời với tư cách <strong id="share-inviter-signed-name"></strong></p>
-
-    <div class="share-inviter-field">
-      <label for="share-personal-note">Lời nhắn viết tay trên thiệp <span class="auth-hint-inline">(tùy chọn)</span></label>
-      <input id="share-personal-note" type="text" maxlength="140" placeholder="Ví dụ: Cuối tuần này đi cùng mình nhé, có chỗ ngồi ấm lắm...">
-    </div>
-
     <div class="share-platforms-block">
-      <span class="share-section-label">Gửi qua</span>
+      <span class="share-section-label">Gửi ngay qua</span>
       <div class="share-platforms-grid">
         <button type="button" class="share-platform-btn" data-share-platform="zalo">
           <svg class="share-platform-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -197,13 +200,36 @@
     <div class="share-url-block">
       <div class="share-url-head">
         <label for="share-url-input" class="share-section-label">Đường dẫn thư mời</label>
-        <button type="button" class="share-preview-trigger" id="share-preview-env-btn">Xem thử hiệu ứng mở thiệp ↗</button>
       </div>
       <div class="share-url-row">
         <input id="share-url-input" type="text" readonly value="{{CANONICAL_EVENT_URL}}">
         <button type="button" class="btn btn--primary btn--sm share-copy-btn" id="share-copy-btn">Sao chép</button>
       </div>
     </div>
+
+    <details class="rsvp-optional-note share-personalize-details">
+      <summary>+ Ghi tên người nhận &amp; lời nhắn viết tay lên thiệp (tùy chọn)</summary>
+      <div class="share-personalize-body">
+        <div class="share-inviter-grid" id="share-inviter-grid">
+          <div class="share-inviter-field">
+            <label for="share-recipient-name">Gửi tới <span class="auth-hint-inline">(tên người được mời)</span></label>
+            <input id="share-recipient-name" type="text" maxlength="60" placeholder="Ví dụ: Lan Anh">
+          </div>
+          <div class="share-inviter-field" id="share-inviter-field-wrap">
+            <label for="share-inviter-name">Người mời <span class="auth-hint-inline">(tên bạn)</span></label>
+            <input id="share-inviter-name" type="text" maxlength="60" placeholder="Ví dụ: Minh Khôi">
+          </div>
+        </div>
+        <p class="share-inviter-signed-hint" id="share-inviter-signed-bar" hidden>Đang mời với tư cách <strong id="share-inviter-signed-name"></strong></p>
+
+        <div class="share-inviter-field">
+          <label for="share-personal-note">Lời nhắn viết tay trên thiệp</label>
+          <input id="share-personal-note" type="text" maxlength="140" placeholder="Ví dụ: Cuối tuần này đi cùng mình nhé...">
+        </div>
+
+        <button type="button" class="share-preview-trigger" id="share-preview-env-btn">Xem thử hiệu ứng mở thiệp ↗</button>
+      </div>
+    </details>
   </div>
 </dialog>
 </div>

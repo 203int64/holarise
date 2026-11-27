@@ -208,7 +208,7 @@
         headerBtn.setAttribute("aria-label", t(`Thẻ Thành Viên ${m.name} (${m.memberCode})`, `Member Pass ${m.name} (${m.memberCode})`));
       } else {
         headerBtn.classList.remove("is-member-signed-in");
-        headerLabel.textContent = t("Đăng nhập", "Sign in");
+        headerLabel.textContent = t("Thẻ Thành Viên", "Member Pass");
         headerBtn.removeAttribute("aria-label");
       }
     }
@@ -217,7 +217,7 @@
       if (m) {
         drawerLabel.textContent = t(`Thẻ Thành Viên · ${m.name}`, `Member Pass · ${m.name}`);
       } else {
-        drawerLabel.textContent = t("Tham gia & Thẻ Thành Viên", "Join & Member Pass");
+        drawerLabel.textContent = t("Thẻ Thành Viên", "Member Pass");
       }
     }
 
@@ -503,12 +503,27 @@
     });
   }
 
+  function isInAppChatWebView() {
+    const ua = navigator.userAgent || "";
+    return /Zalo|FBAN|FBAV|Messenger|Instagram|Line\//i.test(ua);
+  }
+
   function initUnifiedAuthForms() {
-    // Keep Google OAuth returnTo synced to current page
+    const inChatWebView = isInAppChatWebView();
+
+    // Keep Google OAuth returnTo synced to current page; hide inside chat WebViews to avoid 403 disallowed_useragent
     $$("[data-google-auth-link]").forEach((a) => {
-      const path = window.location.pathname || "/tham-gia/";
+      const path = window.location.pathname || (isEn ? "/en/join/" : "/tham-gia/");
       a.setAttribute("href", `/api/member/auth/google?returnTo=${encodeURIComponent(path)}`);
+      if (inChatWebView) {
+        a.hidden = true;
+      }
     });
+    if (inChatWebView) {
+      $$("[data-webview-oauth-note]").forEach((el) => {
+        el.hidden = false;
+      });
+    }
 
     // Show friendly OAuth error if redirected back with ?auth_error=
     const params = new URLSearchParams(window.location.search);
@@ -517,8 +532,8 @@
       const oauthAlert = $("#join-oauth-alert");
       const msgMap = {
         google_not_configured: t(
-          "Đăng nhập Google chưa được gắn khóa GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET trên Cloudflare Pages. Bạn có thể tiếp tục ngay bằng Email hoặc SĐT bên dưới.",
-          "Google sign-in is not yet configured on this deployment. You can continue immediately with your email below."
+          "Đăng nhập Google tạm chưa khả dụng lúc này. Bạn có thể tiếp tục ngay bằng Email hoặc SĐT bên dưới.",
+          "Google sign-in is temporarily unavailable. You can continue immediately with your email or phone below."
         ),
         google_cancelled: t(
           "Bạn đã hủy đăng nhập Google. Bạn có thể thử lại hoặc dùng Email / SĐT.",
@@ -680,7 +695,7 @@
             onAuthChanged();
           } catch (err) {
             setStatus(statusEl, err.message, "error");
-            submitBtn.textContent = "Đăng nhập";
+            submitBtn.textContent = t("Đăng nhập", "Sign in");
           } finally {
             submitBtn.disabled = false;
           }
@@ -690,20 +705,20 @@
         if (mode === "register") {
           const pw = pwInput?.value || "";
           if (pw.length < 6) {
-            setStatus(statusEl, "Mật khẩu cần tối thiểu 6 ký tự.", "error");
+            setStatus(statusEl, t("Mật khẩu cần tối thiểu 6 ký tự.", "Password must be at least 6 characters."), "error");
             pwInput?.focus();
             return;
           }
           const fallbackName = lockedIdentifier.includes("@")
             ? lockedIdentifier.split("@")[0].slice(0, 60)
-            : "Thành viên Hola";
+            : t("Thành viên Hola", "Hola Member");
           submitBtn.disabled = true;
-          submitBtn.textContent = "Đang khởi tạo...";
+          submitBtn.textContent = t("Đang khởi tạo...", "Creating pass...");
           try {
             const res = await api("/api/member/auth/register", {
               method: "POST",
               body: {
-                name: fallbackName.length >= 2 ? fallbackName : "Thành viên Hola",
+                name: fallbackName.length >= 2 ? fallbackName : t("Thành viên Hola", "Hola Member"),
                 identifier: lockedIdentifier,
                 password: pw,
                 primaryPillar: "holaheart",
@@ -723,7 +738,7 @@
             onAuthChanged();
           } catch (err) {
             setStatus(statusEl, err.message, "error");
-            submitBtn.textContent = "Tiếp tục";
+            submitBtn.textContent = t("Tiếp tục", "Continue");
           } finally {
             submitBtn.disabled = false;
           }
@@ -971,14 +986,14 @@
       const bio = ($("#ob-bio")?.value || "").trim();
 
       if (name.length < 2) {
-        setStatus(statusEl, "Vui lòng nhập tên hiển thị (tối thiểu 2 ký tự).", "error");
+        setStatus(statusEl, t("Vui lòng nhập tên hiển thị (tối thiểu 2 ký tự).", "Please enter your display name (at least 2 characters)."), "error");
         $("#ob-name")?.focus();
         return;
       }
 
       if (finishBtn) {
         finishBtn.disabled = true;
-        finishBtn.textContent = "Đang hoàn tất...";
+        finishBtn.textContent = t("Đang hoàn tất...", "Saving...");
       }
       try {
         const res = await api("/api/member/profile", {
@@ -993,7 +1008,7 @@
       } finally {
         if (finishBtn) {
           finishBtn.disabled = false;
-          finishBtn.textContent = "Hoàn tất & Mở Thẻ Thành Viên";
+          finishBtn.textContent = t("Hoàn tất & Mở Thẻ Thành Viên", "Finish & Open Member Pass");
         }
       }
     });
@@ -1034,6 +1049,15 @@
       $$("[data-dash-pane]", dashView).forEach((pane) => {
         pane.hidden = pane.getAttribute("data-dash-pane") !== tab;
       });
+      if (tab === "desk" && window.__holariseMemberDesk) {
+        window.__holariseMemberDesk.open();
+      } else if (window.__holariseMemberDesk) {
+        window.__holariseMemberDesk.pause();
+      }
+    }
+
+    if (window.location.hash === "#hop-thoai") {
+      setTimeout(() => switchDashTab("desk"), 350);
     }
 
     $$("[data-dash-tab]", dashView).forEach((btn) => {

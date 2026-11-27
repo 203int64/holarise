@@ -1,4 +1,5 @@
 import { autoProvisionFinishedEventAlbums } from "../../_lib/albums.js";
+import { listEventCompanions } from "../../_lib/capabilities.js";
 import { canActorViewAlbum, ensureDeepControlSchema, resolveActorContext } from "../../_lib/media-access.js";
 import { ensureMediaApprovalSchema } from "../../_lib/media-approval-schema.js";
 import {
@@ -9,6 +10,7 @@ import {
   fullImageUrl,
   imageAttrs,
   isEventFinished,
+  renderEventCompanionsHtml,
   renderSeatBarHtml,
   replaceMarker,
   resolveEventSlug,
@@ -314,8 +316,12 @@ export async function onRequestGet({ request, env, params }) {
         html = injectPersonalizedTitleTags(html, recipientParam);
       }
       if (matchedEvent && env?.DB) {
-        const webBooked = matchedEvent.showSeatBar ? await countWebRegistrations(env.DB, matchedEvent.id) : 0;
+        const [webBooked, companions] = await Promise.all([
+          matchedEvent.showSeatBar ? countWebRegistrations(env.DB, matchedEvent.id) : Promise.resolve(0),
+          listEventCompanions(env.DB, matchedEvent.id).catch(() => []),
+        ]);
         html = replaceMarker(html, "EVENT_SEAT_BAR", renderSeatBarHtml(matchedEvent, webBooked, "en"));
+        html = replaceMarker(html, "EVENT_COMPANIONS", renderEventCompanionsHtml(matchedEvent, companions, "en"));
         if (matchedEvent.zaloGroupUrl) {
           html = html.replaceAll(DEFAULT_ZALO_GROUP, escHtml(matchedEvent.zaloGroupUrl));
         }
@@ -374,8 +380,12 @@ export async function onRequestGet({ request, env, params }) {
     `<p class="invite-closing">Reserve your seat below so our coordinators can prepare seating and share location pins in the session group. Note: regular gatherings in Hoa Lac are primarily conducted in Vietnamese, and English-speaking coordinators warmly welcome international guests.</p>`
   );
 
-  const webBooked = matched.showSeatBar ? await countWebRegistrations(env.DB, matched.id) : 0;
+  const [webBooked, companions] = await Promise.all([
+    matched.showSeatBar ? countWebRegistrations(env.DB, matched.id) : Promise.resolve(0),
+    listEventCompanions(env.DB, matched.id).catch(() => []),
+  ]);
   const seatBarHtml = renderSeatBarHtml(matched, webBooked, "en");
+  const companionsHtml = renderEventCompanionsHtml(matched, companions, "en");
   const pillarMeta = derivePillarMeta(matched);
   const shareTitle = formatEventShareTitleEn(matched, recipientParam);
 
@@ -398,6 +408,7 @@ export async function onRequestGet({ request, env, params }) {
     __SSR_EVENT_FEE__: escHtml("Free admission · Cover your own drink/supplies if any"),
     __SSR_EVENT_SEATS__: escHtml(matched.seats || ""),
     __SSR_EVENT_SEAT_BAR_HTML__: seatBarHtml,
+    __SSR_EVENT_COMPANIONS_HTML__: companionsHtml,
     __SSR_EVENT_IMAGE__: escHtml(matched.image),
     __SSR_EVENT_IMAGE_ALT__: escHtml(matched.imageAlt || titleEn),
     __SSR_EVENT_ZALO_GROUP__: escHtml(matched.zaloGroupUrl || DEFAULT_ZALO_GROUP),

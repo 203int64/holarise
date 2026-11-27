@@ -379,6 +379,93 @@ export function renderSeatBarHtml(ev, webBookedCount = 0, lang = "vi") {
       </div>`;
 }
 
+function initialsFromName(name) {
+  const parts = String(name || "HR").trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0][0] || ""}${parts[parts.length - 1][0] || ""}`.toUpperCase();
+  }
+  return String(name || "HR").slice(0, 2).toUpperCase();
+}
+
+export function renderEventCompanionsHtml(ev, companions = [], lang = "vi") {
+  if (!ev || !ev.id) return "";
+  const isEn = lang === "en";
+  const safeEventId = escHtml(ev.id);
+  const safeTitle = escHtml(isEn ? ev.titleEn || ev.title || "HolaRise Gathering" : ev.title || "Buổi gặp HolaRise");
+  const safeZalo = escHtml(ev.zaloGroupUrl || "https://zalo.me/g/7fock88aizzrdkmr9ggf");
+  const list = Array.isArray(companions) ? companions.filter(Boolean) : [];
+
+  if (list.length === 0) {
+    const kicker = isEn ? "First time coming alone?" : "Cần hỏi trước buổi gặp?";
+    const note = isEn
+      ? "Ask our event coordinator about directions, timing, or coming solo — no account needed."
+      : "Cần hỏi đường đi, giờ đón hoặc đi một mình lần đầu — nhắn thẳng cho người điều phối buổi này, không cần tạo tài khoản.";
+    const btnText = isEn ? "Message coordinator" : "Nhắn nhanh người điều phối";
+    return `<div class="invite-companion-box invite-companion-box--fallback" data-event-companions-box>
+        <div class="invite-companion-head">
+          <span class="invite-companion-kicker">${kicker}</span>
+        </div>
+        <p class="invite-companion-note">${note}</p>
+        <div class="invite-companion-actions">
+          <button class="btn btn--outline btn--sm" type="button" data-open-event-chat data-event-id="${safeEventId}" data-event-title="${safeTitle}" data-zalo-group="${safeZalo}" data-companion-names="${isEn ? "HolaRise Coordinator" : "Ban Điều phối HolaRise"}">${btnText}</button>
+        </div>
+      </div>`;
+  }
+
+  const kicker = isEn
+    ? list.length > 1
+      ? "Welcoming hosts for this gathering"
+      : "Your welcoming host for this gathering"
+    : list.length > 1
+      ? "Người đón bạn buổi này"
+      : "Người đón bạn buổi này";
+
+  const cards = list
+    .map((c) => {
+      const safeName = escHtml(c.name || (isEn ? "HolaRise Host" : "Người đồng hành"));
+      const safeRole = escHtml(c.roleTitle || (isEn ? "Event Companion" : "Người đồng hành"));
+      const safeGreeting = escHtml(
+        c.greeting ||
+          (isEn
+            ? "Coming solo? Message me ahead of time and I will greet you at the entrance."
+            : "Đi một mình cứ nhắn cho mình trước buổi gặp để mình ra đón bạn nhé.")
+      );
+      const avatarHtml = c.avatarUrl
+        ? `<img class="invite-companion-avatar" src="${escHtml(c.avatarUrl)}" alt="${safeName}" width="44" height="44" loading="lazy" decoding="async">`
+        : `<span class="invite-companion-initials" aria-hidden="true">${escHtml(initialsFromName(c.name))}</span>`;
+      return `<div class="invite-companion-item">
+          ${avatarHtml}
+          <div class="invite-companion-meta">
+            <div class="invite-companion-name-row">
+              <strong>${safeName}</strong>
+              <span class="invite-companion-role">${safeRole}</span>
+            </div>
+            <p class="invite-companion-greeting">${safeGreeting}</p>
+          </div>
+        </div>`;
+    })
+    .join("\n        ");
+
+  const primaryName = list[0]?.name || (isEn ? "your host" : "người đón bạn");
+  const firstName = primaryName.trim().split(/\s+/).slice(-1)[0] || primaryName;
+  const btnText = isEn
+    ? `Message ${escHtml(firstName)}`
+    : `Nhắn nhanh cho ${escHtml(firstName)}`;
+  const allNames = escHtml(list.map((c) => c.name).filter(Boolean).join(", "));
+
+  return `<div class="invite-companion-box" data-event-companions-box>
+        <div class="invite-companion-head">
+          <span class="invite-companion-kicker">${kicker}</span>
+        </div>
+        <div class="invite-companion-list">
+        ${cards}
+        </div>
+        <div class="invite-companion-actions">
+          <button class="btn btn--outline btn--sm" type="button" data-open-event-chat data-event-id="${safeEventId}" data-event-title="${safeTitle}" data-zalo-group="${safeZalo}" data-companion-names="${allNames}">${btnText}</button>
+        </div>
+      </div>`;
+}
+
 export function renderWorkshopsHtml(upcoming) {
   if (!upcoming || upcoming.length === 0) {
     return "";
@@ -499,6 +586,151 @@ export function renderHomeUpcomingCardsHtml(upcoming, keepFullLocation = false, 
       </article>`;
     })
     .join("\n      ");
+}
+
+function getNameInitials(name) {
+  const parts = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length === 0) return "HR";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] || ""}${parts[parts.length - 1][0] || ""}`.toUpperCase();
+}
+
+function truncateQuote(raw, maxLen = 112) {
+  const clean = String(raw || "").replace(/\s+/g, " ").trim();
+  if (clean.length <= maxLen) return clean;
+  const cut = clean.slice(0, maxLen).replace(/\s+\S*$/, "").trim();
+  return `${cut || clean.slice(0, maxLen).trim()}…`;
+}
+
+function resolveVoiceHref(slug, past = [], lang = "vi") {
+  const cleanSlug = String(slug || "").trim().replace(/^\/+|\/+$/g, "");
+  const isEn = lang === "en";
+  if (!cleanSlug) return isEn ? "/en/journey/" : "/hanh-trinh/";
+  if (cleanSlug === "tinh-yeu-thuong-cua-me" || cleanSlug === "holaheart-musicspace") {
+    return isEn ? `/en/journey/${cleanSlug}/#reflections` : `/hanh-trinh/${cleanSlug}/#huong-khi`;
+  }
+  const matched = (past || []).find((ev) => resolveEventSlug(ev) === cleanSlug);
+  if (matched) {
+    const base = isEn ? `/en/events/${cleanSlug}/` : resolveEventHref(matched) || `/su-kien/${cleanSlug}/`;
+    return `${base}#${isEn ? "reflections" : "huong-khi"}`;
+  }
+  return isEn ? `/en/events/${cleanSlug}/#reflections` : `/su-kien/${cleanSlug}/#huong-khi`;
+}
+
+export function renderHeroLivePillHtml(upcoming = [], past = [], lang = "vi") {
+  const isEn = lang === "en";
+  if (upcoming && upcoming.length > 0) {
+    const ws = upcoming[0];
+    const slug = resolveEventSlug(ws);
+    const href = isEn
+      ? ws.hrefEn || (slug ? `/en/events/${slug}/` : "/en/schedule/")
+      : resolveEventHref(ws) || "/lich-hoat-dong/";
+    const dateRaw = (isEn ? ws.dateDisplayEn : "") || ws.dateDisplay || ws.date || "";
+    const datePill = compactDatePill(dateRaw, lang) || dateRaw;
+    const title = (isEn ? ws.shortTitleEn || ws.titleEn : "") || ws.shortTitle || ws.title || "";
+    return `<a class="hero-live-pill" href="${escHtml(href)}"><span class="hero-live-dot" aria-hidden="true"></span><span class="hero-live-pill-text"><strong class="hero-live-pill-time">${escHtml(datePill)}</strong><span class="hero-live-pill-sep" aria-hidden="true">·</span><span class="hero-live-pill-title">${escHtml(title)}</span></span><span class="hero-live-pill-arrow" aria-hidden="true">→</span></a>`;
+  }
+  if (past && past.length > 0) {
+    const ev = past[0];
+    const slug = resolveEventSlug(ev);
+    const href = isEn
+      ? ev.hrefEn || (slug ? `/en/events/${slug}/` : "/en/journey/")
+      : resolveEventHref(ev) || "/hanh-trinh/";
+    const title = (isEn ? ev.titleEn : "") || ev.title || "";
+    const label = isEn ? "Just held" : "Vừa khép lại";
+    return `<a class="hero-live-pill hero-live-pill--past" href="${escHtml(href)}"><span class="hero-live-pill-text"><strong class="hero-live-pill-time">${escHtml(label)}</strong><span class="hero-live-pill-sep" aria-hidden="true">·</span><span class="hero-live-pill-title">${escHtml(title)}</span></span><span class="hero-live-pill-arrow" aria-hidden="true">→</span></a>`;
+  }
+  return "";
+}
+
+export function renderHeroVoiceCardHtml({ voices = [], past = [], lang = "vi" } = {}) {
+  const isEn = lang === "en";
+  const normalizedVoices = [];
+  const seenKeys = new Set();
+
+  for (const row of voices || []) {
+    if (!row) continue;
+    const quoteRaw = String(row.pull_quote || row.pullQuote || row.content || "").trim();
+    const authorName = String(row.author_name || row.authorName || "").trim();
+    if (!quoteRaw || !authorName) continue;
+    const id = String(row.id || "").trim();
+    const dedupKey = id || `${authorName.toLowerCase()}::${quoteRaw.slice(0, 40).toLowerCase()}`;
+    if (seenKeys.has(dedupKey)) continue;
+    seenKeys.add(dedupKey);
+
+    const authorOrg = String(row.author_org || row.authorOrg || row.author_role || row.authorRole || "").trim();
+    const rawAvatar = String(row.author_avatar_url || row.avatarUrl || "").trim();
+    const avatarUrl = rawAvatar && isSafeMediaUrl(rawAvatar) ? rawAvatar : "";
+    const slug = String(row.activity_slug || row.activitySlug || "").trim();
+    const matchedEv = (past || []).find((ev) => resolveEventSlug(ev) === slug);
+    const sourceLabel = matchedEv
+      ? compactDatePill((isEn ? matchedEv.dateDisplayEn : "") || matchedEv.dateDisplay || matchedEv.date || "", lang) ||
+        (isEn ? "Session recap" : "Hương khí buổi gặp")
+      : isEn
+        ? "Community voice"
+        : "Hương khí buổi gặp";
+
+    normalizedVoices.push({
+      id,
+      authorName,
+      authorOrg: authorOrg || (isEn ? "HolaRise participant" : "Thành viên tham dự"),
+      avatarUrl,
+      initials: getNameInitials(authorName),
+      quote: truncateQuote(quoteRaw, 112),
+      heartCount: Math.max(0, Number(row.heart_count ?? row.heartCount ?? 0)),
+      href: resolveVoiceHref(slug, past, lang),
+      sourceLabel,
+    });
+    if (normalizedVoices.length >= 5) break;
+  }
+
+  if (normalizedVoices.length > 0 && !isEn) {
+    const first = normalizedVoices[0];
+    const mainAvatarInner = first.avatarUrl
+      ? `<img src="${escHtml(first.avatarUrl)}" alt="" width="36" height="36" loading="lazy" decoding="async">`
+      : escHtml(first.initials);
+    const tabsHtml = normalizedVoices
+      .map((v, idx) => {
+        const active = idx === 0;
+        const inner = v.avatarUrl
+          ? `<img src="${escHtml(v.avatarUrl)}" alt="" width="26" height="26" loading="lazy" decoding="async">`
+          : `<span>${escHtml(v.initials)}</span>`;
+        return `<button type="button" class="hero-voice-tab${active ? " is-active" : ""}" role="tab" aria-selected="${active ? "true" : "false"}" aria-label="${escHtml(v.authorName)}" data-hv-tab="${idx}" data-voice-id="${escHtml(v.id)}" data-voice-name="${escHtml(v.authorName)}" data-voice-org="${escHtml(v.authorOrg)}" data-voice-quote="${escHtml(v.quote)}" data-voice-avatar="${escHtml(v.avatarUrl)}" data-voice-initials="${escHtml(v.initials)}" data-voice-hearts="${v.heartCount}" data-voice-href="${escHtml(v.href)}" data-voice-source="${escHtml(v.sourceLabel)}">${inner}</button>`;
+      })
+      .join("");
+
+    const heartBtnHtml = first.id
+      ? `<button class="hero-voice-heart" type="button" data-hv-heart data-voice-id="${escHtml(first.id)}" aria-pressed="false" aria-label="Thả tim cảm nhận này"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg><span data-hv-heart-count>${first.heartCount}</span></button>`
+      : "";
+
+    return `<aside class="hero-voice-card" data-hero-voice-card aria-label="Tiếng nói từ buổi gặp"><div class="hero-voice-head"><div class="hero-voice-person"><span class="hero-voice-avatar${first.avatarUrl ? " hero-voice-avatar--photo" : ""}" data-hv-avatar aria-hidden="true">${mainAvatarInner}</span><div class="hero-voice-who"><strong class="hero-voice-name" data-hv-name>${escHtml(first.authorName)}</strong><span class="hero-voice-org" data-hv-org>${escHtml(first.authorOrg)}</span></div></div>${heartBtnHtml}</div><p class="hero-voice-quote" data-hv-quote>“${escHtml(first.quote)}”</p><div class="hero-voice-foot"><div class="hero-voice-avatars" role="tablist" aria-label="Chọn cảm nhận thành viên" data-hv-tabs>${tabsHtml}</div><a class="hero-voice-link" data-hv-link href="${escHtml(first.href)}"><span data-hv-source>${escHtml(first.sourceLabel)}</span><span aria-hidden="true">→</span></a></div></aside>`;
+  }
+
+  if (past && past.length > 0) {
+    const ev = past[0];
+    const slug = resolveEventSlug(ev);
+    const href = isEn
+      ? ev.hrefEn || (slug ? `/en/events/${slug}/` : "/en/journey/")
+      : resolveEventHref(ev) || "/hanh-trinh/";
+    const dateLabel = (isEn ? ev.dateDisplayEn : "") || ev.dateDisplay || ev.date || "";
+    const title = (isEn ? ev.titleEn : "") || ev.title || "";
+    const loc = compactLocation((isEn ? ev.locationEn : "") || ev.location || "");
+    const rawImg = String(ev.image || "").trim();
+    const img = rawImg && isSafeMediaUrl(rawImg) ? rawImg : "";
+    const imgAlt = (isEn ? ev.imageAltEn : "") || ev.imageAlt || title;
+    const eyebrow = isEn ? `Just held · ${dateLabel}` : `Vừa khép lại · ${dateLabel}`;
+    const cta = isEn ? "Browse photos & share a reflection" : "Xem ảnh thực tế & viết hương khí";
+    const aria = isEn ? "Recent gathering" : "Buổi gặp vừa khép lại";
+    const avatarHtml = img
+      ? `<span class="hero-voice-avatar hero-voice-avatar--photo"><img src="${escHtml(img)}" alt="${escHtml(imgAlt)}" width="36" height="36" loading="lazy" decoding="async"></span>`
+      : `<span class="hero-voice-avatar" aria-hidden="true">HR</span>`;
+    return `<aside class="hero-voice-card hero-voice-card--recap" aria-label="${escHtml(aria)}"><a class="hero-voice-recap-link" href="${escHtml(href)}"><div class="hero-voice-head"><div class="hero-voice-person">${avatarHtml}<div class="hero-voice-who"><strong class="hero-voice-name">${escHtml(eyebrow)}</strong><span class="hero-voice-org">${escHtml(loc)}</span></div></div><span class="hero-voice-recap-arrow" aria-hidden="true">→</span></div><p class="hero-voice-quote">“${escHtml(title)}”</p><div class="hero-voice-foot hero-voice-foot--recap"><span class="hero-voice-recap-cta">${escHtml(cta)}</span></div></a></aside>`;
+  }
+
+  return "";
 }
 
 export function renderHomeUpcomingSectionHtml(upcoming, lang = "vi") {

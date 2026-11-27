@@ -82,7 +82,7 @@
           <span class="lang-switch-opt">{{LANG_SWITCH_LABEL}}</span>
         </a>
         <a class="btn btn--primary btn--sm header-cta" href="/en/join/" data-header-member-btn>
-          <span data-header-member-label>Sign in</span>
+          <span data-header-member-label>Member Pass</span>
         </a>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Open navigation menu">
           <span class="nav-toggle-bars" aria-hidden="true">
@@ -102,7 +102,7 @@
       </nav>
       <div class="mobile-drawer-footer">
         <a class="btn btn--primary" href="/en/join/" data-drawer-member-btn style="width: 100%; justify-content: space-between; padding: 15px 22px;">
-          <span data-drawer-member-label>Join &amp; Member Pass</span>
+          <span data-drawer-member-label>Member Pass</span>
           <span aria-hidden="true">→</span>
         </a>
         <button class="btn btn--outline pwa-install-drawer-btn" type="button" data-pwa-install hidden>
@@ -219,11 +219,6 @@
         <button class="btn btn--primary btn--sm" type="button" id="modal-member-onetap-btn">1-Tap RSVP</button>
       </div>
 
-      <div class="rsvp-guest-signin-bar" data-rsvp-guest-prompt>
-        <span>Sign in with Google or Passkey for 1-tap RSVP.</span>
-        <button type="button" class="btn btn--outline btn--sm" data-open-member-auth>Sign in</button>
-      </div>
-
       <form class="form-grid rsvp-modal-form" id="modal-rsvp-form" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register-en" data-endpoint="{{FORM_ENDPOINT}}" data-phone="{{CONTACT_PHONE}}" data-phone-raw="{{CONTACT_PHONE_RAW}}" data-zalo="{{CONTACT_ZALO}}" data-zalo-group="{{CONTACT_ZALO_GROUP}}" novalidate>
         <input type="hidden" name="source" value="event_modal">
         <input type="hidden" name="activity" id="modal-event-input" value="">
@@ -277,7 +272,7 @@
 
         <div class="rsvp-submit-block">
           <button class="btn btn--primary rsvp-submit-btn" type="submit" id="modal-submit-btn">Confirm seat</button>
-          <p class="rsvp-trust-note">Solo guests always welcomed · No password required · <a href="/en/privacy/">Transparency &amp; Privacy</a></p>
+          <p class="rsvp-trust-note">Solo guests always welcomed · <a href="/en/privacy/">Transparency &amp; Privacy</a><span data-rsvp-guest-prompt> · <button type="button" class="inline-text-link" data-open-member-auth>Have a Member Pass?</button></span></p>
         </div>
       </form>
 
@@ -346,16 +341,20 @@
           <a class="btn btn--primary rsvp-submit-btn" href="{{CONTACT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer" id="modal-zalo-group-btn">Join Gathering Zalo Group ↗</a>
           <div class="rsvp-secondary-actions">
             <button type="button" class="btn btn--outline btn--sm" data-ics-download="modal" id="modal-ics-btn" hidden>Add to Calendar (.ics)</button>
-            <button type="button" class="btn btn--outline btn--sm" data-pass-download="modal">Save Pass (PNG)</button>
             <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Invite a friend</button>
+          </div>
+          <div class="rsvp-more-links">
+            <button type="button" class="inline-text-link" data-pass-download="modal">Save Pass (PNG)</button>
+            <span aria-hidden="true">·</span>
             <span class="copy-control">
-              <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
+              <button type="button" class="inline-text-link" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
                 <span>Copy invite</span>
               </button>
               <span class="copy-tip" role="status"></span>
             </span>
+            <span aria-hidden="true">·</span>
+            <button type="button" class="inline-text-link" data-pass-new="modal">Reserve for a friend</button>
           </div>
-          <button type="button" class="pass-reset-link" data-pass-new="modal">Reserve a seat for another friend</button>
         </div>
       </div>
     </div>
@@ -368,8 +367,8 @@
       <div class="auth-dialog-brand">
         <img src="/assets/images/logo-mark.png" alt="HolaRise emblem" width="32" height="32">
         <div>
-          <h2 id="member-auth-heading" class="auth-dialog-title">Sign in to HolaRise</h2>
-          <p class="auth-dialog-sub">Continue with Google, Passkey, or Email.</p>
+          <h2 id="member-auth-heading" class="auth-dialog-title">HolaRise Member Pass</h2>
+          <p class="auth-dialog-sub">Sign in or open a pass with Google, Passkey, or Email.</p>
         </div>
       </div>
 
@@ -394,6 +393,7 @@
           <span>Sign in with Passkey</span>
         </button>
       </div>
+      <p class="auth-webview-note" data-webview-oauth-note hidden>In-app browser detected — continue with Email or Phone below, or open in Safari/Chrome for Google sign-in.</p>
 
       <div class="auth-divider" style="margin: 16px 0;"><span>or</span></div>
 
@@ -404,8 +404,8 @@
         </div>
 
         <div class="auth-field" data-auth-step="identify">
-          <label for="ma-id">Email</label>
-          <input id="ma-id" name="identifier" type="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="you@example.com" required>
+          <label for="ma-id">Email or Phone</label>
+          <input id="ma-id" name="identifier" type="text" inputmode="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="you@example.com or +84..." required>
         </div>
 
         <div class="auth-field" data-auth-step="password" hidden>
@@ -498,16 +498,19 @@
           <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
         </details>
 
-        <div class="auth-row-2" id="fb-guest-contact-row">
-          <div class="auth-field">
-            <label for="fb-name">Your name <span class="auth-hint-inline">(optional)</span></label>
-            <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Leave blank to stay anonymous">
+        <details class="rsvp-optional-note" id="fb-guest-contact-row">
+          <summary>+ Leave your name or contact for a reply (optional)</summary>
+          <div class="auth-row-2" style="margin-top: 10px;">
+            <div class="auth-field">
+              <label for="fb-name">Your name</label>
+              <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Leave blank to stay anonymous">
+            </div>
+            <div class="auth-field">
+              <label for="fb-contact">Email / Phone</label>
+              <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="So our coordinators can reply">
+            </div>
           </div>
-          <div class="auth-field">
-            <label for="fb-contact">Email / Phone <span class="auth-hint-inline">(optional)</span></label>
-            <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="So our coordinators can reply">
-          </div>
-        </div>
+        </details>
 
         <div class="form-status" id="fb-status" role="status" aria-live="polite"></div>
         <div class="fb-submit-row">

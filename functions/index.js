@@ -4,6 +4,8 @@ import {
   applySiteVisualsSsr,
   buildEventsJsonLd,
   parsePartnersJson,
+  renderHeroLivePillHtml,
+  renderHeroVoiceCardHtml,
   renderHomeUpcomingSectionHtml,
   renderHorizontalGalleryHtml,
   renderPartnersStripHtml,
@@ -21,7 +23,7 @@ export async function onRequestGet({ request, env }) {
 
   await Promise.all([ensureMediaApprovalSchema(env.DB), ensureDeepControlSchema(env.DB)]);
 
-  const [assetRes, eventsRes, featuredRes, partnersRow, visualsRow, testimonialsRes] = await Promise.all([
+  const [assetRes, eventsRes, featuredRes, partnersRow, visualsRow, testimonialsRes, heroReflectionsRes] = await Promise.all([
     env.ASSETS.fetch(staticAssetReq),
     env.DB.prepare(
       "SELECT * FROM events WHERE status = 'published' ORDER BY sort_order ASC, date ASC, created_at DESC LIMIT 60"
@@ -48,11 +50,22 @@ export async function onRequestGet({ request, env }) {
       .first()
       .catch(() => null),
     env.DB.prepare(
-      `SELECT author_name, author_role, author_org, pull_quote, content, photo_url
+      `SELECT id, activity_slug, author_name, author_role, author_org, pull_quote, content, photo_url, heart_count
        FROM community_testimonials
        WHERE status = 'approved' AND is_featured_home = 1
        ORDER BY created_at DESC
        LIMIT 6`
+    )
+      .all()
+      .catch(() => null),
+    env.DB.prepare(
+      `SELECT r.id, r.activity_slug, r.pull_quote, r.content, r.mood, r.heart_count,
+              m.name AS author_name, m.organization AS author_org, m.avatar_url AS author_avatar_url
+       FROM activity_reflections r
+       JOIN members m ON m.id = r.member_id
+       WHERE r.status = 'approved'
+       ORDER BY r.created_at DESC
+       LIMIT 5`
     )
       .all()
       .catch(() => null),
@@ -62,10 +75,16 @@ export async function onRequestGet({ request, env }) {
     return assetRes;
   }
 
-  const { upcoming } = splitEventsByDate(eventsRes.results || []);
+  const { upcoming, past } = splitEventsByDate(eventsRes.results || []);
   const partners = parsePartnersJson(partnersRow?.value || "[]");
+  const heroVoices = [
+    ...(heroReflectionsRes?.results || []),
+    ...(testimonialsRes?.results || []),
+  ];
 
   let html = await assetRes.text();
+  html = replaceMarker(html, "HERO_LIVE_PILL", renderHeroLivePillHtml(upcoming, past, "vi"));
+  html = replaceMarker(html, "HERO_VOICE_CARD", renderHeroVoiceCardHtml({ voices: heroVoices, past, lang: "vi" }));
   html = replaceMarker(html, "HOME_UPCOMING_SECTION", renderHomeUpcomingSectionHtml(upcoming));
   html = replaceMarker(html, "EVENTS_JSON_LD", buildEventsJsonLd(upcoming.slice(0, 1)));
   if (partnersRow) {

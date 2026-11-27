@@ -421,11 +421,11 @@ export async function onRequestPost(context) {
   const hasSpecificEvent = Boolean(record.event_id);
   const confirmationMessage = isEn
     ? hasSpecificEvent
-      ? `Thank you, ${record.full_name}! Your seat for ${record.activity_title} is confirmed (ref ${record.id}). See you in Hoa Lac!`
-      : `Thank you, ${record.full_name}! We have received your inquiry (ref ${record.id}). Our coordinating team will follow up shortly.`
+      ? `Thank you, ${record.full_name}. Your seat for ${record.activity_title} is confirmed (ref ${record.id}). See you in Hoa Lac.`
+      : `Thank you, ${record.full_name}. We have received your inquiry (ref ${record.id}). Our coordinating team will follow up shortly.`
     : hasSpecificEvent
-      ? `Cảm ơn ${record.full_name}! Hola đã ghi nhận giữ chỗ của bạn cho ${record.activity_title} (mã ${record.id}). Hẹn gặp bạn tại Hòa Lạc!`
-      : `Cảm ơn ${record.full_name}! Hola đã ghi nhận thông tin đồng hành của bạn (mã ${record.id}). Ban Điều Phối sẽ liên hệ sớm nhất.`;
+      ? `Cảm ơn ${record.full_name}. Hola đã ghi nhận giữ chỗ của bạn cho ${record.activity_title} (mã ${record.id}). Hẹn gặp bạn tại Hòa Lạc.`
+      : `Cảm ơn ${record.full_name}. Hola đã ghi nhận thông tin đồng hành của bạn (mã ${record.id}). Ban Điều Phối sẽ liên hệ sớm nhất.`;
 
   return jsonResponse(
     {

@@ -1274,7 +1274,7 @@ test("Full English mirror (/en/*): static EN purity, Edge SSR routes, sitemap & 
   });
   assert.equal(intlRes.status, 201);
   const intlJson = await intlRes.json();
-  assert.ok(intlJson.message.includes("Thank you, Hannah Sato!"));
+  assert.ok(intlJson.message.includes("Thank you, Hannah Sato."));
   assert.ok(intlJson.message.includes("is confirmed"));
 
   // 5. Validation error with lang='en' returns English field errors
@@ -1650,4 +1650,102 @@ test("EN Post-Event Memory Stage: /en/schedule/ links finished events to /en/eve
   assert.equal(fbJson.ok, true);
   assert.equal(fbJson.isAnonymous, true);
   assert.match(fbJson.message, /Thank you for your anonymous note/i);
+});
+
+test("Hero Living Table SSR: injects live upcoming pill & approved reflections, hides pending/rejected & escapes XSS", async () => {
+  const { onRequestGet: ssrHome } = await import("../functions/index.js");
+  const { onRequestGet: ssrEnHome } = await import("../functions/en/index.js");
+
+  const db = new DatabaseSync(":memory:");
+  for (const mig of [
+    "migrations/0001_init.sql",
+    "migrations/0002_seed.sql",
+    "migrations/0003_media_portal.sql",
+    "migrations/0004_holaheart_first_event.sql",
+    "migrations/0005_cuoc_doi_cua_cha_event.sql",
+    "migrations/0006_member_auth_and_reflections.sql",
+    "migrations/0008_cms_members_and_reflections.sql",
+    "migrations/0011_event_seats_and_slugs.sql",
+    "migrations/0016_media_approval_workflow.sql",
+    "migrations/0017_member_photo_contributions.sql",
+    "migrations/0018_event_zalo_url.sql",
+    "migrations/0019_event_memory_stage.sql",
+    "migrations/0020_deep_member_media_event_control.sql",
+    "migrations/0021_video_media_support.sql",
+  ]) {
+    db.exec(fs.readFileSync(path.join(ROOT, mig), "utf8"));
+  }
+  class Stmt {
+    constructor(sql, bound = []) {
+      this.sql = sql;
+      this.bound = bound;
+    }
+    bind(...args) {
+      return new Stmt(this.sql, args);
+    }
+    async first() {
+      return db.prepare(this.sql).get(...this.bound) ?? null;
+    }
+    async all() {
+      return { results: db.prepare(this.sql).all(...this.bound) };
+    }
+    async run() {
+      const info = db.prepare(this.sql).run(...this.bound);
+      return { success: true, meta: { changes: info.changes } };
+    }
+  }
+  const d1 = { prepare: (sql) => new Stmt(sql) };
+  const env = {
+    DB: d1,
+    ASSETS: {
+      async fetch(req) {
+        const u = new URL(req.url);
+        const rel = u.pathname === "/" ? "index.html" : u.pathname.replace(/^\/+/, "");
+        const file = path.join(ROOT, "dist", rel);
+        if (!fs.existsSync(file)) return new Response("Not Found", { status: 404 });
+        return new Response(fs.readFileSync(file, "utf8"), {
+          status: 200,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        });
+      },
+    },
+  };
+
+  const now = new Date().toISOString();
+  await d1
+    .prepare(
+      "INSERT INTO members (id, member_code, name, email, phone_display, organization, password_hash, password_salt, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'hash', 'salt', 1, ?, ?)"
+    )
+    .bind("mem-hero-1", "HR-261127-01", "Phúc Thành <script>alert(1)</script>", "pt@example.com", "0901112222", "ĐH FPT Hòa Lạc", now, now)
+    .run();
+  await d1
+    .prepare(
+      "INSERT INTO activity_reflections (id, activity_slug, member_id, participant_role, pull_quote, content, heart_count, status, created_at, updated_at) VALUES (?, ?, ?, 'member', ?, ?, 9, 'approved', ?, ?)"
+    )
+    .bind("ref-hero-ok", "tinh-yeu-thuong-cua-me", "mem-hero-1", "Khoảnh khắc ngồi lại bên đèn vàng thật ấm", "Nội dung đầy đủ", now, now)
+    .run();
+  await d1
+    .prepare(
+      "INSERT INTO activity_reflections (id, activity_slug, member_id, participant_role, pull_quote, content, heart_count, status, created_at, updated_at) VALUES (?, ?, ?, 'member', ?, ?, 0, 'pending', ?, ?)"
+    )
+    .bind("ref-hero-secret", "holaheart-musicspace", "mem-hero-1", "SECRET PENDING QUOTE MUST NOT LEAK", "Nội dung chờ duyệt", now, now)
+    .run();
+
+  const homeRes = await ssrHome({ request: makeReq("/"), env });
+  assert.equal(homeRes.status, 200);
+  const homeHtml = await homeRes.text();
+  assert.ok(homeHtml.includes('class="hero-live-pill"'), "Hero must render live temporal pill");
+  assert.ok(homeHtml.includes("data-hero-voice-card"), "Hero must render interactive voice card when approved reflections exist");
+  assert.ok(homeHtml.includes("Phúc Thành &lt;script&gt;alert(1)&lt;/script&gt;"), "Author name must be HTML-escaped against XSS");
+  assert.ok(!homeHtml.includes("<script>alert(1)</script>"), "Raw XSS payload must never appear");
+  assert.ok(homeHtml.includes("Khoảnh khắc ngồi lại bên đèn vàng thật ấm"), "Approved reflection quote must appear on Hero");
+  assert.ok(!homeHtml.includes("SECRET PENDING QUOTE MUST NOT LEAK"), "Pending reflection must never leak onto Hero");
+  assert.ok(homeHtml.includes('data-hv-heart data-voice-id="ref-hero-ok"'), "Heart button must wire directly to reflection ID");
+
+  const enRes = await ssrEnHome({ request: makeReq("/en/"), env });
+  assert.equal(enRes.status, 200);
+  const enHtml = await enRes.text();
+  assert.ok(enHtml.includes('class="hero-live-pill"'), "EN Hero must render live temporal pill");
+  assert.ok(enHtml.includes("hero-voice-card--recap"), "EN Hero must render clean English recap card without leaking VI reflections");
+  assert.ok(!enHtml.includes("Khoảnh khắc ngồi lại"), "EN Hero must not leak Vietnamese reflections");
 });

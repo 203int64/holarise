@@ -1,3 +1,5 @@
+import { ensureChatAndCapabilitySchema, listMemberCapabilities } from "../../_lib/capabilities.js";
+import { mergeGuestThreadsToMember } from "../../_lib/chat.js";
 import { resolveEventHref } from "../../_lib/render.js";
 import {
   ensureReflectionsSchema,
@@ -89,8 +91,13 @@ export async function onRequestGet(context) {
     LIMIT 60
   `;
 
-  await ensureReflectionsSchema(env.DB);
-  const [regsRes, refsRes, photosRes] = await Promise.all([
+  await Promise.all([
+    ensureReflectionsSchema(env.DB),
+    ensureChatAndCapabilitySchema(env.DB),
+  ]);
+  await mergeGuestThreadsToMember(env.DB, member).catch(() => 0);
+
+  const [regsRes, refsRes, photosRes, capabilities, unreadChatRow] = await Promise.all([
     env.DB.prepare(regQuery).bind(...bindParams).all(),
     env.DB.prepare(
       `SELECT id, activity_slug, participant_role, pull_quote, content, photo_url, photos_json, heart_count, status, admin_note, created_at, updated_at
@@ -113,6 +120,13 @@ export async function onRequestGet(context) {
       .bind(member.id)
       .all()
       .catch(() => ({ results: [] })),
+    listMemberCapabilities(env.DB, member.id, { includeInactive: false }).catch(() => []),
+    env.DB.prepare(
+      `SELECT COALESCE(SUM(unread_member), 0) AS cnt FROM chat_threads WHERE member_id = ?`
+    )
+      .bind(member.id)
+      .first()
+      .catch(() => ({ cnt: 0 })),
   ]);
 
   const seenRegIds = new Set();
@@ -187,12 +201,16 @@ export async function onRequestGet(context) {
     if (r.status === "attended") attendedCount += 1;
   }
 
+  const pendingCapabilitiesCount = capabilities.filter((c) => c.status === "pending_accept").length;
+
   return jsonResponse({
     ok: true,
     member: serializePublicMember(member),
     registrations,
     reflections,
     contributedPhotos,
+    capabilities,
+    unreadChatCount: Number(unreadChatRow?.cnt || 0) + pendingCapabilitiesCount,
     journeyStats: {
       activeEvents: activeCount,
       attendedEvents: attendedCount,

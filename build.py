@@ -881,6 +881,83 @@ def render_home_upcoming_cards(upcoming: list, keep_full_location: bool = False,
     return "\n      ".join(cards)
 
 
+def render_hero_live_pill(upcoming: list, past_topics: list, lang: str = "vi") -> str:
+    is_en = lang == "en"
+    if upcoming:
+        ws = upcoming[0]
+        vi_href = resolve_event_href(ws) or "/lich-hoat-dong/"
+        href = (ws.get("hrefEn") or (f"/en/events/{resolve_event_slug(ws)}/" if resolve_event_slug(ws) else "/en/schedule/")) if is_en else vi_href
+        date_raw = (ws.get("dateDisplayEn") if is_en else None) or ws.get("dateDisplay", "")
+        date_pill = compact_date_pill(date_raw, lang=lang)
+        title = (ws.get("shortTitleEn") or ws.get("titleEn") if is_en else None) or ws.get("shortTitle") or ws.get("title", "")
+        return (
+            f'<a class="hero-live-pill" href="{esc(href)}">'
+            f'<span class="hero-live-dot" aria-hidden="true"></span>'
+            f'<span class="hero-live-pill-text">'
+            f'<strong class="hero-live-pill-time">{esc(date_pill)}</strong>'
+            f'<span class="hero-live-pill-sep" aria-hidden="true">·</span>'
+            f'<span class="hero-live-pill-title">{esc(title)}</span>'
+            f'</span>'
+            f'<span class="hero-live-pill-arrow" aria-hidden="true">→</span>'
+            f'</a>'
+        )
+    if past_topics:
+        p = past_topics[0]
+        href = (p.get("hrefEn") if is_en else None) or p.get("href") or ("/en/journey/" if is_en else "/hanh-trinh/")
+        title = (p.get("titleEn") if is_en else None) or p.get("title", "")
+        label = "Just held" if is_en else "Vừa khép lại"
+        return (
+            f'<a class="hero-live-pill hero-live-pill--past" href="{esc(href)}">'
+            f'<span class="hero-live-pill-text">'
+            f'<strong class="hero-live-pill-time">{esc(label)}</strong>'
+            f'<span class="hero-live-pill-sep" aria-hidden="true">·</span>'
+            f'<span class="hero-live-pill-title">{esc(title)}</span>'
+            f'</span>'
+            f'<span class="hero-live-pill-arrow" aria-hidden="true">→</span>'
+            f'</a>'
+        )
+    return ""
+
+
+def render_hero_voice_card_static(past_topics: list, lang: str = "vi") -> str:
+    if not past_topics:
+        return ""
+    is_en = lang == "en"
+    p = past_topics[0]
+    href = (p.get("hrefEn") if is_en else None) or p.get("href") or ("/en/journey/" if is_en else "/hanh-trinh/")
+    date_label = (p.get("dateEn") if is_en else None) or p.get("date", "")
+    title = (p.get("titleEn") if is_en else None) or p.get("title", "")
+    loc = (p.get("locationEn") if is_en else None) or p.get("location", "")
+    img = p.get("image", "")
+    img_alt = (p.get("imageAltEn") if is_en else None) or p.get("imageAlt") or title
+    eyebrow = f"Just held · {date_label}" if is_en else f"Vừa khép lại · {date_label}"
+    cta = "Browse photos & share a reflection" if is_en else "Xem ảnh thực tế & viết hương khí"
+    aria = "Recent gathering" if is_en else "Buổi gặp vừa khép lại"
+    avatar_html = (
+        f'<span class="hero-voice-avatar hero-voice-avatar--photo">'
+        f'<img src="{esc(img)}" alt="{esc(img_alt)}" width="36" height="36" loading="lazy" decoding="async">'
+        f'</span>'
+        if img
+        else '<span class="hero-voice-avatar" aria-hidden="true">HR</span>'
+    )
+    return (
+        f'<aside class="hero-voice-card hero-voice-card--recap" aria-label="{esc(aria)}">'
+        f'<a class="hero-voice-recap-link" href="{esc(href)}">'
+        f'<div class="hero-voice-head">'
+        f'<div class="hero-voice-person">{avatar_html}'
+        f'<div class="hero-voice-who">'
+        f'<strong class="hero-voice-name">{esc(eyebrow)}</strong>'
+        f'<span class="hero-voice-org">{esc(loc)}</span>'
+        f'</div></div>'
+        f'<span class="hero-voice-recap-arrow" aria-hidden="true">→</span>'
+        f'</div>'
+        f'<p class="hero-voice-quote">“{esc(title)}”</p>'
+        f'<div class="hero-voice-foot hero-voice-foot--recap">'
+        f'<span class="hero-voice-recap-cta">{esc(cta)}</span>'
+        f'</div></a></aside>'
+    )
+
+
 def render_home_upcoming_section(upcoming: list, lang: str = "vi") -> str:
     if not upcoming:
         return ""
@@ -2351,6 +2428,8 @@ def build_site() -> list:
         load_template("home.html"),
         {
             "HERO_MEDIA_HTML": hero_media_html,
+            "HERO_LIVE_PILL_HTML": render_hero_live_pill(workshops["upcoming"], workshops.get("pastTopics", []), lang="vi"),
+            "HERO_VOICE_CARD_HTML": render_hero_voice_card_static(workshops.get("pastTopics", []), lang="vi"),
             "HERO_BADGE": esc(h["badge"]),
             "HERO_HEADLINE_LINES": render_hero_headline_lines(h["headline"]),
             "HERO_QUICK_PILLS": render_hero_quick_pills(h.get("quickPills", [])),
@@ -2604,6 +2683,13 @@ def build_site() -> list:
                 "EVENT_FEE": esc(ws["fee"]),
                 "EVENT_SEATS": esc(ws.get("seats", "")),
                 "EVENT_SEAT_BAR_HTML": "",
+                "EVENT_COMPANIONS_HTML": (
+                    f'<div class="invite-companion-box invite-companion-box--fallback" data-event-companions-box>'
+                    f'<div class="invite-companion-head"><span class="invite-companion-kicker">Cần hỏi trước buổi gặp?</span></div>'
+                    f'<p class="invite-companion-note">Cần hỏi đường đi, giờ đón hoặc đi một mình lần đầu — nhắn thẳng cho người điều phối buổi này, không cần tạo tài khoản.</p>'
+                    f'<div class="invite-companion-actions"><button class="btn btn--outline btn--sm" type="button" data-open-event-chat data-event-id="{esc(ws["id"])}" data-event-title="{esc(ws["title"])}" data-zalo-group="{esc(ev_zalo)}" data-companion-names="Ban Điều phối HolaRise">Nhắn nhanh người điều phối</button></div>'
+                    f'</div>'
+                ),
                 "EVENT_IMAGE": esc(ws["image"]),
                 "EVENT_IMAGE_ALT": esc(ws["imageAlt"]),
                 "EVENT_ZALO_GROUP": esc(ev_zalo),
@@ -2672,6 +2758,7 @@ def build_site() -> list:
             "EVENT_FEE": "__SSR_EVENT_FEE__",
             "EVENT_SEATS": "__SSR_EVENT_SEATS__",
             "EVENT_SEAT_BAR_HTML": "__SSR_EVENT_SEAT_BAR_HTML__",
+            "EVENT_COMPANIONS_HTML": "__SSR_EVENT_COMPANIONS_HTML__",
             "EVENT_IMAGE": "__SSR_EVENT_IMAGE__",
             "EVENT_IMAGE_ALT": "__SSR_EVENT_IMAGE_ALT__",
             "EVENT_ZALO_GROUP": "__SSR_EVENT_ZALO_GROUP__",
@@ -2978,6 +3065,8 @@ def build_site() -> list:
         load_template("en_home.html"),
         {
             "HERO_MEDIA_HTML": en_hero_media_html,
+            "HERO_LIVE_PILL_HTML": render_hero_live_pill(workshops["upcoming"], workshops.get("pastTopics", []), lang="en"),
+            "HERO_VOICE_CARD_HTML": render_hero_voice_card_static(workshops.get("pastTopics", []), lang="en"),
             "HERO_HEADLINE_LINES": render_hero_headline_lines(en_h.get("headline", "Stillness within,\nAction from Hoa Lac.")),
             "HERO_DESCRIPTION": esc(en_h.get("description", "")),
             "HERO_PRIMARY_LABEL": esc(en_h.get("primaryCta", {}).get("label", "Join HolaRise")),
@@ -3115,6 +3204,13 @@ def build_site() -> list:
                 "EVENT_FEE": esc(ws.get("feeEn") or "Free admission"),
                 "EVENT_SEATS": esc(ws.get("seats", "")),
                 "EVENT_SEAT_BAR_HTML": "",
+                "EVENT_COMPANIONS_HTML": (
+                    f'<div class="invite-companion-box invite-companion-box--fallback" data-event-companions-box>'
+                    f'<div class="invite-companion-head"><span class="invite-companion-kicker">First time coming alone?</span></div>'
+                    f'<p class="invite-companion-note">Ask our event coordinator about directions, timing, or coming solo — no account needed.</p>'
+                    f'<div class="invite-companion-actions"><button class="btn btn--outline btn--sm" type="button" data-open-event-chat data-event-id="{esc(ws["id"])}" data-event-title="{esc(ev_title_en)}" data-zalo-group="{esc(ev_zalo)}" data-companion-names="HolaRise Coordinator">Message coordinator</button></div>'
+                    f'</div>'
+                ),
                 "EVENT_IMAGE": esc(ws["image"]),
                 "EVENT_IMAGE_ALT": esc(ws.get("imageAltEn") or ws["imageAlt"]),
                 "EVENT_ZALO_GROUP": esc(ev_zalo),
@@ -3178,6 +3274,7 @@ def build_site() -> list:
             "EVENT_FEE": "__SSR_EVENT_FEE__",
             "EVENT_SEATS": "__SSR_EVENT_SEATS__",
             "EVENT_SEAT_BAR_HTML": "__SSR_EVENT_SEAT_BAR_HTML__",
+            "EVENT_COMPANIONS_HTML": "__SSR_EVENT_COMPANIONS_HTML__",
             "EVENT_IMAGE": "__SSR_EVENT_IMAGE__",
             "EVENT_IMAGE_ALT": "__SSR_EVENT_IMAGE_ALT__",
             "EVENT_ZALO_GROUP": "__SSR_EVENT_ZALO_GROUP__",

@@ -1,4 +1,5 @@
 import { autoProvisionFinishedEventAlbums } from "../_lib/albums.js";
+import { listEventCompanions } from "../_lib/capabilities.js";
 import { canActorViewAlbum, ensureDeepControlSchema, resolveActorContext } from "../_lib/media-access.js";
 import { ensureMediaApprovalSchema } from "../_lib/media-approval-schema.js";
 import {
@@ -10,6 +11,7 @@ import {
   fullImageUrl,
   imageAttrs,
   isEventFinished,
+  renderEventCompanionsHtml,
   renderSeatBarHtml,
   replaceMarker,
   resolveEventSlug,
@@ -303,8 +305,12 @@ export async function onRequestGet({ request, env, params }) {
         html = injectPersonalizedTitleTags(html, recipientParam);
       }
       if (matchedEvent && env?.DB) {
-        const webBooked = matchedEvent.showSeatBar ? await countWebRegistrations(env.DB, matchedEvent.id) : 0;
+        const [webBooked, companions] = await Promise.all([
+          matchedEvent.showSeatBar ? countWebRegistrations(env.DB, matchedEvent.id) : Promise.resolve(0),
+          listEventCompanions(env.DB, matchedEvent.id).catch(() => []),
+        ]);
         html = replaceMarker(html, "EVENT_SEAT_BAR", renderSeatBarHtml(matchedEvent, webBooked));
+        html = replaceMarker(html, "EVENT_COMPANIONS", renderEventCompanionsHtml(matchedEvent, companions, "vi"));
         if (matchedEvent.fee) {
           html = replaceMarker(html, "EVENT_FEE", escHtml(matchedEvent.fee));
         }
@@ -367,8 +373,12 @@ export async function onRequestGet({ request, env, params }) {
     `<p class="invite-closing">Mời bạn giữ chỗ trước để chúng mình sắp xếp chu đáo và gửi định vị chi tiết trong Nhóm Zalo buổi gặp.</p>`
   );
 
-  const webBooked = matched.showSeatBar ? await countWebRegistrations(env.DB, matched.id) : 0;
+  const [webBooked, companions] = await Promise.all([
+    matched.showSeatBar ? countWebRegistrations(env.DB, matched.id) : Promise.resolve(0),
+    listEventCompanions(env.DB, matched.id).catch(() => []),
+  ]);
   const seatBarHtml = renderSeatBarHtml(matched, webBooked);
+  const companionsHtml = renderEventCompanionsHtml(matched, companions, "vi");
   const pillarMeta = derivePillarMeta(matched);
   const shareTitle = formatEventShareTitle(matched, recipientParam);
 
@@ -390,6 +400,7 @@ export async function onRequestGet({ request, env, params }) {
     __SSR_EVENT_FEE__: escHtml(matched.fee || "Miễn phí tham dự · Tự túc đồ uống"),
     __SSR_EVENT_SEATS__: escHtml(matched.seats || ""),
     __SSR_EVENT_SEAT_BAR_HTML__: seatBarHtml,
+    __SSR_EVENT_COMPANIONS_HTML__: companionsHtml,
     __SSR_EVENT_IMAGE__: escHtml(matched.image),
     __SSR_EVENT_IMAGE_ALT__: escHtml(matched.imageAlt || matched.title),
     __SSR_EVENT_ZALO_GROUP__: escHtml(matched.zaloGroupUrl || DEFAULT_ZALO_GROUP),

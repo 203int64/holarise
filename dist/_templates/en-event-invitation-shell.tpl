@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=4b6f51fef1">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=381066c4c4">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -127,7 +127,7 @@
           <span class="lang-switch-opt">VN</span>
         </a>
         <a class="btn btn--primary btn--sm header-cta" href="/en/join/" data-header-member-btn>
-          <span data-header-member-label>Sign in</span>
+          <span data-header-member-label>Member Pass</span>
         </a>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Open navigation menu">
           <span class="nav-toggle-bars" aria-hidden="true">
@@ -150,7 +150,7 @@
       </nav>
       <div class="mobile-drawer-footer">
         <a class="btn btn--primary" href="/en/join/" data-drawer-member-btn style="width: 100%; justify-content: space-between; padding: 15px 22px;">
-          <span data-drawer-member-label>Join &amp; Member Pass</span>
+          <span data-drawer-member-label>Member Pass</span>
           <span aria-hidden="true">→</span>
         </a>
         <button class="btn btn--outline pwa-install-drawer-btn" type="button" data-pwa-install hidden>
@@ -218,11 +218,7 @@
       <div class="invite-meta-links">
         <button class="invite-text-btn invite-text-btn--accent" type="button" data-register-event="__SSR_EVENT_TITLE__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-event-date="__SSR_EVENT_DATE_DISPLAY__" data-event-time="__SSR_INVITE_TIME_LABEL__" data-event-location="__SSR_EVENT_LOCATION__" data-venue-url="" data-event-fee="__SSR_EVENT_FEE__" data-event-seats="__SSR_EVENT_SEATS__" data-event-type="__SSR_EVENT_KICKER__" data-event-href="/en/events/__SSR_EVENT_SLUG__/" data-event-image="__SSR_EVENT_IMAGE__" data-zalo-group="__SSR_EVENT_ZALO_GROUP__" data-ics-start="__SSR_INVITE_ICS_START__" data-ics-end="__SSR_INVITE_ICS_END__" data-note-summary="+ Add a note for coordinators (optional)" data-note-placeholder="Share a note ahead of time, or leave blank if you prefer simply to listen..." data-anon-share="true">Reserve a seat</button>
         <span aria-hidden="true">·</span>
-        <button class="invite-text-btn" type="button" data-open-invite-share>Share invitation</button>
-        <span aria-hidden="true">·</span>
-        <a href="__SSR_GOOGLE_CAL_URL__" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
-        <span aria-hidden="true">·</span>
-        <a href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Gathering Zalo Group ↗</a>
+        <button class="invite-text-btn" type="button" data-open-invite-share>Send invitation</button>
       </div>
     </div>
   </div>
@@ -276,18 +272,42 @@
         <span>__SSR_INVITE_VENUE_NAME__</span>
       </div>
 
-      <p class="invite-rsvp-lead">Solo and international guests are always welcomed — no pressure to speak. Just leave your name and phone, Zalo, or email so we can save your seat and share location pins.</p>
+      <p class="invite-rsvp-lead">Just leave your name and phone, Zalo, or email so we can save your seat and share location pins. Solo guests are always welcomed — no pressure to speak.</p>
 
       <div class="invite-rsvp-actions">
         <button class="btn btn--primary" type="button" id="ws-open-rsvp-btn" data-open-on-hash="rsvp" data-register-event="__SSR_EVENT_TITLE__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-event-date="__SSR_EVENT_DATE_DISPLAY__" data-event-time="__SSR_INVITE_TIME_LABEL__" data-event-location="__SSR_EVENT_LOCATION__" data-venue-url="" data-event-fee="__SSR_EVENT_FEE__" data-event-seats="__SSR_EVENT_SEATS__" data-event-type="__SSR_EVENT_KICKER__" data-event-href="/en/events/__SSR_EVENT_SLUG__/" data-event-image="__SSR_EVENT_IMAGE__" data-zalo-group="__SSR_EVENT_ZALO_GROUP__" data-ics-start="__SSR_INVITE_ICS_START__" data-ics-end="__SSR_INVITE_ICS_END__" data-note-summary="+ Add a note for coordinators (optional)" data-note-placeholder="Share a note ahead of time, or leave blank if you prefer simply to listen..." data-anon-share="true">Confirm attendance</button>
-        <button class="btn btn--outline" type="button" data-open-invite-share>Share invitation</button>
-        <a class="btn btn--outline" href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Gathering Zalo Group ↗</a>
+        <button class="btn btn--outline" type="button" data-open-invite-share>Send invitation</button>
       </div>
 
-      <p class="invite-rsvp-footnote">15-second RSVP, no password needed · <a href="/en/privacy/">Transparency &amp; Privacy Standards</a></p>
+      <!-- CMS:EVENT_COMPANIONS:START -->__SSR_EVENT_COMPANIONS_HTML__<!-- CMS:EVENT_COMPANIONS:END -->
+
+      <p class="invite-rsvp-footnote">Free admission · No account required · <a href="__SSR_GOOGLE_CAL_URL__" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a> · <a href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Gathering Zalo Group ↗</a> · <a href="/en/privacy/">Transparency &amp; Privacy</a></p>
     </div>
   </div>
 </section>
+
+<dialog class="club-dialog club-dialog--chat" id="event-companion-chat-dialog" closedby="any" aria-labelledby="evchat-heading">
+  <div class="dialog-inner evchat-dialog-inner">
+    <button class="modal-close" type="button" data-modal-close aria-label="Close conversation">×</button>
+    <div class="evchat-head">
+      <span class="kicker">ASK YOUR WELCOMING HOST</span>
+      <h2 id="evchat-heading" class="evchat-title">Gathering Help Desk</h2>
+      <p class="evchat-sub" id="evchat-sub">Message the coordinator welcoming guests at this session. On your way? Open the <a id="evchat-zalo-escape" href="__SSR_EVENT_ZALO_GROUP__" target="_blank" rel="noopener noreferrer">Gathering Zalo Group ↗</a>.</p>
+    </div>
+    <div class="evchat-messages" id="evchat-messages" role="log" aria-live="polite"></div>
+    <form class="evchat-form" id="evchat-form" novalidate>
+      <div class="evchat-guest-fields" id="evchat-guest-fields" hidden>
+        <input type="text" id="evchat-guest-name" maxlength="80" placeholder="Your name" aria-label="Your name">
+        <input type="text" id="evchat-guest-contact" maxlength="120" placeholder="Zalo phone or email" aria-label="Zalo phone or email">
+      </div>
+      <div class="evchat-compose-row">
+        <textarea id="evchat-input" rows="2" maxlength="1200" placeholder="Example: Coming solo for the first time, where should I park?" aria-label="Your question"></textarea>
+        <button class="btn btn--primary btn--sm" type="submit" id="evchat-send-btn">Send</button>
+      </div>
+      <div class="form-status" id="evchat-status" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</dialog>
 
 <!-- Event Share & Personalized Invitation Modal -->
 <dialog class="club-dialog club-dialog--share" id="event-share-modal" closedby="any" data-pillar="__SSR_EVENT_PILLAR__" data-share-url="__SSR_CANONICAL_URL__" data-share-title="__SSR_EVENT_SHARE_TITLE__" data-share-time="__SSR_INVITE_TIME_LABEL__" data-share-venue="__SSR_INVITE_VENUE_NAME__" aria-labelledby="event-share-heading">
@@ -306,23 +326,6 @@
         <strong class="share-preview-title" id="share-preview-title">__SSR_EVENT_SHARE_TITLE__</strong>
         <p class="share-preview-meta">__SSR_INVITE_TIME_LABEL__ · __SSR_INVITE_VENUE_NAME__</p>
       </div>
-    </div>
-
-    <div class="share-inviter-grid" id="share-inviter-grid">
-      <div class="share-inviter-field">
-        <label for="share-recipient-name">To <span class="auth-hint-inline">(guest name)</span></label>
-        <input id="share-recipient-name" type="text" maxlength="60" placeholder="e.g. Sarah">
-      </div>
-      <div class="share-inviter-field" id="share-inviter-field-wrap">
-        <label for="share-inviter-name">From <span class="auth-hint-inline">(your name)</span></label>
-        <input id="share-inviter-name" type="text" maxlength="60" placeholder="e.g. Alex">
-      </div>
-    </div>
-    <p class="share-inviter-signed-hint" id="share-inviter-signed-bar" hidden>Inviting as <strong id="share-inviter-signed-name"></strong></p>
-
-    <div class="share-inviter-field">
-      <label for="share-personal-note">Personal note on card <span class="auth-hint-inline">(optional)</span></label>
-      <input id="share-personal-note" type="text" maxlength="140" placeholder="e.g. Come join me this weekend, it is a warm small circle...">
     </div>
 
     <div class="share-platforms-block">
@@ -367,13 +370,36 @@
     <div class="share-url-block">
       <div class="share-url-head">
         <label for="share-url-input" class="share-section-label">Invitation link</label>
-        <button type="button" class="share-preview-trigger" id="share-preview-env-btn">Preview envelope opening ↗</button>
       </div>
       <div class="share-url-row">
         <input id="share-url-input" type="text" readonly value="__SSR_CANONICAL_URL__">
         <button type="button" class="btn btn--primary btn--sm share-copy-btn" id="share-copy-btn">Copy</button>
       </div>
     </div>
+
+    <details class="rsvp-optional-note share-personalize-details">
+      <summary>+ Personalize with guest name &amp; handwritten note (optional)</summary>
+      <div class="share-personalize-body">
+        <div class="share-inviter-grid" id="share-inviter-grid">
+          <div class="share-inviter-field">
+            <label for="share-recipient-name">To <span class="auth-hint-inline">(guest name)</span></label>
+            <input id="share-recipient-name" type="text" maxlength="60" placeholder="e.g. Sarah">
+          </div>
+          <div class="share-inviter-field" id="share-inviter-field-wrap">
+            <label for="share-inviter-name">From <span class="auth-hint-inline">(your name)</span></label>
+            <input id="share-inviter-name" type="text" maxlength="60" placeholder="e.g. Alex">
+          </div>
+        </div>
+        <p class="share-inviter-signed-hint" id="share-inviter-signed-bar" hidden>Inviting as <strong id="share-inviter-signed-name"></strong></p>
+
+        <div class="share-inviter-field">
+          <label for="share-personal-note">Personal note on card</label>
+          <input id="share-personal-note" type="text" maxlength="140" placeholder="e.g. Come join me this weekend...">
+        </div>
+
+        <button type="button" class="share-preview-trigger" id="share-preview-env-btn">Preview envelope opening ↗</button>
+      </div>
+    </details>
   </div>
 </dialog>
 </div>
@@ -477,11 +503,6 @@
         <button class="btn btn--primary btn--sm" type="button" id="modal-member-onetap-btn">1-Tap RSVP</button>
       </div>
 
-      <div class="rsvp-guest-signin-bar" data-rsvp-guest-prompt>
-        <span>Sign in with Google or Passkey for 1-tap RSVP.</span>
-        <button type="button" class="btn btn--outline btn--sm" data-open-member-auth>Sign in</button>
-      </div>
-
       <form class="form-grid rsvp-modal-form" id="modal-rsvp-form" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register-en" data-endpoint="/api/registrations" data-phone="077.777.1948" data-phone-raw="0777771948" data-zalo="https://zalo.me/0777771948" data-zalo-group="https://zalo.me/g/7fock88aizzrdkmr9ggf" novalidate>
         <input type="hidden" name="source" value="event_modal">
         <input type="hidden" name="activity" id="modal-event-input" value="">
@@ -535,7 +556,7 @@
 
         <div class="rsvp-submit-block">
           <button class="btn btn--primary rsvp-submit-btn" type="submit" id="modal-submit-btn">Confirm seat</button>
-          <p class="rsvp-trust-note">Solo guests always welcomed · No password required · <a href="/en/privacy/">Transparency &amp; Privacy</a></p>
+          <p class="rsvp-trust-note">Solo guests always welcomed · <a href="/en/privacy/">Transparency &amp; Privacy</a><span data-rsvp-guest-prompt> · <button type="button" class="inline-text-link" data-open-member-auth>Have a Member Pass?</button></span></p>
         </div>
       </form>
 
@@ -604,16 +625,20 @@
           <a class="btn btn--primary rsvp-submit-btn" href="https://zalo.me/g/7fock88aizzrdkmr9ggf" target="_blank" rel="noopener noreferrer" id="modal-zalo-group-btn">Join Gathering Zalo Group ↗</a>
           <div class="rsvp-secondary-actions">
             <button type="button" class="btn btn--outline btn--sm" data-ics-download="modal" id="modal-ics-btn" hidden>Add to Calendar (.ics)</button>
-            <button type="button" class="btn btn--outline btn--sm" data-pass-download="modal">Save Pass (PNG)</button>
             <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Invite a friend</button>
+          </div>
+          <div class="rsvp-more-links">
+            <button type="button" class="inline-text-link" data-pass-download="modal">Save Pass (PNG)</button>
+            <span aria-hidden="true">·</span>
             <span class="copy-control">
-              <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
+              <button type="button" class="inline-text-link" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
                 <span>Copy invite</span>
               </button>
               <span class="copy-tip" role="status"></span>
             </span>
+            <span aria-hidden="true">·</span>
+            <button type="button" class="inline-text-link" data-pass-new="modal">Reserve for a friend</button>
           </div>
-          <button type="button" class="pass-reset-link" data-pass-new="modal">Reserve a seat for another friend</button>
         </div>
       </div>
     </div>
@@ -626,8 +651,8 @@
       <div class="auth-dialog-brand">
         <img src="/assets/images/logo-mark.png" alt="HolaRise emblem" width="32" height="32">
         <div>
-          <h2 id="member-auth-heading" class="auth-dialog-title">Sign in to HolaRise</h2>
-          <p class="auth-dialog-sub">Continue with Google, Passkey, or Email.</p>
+          <h2 id="member-auth-heading" class="auth-dialog-title">HolaRise Member Pass</h2>
+          <p class="auth-dialog-sub">Sign in or open a pass with Google, Passkey, or Email.</p>
         </div>
       </div>
 
@@ -652,6 +677,7 @@
           <span>Sign in with Passkey</span>
         </button>
       </div>
+      <p class="auth-webview-note" data-webview-oauth-note hidden>In-app browser detected — continue with Email or Phone below, or open in Safari/Chrome for Google sign-in.</p>
 
       <div class="auth-divider" style="margin: 16px 0;"><span>or</span></div>
 
@@ -662,8 +688,8 @@
         </div>
 
         <div class="auth-field" data-auth-step="identify">
-          <label for="ma-id">Email</label>
-          <input id="ma-id" name="identifier" type="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="you@example.com" required>
+          <label for="ma-id">Email or Phone</label>
+          <input id="ma-id" name="identifier" type="text" inputmode="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="you@example.com or +84..." required>
         </div>
 
         <div class="auth-field" data-auth-step="password" hidden>
@@ -756,16 +782,19 @@
           <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
         </details>
 
-        <div class="auth-row-2" id="fb-guest-contact-row">
-          <div class="auth-field">
-            <label for="fb-name">Your name <span class="auth-hint-inline">(optional)</span></label>
-            <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Leave blank to stay anonymous">
+        <details class="rsvp-optional-note" id="fb-guest-contact-row">
+          <summary>+ Leave your name or contact for a reply (optional)</summary>
+          <div class="auth-row-2" style="margin-top: 10px;">
+            <div class="auth-field">
+              <label for="fb-name">Your name</label>
+              <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Leave blank to stay anonymous">
+            </div>
+            <div class="auth-field">
+              <label for="fb-contact">Email / Phone</label>
+              <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="So our coordinators can reply">
+            </div>
           </div>
-          <div class="auth-field">
-            <label for="fb-contact">Email / Phone <span class="auth-hint-inline">(optional)</span></label>
-            <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="So our coordinators can reply">
-          </div>
-        </div>
+        </details>
 
         <div class="form-status" id="fb-status" role="status" aria-live="polite"></div>
         <div class="fb-submit-row">
@@ -1067,10 +1096,10 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/main.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/join-pass.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/member.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/pwa.js?v=4b6f51fef1" defer></script>
+  <script src="/assets/js/motion.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/main.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/join-pass.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/member.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/pwa.js?v=381066c4c4" defer></script>
 </body>
 </html>

@@ -34,16 +34,16 @@
   },
   "hero": {
     "badge": "Hola · Together We Rise, Together We Serve",
-    "headline": "Tĩnh tại bên trong,\nHành động từ Hòa Lạc.",
-    "description": "Hành trình người trẻ sống tĩnh tại, giữ xanh cảnh quan và phụng sự cộng đồng.",
+    "headline": "Tĩnh tại bên trong,\nBền bỉ đi cùng nhau.",
+    "description": "Khởi nguồn từ sườn đồi Hòa Lạc — nơi người trẻ ngồi lại lắng nghe, giữ xanh mảnh đất dưới chân và phụng sự cộng đồng.",
     "quickPills": [
       "HolaHeart · Tĩnh tại",
       "HolaGreen · Sinh thái",
       "HolaConnect · Phụng sự"
     ],
     "primaryCta": {
-      "label": "Tham gia cùng Hola",
-      "href": "/tham-gia/"
+      "label": "Xem lịch sắp mở",
+      "href": "#lich-hen"
     },
     "secondaryCta": {
       "label": "Xem hành trình",
@@ -170,7 +170,7 @@
     },
     {
       "question": "Làm sao để giữ chỗ tham gia một buổi gặp?",
-      "answer": "Bạn chỉ cần chọn buổi muốn tham dự tại trang Lịch hoạt động hoặc Tham gia, điền tên gọi và số Zalo trong 15 giây (không cần tạo tài khoản hay mật khẩu), sau đó vào Nhóm Zalo buổi gặp để nhận định vị và ghép xe."
+      "answer": "Bạn chỉ cần chọn buổi phù hợp tại Lịch hoạt động, để lại tên gọi và số Zalo (không cần tạo tài khoản), sau đó vào Nhóm Zalo buổi gặp để nhận định vị và ghép xe."
     },
     {
       "question": "Đi một mình lần đầu có ngại không?",
@@ -196,11 +196,11 @@
   },
   "en": {
     "hero": {
-      "headline": "Stillness within,\nAction from Hoa Lac.",
-      "description": "A non-profit youth community rooted in Hoa Lac for inner stillness, ecological care, and civic service.",
+      "headline": "Stillness within,\nSteadiness together.",
+      "description": "Rooted in the hills of Hoa Lac — where young people gather to listen deeply, care for the land, and serve with quiet consistency.",
       "primaryCta": {
-        "label": "Join HolaRise",
-        "href": "/en/join/"
+        "label": "Upcoming gatherings",
+        "href": "#upcoming"
       },
       "secondaryCta": {
         "label": "Explore our journey",
@@ -307,7 +307,7 @@
       },
       {
         "question": "How do I reserve a seat for an upcoming gathering?",
-        "answer": "Pick a gathering on the Schedule page, enter your name and phone, Zalo, or email in 15 seconds (no password needed), then add the event to your calendar or join the session's Zalo group for location pins and carpool updates."
+        "answer": "Pick a gathering on the Schedule page, leave your name and phone, Zalo, or email (no account needed), then save it to your calendar or join the session's Zalo group for location pins and carpool updates."
       },
       {
         "question": "Is it awkward to come alone for the first time?",

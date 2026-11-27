@@ -47,11 +47,7 @@
       <div class="invite-meta-links">
         <button class="invite-text-btn invite-text-btn--accent" type="button" data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/en/events/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Reserve a seat</button>
         <span aria-hidden="true">·</span>
-        <button class="invite-text-btn" type="button" data-open-invite-share>Share invitation</button>
-        <span aria-hidden="true">·</span>
-        <a href="{{GOOGLE_CAL_URL}}" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a>
-        <span aria-hidden="true">·</span>
-        <a href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Gathering Zalo Group ↗</a>
+        <button class="invite-text-btn" type="button" data-open-invite-share>Send invitation</button>
       </div>
     </div>
   </div>
@@ -105,18 +101,42 @@
         <span>{{INVITE_VENUE_HTML}}</span>
       </div>
 
-      <p class="invite-rsvp-lead">Solo and international guests are always welcomed — no pressure to speak. Just leave your name and phone, Zalo, or email so we can save your seat and share location pins.</p>
+      <p class="invite-rsvp-lead">Just leave your name and phone, Zalo, or email so we can save your seat and share location pins. Solo guests are always welcomed — no pressure to speak.</p>
 
       <div class="invite-rsvp-actions">
         <button class="btn btn--primary" type="button" id="ws-open-rsvp-btn" data-open-on-hash="rsvp" data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/en/events/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Confirm attendance</button>
-        <button class="btn btn--outline" type="button" data-open-invite-share>Share invitation</button>
-        <a class="btn btn--outline" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Gathering Zalo Group ↗</a>
+        <button class="btn btn--outline" type="button" data-open-invite-share>Send invitation</button>
       </div>
 
-      <p class="invite-rsvp-footnote">15-second RSVP, no password needed · <a href="/en/privacy/">Transparency &amp; Privacy Standards</a></p>
+      <!-- CMS:EVENT_COMPANIONS:START -->{{EVENT_COMPANIONS_HTML}}<!-- CMS:EVENT_COMPANIONS:END -->
+
+      <p class="invite-rsvp-footnote">Free admission · No account required · <a href="{{GOOGLE_CAL_URL}}" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a> · <a href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Gathering Zalo Group ↗</a> · <a href="/en/privacy/">Transparency &amp; Privacy</a></p>
     </div>
   </div>
 </section>
+
+<dialog class="club-dialog club-dialog--chat" id="event-companion-chat-dialog" closedby="any" aria-labelledby="evchat-heading">
+  <div class="dialog-inner evchat-dialog-inner">
+    <button class="modal-close" type="button" data-modal-close aria-label="Close conversation">×</button>
+    <div class="evchat-head">
+      <span class="kicker">ASK YOUR WELCOMING HOST</span>
+      <h2 id="evchat-heading" class="evchat-title">Gathering Help Desk</h2>
+      <p class="evchat-sub" id="evchat-sub">Message the coordinator welcoming guests at this session. On your way? Open the <a id="evchat-zalo-escape" href="{{EVENT_ZALO_GROUP}}" target="_blank" rel="noopener noreferrer">Gathering Zalo Group ↗</a>.</p>
+    </div>
+    <div class="evchat-messages" id="evchat-messages" role="log" aria-live="polite"></div>
+    <form class="evchat-form" id="evchat-form" novalidate>
+      <div class="evchat-guest-fields" id="evchat-guest-fields" hidden>
+        <input type="text" id="evchat-guest-name" maxlength="80" placeholder="Your name" aria-label="Your name">
+        <input type="text" id="evchat-guest-contact" maxlength="120" placeholder="Zalo phone or email" aria-label="Zalo phone or email">
+      </div>
+      <div class="evchat-compose-row">
+        <textarea id="evchat-input" rows="2" maxlength="1200" placeholder="Example: Coming solo for the first time, where should I park?" aria-label="Your question"></textarea>
+        <button class="btn btn--primary btn--sm" type="submit" id="evchat-send-btn">Send</button>
+      </div>
+      <div class="form-status" id="evchat-status" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</dialog>
 
 <!-- Event Share & Personalized Invitation Modal -->
 <dialog class="club-dialog club-dialog--share" id="event-share-modal" closedby="any" data-pillar="{{EVENT_PILLAR}}" data-share-url="{{CANONICAL_EVENT_URL}}" data-share-title="{{EVENT_SHARE_TITLE}}" data-share-time="{{INVITE_TIME_LABEL}}" data-share-venue="{{INVITE_VENUE_NAME}}" aria-labelledby="event-share-heading">
@@ -135,23 +155,6 @@
         <strong class="share-preview-title" id="share-preview-title">{{EVENT_SHARE_TITLE}}</strong>
         <p class="share-preview-meta">{{INVITE_TIME_LABEL}} · {{INVITE_VENUE_NAME}}</p>
       </div>
-    </div>
-
-    <div class="share-inviter-grid" id="share-inviter-grid">
-      <div class="share-inviter-field">
-        <label for="share-recipient-name">To <span class="auth-hint-inline">(guest name)</span></label>
-        <input id="share-recipient-name" type="text" maxlength="60" placeholder="e.g. Sarah">
-      </div>
-      <div class="share-inviter-field" id="share-inviter-field-wrap">
-        <label for="share-inviter-name">From <span class="auth-hint-inline">(your name)</span></label>
-        <input id="share-inviter-name" type="text" maxlength="60" placeholder="e.g. Alex">
-      </div>
-    </div>
-    <p class="share-inviter-signed-hint" id="share-inviter-signed-bar" hidden>Inviting as <strong id="share-inviter-signed-name"></strong></p>
-
-    <div class="share-inviter-field">
-      <label for="share-personal-note">Personal note on card <span class="auth-hint-inline">(optional)</span></label>
-      <input id="share-personal-note" type="text" maxlength="140" placeholder="e.g. Come join me this weekend, it is a warm small circle...">
     </div>
 
     <div class="share-platforms-block">
@@ -196,13 +199,36 @@
     <div class="share-url-block">
       <div class="share-url-head">
         <label for="share-url-input" class="share-section-label">Invitation link</label>
-        <button type="button" class="share-preview-trigger" id="share-preview-env-btn">Preview envelope opening ↗</button>
       </div>
       <div class="share-url-row">
         <input id="share-url-input" type="text" readonly value="{{CANONICAL_EVENT_URL}}">
         <button type="button" class="btn btn--primary btn--sm share-copy-btn" id="share-copy-btn">Copy</button>
       </div>
     </div>
+
+    <details class="rsvp-optional-note share-personalize-details">
+      <summary>+ Personalize with guest name &amp; handwritten note (optional)</summary>
+      <div class="share-personalize-body">
+        <div class="share-inviter-grid" id="share-inviter-grid">
+          <div class="share-inviter-field">
+            <label for="share-recipient-name">To <span class="auth-hint-inline">(guest name)</span></label>
+            <input id="share-recipient-name" type="text" maxlength="60" placeholder="e.g. Sarah">
+          </div>
+          <div class="share-inviter-field" id="share-inviter-field-wrap">
+            <label for="share-inviter-name">From <span class="auth-hint-inline">(your name)</span></label>
+            <input id="share-inviter-name" type="text" maxlength="60" placeholder="e.g. Alex">
+          </div>
+        </div>
+        <p class="share-inviter-signed-hint" id="share-inviter-signed-bar" hidden>Inviting as <strong id="share-inviter-signed-name"></strong></p>
+
+        <div class="share-inviter-field">
+          <label for="share-personal-note">Personal note on card</label>
+          <input id="share-personal-note" type="text" maxlength="140" placeholder="e.g. Come join me this weekend...">
+        </div>
+
+        <button type="button" class="share-preview-trigger" id="share-preview-env-btn">Preview envelope opening ↗</button>
+      </div>
+    </details>
   </div>
 </dialog>
 </div>

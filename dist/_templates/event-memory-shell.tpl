@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=4b6f51fef1">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=381066c4c4">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -128,7 +128,7 @@
           <span class="lang-switch-opt">EN</span>
         </a>
         <a class="btn btn--primary btn--sm header-cta" href="/tham-gia/" data-header-member-btn>
-          <span data-header-member-label>Đăng nhập</span>
+          <span data-header-member-label>Thẻ Thành Viên</span>
         </a>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-drawer" aria-label="Mở menu điều hướng">
           <span class="nav-toggle-bars" aria-hidden="true">
@@ -151,7 +151,7 @@
       </nav>
       <div class="mobile-drawer-footer">
         <a class="btn btn--primary" href="/tham-gia/" data-drawer-member-btn style="width: 100%; justify-content: space-between; padding: 15px 22px;">
-          <span data-drawer-member-label>Tham gia &amp; Thẻ Thành Viên</span>
+          <span data-drawer-member-label>Thẻ Thành Viên</span>
           <span aria-hidden="true">→</span>
         </a>
         <button class="btn btn--outline pwa-install-drawer-btn" type="button" data-pwa-install hidden>
@@ -616,14 +616,9 @@
       <div class="modal-member-bar" id="modal-member-rsvp-bar" hidden>
         <div class="modal-member-bar-copy">
           <strong id="modal-member-bar-title">Đang giữ chỗ bằng tài khoản HolaRise</strong>
-          <span id="modal-member-bar-sub">Chỉ cần chọn số chỗ và bấm xác nhận.</span>
+          <span id="modal-member-bar-sub">Chỉ cần xác nhận bên dưới để giữ chỗ ngay.</span>
         </div>
         <button class="btn btn--primary btn--sm" type="button" id="modal-member-onetap-btn">Giữ chỗ 1 chạm</button>
-      </div>
-
-      <div class="rsvp-guest-signin-bar" data-rsvp-guest-prompt>
-        <span>Đăng nhập bằng Google / Passkey để giữ chỗ trong 1 chạm.</span>
-        <button type="button" class="btn btn--outline btn--sm" data-open-member-auth>Đăng nhập</button>
       </div>
 
       <form class="form-grid rsvp-modal-form" id="modal-rsvp-form" action="/api/registrations" method="POST" aria-labelledby="modal-heading" data-club-form data-draft-key="quick-register" data-endpoint="/api/registrations" data-phone="077.777.1948" data-phone-raw="0777771948" data-zalo="https://zalo.me/0777771948" data-zalo-group="https://zalo.me/g/7fock88aizzrdkmr9ggf" novalidate>
@@ -679,7 +674,7 @@
 
         <div class="rsvp-submit-block">
           <button class="btn btn--primary rsvp-submit-btn" type="submit" id="modal-submit-btn">Xác nhận giữ chỗ</button>
-          <p class="rsvp-trust-note">Đi một mình luôn có người đón · Không cần mật khẩu · <a href="/chinh-sach/">Minh bạch &amp; Bảo mật</a></p>
+          <p class="rsvp-trust-note">Đi một mình luôn có người đón · <a href="/chinh-sach/">Minh bạch &amp; An toàn</a><span data-rsvp-guest-prompt> · <button type="button" class="inline-text-link" data-open-member-auth>Đã có Thẻ Thành Viên?</button></span></p>
         </div>
       </form>
 
@@ -774,16 +769,20 @@
           <a class="btn btn--primary rsvp-submit-btn" href="https://zalo.me/g/7fock88aizzrdkmr9ggf" target="_blank" rel="noopener noreferrer" id="modal-zalo-group-btn">Vào Nhóm Zalo buổi gặp ↗</a>
           <div class="rsvp-secondary-actions">
             <button type="button" class="btn btn--outline btn--sm" data-ics-download="modal" id="modal-ics-btn" hidden>Lưu lịch (.ics)</button>
-            <button type="button" class="btn btn--outline btn--sm" data-pass-download="modal">Tải thiệp (PNG)</button>
             <button type="button" class="btn btn--outline btn--sm" data-pass-share="modal">Rủ bạn cùng đi</button>
+          </div>
+          <div class="rsvp-more-links">
+            <button type="button" class="inline-text-link" data-pass-download="modal">Tải thiệp (PNG)</button>
+            <span aria-hidden="true">·</span>
             <span class="copy-control">
-              <button type="button" class="btn btn--outline btn--sm" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
+              <button type="button" class="inline-text-link" command="--copy" commandfor="modal-pass-invite-text" data-copy-invite>
                 <span>Sao chép lời mời</span>
               </button>
               <span class="copy-tip" role="status"></span>
             </span>
+            <span aria-hidden="true">·</span>
+            <button type="button" class="inline-text-link" data-pass-new="modal">Giữ chỗ cho bạn</button>
           </div>
-          <button type="button" class="pass-reset-link" data-pass-new="modal">Giữ chỗ thêm cho một người bạn</button>
         </div>
       </div>
     </div>
@@ -796,8 +795,8 @@
       <div class="auth-dialog-brand">
         <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="32" height="32">
         <div>
-          <h2 id="member-auth-heading" class="auth-dialog-title">Đăng nhập HolaRise</h2>
-          <p class="auth-dialog-sub">Tiếp tục với Google, Passkey hoặc Email.</p>
+          <h2 id="member-auth-heading" class="auth-dialog-title">Thẻ Thành Viên HolaRise</h2>
+          <p class="auth-dialog-sub">Mở hoặc tạo thẻ bằng Google, Passkey hoặc Email / SĐT.</p>
         </div>
       </div>
 
@@ -822,6 +821,7 @@
           <span>Đăng nhập bằng Passkey</span>
         </button>
       </div>
+      <p class="auth-webview-note" data-webview-oauth-note hidden>Đang mở trong ứng dụng chat — bạn dùng Email / SĐT bên dưới, hoặc mở bằng Safari/Chrome để đăng nhập Google.</p>
 
       <div class="auth-divider" style="margin: 16px 0;"><span>hoặc</span></div>
 
@@ -832,8 +832,8 @@
         </div>
 
         <div class="auth-field" data-auth-step="identify">
-          <label for="ma-id">Email</label>
-          <input id="ma-id" name="identifier" type="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com" required>
+          <label for="ma-id">Email hoặc Số điện thoại</label>
+          <input id="ma-id" name="identifier" type="text" inputmode="email" autocomplete="username webauthn" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="tenban@gmail.com hoặc 09xx..." required>
         </div>
 
         <div class="auth-field" data-auth-step="password" hidden>
@@ -927,16 +927,19 @@
           <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
         </details>
 
-        <div class="auth-row-2" id="fb-guest-contact-row">
-          <div class="auth-field">
-            <label for="fb-name">Tên của bạn <span class="auth-hint-inline">(tùy chọn)</span></label>
-            <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Bỏ trống nếu ẩn danh">
+        <details class="rsvp-optional-note" id="fb-guest-contact-row">
+          <summary>+ Để lại tên hoặc liên hệ nếu muốn nhận phản hồi (tùy chọn)</summary>
+          <div class="auth-row-2" style="margin-top: 10px;">
+            <div class="auth-field">
+              <label for="fb-name">Tên của bạn</label>
+              <input id="fb-name" name="fullName" type="text" autocomplete="name" placeholder="Bỏ trống nếu ẩn danh">
+            </div>
+            <div class="auth-field">
+              <label for="fb-contact">Email / Zalo</label>
+              <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Để BĐP phản hồi lại">
+            </div>
           </div>
-          <div class="auth-field">
-            <label for="fb-contact">Email / Zalo <span class="auth-hint-inline">(tùy chọn)</span></label>
-            <input id="fb-contact" name="phone" type="text" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Để BĐP phản hồi lại">
-          </div>
-        </div>
+        </details>
 
         <div class="form-status" id="fb-status" role="status" aria-live="polite"></div>
         <div class="fb-submit-row">
@@ -1238,10 +1241,10 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/main.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/join-pass.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/member.js?v=4b6f51fef1" defer></script>
-  <script src="/assets/js/pwa.js?v=4b6f51fef1" defer></script>
+  <script src="/assets/js/motion.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/main.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/join-pass.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/member.js?v=381066c4c4" defer></script>
+  <script src="/assets/js/pwa.js?v=381066c4c4" defer></script>
 </body>
 </html>
