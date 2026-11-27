@@ -4,7 +4,7 @@ import {
   normalizeDriveCategory,
   uploadImageToDrive,
 } from "../../_lib/drive.js";
-import { errorResponse, jsonResponse, requireAdmin, sniffMediaMime } from "../../_lib/security.js";
+import { errorResponse, jsonResponse, requireAdmin, sniffImageMime, sniffMediaMime } from "../../_lib/security.js";
 
 const MAX_KV_UPLOAD_BYTES = 1.5 * 1024 * 1024; // 1.5 MB image fallback when using MEDIA_KV
 const MAX_KV_AUDIO_BYTES = 8 * 1024 * 1024; // 8 MB soundtrack audio on MEDIA_KV
@@ -43,6 +43,8 @@ export async function onRequestPost(context) {
   const maxLabel = useDrive ? "50 MB" : "8 MB";
   const contentType = context.request.headers.get("Content-Type") || "";
   let bytes;
+  let webBytes = null;
+  let preferWebUrl = false;
   let originalFilename = "";
   let category = "khac";
   let subfolder = "";
@@ -64,7 +66,18 @@ export async function onRequestPost(context) {
       originalFilename = String(file.name || "");
       category = normalizeDriveCategory(formData.get("category"));
       subfolder = String(formData.get("subfolder") || "").trim().slice(0, 120);
+      preferWebUrl = String(formData.get("preferWebUrl") || "").trim() === "1";
       bytes = new Uint8Array(await file.arrayBuffer());
+
+      const rawWebFile = formData.get("webFile");
+      if (
+        rawWebFile &&
+        typeof rawWebFile.arrayBuffer === "function" &&
+        rawWebFile.size > 0 &&
+        rawWebFile.size <= MAX_KV_UPLOAD_BYTES
+      ) {
+        webBytes = new Uint8Array(await rawWebFile.arrayBuffer());
+      }
     } else {
       const buf = await context.request.arrayBuffer();
       if (buf.byteLength > maxBytes) {
@@ -128,13 +141,55 @@ export async function onRequestPost(context) {
         subfolder,
         description: `Người đăng: ${uploaderLabel} · Email: ${auth.user.email} · Tải lên lúc: ${new Date().toISOString()}`,
       });
-      const finalUrl = isVideo
+      let webUrl = "";
+      let webMediaKey = "";
+      if (
+        !isVideo &&
+        !isAudio &&
+        context.env?.MEDIA_KV &&
+        webBytes &&
+        webBytes.byteLength > 0 &&
+        webBytes.byteLength <= MAX_KV_UPLOAD_BYTES
+      ) {
+        const webDetected = sniffImageMime(webBytes);
+        if (webDetected) {
+          const kvWebId = `web-${stamp}-${crypto.randomUUID().slice(0, 10)}.${webDetected.ext}`;
+          try {
+            await context.env.MEDIA_KV.put(`media:${kvWebId}`, webBytes.buffer, {
+              metadata: {
+                contentType: webDetected.mime,
+                size: webBytes.byteLength,
+                mediaType: "image",
+                sourceDriveId: uploaded.driveId,
+                uploadedBy: auth.user.email,
+                uploadedAt: new Date().toISOString(),
+              },
+            });
+            webMediaKey = kvWebId;
+            webUrl = `/api/media/${kvWebId}`;
+          } catch {
+            // Non-fatal: Drive thumbnail proxy remains available
+          }
+        }
+      }
+
+      const driveMediaUrl = isVideo
         ? `${uploaded.url}?kind=video`
         : isAudio
           ? `${uploaded.url}?kind=audio`
           : uploaded.url;
+      const finalUrl = preferWebUrl && webUrl ? webUrl : driveMediaUrl;
       return jsonResponse(
-        { ok: true, ...uploaded, url: finalUrl, mediaType: detected.kind, uploadedBy: uploaderLabel },
+        {
+          ok: true,
+          ...uploaded,
+          url: finalUrl,
+          originalUrl: driveMediaUrl,
+          webUrl,
+          webMediaKey,
+          mediaType: detected.kind,
+          uploadedBy: uploaderLabel,
+        },
         201
       );
     } catch (err) {

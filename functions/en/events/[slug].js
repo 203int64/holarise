@@ -65,7 +65,7 @@ function renderMemoryGalleryHtmlEn(photos, ev) {
              <span>Video</span>
            </span>`
         : `<img ${imageAttrs(p.url, isLead || isWide ? "(max-width: 820px) 94vw, 680px" : "(max-width: 640px) 46vw, 340px")} alt="${escHtml(alt)}" width="480" height="360" loading="lazy" decoding="async">`;
-      return `<button class="archive-thumb memory-stage-thumb${isLead ? " is-lead" : ""}${isWide ? " is-wide" : ""}${isVideo ? " is-video" : ""}" type="button" data-media-kind="${isVideo ? "video" : "image"}" aria-label="View ${isVideo ? "video" : "photo"} ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(isVideo ? p.url : fullImageUrl(p.url))}" data-lightbox-type="${isVideo ? "video" : "image"}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCap)}">
+      return `<button class="archive-thumb memory-stage-thumb${isLead ? " is-lead" : ""}${isWide ? " is-wide" : ""}${isVideo ? " is-video" : ""}" type="button" data-media-kind="${isVideo ? "video" : "image"}" aria-label="View ${isVideo ? "video" : "photo"} ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(isVideo ? p.url : fullImageUrl(p.full_url || p.url))}" data-lightbox-type="${isVideo ? "video" : "image"}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCap)}">
         ${mediaInner}
         <span class="archive-thumb-idx" aria-hidden="true">${pad2(idx + 1)}</span>
         <span class="archive-thumb-cap" aria-hidden="true">${escHtml(p.photographer || caption)}</span>
@@ -126,7 +126,9 @@ async function renderMemoryStageResponseEn({ request, env, matched, slug }) {
   const [photosRes, refCountRow] = await Promise.all([
     albumId && canViewGallery
       ? env.DB.prepare(
-          `SELECT id, COALESCE(NULLIF(web_url, ''), url) AS url, caption, alt, photographer,
+          `SELECT id, COALESCE(NULLIF(web_url, ''), url) AS url,
+                  CASE WHEN COALESCE(web_media_key, '') LIKE 'ai-%' THEN COALESCE(NULLIF(web_url, ''), url) ELSE url END AS full_url,
+                  caption, alt, photographer,
                   COALESCE(NULLIF(media_type, ''), 'image') AS media_type
            FROM media_photos
            WHERE album_id = ? AND COALESCE(approval_status, 'approved') = 'approved'

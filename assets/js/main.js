@@ -518,12 +518,29 @@
       });
     }
 
+    var lightboxLoadSeq = 0;
+    var toDriveDetailUrl = function (rawSrc) {
+      var s = String(rawSrc || "");
+      if (s.indexOf("/api/media/drive/") === 0 && !/[?&](?:kind=(?:video|audio)|download=1|raw=1)\b/i.test(s)) {
+        return s.split("?")[0] + "?raw=1";
+      }
+      return s;
+    };
+    var toDriveDownloadUrl = function (rawSrc) {
+      var s = String(rawSrc || "");
+      if (s.indexOf("/api/media/drive/") === 0) {
+        return s.split("?")[0] + "?download=1";
+      }
+      return s;
+    };
+
     var showGalleryIndex = function (idx) {
       if (!activeSlides.length) return;
       var total = activeSlides.length;
       activeGalleryIdx = ((idx % total) + total) % total;
       var item = activeSlides[activeGalleryIdx];
       var isVid = item.type === "video" || isVideoUrl(item.src);
+      var loadSeq = ++lightboxLoadSeq;
       if (isVid && lightboxVideo) {
         lightboxImg.hidden = true;
         lightboxImg.removeAttribute("src");
@@ -536,8 +553,19 @@
       } else {
         stopLightboxVideo();
         lightboxImg.hidden = false;
-        lightboxImg.src = item.src || "";
+        var detailSrc = toDriveDetailUrl(item.src || "");
+        var previewSrc = item.thumb || detailSrc;
+        lightboxImg.src = previewSrc;
         lightboxImg.alt = item.alt || "";
+        if (detailSrc && detailSrc !== previewSrc) {
+          var hiImg = new Image();
+          hiImg.onload = function () {
+            if (loadSeq === lightboxLoadSeq && !lightboxImg.hidden) {
+              lightboxImg.src = detailSrc;
+            }
+          };
+          hiImg.src = detailSrc;
+        }
       }
       var captionText = item.caption || "";
       if (item.photographer) {
@@ -553,10 +581,7 @@
         var src = String(item.src || "");
         if (src) {
           lightboxDownload.hidden = false;
-          lightboxDownload.href =
-            src.indexOf("/api/media/drive/") === 0 && src.indexOf("download=1") === -1
-              ? src + (src.indexOf("?") === -1 ? "?download=1" : "&download=1")
-              : src;
+          lightboxDownload.href = toDriveDownloadUrl(src);
         } else {
           lightboxDownload.hidden = true;
         }

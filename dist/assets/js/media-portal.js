@@ -168,8 +168,41 @@
   }
 
   /* =========================================================================
-     Client-side Image Compression (Fallback KV upload & Admin WebP approval)
+     Client-side Image Compression (Dual-Upload WebP + Fast Grid / Full Detail)
      ========================================================================= */
+  function isDriveImageUrl(url) {
+    const s = String(url || "").trim();
+    return s.startsWith("/api/media/drive/") && !/[?&]kind=(?:video|audio)\b/i.test(s);
+  }
+
+  function formatCoverThumb(url, width = 480) {
+    if (!url) return "";
+    if (isDriveImageUrl(url)) {
+      return `${String(url).split("?")[0]}?w=${width}`;
+    }
+    return url;
+  }
+
+  function getFastGridUrl(photo, width = 480) {
+    if (!photo) return "";
+    if (photo.webUrl) return photo.webUrl;
+    if (isDriveImageUrl(photo.url)) {
+      return `${String(photo.url).split("?")[0]}?w=${width}`;
+    }
+    return photo.displayUrl || photo.url || "";
+  }
+
+  function getFullDetailUrl(photo) {
+    if (!photo) return "";
+    if (String(photo.webMediaKey || "").startsWith("ai-") && photo.webUrl) {
+      return photo.webUrl;
+    }
+    if (isDriveImageUrl(photo.url)) {
+      return `${String(photo.url).split("?")[0]}?raw=1`;
+    }
+    return photo.displayUrl || photo.url || "";
+  }
+
   function compressImageFile(file, maxDim = 1280, quality = 0.82) {
     return new Promise((resolve, reject) => {
       const objectUrl = URL.createObjectURL(file);
@@ -195,14 +228,24 @@
           ctx.fillRect(0, 0, width, height);
           ctx.drawImage(img, 0, 0, width, height);
           canvas.toBlob(
-            (blob) => {
-              if (!blob) {
-                reject(new Error("Không thể nén ảnh trên trình duyệt."));
+            (webpBlob) => {
+              if (webpBlob && webpBlob.type === "image/webp" && webpBlob.size > 0) {
+                resolve({ blob: webpBlob, ext: "webp" });
                 return;
               }
-              resolve(blob);
+              canvas.toBlob(
+                (jpegBlob) => {
+                  if (!jpegBlob) {
+                    reject(new Error("Không thể nén ảnh trên trình duyệt."));
+                    return;
+                  }
+                  resolve({ blob: jpegBlob, ext: "jpg" });
+                },
+                "image/jpeg",
+                quality
+              );
             },
-            "image/jpeg",
+            "image/webp",
             quality
           );
         } catch (err) {
@@ -218,67 +261,6 @@
     });
   }
 
-  async function compressRemoteImageToWebBlob(url, maxDim = 1280, quality = 0.82, timeoutMs = 10000) {
-    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-    const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
-    let res;
-    try {
-      res = await fetch(url, {
-        credentials: "same-origin",
-        signal: controller ? controller.signal : undefined,
-      });
-    } finally {
-      if (timer) clearTimeout(timer);
-    }
-    if (!res.ok) {
-      throw new Error(`Không thể tải ảnh gốc để nén (HTTP ${res.status}).`);
-    }
-    const origBlob = await res.blob();
-    if (origBlob.type && !origBlob.type.startsWith("image/")) {
-      throw new Error("Tệp không phải định dạng ảnh để nén WebP.");
-    }
-    const img = await new Promise((resolve, reject) => {
-      const el = new Image();
-      const objUrl = URL.createObjectURL(origBlob);
-      el.onload = () => {
-        URL.revokeObjectURL(objUrl);
-        resolve(el);
-      };
-      el.onerror = () => {
-        URL.revokeObjectURL(objUrl);
-        reject(new Error("Không thể giải mã ảnh gốc để nén."));
-      };
-      el.src = objUrl;
-    });
-
-    let { width, height } = img;
-    if (width > maxDim || height > maxDim) {
-      if (width >= height) {
-        height = Math.round((height * maxDim) / width);
-        width = maxDim;
-      } else {
-        width = Math.round((width * maxDim) / height);
-        height = maxDim;
-      }
-    }
-
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0, width, height);
-
-    const webpBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
-    if (webpBlob && webpBlob.type === "image/webp" && webpBlob.size > 0) {
-      return { blob: webpBlob, ext: "webp" };
-    }
-    const jpegBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
-    if (jpegBlob && jpegBlob.size > 0) {
-      return { blob: jpegBlob, ext: "jpg" };
-    }
-    throw new Error("Trình duyệt không nén được ảnh web.");
-  }
-
   function isVideoPhotoItem(photo) {
     return (
       photo?.mediaType === "video" ||
@@ -286,47 +268,7 @@
     );
   }
 
-  // Background WebP compression queue (never blocks instant photo approval!)
-  const bgOptQueue = [];
-  let bgOptRunning = false;
-
-  function enqueueBackgroundWebOptimization(photo) {
-    if (!photo || !photo.id || photo.webUrl || isVideoPhotoItem(photo)) return;
-    if (!String(photo.url || "").startsWith("/api/media/drive/")) return;
-    bgOptQueue.push(photo);
-    if (!bgOptRunning) drainBackgroundWebOptimization();
-  }
-
-  async function drainBackgroundWebOptimization() {
-    if (bgOptRunning) return;
-    bgOptRunning = true;
-    try {
-      while (bgOptQueue.length > 0) {
-        const photo = bgOptQueue.shift();
-        try {
-          const { blob, ext } = await compressRemoteImageToWebBlob(photo.url, 1280, 0.82, 10000);
-          const fd = new FormData();
-          fd.append("action", "approve");
-          fd.append("file", blob, `${photo.id}.${ext}`);
-          const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}/approve`, {
-            method: "POST",
-            body: fd,
-          });
-          if (res?.item) {
-            const idx = state.photos.findIndex((p) => p.id === photo.id);
-            if (idx !== -1) state.photos[idx] = res.item;
-          }
-        } catch {
-          // Non-fatal: photo is already approved and live via Drive proxy
-        }
-      }
-    } finally {
-      bgOptRunning = false;
-    }
-  }
-
   async function approveSinglePhoto(photo) {
-    // Stage 1: Instant server-side approval (~180ms) — works for both large Drive photos & videos
     const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}/approve`, {
       method: "POST",
       json: { action: "approve" },
@@ -336,8 +278,6 @@
     if (state.activeAlbum && !state.activeAlbum.coverUrl && !isVideoPhotoItem(res.item)) {
       state.activeAlbum.coverUrl = res.item.webUrl || res.item.url;
     }
-    // Stage 2: Silently generate WebP cache copy in background for Zalo WebView speed
-    enqueueBackgroundWebOptimization(res.item);
     return { item: res.item, bytes: res.item?.sizeBytes || 0 };
   }
 
@@ -500,7 +440,7 @@
               ? '<span class="album-corner-pill album-corner-pill--draft">Nháp</span>'
               : "";
         const coverHtml = a.coverUrl
-          ? `<img src="${esc(a.coverUrl)}" alt="${esc(a.title)}" loading="lazy">`
+          ? `<img src="${esc(formatCoverThumb(a.coverUrl, 480))}" alt="${esc(a.title)}" loading="lazy" decoding="async">`
           : `<div class="album-card-cover--empty">Chưa có ảnh</div>`;
         const dateLabel = a.dateDisplay || a.eventDate || "Chưa ghi ngày";
         return `<article class="album-card" data-open-album="${esc(a.id)}" tabindex="0" role="button" aria-label="Mở album ${esc(a.title)}">
@@ -680,7 +620,7 @@
         const isVideo =
           String(p.mediaType || "image").toLowerCase() === "video" ||
           /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(p.displayUrl || p.url || ""));
-        const mediaSrc = p.displayUrl || p.url;
+        const mediaSrc = isVideo ? p.displayUrl || p.url : getFastGridUrl(p, 480);
         if (isVideo) {
           markers.push('<span class="tile-pill tile-pill--video">Video</span>');
         }
@@ -885,6 +825,8 @@
     }
   }
 
+  let lightboxLoadSeq = 0;
+
   function renderLightbox() {
     const list = getFilteredPhotos();
     const idx = list.findIndex((p) => p.id === state.lightboxPhotoId);
@@ -913,6 +855,7 @@
       /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(photo.displayUrl || photo.url || ""));
     const imgEl = $("#lb-img");
     const vidEl = $("#lb-video");
+    const loadSeq = ++lightboxLoadSeq;
     if (isVideo && vidEl) {
       imgEl.hidden = true;
       imgEl.removeAttribute("src");
@@ -925,8 +868,19 @@
         vidEl.hidden = true;
       }
       imgEl.hidden = false;
-      imgEl.src = photo.displayUrl || photo.url;
+      const previewSrc = getFastGridUrl(photo, 480);
+      const fullSrc = getFullDetailUrl(photo);
+      imgEl.src = previewSrc || fullSrc;
       imgEl.alt = photo.caption || photo.alt || state.activeAlbum?.title || "Ảnh sự kiện";
+      if (fullSrc && fullSrc !== previewSrc) {
+        const hi = new Image();
+        hi.onload = () => {
+          if (loadSeq === lightboxLoadSeq && !imgEl.hidden) {
+            imgEl.src = fullSrc;
+          }
+        };
+        hi.src = fullSrc;
+      }
     }
 
     $("#lb-prev").hidden = activeList.length <= 1;
@@ -1434,13 +1388,26 @@
       const isVid = isVideoFile(item.file);
       let uploadPayload = item.file;
       let uploadFilename = item.name || (isVid ? "video.mp4" : "photo.jpg");
+      let webPreview = null;
 
-      if (!isVid && !storageInfo.driveConfigured) {
+      if (!isVid) {
         item.status = "compressing";
         item.error = "";
         renderUploadQueue();
-        uploadPayload = await compressImageFile(item.file, 1280, 0.82);
-        uploadFilename = item.name.replace(/\.[^.]+$/, "") + ".jpg";
+        if (!storageInfo.driveConfigured) {
+          const compressed = await compressImageFile(item.file, 1280, 0.82);
+          uploadPayload = compressed.blob;
+          uploadFilename = item.name.replace(/\.[^.]+$/, "") + `.${compressed.ext}`;
+        } else {
+          try {
+            const compressed = await compressImageFile(item.file, 1280, 0.82);
+            if (compressed?.blob && compressed.blob.size > 0 && compressed.blob.size <= 1.45 * 1024 * 1024) {
+              webPreview = compressed;
+            }
+          } catch {
+            // Best-effort: Drive thumbnail proxy handles display resizing
+          }
+        }
       }
 
       item.status = "uploading";
@@ -1459,6 +1426,9 @@
 
       const fd = new FormData();
       fd.append("file", uploadPayload, uploadFilename);
+      if (webPreview) {
+        fd.append("webFile", webPreview.blob, `web.${webPreview.ext}`);
+      }
       fd.append("category", "album");
       fd.append("subfolder", folderName);
       const uploaded = await apiFetch("/api/admin/media", { method: "POST", body: fd });
@@ -1468,6 +1438,8 @@
         json: {
           url: uploaded.url,
           mediaKey: uploaded.id,
+          webUrl: uploaded.webUrl || "",
+          webMediaKey: uploaded.webMediaKey || "",
           mediaType: uploaded.mediaType || (isVid ? "video" : "image"),
           caption: "",
           alt: state.activeAlbum.title,
@@ -1561,7 +1533,7 @@
     const dlg = $("#photo-dialog");
     showAlert($("#photo-form-alert"), "");
     $("#pf-id").value = photo.id;
-    $("#pf-preview").src = photo.displayUrl || photo.url;
+    $("#pf-preview").src = getFastGridUrl(photo, 480);
     $("#pf-caption").value = photo.caption || "";
     $("#pf-photographer").value = photo.photographer || "";
     $("#pf-featured").checked = Boolean(photo.isFeaturedHome);

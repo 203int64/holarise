@@ -31,7 +31,9 @@ export async function onRequestGet({ request, env }) {
       .all()
       .catch(() => null),
     env.DB.prepare(
-      `SELECT COALESCE(NULLIF(p.web_url, ''), p.url) AS url, p.caption, p.alt, p.photographer, a.title AS album_title
+      `SELECT COALESCE(NULLIF(p.web_url, ''), p.url) AS url,
+              CASE WHEN COALESCE(p.web_media_key, '') LIKE 'ai-%' THEN COALESCE(NULLIF(p.web_url, ''), p.url) ELSE p.url END AS full_url,
+              p.caption, p.alt, p.photographer, a.title AS album_title
        FROM media_photos p
        JOIN media_albums a ON a.id = p.album_id
        WHERE a.status = 'published'
@@ -99,6 +101,7 @@ export async function onRequestGet({ request, env }) {
 
   let homePhotos = (featuredRes?.results || []).map((r) => ({
     url: r.url,
+    fullUrl: r.full_url || r.url,
     caption: r.caption || "",
     alt: r.alt || "",
     photographer: r.photographer || "",
@@ -107,7 +110,9 @@ export async function onRequestGet({ request, env }) {
 
   if (homePhotos.length === 0 && featuredRes) {
     const latestRes = await env.DB.prepare(
-      `SELECT COALESCE(NULLIF(p.web_url, ''), p.url) AS url, p.caption, p.alt, p.photographer, a.title AS album_title
+      `SELECT COALESCE(NULLIF(p.web_url, ''), p.url) AS url,
+              CASE WHEN COALESCE(p.web_media_key, '') LIKE 'ai-%' THEN COALESCE(NULLIF(p.web_url, ''), p.url) ELSE p.url END AS full_url,
+              p.caption, p.alt, p.photographer, a.title AS album_title
        FROM media_photos p
        JOIN media_albums a ON a.id = p.album_id
        WHERE a.status = 'published'
@@ -120,6 +125,7 @@ export async function onRequestGet({ request, env }) {
       .catch(() => null);
     homePhotos = (latestRes?.results || []).map((r) => ({
       url: r.url,
+      fullUrl: r.full_url || r.url,
       caption: r.caption || "",
       alt: r.alt || "",
       photographer: r.photographer || "",

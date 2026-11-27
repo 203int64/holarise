@@ -182,6 +182,10 @@
       ctx.drawImage(img, 0, 0, w, h);
     }
 
+    const webpBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+    if (webpBlob && webpBlob.type === "image/webp" && webpBlob.size > 0) {
+      return webpBlob;
+    }
     const blob = await new Promise((resolve, reject) => {
       canvas.toBlob(
         (b) => (b ? resolve(b) : reject(new Error("Không thể nén ảnh trên trình duyệt."))),
@@ -2419,6 +2423,20 @@
           try {
             const fd = new FormData();
             fd.append("file", item.file, item.file.name || "photo.jpg");
+            const isVideoUpload =
+              /^video\//i.test(String(item.file?.type || "")) ||
+              /\.(mp4|mov|webm|m4v)$/i.test(String(item.file?.name || ""));
+            if (!isVideoUpload) {
+              try {
+                const webBlob = await compressImage(item.file, 1280, 0.82, false);
+                if (webBlob && webBlob.size > 0 && webBlob.size <= 1.45 * 1024 * 1024) {
+                  const ext = webBlob.type === "image/webp" ? "webp" : "jpg";
+                  fd.append("webFile", webBlob, `web.${ext}`);
+                }
+              } catch {
+                // Best-effort: Drive thumbnail proxy will still optimize display
+              }
+            }
             if (credit) fd.append("photographer", credit);
             const res = await fetch(`/api/member/albums/${encodeURIComponent(albumId)}/photos`, {
               method: "POST",

@@ -6,7 +6,7 @@
     "englishName": "HolaRise – Youth Community & Social Impact Initiative",
     "tagline": "Together We Rise, Together We Serve.",
     "motto": "Hola · Together We Rise, Together We Serve.",
-    "subtitle": "Khởi nguồn từ những buổi sớm trên sườn đồi Hòa Lạc, HolaRise đồng hành cùng người trẻ rèn sự tĩnh tại bên trong (HolaHeart), giữ xanh cảnh quan tự nhiên (HolaGreen) và mang tri thức phụng sự cộng đồng (HolaConnect).",
+    "subtitle": "Cộng đồng sinh viên và người trẻ phi lợi nhuận khởi nguồn tại Hòa Lạc — nơi chúng mình lắng nghe thật (HolaHeart), giữ sạch nơi mình sống (HolaGreen) và kết nối học hỏi, sẻ chia tri thức (HolaConnect).",
     "location": "Khởi nguồn từ Hòa Lạc, Hà Nội",
     "siteUrl": "https://holarise.org",
     "language": "vi",
@@ -34,19 +34,19 @@
   },
   "hero": {
     "badge": "Hola · Together We Rise, Together We Serve",
-    "headline": "Tĩnh tại bên trong,\nBền bỉ đi cùng nhau.",
-    "description": "Khởi nguồn từ sườn đồi Hòa Lạc — nơi người trẻ ngồi lại lắng nghe, giữ xanh mảnh đất dưới chân và phụng sự cộng đồng.",
+    "headline": "Cùng nhau trưởng thành,\nCùng nhau sẻ chia.",
+    "description": "Cộng đồng sinh viên và người trẻ phi lợi nhuận tại Hòa Lạc — nơi chúng mình lắng nghe thật, học hỏi từ nhau, giữ sạch môi trường sống và làm những việc có ích.",
     "quickPills": [
-      "HolaHeart · Tĩnh tại",
-      "HolaGreen · Sinh thái",
-      "HolaConnect · Phụng sự"
+      "HolaHeart · Lắng nghe",
+      "HolaGreen · Hành động xanh",
+      "HolaConnect · Học hỏi & Sẻ chia"
     ],
     "primaryCta": {
-      "label": "Xem lịch sắp mở",
+      "label": "Xem lịch tuần này",
       "href": "#lich-hen"
     },
     "secondaryCta": {
-      "label": "Xem hành trình",
+      "label": "Hành trình đã qua",
       "href": "#hanh-trinh-that"
     },
     "image": "/assets/images/holarise-binh-minh-1671.webp",
@@ -62,27 +62,27 @@
   },
   "impactMetrics": [],
   "philosophy": {
-    "quote": "Mọi thay đổi bền vững đều khởi đi từ sự tĩnh tại bên trong — khi người trẻ trân trọng gia đình, giữ xanh mảnh đất dưới chân và bền bỉ sẻ chia.",
+    "quote": "Yêu thương không chỉ nằm ở lời nói — mà ở những việc ta thật sự làm cùng nhau: một buổi ngồi lại lắng nghe và học hỏi, một tuyến đường sạch hơn hôm qua, và một tủ sách trao đúng tay trẻ nhỏ.",
     "quoteAuthor": "Cộng đồng HolaRise",
-    "mission": "Đồng hành cùng người trẻ rèn nội lực (HolaHeart), giữ xanh cảnh quan (HolaGreen) và sẻ chia tri thức (HolaConnect) — từ Hòa Lạc lan tỏa đi xa.",
-    "vision": "Xây dựng mạng lưới người trẻ đĩnh đạc, minh bạch và sống có chiều sâu, khởi phát từ cái nôi Hòa Lạc.",
+    "mission": "Tạo ra những buổi gặp và hoạt động cộng đồng phi lợi nhuận, rõ ràng và thiết thực — để người trẻ học hỏi từ nhau, trân trọng gia đình, có trách nhiệm với môi trường và chủ động đóng góp cho xã hội.",
+    "vision": "Xây dựng mạng lưới sinh viên và người trẻ ham học hỏi, sống tử tế và bền bỉ hành động vì cộng đồng — khởi nguồn từ Hòa Lạc và lan tỏa đi xa.",
     "motto": "Hola · Together We Rise, Together We Serve",
     "coreValues": [
       {
-        "title": "Lắng nghe & Đồng đẳng",
-        "description": "Vòng tròn ngang tầm mắt: chia sẻ hay chỉ ngồi lắng nghe đều tự nhiên."
+        "title": "Lắng nghe & Học hỏi",
+        "description": "Ngồi ngang hàng, tôn trọng góc nhìn khác biệt; mỗi câu chuyện thật đều là một bài học quý."
       },
       {
-        "title": "Gốc rễ & Lòng biết ơn",
-        "description": "Trưởng thành từ sự trân trọng gia đình, thầy cô và thiên nhiên quanh mình."
+        "title": "Gia đình & Biết ơn",
+        "description": "Trân trọng cha mẹ, thầy cô và những điều tử tế mình đang nhận mỗi ngày."
       },
       {
-        "title": "Việc nhỏ · Dấu ấn bền",
-        "description": "Tiết chế hình thức; làm trọn từng buổi đối thoại, tuyến đường sạch và kệ sách trao tay."
+        "title": "Nói thật & Làm thật",
+        "description": "Ít hình thức, rõ việc làm: trọn vẹn từng buổi gặp, từng tuyến đường sạch và từng kệ sách trao tay."
       },
       {
-        "title": "Minh bạch & Đối soát",
-        "description": "Công khai lịch trình, chi phí từng con số và đối soát kết quả sau mỗi chiến dịch."
+        "title": "Rõ ràng & Minh bạch",
+        "description": "Công khai lịch trình, chi phí từng con số và kết quả thực tế sau mỗi hoạt động."
       }
     ]
   },
@@ -166,7 +166,7 @@
   "faqs": [
     {
       "question": "HolaRise dành cho ai và hoạt động ở đâu?",
-      "answer": "HolaRise khởi nguồn từ Hòa Lạc, chào đón sinh viên các trường đại học, thanh niên đi làm và những người trẻ yêu lối sống có chiều sâu. Dù bắt đầu từ Hòa Lạc, hệ giá trị và mạng lưới kết nối của HolaRise đồng hành cùng bạn trên mọi chặng đường trưởng thành."
+      "answer": "HolaRise khởi nguồn từ Hòa Lạc, chào đón sinh viên các trường đại học, thanh niên đi làm và những bạn trẻ thích học hỏi, sống chân thành và làm việc có ích. Dù bắt đầu từ Hòa Lạc, mạng lưới kết nối của HolaRise đồng hành cùng bạn trên nhiều chặng đường trưởng thành."
     },
     {
       "question": "Làm sao để giữ chỗ tham gia một buổi gặp?",
@@ -196,14 +196,14 @@
   },
   "en": {
     "hero": {
-      "headline": "Stillness within,\nSteadiness together.",
-      "description": "Rooted in the hills of Hoa Lac — where young people gather to listen deeply, care for the land, and serve with quiet consistency.",
+      "headline": "Grow together,\nServe together.",
+      "description": "A non-profit youth and student community rooted in Hoa Lac — where we listen honestly, learn from one another, care for our surroundings, and act with purpose.",
       "primaryCta": {
-        "label": "Upcoming gatherings",
+        "label": "This week's schedule",
         "href": "#upcoming"
       },
       "secondaryCta": {
-        "label": "Explore our journey",
+        "label": "Past gatherings",
         "href": "#journey-gallery"
       },
       "imageAlt": "HolaRise young people welcoming sunrise on the hills of Hoa Lac."
@@ -212,26 +212,26 @@
       "imageAlt": "Morning sunrise over the hills and calm water — the origin emblem of HolaRise."
     },
     "philosophy": {
-      "quote": "Every lasting change begins with stillness within — when young people honor family, care for the land beneath their feet, and serve with quiet consistency.",
-      "mission": "Accompanying young people to cultivate inner steadiness (HolaHeart), keep local landscapes green (HolaGreen), and share knowledge in civic service (HolaConnect) — rooted in Hoa Lac and built to travel far.",
-      "vision": "Building a grounded, transparent network of young people living with depth and civic responsibility, originating from Hoa Lac.",
+      "quote": "Care is never proven by words alone — it lives in what we actually do together: an honest circle to listen and learn, a cleaner road than yesterday, and a bookshelf placed in children's hands.",
+      "mission": "Creating transparent, non-profit gatherings and civic projects where young people learn from one another, honor family, care for the environment, and contribute meaningfully to society.",
+      "vision": "Building a grounded network of students and young professionals who stay curious, live thoughtfully, and act consistently for their communities — starting in Hoa Lac and reaching far beyond.",
       "motto": "Hola · Together We Rise, Together We Serve",
       "coreValues": [
         {
-          "title": "Peer Listening",
-          "description": "Eye-level circles where speaking up or simply listening are equally welcome."
+          "title": "Listen & Learn",
+          "description": "Eye-level circles where every real story brings a perspective worth learning from."
         },
         {
-          "title": "Roots & Gratitude",
-          "description": "Growing through respect for family, teachers, and the surrounding natural landscape."
+          "title": "Family & Gratitude",
+          "description": "Honoring parents, teachers, and the quiet kindness supporting us each day."
         },
         {
-          "title": "Small Acts · Lasting Marks",
-          "description": "Less spectacle, more follow-through: honest dialogues, clean green routes, and children's bookshelves."
+          "title": "Honest Action",
+          "description": "Less spectacle, real follow-through: meaningful sessions, clean roads, and children's bookshelves."
         },
         {
-          "title": "Open Traceability",
-          "description": "Every schedule, cost, and campaign handover is published transparently."
+          "title": "Clear & Transparent",
+          "description": "Every schedule, cost, and real outcome is published openly after each project."
         }
       ]
     },

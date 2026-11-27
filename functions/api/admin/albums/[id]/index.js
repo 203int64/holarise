@@ -2,6 +2,7 @@ import {
   buildEventFolderName,
   ensureCategorySubfolder,
   isDriveConfigured,
+  purgeDriveThumbCache,
   trashDriveFile,
 } from "../../../../_lib/drive.js";
 import { ensureDeepControlSchema, resolveActorContext, VALID_ALBUM_VISIBILITIES } from "../../../../_lib/media-access.js";
@@ -245,7 +246,10 @@ export async function onRequestDelete(context) {
     await Promise.allSettled(kvKeys.map((k) => context.env.MEDIA_KV.delete(`media:${k}`)));
   }
   if (driveIds.length > 0) {
-    await Promise.allSettled(driveIds.map((fileId) => trashDriveFile(context.env, fileId)));
+    await Promise.allSettled([
+      ...driveIds.map((fileId) => trashDriveFile(context.env, fileId)),
+      ...driveIds.map((fileId) => purgeDriveThumbCache(context.env, fileId)),
+    ]);
   }
 
   return jsonResponse({ ok: true, id, deletedKvKeys: kvKeys.length, trashedDriveFiles: driveIds.length });

@@ -35,6 +35,7 @@ export async function onRequestGet({ request, env }) {
       .catch(() => null),
     env.DB.prepare(
       `SELECT p.id, p.album_id, COALESCE(NULLIF(p.web_url, ''), p.url) AS url,
+              CASE WHEN COALESCE(p.web_media_key, '') LIKE 'ai-%' THEN COALESCE(NULLIF(p.web_url, ''), p.url) ELSE p.url END AS full_url,
               p.caption, p.alt, p.photographer
        FROM media_photos p
        JOIN media_albums a ON a.id = p.album_id
@@ -71,6 +72,7 @@ export async function onRequestGet({ request, env }) {
       photosByAlbum.get(row.album_id).push({
         id: row.id,
         url: row.url,
+        fullUrl: row.full_url || row.url,
         caption: row.caption || "",
         alt: row.alt || "",
         photographer: row.photographer || "",

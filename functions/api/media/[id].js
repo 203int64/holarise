@@ -33,8 +33,13 @@ export async function onRequestGet(context) {
   const isRanged = Boolean(rangeHeader);
 
   const cache = typeof caches !== "undefined" ? caches.default : null;
-  if (cache && !access.restricted && !isRanged) {
-    const cached = await cache.match(request);
+  const reqOrigin = new URL(request.url).origin;
+  const cacheRequest =
+    cache && !access.restricted && !isRanged
+      ? new Request(`${reqOrigin}/api/media/${encodeURIComponent(id)}`, { method: "GET" })
+      : null;
+  if (cache && cacheRequest) {
+    const cached = await cache.match(cacheRequest);
     if (cached) return cached;
   }
 
@@ -108,12 +113,13 @@ export async function onRequestGet(context) {
 
   if (
     cache &&
+    cacheRequest &&
     !access.restricted &&
     !contentType.startsWith("audio/") &&
     !contentType.startsWith("video/") &&
     typeof context.waitUntil === "function"
   ) {
-    context.waitUntil(cache.put(request, response.clone()));
+    context.waitUntil(cache.put(cacheRequest, response.clone()));
   }
   return response;
 }

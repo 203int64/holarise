@@ -1,4 +1,4 @@
-import { trashDriveFile } from "../../../_lib/drive.js";
+import { purgeDriveThumbCache, trashDriveFile } from "../../../_lib/drive.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
 import { cleanStr } from "../../../_lib/validation.js";
 import { serializePhotoRow } from "../albums/[id]/index.js";
@@ -55,7 +55,7 @@ export async function onRequestPatch(context) {
     stmts.push(
       context.env.DB.prepare(
         "UPDATE media_albums SET cover_url = ?, updated_at = ? WHERE id = ?"
-      ).bind(existing.url, now, existing.album_id)
+      ).bind(existing.web_url || existing.url, now, existing.album_id)
     );
   }
 
@@ -87,7 +87,11 @@ export async function onRequestDelete(context) {
 
   if (existing.media_key) {
     if (existing.media_key.startsWith("drive:")) {
-      await trashDriveFile(context.env, existing.media_key.slice(6)).catch(() => {});
+      const driveId = existing.media_key.slice(6);
+      await Promise.allSettled([
+        trashDriveFile(context.env, driveId),
+        purgeDriveThumbCache(context.env, driveId),
+      ]);
     } else if (context.env?.MEDIA_KV) {
       await context.env.MEDIA_KV.delete(`media:${existing.media_key}`).catch(() => {});
     }

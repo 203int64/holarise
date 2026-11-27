@@ -485,6 +485,10 @@
     ctx.fillRect(0, 0, width, height);
     ctx.drawImage(bitmap, 0, 0, width, height);
 
+    const webpBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+    if (webpBlob && webpBlob.type === "image/webp" && webpBlob.size > 0) {
+      return { blob: webpBlob, width, height, ext: "webp" };
+    }
     const blob = await new Promise((resolve, reject) => {
       canvas.toBlob(
         (b) => (b ? resolve(b) : reject(new Error("Không thể nén ảnh trên trình duyệt."))),
@@ -492,7 +496,7 @@
         quality
       );
     });
-    return { blob, width, height };
+    return { blob, width, height, ext: "jpg" };
   }
 
   function detectUploadSubfolder(category) {
@@ -515,13 +519,22 @@
     const subfolder = detectUploadSubfolder(category);
     if (subfolder) form.append("subfolder", subfolder);
 
-    if (!forceBlob && storageInfo.driveConfigured) {
-      form.append("file", file, file.name || "upload.jpg");
+    if (storageInfo.driveConfigured) {
+      form.append("file", file, file.name || (forceBlob ? "cropped.jpg" : "upload.jpg"));
+      try {
+        const { blob: webBlob, ext } = await compressImageToJpeg(file, maxWidth, 0.84);
+        if (webBlob && webBlob.size > 0 && webBlob.size <= 1.45 * 1024 * 1024) {
+          form.append("webFile", webBlob, `web.${ext || "webp"}`);
+          form.append("preferWebUrl", "1");
+        }
+      } catch {
+        // Best-effort: Drive thumbnail proxy will still resize on the fly
+      }
     } else if (forceBlob) {
       form.append("file", file, file.name || "cropped.jpg");
     } else {
-      const { blob } = await compressImageToJpeg(file, maxWidth, 0.84);
-      form.append("file", blob, "upload.jpg");
+      const { blob, ext } = await compressImageToJpeg(file, maxWidth, 0.84);
+      form.append("file", blob, `upload.${ext || "jpg"}`);
     }
     return api("/api/admin/media", { method: "POST", body: form });
   }

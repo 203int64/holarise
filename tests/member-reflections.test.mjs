@@ -1049,6 +1049,25 @@ test("Member album photo contribution: auth gate, Drive nested dong-gop/<member>
     assert.deepEqual(createdFolders[1].parents, [createdFolders[0].id]);
     assert.deepEqual(uploadedParents, [createdFolders[1].id]);
 
+    // Dual-upload with webFile stores original on Drive + lightweight web preview in MEDIA_KV immediately
+    const dualFd = new FormData();
+    dualFd.append("file", new Blob([fakeJpeg], { type: "image/jpeg" }), "anh-su-kien-2.jpg");
+    dualFd.append("webFile", new Blob([fakeJpeg], { type: "image/jpeg" }), "web.jpg");
+    const dualRes = await memberAlbumPhotoUpload({
+      request: new Request("https://holarise.org/api/member/albums/alb-test-event/photos", {
+        method: "POST",
+        headers: { Origin: "https://holarise.org", Cookie: memberCookie },
+        body: dualFd,
+      }),
+      params: { id: "alb-test-event" },
+      env,
+    });
+    assert.equal(dualRes.status, 201);
+    const dualData = await dualRes.json();
+    assert.equal(dualData.item.url, "/api/media/drive/DrivePhotoFile123456");
+    assert.match(dualData.item.webUrl, /^\/api\/media\/web-\d{8}-[a-f0-9-]+\.jpg$/);
+    assert.equal(dualData.item.displayUrl, dualData.item.webUrl);
+
     // Non-image upload must be rejected (415)
     const badFd = new FormData();
     badFd.append("file", new Blob(["not an image"], { type: "text/plain" }), "notes.txt");

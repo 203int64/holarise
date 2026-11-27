@@ -18,6 +18,7 @@ import {
   errorResponse,
   jsonResponse,
   requireMember,
+  sniffImageMime,
   sniffMediaMime,
 } from "../../../../_lib/security.js";
 import { cleanStr, slugifyVi } from "../../../../_lib/validation.js";
@@ -96,6 +97,7 @@ export async function onRequestPost(context) {
   const contentType = request.headers.get("Content-Type") || "";
 
   let bytes;
+  let webBytes = null;
   let originalFilename = "";
   let caption = "";
   let photographer = "";
@@ -114,6 +116,16 @@ export async function onRequestPost(context) {
       caption = cleanStr(formData.get("caption"), 240);
       photographer = cleanStr(formData.get("photographer"), 100);
       bytes = new Uint8Array(await file.arrayBuffer());
+
+      const rawWebFile = formData.get("webFile");
+      if (
+        rawWebFile &&
+        typeof rawWebFile.arrayBuffer === "function" &&
+        rawWebFile.size > 0 &&
+        rawWebFile.size <= MAX_KV_UPLOAD_BYTES
+      ) {
+        webBytes = new Uint8Array(await rawWebFile.arrayBuffer());
+      }
     } else {
       const buf = await request.arrayBuffer();
       if (buf.byteLength > maxReadBytes) {
@@ -175,6 +187,8 @@ export async function onRequestPost(context) {
 
   let mediaKey = "";
   let photoUrl = "";
+  let webMediaKey = "";
+  let webUrl = "";
   let storage = "media_kv";
   let folderPath = "";
   let drivePath = "";
@@ -213,6 +227,30 @@ export async function onRequestPost(context) {
       storage = "google_drive";
       folderPath = `${eventFolderName}/dong-gop/${memberFolder}`;
       drivePath = `${folderPath}/${standardizedFilename}`;
+
+      // Store optional client-compressed WebP/JPEG display copy in MEDIA_KV for instant grid/page loads
+      if (!isVideo && env?.MEDIA_KV && webBytes && webBytes.byteLength > 0 && webBytes.byteLength <= MAX_KV_UPLOAD_BYTES) {
+        const webDetected = sniffImageMime(webBytes);
+        if (webDetected) {
+          const kvWebId = `web-${stamp}-${crypto.randomUUID().slice(0, 10)}.${webDetected.ext}`;
+          try {
+            await env.MEDIA_KV.put(`media:${kvWebId}`, webBytes.buffer, {
+              metadata: {
+                contentType: webDetected.mime,
+                size: webBytes.byteLength,
+                albumId: album.id,
+                uploadedByMember: auth.member.id,
+                source: "member_contribution_web",
+                uploadedAt: now,
+              },
+            });
+            webMediaKey = kvWebId;
+            webUrl = `/api/media/${kvWebId}`;
+          } catch {
+            // Non-fatal: Drive thumbnail proxy will still serve optimized image
+          }
+        }
+      }
     } catch (err) {
       return errorResponse(
         502,
@@ -258,7 +296,7 @@ export async function onRequestPost(context) {
          source_kind, drive_path, media_type,
          approval_status, web_url, web_media_key, approved_by, approved_at,
          created_at, updated_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 'member_contribution', ?, ?, 'pending', '', '', '', '', ?, ?)`
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 'member_contribution', ?, ?, 'pending', ?, ?, '', '', ?, ?)`
     ).bind(
       photoId,
       album.id,
@@ -272,6 +310,8 @@ export async function onRequestPost(context) {
       auth.member.id,
       drivePath,
       detected.kind,
+      webUrl,
+      webMediaKey,
       now,
       now
     ),

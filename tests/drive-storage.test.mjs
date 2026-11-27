@@ -3,14 +3,19 @@ import test from "node:test";
 
 import {
   buildEventFolderName,
+  buildSizedDriveThumbnailUrl,
   ensureCategorySubfolder,
   fetchDriveImage,
   isDriveConfigured,
+  normalizeDriveThumbWidth,
+  purgeDriveThumbCache,
   resetDriveCachesForTest,
   trashDriveFile,
   uploadImageToDrive,
 } from "../functions/_lib/drive.js";
+import { imageAttrs } from "../functions/_lib/render.js";
 import { onRequestGet as mediaProxyGet, onRequestHead as mediaProxyHead } from "../functions/api/media/drive/[id].js";
+import { onRequestPost as adminMediaPost } from "../functions/api/admin/media.js";
 
 const TINY_PNG = new Uint8Array([
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
@@ -733,4 +738,226 @@ test("Admin/Media WebAuthn Passkey end-to-end register-verify & login-verify wit
   assert.equal(loginData.ok, true);
   assert.equal(loginData.user.email, "yen@holarise.org");
   assert.match(loginVerifyRes.headers.get("Set-Cookie") || "", /holarise_session=/);
+});
+
+const TINY_WEBP = new Uint8Array([
+  0x52, 0x49, 0x46, 0x46, 0x1a, 0x00, 0x00, 0x00,
+  0x57, 0x45, 0x42, 0x50, 0x56, 0x50, 0x38, 0x4c,
+  0x0d, 0x00, 0x00, 0x00, 0x2f, 0x00, 0x00, 0x00,
+  0x10, 0x07, 0x10, 0x11, 0x11, 0x88, 0x88, 0xfe,
+  0x07, 0x00,
+]);
+
+function createMockKv() {
+  const store = new Map();
+  return {
+    _store: store,
+    async put(key, value, opts = {}) {
+      const buf = value instanceof ArrayBuffer ? value : value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength);
+      store.set(key, { value: buf, metadata: opts.metadata || null });
+    },
+    async getWithMetadata(key) {
+      const hit = store.get(key);
+      if (!hit) return { value: null, metadata: null };
+      return { value: hit.value, metadata: hit.metadata };
+    },
+    async delete(key) {
+      store.delete(key);
+    },
+  };
+}
+
+test("Drive thumbnail proxy: serves resized WebP thumbnails, warms MEDIA_KV cache, supports ?w=480 & ?raw=1, and purges cache", async () => {
+  resetDriveCachesForTest();
+  const kv = createMockKv();
+  const env = { ...DRIVE_ENV, MEDIA_KV: kv };
+  const fileId = "1FastThumbDriveFileId1234";
+
+  assert.equal(normalizeDriveThumbWidth("300"), 480);
+  assert.equal(normalizeDriveThumbWidth("900"), 960);
+  assert.equal(normalizeDriveThumbWidth("1200"), 1280);
+  assert.equal(normalizeDriveThumbWidth("2000"), 1600);
+  assert.equal(
+    buildSizedDriveThumbnailUrl("https://lh3.googleusercontent.com/drive-storage/abc=s220", 480, { preferWebp: true }),
+    "https://lh3.googleusercontent.com/drive-storage/abc=s480-rw"
+  );
+  assert.equal(buildSizedDriveThumbnailUrl("http://evil.local/x=s220", 480), "");
+
+  const attrs = imageAttrs(`/api/media/drive/${fileId}`, "480px");
+  assert.match(attrs, /src="\/api\/media\/drive\/1FastThumbDriveFileId1234\?w=960"/);
+  assert.match(attrs, /srcset="[^"]*\?w=480 480w[^"]*\?w=960 960w[^"]*\?w=1280 1280w"/);
+
+  const fetchedUrls = [];
+  const prevFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    const s = String(url);
+    fetchedUrls.push(s);
+    if (s.startsWith("https://oauth2.googleapis.com/token")) {
+      return new Response(JSON.stringify({ access_token: "ya29.thumb-token", expires_in: 3600 }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (s.includes(`/drive/v3/files/${fileId}?fields=thumbnailLink,mimeType`)) {
+      return new Response(
+        JSON.stringify({
+          thumbnailLink: "https://lh3.googleusercontent.com/drive-storage/mocked=s220",
+          mimeType: "image/png",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    if (s.startsWith("https://lh3.googleusercontent.com/drive-storage/mocked=s")) {
+      return new Response(TINY_WEBP, {
+        status: 200,
+        headers: { "Content-Type": "image/webp", "Content-Length": String(TINY_WEBP.byteLength) },
+      });
+    }
+    if (s.includes(`/drive/v3/files/${fileId}?alt=media`)) {
+      return new Response(TINY_PNG, {
+        status: 200,
+        headers: { "Content-Type": "image/png", "Content-Length": String(TINY_PNG.byteLength) },
+      });
+    }
+    return new Response("Not Found", { status: 404 });
+  };
+
+  try {
+    const pendingTasks = [];
+    const waitUntil = (p) => pendingTasks.push(p);
+
+    // 1. First request (grid ?w=480, Accept: image/webp) fetches Drive thumbnail =s480-rw and warms KV
+    const r1 = await mediaProxyGet({
+      request: new Request(`https://holarise.org/api/media/drive/${fileId}?w=480`, {
+        headers: { Accept: "image/webp,*/*" },
+      }),
+      env,
+      params: { id: fileId },
+      waitUntil,
+    });
+    await Promise.all(pendingTasks.splice(0));
+    assert.equal(r1.status, 200);
+    assert.equal(r1.headers.get("Content-Type"), "image/webp");
+    assert.equal(r1.headers.get("X-Media-Optimized"), "drive-thumb-480");
+    assert.equal(r1.headers.get("Vary"), "Accept");
+    assert.ok(fetchedUrls.some((u) => u.endsWith("=s480-rw")));
+    assert.ok(kv._store.has(`dthumb:${fileId}:480:webp`));
+
+    // 2. Second request serves straight from MEDIA_KV warm cache with ZERO Drive API calls
+    const countBefore = fetchedUrls.length;
+    const r2 = await mediaProxyGet({
+      request: new Request(`https://holarise.org/api/media/drive/${fileId}?w=480`, {
+        headers: { Accept: "image/webp,*/*" },
+      }),
+      env,
+      params: { id: fileId },
+      waitUntil,
+    });
+    assert.equal(r2.status, 200);
+    assert.equal(r2.headers.get("X-Media-Optimized"), "kv-thumb-480");
+    assert.equal(fetchedUrls.length, countBefore);
+
+    // 3. ?raw=1 bypasses thumbnail & KV cache to return full original PNG
+    const rRaw = await mediaProxyGet({
+      request: new Request(`https://holarise.org/api/media/drive/${fileId}?raw=1`, {
+        headers: { Accept: "image/webp,*/*" },
+      }),
+      env,
+      params: { id: fileId },
+      waitUntil,
+    });
+    assert.equal(rRaw.status, 200);
+    assert.equal(rRaw.headers.get("Content-Type"), "image/png");
+    assert.equal(rRaw.headers.get("X-Media-Optimized"), null);
+
+    // 4. Purge cleans cached Drive thumbnails from KV
+    await purgeDriveThumbCache(env, fileId);
+    assert.equal(kv._store.has(`dthumb:${fileId}:480:webp`), false);
+  } finally {
+    globalThis.fetch = prevFetch;
+  }
+});
+
+test("Dual-upload /api/admin/media stores original on Drive + fast WebP on MEDIA_KV (preferWebUrl=1)", async () => {
+  resetDriveCachesForTest();
+  const db = createMockD1();
+  const kv = createMockKv();
+  const now = new Date().toISOString();
+  await db
+    .prepare(
+      "INSERT INTO admin_users (id, email, name, role, password_hash, password_salt, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?)"
+    )
+    .bind("adm-1", "203int64@gmail.com", "Admin", "super_admin", "hash", "salt", now)
+    .run();
+
+  const tokenBytes = crypto.getRandomValues(new Uint8Array(16));
+  const rawToken = Array.from(tokenBytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  const hashBuf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(rawToken));
+  const tokenHash = Array.from(new Uint8Array(hashBuf), (b) => b.toString(16).padStart(2, "0")).join("");
+  await db
+    .prepare(
+      "INSERT INTO sessions (id, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)"
+    )
+    .bind(tokenHash, "adm-1", new Date(Date.now() + 3600_000).toISOString(), now)
+    .run();
+
+  const env = { ...DRIVE_ENV, DB: db, MEDIA_KV: kv };
+  const prevFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    const s = String(url);
+    if (s.startsWith("https://oauth2.googleapis.com/token")) {
+      return new Response(JSON.stringify({ access_token: "ya29.dual-token", expires_in: 3600 }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (s.includes("/drive/v3/files?q=")) {
+      return new Response(JSON.stringify({ files: [{ id: "folder_giao_dien" }] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (s.startsWith("https://www.googleapis.com/upload/drive/v3/files")) {
+      return new Response(
+        JSON.stringify({
+          id: "1DualUploadDriveFile12345",
+          name: "pillar.png",
+          mimeType: "image/png",
+          size: String(TINY_PNG.byteLength),
+          webViewLink: "https://drive.google.com/file/d/1DualUploadDriveFile12345/view",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    return new Response("Not Found", { status: 404 });
+  };
+
+  try {
+    const form = new FormData();
+    form.append("category", "giao-dien");
+    form.append("preferWebUrl", "1");
+    form.append("file", new Blob([TINY_PNG], { type: "image/png" }), "pillar.png");
+    form.append("webFile", new Blob([TINY_WEBP], { type: "image/webp" }), "web.webp");
+
+    const res = await adminMediaPost({
+      request: new Request("https://holarise.org/api/admin/media", {
+        method: "POST",
+        headers: {
+          Origin: "https://holarise.org",
+          Cookie: `holarise_session=${rawToken}`,
+        },
+        body: form,
+      }),
+      env,
+    });
+    assert.equal(res.status, 201);
+    const data = await res.json();
+    assert.equal(data.ok, true);
+    assert.equal(data.originalUrl, "/api/media/drive/1DualUploadDriveFile12345");
+    assert.match(data.webUrl, /^\/api\/media\/web-\d{8}-[a-f0-9-]+\.webp$/);
+    assert.equal(data.url, data.webUrl);
+    assert.ok(kv._store.has(`media:${data.webMediaKey}`));
+  } finally {
+    globalThis.fetch = prevFetch;
+  }
 });

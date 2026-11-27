@@ -16,6 +16,39 @@ const DRIVE_UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3/files";
 
 const SAFE_DRIVE_ID_RE = /^[a-zA-Z0-9_-]{10,128}$/;
 const ALLOWED_CATEGORIES = new Set(["su-kien", "bai-viet", "album", "giao-dien", "khac"]);
+export const DRIVE_THUMB_WIDTHS = [480, 960, 1280, 1600];
+
+export function normalizeDriveThumbWidth(raw) {
+  const n = Number.parseInt(String(raw || "").trim(), 10);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  if (n <= 560) return 480;
+  if (n <= 1080) return 960;
+  if (n <= 1440) return 1280;
+  return 1600;
+}
+
+export function buildSizedDriveThumbnailUrl(thumbnailLink, width = 1280, { preferWebp = false } = {}) {
+  const raw = String(thumbnailLink || "").trim();
+  if (!raw || !raw.startsWith("https://")) return "";
+  const w = normalizeDriveThumbWidth(width) || 1280;
+  const suffix = `=s${w}${preferWebp ? "-rw" : ""}`;
+  if (/=[swh]\d+[^/?&#]*$/i.test(raw)) {
+    return raw.replace(/=[swh]\d+[^/?&#]*$/i, suffix);
+  }
+  if (/googleusercontent\.com\//i.test(raw) && !raw.includes("=")) {
+    return `${raw}${suffix}`;
+  }
+  return raw;
+}
+
+export async function purgeDriveThumbCache(env, fileId) {
+  if (!env?.MEDIA_KV || !isSafeDriveFileId(fileId)) return;
+  const keys = [];
+  for (const w of DRIVE_THUMB_WIDTHS) {
+    keys.push(`dthumb:${fileId}:${w}:webp`, `dthumb:${fileId}:${w}:img`);
+  }
+  await Promise.allSettled(keys.map((k) => env.MEDIA_KV.delete(k)));
+}
 
 // Isolate-local caches (safe across requests within a single Worker isolate)
 let cachedToken = { key: "", token: "", expiresAt: 0 };
@@ -291,6 +324,65 @@ export async function uploadImageToDrive(
     contentType: data.mimeType || mimeType,
     size: Number(data.size || bytes.byteLength),
     storage: "google_drive",
+  };
+}
+
+/**
+ * Fetch a Google-resized lightweight thumbnail for fast web display (40-160 KB vs 3-15 MB originals).
+ * Automatically signals fallbackToOriginal=true for videos, audios, or freshly uploaded files whose
+ * thumbnail is not yet ready so callers seamlessly fall back to ?alt=media without breaking images.
+ */
+export async function fetchDriveThumbnail(
+  env,
+  fileId,
+  fetchImpl = fetch,
+  { width = 1280, preferWebp = false } = {}
+) {
+  if (!isSafeDriveFileId(fileId)) {
+    return { ok: false, status: 404, error: "INVALID_ID", fallbackToOriginal: false };
+  }
+  const accessToken = await getDriveAccessToken(env, fetchImpl);
+  const metaUrl = `${DRIVE_FILES_URL}/${encodeURIComponent(fileId)}?fields=thumbnailLink,mimeType&supportsAllDrives=true`;
+  const metaRes = await fetchImpl(metaUrl, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!metaRes.ok) {
+    return { ok: false, status: metaRes.status, error: `META_HTTP_${metaRes.status}`, fallbackToOriginal: true };
+  }
+
+  const meta = await metaRes.json().catch(() => null);
+  const mimeType = String(meta?.mimeType || "").toLowerCase();
+  if (mimeType && !mimeType.startsWith("image/")) {
+    return { ok: false, status: 415, error: "NON_IMAGE", mimeType, fallbackToOriginal: true };
+  }
+
+  const sizedUrl = buildSizedDriveThumbnailUrl(meta?.thumbnailLink, width, { preferWebp });
+  if (!sizedUrl) {
+    return { ok: false, status: 404, error: "NO_THUMBNAIL", fallbackToOriginal: true };
+  }
+
+  let thumbRes = await fetchImpl(sizedUrl, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (thumbRes.status === 401 || thumbRes.status === 403) {
+    thumbRes = await fetchImpl(sizedUrl);
+  }
+  if (!thumbRes.ok) {
+    return { ok: false, status: thumbRes.status, error: `THUMB_HTTP_${thumbRes.status}`, fallbackToOriginal: true };
+  }
+
+  const contentType = String(thumbRes.headers.get("Content-Type") || "").toLowerCase();
+  if (!contentType.startsWith("image/")) {
+    return { ok: false, status: 415, error: "INVALID_THUMB_MIME", fallbackToOriginal: true };
+  }
+
+  return {
+    ok: true,
+    status: 200,
+    contentType,
+    body: thumbRes.body,
+    contentLength: thumbRes.headers.get("Content-Length") || "",
+    resized: true,
   };
 }
 

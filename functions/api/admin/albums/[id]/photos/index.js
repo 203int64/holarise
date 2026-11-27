@@ -6,6 +6,8 @@ import { serializePhotoRow } from "../index.js";
 const MEDIA_ROLES = ["super_admin", "editor", "media"];
 const APPROVER_ROLES = new Set(["super_admin", "editor"]);
 const MAX_BATCH_PHOTOS = 30;
+const SAFE_KV_KEY_RE = /^[a-zA-Z0-9._-]{6,96}$/;
+const SAFE_KV_URL_RE = /^\/api\/media\/[a-zA-Z0-9._-]{6,96}$/;
 
 export async function onRequestPost(context) {
   const auth = await requireAdmin(context, { allowedRoles: MEDIA_ROLES });
@@ -72,6 +74,10 @@ export async function onRequestPost(context) {
       rawItem.mediaType === "video" || /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(p.url || ""))
         ? "video"
         : "image";
+    const rawWebUrl = String(rawItem.webUrl || rawItem.web_url || "").trim();
+    const rawWebKey = String(rawItem.webMediaKey || rawItem.web_media_key || "").trim();
+    const webUrl = mediaType === "image" && SAFE_KV_URL_RE.test(rawWebUrl) ? rawWebUrl : "";
+    const webMediaKey = webUrl && SAFE_KV_KEY_RE.test(rawWebKey) ? rawWebKey : "";
     stmts.push(
       context.env.DB.prepare(
         `INSERT INTO media_photos (
@@ -79,7 +85,7 @@ export async function onRequestPost(context) {
            is_featured_home, sort_order, uploaded_by, media_type,
            approval_status, web_url, web_media_key, approved_by, approved_at,
            created_at, updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', '', ?, ?, ?, ?)`
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       ).bind(
         id,
         albumId,
@@ -93,6 +99,8 @@ export async function onRequestPost(context) {
         auth.user.email,
         mediaType,
         approvalStatus,
+        webUrl,
+        webMediaKey,
         approvedBy,
         approvedAt,
         now,
@@ -104,8 +112,8 @@ export async function onRequestPost(context) {
       album_id: albumId,
       media_key: p.media_key,
       url: p.url,
-      web_url: "",
-      web_media_key: "",
+      web_url: webUrl,
+      web_media_key: webMediaKey,
       approval_status: approvalStatus,
       approved_by: approvedBy,
       approved_at: approvedAt,
@@ -121,11 +129,12 @@ export async function onRequestPost(context) {
   }
 
   const firstApproved = inserted.find((p) => p.approval_status === "approved");
-  if (!album.cover_url && firstApproved) {
+  const nextCoverUrl = firstApproved ? firstApproved.web_url || firstApproved.url : "";
+  if (!album.cover_url && nextCoverUrl) {
     stmts.push(
       context.env.DB.prepare(
         "UPDATE media_albums SET cover_url = ?, updated_at = ? WHERE id = ?"
-      ).bind(firstApproved.url, now, albumId)
+      ).bind(nextCoverUrl, now, albumId)
     );
   } else {
     stmts.push(
@@ -139,7 +148,7 @@ export async function onRequestPost(context) {
     {
       ok: true,
       items: inserted.map(serializePhotoRow),
-      coverUrl: album.cover_url || firstApproved?.url || "",
+      coverUrl: album.cover_url || nextCoverUrl,
     },
     201
   );

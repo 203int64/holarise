@@ -74,17 +74,34 @@ function imageVariant(src, width) {
   return `/assets/images/web/${stem}-${width}.webp`;
 }
 
+function isDriveImageUrl(src) {
+  const s = String(src || "").trim();
+  return s.startsWith("/api/media/drive/") && !/[?&](?:kind=(?:video|audio)|download=1|raw=1)\b/i.test(s);
+}
+
+function driveSizedUrl(src, width) {
+  const base = String(src || "").split("?")[0];
+  return `${base}?w=${width}`;
+}
+
 export function fullImageUrl(src) {
   const widths = Object.hasOwn(imageWidths, src) && imageWidths[src];
   return widths ? imageVariant(src, widths.at(-1)) : src;
 }
 
 export function imageAttrs(src, sizes) {
-  const attrs = `src="${escHtml(src)}"`;
   const widths = Object.hasOwn(imageWidths, src) && imageWidths[src];
-  if (!widths) return attrs;
-  const srcset = widths.map((width) => `${imageVariant(src, width)} ${width}w`).join(", ");
-  return `${attrs} srcset="${escHtml(srcset)}" sizes="${escHtml(sizes)}"`;
+  if (widths) {
+    const attrs = `src="${escHtml(src)}"`;
+    const srcset = widths.map((width) => `${imageVariant(src, width)} ${width}w`).join(", ");
+    return `${attrs} srcset="${escHtml(srcset)}" sizes="${escHtml(sizes)}"`;
+  }
+  if (isDriveImageUrl(src)) {
+    const fallbackSrc = driveSizedUrl(src, 960);
+    const srcset = [480, 960, 1280].map((w) => `${driveSizedUrl(src, w)} ${w}w`).join(", ");
+    return `src="${escHtml(fallbackSrc)}" srcset="${escHtml(srcset)}" sizes="${escHtml(sizes)}"`;
+  }
+  return `src="${escHtml(src)}"`;
 }
 
 export function absUrl(path) {
@@ -1112,7 +1129,7 @@ export function renderHorizontalGalleryHtml(photos, lang = "vi") {
       const caption = p.caption || p.albumTitle || (isEn ? "HolaRise Moment in Hoa Lac" : "Khoảnh khắc Hola tại Hòa Lạc");
       const alt = p.alt || caption;
       const photographer = p.photographer ? (isEn ? ` · Photo: ${p.photographer}` : ` · Ảnh: ${p.photographer}`) : "";
-      return `<button class="horizontal-card" type="button" data-lightbox-src="${escHtml(fullImageUrl(p.url))}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(caption + photographer)}">
+      return `<button class="horizontal-card" type="button" data-lightbox-src="${escHtml(fullImageUrl(p.fullUrl || p.full_url || p.url))}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(caption + photographer)}">
         <div class="horizontal-frame">
           <img ${imageAttrs(p.url, "(max-width: 640px) 82vw, 620px")} alt="${escHtml(alt)}" width="960" height="600" loading="lazy" decoding="async">
           <div class="horizontal-caption">
@@ -1169,7 +1186,7 @@ export function renderPublicAlbumsHtml(albumsWithPhotos, lang = "vi") {
           const alt = p.alt || caption;
           const photographer = p.photographer ? (isEn ? ` · Photo: ${p.photographer}` : ` · Ảnh: ${p.photographer}`) : "";
           const fullCaption = `${caption}${photographer}`;
-          return `<button class="archive-thumb" type="button" aria-label="${isEn ? "View photo" : "Xem ảnh"} ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(fullImageUrl(p.url))}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCaption)}">
+          return `<button class="archive-thumb" type="button" aria-label="${isEn ? "View photo" : "Xem ảnh"} ${pad2(idx + 1)}: ${escHtml(alt)}" data-lightbox-src="${escHtml(fullImageUrl(p.fullUrl || p.full_url || p.url))}" data-lightbox-alt="${escHtml(alt)}" data-lightbox-caption="${escHtml(fullCaption)}">
             <img ${imageAttrs(p.url, "(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 280px")} alt="${escHtml(alt)}" width="480" height="360" loading="lazy" decoding="async">
             <span class="archive-thumb-idx" aria-hidden="true">${pad2(idx + 1)}</span>
             <span class="archive-thumb-cap" aria-hidden="true">${escHtml(caption)}</span>
@@ -1273,7 +1290,7 @@ export function applySiteVisualsSsr(html, rawVisualsJson, lang = "vi") {
     out = replaceMarker(
       out,
       "HERO_MEDIA",
-      `<img class="hero-card-img" src="${escHtml(parsed.heroImage)}" alt="${heroAlt}" width="1376" height="768" fetchpriority="high" decoding="async" data-cinema-img>${badgeHtml}`
+      `<img class="hero-card-img" ${imageAttrs(parsed.heroImage, "(max-width: 820px) 96vw, 1280px")} alt="${heroAlt}" width="1376" height="768" fetchpriority="high" decoding="async" data-cinema-img>${badgeHtml}`
     );
   }
 
@@ -1285,7 +1302,7 @@ export function applySiteVisualsSsr(html, rawVisualsJson, lang = "vi") {
     out = replaceMarker(
       out,
       "ABOUT_MEDIA",
-      `<img src="${escHtml(parsed.aboutImage)}" alt="${aboutAlt}" width="1280" height="714" fetchpriority="high" decoding="async">${badgeHtml}`
+      `<img ${imageAttrs(parsed.aboutImage, "(max-width: 820px) 94vw, 960px")} alt="${aboutAlt}" width="1280" height="714" fetchpriority="high" decoding="async">${badgeHtml}`
     );
   }
 
@@ -1301,12 +1318,12 @@ export function applySiteVisualsSsr(html, rawVisualsJson, lang = "vi") {
     out = replaceMarker(
       out,
       `PILLAR_SLIDE_${idx}`,
-      `<img src="${escHtml(p.image)}" alt="${alt}" width="960" height="720" loading="lazy" decoding="async">${orientChip}`
+      `<img ${imageAttrs(p.image, "(max-width: 820px) 92vw, 640px")} alt="${alt}" width="960" height="720" loading="lazy" decoding="async">${orientChip}`
     );
     out = replaceMarker(
       out,
       `PILLAR_MAIN_${key.toUpperCase()}`,
-      `<img src="${escHtml(p.image)}" alt="${alt}" width="960" height="600" loading="lazy" decoding="async">${orientChip}`
+      `<img ${imageAttrs(p.image, "(max-width: 820px) 92vw, 640px")} alt="${alt}" width="960" height="600" loading="lazy" decoding="async">${orientChip}`
     );
   }
   return out;
