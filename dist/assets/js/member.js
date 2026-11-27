@@ -1419,7 +1419,19 @@
     // Public Editorial Passport link (/tv/[code])
     const pubLink = $("#btn-open-public-passport");
     if (pubLink && m.memberCode) {
-      pubLink.href = `/tv/${encodeURIComponent(m.memberCode)}${IS_EN ? "?lang=en" : ""}`;
+      const targetHref = `/tv/${encodeURIComponent(m.memberCode)}${IS_EN ? "?lang=en" : ""}`;
+      pubLink.setAttribute("href", targetHref);
+      pubLink.dataset.passportUrl = targetHref;
+      if (!pubLink.dataset.boundPassportClick) {
+        pubLink.dataset.boundPassportClick = "1";
+        pubLink.addEventListener("click", (e) => {
+          const url = pubLink.dataset.passportUrl || pubLink.getAttribute("href") || "";
+          if (url && url.startsWith("/tv/")) {
+            e.preventDefault();
+            window.open(url, "_blank", "noopener");
+          }
+        });
+      }
     }
 
     // Editorial welcome heading

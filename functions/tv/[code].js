@@ -103,9 +103,9 @@ export async function onRequestGet({ params, request, env }) {
     });
   }
 
-  // Strictly select public-safe columns + phone_norm ONLY for internal server-side attendance join (never rendered)
+  // Strictly select public-safe columns + phone_norm/email ONLY for internal server-side attendance join (never rendered)
   const member = await env.DB.prepare(
-    `SELECT id, member_code, name, organization, pillar_choice, role_title, bio, avatar_url, created_at, phone_norm
+    `SELECT id, member_code, name, organization, pillar_choice, role_title, bio, avatar_url, created_at, phone_norm, email
      FROM members
      WHERE UPPER(member_code) = ? AND is_active = 1
      LIMIT 1`
@@ -124,6 +124,7 @@ export async function onRequestGet({ params, request, env }) {
   const normalizedMemberPhone = member.phone_norm
     ? normalizePhone(member.phone_norm)?.phoneNorm || String(member.phone_norm).replace(/\D/g, "")
     : "";
+  const normalizedMemberEmail = String(member.email || "").trim().toLowerCase();
 
   // Run all public-safe journey queries in parallel
   const [regRows, refRows, photoRows] = await Promise.all([
@@ -135,11 +136,21 @@ export async function onRequestGet({ params, request, env }) {
        FROM registrations r
        LEFT JOIN events e ON e.id = r.event_id
        WHERE r.status != 'cancelled'
-         AND (r.member_id = ? OR (? != '' AND REPLACE(REPLACE(REPLACE(r.phone, ' ', ''), '.', ''), '-', '') = ?))
+         AND (
+           r.member_id = ?
+           OR (? != '' AND (r.member_id IS NULL OR r.member_id = '') AND LOWER(TRIM(r.email)) = ?)
+           OR (? != '' AND REPLACE(REPLACE(REPLACE(r.phone, ' ', ''), '.', ''), '-', '') = ?)
+         )
        ORDER BY COALESCE(NULLIF(e.date, ''), substr(r.created_at, 1, 10)) DESC, r.created_at DESC
        LIMIT 30`
     )
-      .bind(member.id, normalizedMemberPhone, normalizedMemberPhone)
+      .bind(
+        member.id,
+        normalizedMemberEmail,
+        normalizedMemberEmail,
+        normalizedMemberPhone,
+        normalizedMemberPhone
+      )
       .all()
       .catch(() => ({ results: [] })),
 
