@@ -215,46 +215,30 @@
     </div>
   </div>
 
-  <!-- STEP 2: AUTHENTICATED MEMBER HUB -->
+  <!-- STEP 2: AUTHENTICATED MEMBER HUB (2-Column Editorial Passport & Journey Studio) -->
   <div class="container" id="member-dashboard-view" hidden>
-    <div class="member-hub-shell">
+    <div class="member-hub-shell member-hub-shell--editorial">
       <nav class="member-hub-tabs" role="tablist" aria-label="Member account sections">
-        <button type="button" class="member-hub-tab is-active" role="tab" aria-selected="true" data-dash-tab="profile">Pass &amp; Profile</button>
-        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="activity">Journey Wallet</button>
-        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="security">Security</button>
+        <button type="button" class="member-hub-tab is-active" role="tab" aria-selected="true" data-dash-tab="profile">Journey &amp; Passport</button>
+        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="security">Security &amp; Sign-in</button>
       </nav>
 
-      <!-- TAB 1: MEMBER PASS & PROFILE -->
+      <!-- TAB 1: EDITORIAL PASSPORT + LIVE JOURNEY WORKSPACE -->
       <div class="member-hub-pane" data-dash-pane="profile">
-        <div class="member-pass-stage">
-          <div class="member-dash-card-col">
-            <div class="member-completion-bar" id="member-completion-box">
-              <div class="member-completion-top">
-                <span>Member Pass Completion</span>
-                <strong id="dash-completion-pct">40%</strong>
-              </div>
-              <div class="member-completion-track" aria-hidden="true">
-                <span class="member-completion-fill" id="dash-completion-fill" style="width: 40%;"></span>
-              </div>
-              <p class="member-completion-hint" id="dash-completion-hint">Add your photo, university/organization, and short motto to complete your pass.</p>
-            </div>
-
-            <article class="sunrise-pass member-pass-live member-pass-luxe" id="member-live-pass" data-sunrise-pass data-pass-theme="sunrise" aria-label="Your HolaRise Member Pass">
-              <div class="member-pass-mesh" aria-hidden="true"></div>
-              <div class="member-pass-foil" aria-hidden="true"></div>
-              <div class="sunrise-pass-glare" aria-hidden="true"></div>
-
+        <div class="member-editorial-grid">
+          <aside class="member-passport-aside">
+            <article class="sunrise-pass member-pass-live member-pass-editorial" id="member-live-pass" data-sunrise-pass data-pass-theme="pine" aria-label="Your HolaRise Member Passport">
               <div class="pass-header">
                 <div class="pass-brand">
-                  <img src="/assets/images/logo-mark.png" alt="HolaRise emblem" width="28" height="28">
-                  <span>HOLARISE · HOA LAC</span>
+                  <img src="/assets/images/favicon-96.png" alt="HolaRise emblem" width="26" height="26">
+                  <span>HOLARISE · PASSPORT</span>
                 </div>
-                <span class="pass-state-pill" id="dash-pass-tier">LV.1 · FIRST STEP</span>
+                <span class="pass-state-pill" id="dash-pass-tier">FIRST STEP</span>
               </div>
 
               <div class="member-pass-identity">
                 <div class="member-pass-avatar-wrap">
-                  <img id="dash-avatar-img" class="member-pass-avatar" src="/assets/images/logo-mark.png" alt="HolaRise member avatar" width="64" height="64" hidden>
+                  <img id="dash-avatar-img" class="member-pass-avatar" src="/assets/images/favicon-96.png" alt="HolaRise member avatar" width="68" height="68" hidden>
                   <span id="dash-avatar-initials" class="member-pass-initials" aria-hidden="true">HR</span>
                 </div>
                 <div class="member-pass-identity-text">
@@ -266,18 +250,10 @@
 
               <p class="pass-greeting" id="dash-pass-bio">Living grounded, greener, and serving with consistency at HolaRise.</p>
 
-              <div class="pass-exp-panel" aria-label="Journey EXP progress">
-                <div class="pass-exp-head">
-                  <span class="pass-exp-rank" id="dash-exp-rank">Journey · First Step</span>
-                  <strong class="pass-exp-val" id="dash-exp-val">20 / 150 EXP</strong>
-                </div>
-                <div class="pass-exp-track" aria-hidden="true">
-                  <span class="pass-exp-fill" id="dash-exp-fill" style="width: 13%;"></span>
-                </div>
-                <div class="pass-exp-breakdown" id="dash-exp-breakdown">0 gatherings · 0 reflections</div>
+              <div class="pass-journey-strip" aria-label="Journey milestone summary">
+                <span class="pass-journey-label" id="dash-exp-rank">Journey Milestones</span>
+                <strong class="pass-journey-summary" id="dash-exp-breakdown">0 events · 0 reflections</strong>
               </div>
-
-              <div class="pass-divider" aria-hidden="true"></div>
 
               <div class="pass-meta-grid">
                 <div class="pass-meta-item">
@@ -300,20 +276,162 @@
 
               <div class="pass-footer pass-footer--clean">
                 <span>HOLARISE.ORG</span>
-                <span>HOA LAC · YOUTH COMMUNITY</span>
+                <span>HOA LAC · YOUTH</span>
               </div>
             </article>
 
-            <div class="member-pass-controls member-pass-controls--stage">
-              <button type="button" class="btn btn--primary btn--sm" id="btn-download-member-pass">Save Pass (PNG)</button>
-              <button type="button" class="btn btn--outline btn--sm" id="btn-open-profile-modal">Edit Profile</button>
-              <button type="button" class="btn btn--outline btn--sm member-avatar-upload-btn" id="btn-change-avatar">Change Photo</button>
+            <div class="member-pass-actions-editorial">
+              <a class="btn btn--primary btn--sm" id="btn-open-public-passport" href="/en/join/" target="_blank" rel="noopener">Open Public Passport ↗</a>
+              <button type="button" class="btn btn--outline btn--sm" id="btn-download-member-pass">Save Pass (PNG)</button>
+            </div>
+
+            <div class="member-pass-secondary-actions">
+              <button type="button" class="member-text-action" id="btn-open-profile-modal">Edit Profile</button>
+              <span aria-hidden="true">·</span>
+              <button type="button" class="member-text-action member-avatar-upload-btn" id="btn-change-avatar">Change Photo</button>
               <input id="dash-avatar-input" type="file" accept="image/*" class="visually-hidden" tabindex="-1">
-              <button type="button" class="btn btn--outline btn--sm" id="btn-member-logout">Sign out</button>
+              <span aria-hidden="true">·</span>
+              <button type="button" class="member-text-action member-text-action--muted" id="btn-member-logout">Sign out</button>
             </div>
             <div class="form-status" id="dash-avatar-status" role="status" aria-live="polite"></div>
+
+            <div class="member-completion-bar member-completion-bar--slim" id="member-completion-box">
+              <div class="member-completion-top">
+                <span>Profile Completion</span>
+                <strong id="dash-completion-pct">40%</strong>
+              </div>
+              <div class="member-completion-track" aria-hidden="true">
+                <span class="member-completion-fill" id="dash-completion-fill" style="width: 40%;"></span>
+              </div>
+              <p class="member-completion-hint" id="dash-completion-hint">Add your photo, university/organization, and short motto to complete your pass.</p>
+            </div>
+          </aside>
+
+          <div class="member-journey-main">
+            <section class="member-journey-hero">
+              <div class="member-journey-hero-head">
+                <div>
+                  <span class="member-editorial-kicker">Your HolaRise Journey</span>
+                  <h2 id="dash-welcome-heading">Welcome back</h2>
+                </div>
+                <a class="arrow-link" href="/en/schedule/">Schedule →</a>
+              </div>
+
+              <div class="member-metrics-grid" aria-label="Journey stats">
+                <div class="member-metric-tile">
+                  <strong id="dash-stat-events">0</strong>
+                  <span>Gatherings recorded</span>
+                </div>
+                <div class="member-metric-tile">
+                  <strong id="dash-stat-pillars">1/3</strong>
+                  <span>Pillars touched</span>
+                </div>
+                <div class="member-metric-tile">
+                  <strong id="dash-stat-refs">0</strong>
+                  <span>Reflections</span>
+                </div>
+                <div class="member-metric-tile">
+                  <strong id="dash-stat-photos">0</strong>
+                  <span>Contributed photos</span>
+                </div>
+              </div>
+
+              <div class="member-pillar-stamps" aria-label="Three HolaRise Pillars">
+                <div class="member-pillar-stamp is-active" data-pillar-stamp="holaheart">
+                  <span class="member-pillar-dot" style="background:#B58342;"></span>
+                  <div>
+                    <strong>HolaHeart</strong>
+                    <span>Stillness &amp; Listening</span>
+                  </div>
+                </div>
+                <div class="member-pillar-stamp" data-pillar-stamp="holagreen">
+                  <span class="member-pillar-dot" style="background:#2D6A4F;"></span>
+                  <div>
+                    <strong>HolaGreen</strong>
+                    <span>Ecology &amp; Landscapes</span>
+                  </div>
+                </div>
+                <div class="member-pillar-stamp" data-pillar-stamp="holaconnect">
+                  <span class="member-pillar-dot" style="background:#3B5B8A;"></span>
+                  <div>
+                    <strong>HolaConnect</strong>
+                    <span>Knowledge &amp; Service</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="member-panel-box member-next-chapter" id="member-quick-events-box">
+              <div class="member-panel-head">
+                <div>
+                  <span class="kicker">Next Chapter</span>
+                  <h2>1-Tap RSVP for Upcoming Gatherings</h2>
+                </div>
+                <a class="arrow-link" href="/en/schedule/">View all →</a>
+              </div>
+              <div style="margin-top: 12px;">
+                <!-- CMS:JOIN_EVENTS_SECTION:START -->
+                {{JOIN_EVENTS_SECTION_HTML}}
+                <!-- CMS:JOIN_EVENTS_SECTION:END -->
+                <div class="form-status" id="dash-event-book-status" role="status" aria-live="polite"></div>
+                <div style="margin-top: 14px;">
+                  <button type="button" class="auth-submit-btn" style="width:auto;min-height:42px;padding:0 24px;" id="btn-dash-book-event">1-Tap RSVP</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="member-panel-box">
+              <div class="member-panel-head">
+                <div>
+                  <span class="kicker">Personal Journey Wallet</span>
+                  <h2>My Event Passes &amp; History</h2>
+                </div>
+              </div>
+              <div id="member-wallet-summary" class="member-wallet-summary" hidden></div>
+              <div id="member-bookings-list" class="member-wallet-stack">
+                <p class="member-empty-hint">Loading your event passes...</p>
+              </div>
+            </section>
+
+            <section class="member-panel-box" id="member-contributed-photos-section" hidden>
+              <div class="member-panel-head">
+                <div>
+                  <span class="kicker">Through Your Lens</span>
+                  <h2>Photos You Contributed</h2>
+                </div>
+                <button type="button" class="btn btn--outline btn--sm" data-open-album-contribute>+ Contribute Photos</button>
+              </div>
+              <div id="member-contributed-photos-grid" class="member-contrib-grid"></div>
+            </section>
+
+            <section class="member-panel-box">
+              <div class="member-panel-head">
+                <div>
+                  <span class="kicker">Community Guestbook</span>
+                  <h2>Reflections &amp; Memories Shared</h2>
+                </div>
+                <a class="arrow-link" href="/en/journey/">Write a reflection →</a>
+              </div>
+              <div id="member-reflections-list" class="member-list-stack">
+                <p class="member-empty-hint">Loading your reflections...</p>
+              </div>
+            </section>
           </div>
         </div>
+
+        <dialog id="member-wallet-dialog" class="wallet-pass-dialog" aria-labelledby="wallet-dlg-title">
+          <div class="wallet-dlg-shell">
+            <div class="wallet-dlg-topbar">
+              <span class="kicker" id="wallet-dlg-kicker">Event Pass</span>
+              <button type="button" class="wallet-dlg-close" id="wallet-dlg-close" aria-label="Close event pass">✕</button>
+            </div>
+            <div id="wallet-dlg-body"></div>
+            <div class="wallet-dlg-actions">
+              <button type="button" class="btn btn--primary btn--sm" id="wallet-dlg-download">Save Event Pass (PNG)</button>
+              <a class="btn btn--outline btn--sm" id="wallet-dlg-link" href="/en/schedule/" hidden>Open event invitation →</a>
+            </div>
+          </div>
+        </dialog>
 
         <dialog class="club-dialog club-dialog--auth member-profile-dialog" id="member-profile-modal" closedby="any" aria-labelledby="profile-modal-heading">
           <div class="dialog-inner auth-dialog-inner">
@@ -367,68 +485,6 @@
             </form>
           </div>
         </dialog>
-      </div>
-
-      <!-- TAB 2: MY JOURNEY WALLET -->
-      <div class="member-hub-pane" data-dash-pane="activity" hidden>
-        <div class="member-hub-stack">
-          <section class="member-panel-box">
-            <div class="member-panel-head">
-              <div>
-                <span class="kicker">Personal Journey Wallet</span>
-                <h2>My Event Passes</h2>
-              </div>
-              <a class="arrow-link" href="/en/schedule/">This Week's Schedule →</a>
-            </div>
-            <div id="member-wallet-summary" class="member-wallet-summary" hidden></div>
-            <div id="member-bookings-list" class="member-wallet-stack">
-              <p class="member-empty-hint">Loading your event passes...</p>
-            </div>
-          </section>
-
-          <dialog id="member-wallet-dialog" class="wallet-pass-dialog" aria-labelledby="wallet-dlg-title">
-            <div class="wallet-dlg-shell">
-              <div class="wallet-dlg-topbar">
-                <span class="kicker" id="wallet-dlg-kicker">Event Pass</span>
-                <button type="button" class="wallet-dlg-close" id="wallet-dlg-close" aria-label="Close event pass">✕</button>
-              </div>
-              <div id="wallet-dlg-body"></div>
-              <div class="wallet-dlg-actions">
-                <button type="button" class="btn btn--primary btn--sm" id="wallet-dlg-download">Save Event Pass (PNG)</button>
-                <a class="btn btn--outline btn--sm" id="wallet-dlg-link" href="/en/schedule/" hidden>Open event invitation →</a>
-              </div>
-            </div>
-          </dialog>
-
-          <section class="member-panel-box">
-            <div class="member-panel-head">
-              <div>
-                <span class="kicker">Community Guestbook</span>
-                <h2>Reflections &amp; Memories Shared</h2>
-              </div>
-              <a class="arrow-link" href="/en/journey/">Write a reflection →</a>
-            </div>
-            <div id="member-reflections-list" class="member-list-stack">
-              <p class="member-empty-hint">Loading your reflections...</p>
-            </div>
-          </section>
-
-          <details class="member-panel-box member-quick-book-details" id="member-quick-events-box">
-            <summary class="member-quick-book-summary">
-              <span>Quick 1-Tap RSVP for Upcoming Gatherings</span>
-              <span class="member-quick-book-hint">Expand</span>
-            </summary>
-            <div style="margin-top: 16px;">
-              <!-- CMS:JOIN_EVENTS_SECTION:START -->
-              {{JOIN_EVENTS_SECTION_HTML}}
-              <!-- CMS:JOIN_EVENTS_SECTION:END -->
-              <div class="form-status" id="dash-event-book-status" role="status" aria-live="polite"></div>
-              <div style="margin-top: 12px;">
-                <button type="button" class="auth-submit-btn" style="width:auto;min-height:42px;padding:0 22px;" id="btn-dash-book-event">1-Tap RSVP</button>
-              </div>
-            </div>
-          </details>
-        </div>
       </div>
 
       <!-- TAB 3: SECURITY (Passkey Management) -->

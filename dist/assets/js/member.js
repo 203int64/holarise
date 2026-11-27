@@ -1412,13 +1412,58 @@
             );
     }
 
-    // Update Luxe Card EXP & Tier
+    if ($("#member-completion-box")) {
+      $("#member-completion-box").hidden = pct >= 100;
+    }
+
+    // Public Editorial Passport link (/tv/[code])
+    const pubLink = $("#btn-open-public-passport");
+    if (pubLink && m.memberCode) {
+      pubLink.href = `/tv/${encodeURIComponent(m.memberCode)}${IS_EN ? "?lang=en" : ""}`;
+    }
+
+    // Editorial welcome heading
+    if ($("#dash-welcome-heading")) {
+      const firstName = String(m.name || "").trim().split(/\s+/).slice(-1)[0] || m.name || "";
+      $("#dash-welcome-heading").textContent = firstName
+        ? t(`Chào mừng trở lại, ${firstName}`, `Welcome back, ${firstName}`)
+        : t("Hành trình của bạn", "Your Journey");
+    }
+
+    // Update Editorial Milestone Badge (no gamey LV.1 / EXP wording)
     const exp = computeMemberExp(m, state.dashboard);
-    if ($("#dash-pass-tier")) $("#dash-pass-tier").textContent = exp.tierBadge;
-    if ($("#dash-exp-rank")) $("#dash-exp-rank").textContent = `${t("Hành trình", "Journey")} · ${exp.tierName}`;
+    const cleanTier = String(exp.tierName || t("Khởi hành", "Starter")).toUpperCase();
+    if ($("#dash-pass-tier")) $("#dash-pass-tier").textContent = cleanTier;
+    if ($("#dash-exp-rank")) $("#dash-exp-rank").textContent = t("Dấu ấn hành trình", "Journey Milestones");
     if ($("#dash-exp-val")) $("#dash-exp-val").textContent = exp.expText;
     if ($("#dash-exp-fill")) $("#dash-exp-fill").style.width = `${exp.progressPct}%`;
-    if ($("#dash-exp-breakdown")) $("#dash-exp-breakdown").textContent = exp.breakdownText;
+    const stats = state.dashboard?.journeyStats || null;
+    if ($("#dash-exp-breakdown")) {
+      if (stats) {
+        const parts = [
+          `${stats.activeEvents} ${t("hoạt động", "events")}`,
+          `${stats.reflectionsCount} ${t("lưu bút", "reflections")}`,
+        ];
+        if (stats.contributedPhotosCount > 0) {
+          parts.push(`${stats.contributedPhotosCount} ${t("ảnh góp", "photos")}`);
+        }
+        $("#dash-exp-breakdown").textContent = parts.join(" · ");
+      } else {
+        $("#dash-exp-breakdown").textContent = exp.breakdownText;
+      }
+    }
+
+    // Update 4 Editorial Journey Metrics & 3 Pillar Stamps
+    if (stats) {
+      if ($("#dash-stat-events")) $("#dash-stat-events").textContent = String(stats.activeEvents || 0);
+      if ($("#dash-stat-pillars")) $("#dash-stat-pillars").textContent = `${(stats.pillarsTouched || []).length || 1}/3`;
+      if ($("#dash-stat-refs")) $("#dash-stat-refs").textContent = String(stats.reflectionsCount || 0);
+      if ($("#dash-stat-photos")) $("#dash-stat-photos").textContent = String(stats.contributedPhotosCount || 0);
+      const touched = new Set(stats.pillarsTouched || [m.pillarChoice || "holaheart"]);
+      $$("[data-pillar-stamp]").forEach((el) => {
+        el.classList.toggle("is-active", touched.has(el.getAttribute("data-pillar-stamp")));
+      });
+    }
   }
 
   async function refreshJoinDashboard() {
@@ -1456,6 +1501,34 @@
       if (data.member) {
         state.member = data.member;
         renderMemberDashboardCard();
+      }
+
+      // Render Contributed Photos Mosaic if member has contributed photos
+      const contribSec = $("#member-contributed-photos-section");
+      const contribGrid = $("#member-contributed-photos-grid");
+      const contribPhotos = Array.isArray(data.contributedPhotos) ? data.contributedPhotos : [];
+      if (contribSec && contribGrid) {
+        if (contribPhotos.length > 0) {
+          contribSec.hidden = false;
+          contribGrid.innerHTML = contribPhotos
+            .map((p) => {
+              const badge =
+                p.approvalStatus === "pending"
+                  ? `<span class="member-contrib-status is-pending">${t("Chờ duyệt", "Pending")}</span>`
+                  : "";
+              const cap = p.caption || p.albumTitle || t("Khoảnh khắc đóng góp", "Contributed photo");
+              return `<figure class="member-contrib-card">
+                <div class="member-contrib-thumb">
+                  <img src="${escHtml(p.url)}" alt="${escHtml(cap)}" loading="lazy">
+                  ${badge}
+                </div>
+                <figcaption>${escHtml(p.albumTitle || cap)}</figcaption>
+              </figure>`;
+            })
+            .join("");
+        } else {
+          contribSec.hidden = true;
+        }
       }
 
       const bookingsBox = $("#member-bookings-list");

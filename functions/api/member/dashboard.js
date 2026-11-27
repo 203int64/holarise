@@ -90,7 +90,7 @@ export async function onRequestGet(context) {
   `;
 
   await ensureReflectionsSchema(env.DB);
-  const [regsRes, refsRes] = await Promise.all([
+  const [regsRes, refsRes, photosRes] = await Promise.all([
     env.DB.prepare(regQuery).bind(...bindParams).all(),
     env.DB.prepare(
       `SELECT id, activity_slug, participant_role, pull_quote, content, photo_url, photos_json, heart_count, status, admin_note, created_at, updated_at
@@ -101,6 +101,18 @@ export async function onRequestGet(context) {
     )
       .bind(member.id)
       .all(),
+    env.DB.prepare(
+      `SELECT p.id, p.url, p.web_url, p.caption, p.approval_status, p.media_type, p.created_at, a.title AS album_title, a.slug AS album_slug
+       FROM media_photos p
+       LEFT JOIN media_albums a ON a.id = p.album_id
+       WHERE p.contributor_member_id = ?
+         AND COALESCE(p.media_type, 'image') = 'image'
+       ORDER BY p.created_at DESC
+       LIMIT 12`
+    )
+      .bind(member.id)
+      .all()
+      .catch(() => ({ results: [] })),
   ]);
 
   const seenRegIds = new Set();
@@ -154,10 +166,39 @@ export async function onRequestGet(context) {
     };
   });
 
+  const contributedPhotos = (photosRes?.results || []).map((p) => ({
+    id: p.id,
+    url: p.web_url || p.url || "",
+    caption: p.caption || "",
+    approvalStatus: p.approval_status || "approved",
+    albumTitle: p.album_title || "",
+    albumSlug: p.album_slug || "",
+    createdAt: p.created_at,
+  }));
+
+  const pillarsSet = new Set([member.pillar_choice || "holaheart"]);
+  let activeCount = 0;
+  let attendedCount = 0;
+  for (const r of registrations) {
+    if (r.status !== "cancelled") {
+      activeCount += 1;
+      if (r.eventPillar) pillarsSet.add(r.eventPillar);
+    }
+    if (r.status === "attended") attendedCount += 1;
+  }
+
   return jsonResponse({
     ok: true,
     member: serializePublicMember(member),
     registrations,
     reflections,
+    contributedPhotos,
+    journeyStats: {
+      activeEvents: activeCount,
+      attendedEvents: attendedCount,
+      pillarsTouched: Array.from(pillarsSet),
+      reflectionsCount: reflections.length,
+      contributedPhotosCount: contributedPhotos.length,
+    },
   });
 }

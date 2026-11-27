@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=2d64653f1d">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=4477fc7257">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -455,46 +455,31 @@
     </div>
   </div>
 
-  <!-- STEP 2: AUTHENTICATED MEMBER HUB (Luma-style Clean 3-Tab Architecture) -->
+  <!-- STEP 2: AUTHENTICATED MEMBER HUB (2-Column Editorial Passport & Journey Studio) -->
   <div class="container" id="member-dashboard-view" hidden>
-    <div class="member-hub-shell">
+    <div class="member-hub-shell member-hub-shell--editorial">
       <nav class="member-hub-tabs" role="tablist" aria-label="Quản lý tài khoản thành viên">
-        <button type="button" class="member-hub-tab is-active" role="tab" aria-selected="true" data-dash-tab="profile">Thẻ &amp; Hồ sơ</button>
-        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="activity">Ví hành trình</button>
-        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="security">Bảo mật</button>
+        <button type="button" class="member-hub-tab is-active" role="tab" aria-selected="true" data-dash-tab="profile">Hành trình &amp; Thẻ</button>
+        <button type="button" class="member-hub-tab" role="tab" aria-selected="false" data-dash-tab="security">Bảo mật &amp; Đăng nhập</button>
       </nav>
 
-      <!-- TAB 1: MEMBER PASS & PROFILE -->
+      <!-- TAB 1: EDITORIAL PASSPORT + LIVE JOURNEY WORKSPACE -->
       <div class="member-hub-pane" data-dash-pane="profile">
-        <div class="member-pass-stage">
-          <div class="member-dash-card-col">
-            <div class="member-completion-bar" id="member-completion-box">
-              <div class="member-completion-top">
-                <span>Hoàn thiện Thẻ Thành Viên</span>
-                <strong id="dash-completion-pct">40%</strong>
-              </div>
-              <div class="member-completion-track" aria-hidden="true">
-                <span class="member-completion-fill" id="dash-completion-fill" style="width: 40%;"></span>
-              </div>
-              <p class="member-completion-hint" id="dash-completion-hint">Thêm ảnh đại diện, trường/đơn vị và châm ngôn để hoàn thiện thẻ của bạn.</p>
-            </div>
-
-            <article class="sunrise-pass member-pass-live member-pass-luxe" id="member-live-pass" data-sunrise-pass data-pass-theme="sunrise" aria-label="Thẻ Thành Viên Hola của bạn">
-              <div class="member-pass-mesh" aria-hidden="true"></div>
-              <div class="member-pass-foil" aria-hidden="true"></div>
-              <div class="sunrise-pass-glare" aria-hidden="true"></div>
-
+        <div class="member-editorial-grid">
+          <!-- LEFT STICKY COLUMN: PINE & GOLD EDITORIAL PASSPORT CARD -->
+          <aside class="member-passport-aside">
+            <article class="sunrise-pass member-pass-live member-pass-editorial" id="member-live-pass" data-sunrise-pass data-pass-theme="pine" aria-label="Thẻ Thành Viên Hola của bạn">
               <div class="pass-header">
                 <div class="pass-brand">
-                  <img src="/assets/images/logo-mark.png" alt="Biểu trưng HolaRise" width="28" height="28">
-                  <span>HOLARISE · HÒA LẠC</span>
+                  <img src="/assets/images/favicon-96.png" alt="Biểu trưng HolaRise" width="26" height="26">
+                  <span>HOLARISE · HỘ CHIẾU</span>
                 </div>
-                <span class="pass-state-pill" id="dash-pass-tier">LV.1 · KHỞI HÀNH</span>
+                <span class="pass-state-pill" id="dash-pass-tier">KHỞI HÀNH</span>
               </div>
 
               <div class="member-pass-identity">
                 <div class="member-pass-avatar-wrap">
-                  <img id="dash-avatar-img" class="member-pass-avatar" src="/assets/images/logo-mark.png" alt="Ảnh đại diện thành viên HolaRise" width="64" height="64" hidden>
+                  <img id="dash-avatar-img" class="member-pass-avatar" src="/assets/images/favicon-96.png" alt="Ảnh đại diện thành viên HolaRise" width="68" height="68" hidden>
                   <span id="dash-avatar-initials" class="member-pass-initials" aria-hidden="true">HR</span>
                 </div>
                 <div class="member-pass-identity-text">
@@ -506,18 +491,10 @@
 
               <p class="pass-greeting" id="dash-pass-bio">Sống sâu hơn, xanh hơn và bền bỉ sẻ chia cùng HolaRise.</p>
 
-              <div class="pass-exp-panel" aria-label="Điểm hành trình EXP">
-                <div class="pass-exp-head">
-                  <span class="pass-exp-rank" id="dash-exp-rank">Hành trình · Khởi hành</span>
-                  <strong class="pass-exp-val" id="dash-exp-val">20 / 150 EXP</strong>
-                </div>
-                <div class="pass-exp-track" aria-hidden="true">
-                  <span class="pass-exp-fill" id="dash-exp-fill" style="width: 13%;"></span>
-                </div>
-                <div class="pass-exp-breakdown" id="dash-exp-breakdown">0 hoạt động · 0 lưu bút</div>
+              <div class="pass-journey-strip" aria-label="Tóm tắt dấu ấn hành trình">
+                <span class="pass-journey-label" id="dash-exp-rank">Dấu ấn hành trình</span>
+                <strong class="pass-journey-summary" id="dash-exp-breakdown">0 hoạt động · 0 lưu bút</strong>
               </div>
-
-              <div class="pass-divider" aria-hidden="true"></div>
 
               <div class="pass-meta-grid">
                 <div class="pass-meta-item">
@@ -540,20 +517,196 @@
 
               <div class="pass-footer pass-footer--clean">
                 <span>HOLARISE.ORG</span>
-                <span>HÒA LẠC · CỘNG ĐỒNG THANH NIÊN</span>
+                <span>HÒA LẠC · THANH NIÊN</span>
               </div>
             </article>
 
-            <div class="member-pass-controls member-pass-controls--stage">
-              <button type="button" class="btn btn--primary btn--sm" id="btn-download-member-pass">Tải Thẻ (PNG)</button>
-              <button type="button" class="btn btn--outline btn--sm" id="btn-open-profile-modal">Chỉnh sửa thông tin</button>
-              <button type="button" class="btn btn--outline btn--sm member-avatar-upload-btn" id="btn-change-avatar">Đổi ảnh</button>
+            <div class="member-pass-actions-editorial">
+              <a class="btn btn--primary btn--sm" id="btn-open-public-passport" href="/tham-gia/" target="_blank" rel="noopener">Mở Hộ chiếu công khai ↗</a>
+              <button type="button" class="btn btn--outline btn--sm" id="btn-download-member-pass">Tải Thẻ (PNG)</button>
+            </div>
+
+            <div class="member-pass-secondary-actions">
+              <button type="button" class="member-text-action" id="btn-open-profile-modal">Chỉnh sửa hồ sơ</button>
+              <span aria-hidden="true">·</span>
+              <button type="button" class="member-text-action member-avatar-upload-btn" id="btn-change-avatar">Đổi ảnh đại diện</button>
               <input id="dash-avatar-input" type="file" accept="image/*" class="visually-hidden" tabindex="-1">
-              <button type="button" class="btn btn--outline btn--sm" id="btn-member-logout">Đăng xuất</button>
+              <span aria-hidden="true">·</span>
+              <button type="button" class="member-text-action member-text-action--muted" id="btn-member-logout">Đăng xuất</button>
             </div>
             <div class="form-status" id="dash-avatar-status" role="status" aria-live="polite"></div>
+
+            <div class="member-completion-bar member-completion-bar--slim" id="member-completion-box">
+              <div class="member-completion-top">
+                <span>Hoàn thiện hồ sơ</span>
+                <strong id="dash-completion-pct">40%</strong>
+              </div>
+              <div class="member-completion-track" aria-hidden="true">
+                <span class="member-completion-fill" id="dash-completion-fill" style="width: 40%;"></span>
+              </div>
+              <p class="member-completion-hint" id="dash-completion-hint">Thêm ảnh đại diện, trường/đơn vị và châm ngôn để hoàn thiện thẻ của bạn.</p>
+            </div>
+          </aside>
+
+          <!-- RIGHT MAIN COLUMN: LIVE JOURNEY OVERVIEW, UPCOMING GATHERINGS & MEMORIES -->
+          <div class="member-journey-main">
+            <section class="member-journey-hero">
+              <div class="member-journey-hero-head">
+                <div>
+                  <span class="member-editorial-kicker">Hành trình của bạn tại HolaRise</span>
+                  <h2 id="dash-welcome-heading">Chào mừng trở lại</h2>
+                </div>
+                <a class="arrow-link" href="/lich-hoat-dong/">Lịch hoạt động →</a>
+              </div>
+
+              <div class="member-metrics-grid" aria-label="Thống kê hành trình">
+                <div class="member-metric-tile">
+                  <strong id="dash-stat-events">0</strong>
+                  <span>Hoạt động đã ghi nhận</span>
+                </div>
+                <div class="member-metric-tile">
+                  <strong id="dash-stat-pillars">1/3</strong>
+                  <span>Trụ cột đã chạm</span>
+                </div>
+                <div class="member-metric-tile">
+                  <strong id="dash-stat-refs">0</strong>
+                  <span>Trang lưu bút</span>
+                </div>
+                <div class="member-metric-tile">
+                  <strong id="dash-stat-photos">0</strong>
+                  <span>Ảnh đã đóng góp</span>
+                </div>
+              </div>
+
+              <div class="member-pillar-stamps" aria-label="Dấu ấn 3 trụ cột HolaRise">
+                <div class="member-pillar-stamp is-active" data-pillar-stamp="holaheart">
+                  <span class="member-pillar-dot" style="background:#B58342;"></span>
+                  <div>
+                    <strong>HolaHeart</strong>
+                    <span>Tĩnh tại &amp; Lắng nghe</span>
+                  </div>
+                </div>
+                <div class="member-pillar-stamp" data-pillar-stamp="holagreen">
+                  <span class="member-pillar-dot" style="background:#2D6A4F;"></span>
+                  <div>
+                    <strong>HolaGreen</strong>
+                    <span>Sinh thái &amp; Cảnh quan</span>
+                  </div>
+                </div>
+                <div class="member-pillar-stamp" data-pillar-stamp="holaconnect">
+                  <span class="member-pillar-dot" style="background:#3B5B8A;"></span>
+                  <div>
+                    <strong>HolaConnect</strong>
+                    <span>Tri thức &amp; Phụng sự</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- NEXT CHAPTER: 1-TAP UPCOMING BOOKING (OPEN BY DEFAULT) -->
+            <section class="member-panel-box member-next-chapter" id="member-quick-events-box">
+              <div class="member-panel-head">
+                <div>
+                  <span class="kicker">Chặng tiếp theo dành cho bạn</span>
+                  <h2>Giữ chỗ 1 chạm cho buổi gặp sắp tới</h2>
+                </div>
+                <a class="arrow-link" href="/lich-hoat-dong/">Xem tất cả →</a>
+              </div>
+              <div style="margin-top: 12px;">
+                <!-- CMS:JOIN_EVENTS_SECTION:START -->
+                <fieldset class="join-fieldset" data-join-events-step>
+          <legend class="join-legend">Chọn hoạt động bạn muốn tham gia</legend>
+          <div class="join-event-grid">
+      <div class="join-event-option">
+        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-holaheart-cuoc-doi-cua-cha-2026-11-29" value="holaheart-cuoc-doi-cua-cha-2026-11-29" data-event-title="Workshop &quot;Cuộc Đời Của Cha&quot;" data-event-date="Chủ Nhật, 29/11/2026" data-event-time="19:15 – 21:30" data-event-location="Mây Lang Thang Cafe (ngõ 2 đường vào TTGDQP, Hòa Lạc)" data-event-type="HolaHeart · Lắng nghe &amp; Gia đình" data-event-seats="">
+        <label class="join-event-card" for="join-ev-holaheart-cuoc-doi-cua-cha-2026-11-29">
+          <span class="join-event-top">
+            <span class="join-event-date">Chủ Nhật, 29/11/2026</span>
+            <span class="join-event-seats"></span>
+          </span>
+          <span class="join-event-title">Workshop &quot;Cuộc Đời Của Cha&quot;</span>
+          <span class="join-event-meta">19:15 – 21:30 · Mây Lang Thang Cafe (ngõ 2 đường vào TTGDQP, Hòa Lạc)</span>
+        </label>
+      </div>
+      <div class="join-event-option">
+        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-holaconnect-leo-nui-lam-nghiep-2026-11-26" value="holaconnect-leo-nui-lam-nghiep-2026-11-26" data-event-title="HolaConnect · Chiều Leo Núi &amp; Trò Chuyện Dưới Tán Thông" data-event-date="Thứ Năm, 26/11/2026" data-event-time="14:30 – 17:30" data-event-location="Núi Luốt – ĐH Lâm Nghiệp (Xuân Mai)" data-event-type="HolaConnect · Dã ngoại &amp; Gắn kết" data-event-seats="">
+        <label class="join-event-card" for="join-ev-holaconnect-leo-nui-lam-nghiep-2026-11-26">
+          <span class="join-event-top">
+            <span class="join-event-date">Thứ Năm, 26/11/2026</span>
+            <span class="join-event-seats"></span>
+          </span>
+          <span class="join-event-title">HolaConnect · Chiều Leo Núi &amp; Trò Chuyện Dưới Tán Thông</span>
+          <span class="join-event-meta">14:30 – 17:30 · Núi Luốt – ĐH Lâm Nghiệp (Xuân Mai)</span>
+        </label>
+      </div>
+    </div>
+        </fieldset>
+                <!-- CMS:JOIN_EVENTS_SECTION:END -->
+                <div class="form-status" id="dash-event-book-status" role="status" aria-live="polite"></div>
+                <div style="margin-top: 14px;">
+                  <button type="button" class="auth-submit-btn" style="width:auto;min-height:42px;padding:0 24px;" id="btn-dash-book-event">Giữ chỗ 1 chạm</button>
+                </div>
+              </div>
+            </section>
+
+            <!-- MY EVENT PASSES & HISTORY -->
+            <section class="member-panel-box">
+              <div class="member-panel-head">
+                <div>
+                  <span class="kicker">Dấu ấn đã tham dự</span>
+                  <h2>Thẻ sự kiện &amp; Lịch sử hoạt động</h2>
+                </div>
+              </div>
+              <div id="member-wallet-summary" class="member-wallet-summary" hidden></div>
+              <div id="member-bookings-list" class="member-wallet-stack">
+                <p class="member-empty-hint">Đang mở lịch sử hành trình...</p>
+              </div>
+            </section>
+
+            <!-- CONTRIBUTED PHOTOS -->
+            <section class="member-panel-box" id="member-contributed-photos-section" hidden>
+              <div class="member-panel-head">
+                <div>
+                  <span class="kicker">Góc nhìn của bạn</span>
+                  <h2>Khoảnh khắc bạn đã gửi góp</h2>
+                </div>
+                <button type="button" class="btn btn--outline btn--sm" data-open-album-contribute>+ Góp thêm ảnh</button>
+              </div>
+              <div id="member-contributed-photos-grid" class="member-contrib-grid"></div>
+            </section>
+
+            <!-- REFLECTIONS -->
+            <section class="member-panel-box">
+              <div class="member-panel-head">
+                <div>
+                  <span class="kicker">Lưu bút cộng đồng</span>
+                  <h2>Cảm nhận &amp; Ảnh kỷ niệm đã gửi</h2>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
+                  <button type="button" class="btn btn--outline btn--sm" data-open-album-contribute>Góp ảnh vào Kho chung</button>
+                  <a class="arrow-link" href="/hanh-trinh/">Viết lưu bút mới →</a>
+                </div>
+              </div>
+              <div id="member-reflections-list" class="member-list-stack">
+                <p class="member-empty-hint">Đang tải danh sách lưu bút...</p>
+              </div>
+            </section>
           </div>
         </div>
+
+        <dialog id="member-wallet-dialog" class="wallet-pass-dialog" aria-labelledby="wallet-dlg-title">
+          <div class="wallet-dlg-shell">
+            <div class="wallet-dlg-topbar">
+              <span class="kicker" id="wallet-dlg-kicker">Thẻ sự kiện</span>
+              <button type="button" class="wallet-dlg-close" id="wallet-dlg-close" aria-label="Đóng thẻ sự kiện">✕</button>
+            </div>
+            <div id="wallet-dlg-body"></div>
+            <div class="wallet-dlg-actions">
+              <button type="button" class="btn btn--primary btn--sm" id="wallet-dlg-download">Tải thẻ sự kiện (PNG)</button>
+              <a class="btn btn--outline btn--sm" id="wallet-dlg-link" href="/lich-hoat-dong/" hidden>Mở thư mời sự kiện →</a>
+            </div>
+          </div>
+        </dialog>
 
         <!-- Popup Chỉnh sửa thông tin cá nhân (ẩn mặc định) -->
         <dialog class="club-dialog club-dialog--auth member-profile-dialog" id="member-profile-modal" closedby="any" aria-labelledby="profile-modal-heading">
@@ -608,97 +761,6 @@
             </form>
           </div>
         </dialog>
-      </div>
-
-      <!-- TAB 2: MY JOURNEY WALLET (Event Pass Wallet + Reflections + Quick Book) -->
-      <div class="member-hub-pane" data-dash-pane="activity" hidden>
-        <div class="member-hub-stack">
-          <section class="member-panel-box">
-            <div class="member-panel-head">
-              <div>
-                <span class="kicker">Ví hành trình cá nhân</span>
-                <h2>Thẻ sự kiện của tôi</h2>
-              </div>
-              <a class="arrow-link" href="/lich-hoat-dong/">Xem lịch tuần này →</a>
-            </div>
-            <div id="member-wallet-summary" class="member-wallet-summary" hidden></div>
-            <div id="member-bookings-list" class="member-wallet-stack">
-              <p class="member-empty-hint">Đang mở ví thẻ sự kiện...</p>
-            </div>
-          </section>
-
-          <dialog id="member-wallet-dialog" class="wallet-pass-dialog" aria-labelledby="wallet-dlg-title">
-            <div class="wallet-dlg-shell">
-              <div class="wallet-dlg-topbar">
-                <span class="kicker" id="wallet-dlg-kicker">Thẻ sự kiện</span>
-                <button type="button" class="wallet-dlg-close" id="wallet-dlg-close" aria-label="Đóng thẻ sự kiện">✕</button>
-              </div>
-              <div id="wallet-dlg-body"></div>
-              <div class="wallet-dlg-actions">
-                <button type="button" class="btn btn--primary btn--sm" id="wallet-dlg-download">Tải thẻ sự kiện (PNG)</button>
-                <a class="btn btn--outline btn--sm" id="wallet-dlg-link" href="/lich-hoat-dong/" hidden>Mở thư mời sự kiện →</a>
-              </div>
-            </div>
-          </dialog>
-
-          <section class="member-panel-box">
-            <div class="member-panel-head">
-              <div>
-                <span class="kicker">Lưu bút cộng đồng</span>
-                <h2>Cảm nhận &amp; Ảnh kỷ niệm đã gửi</h2>
-              </div>
-              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
-                <button type="button" class="btn btn--outline btn--sm" data-open-album-contribute>Góp ảnh vào Kho chung</button>
-                <a class="arrow-link" href="/hanh-trinh/">Viết lưu bút mới →</a>
-              </div>
-            </div>
-            <div id="member-reflections-list" class="member-list-stack">
-              <p class="member-empty-hint">Đang tải danh sách lưu bút...</p>
-            </div>
-          </section>
-
-          <details class="member-panel-box member-quick-book-details" id="member-quick-events-box">
-            <summary class="member-quick-book-summary">
-              <span>Giữ chỗ nhanh cho hoạt động sắp diễn ra</span>
-              <span class="member-quick-book-hint">Mở rộng</span>
-            </summary>
-            <div style="margin-top: 16px;">
-              <!-- CMS:JOIN_EVENTS_SECTION:START -->
-              <fieldset class="join-fieldset" data-join-events-step>
-          <legend class="join-legend">Chọn hoạt động bạn muốn tham gia</legend>
-          <div class="join-event-grid">
-      <div class="join-event-option">
-        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-holaheart-cuoc-doi-cua-cha-2026-11-29" value="holaheart-cuoc-doi-cua-cha-2026-11-29" data-event-title="Workshop &quot;Cuộc Đời Của Cha&quot;" data-event-date="Chủ Nhật, 29/11/2026" data-event-time="19:15 – 21:30" data-event-location="Mây Lang Thang Cafe (ngõ 2 đường vào TTGDQP, Hòa Lạc)" data-event-type="HolaHeart · Lắng nghe &amp; Gia đình" data-event-seats="">
-        <label class="join-event-card" for="join-ev-holaheart-cuoc-doi-cua-cha-2026-11-29">
-          <span class="join-event-top">
-            <span class="join-event-date">Chủ Nhật, 29/11/2026</span>
-            <span class="join-event-seats"></span>
-          </span>
-          <span class="join-event-title">Workshop &quot;Cuộc Đời Của Cha&quot;</span>
-          <span class="join-event-meta">19:15 – 21:30 · Mây Lang Thang Cafe (ngõ 2 đường vào TTGDQP, Hòa Lạc)</span>
-        </label>
-      </div>
-      <div class="join-event-option">
-        <input class="visually-hidden" type="radio" name="eventChoice" id="join-ev-holaconnect-leo-nui-lam-nghiep-2026-11-26" value="holaconnect-leo-nui-lam-nghiep-2026-11-26" data-event-title="HolaConnect · Chiều Leo Núi &amp; Trò Chuyện Dưới Tán Thông" data-event-date="Thứ Năm, 26/11/2026" data-event-time="14:30 – 17:30" data-event-location="Núi Luốt – ĐH Lâm Nghiệp (Xuân Mai)" data-event-type="HolaConnect · Dã ngoại &amp; Gắn kết" data-event-seats="">
-        <label class="join-event-card" for="join-ev-holaconnect-leo-nui-lam-nghiep-2026-11-26">
-          <span class="join-event-top">
-            <span class="join-event-date">Thứ Năm, 26/11/2026</span>
-            <span class="join-event-seats"></span>
-          </span>
-          <span class="join-event-title">HolaConnect · Chiều Leo Núi &amp; Trò Chuyện Dưới Tán Thông</span>
-          <span class="join-event-meta">14:30 – 17:30 · Núi Luốt – ĐH Lâm Nghiệp (Xuân Mai)</span>
-        </label>
-      </div>
-    </div>
-        </fieldset>
-              <!-- CMS:JOIN_EVENTS_SECTION:END -->
-              <div class="form-status" id="dash-event-book-status" role="status" aria-live="polite"></div>
-              <div style="margin-top: 12px;">
-                <button type="button" class="auth-submit-btn" style="width:auto;min-height:42px;padding:0 22px;" id="btn-dash-book-event">Giữ chỗ 1 chạm</button>
-              </div>
-            </div>
-          </details>
-        </div>
       </div>
 
       <!-- TAB 3: SECURITY (Passkey Management) -->
@@ -1539,10 +1601,10 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=2d64653f1d" defer></script>
-  <script src="/assets/js/main.js?v=2d64653f1d" defer></script>
-  <script src="/assets/js/join-pass.js?v=2d64653f1d" defer></script>
-  <script src="/assets/js/member.js?v=2d64653f1d" defer></script>
-  <script src="/assets/js/pwa.js?v=2d64653f1d" defer></script>
+  <script src="/assets/js/motion.js?v=4477fc7257" defer></script>
+  <script src="/assets/js/main.js?v=4477fc7257" defer></script>
+  <script src="/assets/js/join-pass.js?v=4477fc7257" defer></script>
+  <script src="/assets/js/member.js?v=4477fc7257" defer></script>
+  <script src="/assets/js/pwa.js?v=4477fc7257" defer></script>
 </body>
 </html>

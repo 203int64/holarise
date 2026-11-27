@@ -17167,3 +17167,439 @@ body.is-memory-stage.is-header-light .site-header {
     font-size: 0.8rem;
   }
 }
+
+
+/* =========================================================================
+   HOLARISE EDITORIAL MEMBER PASSPORT & 2-COLUMN JOURNEY STUDIO (/tham-gia/)
+   ========================================================================= */
+.member-hub-shell--editorial {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.member-editorial-grid {
+  display: grid;
+  grid-template-columns: 372px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.member-passport-aside {
+  position: sticky;
+  top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Pine & Gold Editorial Passport Card (replaces muddy brown & ticket notches) */
+.sunrise-pass.member-pass-editorial {
+  position: relative;
+  background:
+    radial-gradient(120% 90% at 95% 5%, rgba(197, 155, 95, 0.24) 0%, rgba(197, 155, 95, 0) 56%),
+    radial-gradient(85% 80% at 5% 96%, rgba(197, 155, 95, 0.14) 0%, rgba(27, 59, 43, 0) 60%),
+    linear-gradient(148deg, #1F4532 0%, #163325 56%, #10251B 100%) !important;
+  color: #FAF8F4 !important;
+  border-radius: 22px !important;
+  padding: 24px 24px 20px !important;
+  border: 1px solid rgba(197, 155, 95, 0.48) !important;
+  box-shadow: 0 22px 50px rgba(17, 38, 27, 0.2), inset 0 1px 0 rgba(250, 248, 244, 0.12) !important;
+  overflow: hidden;
+}
+
+.sunrise-pass.member-pass-editorial::before,
+.sunrise-pass.member-pass-editorial::after {
+  display: none !important;
+}
+
+.member-pass-editorial .pass-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(197, 155, 95, 0.28);
+}
+
+.member-pass-editorial .pass-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  color: #E8D7B9;
+}
+
+.member-pass-editorial .pass-brand img {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #FAF8F4;
+}
+
+.member-pass-editorial .pass-state-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(197, 155, 95, 0.18);
+  border: 1px solid rgba(197, 155, 95, 0.5);
+  color: #F6E9D2;
+}
+
+.member-pass-editorial .member-pass-avatar,
+.member-pass-editorial .member-pass-initials {
+  border: 2px solid #C59B5F !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.26);
+}
+
+.member-pass-editorial .member-pass-initials {
+  background: linear-gradient(135deg, #F5E8CE, #C59B5F) !important;
+  color: #1B3B2B !important;
+  font-family: "Lora", Georgia, serif;
+}
+
+.member-pass-editorial .pass-program-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #C59B5F;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin-bottom: 3px;
+}
+
+.member-pass-editorial .pass-member-name {
+  font-family: "Lora", Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: #FAF8F4;
+  line-height: 1.2;
+}
+
+.member-pass-editorial .pass-member-org {
+  font-size: 0.84rem;
+  color: rgba(250, 248, 244, 0.76);
+  margin-top: 2px;
+}
+
+.member-pass-editorial .pass-greeting {
+  font-family: "Lora", Georgia, serif;
+  font-style: italic;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: rgba(250, 248, 244, 0.86);
+  margin: 14px 0 16px;
+}
+
+.pass-journey-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(250, 248, 244, 0.07);
+  border: 1px solid rgba(197, 155, 95, 0.28);
+  margin-bottom: 16px;
+}
+
+.pass-journey-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #D6C4A1;
+}
+
+.pass-journey-summary {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #FAF8F4;
+}
+
+.member-pass-editorial .pass-meta-grid {
+  padding-top: 14px;
+  border-top: 1px solid rgba(250, 248, 244, 0.14);
+}
+
+.member-pass-editorial .pass-meta-key {
+  color: rgba(232, 215, 185, 0.72);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.member-pass-editorial .pass-meta-val {
+  color: #FAF8F4;
+  font-size: 0.84rem;
+}
+
+.member-pass-editorial .pass-code {
+  color: #E8C78E;
+}
+
+.member-pass-editorial .pass-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(197, 155, 95, 0.22);
+  color: rgba(232, 215, 185, 0.68);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
+
+/* Editorial Action Row under Card */
+.member-pass-actions-editorial {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.member-pass-actions-editorial .btn {
+  justify-content: center;
+  min-height: 42px;
+}
+
+.member-pass-secondary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--ink-muted, #6E7570);
+}
+
+.member-text-action {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 4px 2px;
+  font: inherit;
+  font-weight: 500;
+  color: #1B3B2B;
+  cursor: pointer;
+}
+
+.member-text-action:hover {
+  text-decoration: underline;
+}
+
+.member-text-action--muted {
+  color: #6E7570;
+}
+
+.member-completion-bar--slim {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #FAF8F4;
+  border: 1px solid #E8E3D9;
+}
+
+/* Right Column: Live Journey Workspace */
+.member-journey-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.member-journey-hero {
+  background: #FAF8F4;
+  border: 1px solid #E8E3D9;
+  border-radius: 20px;
+  padding: 24px 26px;
+}
+
+.member-journey-hero-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.member-editorial-kicker {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #B58342;
+  margin-bottom: 4px;
+}
+
+.member-journey-hero h2 {
+  margin: 0;
+  font-family: "Lora", Georgia, serif;
+  font-size: clamp(1.35rem, 2.2vw, 1.65rem);
+  font-weight: 600;
+  color: #1B3B2B;
+  line-height: 1.25;
+}
+
+.member-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.member-metric-tile {
+  background: #FFFFFF;
+  border: 1px solid #EAE4D8;
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+}
+
+.member-metric-tile strong {
+  display: block;
+  font-family: "Lora", Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #1B3B2B;
+}
+
+.member-metric-tile span {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.74rem;
+  color: #6B7670;
+}
+
+.member-pillar-stamps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.member-pillar-stamp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 12px;
+  border: 1px solid #E8E3D9;
+  background: rgba(255, 255, 255, 0.55);
+  opacity: 0.58;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.member-pillar-stamp.is-active {
+  background: #FFFFFF;
+  border-color: rgba(197, 155, 95, 0.65);
+  opacity: 1;
+}
+
+.member-pillar-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.member-pillar-stamp strong {
+  display: block;
+  font-size: 0.82rem;
+  color: #1B3B2B;
+  line-height: 1.2;
+}
+
+.member-pillar-stamp span {
+  display: block;
+  font-size: 0.71rem;
+  color: #6E7570;
+  margin-top: 2px;
+}
+
+.member-next-chapter {
+  border-color: rgba(197, 155, 95, 0.45) !important;
+  background: #FFFFFF !important;
+}
+
+/* Contributed Photos Mosaic */
+.member-contrib-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.member-contrib-card {
+  margin: 0;
+  border: 1px solid #E8E3D9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #FAF8F4;
+}
+
+.member-contrib-thumb {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.member-contrib-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.member-contrib-status {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(27, 59, 43, 0.85);
+  color: #FAF8F4;
+}
+
+.member-contrib-card figcaption {
+  padding: 7px 10px;
+  font-size: 0.74rem;
+  color: #4B5751;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 920px) {
+  .member-editorial-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .member-passport-aside {
+    position: static;
+    max-width: 440px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .member-journey-hero {
+    padding: 18px 16px;
+  }
+  .member-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .member-pillar-stamps {
+    grid-template-columns: 1fr;
+  }
+  .member-contrib-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .member-pass-actions-editorial {
+    grid-template-columns: 1fr;
+  }
+}
