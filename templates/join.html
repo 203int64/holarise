@@ -444,29 +444,29 @@
         </dialog>
 
         <!-- Popup Chỉnh sửa thông tin cá nhân (ẩn mặc định) -->
-        <dialog class="club-dialog club-dialog--auth member-profile-dialog" id="member-profile-modal" closedby="any" aria-labelledby="profile-modal-heading">
-          <div class="dialog-inner auth-dialog-inner">
+        <dialog class="club-dialog club-dialog--auth member-profile-dialog member-profile-dialog--editorial" id="member-profile-modal" closedby="any" aria-labelledby="profile-modal-heading">
+          <div class="dialog-inner auth-dialog-inner member-profile-inner">
             <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
-            <div class="auth-dialog-brand">
-              <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="32" height="32">
+            <div class="auth-dialog-brand member-profile-head">
+              <img src="/assets/images/favicon-96.png" alt="Logo HolaRise" width="36" height="36">
               <div>
                 <h2 id="profile-modal-heading" class="auth-dialog-title">Chỉnh sửa Thẻ Thành Viên</h2>
-                <p class="auth-dialog-sub">Cập nhật họ tên, liên hệ và trụ cột hiển thị trên thẻ của bạn.</p>
+                <p class="auth-dialog-sub">Cập nhật thông tin hiển thị trên Hộ chiếu Hành trình của bạn.</p>
               </div>
             </div>
-            <form class="auth-form" id="member-profile-form" novalidate>
-              <div class="auth-row-2">
+            <form class="auth-form member-profile-form" id="member-profile-form" novalidate>
+              <div class="auth-row-2 member-profile-row2">
                 <div class="auth-field">
                   <label for="prof-name">Họ và tên <span aria-hidden="true">*</span></label>
-                  <input id="prof-name" name="name" type="text" autocomplete="name" minlength="2" required>
+                  <input id="prof-name" name="name" type="text" autocomplete="name" minlength="2" required placeholder="Nguyễn Minh Anh">
                 </div>
                 <div class="auth-field">
-                  <label for="prof-phone">Số điện thoại / Zalo <span class="auth-hint-inline">(giữ chỗ 1 chạm)</span></label>
+                  <label for="prof-phone">Số điện thoại / Zalo</label>
                   <input id="prof-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx">
                 </div>
               </div>
               <div class="auth-field">
-                <label for="prof-org">Trường / Đơn vị <span class="auth-hint-inline">(48 gợi ý)</span></label>
+                <label for="prof-org">Trường / Đơn vị</label>
                 <input id="prof-org" name="organization" type="text" list="holarise-org-presets" autocomplete="organization" placeholder="Gõ để chọn trường hoặc đơn vị...">
               </div>
               <div class="org-quick-chips" aria-label="Chọn nhanh đơn vị">
@@ -475,23 +475,21 @@
                 <button type="button" class="org-chip-btn" data-org-chip="Khu Công nghệ cao Hòa Lạc (HHTP)" data-org-target="prof-org">KCNC Hòa Lạc</button>
                 <button type="button" class="org-chip-btn" data-org-chip="Người đi làm / Tự do" data-org-target="prof-org">Người đi làm</button>
               </div>
-              <div class="auth-row-2">
-                <div class="auth-field">
-                  <label for="prof-pillar">Trụ cột đồng hành</label>
-                  <select id="prof-pillar" name="primaryPillar">
-                    <option value="holaheart">HolaHeart · Nội lực &amp; Lắng nghe</option>
-                    <option value="holagreen">HolaGreen · Sinh thái &amp; Cảnh quan</option>
-                    <option value="holaconnect">HolaConnect · Tri thức &amp; Phụng sự</option>
-                  </select>
-                </div>
-                <div class="auth-field">
-                  <label for="prof-bio">Châm ngôn trên thẻ <span class="auth-hint-inline">(tối đa 160 ký tự)</span></label>
-                  <input id="prof-bio" name="bio" type="text" maxlength="160" placeholder="Một câu ngắn gọn về hành trình của bạn...">
-                </div>
+              <div class="auth-field">
+                <label for="prof-pillar">Trụ cột đồng hành</label>
+                <select id="prof-pillar" name="primaryPillar">
+                  <option value="holaheart">HolaHeart · Tĩnh tại, Lắng nghe &amp; Gia đình</option>
+                  <option value="holagreen">HolaGreen · Sinh thái &amp; Cảnh quan Bền vững</option>
+                  <option value="holaconnect">HolaConnect · Tri thức &amp; Phụng sự Cộng đồng</option>
+                </select>
+              </div>
+              <div class="auth-field">
+                <label for="prof-bio">Châm ngôn trên thẻ</label>
+                <textarea id="prof-bio" name="bio" rows="2" maxlength="160" placeholder="Một câu ngắn gọn về hành trình bạn muốn lưu trên thẻ (tối đa 160 ký tự)..."></textarea>
               </div>
               <div class="form-status" id="prof-status" role="status" aria-live="polite"></div>
               <div class="member-profile-modal-actions">
-                <button class="auth-submit-btn" type="submit" id="prof-submit-btn">Lưu thay đổi</button>
+                <button class="auth-submit-btn member-profile-save-btn" type="submit" id="prof-submit-btn">Lưu thay đổi</button>
               </div>
             </form>
           </div>

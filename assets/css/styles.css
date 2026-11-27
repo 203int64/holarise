@@ -17603,3 +17603,149 @@ body.is-memory-stage.is-header-light .site-header {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Editorial Profile Edit Modal (/tham-gia/ & /en/join/) */
+.member-profile-dialog--editorial {
+  max-width: 560px !important;
+  width: calc(100% - 28px);
+  border-radius: 22px !important;
+  border: 1px solid #E6E0D4 !important;
+  box-shadow: 0 28px 70px rgba(17, 38, 27, 0.22) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.member-profile-inner {
+  padding: 0 !important;
+  background: #FFFFFF;
+}
+
+.member-profile-head {
+  padding: 22px 28px 18px;
+  background: #FAF8F4;
+  border-bottom: 1px solid #EAE4D8;
+  margin-bottom: 0 !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+
+.member-profile-head img {
+  border-radius: 10px;
+  border: 1px solid #E6E0D4;
+  background: #FFFFFF;
+  flex-shrink: 0;
+}
+
+.member-profile-head .auth-dialog-title {
+  font-family: "Lora", Georgia, serif;
+  font-size: 1.25rem;
+  color: #1B3B2B;
+  margin: 0 0 2px;
+}
+
+.member-profile-head .auth-dialog-sub {
+  font-size: 0.84rem;
+  color: #5C6862;
+  margin: 0;
+}
+
+.member-profile-form {
+  padding: 22px 28px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.member-profile-row2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+
+.member-profile-form .auth-field {
+  margin: 0;
+}
+
+.member-profile-form .auth-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2A3630;
+  margin-bottom: 6px;
+  white-space: nowrap;
+}
+
+.member-profile-form input,
+.member-profile-form select,
+.member-profile-form textarea {
+  width: 100%;
+  border: 1px solid #DDD6C8;
+  border-radius: 12px;
+  background: #FCFBF9;
+  color: #1B2420;
+  font-size: 0.92rem;
+  padding: 11px 14px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.member-profile-form textarea {
+  resize: vertical;
+  min-height: 70px;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+.member-profile-form input:focus,
+.member-profile-form select:focus,
+.member-profile-form textarea:focus {
+  outline: none;
+  background: #FFFFFF;
+  border-color: #1B3B2B;
+  box-shadow: 0 0 0 3px rgba(27, 59, 43, 0.1);
+}
+
+.member-profile-form .org-quick-chips {
+  margin-top: -6px;
+  gap: 6px;
+}
+
+.member-profile-form .org-chip-btn {
+  background: #FAF8F4;
+  border: 1px solid #E5DEC9;
+  color: #36443D;
+  font-size: 0.78rem;
+  padding: 5px 11px;
+}
+
+.member-profile-form .org-chip-btn:hover {
+  border-color: #1B3B2B;
+  color: #1B3B2B;
+  background: #F3EFE6;
+}
+
+.member-profile-save-btn {
+  background: #1B3B2B !important;
+  color: #FAF8F4 !important;
+  border-radius: 999px !important;
+  min-height: 46px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+}
+
+.member-profile-save-btn:hover {
+  background: #132A1F !important;
+}
+
+@media (max-width: 560px) {
+  .member-profile-head {
+    padding: 18px 20px 14px;
+  }
+  .member-profile-form {
+    padding: 18px 20px 22px;
+  }
+  .member-profile-row2 {
+    grid-template-columns: 1fr;
+  }
+}

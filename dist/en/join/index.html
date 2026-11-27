@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=544532b9b5">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=4b6f51fef1">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -697,24 +697,24 @@
           </div>
         </dialog>
 
-        <dialog class="club-dialog club-dialog--auth member-profile-dialog" id="member-profile-modal" closedby="any" aria-labelledby="profile-modal-heading">
-          <div class="dialog-inner auth-dialog-inner">
+        <dialog class="club-dialog club-dialog--auth member-profile-dialog member-profile-dialog--editorial" id="member-profile-modal" closedby="any" aria-labelledby="profile-modal-heading">
+          <div class="dialog-inner auth-dialog-inner member-profile-inner">
             <button class="modal-close" type="button" data-modal-close aria-label="Close dialog">×</button>
-            <div class="auth-dialog-brand">
-              <img src="/assets/images/logo-mark.png" alt="HolaRise emblem" width="32" height="32">
+            <div class="auth-dialog-brand member-profile-head">
+              <img src="/assets/images/favicon-96.png" alt="HolaRise emblem" width="36" height="36">
               <div>
-                <h2 id="profile-modal-heading" class="auth-dialog-title">Edit Member Pass</h2>
-                <p class="auth-dialog-sub">Update your display name, contact info, and primary pillar.</p>
+                <h2 id="profile-modal-heading" class="auth-dialog-title">Edit Member Passport</h2>
+                <p class="auth-dialog-sub">Update the details displayed on your HolaRise Member Passport.</p>
               </div>
             </div>
-            <form class="auth-form" id="member-profile-form" novalidate>
-              <div class="auth-row-2">
+            <form class="auth-form member-profile-form" id="member-profile-form" novalidate>
+              <div class="auth-row-2 member-profile-row2">
                 <div class="auth-field">
                   <label for="prof-name">Full name <span aria-hidden="true">*</span></label>
                   <input id="prof-name" name="name" type="text" autocomplete="name" minlength="2" required>
                 </div>
                 <div class="auth-field">
-                  <label for="prof-phone">Phone / Zalo <span class="auth-hint-inline">(for 1-tap RSVP)</span></label>
+                  <label for="prof-phone">Phone / Zalo</label>
                   <input id="prof-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+84...">
                 </div>
               </div>
@@ -728,23 +728,21 @@
                 <button type="button" class="org-chip-btn" data-org-chip="Hoa Lac High-Tech Park (HHTP)" data-org-target="prof-org">Hoa Lac HHTP</button>
                 <button type="button" class="org-chip-btn" data-org-chip="International Exchange Student" data-org-target="prof-org">International Student</button>
               </div>
-              <div class="auth-row-2">
-                <div class="auth-field">
-                  <label for="prof-pillar">Primary pillar</label>
-                  <select id="prof-pillar" name="primaryPillar">
-                    <option value="holaheart">HolaHeart · Stillness &amp; Listening</option>
-                    <option value="holagreen">HolaGreen · Ecology &amp; Landscapes</option>
-                    <option value="holaconnect">HolaConnect · Knowledge &amp; Service</option>
-                  </select>
-                </div>
-                <div class="auth-field">
-                  <label for="prof-bio">Pass motto <span class="auth-hint-inline">(max 160 chars)</span></label>
-                  <input id="prof-bio" name="bio" type="text" maxlength="160" placeholder="A short line about your journey...">
-                </div>
+              <div class="auth-field">
+                <label for="prof-pillar">Primary pillar</label>
+                <select id="prof-pillar" name="primaryPillar">
+                  <option value="holaheart">HolaHeart · Stillness, Listening &amp; Family</option>
+                  <option value="holagreen">HolaGreen · Ecology &amp; Sustainable Landscape</option>
+                  <option value="holaconnect">HolaConnect · Knowledge &amp; Community Service</option>
+                </select>
+              </div>
+              <div class="auth-field">
+                <label for="prof-bio">Passport motto</label>
+                <textarea id="prof-bio" name="bio" rows="2" maxlength="160" placeholder="A short line about your journey (max 160 chars)..."></textarea>
               </div>
               <div class="form-status" id="prof-status" role="status" aria-live="polite"></div>
               <div class="member-profile-modal-actions">
-                <button class="auth-submit-btn" type="submit" id="prof-submit-btn">Save changes</button>
+                <button class="auth-submit-btn member-profile-save-btn" type="submit" id="prof-submit-btn">Save changes</button>
               </div>
             </form>
           </div>
@@ -1562,10 +1560,10 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=544532b9b5" defer></script>
-  <script src="/assets/js/main.js?v=544532b9b5" defer></script>
-  <script src="/assets/js/join-pass.js?v=544532b9b5" defer></script>
-  <script src="/assets/js/member.js?v=544532b9b5" defer></script>
-  <script src="/assets/js/pwa.js?v=544532b9b5" defer></script>
+  <script src="/assets/js/motion.js?v=4b6f51fef1" defer></script>
+  <script src="/assets/js/main.js?v=4b6f51fef1" defer></script>
+  <script src="/assets/js/join-pass.js?v=4b6f51fef1" defer></script>
+  <script src="/assets/js/member.js?v=4b6f51fef1" defer></script>
+  <script src="/assets/js/pwa.js?v=4b6f51fef1" defer></script>
 </body>
 </html>
