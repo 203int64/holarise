@@ -223,58 +223,66 @@
       </div>
 
       <nav class="sidebar-nav" aria-label="Các mục quản trị">
-        <button class="nav-item is-active" type="button" data-tab="overview">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-          <span>Tổng quan</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="timeline">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
-          <span>Timeline</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="tasks">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          <span>Nhiệm vụ</span>
-          <span class="nav-badge" id="badge-open-tasks" hidden>0</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="team">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Đội ngũ &amp; Quyền</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="registrations">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          <span>Đơn đăng ký</span>
-          <span class="nav-badge" id="badge-new-regs" hidden>0</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="events">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span>Sự kiện</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="posts">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          <span>Bài viết</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="inbox">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-          <span>Hộp thoại</span>
-          <span class="nav-badge" id="badge-unread-chat" hidden>0</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="community">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>Cộng đồng</span>
-          <span class="nav-badge" id="badge-pending-refs" hidden>0</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="settings">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          <span>Giao diện &amp; Cài đặt</span>
-        </button>
+        <div class="nav-group" data-nav-group="work">
+          <div class="nav-group-label">Làm việc</div>
+          <button class="nav-item is-active" type="button" data-tab="overview">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span>Tổng quan</span>
+          </button>
+          <button class="nav-item" type="button" data-tab="timeline">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+            <span>Timeline</span>
+          </button>
+          <button class="nav-item" type="button" data-tab="tasks">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span>Nhiệm vụ</span>
+            <span class="nav-badge" id="badge-open-tasks" hidden>0</span>
+          </button>
+        </div>
 
-        <div class="sidebar-divider" aria-hidden="true"></div>
+        <div class="nav-group" data-nav-group="ops">
+          <div class="nav-group-label">Vận hành</div>
+          <button class="nav-item" type="button" data-tab="events">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Sự kiện</span>
+          </button>
+          <button class="nav-item" type="button" data-tab="registrations">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <span>Đơn đăng ký</span>
+            <span class="nav-badge" id="badge-new-regs" hidden>0</span>
+          </button>
+          <button class="nav-item" type="button" data-tab="posts">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>Bài viết</span>
+          </button>
+          <button class="nav-item" type="button" data-tab="inbox">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            <span>Hộp thoại</span>
+            <span class="nav-badge" id="badge-unread-chat" hidden>0</span>
+          </button>
+          <button class="nav-item" type="button" data-tab="community">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Cộng đồng</span>
+            <span class="nav-badge" id="badge-pending-refs" hidden>0</span>
+          </button>
+        </div>
 
-        <a class="nav-item" href="/media/">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><polyline points="21 15 16 10 5 19"/></svg>
-          <span>Ban Hình Ảnh ↗</span>
-          <span class="nav-badge nav-badge--warn" id="badge-pending-photos" hidden>0</span>
-        </a>
+        <div class="nav-group" data-nav-group="org">
+          <div class="nav-group-label">Tổ chức</div>
+          <button class="nav-item" type="button" data-tab="team">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Phân quyền</span>
+          </button>
+          <button class="nav-item" type="button" data-tab="settings">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Cài đặt</span>
+          </button>
+          <a class="nav-item" href="/media/">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><polyline points="21 15 16 10 5 19"/></svg>
+            <span>Kho Ảnh ↗</span>
+            <span class="nav-badge nav-badge--warn" id="badge-pending-photos" hidden>0</span>
+          </a>
+        </div>
       </nav>
 
       <div class="sidebar-footer">
@@ -324,13 +332,12 @@
       <section class="tab-panel" id="panel-overview" data-panel="overview">
         <div class="page-head">
           <div>
-            <h1>Tổng quan điều phối</h1>
-            <p class="page-sub">Toàn cảnh đơn giữ chỗ, lịch hoạt động sắp tới, lưu bút và ảnh đóng góp đang chờ xử lý.</p>
+            <h1>Tổng quan</h1>
           </div>
           <div class="page-actions">
-            <button class="btn btn--outline" type="button" id="btn-refresh-overview">Làm mới</button>
-            <button class="btn btn--outline" type="button" data-quick-action="new-post">+ Viết bài</button>
-            <button class="btn btn--primary" type="button" data-quick-action="new-event">+ Đăng sự kiện</button>
+            <button class="btn btn--ghost btn--sm" type="button" id="btn-refresh-overview">Làm mới</button>
+            <button class="btn btn--outline btn--sm" type="button" data-quick-action="new-post">+ Bài viết</button>
+            <button class="btn btn--primary btn--sm" type="button" data-quick-action="new-event">+ Sự kiện</button>
           </div>
         </div>
 
@@ -341,12 +348,11 @@
       <section class="tab-panel" id="panel-timeline" data-panel="timeline" hidden>
         <div class="page-head">
           <div>
-            <h1>Timeline &amp; Tiến độ Sự kiện</h1>
-            <p class="page-sub">Dòng thời gian hợp nhất từ lịch sự kiện, hạn chót nhiệm vụ theo Ban và hàng chờ duyệt bài/ảnh.</p>
+            <h1>Timeline</h1>
           </div>
           <div class="page-actions">
-            <button class="btn btn--outline" type="button" id="btn-refresh-timeline">Làm mới</button>
-            <button class="btn btn--primary" type="button" data-go-tab="tasks">Mở bảng Nhiệm vụ</button>
+            <button class="btn btn--ghost btn--sm" type="button" id="btn-refresh-timeline">Làm mới</button>
+            <button class="btn btn--primary btn--sm" type="button" data-go-tab="tasks">Nhiệm vụ</button>
           </div>
         </div>
         <div id="timeline-container"></div>
@@ -356,11 +362,10 @@
       <section class="tab-panel" id="panel-tasks" data-panel="tasks" hidden>
         <div class="page-head">
           <div>
-            <h1>Nhiệm vụ &amp; Phân công</h1>
-            <p class="page-sub">Giao việc cho Ban chuyên môn hoặc CTV sự kiện (/tham-gia/), đổi trạng thái 1 chạm và gắn link Nhóm Zalo.</p>
+            <h1>Nhiệm vụ</h1>
           </div>
           <div class="page-actions">
-            <button class="btn btn--primary" type="button" id="btn-new-task">+ Giao nhiệm vụ</button>
+            <button class="btn btn--primary btn--sm" type="button" id="btn-new-task">+ Giao việc</button>
           </div>
         </div>
 
@@ -385,58 +390,57 @@
         <div id="tasks-container"></div>
       </section>
 
-      <!-- PANEL 0D: TEAM, ROLES MATRIX & AUDIT LOG -->
+      <!-- PANEL 0D: TEAM, ROLES MATRIX & AUDIT LOG (CLEAN 3 SUB-TABS) -->
       <section class="tab-panel" id="panel-team" data-panel="team" hidden>
         <div class="page-head">
           <div>
-            <h1>Đội ngũ, Phân quyền &amp; Nhật ký</h1>
-            <p class="page-sub">Ma trận 4 Ban công tác × 6 Vai hệ thống, quản lý tài khoản Ban và Nhật ký thao tác minh bạch.</p>
+            <h1>Phân quyền &amp; Đội ngũ</h1>
           </div>
           <div class="page-actions">
-            <button class="btn btn--primary" type="button" id="btn-new-invite">✉️ Gửi link mời (48h)</button>
-            <button class="btn btn--outline" type="button" id="btn-new-staff-team">+ Cấp trực tiếp</button>
+            <button class="btn btn--primary btn--sm" type="button" id="btn-new-invite">+ Mời qua link</button>
+            <button class="btn btn--outline btn--sm" type="button" id="btn-new-staff-team">Cấp trực tiếp</button>
           </div>
         </div>
 
-        <section class="panel-box" style="margin-bottom:16px;">
-          <div class="panel-box-head">
-            <div>
-              <h2>Khung 4 Ban &amp; Vai trò hệ thống</h2>
-              <p>Mỗi tài khoản chỉ thấy và thực hiện đúng quyền trong phạm vi Ban phụ trách; CTV sự kiện dùng thẻ quyền có hạn ngay tại <code>/tham-gia/</code>.</p>
-            </div>
-          </div>
-          <div id="roles-matrix-container"></div>
-        </section>
+        <div class="subtab-bar" role="tablist" aria-label="Mục con Phân quyền">
+          <button class="subtab-btn" type="button" role="tab" aria-selected="true" data-team-subtab="members" id="subtab-team-members">Nhân sự &amp; Lời mời</button>
+          <button class="subtab-btn" type="button" role="tab" aria-selected="false" data-team-subtab="roles" id="subtab-team-roles">Quyền theo 4 Ban</button>
+          <button class="subtab-btn" type="button" role="tab" aria-selected="false" data-team-subtab="audit" id="subtab-team-audit">Nhật ký thao tác</button>
+        </div>
 
-        <section class="panel-box" id="box-team-accounts" style="margin-bottom:16px;">
-          <div class="panel-box-head">
-            <div>
-              <h2>Lời mời đang chờ &amp; Tài khoản Ban chuyên môn</h2>
-              <p>Gửi link mời 48h để thành viên tự đặt mật khẩu và ký cam kết bảo mật, hoặc chỉnh trực tiếp Ban/Vai bên dưới.</p>
-            </div>
-          </div>
-          <div id="team-invites-container" style="margin-bottom:14px;"></div>
-          <div id="team-users-container"></div>
-        </section>
+        <div role="tabpanel" data-team-panel="members">
+          <section class="panel-box" id="box-team-accounts">
+            <div id="team-invites-container" style="margin-bottom:14px;"></div>
+            <div id="team-users-container"></div>
+          </section>
+        </div>
 
-        <section class="panel-box" id="box-audit-log">
-          <div class="panel-box-head panel-box-head--row">
-            <div>
-              <h2>Nhật ký thao tác (Audit Log)</h2>
-              <p>Truy vết các thao tác phân quyền, tạo/duyệt bài, duyệt ảnh, nhiệm vụ và xuất dữ liệu.</p>
+        <div role="tabpanel" data-team-panel="roles" hidden>
+          <section class="panel-box">
+            <div id="roles-matrix-container"></div>
+          </section>
+        </div>
+
+        <div role="tabpanel" data-team-panel="audit" hidden>
+          <section class="panel-box" id="box-audit-log">
+            <div class="panel-box-head panel-box-head--row">
+              <div>
+                <h2>Nhật ký thao tác</h2>
+              </div>
+              <select id="audit-filter-action" aria-label="Lọc loại thao tác" style="max-width:210px;">
+                <option value="">Tất cả thao tác</option>
+                <option value="task.">Nhiệm vụ</option>
+                <option value="post.">Bài viết</option>
+                <option value="media.">Duyệt ảnh</option>
+                <option value="invite.">Lời mời</option>
+                <option value="user.">Tài khoản</option>
+                <option value="resource.">Nguồn lực</option>
+                <option value="registrations.">Xuất CSV</option>
+              </select>
             </div>
-            <select id="audit-filter-action" aria-label="Lọc loại thao tác" style="max-width:220px;">
-              <option value="">Tất cả thao tác</option>
-              <option value="task.">Nhiệm vụ &amp; Playbook</option>
-              <option value="post.">Bài viết &amp; Duyệt bài</option>
-              <option value="media.">Duyệt ảnh Safeguarding</option>
-              <option value="user.">Phân quyền nhân sự</option>
-              <option value="registrations.">Xuất dữ liệu đăng ký</option>
-              <option value="auth.">Đăng nhập</option>
-            </select>
-          </div>
-          <div id="audit-logs-container"></div>
-        </section>
+            <div id="audit-logs-container"></div>
+          </section>
+        </div>
       </section>
 
       <!-- PANEL 1: REGISTRATIONS -->
@@ -444,7 +448,7 @@
         <div class="page-head">
           <div>
             <h1>Đơn đăng ký &amp; Check-in</h1>
-            <p class="page-sub">Xử lý trạng thái 1 chạm, liên hệ Zalo nhanh, lưu thành viên và xem ảnh báo lỗi đính kèm.</p>
+            <p class="page-sub">Chỉ hiển thị đăng ký sự kiện &amp; tham gia cộng đồng — xử lý trạng thái 1 chạm, liên hệ Zalo và lưu thành viên.</p>
           </div>
           <div class="page-actions">
             <button class="btn btn--outline" type="button" id="btn-refresh-regs">Làm mới</button>

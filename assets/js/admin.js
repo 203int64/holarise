@@ -1071,93 +1071,72 @@
 
       const kpiCards = [];
       if (can("tasks.read")) {
-        kpiCards.push(`<button class="kpi-card ${overdueTasks > 0 ? "kpi-card--warn" : openTasks > 0 ? "kpi-card--accent" : ""}" type="button" data-go-tab="tasks">
+        kpiCards.push(`<button class="kpi-card ${overdueTasks > 0 ? "kpi-card--warn" : ""}" type="button" data-go-tab="tasks">
           <span class="kpi-label">Nhiệm vụ đang mở</span>
           <strong class="kpi-value">${openTasks}</strong>
-          <span class="kpi-foot">${overdueTasks} quá hạn · ${Number(data.tasks?.mine || 0)} giao cho bạn · ${Number(data.tasks?.done || 0)} đã xong</span>
+          <span class="kpi-foot">${overdueTasks > 0 ? `${overdueTasks} quá hạn` : `${Number(data.tasks?.mine || 0)} giao cho bạn`}</span>
         </button>`);
       }
       if (can("registrations.read")) {
         kpiCards.push(`<button class="kpi-card ${newRegs > 0 ? "kpi-card--accent" : ""}" type="button" data-go-tab="registrations" data-go-status="new">
-          <span class="kpi-label">Đơn mới cần liên hệ</span>
+          <span class="kpi-label">Đơn mới</span>
           <strong class="kpi-value">${newRegs}</strong>
-          <span class="kpi-foot">Tổng ${data.registrations?.all || 0} đơn · ${data.registrations?.attended || 0} đã tham gia</span>
-        </button>`);
-      }
-      if (can("posts.read")) {
-        kpiCards.push(`<button class="kpi-card ${pendingPosts > 0 ? "kpi-card--warn" : ""}" type="button" data-go-tab="posts">
-          <span class="kpi-label">Bài Hành trình chờ duyệt</span>
-          <strong class="kpi-value">${pendingPosts}</strong>
-          <span class="kpi-foot">${Number(data.posts?.published || 0)} đã đăng · ${Number(data.posts?.draft || 0)} nháp</span>
+          <span class="kpi-foot">${data.registrations?.all || 0} tổng · ${data.registrations?.attended || 0} đã dự</span>
         </button>`);
       }
       if (can("events.read")) {
         kpiCards.push(`<button class="kpi-card" type="button" data-go-tab="events">
-          <span class="kpi-label">Sự kiện sắp diễn ra</span>
+          <span class="kpi-label">Sự kiện tới</span>
           <strong class="kpi-value">${data.events?.upcomingCount || 0}</strong>
-          <span class="kpi-foot">${data.events?.pastCount || 0} đã tổ chức · ${data.events?.draftCount || 0} nháp</span>
+          <span class="kpi-foot">${data.events?.pastCount || 0} đã tổ chức</span>
         </button>`);
       }
-      if (can("reflections.read")) {
-        kpiCards.push(`<button class="kpi-card ${pendingRefs > 0 || Number(data.feedbacks?.new || 0) > 0 ? "kpi-card--warn" : ""}" type="button" data-go-tab="community">
-          <span class="kpi-label">Lưu bút &amp; Góp ý mới</span>
-          <strong class="kpi-value">${pendingRefs + Number(data.feedbacks?.new || 0)}</strong>
-          <span class="kpi-foot">${pendingRefs} lưu bút · ${Number(data.feedbacks?.new || 0)} góp ý</span>
+      if (can("posts.read") && !can("registrations.read")) {
+        kpiCards.push(`<button class="kpi-card ${pendingPosts > 0 ? "kpi-card--warn" : ""}" type="button" data-go-tab="posts">
+          <span class="kpi-label">Bài chờ duyệt</span>
+          <strong class="kpi-value">${pendingPosts}</strong>
+          <span class="kpi-foot">${Number(data.posts?.published || 0)} đã đăng · ${Number(data.posts?.draft || 0)} nháp</span>
         </button>`);
       }
-      if (can("media.read")) {
-        kpiCards.push(`<a class="kpi-card ${pendingPhotos > 0 ? "kpi-card--warn" : ""}" href="/media/">
-          <span class="kpi-label">Ảnh chờ duyệt Safeguarding</span>
-          <strong class="kpi-value">${pendingPhotos}</strong>
-          <span class="kpi-foot">${data.media?.albumCount || 0} album · ${data.media?.photoCount || 0} ảnh · Mở /media/ ↗</span>
-        </a>`);
+      const totalReviewQueue =
+        (can("posts.read") ? pendingPosts : 0) +
+        (can("reflections.read") ? pendingRefs + Number(data.feedbacks?.new || 0) : 0) +
+        (can("media.read") ? pendingPhotos : 0);
+      if (can("media.read") || can("reflections.read")) {
+        const destTab = pendingPosts > 0 && can("posts.read") ? "posts" : pendingRefs > 0 && can("reflections.read") ? "community" : "timeline";
+        kpiCards.push(`<button class="kpi-card ${totalReviewQueue > 0 ? "kpi-card--warn" : ""}" type="button" data-go-tab="${destTab}">
+          <span class="kpi-label">Chờ duyệt</span>
+          <strong class="kpi-value">${totalReviewQueue}</strong>
+          <span class="kpi-foot">${pendingPosts} bài · ${pendingPhotos} ảnh · ${pendingRefs} lưu bút</span>
+        </button>`);
       }
-
-      const healthStripHtml = isSuper
-        ? `<div class="health-strip" aria-label="Trạng thái kết nối hệ thống">
-            <span class="health-pill ${integ.driveConfigured ? "is-ok" : "is-warn"}"><span class="health-dot"></span>Google Drive: ${integ.driveConfigured ? "Đã nối ảnh gốc" : "Đang dùng MEDIA_KV"}</span>
-            <span class="health-pill ${integ.gasConfigured ? "is-ok" : "is-warn"}"><span class="health-dot"></span>Google Sheets: ${integ.gasConfigured ? "Đang đồng bộ" : "Chưa cấu hình"}</span>
-            <span class="health-pill ${integ.mediaGateEnabled ? "is-ok" : "is-warn"}"><span class="health-dot"></span>PIN Ban Hình Ảnh: ${integ.mediaGateEnabled ? "Đang bật" : "Chưa đặt"}</span>
-          </div>`
-        : "";
 
       const rightPanelHtml = can("registrations.read")
         ? `<section class="panel-box">
             <div class="panel-box-head panel-box-head--row">
-              <div>
-                <h2>Đơn đăng ký mới nhất</h2>
-                <p>Chạm Zalo để nhắn trực tiếp hoặc mở danh sách check-in.</p>
-              </div>
+              <h2>Đơn đăng ký mới</h2>
               <button class="btn btn--ghost btn--sm" type="button" data-go-tab="registrations">Tất cả →</button>
             </div>
             ${recentRegsHtml}
           </section>`
         : `<section class="panel-box">
-            <div class="panel-box-head panel-box-head--row">
-              <div>
-                <h2>Lối tắt nhanh của Ban bạn</h2>
-                <p>Chỉ hiển thị các đầu mục thuộc phạm vi vai trò hiện tại (che danh sách SĐT người tham dự).</p>
-              </div>
+            <div class="panel-box-head">
+              <h2>Bắt đầu nhanh</h2>
             </div>
             <div class="btn-row" style="flex-wrap:wrap;">
-              ${can("timeline.read") ? '<button class="btn btn--primary btn--sm" type="button" data-go-tab="timeline">Mở Timeline Sự kiện</button>' : ""}
-              ${can("tasks.read") ? '<button class="btn btn--outline btn--sm" type="button" data-go-tab="tasks">Xem Nhiệm vụ của tôi</button>' : ""}
-              ${can("posts.draft") ? '<button class="btn btn--outline btn--sm" type="button" data-go-tab="posts">Soạn / Duyệt Bài viết</button>' : ""}
-              ${can("media.read") ? '<a class="btn btn--outline btn--sm" href="/media/">Mở Kho Ban Hình Ảnh ↗</a>' : ""}
-              ${can("team.read") ? '<button class="btn btn--ghost btn--sm" type="button" data-go-tab="team">Xem Ma trận Quyền</button>' : ""}
+              ${can("timeline.read") ? '<button class="btn btn--primary btn--sm" type="button" data-go-tab="timeline">Mở Timeline</button>' : ""}
+              ${can("tasks.read") ? '<button class="btn btn--outline btn--sm" type="button" data-go-tab="tasks">Nhiệm vụ của tôi</button>' : ""}
+              ${can("posts.draft") ? '<button class="btn btn--outline btn--sm" type="button" data-go-tab="posts">Bài viết</button>' : ""}
+              ${can("media.read") ? '<a class="btn btn--outline btn--sm" href="/media/">Kho Ảnh ↗</a>' : ""}
             </div>
           </section>`;
 
       box.innerHTML = `
-        <div class="overview-kpis">${kpiCards.join("")}</div>
-        ${healthStripHtml}
+        <div class="overview-kpis">${kpiCards.slice(0, 4).join("")}</div>
         <div class="overview-grid">
           <section class="panel-box">
             <div class="panel-box-head panel-box-head--row">
-              <div>
-                <h2>Sự kiện sắp diễn ra</h2>
-                <p>Lấy số giữ chỗ trực tiếp từ bảng đơn đăng ký D1.</p>
-              </div>
+              <h2>Sự kiện sắp tới</h2>
               ${can("events.read") ? '<button class="btn btn--ghost btn--sm" type="button" data-go-tab="events">Tất cả →</button>' : ""}
             </div>
             ${upcomingHtml}

@@ -232,40 +232,36 @@
     document.body.setAttribute("data-role-theme", effRole);
     el.hidden = false;
 
-    const previewControls = state.isSoleAdmin
-      ? `<div class="mgr-preview-bar" role="group" aria-label="Xem thử giao diện theo từng vai trò">
-          <span class="mgr-preview-label">Xem thử giao diện vai:</span>
-          ${Object.values(ROLE_WORKSPACE_META)
-            .map(
-              (r) => `<button type="button" class="mgr-preview-pill ${effRole === r.code ? "is-active" : ""}" data-mgr-preview-role="${esc(r.code)}">${esc(r.short)}</button>`
-            )
-            .join("")}
+    const isPreviewing = state.isSoleAdmin && state.previewRole && state.previewRole !== "super_admin";
+    const switcherHtml = state.isSoleAdmin
+      ? `<div class="mgr-slim-right">
+          <label class="mgr-slim-select-wrap">
+            <span>Góc nhìn</span>
+            <select id="mgr-role-preview-select" aria-label="Xem thử giao diện theo vai trò">
+              ${Object.values(ROLE_WORKSPACE_META)
+                .map((r) => `<option value="${esc(r.code)}" ${effRole === r.code ? "selected" : ""}>${esc(r.short)}</option>`)
+                .join("")}
+            </select>
+          </label>
+          ${isPreviewing ? '<button type="button" class="btn btn--ghost btn--sm" data-mgr-preview-role="super_admin">Thoát xem thử</button>' : ""}
         </div>`
       : "";
 
-    const previewNotice =
-      state.isSoleAdmin && state.previewRole && state.previewRole !== "super_admin"
-        ? `<div class="mgr-preview-notice">Đang mô phỏng giao diện của <strong>${esc(meta.short)}</strong> (chỉ ẩn/hiện UI để bạn kiểm tra trải nghiệm phân quyền). <button type="button" class="btn btn--outline btn--sm" data-mgr-preview-role="super_admin">Quay về Chủ nhiệm</button></div>`
-        : "";
-
     el.innerHTML = `
-      <div class="mgr-banner-top">
-        <div class="mgr-banner-copy">
+      <div class="mgr-slim-bar ${isPreviewing ? "is-preview" : ""}">
+        <div class="mgr-slim-left">
           <span class="mgr-role-dot"></span>
-          <div>
-            <strong>${esc(meta.title)}</strong>
-            <p>${esc(meta.subtitle)}</p>
-          </div>
+          <strong>${esc(meta.short)}</strong>
+          <span class="mgr-slim-sep" aria-hidden="true">·</span>
+          <span class="mgr-slim-dept">${esc(state.user.department || "Ban Điều Hành")}</span>
         </div>
-        <div class="mgr-banner-quick">
-          ${canAccessTab("timeline") ? '<button type="button" class="btn btn--outline btn--sm" data-go-tab="timeline">Timeline</button>' : ""}
-          ${canAccessTab("tasks") ? '<button type="button" class="btn btn--outline btn--sm" data-go-tab="tasks">Nhiệm vụ</button>' : ""}
-          ${canAccessTab("team") ? '<button type="button" class="btn btn--primary btn--sm" data-go-tab="team">Phân quyền &amp; Ban</button>' : ""}
-        </div>
+        ${switcherHtml}
       </div>
-      ${previewControls}
-      ${previewNotice}
     `;
+
+    $("#mgr-role-preview-select")?.addEventListener("change", (e) => {
+      setPreviewRole(e.target.value || "super_admin");
+    });
   }
 
   function applyRoleVisuals() {
@@ -275,8 +271,13 @@
       const tab = btn.getAttribute("data-tab");
       btn.hidden = !canAccessTab(tab);
     });
+    // Hide empty sidebar groups automatically
+    $$("[data-nav-group]").forEach((grp) => {
+      const visibleItems = $$(".nav-item:not([hidden])", grp);
+      grp.hidden = visibleItems.length === 0;
+    });
 
-    // 2. Role-scoped action buttons inside shared panels
+    // 2. Role-scoped action buttons & sub-tabs inside shared panels
     const setHidden = (sel, shouldHide) => {
       const el = $(sel);
       if (el) el.hidden = Boolean(shouldHide);
@@ -289,8 +290,16 @@
     setHidden("#btn-new-task", !hasPerm("tasks.write"));
     setHidden("#btn-new-staff-team", !effSuper);
     setHidden("#btn-new-media-user", !effSuper);
+    setHidden("#btn-new-invite", !effSuper);
+    setHidden("#subtab-team-members", !effSuper);
+    setHidden("#subtab-team-audit", !effSuper);
     setHidden("#box-audit-log", !effSuper);
     setHidden("#box-team-accounts", !effSuper);
+    if (!effSuper) {
+      switchTeamSubtab("roles");
+    } else {
+      switchTeamSubtab("members");
+    }
 
     // 3. Maker-Checker on Post Status select: CTV Content cannot choose 'published' or 'changes_requested'
     const postStatusSel = $("#post-status");
@@ -307,9 +316,17 @@
         postStatusSel.value = "pending_review";
       }
     }
-    setHidden("#btn-new-invite", !effSuper);
 
     renderWorkspaceBanner();
+  }
+
+  function switchTeamSubtab(val) {
+    $$("[data-team-subtab]").forEach((btn) => {
+      btn.setAttribute("aria-selected", String(btn.getAttribute("data-team-subtab") === val));
+    });
+    $$("[data-team-panel]").forEach((panel) => {
+      panel.hidden = panel.getAttribute("data-team-panel") !== val;
+    });
   }
 
   function setPreviewRole(roleCode) {
@@ -971,6 +988,9 @@
     if (state.bound) return;
     state.bound = true;
 
+    $$("[data-team-subtab]").forEach((btn) => {
+      btn.addEventListener("click", () => switchTeamSubtab(btn.getAttribute("data-team-subtab") || "members"));
+    });
     $("#btn-refresh-timeline")?.addEventListener("click", () => loadTimeline());
     $("#btn-new-task")?.addEventListener("click", () => openTaskDialog(null));
     $("#btn-new-staff-team")?.addEventListener("click", () => {
