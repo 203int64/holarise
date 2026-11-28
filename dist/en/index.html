@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=085e3513d2">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=3728347fbf">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -232,7 +232,7 @@
   <div class="container">
     <div class="hero-card" data-hero-card>
       <!-- CMS:HERO_MEDIA:START -->
-      <picture class="hero-card-picture"><source media="(max-width: 640px)" type="image/webp" srcset="/assets/images/holarise-binh-minh-doc-512.webp 512w, /assets/images/holarise-binh-minh-doc-768.webp 768w, /assets/images/holarise-binh-minh-doc-1024.webp 1024w" sizes="calc(100vw - 40px)" width="1024" height="1536"><img class="hero-card-img" src="/assets/images/holarise-binh-minh-1671.webp" srcset="/assets/images/holarise-binh-minh-768.webp 768w, /assets/images/holarise-binh-minh-1200.webp 1200w, /assets/images/holarise-binh-minh-1671.webp 1671w" sizes="(min-width: 1280px) 1240px, calc(100vw - 40px)" alt="HolaRise young people welcoming sunrise on the hills of Hoa Lac." width="1671" height="941" fetchpriority="high" decoding="async" data-cinema-img></picture><span class="visual-orientation-chip">Concept Visual</span>
+      <picture class="hero-card-picture"><source media="(max-width: 640px)" type="image/webp" srcset="/assets/images/hero-sunrise-youth-doc-512.webp 512w, /assets/images/hero-sunrise-youth-doc-768.webp 768w" sizes="calc(100vw - 40px)" width="1024" height="1536"><img class="hero-card-img" src="/assets/images/hero-sunrise-youth-1600.webp" srcset="/assets/images/hero-sunrise-youth-768.webp 768w, /assets/images/hero-sunrise-youth-1200.webp 1200w, /assets/images/hero-sunrise-youth-1600.webp 1376w" sizes="(min-width: 1280px) 1240px, calc(100vw - 40px)" alt="HolaRise young people welcoming sunrise on the hills of Hoa Lac." width="1376" height="768" fetchpriority="high" decoding="async" data-cinema-img></picture>
       <!-- CMS:HERO_MEDIA:END -->
       <div class="hero-card-scrim" aria-hidden="true"></div>
 
@@ -243,6 +243,7 @@
       <div class="hero-card-bottom">
         <div class="hero-card-main">
           <div class="hero-card-copy">
+            <p class="hero-motto-eyebrow" data-hero-stagger>Hola · Together We Rise, Together We Serve</p>
             <h1 class="hero-display-title">
               <span class="split-line-mask"><span class="split-line-inner">Grow together,</span></span>
           <span class="split-line-mask"><span class="split-line-inner">Serve together.</span></span>
@@ -329,8 +330,8 @@
 </section>
 <!-- CMS:HOME_UPCOMING_SECTION:END -->
 
-<!-- PART 3: Three Pillars (Editorial 3-Column Grid) -->
-<section class="section section--editorial-pillars" id="pillars" aria-label="Three Impact Pillars">
+<!-- PART 3: Three Pillars (Interactive Amie-Style Story Stage) -->
+<section class="section section--editorial-pillars story-section" id="pillars" data-story-section data-pillar="holaheart" aria-label="Three Impact Pillars">
   <div class="container">
     <div class="section-header--split section-header--editorial" data-reveal>
       <div>
@@ -343,68 +344,76 @@
       </a>
     </div>
 
-    <div class="pillar-editorial-grid" data-stagger-group>
-      <article class="pillar-editorial-card" data-stagger-item data-pillar="holaheart">
-        <div class="pillar-editorial-media" data-curtain>
-          <!-- CMS:PILLAR_SLIDE_0:START -->
-          <img src="/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg" srcset="/assets/images/web/events/holaheart-2026-11-15/07-speaker-sharing-640.webp 640w, /assets/images/web/events/holaheart-2026-11-15/07-speaker-sharing-960.webp 960w, /assets/images/web/events/holaheart-2026-11-15/07-speaker-sharing-1440.webp 1440w" sizes="(max-width: 760px) calc(100vw - 40px), 380px" alt="Dialogue and listening circle at the HolaHeart gathering on 15 Nov 2026 in Hoa Lac." width="960" height="720" loading="lazy" decoding="async">
-          <!-- CMS:PILLAR_SLIDE_0:END -->
+    <div class="story-stage story-stage--unified" data-story-stage data-pillar="holaheart">
+      <div class="story-controls-col">
+        <div class="story-nav" role="tablist" aria-label="Select impact pillar" data-story-tablist>
+          <span class="story-nav-glider" data-story-glider aria-hidden="true"></span>
+          <button class="story-tab is-active" type="button" role="tab" aria-selected="true" data-story-tab="0" data-pillar="holaheart">01 · HolaHeart</button> <button class="story-tab" type="button" role="tab" aria-selected="false" data-story-tab="1" data-pillar="holagreen">02 · HolaGreen</button> <button class="story-tab" type="button" role="tab" aria-selected="false" data-story-tab="2" data-pillar="holaconnect">03 · HolaConnect</button>
         </div>
-        <div class="pillar-editorial-body">
-          <div class="pillar-editorial-meta">
-            <span class="pillar-editorial-num">01 · HolaHeart</span>
+        <div class="story-panels">
+          <article class="story-panel is-active" data-story-panel="0" data-pillar="holaheart">
+          <div class="story-panel-index">01 / 03 — HolaHeart</div>
+          <h3>Listening &amp; Family</h3>
+          <p class="story-panel-summary">Stage-free circles to talk honestly about family, learn from one another&#x27;s perspectives, and grow steadier in daily life.</p>
+          <div class="visual-chip-row" aria-label="Key activities"><span class="visual-chip">Peer dialogues &amp; shared learning</span><span class="visual-chip">Family gratitude &amp; reflection</span><span class="visual-chip">Acoustic evenings for genuine connection</span></div>
+          <div class="story-panel-footer">
 
+            <a class="arrow-link" href="/en/schedule/?nhom=holaheart"><span>HolaHeart schedule</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
           </div>
-          <h3 class="pillar-editorial-title">
-            <a class="card-link" href="/en/schedule/?nhom=holaheart">Listening &amp; Family</a>
-          </h3>
-          <p class="pillar-editorial-desc">Eye-level dialogues on family, youth challenges, and acoustic evenings.</p>
-          <div class="pillar-editorial-foot">
-            <span class="pillar-editorial-more">HolaHeart schedule</span>
-            <span class="circle-go" aria-hidden="true">→</span>
+        </article> <article class="story-panel" data-story-panel="1" data-pillar="holagreen">
+          <div class="story-panel-index">02 / 03 — HolaGreen</div>
+          <h3>Caring for Where We Live</h3>
+          <p class="story-panel-summary">HolaGreen is preparing to launch safe public roadside cleanups around university zones, practicing waste sorting at source and caring for local greenery.</p>
+          <div class="visual-chip-row" aria-label="Key activities"><span class="visual-chip">Safe public roadside cleanups</span><span class="visual-chip">Source waste sorting &amp; plastic reduction</span><span class="visual-chip">Native greenery stewardship</span></div>
+          <div class="story-panel-footer">
+            <span class="story-metric-pill">Launching soon</span>
+            <a class="arrow-link" href="/en/schedule/?nhom=holagreen"><span>HolaGreen schedule</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
           </div>
+        </article> <article class="story-panel" data-story-panel="2" data-pillar="holaconnect">
+          <div class="story-panel-index">03 / 03 — HolaConnect</div>
+          <h3>Connection &amp; Community Bookshelves</h3>
+          <p class="story-panel-summary">Outdoor walks connecting students across campuses to broaden perspectives, learn from one another, and build transparent children&#x27;s bookshelves with local schools.</p>
+          <div class="visual-chip-row" aria-label="Key activities"><span class="visual-chip">Pine-hill treks &amp; outdoor connection</span><span class="visual-chip">Children&#x27;s community bookshelves</span><span class="visual-chip">Transparent partnerships with local schools</span></div>
+          <div class="story-panel-footer">
+            <span class="story-metric-pill">Open for RSVP</span>
+            <a class="arrow-link" href="/en/schedule/?nhom=holaconnect"><span>HolaConnect schedule</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
+          </div>
+        </article>
         </div>
-      </article> <article class="pillar-editorial-card" data-stagger-item data-pillar="holagreen">
-        <div class="pillar-editorial-media" data-curtain>
+      </div>
+
+      <div class="story-media-frame story-media-frame--unified" data-story-swipe aria-label="Swipe to switch pillar">
+        <div class="story-stage-hud" aria-hidden="true">
+          <div class="story-odometer-row">
+            <div class="story-odometer">
+              <div class="story-odometer-drum" data-odometer-drum>
+                <span>01</span><span>02</span><span>03</span>
+              </div>
+            </div>
+            <span class="story-odometer-total">/ 03</span>
+          </div>
+          <span class="story-hud-kicker">Three Impact Pillars</span>
+        </div>
+        <div class="story-slide image-note is-active" data-story-slide="0" data-pillar="holaheart" tabindex="0" role="group" aria-label="HolaHeart · 15/11/2026 · Dialogue and listening circle at the HolaHeart gathering on 15 Nov 2026 in Hoa Lac.">
+          <!-- CMS:PILLAR_SLIDE_0:START -->
+          <img src="/assets/images/events/holaheart-2026-11-15/07-speaker-sharing.jpg" srcset="/assets/images/web/events/holaheart-2026-11-15/07-speaker-sharing-640.webp 640w, /assets/images/web/events/holaheart-2026-11-15/07-speaker-sharing-960.webp 960w, /assets/images/web/events/holaheart-2026-11-15/07-speaker-sharing-1440.webp 1440w" sizes="(max-width: 1023px) calc(100vw - 40px), 620px" alt="Dialogue and listening circle at the HolaHeart gathering on 15 Nov 2026 in Hoa Lac." width="960" height="720" loading="lazy" decoding="async">
+          <!-- CMS:PILLAR_SLIDE_0:END -->
+          <span class="image-note-caption" aria-hidden="true">HolaHeart · 15/11/2026 · Dialogue and listening circle at the HolaHeart gathering on 15 Nov 2026 in Hoa Lac.</span>
+          <div class="story-slide-scrim" aria-hidden="true"></div>
+        </div> <div class="story-slide image-note" data-story-slide="1" data-pillar="holagreen" tabindex="-1" role="group" aria-label="HolaGreen · Hoa Lac · Concept visual of youth caring for greenery — HolaGreen is preparing to launch its first session.">
           <!-- CMS:PILLAR_SLIDE_1:START -->
-          <img src="/assets/images/illustrations/holagreen/G03.jpg" srcset="/assets/images/web/illustrations/holagreen/G03-640.webp 640w, /assets/images/web/illustrations/holagreen/G03-1672.webp 1672w" sizes="(max-width: 760px) calc(100vw - 40px), 380px" alt="Concept visual of youth caring for greenery — HolaGreen is preparing to launch its first session." width="960" height="720" fetchpriority="low" loading="lazy" decoding="async"><span class="visual-orientation-chip">Concept Visual</span>
+          <img src="/assets/images/illustrations/holagreen/G03.jpg" srcset="/assets/images/web/illustrations/holagreen/G03-640.webp 640w, /assets/images/web/illustrations/holagreen/G03-1672.webp 1672w" sizes="(max-width: 1023px) calc(100vw - 40px), 620px" alt="Concept visual of youth caring for greenery — HolaGreen is preparing to launch its first session." width="960" height="720" fetchpriority="low" loading="lazy" decoding="async"><span class="visual-orientation-chip">Concept Visual</span>
           <!-- CMS:PILLAR_SLIDE_1:END -->
-        </div>
-        <div class="pillar-editorial-body">
-          <div class="pillar-editorial-meta">
-            <span class="pillar-editorial-num">02 · HolaGreen</span>
-            <span class="pillar-editorial-status">Launching soon</span>
-          </div>
-          <h3 class="pillar-editorial-title">
-            <a class="card-link" href="/en/schedule/?nhom=holagreen">Caring for Where We Live</a>
-          </h3>
-          <p class="pillar-editorial-desc">Safe roadside cleanups, plastic reduction, and local greenery care.</p>
-          <div class="pillar-editorial-foot">
-            <span class="pillar-editorial-more">HolaGreen schedule</span>
-            <span class="circle-go" aria-hidden="true">→</span>
-          </div>
-        </div>
-      </article> <article class="pillar-editorial-card" data-stagger-item data-pillar="holaconnect">
-        <div class="pillar-editorial-media" data-curtain>
+          <span class="image-note-caption" aria-hidden="true">HolaGreen · Hoa Lac · Concept visual of youth caring for greenery — HolaGreen is preparing to launch its first session.</span>
+          <div class="story-slide-scrim" aria-hidden="true"></div>
+        </div> <div class="story-slide image-note" data-story-slide="2" data-pillar="holaconnect" tabindex="-1" role="group" aria-label="HolaConnect · Hoa Lac · Concept visual for shared knowledge and community service — HolaConnect opens with the Nui Luot trek on 26 Nov 2026.">
           <!-- CMS:PILLAR_SLIDE_2:START -->
-          <img src="/assets/images/illustrations/holaconnect/C04.jpg" srcset="/assets/images/web/illustrations/holaconnect/C04-640.webp 640w, /assets/images/web/illustrations/holaconnect/C04-1672.webp 1672w" sizes="(max-width: 760px) calc(100vw - 40px), 380px" alt="Concept visual for shared knowledge and community service — HolaConnect opens with the Nui Luot trek on 26 Nov 2026." width="960" height="720" fetchpriority="low" loading="lazy" decoding="async"><span class="visual-orientation-chip">Concept Visual</span>
+          <img src="/assets/images/illustrations/holaconnect/C04.jpg" srcset="/assets/images/web/illustrations/holaconnect/C04-640.webp 640w, /assets/images/web/illustrations/holaconnect/C04-1672.webp 1672w" sizes="(max-width: 1023px) calc(100vw - 40px), 620px" alt="Concept visual for shared knowledge and community service — HolaConnect opens with the Nui Luot trek on 26 Nov 2026." width="960" height="720" fetchpriority="low" loading="lazy" decoding="async"><span class="visual-orientation-chip">Concept Visual</span>
           <!-- CMS:PILLAR_SLIDE_2:END -->
+          <span class="image-note-caption" aria-hidden="true">HolaConnect · Hoa Lac · Concept visual for shared knowledge and community service — HolaConnect opens with the Nui Luot trek on 26 Nov 2026.</span>
+          <div class="story-slide-scrim" aria-hidden="true"></div>
         </div>
-        <div class="pillar-editorial-body">
-          <div class="pillar-editorial-meta">
-            <span class="pillar-editorial-num">03 · HolaConnect</span>
-            <span class="pillar-editorial-status">Open for RSVP</span>
-          </div>
-          <h3 class="pillar-editorial-title">
-            <a class="card-link" href="/en/schedule/?nhom=holaconnect">Connection &amp; Community Bookshelves</a>
-          </h3>
-          <p class="pillar-editorial-desc">Outdoor walks, cross-campus learning, and children&#x27;s community bookshelves.</p>
-          <div class="pillar-editorial-foot">
-            <span class="pillar-editorial-more">HolaConnect schedule</span>
-            <span class="circle-go" aria-hidden="true">→</span>
-          </div>
-        </div>
-      </article>
+      </div>
     </div>
   </div>
 </section>
@@ -1290,10 +1299,12 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=085e3513d2" defer></script>
-  <script src="/assets/js/main.js?v=085e3513d2" defer></script>
-  <script src="/assets/js/join-pass.js?v=085e3513d2" defer></script>
-  <script src="/assets/js/member.js?v=085e3513d2" defer></script>
-  <script src="/assets/js/pwa.js?v=085e3513d2" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=3728347fbf" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/motion.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/main.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/join-pass.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/member.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/pwa.js?v=3728347fbf" defer></script>
 </body>
 </html>

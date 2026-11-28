@@ -1,4 +1,6 @@
 import { getAdminUserProfile } from "../../_lib/admin-passkey-schema.js";
+import { hasMemberCapability } from "../../_lib/capabilities.js";
+import { getMediaAccessPin } from "../../_lib/gate-token.js";
 import { getMemberPermissions } from "../../_lib/media-access.js";
 import { errorResponse, getSessionMember, getSessionUser, isSoleAdminAccount, jsonResponse } from "../../_lib/security.js";
 
@@ -25,18 +27,23 @@ export async function onRequestGet({ request, env }) {
         hasPasskey: false,
       };
   }
-  let mediaViewer = null;
+  let mediaContributor = null;
   if (!profile && sessionMember) {
     const perms = await getMemberPermissions(env.DB, sessionMember.id);
-    if (perms.canAccessMediaPortal) {
-      mediaViewer = {
+    const isNgv =
+      perms.canAccessMediaPortal ||
+      (await hasMemberCapability(env.DB, sessionMember.id, "media.portal").catch(() => false));
+    if (isNgv) {
+      mediaContributor = {
         id: sessionMember.id,
         email: sessionMember.email || "",
-        name: sessionMember.name || "Thành viên HolaRise",
+        name: sessionMember.name || "Thành viên NGV",
         phone: sessionMember.phone_display || "",
-        department: `Thành viên (${sessionMember.member_code}) · Chỉ xem`,
-        role: "media_viewer",
+        department: `NGV · ${sessionMember.member_code || "Cộng tác viên Media"}`,
+        memberCode: sessionMember.member_code || "",
+        role: "ngv",
         hasPasskey: false,
+        canUpload: true,
       };
     }
   }
@@ -45,8 +52,9 @@ export async function onRequestGet({ request, env }) {
     initialized,
     authenticated: Boolean(profile),
     isSoleAdmin: Boolean(profile && isSoleAdminAccount(profile, env)),
-    mediaGateEnabled: Boolean(String(env?.MEDIA_ACCESS_PIN || "").trim()),
+    mediaGateEnabled: Boolean(getMediaAccessPin(env)),
     user: profile,
-    mediaViewer,
+    mediaContributor,
+    mediaViewer: mediaContributor,
   });
 }

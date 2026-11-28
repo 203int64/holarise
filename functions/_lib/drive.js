@@ -328,6 +328,128 @@ export async function uploadImageToDrive(
 }
 
 /**
+ * Initialize a Google Drive Resumable Upload session URI so the browser can stream
+ * large original videos & photos (100 MB -> multi-GB) directly to Google Drive in chunks,
+ * bypassing Cloudflare Workers' 100 MB request body and 128 MB RAM limits without exposing OAuth tokens.
+ */
+export async function createDriveResumableSession(
+  env,
+  {
+    filename,
+    mimeType,
+    fileSize = 0,
+    category = "album",
+    subfolder = "",
+    parentFolderId = "",
+    description = "",
+    origin = "",
+    fetchImpl = fetch,
+  }
+) {
+  const cfg = getDriveConfig(env);
+  const accessToken = await getDriveAccessToken(env, fetchImpl);
+
+  const subSegments = Array.isArray(subfolder)
+    ? subfolder.map((s) => String(s || "").trim()).filter(Boolean)
+    : String(subfolder || "").trim()
+      ? [String(subfolder).trim()]
+      : [];
+
+  let parentId = "";
+  if (parentFolderId && isSafeDriveFileId(parentFolderId)) {
+    parentId = parentFolderId;
+    for (const seg of subSegments) {
+      parentId = await ensureSubfolder(seg, parentId, accessToken, fetchImpl);
+    }
+  } else {
+    const cat = normalizeDriveCategory(category);
+    parentId = cfg.rootFolderId || "";
+    if (parentId || subSegments.length > 0) {
+      parentId = await ensureSubfolder(cat, parentId, accessToken, fetchImpl);
+      for (const seg of subSegments) {
+        parentId = await ensureSubfolder(seg, parentId, accessToken, fetchImpl);
+      }
+    }
+  }
+
+  const safeName = sanitizeDriveName(filename, `holarise-${Date.now()}`);
+  const metadata = { name: safeName, mimeType };
+  if (description) metadata.description = String(description).slice(0, 500);
+  if (parentId) metadata.parents = [parentId];
+
+  const initUrl =
+    `${DRIVE_UPLOAD_URL}?uploadType=resumable&supportsAllDrives=true` +
+    `&fields=id,name,mimeType,size,webViewLink,webContentLink`;
+
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json; charset=UTF-8",
+    "X-Upload-Content-Type": mimeType,
+  };
+  const numericSize = Number(fileSize || 0);
+  if (Number.isFinite(numericSize) && numericSize > 0) {
+    headers["X-Upload-Content-Length"] = String(Math.trunc(numericSize));
+  }
+  const cleanOrigin = String(origin || "").trim();
+  if (/^https?:\/\/[^/\s]+$/i.test(cleanOrigin)) {
+    headers.Origin = cleanOrigin;
+  }
+
+  const res = await fetchImpl(initUrl, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(metadata),
+  });
+
+  const uploadUrl = res.headers.get("Location") || res.headers.get("location") || "";
+  if (!res.ok || !uploadUrl) {
+    const errData = await res.json().catch(() => ({}));
+    const detail = errData?.error?.message || `HTTP ${res.status}`;
+    throw new Error(`Không thể khởi tạo phiên tải Google Drive: ${detail}`);
+  }
+
+  return {
+    uploadUrl,
+    folderId: parentId,
+    folderUrl: parentId ? `https://drive.google.com/drive/folders/${parentId}` : "",
+    filename: safeName,
+    mimeType,
+  };
+}
+
+/**
+ * Verify a Google Drive file after browser-direct resumable upload and return canonical media metadata.
+ */
+export async function getDriveFileMetadata(env, fileId, fetchImpl = fetch) {
+  if (!isSafeDriveFileId(fileId)) {
+    throw new Error("Mã tệp Google Drive không hợp lệ.");
+  }
+  const accessToken = await getDriveAccessToken(env, fetchImpl);
+  const metaUrl =
+    `${DRIVE_FILES_URL}/${encodeURIComponent(fileId)}` +
+    `?fields=id,name,mimeType,size,webViewLink,trashed&supportsAllDrives=true`;
+  const res = await fetchImpl(metaUrl, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data?.id || data.trashed) {
+    throw new Error("Không tìm thấy tệp vừa tải lên trên Google Drive.");
+  }
+  const mimeType = String(data.mimeType || "application/octet-stream").toLowerCase();
+  return {
+    driveId: data.id,
+    id: `drive:${data.id}`,
+    url: `/api/media/drive/${data.id}`,
+    driveUrl: data.webViewLink || `https://drive.google.com/file/d/${data.id}/view`,
+    downloadUrl: `/api/media/drive/${data.id}?download=1`,
+    contentType: mimeType,
+    filename: data.name || "",
+    size: Number(data.size || 0),
+    storage: "google_drive",
+  };
+}
+
+/**
  * Fetch a Google-resized lightweight thumbnail for fast web display (40-160 KB vs 3-15 MB originals).
  * Automatically signals fallbackToOriginal=true for videos, audios, or freshly uploaded files whose
  * thumbnail is not yet ready so callers seamlessly fall back to ?alt=media without breaking images.

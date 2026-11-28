@@ -1720,7 +1720,7 @@
               ${m.isPublicTeam ? `<span class="badge badge--attended">Đội ngũ công khai</span>` : ""}
               ${m.roleTitle ? `<span class="badge badge--past">${esc(m.roleTitle)}</span>` : ""}
               ${m.canViewAllMedia ? `<span class="badge badge--attended">Xem mọi Media</span>` : ""}
-              ${m.canAccessMediaPortal ? `<span class="badge badge--new">Cổng /media/</span>` : ""}
+              ${m.canAccessMediaPortal ? `<span class="badge badge--new">NGV · Media</span>` : ""}
               ${Number(m.albumGrantCount || 0) > 0 ? `<span class="badge badge--past">${Number(m.albumGrantCount)} album</span>` : ""}
               <span class="cell-sub"><code>${esc(m.memberCode)}</code> · ${esc(contact)} · ${esc(m.organization || "Hòa Lạc")} · ${esc(pillarLabel)} · ${esc(countsLabel)}</span>
             </div>
@@ -1981,7 +1981,7 @@
             </label>
             <label class="check-chip">
               <input type="checkbox" id="m360-media-portal" ${ma.canAccessMediaPortal ? "checked" : ""}>
-              <span><strong>Mở cổng <code>/media/</code> (Chế độ Chỉ xem):</strong> Cho phép thành viên xem &amp; tải ảnh gốc trực tiếp tại <code>/media/</code> mà không được tạo, sửa, xóa hay duyệt ảnh.</span>
+              <span><strong>Nâng quyền NGV (Cổng <code>/media/</code>):</strong> Cho phép thành viên đăng nhập <code>/media/</code> (qua mã cổng) để xem toàn bộ thư mục và tải ảnh, video không giới hạn vào hàng Chờ duyệt.</span>
             </label>
           </div>
         </div>

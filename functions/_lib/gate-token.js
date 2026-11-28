@@ -1,10 +1,16 @@
 /**
  * Stateless HMAC-SHA256 Gate Token helper for the 2-step team vault flow
- * (Step 1: Verify PIN -> Step 2: Login / Register).
- * Key is derived from env.MEDIA_ACCESS_PIN (Cloudflare Secret) — zero DB overhead.
+ * (Step 1: Verify PIN -> Step 2: Login).
+ * Uses Cloudflare Secret env.MEDIA_ACCESS_PIN with fallback default "1948".
  */
 
+export const DEFAULT_MEDIA_ACCESS_PIN = "1948";
 const GATE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+export function getMediaAccessPin(env) {
+  const configured = String(env?.MEDIA_ACCESS_PIN || "").trim();
+  return configured || DEFAULT_MEDIA_ACCESS_PIN;
+}
 
 export function constantTimeStringEqual(a, b) {
   const s1 = String(a || "");

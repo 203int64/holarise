@@ -39,8 +39,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=085e3513d2">
-  <link rel="stylesheet" href="/assets/css/media.css?v=085e3513d2">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=3728347fbf">
+  <link rel="stylesheet" href="/assets/css/media.css?v=3728347fbf">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
 <body data-pwa-app-name="HolaRise Media">
@@ -57,14 +57,14 @@
             <span>HolaRise · Hòa Lạc</span>
           </div>
           <div class="vault-aside-copy">
-            <p class="vault-kicker">Cổng Ban Hình Ảnh</p>
+            <p class="vault-kicker">Cổng Media · NGV</p>
             <h2>Lưu giữ từng khoảnh khắc nguyên bản.</h2>
-            <p class="vault-quote">Ảnh gốc độ phân giải đầy đủ được lưu trực tiếp lên Google Drive tổ chức và phân phối mượt mà tới toàn cộng đồng.</p>
+            <p class="vault-quote">Ảnh và video gốc độ phân giải đầy đủ được lưu trực tiếp lên Google Drive tổ chức và chuyển qua hàng duyệt trước khi lên web.</p>
           </div>
           <ul class="vault-pillars">
-            <li>100% ảnh gốc không nén trên Google Drive</li>
-            <li>Đăng nhập 1 chạm bằng Face ID / Touch ID</li>
-            <li>Ghi nhận minh bạch danh tính người đăng</li>
+            <li>100% ảnh &amp; video gốc không giới hạn số lượng trên Google Drive</li>
+            <li>Phân quyền rõ ràng: Admin duyệt · NGV xem &amp; tải lên</li>
+            <li>Đăng nhập trực tiếp bằng Tài khoản Thành viên đã nâng quyền NGV</li>
           </ul>
         </div>
       </aside>
@@ -75,15 +75,15 @@
             <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="36" height="36">
             <div>
               <strong>HolaRise Media</strong>
-              <span>Cổng Ban Hình Ảnh</span>
+              <span>Cổng Media · NGV</span>
             </div>
           </div>
 
-          <!-- STEP 1: TEAM ACCESS CODE GATE -->
+          <!-- STEP 1: TEAM ACCESS CODE GATE (1948) -->
           <div class="vault-step" id="vault-step-pin" data-vault-step="pin">
             <span class="vault-step-badge">Bước 1 / 2 · Mã bảo mật</span>
-            <h1 class="vault-title">Nhập mã bảo mật</h1>
-            <p class="vault-subtitle">Nhập mã 4 chữ số nội bộ để mở cổng truy cập Ban Hình Ảnh.</p>
+            <h1 class="vault-title">Nhập mã cổng Media</h1>
+            <p class="vault-subtitle">Nhập mã 4 chữ số nội bộ để mở màn hình đăng nhập NGV và Quản trị.</p>
 
             <form id="pin-gate-form" class="pin-gate-form" novalidate>
               <div class="pin-group" role="group" aria-label="Mã bảo mật 4 chữ số">
@@ -97,89 +97,38 @@
             </form>
           </div>
 
-          <!-- STEP 2: PROGRESSIVE LOGIN -> FALLBACK REGISTER / EMAIL -->
+          <!-- STEP 2: NGV & ADMIN LOGIN (NO OPEN SELF-REGISTRATION) -->
           <div class="vault-step" id="vault-step-auth" data-vault-step="auth" hidden>
             <div class="vault-step-head">
               <span class="vault-step-badge vault-step-badge--ok">Bước 2 / 2 · Đã mở cổng</span>
               <button class="vault-back-btn" type="button" id="btn-vault-back">← Nhập lại mã</button>
             </div>
 
-            <!-- VIEW A: SINGLE LOGIN BUTTON (DEFAULT) -->
             <div class="vault-view" data-auth-view="login">
-              <h1 class="vault-title">Đăng nhập Ban Hình Ảnh</h1>
-              <p class="vault-subtitle">Xác thực bằng Face ID, Touch ID hoặc khóa thiết bị đã đăng ký.</p>
-
-              <button class="btn btn--primary btn--full btn--lg" type="button" id="btn-vault-login">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3H5a2 2 0 0 0-2 2v2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 21h2a2 2 0 0 0 2-2v-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M9 10v.01"/><path d="M15 10v.01"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg>
-                <span>Đăng nhập</span>
-              </button>
-
-              <div class="form-alert" id="vault-login-alert" role="alert" hidden></div>
-
-              <!-- REVEALED ONLY AFTER LOGIN FAILS -->
-              <div class="vault-fallback" id="vault-fallback-box" hidden>
-                <p class="vault-fallback-text">Chưa có khóa sinh trắc học trên thiết bị này?</p>
-                <button class="btn btn--outline btn--full btn--lg" type="button" data-vault-go="register">Đăng ký tài khoản mới</button>
-                <button class="vault-link-btn" type="button" data-vault-go="email">Đã có tài khoản? Đăng nhập bằng Email</button>
-              </div>
-            </div>
-
-            <!-- VIEW B: REGISTER -->
-            <div class="vault-view" data-auth-view="register" hidden>
-              <button class="vault-subback" type="button" data-vault-go="login">← Quay lại Đăng nhập</button>
-              <h1 class="vault-title">Đăng ký tài khoản Ban Hình Ảnh</h1>
-              <p class="vault-subtitle">Điền thông tin thành viên để tạo hồ sơ người đăng và bật Face ID / Touch ID.</p>
-
-              <form id="media-gate-form" class="admin-form" novalidate>
-                <div class="field">
-                  <label for="mg-name">Họ và tên đầy đủ <span aria-hidden="true">*</span></label>
-                  <input id="mg-name" name="fullName" type="text" autocomplete="name" required minlength="3" placeholder="Ví dụ: Nguyễn Minh Anh">
-                </div>
-                <div class="field-row-2">
-                  <div class="field">
-                    <label for="mg-phone">SĐT / Zalo <span aria-hidden="true">*</span></label>
-                    <input id="mg-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="09xxxxxxxx">
-                  </div>
-                  <div class="field">
-                    <label for="mg-dept">Ban / Vai trò <span aria-hidden="true">*</span></label>
-                    <input id="mg-dept" name="department" type="text" required minlength="2" placeholder="Ban Hình Ảnh">
-                  </div>
-                </div>
-                <div class="field">
-                  <label for="mg-email">Email liên hệ <span aria-hidden="true">*</span></label>
-                  <input id="mg-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="tenban@holarise.org">
-                </div>
-                <div class="field">
-                  <label for="mg-password">Mật khẩu dự phòng (tối thiểu 8 ký tự) <span aria-hidden="true">*</span></label>
-                  <input id="mg-password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="Tối thiểu 8 ký tự">
-                </div>
-                <div class="form-alert" id="mg-alert" role="alert" hidden></div>
-                <button class="btn btn--primary btn--full btn--lg" type="submit" id="mg-submit">Hoàn tất đăng ký &amp; Bật Face ID</button>
-              </form>
-
-              <button class="vault-link-btn" type="button" data-vault-go="email">Đã có tài khoản? Đăng nhập bằng Email</button>
-            </div>
-
-            <!-- VIEW C: EMAIL FALLBACK -->
-            <div class="vault-view" data-auth-view="email" hidden>
-              <button class="vault-subback" type="button" data-vault-go="login">← Quay lại Đăng nhập</button>
-              <h1 class="vault-title">Đăng nhập bằng Email</h1>
-              <p class="vault-subtitle">Dành cho thành viên đã có tài khoản khi truy cập trên thiết bị mới.</p>
+              <h1 class="vault-title">Đăng nhập NGV &amp; Quản trị</h1>
+              <p class="vault-subtitle">Dùng Tài khoản Thành viên đã được nâng quyền NGV (Email hoặc SĐT) hoặc tài khoản Quản trị.</p>
 
               <form id="login-form" class="admin-form" novalidate>
                 <div class="field">
-                  <label for="login-email">Email tài khoản</label>
-                  <input id="login-email" name="email" type="email" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="tenban@holarise.org">
+                  <label for="login-email">Email hoặc Số điện thoại</label>
+                  <input id="login-email" name="identifier" type="text" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="tenban@holarise.org hoặc 09xxxxxxxx">
                 </div>
                 <div class="field">
                   <label for="login-password">Mật khẩu</label>
                   <input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">
                 </div>
                 <div class="form-alert" id="login-alert" role="alert" hidden></div>
-                <button class="btn btn--primary btn--full btn--lg" type="submit" id="login-submit">Đăng nhập vào kho ảnh</button>
+                <button class="btn btn--primary btn--full btn--lg" type="submit" id="login-submit">Đăng nhập vào kho Media</button>
               </form>
 
-              <button class="vault-link-btn" type="button" data-vault-go="register">Chưa có tài khoản? Đăng ký mới</button>
+              <div class="vault-fallback" id="vault-passkey-box" style="margin-top: 14px;">
+                <button class="btn btn--outline btn--full" type="button" id="btn-vault-login">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3H5a2 2 0 0 0-2 2v2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 21h2a2 2 0 0 0 2-2v-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M9 10v.01"/><path d="M15 10v.01"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg>
+                  <span>Đăng nhập Quản trị bằng Face ID / Passkey</span>
+                </button>
+                <div class="form-alert" id="vault-login-alert" role="alert" hidden style="margin-top: 10px;"></div>
+                <p class="vault-fallback-text" style="margin-top: 12px;">Chưa có tài khoản hoặc chưa được nâng quyền NGV? <a href="/tham-gia/">Mở Tài khoản Thành viên</a> và liên hệ Quản trị để cấp quyền.</p>
+              </div>
             </div>
           </div>
 
@@ -227,7 +176,7 @@
 
           <button class="btn btn--primary btn--sm" type="button" id="btn-upload-trigger" hidden>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <span>Tải ảnh</span>
+            <span>Tải ảnh / video</span>
           </button>
 
           <!-- Workspace Overflow Menu -->
@@ -242,7 +191,7 @@
               </div>
               <a class="mp-menu-item" id="ws-drive-link" href="https://drive.google.com" target="_blank" rel="noopener noreferrer" hidden>Mở thư mục Google Drive ↗</a>
               <button class="mp-menu-item" type="button" id="btn-edit-album">Sửa thông tin Album</button>
-              <hr class="mp-menu-sep">
+              <hr class="mp-menu-sep" id="ws-menu-danger-sep">
               <button class="mp-menu-item mp-menu-item--danger" type="button" id="btn-delete-album">Xóa Album này</button>
             </div>
           </details>
@@ -293,12 +242,12 @@
 
       <!-- VIEW 2: PHOTO-FIRST ALBUM WORKSPACE -->
       <section id="view-workspace" hidden>
-        <input type="file" id="multi-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/*" multiple hidden>
+        <input type="file" id="multi-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*,video/mp4,video/quicktime,video/webm,video/x-m4v,video/*" multiple hidden>
 
         <!-- Media Moderation Status Strip -->
         <div class="ws-moderation-strip" id="ws-moderation-strip">
           <span class="ws-mod-dot" aria-hidden="true"></span>
-          <span><strong>Kiểm duyệt Media: ĐANG BẬT</strong> · Ảnh đóng góp của thành viên lưu vào thư mục chuẩn hóa trên Google Drive và chờ Admin / Ban Điều Phối duyệt trước khi hiện lên Sân khấu Kỷ niệm.</span>
+          <span id="ws-moderation-copy"><strong>Kiểm duyệt Media: ĐANG BẬT</strong> · Ảnh &amp; video NGV tải lên được lưu bản gốc trên Google Drive và vào hàng Chờ duyệt trước khi hiển thị công khai.</span>
         </div>
 
         <!-- Compact Status Filter & Multi-Select Bar -->
@@ -342,8 +291,8 @@
         <div class="drop-overlay" id="drop-overlay" hidden aria-hidden="true">
           <div class="drop-overlay-box">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <strong>Thả ảnh vào đây để tải lên Album</strong>
-            <span>Tối đa 30 ảnh/lượt · Tự giữ nguyên ảnh gốc trên Google Drive</span>
+            <strong>Thả ảnh hoặc video vào đây để tải lên Album</strong>
+            <span>Không giới hạn số lượng tệp · Giữ nguyên ảnh &amp; video gốc trên Google Drive</span>
           </div>
         </div>
       </section>
@@ -614,9 +563,9 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=085e3513d2" defer></script>
-  <script src="/assets/js/gate-ui.js?v=085e3513d2" defer></script>
-  <script src="/assets/js/media-portal.js?v=085e3513d2" defer></script>
-  <script src="/assets/js/pwa.js?v=085e3513d2" defer></script>
+  <script src="/assets/js/passkey-client.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/gate-ui.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/media-portal.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/pwa.js?v=3728347fbf" defer></script>
 </body>
 </html>

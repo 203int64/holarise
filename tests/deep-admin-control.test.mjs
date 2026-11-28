@@ -408,16 +408,18 @@ test("Member 360° Dossier, Force Revoke Sessions & /media/ Viewer-Only Portal M
   });
   assert.equal(grantPortal.status, 200);
 
-  // Now auth/status returns mediaViewer object
+  // Now auth/status returns NGV contributor object
   const stAfter = await (await authStatus({ request: makeReq("/api/auth/status", { cookie: m1Cookie }), env })).json();
-  assert.equal(stAfter.mediaViewer?.role, "media_viewer");
+  assert.equal(stAfter.mediaContributor?.role, "ngv");
+  assert.equal(stAfter.mediaContributor?.canUpload, true);
   assert.equal(stAfter.mediaViewer?.id, m1.id);
 
-  // Viewer can GET /api/admin/albums and /api/admin/albums/:id (strictly read-only, approved photos only!)
+  // NGV can GET /api/admin/albums and /api/admin/albums/:id (sees all folders & approved+pending items)
   const albListRes = await adminAlbumsList({ request: makeReq("/api/admin/albums", { cookie: m1Cookie }), env });
   assert.equal(albListRes.status, 200);
   const albList = await albListRes.json();
-  assert.equal(albList.viewerOnly, true);
+  assert.equal(albList.ngvMode, true);
+  assert.equal(albList.canUpload, true);
   assert.ok(albList.items.some((a) => a.id === "alb-viewer-1"));
 
   const albDetailRes = await adminAlbumDetailGet({
@@ -427,11 +429,35 @@ test("Member 360° Dossier, Force Revoke Sessions & /media/ Viewer-Only Portal M
   });
   assert.equal(albDetailRes.status, 200);
   const albDetail = await albDetailRes.json();
-  assert.equal(albDetail.viewerOnly, true);
-  assert.equal(albDetail.photos.length, 1, "Viewer must only see approved photos, not pending");
-  assert.equal(albDetail.photos[0].id, "ph-v-ok");
+  assert.equal(albDetail.ngvMode, true);
+  assert.equal(albDetail.photos.length, 2, "NGV sees both approved and pending items inside folder");
 
-  // Viewer is strictly blocked from mutating albums or accessing /api/admin/members
+  // NGV can upload photos & videos into album — ALWAYS forced into 'pending' status
+  const { onRequestPost: albumPhotosPost } = await import("../functions/api/admin/albums/[id]/photos/index.js");
+  const ngvUploadRes = await albumPhotosPost({
+    request: makeReq("/api/admin/albums/alb-viewer-1/photos", {
+      method: "POST",
+      cookie: m1Cookie,
+      body: {
+        url: "/api/media/drive/abc1234567890?kind=video",
+        mediaKey: "drive:abc1234567890",
+        mediaType: "video",
+        caption: "Clip hậu trường NGV",
+        approvalStatus: "approved", // Attempt to self-approve must be ignored!
+        isFeaturedHome: true,
+      },
+    }),
+    params: { id: "alb-viewer-1" },
+    env,
+  });
+  assert.equal(ngvUploadRes.status, 201);
+  const ngvUploadData = await ngvUploadRes.json();
+  assert.equal(ngvUploadData.items[0].approvalStatus, "pending", "NGV upload must stay pending for Admin review");
+  assert.equal(ngvUploadData.items[0].isFeaturedHome, false);
+  assert.equal(ngvUploadData.items[0].mediaType, "video");
+  assert.equal(ngvUploadData.items[0].sourceKind, "ngv_upload");
+
+  // NGV is strictly blocked from mutating/deleting albums, approving/deleting photos, or accessing /api/admin/members
   const createDenied = await adminAlbumsCreate({
     request: makeReq("/api/admin/albums", { method: "POST", cookie: m1Cookie, body: { title: "Hack Album" } }),
     env,
@@ -451,6 +477,26 @@ test("Member 360° Dossier, Force Revoke Sessions & /media/ Viewer-Only Portal M
     env,
   });
   assert.ok(delDenied.status === 401 || delDenied.status === 403);
+
+  const { onRequestPost: photoApprovePost } = await import("../functions/api/admin/photos/[id]/approve.js");
+  const approveDenied = await photoApprovePost({
+    request: makeReq(`/api/admin/photos/${ngvUploadData.items[0].id}/approve`, {
+      method: "POST",
+      cookie: m1Cookie,
+      body: { action: "approve" },
+    }),
+    params: { id: ngvUploadData.items[0].id },
+    env,
+  });
+  assert.ok(approveDenied.status === 401 || approveDenied.status === 403);
+
+  const { onRequestDelete: photoDelete } = await import("../functions/api/admin/photos/[id].js");
+  const photoDelDenied = await photoDelete({
+    request: makeReq("/api/admin/photos/ph-v-ok", { method: "DELETE", cookie: m1Cookie }),
+    params: { id: "ph-v-ok" },
+    env,
+  });
+  assert.ok(photoDelDenied.status === 401 || photoDelDenied.status === 403);
 
   const adminMembersDenied = await adminMembersList({ request: makeReq("/api/admin/members", { cookie: m1Cookie }), env });
   assert.ok(adminMembersDenied.status === 401 || adminMembersDenied.status === 403);

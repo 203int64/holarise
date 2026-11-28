@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=085e3513d2">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=3728347fbf">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -210,16 +210,15 @@
     <div class="kicker invite-pillar-kicker" style="margin-top: 18px;">__SSR_EVENT_KICKER__</div>
     <h1 class="invite-title">__SSR_INVITE_HEADLINE__</h1>
 
-    <div class="invite-meta-bar">
+    <div class="invite-meta-bar invite-meta-bar--luma">
       <div class="invite-meta-facts">
         <time datetime="__SSR_INVITE_START_ISO__">__SSR_INVITE_TIME_LABEL__</time>
         <span aria-hidden="true">·</span>
         <span>__SSR_INVITE_VENUE_NAME__</span>
       </div>
-      <div class="invite-meta-links">
-        <button class="invite-text-btn invite-text-btn--accent" type="button" data-register-event="__SSR_EVENT_TITLE__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-event-date="__SSR_EVENT_DATE_DISPLAY__" data-event-time="__SSR_INVITE_TIME_LABEL__" data-event-location="__SSR_EVENT_LOCATION__" data-venue-url="" data-event-fee="__SSR_EVENT_FEE__" data-event-seats="__SSR_EVENT_SEATS__" data-event-type="__SSR_EVENT_KICKER__" data-event-href="/su-kien/__SSR_EVENT_SLUG__/" data-event-image="__SSR_EVENT_IMAGE__" data-zalo-group="__SSR_EVENT_ZALO_GROUP__" data-ics-start="__SSR_INVITE_ICS_START__" data-ics-end="__SSR_INVITE_ICS_END__" data-note-summary="+ Gửi đôi dòng chia sẻ hoặc lời nhắn cho người điều phối (tùy chọn)" data-note-placeholder="Điều bạn muốn chia sẻ trước buổi gặp, hoặc để trống nếu chỉ muốn đến lắng nghe..." data-anon-share="true">Giữ chỗ tham dự</button>
-        <span aria-hidden="true">·</span>
-        <button class="invite-text-btn" type="button" data-open-invite-share>Gửi thiệp cho bạn</button>
+      <div class="invite-meta-links invite-meta-cta-row">
+        <button class="btn btn--primary btn--sm" type="button" data-magnetic data-register-event="__SSR_EVENT_TITLE__" data-event-id="__SSR_EVENT_ID__" data-event-slug="__SSR_EVENT_SLUG__" data-event-date="__SSR_EVENT_DATE_DISPLAY__" data-event-time="__SSR_INVITE_TIME_LABEL__" data-event-location="__SSR_EVENT_LOCATION__" data-venue-url="" data-event-fee="__SSR_EVENT_FEE__" data-event-seats="__SSR_EVENT_SEATS__" data-event-type="__SSR_EVENT_KICKER__" data-event-href="/su-kien/__SSR_EVENT_SLUG__/" data-event-image="__SSR_EVENT_IMAGE__" data-zalo-group="__SSR_EVENT_ZALO_GROUP__" data-ics-start="__SSR_INVITE_ICS_START__" data-ics-end="__SSR_INVITE_ICS_END__" data-note-summary="+ Gửi đôi dòng chia sẻ hoặc lời nhắn cho người điều phối (tùy chọn)" data-note-placeholder="Điều bạn muốn chia sẻ trước buổi gặp, hoặc để trống nếu chỉ muốn đến lắng nghe..." data-anon-share="true">Giữ chỗ tham dự</button>
+        <button class="btn btn--outline btn--sm" type="button" data-open-invite-share>Gửi thiệp cho bạn</button>
       </div>
     </div>
   </div>
@@ -1125,10 +1124,12 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=085e3513d2" defer></script>
-  <script src="/assets/js/main.js?v=085e3513d2" defer></script>
-  <script src="/assets/js/join-pass.js?v=085e3513d2" defer></script>
-  <script src="/assets/js/member.js?v=085e3513d2" defer></script>
-  <script src="/assets/js/pwa.js?v=085e3513d2" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=3728347fbf" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/motion.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/main.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/join-pass.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/member.js?v=3728347fbf" defer></script>
+  <script src="/assets/js/pwa.js?v=3728347fbf" defer></script>
 </body>
 </html>

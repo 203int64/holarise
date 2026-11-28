@@ -50,22 +50,21 @@ export function serializeAlbumRow(row) {
 
 export async function onRequestGet(context) {
   const auth = await requireAdmin(context, { allowedRoles: MEDIA_ROLES });
-  let viewerOnly = false;
+  let ngvMode = false;
   if (!auth.ok) {
     const actor = await resolveActorContext(context.env, context.request);
-    if (!actor.isMediaViewer) return auth.response;
-    viewerOnly = true;
+    if (!actor.isMediaContributor) return auth.response;
+    ngvMode = true;
   }
 
   await Promise.all([
     ensureMediaApprovalSchema(context.env.DB),
     ensureDeepControlSchema(context.env.DB),
   ]);
-  if (!viewerOnly) {
+  if (!ngvMode) {
     await autoProvisionFinishedEventAlbums(context.env);
   }
 
-  const whereClause = viewerOnly ? "WHERE a.status = 'published'" : "";
   const { results } = await context.env.DB.prepare(
     `SELECT a.*,
             (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id) AS photo_count,
@@ -74,13 +73,12 @@ export async function onRequestGet(context) {
             (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id AND (p.source_kind = 'member_contribution' OR p.contributor_member_id != '')) AS contribution_count,
             (SELECT COUNT(*) FROM media_photos p WHERE p.album_id = a.id AND p.is_featured_home = 1 AND COALESCE(p.approval_status, 'approved') = 'approved') AS featured_count
      FROM media_albums a
-     ${whereClause}
      ORDER BY a.sort_order ASC, a.event_date DESC, a.created_at DESC
      LIMIT 200`
   ).all();
 
   const rows = results || [];
-  if (!viewerOnly && isDriveConfigured(context.env)) {
+  if (!ngvMode && isDriveConfigured(context.env)) {
     let provisioned = 0;
     for (const row of rows) {
       if (row.drive_url || provisioned >= 3) continue;
@@ -111,7 +109,9 @@ export async function onRequestGet(context) {
 
   return jsonResponse({
     ok: true,
-    viewerOnly,
+    viewerOnly: false,
+    ngvMode,
+    canUpload: true,
     items: rows.map(serializeAlbumRow),
   });
 }

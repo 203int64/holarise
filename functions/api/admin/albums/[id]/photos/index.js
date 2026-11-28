@@ -1,17 +1,32 @@
+import { resolveActorContext } from "../../../../../_lib/media-access.js";
 import { ensureMediaApprovalSchema } from "../../../../../_lib/media-approval-schema.js";
-import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../../../_lib/security.js";
+import {
+  errorResponse,
+  jsonResponse,
+  readJsonBody,
+  requireAdmin,
+  verifyCsrfOrigin,
+} from "../../../../../_lib/security.js";
 import { validatePhotoInput } from "../../../../../_lib/validation.js";
 import { serializePhotoRow } from "../index.js";
 
 const MEDIA_ROLES = ["super_admin", "editor", "media"];
 const APPROVER_ROLES = new Set(["super_admin", "editor"]);
-const MAX_BATCH_PHOTOS = 30;
+const MAX_BATCH_PHOTOS = 500;
 const SAFE_KV_KEY_RE = /^[a-zA-Z0-9._-]{6,96}$/;
 const SAFE_KV_URL_RE = /^\/api\/media\/[a-zA-Z0-9._-]{6,96}$/;
 
 export async function onRequestPost(context) {
   const auth = await requireAdmin(context, { allowedRoles: MEDIA_ROLES });
-  if (!auth.ok) return auth.response;
+  let ngvMember = null;
+  if (!auth.ok) {
+    if (!verifyCsrfOrigin(context.request)) {
+      return errorResponse(403, "CSRF_BLOCKED", "Nguồn yêu cầu không hợp lệ.");
+    }
+    const actor = await resolveActorContext(context.env, context.request);
+    if (!actor.isMediaContributor || !actor.member) return auth.response;
+    ngvMember = actor.member;
+  }
 
   await ensureMediaApprovalSchema(context.env.DB);
 
@@ -22,25 +37,25 @@ export async function onRequestPost(context) {
     .bind(albumId)
     .first();
   if (!album) {
-    return errorResponse(404, "NOT_FOUND", "Không tìm thấy album để thêm ảnh.");
+    return errorResponse(404, "NOT_FOUND", "Không tìm thấy album để thêm ảnh/video.");
   }
 
-  const parsed = await readJsonBody(context.request, 128 * 1024);
+  const parsed = await readJsonBody(context.request, 512 * 1024);
   if (!parsed.ok) return parsed.response;
 
   const rawList = Array.isArray(parsed.data.photos) ? parsed.data.photos : [parsed.data];
   if (rawList.length === 0) {
-    return errorResponse(400, "EMPTY_PHOTOS", "Danh sách ảnh cần thêm đang trống.");
+    return errorResponse(400, "EMPTY_PHOTOS", "Danh sách ảnh/video cần thêm đang trống.");
   }
   if (rawList.length > MAX_BATCH_PHOTOS) {
-    return errorResponse(400, "BATCH_TOO_LARGE", `Mỗi lượt chỉ hỗ trợ tối đa ${MAX_BATCH_PHOTOS} ảnh.`);
+    return errorResponse(400, "BATCH_TOO_LARGE", `Mỗi yêu cầu chỉ hỗ trợ tối đa ${MAX_BATCH_PHOTOS} mục.`);
   }
 
   const validated = [];
   for (let i = 0; i < rawList.length; i++) {
     const check = validatePhotoInput(rawList[i] || {});
     if (!check.ok) {
-      return errorResponse(400, "VALIDATION_ERROR", `Ảnh thứ ${i + 1} chưa hợp lệ.`, check.fields);
+      return errorResponse(400, "VALIDATION_ERROR", `Mục thứ ${i + 1} chưa hợp lệ.`, check.fields);
     }
     validated.push(check.value);
   }
@@ -52,7 +67,12 @@ export async function onRequestPost(context) {
     .first();
   let nextSort = Number(maxRow?.max_sort || 0) + 1;
 
-  const canApproveDirectly = APPROVER_ROLES.has(auth.user.role);
+  const canApproveDirectly = !ngvMember && APPROVER_ROLES.has(auth.user?.role);
+  const uploadedBy = ngvMember
+    ? ngvMember.email || ngvMember.phone_display || ngvMember.member_code || ngvMember.id
+    : auth.user.email;
+  const contributorMemberId = ngvMember ? ngvMember.id : "";
+  const sourceKind = ngvMember ? "ngv_upload" : "team";
   const now = new Date().toISOString();
   const inserted = [];
   const stmts = [];
@@ -62,16 +82,17 @@ export async function onRequestPost(context) {
     const rawItem = rawList[i] || {};
     const id = `pho-${crypto.randomUUID().slice(0, 12)}`;
     const sortOrder = p.sort_order > 0 ? p.sort_order : nextSort++;
-    // CTV ('media') uploads always enter 'pending' until an Admin approves & compresses for web.
+    // NGV & CTV ('media') uploads ALWAYS enter 'pending' until Admin approves.
     const approvalStatus = canApproveDirectly
       ? (rawItem.approvalStatus === "pending" ? "pending" : "approved")
       : "pending";
     const isFeaturedHome = approvalStatus === "approved" ? p.is_featured_home : 0;
-    const approvedBy = approvalStatus === "approved" ? auth.user.email : "";
+    const approvedBy = approvalStatus === "approved" ? uploadedBy : "";
     const approvedAt = approvalStatus === "approved" ? now : "";
+    const photographer = p.photographer || (ngvMember ? ngvMember.name || "NGV HolaRise" : "");
 
     const mediaType =
-      rawItem.mediaType === "video" || /[?&]kind=video\b|\.(mp4|mov|webm)(?:[?#]|$)/i.test(String(p.url || ""))
+      rawItem.mediaType === "video" || /[?&]kind=video\b|\.(mp4|mov|m4v|webm)(?:[?#]|$)/i.test(String(p.url || ""))
         ? "video"
         : "image";
     const rawWebUrl = String(rawItem.webUrl || rawItem.web_url || "").trim();
@@ -82,10 +103,10 @@ export async function onRequestPost(context) {
       context.env.DB.prepare(
         `INSERT INTO media_photos (
            id, album_id, media_key, url, caption, alt, photographer,
-           is_featured_home, sort_order, uploaded_by, media_type,
+           is_featured_home, sort_order, uploaded_by, contributor_member_id, source_kind, media_type,
            approval_status, web_url, web_media_key, approved_by, approved_at,
            created_at, updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       ).bind(
         id,
         albumId,
@@ -93,10 +114,12 @@ export async function onRequestPost(context) {
         p.url,
         p.caption,
         p.alt,
-        p.photographer,
+        photographer,
         isFeaturedHome,
         sortOrder,
-        auth.user.email,
+        uploadedBy,
+        contributorMemberId,
+        sourceKind,
         mediaType,
         approvalStatus,
         webUrl,
@@ -119,16 +142,19 @@ export async function onRequestPost(context) {
       approved_at: approvedAt,
       caption: p.caption,
       alt: p.alt,
-      photographer: p.photographer,
+      photographer,
       is_featured_home: isFeaturedHome,
       sort_order: sortOrder,
-      uploaded_by: auth.user.email,
+      uploaded_by: uploadedBy,
+      contributor_member_id: contributorMemberId,
+      source_kind: sourceKind,
+      media_type: mediaType,
       created_at: now,
       updated_at: now,
     });
   }
 
-  const firstApproved = inserted.find((p) => p.approval_status === "approved");
+  const firstApproved = inserted.find((p) => p.approval_status === "approved" && p.media_type !== "video");
   const nextCoverUrl = firstApproved ? firstApproved.web_url || firstApproved.url : "";
   if (!album.cover_url && nextCoverUrl) {
     stmts.push(

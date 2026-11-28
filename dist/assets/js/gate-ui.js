@@ -43,8 +43,13 @@
       panel.hidden = !active;
     });
     if (viewName === "login") {
-      const loginBtn = document.getElementById("btn-vault-login");
-      if (loginBtn) loginBtn.focus();
+      const firstInput = document.querySelector('[data-auth-view="login"] input:not([type="hidden"])');
+      if (firstInput) {
+        firstInput.focus();
+      } else {
+        const loginBtn = document.getElementById("btn-vault-login");
+        if (loginBtn) loginBtn.focus();
+      }
     } else {
       const activeInput = document.querySelector(
         `[data-auth-view="${viewName}"] input:not([type="hidden"])`

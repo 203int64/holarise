@@ -523,7 +523,8 @@ def render_home_pillars_grid(pillars: list, lang: str = "vi") -> str:
     </div>"""
 
 
-def render_story_stage(pillars: list) -> str:
+def render_story_stage(pillars: list, lang: str = "vi") -> str:
+    is_en = lang == "en"
     tabs = []
     panels = []
     slides = []
@@ -533,63 +534,70 @@ def render_story_stage(pillars: list) -> str:
         odometer_digits.append(f"<span>{num}</span>")
         active_cls = " is-active" if idx == 0 else ""
         selected = "true" if idx == 0 else "false"
-        tab_label = p.get("shortTab", f'{num} · {p["badge"]}')
+        tab_label = (p.get("shortTabEn") if is_en else None) or p.get("shortTab", f'{num} · {p["badge"]}')
         filter_key = p.get("filterKey") or derive_pillar_filter(p.get("badge", ""), [], p.get("id", ""))
+        title = (p.get("titleEn") if is_en else None) or p["title"]
+        summary = ((p.get("summaryEn") or p.get("shortSummaryEn")) if is_en else (p.get("summary") or p.get("shortSummary")) or "").strip()
+        highlights = (p.get("highlightsEn") if is_en and p.get("highlightsEn") else p.get("highlights", []))
+        metric_badge = ((p.get("metricBadgeEn") if is_en else p.get("metricBadge")) or "").strip()
+        img_alt = (p.get("imageAltEn") if is_en else None) or p["imageAlt"]
+
         tabs.append(
             f'<button class="story-tab{active_cls}" type="button" role="tab" aria-selected="{selected}" data-story-tab="{idx}" data-pillar="{esc(filter_key)}">{esc(tab_label)}</button>'
         )
 
-        chips_html = "".join(f'<span class="visual-chip">{esc(h)}</span>' for h in p["highlights"])
-        metric_badge = p.get("metricBadge", "")
+        chips_html = "".join(f'<span class="visual-chip">{esc(h)}</span>' for h in highlights)
         metric_html = f'<span class="story-metric-pill">{esc(metric_badge)}</span>' if metric_badge else ""
-        cta_href = f"/lich-hoat-dong/?nhom={esc(filter_key)}"
-        cta_label = f"Xem lịch {p['badge']}"
+        cta_href = f"{'/en/schedule/' if is_en else '/lich-hoat-dong/'}?nhom={esc(filter_key)}"
+        cta_label = f"{p['badge']} schedule" if is_en else f"Xem lịch {p['badge']}"
+        chips_aria = "Key activities" if is_en else "Hoạt động tiêu biểu"
 
         panels.append(
             f"""<article class="story-panel{active_cls}" data-story-panel="{idx}" data-pillar="{esc(filter_key)}">
           <div class="story-panel-index">{num} / 0{len(pillars)} — {esc(p['badge'])}</div>
-          <h3 data-i18n="pillar.{esc(filter_key)}.title">{esc(p['title'])}</h3>
-          <p class="story-panel-summary" data-i18n="pillar.{esc(filter_key)}.summary">{esc(p['summary'])}</p>
-          <div class="visual-chip-row" aria-label="Hoạt động tiêu biểu">{chips_html}</div>
+          <h3>{esc(title)}</h3>
+          <p class="story-panel-summary">{esc(summary)}</p>
+          <div class="visual-chip-row" aria-label="{chips_aria}">{chips_html}</div>
           <div class="story-panel-footer">
             {metric_html}
-            <a class="arrow-link" href="{cta_href}"><span data-i18n="pillar.{esc(filter_key)}.cta">{esc(cta_label)}</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
+            <a class="arrow-link" href="{cta_href}"><span>{esc(cta_label)}</span><span class="arrow-swap" aria-hidden="true"><span>→</span><span>→</span></span></a>
           </div>
         </article>"""
         )
 
         priority_attr = ' fetchpriority="low" loading="lazy" decoding="async"' if idx > 0 else ' loading="lazy" decoding="async"'
-        image_label = "HolaHeart · 15/11/2026" if filter_key == "holaheart" else f"{p['badge']} · Hòa Lạc"
+        image_label = "HolaHeart · 15/11/2026" if filter_key == "holaheart" else f"{p['badge']} · {'Hoa Lac' if is_en else 'Hòa Lạc'}"
         orient_chip = (
-            '<span class="visual-orientation-chip" data-i18n="media.orientation">Ảnh định hướng</span>'
+            f'<span class="visual-orientation-chip">{"Concept Visual" if is_en else "Ảnh định hướng"}</span>'
             if p.get("imageIsIllustration")
             else ""
         )
         slides.append(
-            f"""<div class="story-slide image-note{active_cls}" data-story-slide="{idx}" data-pillar="{esc(filter_key)}" tabindex="{0 if idx == 0 else -1}" role="group" aria-label="{esc(image_label)} · {esc(p['imageAlt'])}">
+            f"""<div class="story-slide image-note{active_cls}" data-story-slide="{idx}" data-pillar="{esc(filter_key)}" tabindex="{0 if idx == 0 else -1}" role="group" aria-label="{esc(image_label)} · {esc(img_alt)}">
           <!-- CMS:PILLAR_SLIDE_{idx}:START -->
-          <img {image_attrs(p['image'], '(max-width: 1023px) calc(100vw - 40px), 620px')} alt="{esc(p['imageAlt'])}" width="960" height="720"{priority_attr}>{orient_chip}
+          <img {image_attrs(p['image'], '(max-width: 1023px) calc(100vw - 40px), 620px')} alt="{esc(img_alt)}" width="960" height="720"{priority_attr}>{orient_chip}
           <!-- CMS:PILLAR_SLIDE_{idx}:END -->
-          {render_image_tooltip(p['imageAlt'], image_label)}
+          {render_image_tooltip(img_alt, image_label)}
           <div class="story-slide-scrim" aria-hidden="true"></div>
         </div>"""
         )
 
-    return f"""<div class="story-stage" data-story-stage>
+    tablist_aria = "Select impact pillar" if is_en else "Chọn trụ cột hoạt động"
+    hud_kicker = "Three Impact Pillars" if is_en else "Mô hình Tạo Tác Động"
+    swipe_aria = "Swipe to switch pillar" if is_en else "Vuốt ngang để đổi trụ cột"
+
+    return f"""<div class="story-stage story-stage--unified" data-story-stage data-pillar="holaheart">
       <div class="story-controls-col">
-        <div class="story-nav" role="tablist" aria-label="Chọn trụ cột hoạt động" data-story-tablist>
+        <div class="story-nav" role="tablist" aria-label="{tablist_aria}" data-story-tablist>
           <span class="story-nav-glider" data-story-glider aria-hidden="true"></span>
           {" ".join(tabs)}
-        </div>
-        <div class="story-media-frame story-media-frame--mobile" data-story-swipe aria-label="Vuốt ngang để đổi trụ cột">
-          {" ".join(slides)}
         </div>
         <div class="story-panels">
           {" ".join(panels)}
         </div>
       </div>
 
-      <div class="story-media-frame story-media-frame--desktop">
+      <div class="story-media-frame story-media-frame--unified" data-story-swipe aria-label="{swipe_aria}">
         <div class="story-stage-hud" aria-hidden="true">
           <div class="story-odometer-row">
             <div class="story-odometer">
@@ -599,7 +607,7 @@ def render_story_stage(pillars: list) -> str:
             </div>
             <span class="story-odometer-total">/ 0{len(pillars)}</span>
           </div>
-          <span class="story-hud-kicker">Mô hình Tạo Tác Động</span>
+          <span class="story-hud-kicker">{hud_kicker}</span>
         </div>
         {" ".join(slides)}
       </div>
@@ -1832,9 +1840,22 @@ def write_page(
     contact_address_en = c.get("addressEn") or "Tan Xa, Hoa Lac, Thach That, Hanoi, Vietnam"
 
     resolved_cache_bust = esc(cache_bust or CURRENT_BUILD_HASH)
-    gsap_body_classes = {"page-home", "page-about", "page-news", "page-journey"}
+    gsap_body_classes = {"is-home", "page-home", "page-about", "page-news", "page-journey"}
+    gsap_content_hooks = (
+        "data-hero-card",
+        "data-reveal",
+        "data-scrub-words",
+        "data-curtain",
+        "data-stagger-group",
+        "data-magnetic",
+        "data-sunrise-pass",
+        "data-hover-photo",
+        "data-hairline",
+        "data-counter",
+    )
     body_tokens = set(str(body_class or "").split())
-    if body_tokens & gsap_body_classes:
+    needs_gsap = bool(body_tokens & gsap_body_classes) or any(hook in main_content for hook in gsap_content_hooks)
+    if needs_gsap:
         gsap_scripts = (
             f'  <script src="/assets/vendor/gsap.min.js?v={resolved_cache_bust}" defer></script>\n'
             f'  <script src="/assets/vendor/ScrollTrigger.min.js?v={resolved_cache_bust}" defer></script>\n'
@@ -2422,7 +2443,7 @@ def build_site() -> list:
         if h.get("mobileImageSrcset")
         else ""
     )
-    hero_media_html = f'<picture class="hero-card-picture">{hero_mobile_src}<img class="hero-card-img" src="{esc(h["image"])}"{hero_srcset} alt="{esc(h["imageAlt"])}" width="1671" height="941" fetchpriority="high" decoding="async" data-cinema-img></picture>{hero_orient_chip}'
+    hero_media_html = f'<picture class="hero-card-picture">{hero_mobile_src}<img class="hero-card-img" src="{esc(h["image"])}"{hero_srcset} alt="{esc(h["imageAlt"])}" width="1376" height="768" fetchpriority="high" decoding="async" data-cinema-img></picture>{hero_orient_chip}'
 
     home_main = render_template(
         load_template("home.html"),
@@ -2441,7 +2462,7 @@ def build_site() -> list:
             "HOME_UPCOMING_SECTION": f"<!-- CMS:HOME_UPCOMING_SECTION:START -->\n{render_home_upcoming_section(workshops['upcoming'])}\n<!-- CMS:HOME_UPCOMING_SECTION:END -->",
             "PHILOSOPHY_QUOTE": esc(p["quote"]),
             "PHILOSOPHY_MOTTO": esc(p["motto"]),
-            "PILLARS_EDITORIAL_HTML": render_home_pillars_grid(activities["pillars"]),
+            "PILLARS_EDITORIAL_HTML": render_story_stage(activities["pillars"], lang="vi"),
             "HORIZONTAL_GALLERY_HTML": f"<!-- CMS:HORIZONTAL_GALLERY:START -->\n{render_horizontal_gallery(home_gallery_mix)}\n<!-- CMS:HORIZONTAL_GALLERY:END -->",
             "PARTNERS_STRIP": f"<!-- CMS:PARTNERS_STRIP:START -->\n{render_partners_strip(site.get('partners', []))}\n<!-- CMS:PARTNERS_STRIP:END -->",
             "TESTIMONIALS_SECTION": render_testimonials_section(site.get("testimonials", [])),
@@ -3060,20 +3081,21 @@ def build_site() -> list:
         else ""
     )
     en_hero_img_alt = en_h.get("imageAlt") or "HolaRise young people welcoming sunrise on the hills of Hoa Lac."
-    en_hero_media_html = f'<picture class="hero-card-picture">{hero_mobile_src}<img class="hero-card-img" src="{esc(h["image"])}"{hero_srcset} alt="{esc(en_hero_img_alt)}" width="1671" height="941" fetchpriority="high" decoding="async" data-cinema-img></picture>{en_hero_orient_chip}'
+    en_hero_media_html = f'<picture class="hero-card-picture">{hero_mobile_src}<img class="hero-card-img" src="{esc(h["image"])}"{hero_srcset} alt="{esc(en_hero_img_alt)}" width="1376" height="768" fetchpriority="high" decoding="async" data-cinema-img></picture>{en_hero_orient_chip}'
     en_home_main = render_template(
         load_template("en_home.html"),
         {
             "HERO_MEDIA_HTML": en_hero_media_html,
             "HERO_LIVE_PILL_HTML": render_hero_live_pill(workshops["upcoming"], workshops.get("pastTopics", []), lang="en"),
             "HERO_VOICE_CARD_HTML": render_hero_voice_card_static(workshops.get("pastTopics", []), lang="en"),
+            "HERO_BADGE": esc(en_h.get("badge") or h["badge"]),
             "HERO_HEADLINE_LINES": render_hero_headline_lines(en_h.get("headline", "Stillness within,\nAction from Hoa Lac.")),
             "HERO_DESCRIPTION": esc(en_h.get("description", "")),
             "HERO_PRIMARY_LABEL": esc(en_h.get("primaryCta", {}).get("label", "Join HolaRise")),
             "HERO_PRIMARY_HREF": esc(en_h.get("primaryCta", {}).get("href", "/en/join/")),
             "HERO_SECONDARY_LABEL": esc(en_h.get("secondaryCta", {}).get("label", "Explore our journey")),
             "HERO_SECONDARY_HREF": esc(en_h.get("secondaryCta", {}).get("href", "#journey-gallery")),
-            "PILLARS_EDITORIAL_HTML": render_home_pillars_grid(activities["pillars"], lang="en"),
+            "PILLARS_EDITORIAL_HTML": render_story_stage(activities["pillars"], lang="en"),
             "HOME_UPCOMING_SECTION": f"<!-- CMS:HOME_UPCOMING_SECTION:START -->\n{render_home_upcoming_section(workshops['upcoming'], lang='en')}\n<!-- CMS:HOME_UPCOMING_SECTION:END -->",
             "HORIZONTAL_GALLERY_HTML": f"<!-- CMS:HORIZONTAL_GALLERY:START -->\n        {render_horizontal_gallery(home_gallery_mix, lang='en')}\n        <!-- CMS:HORIZONTAL_GALLERY:END -->",
             "PHILOSOPHY_QUOTE": esc(en_p.get("quote", "")),

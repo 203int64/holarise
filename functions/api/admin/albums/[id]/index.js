@@ -48,11 +48,11 @@ export function serializePhotoRow(row) {
 
 export async function onRequestGet(context) {
   const auth = await requireAdmin(context, { allowedRoles: MEDIA_ROLES });
-  let viewerOnly = false;
+  let ngvMode = false;
   if (!auth.ok) {
     const actor = await resolveActorContext(context.env, context.request);
-    if (!actor.isMediaViewer) return auth.response;
-    viewerOnly = true;
+    if (!actor.isMediaContributor) return auth.response;
+    ngvMode = true;
   }
 
   await Promise.all([
@@ -72,12 +72,12 @@ export async function onRequestGet(context) {
     .bind(id)
     .first();
 
-  if (!album || (viewerOnly && album.status !== "published")) {
+  if (!album) {
     return errorResponse(404, "NOT_FOUND", "Không tìm thấy album.");
   }
 
-  // Lazy auto-provision Drive folder for pre-existing albums (e.g. 15/11) that lack drive_url
-  if (!viewerOnly && !album.drive_url && isDriveConfigured(context.env)) {
+  // Lazy auto-provision Drive folder for pre-existing albums that lack drive_url
+  if (!album.drive_url && isDriveConfigured(context.env)) {
     try {
       const folderName = buildEventFolderName({
         eventDate: album.event_date,
@@ -101,14 +101,15 @@ export async function onRequestGet(context) {
     }
   }
 
-  const photosSql = viewerOnly
-    ? "SELECT * FROM media_photos WHERE album_id = ? AND COALESCE(approval_status, 'approved') = 'approved' ORDER BY sort_order ASC, created_at DESC LIMIT 300"
-    : "SELECT * FROM media_photos WHERE album_id = ? ORDER BY sort_order ASC, created_at DESC LIMIT 300";
+  const photosSql =
+    "SELECT * FROM media_photos WHERE album_id = ? ORDER BY sort_order ASC, created_at DESC LIMIT 1000";
   const { results } = await context.env.DB.prepare(photosSql).bind(id).all();
 
   return jsonResponse({
     ok: true,
-    viewerOnly,
+    viewerOnly: false,
+    ngvMode,
+    canUpload: true,
     album: serializeAlbumRow(album),
     photos: (results || []).map(serializePhotoRow),
   });

@@ -135,6 +135,7 @@ export async function resolveActorContext(env, request) {
       member: null,
       canViewAllMedia: false,
       isMediaViewer: false,
+      isMediaContributor: false,
     };
   }
   await ensureDeepControlSchema(env.DB);
@@ -146,10 +147,12 @@ export async function resolveActorContext(env, request) {
   const isMediaTeam = Boolean(adminUser && adminUser.role === "media");
   let canViewAllMedia = false;
   let isMediaViewer = false;
+  let isMediaContributor = false;
   if (member) {
     const perms = await getMemberPermissions(env.DB, member.id);
     canViewAllMedia = perms.canViewAllMedia;
     isMediaViewer = perms.canAccessMediaPortal;
+    isMediaContributor = perms.canAccessMediaPortal;
   }
   return {
     adminUser,
@@ -158,6 +161,7 @@ export async function resolveActorContext(env, request) {
     member,
     canViewAllMedia,
     isMediaViewer,
+    isMediaContributor,
   };
 }
 
@@ -291,12 +295,12 @@ export async function checkMediaAssetAccess(env, request, { driveFileId = "", kv
   }
 
   // Safeguarding & moderation lock: unapproved/rejected photos or draft albums
-  // must NEVER leak publicly or be cached on CDN; only sole admin & media team may inspect.
+  // must NEVER leak publicly or be cached on CDN; only sole admin, media team & NGV may inspect.
   const approvalStatus = String(album.approval_status || "approved").toLowerCase();
   const albumStatus = String(album.album_status || "published").toLowerCase();
   if (approvalStatus !== "approved" || albumStatus !== "published") {
     const actor = await resolveActorContext(env, request);
-    const allowed = Boolean(actor.isSoleAdmin || actor.isMediaTeam);
+    const allowed = Boolean(actor.isSoleAdmin || actor.isMediaTeam || actor.isMediaContributor);
     return {
       restricted: true,
       allowed,

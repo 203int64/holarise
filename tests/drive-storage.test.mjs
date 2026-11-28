@@ -238,17 +238,24 @@ function createMockD1() {
   };
 }
 
-test("Media Gate enforces secret PIN, verified uploader profile, and WebAuthn passkey login challenge", async () => {
+import { onRequestPost as mediaLoginPost } from "../functions/api/auth/media-login.js";
+import { onRequestPost as verifyGatePost } from "../functions/api/auth/verify-gate.js";
+import { onRequestPost as memberRegisterPost } from "../functions/api/member/auth/register.js";
+import { createDriveResumableSession } from "../functions/_lib/drive.js";
+import { createSession, hashPassword } from "../functions/_lib/security.js";
+
+test("Media Gate blocks open self-registration; 1948 default PIN + NGV /api/auth/media-login works end-to-end", async () => {
   const db = createMockD1();
-  const env = { DB: db, MEDIA_ACCESS_PIN: "9999" };
+  // No MEDIA_ACCESS_PIN in env -> defaults to "1948"
+  const env = { DB: db };
 
-  // 1. Wrong PIN rejected with 401
-  const badPinRes = await mediaGatePost({
+  // 1. Open self-registration on /api/auth/media-gate is permanently disabled (403)
+  const closedReg = await mediaGatePost({
     request: new Request("https://holarise.org/api/auth/media-gate", {
       method: "POST",
       headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
       body: JSON.stringify({
-        pin: "0000",
+        pin: "1948",
         fullName: "Nguyễn Minh Anh",
         phone: "0912345678",
         department: "Ban Hình Ảnh",
@@ -257,56 +264,95 @@ test("Media Gate enforces secret PIN, verified uploader profile, and WebAuthn pa
     }),
     env,
   });
-  assert.equal(badPinRes.status, 401);
+  assert.equal(closedReg.status, 403);
+  const closedData = await closedReg.json();
+  assert.equal(closedData.error.code, "REGISTRATION_DISABLED");
 
-  // 2. Incomplete profile rejected with 400
-  const badProfileRes = await mediaGatePost({
-    request: new Request("https://holarise.org/api/auth/media-gate", {
+  // 2. Wrong PIN rejected with 401; default "1948" accepted with HMAC gateToken
+  const wrongPin = await verifyGatePost({
+    request: new Request("https://holarise.org/api/auth/verify-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({ pin: "0000" }),
+    }),
+    env,
+  });
+  assert.equal(wrongPin.status, 401);
+
+  const rightPin = await verifyGatePost({
+    request: new Request("https://holarise.org/api/auth/verify-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({ pin: "1948" }),
+    }),
+    env,
+  });
+  assert.equal(rightPin.status, 200);
+  const { gateToken } = await rightPin.json();
+  assert.ok(gateToken && gateToken.split(".").length === 3);
+
+  // 3. Register a normal Member (NOT NGV yet)
+  const regMember = await memberRegisterPost({
+    request: new Request("https://holarise.org/api/member/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
       body: JSON.stringify({
-        pin: "9999",
-        fullName: "Anh",
-        phone: "123",
-        department: "",
-        email: "not-an-email",
+        name: "Trần Quốc Bảo",
+        identifier: "0987654321",
+        password: "StrongPassword123",
       }),
     }),
     env,
   });
-  assert.equal(badProfileRes.status, 400);
+  assert.equal(regMember.status, 201);
+  const regMemberData = await regMember.json();
+  const memberId = regMemberData.member.id;
 
-  // 3. Valid PIN + verified profile creates media user, returns Set-Cookie & prompts Passkey setup
-  const okRes = await mediaGatePost({
-    request: new Request("https://holarise.org/api/auth/media-gate", {
+  // 4. Normal Member without NGV upgrade is blocked (403 NGV_REQUIRED) even with valid gateToken
+  const deniedLogin = await mediaLoginPost({
+    request: new Request("https://holarise.org/api/auth/media-login", {
       method: "POST",
       headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
       body: JSON.stringify({
-        pin: "9999",
-        fullName: "Nguyễn Minh Anh",
-        phone: "0912345678",
-        department: "Ban Hình Ảnh",
-        email: "anh@holarise.org",
+        gateToken,
+        identifier: "0987654321",
+        password: "StrongPassword123",
       }),
     }),
     env,
   });
-  assert.equal(okRes.status, 200);
-  const okData = await okRes.json();
-  assert.equal(okData.ok, true);
-  assert.equal(okData.user.name, "Nguyễn Minh Anh");
-  assert.equal(okData.user.phone, "0912345678");
-  assert.equal(okData.user.department, "Ban Hình Ảnh");
-  assert.equal(okData.user.role, "media");
-  assert.equal(okData.requiresPasskeySetup, true);
-  assert.match(okRes.headers.get("Set-Cookie") || "", /holarise_session=/);
+  assert.equal(deniedLogin.status, 403);
+  const deniedData = await deniedLogin.json();
+  assert.equal(deniedData.error.code, "NGV_REQUIRED");
 
-  // 4. Passkey login options returns challenge + rpId
+  // 5. Upgrade member to NGV (can_access_media_portal = 1) -> login succeeds via phone
+  await db.prepare("UPDATE members SET can_access_media_portal = 1 WHERE id = ?").bind(memberId).run();
+  const ngvLogin = await mediaLoginPost({
+    request: new Request("https://holarise.org/api/auth/media-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
+      body: JSON.stringify({
+        gateToken,
+        identifier: "0987654321",
+        password: "StrongPassword123",
+      }),
+    }),
+    env,
+  });
+  assert.equal(ngvLogin.status, 200);
+  const ngvData = await ngvLogin.json();
+  assert.equal(ngvData.ok, true);
+  assert.equal(ngvData.accountType, "ngv");
+  assert.equal(ngvData.user.role, "ngv");
+  assert.equal(ngvData.user.canUpload, true);
+  assert.match(ngvLogin.headers.get("Set-Cookie") || "", /holarise_member_session=/);
+
+  // 6. Passkey login options still returns valid challenge + rpId
   const optRes = await passkeyLoginOptionsPost({
     request: new Request("https://holarise.org/api/auth/passkey/login-options", {
       method: "POST",
       headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
-      body: JSON.stringify({ email: "anh@holarise.org" }),
+      body: JSON.stringify({ email: "203int64@holarise.org" }),
     }),
     env,
   });
@@ -316,80 +362,50 @@ test("Media Gate enforces secret PIN, verified uploader profile, and WebAuthn pa
   assert.ok(optData.options.challenge.length >= 32);
 });
 
-import { onRequestPost as verifyGatePost } from "../functions/api/auth/verify-gate.js";
+test("Google Drive Resumable Upload session initializes direct upload URI for multi-GB video with Origin CORS header", async () => {
+  resetDriveCachesForTest();
+  const env = {
+    GOOGLE_DRIVE_CLIENT_ID: "cid",
+    GOOGLE_DRIVE_CLIENT_SECRET: "csec",
+    GOOGLE_DRIVE_REFRESH_TOKEN: "rtok-resumable",
+    GOOGLE_DRIVE_ROOT_FOLDER_ID: "rootFolder0123456789",
+  };
+  let seenInitHeaders = null;
+  const fakeFetch = async (url, init = {}) => {
+    const u = String(url);
+    if (u.startsWith("https://oauth2.googleapis.com/token")) {
+      return new Response(JSON.stringify({ access_token: "ya29.resumable", expires_in: 3600 }), { status: 200 });
+    }
+    if (u.includes("/drive/v3/files?q=")) {
+      return new Response(JSON.stringify({ files: [{ id: "folderExisting12345", name: "album" }] }), { status: 200 });
+    }
+    if (u.includes("uploadType=resumable")) {
+      seenInitHeaders = init.headers;
+      return new Response(null, {
+        status: 200,
+        headers: { Location: "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=abc123" },
+      });
+    }
+    throw new Error(`Unexpected fetch URL: ${u}`);
+  };
 
-test("2-Step Vault: /api/auth/verify-gate issues HMAC gateToken accepted by Step 2 registration", async () => {
-  const db = createMockD1();
-  const env = { DB: db, MEDIA_ACCESS_PIN: "1948" };
-
-  // Wrong PIN -> 401
-  const wrong = await verifyGatePost({
-    request: new Request("https://holarise.org/api/auth/verify-gate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
-      body: JSON.stringify({ pin: "0000" }),
-    }),
-    env,
+  const session = await createDriveResumableSession(env, {
+    filename: "su-kien-4k.mov",
+    mimeType: "video/quicktime",
+    fileSize: 1_500_000_000,
+    category: "album",
+    subfolder: "2026-11-15 - HolaHeart",
+    origin: "https://holarise.org",
+    fetchImpl: fakeFetch,
   });
-  assert.equal(wrong.status, 401);
 
-  // Correct PIN -> 200 + HMAC gateToken
-  const right = await verifyGatePost({
-    request: new Request("https://holarise.org/api/auth/verify-gate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
-      body: JSON.stringify({ pin: "1948" }),
-    }),
-    env,
-  });
-  assert.equal(right.status, 200);
-  const { gateToken } = await right.json();
-  assert.ok(gateToken && gateToken.split(".").length === 3);
-
-  // Step 2 registration using gateToken (without resending raw PIN)
-  const reg = await mediaGatePost({
-    request: new Request("https://holarise.org/api/auth/media-gate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
-      body: JSON.stringify({
-        gateToken,
-        fullName: "Trần Quốc Bảo",
-        phone: "0987654321",
-        department: "Ban Truyền Thông",
-        email: "bao@holarise.org",
-        password: "StrongPassword123",
-      }),
-    }),
-    env,
-  });
-  assert.equal(reg.status, 200);
-  const regData = await reg.json();
-  assert.equal(regData.ok, true);
-  assert.equal(regData.user.name, "Trần Quốc Bảo");
-
-  // Duplicate email registration must be blocked with 409 EMAIL_EXISTS (no password overwrite)
-  const dup = await mediaGatePost({
-    request: new Request("https://holarise.org/api/auth/media-gate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
-      body: JSON.stringify({
-        gateToken,
-        fullName: "Kẻ Chiếm Quyền",
-        phone: "0911223344",
-        department: "Ban Khác",
-        email: "bao@holarise.org",
-        password: "HackedPassword999",
-      }),
-    }),
-    env,
-  });
-  assert.equal(dup.status, 409);
-  const dupData = await dup.json();
-  assert.equal(dupData.error.code, "EMAIL_EXISTS");
+  assert.equal(session.uploadUrl, "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=abc123");
+  assert.equal(seenInitHeaders.Origin, "https://holarise.org");
+  assert.equal(seenInitHeaders["X-Upload-Content-Type"], "video/quicktime");
+  assert.equal(seenInitHeaders["X-Upload-Content-Length"], "1500000000");
 });
 
 import { onRequestPost as createEventPost } from "../functions/api/admin/events/index.js";
-import { createSession } from "../functions/_lib/security.js";
 
 test("Event & Album folder naming + auto-provision draft media album on event creation", async () => {
   resetDriveCachesForTest();
@@ -533,23 +549,14 @@ test("Migration 0012 fixes production D1 missing 0003: widens role CHECK, preser
     .run();
   await createSession(db, "usr_prod_1");
 
-  // Confirm bug before 0012: media-gate fails with CHECK constraint error
+  // Confirm bug before 0012: inserting role='media' into admin_users fails CHECK constraint
   await assert.rejects(
     () =>
-      mediaGatePost({
-        request: new Request("https://holarise.org/api/auth/media-gate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
-          body: JSON.stringify({
-            pin: "9999",
-            fullName: "Lê Minh Quân",
-            phone: "0912345678",
-            department: "Ban Hình Ảnh",
-            email: "quan@holarise.org",
-          }),
-        }),
-        env: { DB: db, MEDIA_ACCESS_PIN: "9999" },
-      }),
+      db
+        .prepare(
+          "INSERT INTO admin_users (id, email, name, password_hash, password_salt, role, is_active, created_at) VALUES ('usr_m_1', 'quan@holarise.org', 'Lê Minh Quân', 'h', 's', 'media', 1, '2026-11-16T00:00:00Z')"
+        )
+        .run(),
     /CHECK constraint failed/
   );
 
@@ -577,32 +584,17 @@ test("Migration 0012 fixes production D1 missing 0003: widens role CHECK, preser
   const preservedSessions = await db.prepare("SELECT COUNT(*) AS cnt FROM sessions").first();
   assert.equal(preservedSessions.cnt, 1);
 
-  // Verify media registration now succeeds with 200 OK
-  const okRes = await mediaGatePost({
-    request: new Request("https://holarise.org/api/auth/media-gate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
-      body: JSON.stringify({
-        pin: "9999",
-        fullName: "Lê Minh Quân",
-        phone: "0912345678",
-        department: "Ban Hình Ảnh",
-        email: "quan@holarise.org",
-      }),
-    }),
-    env: { DB: db, MEDIA_ACCESS_PIN: "9999" },
-  });
-  assert.equal(okRes.status, 200);
-  const okData = await okRes.json();
-  assert.equal(okData.ok, true);
-  assert.equal(okData.user.role, "media");
-
-  // Verify /api/admin/albums also works with the newly registered media session
-  const cookieHeader = (okRes.headers.get("Set-Cookie") || "").split(";")[0];
+  // Verify inserting role='media' now succeeds and /api/admin/albums works
+  await db
+    .prepare(
+      "INSERT INTO admin_users (id, email, name, password_hash, password_salt, role, is_active, created_at) VALUES ('usr_m_1', 'quan@holarise.org', 'Lê Minh Quân', 'h', 's', 'media', 1, '2026-11-16T00:00:00Z')"
+    )
+    .run();
+  const { rawToken: mediaToken } = await createSession(db, "usr_m_1");
   const albRes = await listAlbumsGet({
     request: new Request("https://holarise.org/api/admin/albums", {
       method: "GET",
-      headers: { Cookie: cookieHeader },
+      headers: { Cookie: `holarise_session=${mediaToken}` },
     }),
     env: { DB: db },
   });
@@ -619,25 +611,18 @@ test("Admin/Media WebAuthn Passkey end-to-end register-verify & login-verify wit
   const { bytesToBase64Url } = await import("../functions/_lib/webauthn.js");
 
   const db = createMockD1();
-  const env = { DB: db, MEDIA_ACCESS_PIN: "9999" };
+  const env = { DB: db, MEDIA_ACCESS_PIN: "1948" };
 
-  // 1. Register media account to obtain valid session cookie
-  const gateRes = await mediaGatePost({
-    request: new Request("https://holarise.org/api/auth/media-gate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Origin: "https://holarise.org" },
-      body: JSON.stringify({
-        pin: "9999",
-        fullName: "Trần Hải Yến",
-        phone: "0988777666",
-        department: "Ban Media",
-        email: "yen@holarise.org",
-      }),
-    }),
-    env,
-  });
-  assert.equal(gateRes.status, 200);
-  const cookieHeader = (gateRes.headers.get("Set-Cookie") || "").split(";")[0];
+  // 1. Seed sole admin user + session cookie
+  const pw = await hashPassword("PasskeyAdmin2026!");
+  await db
+    .prepare(
+      "INSERT INTO admin_users (id, email, name, password_hash, password_salt, role, is_active, created_at) VALUES ('usr_pk_1', '203int64@holarise.org', 'Trần Hải Yến', ?, ?, 'super_admin', 1, '2026-11-16T00:00:00Z')"
+    )
+    .bind(pw.hash, pw.salt)
+    .run();
+  const { rawToken } = await createSession(db, "usr_pk_1");
+  const cookieHeader = `holarise_session=${rawToken}`;
 
   // 2. Request registration options
   const regOptRes = await registerOptionsPost({
@@ -736,7 +721,7 @@ test("Admin/Media WebAuthn Passkey end-to-end register-verify & login-verify wit
   assert.equal(loginVerifyRes.status, 200);
   const loginData = await loginVerifyRes.json();
   assert.equal(loginData.ok, true);
-  assert.equal(loginData.user.email, "yen@holarise.org");
+  assert.equal(loginData.user.email, "203int64@holarise.org");
   assert.match(loginVerifyRes.headers.get("Set-Cookie") || "", /holarise_session=/);
 });
 

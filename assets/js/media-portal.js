@@ -8,11 +8,13 @@
     super_admin: "Quản trị chính",
     editor: "Ban Điều Phối",
     media: "Ban Hình Ảnh",
-    media_viewer: "Thành viên xem Media",
+    ngv: "NGV · Cộng tác viên Media",
+    media_viewer: "NGV · Cộng tác viên Media",
   };
 
-  const MAX_BATCH_FILES = 30;
   const UPLOAD_CONCURRENCY = 2;
+  const RESUMABLE_CHUNK_BYTES = 8 * 1024 * 1024; // 8 MB (multiple of 256 KB required by Google Drive)
+  const DIRECT_RESUMABLE_IMAGE_THRESHOLD = 8 * 1024 * 1024;
 
   const state = {
     user: null,
@@ -94,8 +96,32 @@
     return state.user?.role === "super_admin" || state.user?.role === "editor";
   }
 
-  function isViewerOnly() {
-    return state.user?.role === "media_viewer";
+  function isNgvRole() {
+    return state.user?.role === "ngv" || state.user?.role === "media_viewer";
+  }
+
+  function canManageMedia() {
+    return (
+      state.user?.role === "super_admin" ||
+      state.user?.role === "editor" ||
+      state.user?.role === "media"
+    );
+  }
+
+  function isVideoFile(file) {
+    if (!file) return false;
+    const t = String(file.type || "").toLowerCase();
+    if (t.startsWith("video/")) return true;
+    return /\.(mp4|mov|m4v|webm|3gp|mpeg|mpg)$/i.test(String(file.name || ""));
+  }
+
+  function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Không đọc được ảnh xem trước."));
+      reader.readAsDataURL(blob);
+    });
   }
 
   function toast(message, type = "info") {
@@ -159,10 +185,11 @@
       const info = await apiFetch("/api/admin/media", { method: "GET" });
       state.mediaStorage = {
         driveConfigured: Boolean(info?.driveConfigured),
+        resumableSupported: Boolean(info?.resumableSupported ?? info?.driveConfigured),
         storage: info?.storage || "media_kv",
       };
     } catch {
-      state.mediaStorage = { driveConfigured: false, storage: "media_kv" };
+      state.mediaStorage = { driveConfigured: false, resumableSupported: false, storage: "media_kv" };
     }
     return state.mediaStorage;
   }
@@ -306,10 +333,10 @@
 
     const passkeyBtn = $("#btn-setup-passkey");
     if (passkeyBtn) {
-      passkeyBtn.hidden = isViewerOnly() || Boolean(user.hasPasskey) || !window.HolaPasskey?.isSupported?.();
+      passkeyBtn.hidden = isNgvRole() || Boolean(user.hasPasskey) || !window.HolaPasskey?.isSupported?.();
     }
-    const changePwBtn = $("#btn-change-pw");
-    if (changePwBtn) changePwBtn.hidden = isViewerOnly();
+    const changePwBtn = $("#btn-open-pw");
+    if (changePwBtn) changePwBtn.hidden = isNgvRole();
 
     const savedPhotographer =
       localStorage.getItem("holarise_media_photographer") || user.name || "Ban Hình Ảnh HolaRise";
@@ -330,14 +357,14 @@
       const status = await apiFetch("/api/auth/status");
       if (status.authenticated && status.user) {
         await enterMediaShell(status.user);
-      } else if (status.mediaViewer) {
-        await enterMediaShell(status.mediaViewer);
+      } else if (status.mediaContributor || status.mediaViewer) {
+        await enterMediaShell(status.mediaContributor || status.mediaViewer);
       } else {
         showAuthScreen();
       }
     } catch (err) {
       showAuthScreen();
-      showAlert($("#login-alert"), err.message || "Không thể kết nối máy chủ.");
+      showAlert($("#pin-gate-alert"), err.message || "Không thể kết nối máy chủ.");
     }
   }
 
@@ -346,12 +373,15 @@
      ========================================================================= */
   function setTopbarMode(mode) {
     const inWorkspace = mode === "workspace";
-    const viewer = isViewerOnly();
+    const canManage = canManageMedia();
     $("#brand-home-link").hidden = inWorkspace;
     $("#ws-nav-head").hidden = !inWorkspace;
-    $("#btn-new-album").hidden = viewer || inWorkspace;
-    $("#btn-upload-trigger").hidden = viewer || !inWorkspace;
-    $("#ws-more-menu").hidden = viewer || !inWorkspace;
+    $("#btn-new-album").hidden = !canManage || inWorkspace;
+    $("#btn-upload-trigger").hidden = !inWorkspace;
+    $("#ws-more-menu").hidden = !inWorkspace;
+    if ($("#btn-edit-album")) $("#btn-edit-album").hidden = !canManage;
+    if ($("#btn-delete-album")) $("#btn-delete-album").hidden = !canManage;
+    if ($("#ws-menu-danger-sep")) $("#ws-menu-danger-sep").hidden = !canManage;
   }
 
   function showAlbumsListView(updateUrl = true) {
@@ -425,8 +455,8 @@
     if (list.length === 0) {
       grid.innerHTML = `<div class="media-empty-box">
         <h3>Chưa có Album phù hợp</h3>
-        <p>${state.albums.length === 0 ? "Tạo Album sự kiện đầu tiên để tải ảnh gốc lên kho HolaRise." : "Thử xóa bộ lọc hoặc từ khóa tìm kiếm."}</p>
-        ${state.albums.length === 0 ? '<button class="btn btn--primary btn--sm" type="button" data-trigger-new-album>+ Tạo Album đầu tiên</button>' : ""}
+        <p>${state.albums.length === 0 ? (canManageMedia() ? "Tạo Album sự kiện đầu tiên để tải ảnh & video gốc lên kho HolaRise." : "Hiện chưa có thư mục sự kiện nào được tạo bởi Quản trị.") : "Thử xóa bộ lọc hoặc từ khóa tìm kiếm."}</p>
+        ${state.albums.length === 0 && canManageMedia() ? '<button class="btn btn--primary btn--sm" type="button" data-trigger-new-album>+ Tạo Album đầu tiên</button>' : ""}
       </div>`;
       return;
     }
@@ -447,7 +477,7 @@
           <div class="album-card-cover">
             ${coverHtml}
             ${cornerPill}
-            ${isViewerOnly() ? "" : `<button class="album-edit-btn" type="button" data-edit-album="${esc(a.id)}" aria-label="Sửa album ${esc(a.title)}" title="Sửa thông tin Album">
+            ${!canManageMedia() ? "" : `<button class="album-edit-btn" type="button" data-edit-album="${esc(a.id)}" aria-label="Sửa album ${esc(a.title)}" title="Sửa thông tin Album">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             </button>`}
           </div>
@@ -563,10 +593,17 @@
 
     const selectBtn = $("#btn-toggle-select");
     if (selectBtn) {
-      selectBtn.hidden = total === 0;
+      selectBtn.hidden = !canManageMedia() || total === 0;
       selectBtn.textContent = state.selectMode ? "Xong" : "Chọn nhiều";
       selectBtn.classList.toggle("btn--primary", state.selectMode);
       selectBtn.classList.toggle("btn--outline", !state.selectMode);
+    }
+
+    const modCopy = $("#ws-moderation-copy");
+    if (modCopy) {
+      modCopy.innerHTML = isNgvRole()
+        ? "<strong>Chế độ NGV: Đang mở tải lên</strong> · Bạn có thể xem toàn bộ thư mục và tải ảnh, video gốc không giới hạn số lượng. Tệp tải lên sẽ vào hàng <em>Chờ duyệt</em> để Quản trị duyệt lên web."
+        : "<strong>Kiểm duyệt Media: ĐANG BẬT</strong> · Ảnh &amp; video NGV và thành viên tải lên được lưu bản gốc trên Google Drive và chờ Quản trị duyệt trước khi hiển thị công khai.";
     }
   }
 
@@ -580,9 +617,9 @@
     if (state.photos.length === 0) {
       grid.innerHTML = `<div class="media-empty-box media-empty-box--clickable" data-trigger-upload tabindex="0" role="button">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <h3>Album chưa có ảnh</h3>
-        <p>Chạm vào đây hoặc kéo thả ảnh trực tiếp để tải lên (tối đa 30 ảnh/lượt).</p>
-        <span class="btn btn--primary btn--sm">+ Chọn ảnh từ máy</span>
+        <h3>Album chưa có ảnh hoặc video</h3>
+        <p>Chạm vào đây hoặc kéo thả ảnh &amp; video gốc trực tiếp để tải lên (không giới hạn số lượng).</p>
+        <span class="btn btn--primary btn--sm">+ Chọn ảnh &amp; video từ máy</span>
       </div>`;
       return;
     }
@@ -916,14 +953,18 @@
       : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Ghim Trang chủ';
 
     const coverBtn = $("#lb-btn-cover");
-    coverBtn.hidden = !isApproved || Boolean(isCover);
+    coverBtn.hidden = !canManageMedia() || !isApproved || Boolean(isCover);
     coverBtn.disabled = false;
+
+    const editBtn = $("#lb-btn-edit");
+    if (editBtn) editBtn.hidden = !canManageMedia();
+    const delBtn = $("#lb-btn-delete");
+    if (delBtn) delBtn.hidden = !canManageMedia();
 
     const aiBtn = $("#lb-btn-ai-retouch");
     if (aiBtn) {
       const isVideo = String(photo.mediaType || "image").toLowerCase() === "video";
-      const isViewerOnly = state.user?.role === "media_viewer";
-      aiBtn.hidden = isVideo || isViewerOnly;
+      aiBtn.hidden = isVideo || !canManageMedia();
       aiBtn.disabled = false;
     }
   }
@@ -1307,22 +1348,19 @@
   }
 
   /* =========================================================================
-     Multi-Image Upload Queue (Concurrency = 2 + Retry)
+     Unlimited Multi-Image & Large Video Upload Queue (Concurrency = 2 + Drive Resumable)
      ========================================================================= */
   function enqueueFiles(fileList) {
     if (!state.activeAlbum) return;
     const files = Array.from(fileList || []).filter((f) => f && f.size > 0);
     if (files.length === 0) return;
 
-    if (files.length > MAX_BATCH_FILES) {
-      toast(`Chỉ chọn tối đa ${MAX_BATCH_FILES} ảnh mỗi lượt (đã lấy ${MAX_BATCH_FILES} ảnh đầu).`, "info");
-    }
-    const batch = files.slice(0, MAX_BATCH_FILES);
-    const items = batch.map((file, idx) => ({
+    const items = files.map((file, idx) => ({
       uid: `q-${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
       file,
-      name: file.name || `anh-${idx + 1}.jpg`,
+      name: file.name || (isVideoFile(file) ? `video-${idx + 1}.mp4` : `anh-${idx + 1}.jpg`),
       status: "pending",
+      progress: 0,
       error: "",
     }));
 
@@ -1347,32 +1385,147 @@
     const total = state.uploadQueue.length;
     const done = state.uploadQueue.filter((i) => i.status === "done").length;
     const failed = state.uploadQueue.filter((i) => i.status === "error").length;
-    const pct = Math.round(((done + failed) / Math.max(1, total)) * 100);
+    const activePartial = state.uploadQueue
+      .filter((i) => i.status === "uploading")
+      .reduce((sum, i) => sum + Math.max(0, Math.min(99, Number(i.progress || 0))) / 100, 0);
+    const pct = Math.min(100, Math.round(((done + failed + activePartial) / Math.max(1, total)) * 100));
     if (fill) fill.style.width = `${pct}%`;
 
     $("#upload-queue-summary").textContent = state.uploading
-      ? `Đang tải lên: ${done}/${total}${failed ? ` · ${failed} lỗi` : ""}`
-      : `Hoàn tất: ${done}/${total} ảnh${failed ? ` · ${failed} lỗi` : ""}`;
+      ? `Đang tải lên: ${done}/${total} tệp (${pct}%)${failed ? ` · ${failed} lỗi` : ""}`
+      : `Hoàn tất: ${done}/${total} tệp${failed ? ` · ${failed} lỗi` : ""}`;
 
     $("#btn-retry-failed").hidden = state.uploading || failed === 0;
     $("#btn-clear-queue").hidden = state.uploading;
 
     const statusText = {
       pending: "Chờ...",
-      compressing: "Đang nén...",
+      compressing: "Đang xử lý...",
       uploading: "Đang tải...",
       done: "Xong ✓",
       error: "Lỗi",
     };
 
     list.innerHTML = state.uploadQueue
-      .map(
-        (item) => `<div class="queue-item queue-item--${esc(item.status)}">
+      .map((item) => {
+        const label =
+          item.status === "error"
+            ? item.error || "Lỗi"
+            : item.status === "uploading" && item.progress > 0
+              ? `Đang tải ${item.progress}%`
+              : statusText[item.status];
+        return `<div class="queue-item queue-item--${esc(item.status)}">
           <span class="queue-item-name" title="${esc(item.name)}">${esc(item.name)}</span>
-          <span class="queue-item-status">${esc(item.status === "error" ? item.error || "Lỗi" : statusText[item.status])}</span>
-        </div>`
-      )
+          <span class="queue-item-status">${esc(label)}</span>
+        </div>`;
+      })
       .join("");
+  }
+
+  async function uploadFileDirectResumable(item, { folderName, isVid, webPreview }) {
+    const file = item.file;
+    const mimeType =
+      String(file.type || "").toLowerCase() || (isVid ? "video/mp4" : "image/jpeg");
+    const init = await apiFetch("/api/admin/media", {
+      method: "POST",
+      json: {
+        action: "init-resumable",
+        filename: item.name || (isVid ? "video.mp4" : "photo.jpg"),
+        mimeType,
+        fileSize: file.size,
+        category: "album",
+        subfolder: folderName,
+      },
+    });
+    const uploadUrl = init?.uploadUrl;
+    if (!uploadUrl) {
+      throw new Error("Không lấy được phiên tải Google Drive.");
+    }
+
+    const total = file.size;
+    let offset = 0;
+    let driveData = null;
+
+    while (offset < total) {
+      const end = Math.min(offset + RESUMABLE_CHUNK_BYTES, total);
+      const chunk = file.slice(offset, end);
+      let attempt = 0;
+      let res = null;
+      while (attempt < 3) {
+        try {
+          res = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: {
+              "Content-Type": mimeType,
+              "Content-Range": `bytes ${offset}-${end - 1}/${total}`,
+            },
+            body: chunk,
+          });
+          if (res.status === 308 || res.ok) break;
+          if (res.status >= 500 && attempt < 2) {
+            attempt += 1;
+            await new Promise((r) => setTimeout(r, 600 * attempt));
+            continue;
+          }
+          break;
+        } catch (netErr) {
+          if (attempt < 2) {
+            attempt += 1;
+            await new Promise((r) => setTimeout(r, 700 * attempt));
+            continue;
+          }
+          throw netErr;
+        }
+      }
+
+      if (!res) {
+        throw new Error("Mất kết nối khi đang tải lên Google Drive.");
+      }
+
+      if (res.status === 308) {
+        const rangeHeader = res.headers.get("Range") || "";
+        const m = rangeHeader.match(/bytes=0-(\d+)/i);
+        offset = m ? Number(m[1]) + 1 : end;
+        item.progress = Math.min(99, Math.round((offset / total) * 100));
+        renderUploadQueue();
+        continue;
+      }
+
+      if (res.ok) {
+        driveData = await res.json().catch(() => null);
+        item.progress = 99;
+        renderUploadQueue();
+        break;
+      }
+
+      const errText = await res.text().catch(() => "");
+      throw new Error(`Google Drive từ chối tệp (HTTP ${res.status})${errText ? `: ${errText.slice(0, 120)}` : ""}`);
+    }
+
+    const driveId = driveData?.id;
+    if (!driveId) {
+      throw new Error("Google Drive không trả mã tệp sau khi tải xong.");
+    }
+
+    let webThumbDataUrl = "";
+    if (!isVid && webPreview?.blob) {
+      try {
+        webThumbDataUrl = await blobToDataUrl(webPreview.blob);
+      } catch {
+        webThumbDataUrl = "";
+      }
+    }
+
+    return apiFetch("/api/admin/media", {
+      method: "POST",
+      json: {
+        action: "finalize-resumable",
+        driveId,
+        filename: item.name,
+        mimeType,
+        webThumbDataUrl,
+      },
+    });
   }
 
   async function processSingleQueueItem(item) {
@@ -1411,6 +1564,7 @@
       }
 
       item.status = "uploading";
+      item.progress = 0;
       item.error = "";
       renderUploadQueue();
 
@@ -1424,14 +1578,36 @@
           ? `${dateMatch[1]} - ${cleanTitle}`.slice(0, 120)
           : (cleanTitle || state.activeAlbum.slug || "").slice(0, 120);
 
-      const fd = new FormData();
-      fd.append("file", uploadPayload, uploadFilename);
-      if (webPreview) {
-        fd.append("webFile", webPreview.blob, `web.${webPreview.ext}`);
+      let uploaded = null;
+      const shouldUseDirectResumable =
+        storageInfo.driveConfigured &&
+        storageInfo.resumableSupported &&
+        (isVid || item.file.size > DIRECT_RESUMABLE_IMAGE_THRESHOLD);
+
+      if (shouldUseDirectResumable) {
+        try {
+          uploaded = await uploadFileDirectResumable(item, { folderName, isVid, webPreview });
+        } catch (directErr) {
+          const proxyCap = isVid ? 48 * 1024 * 1024 : 24 * 1024 * 1024;
+          if (item.file.size > proxyCap) {
+            throw directErr;
+          }
+          // Fallback to Worker proxy for moderate files if browser/WebView blocked direct Drive CORS
+          item.progress = 0;
+          renderUploadQueue();
+        }
       }
-      fd.append("category", "album");
-      fd.append("subfolder", folderName);
-      const uploaded = await apiFetch("/api/admin/media", { method: "POST", body: fd });
+
+      if (!uploaded) {
+        const fd = new FormData();
+        fd.append("file", uploadPayload, uploadFilename);
+        if (webPreview) {
+          fd.append("webFile", webPreview.blob, `web.${webPreview.ext}`);
+        }
+        fd.append("category", "album");
+        fd.append("subfolder", folderName);
+        uploaded = await apiFetch("/api/admin/media", { method: "POST", body: fd });
+      }
 
       const attached = await apiFetch(`/api/admin/albums/${encodeURIComponent(albumId)}/photos`, {
         method: "POST",
@@ -1445,11 +1621,12 @@
           alt: state.activeAlbum.title,
           photographer,
           isFeaturedHome: false,
-          approvalStatus: storageInfo.driveConfigured ? "pending" : undefined,
+          approvalStatus: isNgvRole() || storageInfo.driveConfigured ? "pending" : undefined,
         },
       });
 
       item.status = "done";
+      item.progress = 100;
       if (Array.isArray(attached.items) && attached.items.length > 0) {
         state.photos = [...attached.items, ...state.photos];
         if (!state.activeAlbum.coverUrl && attached.coverUrl) {
@@ -1722,13 +1899,20 @@
       const alertEl = $("#login-alert");
       const btn = $("#login-submit");
       showAlert(alertEl, "");
+      const gateToken = window.HolaVault?.getGateToken?.() || "";
+      if (!gateToken) {
+        showAlert(alertEl, "Phiên mã cổng đã hết hạn. Vui lòng nhập lại mã cổng.");
+        window.HolaVault?.reset?.();
+        return;
+      }
       btn.disabled = true;
       btn.textContent = "Đang đăng nhập...";
       try {
-        const res = await apiFetch("/api/auth/login", {
+        const res = await apiFetch("/api/auth/media-login", {
           method: "POST",
           json: {
-            email: $("#login-email").value.trim(),
+            gateToken,
+            identifier: $("#login-email").value.trim(),
             password: $("#login-password").value,
           },
         });
@@ -1736,22 +1920,28 @@
         toast(`Chào mừng ${res.user.name}.`, "success");
         await enterMediaShell(res.user);
       } catch (err) {
-        showAlert(alertEl, err.message);
+        if (err?.data?.error?.code === "GATE_EXPIRED") {
+          window.HolaVault?.reset?.();
+          showAlert($("#pin-gate-alert"), err.message);
+        } else {
+          showAlert(alertEl, err.message);
+        }
       } finally {
         btn.disabled = false;
-        btn.textContent = "Đăng nhập vào kho ảnh";
+        btn.textContent = "Đăng nhập vào kho Media";
       }
     });
 
-    // Logout
+    // Logout (clears both Admin and NGV Member sessions)
     $("#btn-logout")?.addEventListener("click", async () => {
       closeAllMenus();
       try {
-        await apiFetch("/api/auth/logout", { method: "POST" });
+        await apiFetch("/api/auth/logout?scope=media", { method: "POST" });
       } catch {
         // ignore
       }
       state.user = null;
+      state.mediaStorage = null;
       showAuthScreen();
       toast("Đã đăng xuất.", "info");
     });

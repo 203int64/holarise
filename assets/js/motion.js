@@ -260,7 +260,7 @@
     );
   }
 
-  /* 2B. Mobile Horizontal Photo Exhibition Sync */
+  /* 2B. Horizontal Photo Exhibition Sync (Desktop & Mobile native CSS scroll-snap) */
   var hSectionEl = document.querySelector("[data-horizontal-section]");
   var hWrap = document.querySelector(".horizontal-track-wrap");
   var hFillMobile = document.querySelector("[data-exhibition-fill]");
@@ -268,25 +268,44 @@
   var hPrevBtn = document.querySelector("[data-exhibition-prev]");
   var hNextBtn = document.querySelector("[data-exhibition-next]");
   if (hWrap && hFillMobile) {
-    var getTotalGalleryCards = function () {
-      return hWrap.querySelectorAll(".horizontal-card").length || 1;
+    var getGalleryCards = function () {
+      return Array.prototype.slice.call(hWrap.querySelectorAll(".horizontal-card"));
+    };
+    var getGalleryStep = function (cards) {
+      if (cards.length > 1) {
+        var delta = cards[1].offsetLeft - cards[0].offsetLeft;
+        if (delta > 0) return delta;
+      }
+      return cards[0] ? cards[0].getBoundingClientRect().width + 24 : 380;
     };
     var galleryRafPending = false;
-    var updateMobileGalleryProgress = function () {
-      if (desktopMq.matches && hasGsap && !prefersReduced) return;
-      var totalGalleryCards = getTotalGalleryCards();
-      var maxScroll = Math.max(1, hWrap.scrollWidth - hWrap.clientWidth);
-      var prog = Math.min(1, Math.max(0, hWrap.scrollLeft / maxScroll));
-      var pct = Math.max(1 / totalGalleryCards, prog);
+    var activeGalleryIdx = 0;
+    var updateGalleryProgress = function (overrideIdx) {
+      var cards = getGalleryCards();
+      var totalGalleryCards = cards.length || 1;
+      var maxScroll = Math.max(0, hWrap.scrollWidth - hWrap.clientWidth);
+      var step = getGalleryStep(cards);
+      var curIdx;
+      if (typeof overrideIdx === "number") {
+        curIdx = Math.min(totalGalleryCards - 1, Math.max(0, overrideIdx));
+      } else if (maxScroll <= 4) {
+        curIdx = activeGalleryIdx;
+      } else if (hWrap.scrollLeft >= maxScroll - 4) {
+        curIdx = totalGalleryCards - 1;
+      } else {
+        curIdx = Math.min(totalGalleryCards - 1, Math.max(0, Math.round(hWrap.scrollLeft / step)));
+      }
+      activeGalleryIdx = curIdx;
+      var cur = curIdx + 1;
+      var pct = Math.max(1 / totalGalleryCards, cur / totalGalleryCards);
       hFillMobile.style.transform = "scaleX(" + pct.toFixed(4) + ")";
       if (hCountMobile) {
-        var cur = Math.min(totalGalleryCards, Math.max(1, Math.round(prog * (totalGalleryCards - 1)) + 1));
         var pCur = cur < 10 ? "0" + cur : String(cur);
         var pTot = totalGalleryCards < 10 ? "0" + totalGalleryCards : String(totalGalleryCards);
         hCountMobile.textContent = pCur + " / " + pTot;
       }
-      if (hPrevBtn) hPrevBtn.disabled = hWrap.scrollLeft <= 4;
-      if (hNextBtn) hNextBtn.disabled = hWrap.scrollLeft >= maxScroll - 4;
+      if (hPrevBtn) hPrevBtn.disabled = curIdx <= 0 && hWrap.scrollLeft <= 4;
+      if (hNextBtn) hNextBtn.disabled = curIdx >= totalGalleryCards - 1 || (maxScroll > 4 && hWrap.scrollLeft >= maxScroll - 4);
     };
     hWrap.addEventListener(
       "scroll",
@@ -295,34 +314,22 @@
         galleryRafPending = true;
         window.requestAnimationFrame(function () {
           galleryRafPending = false;
-          updateMobileGalleryProgress();
+          updateGalleryProgress();
         });
       },
       { passive: true }
     );
-    updateMobileGalleryProgress();
+    updateGalleryProgress(0);
 
     var stepGallery = function (dir) {
-      var totalGalleryCards = getTotalGalleryCards();
-      if (desktopMq.matches && hasGsap && !prefersReduced && hSectionEl) {
-        var rect = hSectionEl.getBoundingClientRect();
-        var sectionTop = window.scrollY + rect.top;
-        var runway = Math.max(1, hSectionEl.offsetHeight - window.innerHeight);
-        var curProg = Math.min(1, Math.max(0, (window.scrollY - sectionTop) / runway));
-        var curIdx = Math.round(curProg * (totalGalleryCards - 1));
-        var nextIdx = Math.max(0, Math.min(totalGalleryCards - 1, curIdx + dir));
-        var targetProg = totalGalleryCards > 1 ? nextIdx / (totalGalleryCards - 1) : 0;
-        var targetTop = sectionTop + targetProg * runway;
-        if (window.HolaSmoothScroll && window.HolaSmoothScroll.scrollTo) {
-          window.HolaSmoothScroll.scrollTo(targetTop);
-        } else {
-          window.scrollTo({ top: targetTop, behavior: "smooth" });
-        }
-        return;
-      }
-      var card = hWrap.querySelector(".horizontal-card");
-      var step = card ? card.getBoundingClientRect().width + 24 : 380;
-      hWrap.scrollBy({ left: dir * step, behavior: prefersReduced ? "auto" : "smooth" });
+      var cards = getGalleryCards();
+      var totalGalleryCards = cards.length || 1;
+      var step = getGalleryStep(cards);
+      var nextIdx = Math.max(0, Math.min(totalGalleryCards - 1, activeGalleryIdx + dir));
+      var maxScroll = Math.max(0, hWrap.scrollWidth - hWrap.clientWidth);
+      var targetLeft = nextIdx >= totalGalleryCards - 1 ? maxScroll : Math.min(maxScroll, nextIdx * step);
+      updateGalleryProgress(nextIdx);
+      hWrap.scrollTo({ left: targetLeft, behavior: prefersReduced ? "auto" : "smooth" });
     };
 
     if (hPrevBtn) {
@@ -847,149 +854,8 @@
     });
   });
 
-  /* 11. Desktop 340vh Exhibition Runway + Active Center Focus + Contextual Cursor Pill + 3D Pass Tilt */
+  /* 11. Desktop Tactile Micro-Craft (Spotlight, 3D Specular Tilt, Floating Preview, Magnetic CTA) */
   var mm = gsap.matchMedia();
-
-  mm.add("(min-width: 1024px)", function () {
-    var hSection = document.querySelector("[data-horizontal-section]");
-    var hTrack = document.querySelector("[data-horizontal-track]");
-    var hCards = hTrack ? Array.prototype.slice.call(hTrack.querySelectorAll(".horizontal-card")) : [];
-    var hImages = hTrack ? Array.prototype.slice.call(hTrack.querySelectorAll(".horizontal-frame img")) : [];
-    var cursorPill = document.getElementById("exhibition-cursor-pill");
-    var cursorPillText = cursorPill ? cursorPill.querySelector("[data-cursor-pill-text]") : null;
-    var totalDeskCards = hCards.length || 1;
-
-    /* Scroll-jacking disabled per AGENTS.md Tầng 1: native CSS scroll-snap handles smooth horizontal gallery on both desktop & mobile */
-    if (false && hSection && hTrack) {
-      var getMaxShift = function () {
-        return Math.max(0, hTrack.scrollWidth - window.innerWidth + 96);
-      };
-
-      var syncRunwayHeight = function () {
-        var shift = getMaxShift();
-        var idealPx = Math.max(window.innerHeight * 3.35, shift * 1.15 + window.innerHeight);
-        var cappedPx = Math.min(window.innerHeight * 4.0, idealPx);
-        hSection.style.height = Math.round(cappedPx) + "px";
-      };
-      syncRunwayHeight();
-      ScrollTrigger.addEventListener("refreshInit", syncRunwayHeight);
-
-      var cardSkewSetters = hCards.map(function (c) {
-        return gsap.quickTo(c, "skewX", { duration: 0.45, ease: "power3.out" });
-      });
-      var cardSkewReset = null;
-
-      var updateCenterCard = function (progress) {
-        var focusFloat = progress * (totalDeskCards - 1);
-        hCards.forEach(function (card, idx) {
-          var dist = Math.abs(idx - focusFloat);
-          card.classList.toggle("is-center-card", dist < 0.58);
-        });
-      };
-      updateCenterCard(0);
-
-      gsap.fromTo(
-        hTrack,
-        { x: 0 },
-        {
-          x: function () {
-            return -getMaxShift();
-          },
-          ease: "none",
-          scrollTrigger: {
-            trigger: hSection,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 0.72,
-            invalidateOnRefresh: true,
-            onUpdate: function (self) {
-              if (hFillMobile) {
-                var pct = Math.max(1 / totalDeskCards, self.progress);
-                hFillMobile.style.transform = "scaleX(" + pct.toFixed(4) + ")";
-              }
-              if (hCountMobile) {
-                var cur = Math.min(totalDeskCards, Math.max(1, Math.round(self.progress * (totalDeskCards - 1)) + 1));
-                var pCur = cur < 10 ? "0" + cur : String(cur);
-                var pTot = totalDeskCards < 10 ? "0" + totalDeskCards : String(totalDeskCards);
-                hCountMobile.textContent = pCur + " / " + pTot;
-              }
-              if (hPrevBtn) hPrevBtn.disabled = self.progress <= 0.02;
-              if (hNextBtn) hNextBtn.disabled = self.progress >= 0.98;
-
-              updateCenterCard(self.progress);
-
-              var skew = Math.max(-3, Math.min(3, -(self.getVelocity() / 560)));
-              cardSkewSetters.forEach(function (set) {
-                set(skew);
-              });
-              if (cardSkewReset) clearTimeout(cardSkewReset);
-              cardSkewReset = setTimeout(function () {
-                cardSkewSetters.forEach(function (set) {
-                  set(0);
-                });
-              }, 140);
-            },
-          },
-        }
-      );
-
-      if (hImages.length) {
-        gsap.fromTo(
-          hImages,
-          { xPercent: -9 },
-          {
-            xPercent: 9,
-            ease: "none",
-            scrollTrigger: {
-              trigger: hSection,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.72,
-              invalidateOnRefresh: true,
-            },
-          }
-        );
-      }
-
-      /* Contextual Cursor Pill over Horizontal Exhibition Cards (pointer: fine only) */
-      if (isFinePointer && cursorPill) {
-        var pillX = gsap.quickTo(cursorPill, "x", { duration: 0.22, ease: "power3.out" });
-        var pillY = gsap.quickTo(cursorPill, "y", { duration: 0.22, ease: "power3.out" });
-
-        hCards.forEach(function (card, idx) {
-          card.addEventListener("pointerenter", function (e) {
-            var lang = document.documentElement.lang || document.documentElement.getAttribute("data-lang") || "vi";
-            var prefix = lang.toLowerCase().indexOf("en") === 0 ? "VIEW" : "XEM ẢNH";
-            var badgeIdx =
-              card.getAttribute("data-card-index") ||
-              (idx + 1 < 10 ? "0" + (idx + 1) : String(idx + 1)) +
-                " / " +
-                (totalDeskCards < 10 ? "0" + totalDeskCards : String(totalDeskCards));
-            if (cursorPillText) {
-              cursorPillText.textContent = prefix + " · " + badgeIdx;
-            }
-            pillX(e.clientX + 16);
-            pillY(e.clientY + 16);
-            cursorPill.classList.add("is-visible");
-          });
-
-          card.addEventListener("pointermove", function (e) {
-            pillX(e.clientX + 16);
-            pillY(e.clientY + 16);
-          });
-
-          card.addEventListener("pointerleave", function () {
-            cursorPill.classList.remove("is-visible");
-          });
-        });
-      }
-
-      return function () {
-        ScrollTrigger.removeEventListener("refreshInit", syncRunwayHeight);
-        hSection.style.height = "";
-      };
-    }
-  });
 
   mm.add("(min-width: 1024px)", function () {
     if (!isFinePointer) return;

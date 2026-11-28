@@ -1,6 +1,7 @@
 import { ensureChatAndCapabilitySchema } from "../../_lib/capabilities.js";
 import { isDriveConfigured } from "../../_lib/drive.js";
 import { getSettingsMap } from "../../_lib/gas.js";
+import { getMediaAccessPin } from "../../_lib/gate-token.js";
 import { ensureMediaApprovalSchema } from "../../_lib/media-approval-schema.js";
 import { serializeEventRow, splitEventsByDate } from "../../_lib/render.js";
 import { jsonResponse, requireAdmin } from "../../_lib/security.js";
@@ -167,7 +168,7 @@ export async function onRequestGet(context) {
       driveConfigured: isDriveConfigured(context.env),
       gasConfigured: Boolean(settingsMap?.gas_webhook_url),
       hasWebhookSecret: Boolean(settingsMap?.gas_webhook_secret),
-      mediaGateEnabled: Boolean(String(context.env?.MEDIA_ACCESS_PIN || "").trim()),
+      mediaGateEnabled: Boolean(getMediaAccessPin(context.env)),
     },
   });
 }

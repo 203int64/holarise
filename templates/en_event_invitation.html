@@ -38,16 +38,15 @@
     <div class="kicker invite-pillar-kicker" style="margin-top: 18px;">{{EVENT_KICKER}} · {{EVENT_LANG_BADGE}}</div>
     <h1 class="invite-title">{{INVITE_HEADLINE}}</h1>
 
-    <div class="invite-meta-bar">
+    <div class="invite-meta-bar invite-meta-bar--luma">
       <div class="invite-meta-facts">
         <time datetime="{{INVITE_START_ISO}}">{{INVITE_TIME_LABEL}}</time>
         <span aria-hidden="true">·</span>
         <span>{{INVITE_VENUE_HTML}}</span>
       </div>
-      <div class="invite-meta-links">
-        <button class="invite-text-btn invite-text-btn--accent" type="button" data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/en/events/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Reserve a seat</button>
-        <span aria-hidden="true">·</span>
-        <button class="invite-text-btn" type="button" data-open-invite-share>Send invitation</button>
+      <div class="invite-meta-links invite-meta-cta-row">
+        <button class="btn btn--primary btn--sm" type="button" data-magnetic data-register-event="{{EVENT_TITLE}}" data-event-id="{{EVENT_ID}}" data-event-slug="{{EVENT_SLUG}}" data-event-date="{{EVENT_DATE_DISPLAY}}" data-event-time="{{INVITE_TIME_LABEL}}" data-event-location="{{EVENT_LOCATION}}" data-venue-url="{{EVENT_VENUE_URL}}" data-event-fee="{{EVENT_FEE}}" data-event-seats="{{EVENT_SEATS}}" data-event-type="{{EVENT_KICKER}}" data-event-href="/en/events/{{EVENT_SLUG}}/" data-event-image="{{EVENT_IMAGE}}" data-zalo-group="{{EVENT_ZALO_GROUP}}" data-ics-start="{{INVITE_ICS_START}}" data-ics-end="{{INVITE_ICS_END}}" data-note-summary="{{EVENT_NOTE_SUMMARY}}" data-note-placeholder="{{EVENT_NOTE_PLACEHOLDER}}" data-anon-share="true">Reserve a seat</button>
+        <button class="btn btn--outline btn--sm" type="button" data-open-invite-share>Send invitation</button>
       </div>
     </div>
   </div>

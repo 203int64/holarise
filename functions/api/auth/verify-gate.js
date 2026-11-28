@@ -1,11 +1,11 @@
 /**
  * POST /api/auth/verify-gate
- * Step 1 of the 2-step team vault flow (/media/ and /admin/):
- * Verifies the 4-digit team access code against Cloudflare Secret MEDIA_ACCESS_PIN
- * (with strict rate limiting: 5 attempts / 15 min per IP) and returns a 10-minute HMAC gateToken.
+ * Step 1 of the /media/ 2-step vault flow:
+ * Verifies the 4-digit access code against MEDIA_ACCESS_PIN (default: "1948")
+ * with strict rate limiting (5 attempts / 15 min per IP) and returns a 10-minute HMAC gateToken.
  */
 
-import { constantTimeStringEqual, createGateToken } from "../../_lib/gate-token.js";
+import { constantTimeStringEqual, createGateToken, getMediaAccessPin } from "../../_lib/gate-token.js";
 import {
   checkRateLimit,
   errorResponse,
@@ -24,14 +24,7 @@ export async function onRequestPost({ request, env }) {
     return errorResponse(403, "CSRF_BLOCKED", "Nguồn yêu cầu không hợp lệ.");
   }
 
-  const expectedPin = String(env?.MEDIA_ACCESS_PIN || "").trim();
-  if (!expectedPin) {
-    return errorResponse(
-      503,
-      "PIN_NOT_CONFIGURED",
-      "Chưa cấu hình mã cổng đội ngũ (MEDIA_ACCESS_PIN)."
-    );
-  }
+  const expectedPin = getMediaAccessPin(env);
 
   const ipHash = await getClientIpHash(request);
   const rl = await checkRateLimit(env.DB, `verify-gate:${ipHash}`, 5, 15 * 60 * 1000);
