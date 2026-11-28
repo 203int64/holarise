@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=ff3e65bc8a">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=d7b9f503da">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
 <body data-pwa-app-name="HolaRise Manager">
@@ -224,7 +224,6 @@
 
       <nav class="sidebar-nav" aria-label="Các mục quản trị">
         <div class="nav-group" data-nav-group="work">
-          <div class="nav-group-label">Làm việc</div>
           <button class="nav-item is-active" type="button" data-tab="overview">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
             <span>Tổng quan</span>
@@ -241,7 +240,7 @@
         </div>
 
         <div class="nav-group" data-nav-group="ops">
-          <div class="nav-group-label">Vận hành</div>
+          <div class="nav-group-label">Chương trình &amp; Web</div>
           <button class="nav-item" type="button" data-tab="events">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <span>Sự kiện</span>
@@ -265,10 +264,15 @@
             <span>Cộng đồng</span>
             <span class="nav-badge" id="badge-pending-refs" hidden>0</span>
           </button>
+          <a class="nav-item" href="/media/">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><polyline points="21 15 16 10 5 19"/></svg>
+            <span>Kho Ảnh ↗</span>
+            <span class="nav-badge nav-badge--warn" id="badge-pending-photos" hidden>0</span>
+          </a>
         </div>
 
         <div class="nav-group" data-nav-group="org">
-          <div class="nav-group-label">Tổ chức</div>
+          <div class="nav-group-label">Hệ thống</div>
           <button class="nav-item" type="button" data-tab="team">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <span>Phân quyền</span>
@@ -281,11 +285,6 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span>Cài đặt</span>
           </button>
-          <a class="nav-item" href="/media/">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><polyline points="21 15 16 10 5 19"/></svg>
-            <span>Kho Ảnh ↗</span>
-            <span class="nav-badge nav-badge--warn" id="badge-pending-photos" hidden>0</span>
-          </a>
         </div>
       </nav>
 
@@ -2276,11 +2275,11 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=ff3e65bc8a" defer></script>
-  <script src="/assets/js/admin-manager.js?v=ff3e65bc8a" defer></script>
-  <script src="/assets/js/admin-analytics.js?v=ff3e65bc8a" defer></script>
-  <script src="/assets/js/admin.js?v=ff3e65bc8a" defer></script>
-  <script src="/assets/js/admin-desk.js?v=ff3e65bc8a" defer></script>
-  <script src="/assets/js/pwa.js?v=ff3e65bc8a" defer></script>
+  <script src="/assets/js/passkey-client.js?v=d7b9f503da" defer></script>
+  <script src="/assets/js/admin-manager.js?v=d7b9f503da" defer></script>
+  <script src="/assets/js/admin-analytics.js?v=d7b9f503da" defer></script>
+  <script src="/assets/js/admin.js?v=d7b9f503da" defer></script>
+  <script src="/assets/js/admin-desk.js?v=d7b9f503da" defer></script>
+  <script src="/assets/js/pwa.js?v=d7b9f503da" defer></script>
 </body>
 </html>

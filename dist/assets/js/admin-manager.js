@@ -13,7 +13,7 @@
     overview: "overview.read",
     timeline: "timeline.read",
     tasks: "tasks.read",
-    team: "team.read",
+    team: "users.manage",
     registrations: "registrations.read",
     events: "events.read",
     posts: "posts.read",
