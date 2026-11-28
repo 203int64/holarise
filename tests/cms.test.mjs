@@ -1469,19 +1469,20 @@ test("CMS v2: Sole-admin 203int64 lock, /api/admin/overview, migration 0018 zalo
   const ovRes = await overviewGet({ request: makeReq("/api/admin/overview", { cookie: soleCookie }), env });
   assert.equal(ovRes.status, 200);
   const ov = await ovRes.json();
-  assert.equal(ov.registrations.new, 2);
+  // Legacy feedback row REG-BUG-1 is excluded from pure registrations counts
+  assert.equal(ov.registrations.new, 1);
   assert.equal(ov.media.pendingPhotoCount, albumRow ? 1 : 0);
   const evInOv = ov.events.upcoming.find((x) => x.id === createdEv.id);
   assert.ok(evInOv);
   assert.equal(evInOv.webBookedCount, 1);
 
-  const bugRegsRes = await regsList({
-    request: makeReq("/api/admin/registrations?source=feedback", { cookie: soleCookie }),
+  const pureRegsRes = await regsList({
+    request: makeReq("/api/admin/registrations", { cookie: soleCookie }),
     env,
   });
-  const bugRegs = await bugRegsRes.json();
-  assert.equal(bugRegs.items.length, 1);
-  assert.equal(bugRegs.items[0].bug_screenshot_url, "/api/admin/bug-screenshot/bug-261126-abc12345.jpg");
+  const pureRegs = await pureRegsRes.json();
+  assert.equal(pureRegs.items.length, 1);
+  assert.notEqual(pureRegs.items[0].id, "REG-BUG-1");
 });
 
 test("EN Post-Event Memory Stage: /en/schedule/ links finished events to /en/events/<slug>/, 1:1 VN<->EN switch, & EN feedback API", async () => {

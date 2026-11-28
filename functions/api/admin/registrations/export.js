@@ -1,6 +1,7 @@
 import { logAudit } from "../../../_lib/rbac.js";
 import { requireAdmin } from "../../../_lib/security.js";
 import { buildRegistrationsCsv, cleanStr, VALID_REG_STATUSES } from "../../../_lib/validation.js";
+import { PURE_REGISTRATION_SQL } from "./index.js";
 
 export async function onRequestGet(context) {
   const auth = await requireAdmin(context, { superAdminOnly: true });
@@ -10,7 +11,7 @@ export async function onRequestGet(context) {
   const status = cleanStr(url.searchParams.get("status"), 20);
   const activity = cleanStr(url.searchParams.get("activity"), 220);
 
-  const where = [];
+  const where = [PURE_REGISTRATION_SQL];
   const binds = [];
   if (status && VALID_REG_STATUSES.has(status)) {
     where.push("status = ?");
@@ -20,7 +21,7 @@ export async function onRequestGet(context) {
     where.push("activity_title = ?");
     binds.push(activity);
   }
-  const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const whereSql = `WHERE ${where.join(" AND ")}`;
 
   const { results } = await context.env.DB.prepare(
     `SELECT id, created_at, source, activity_title, full_name, phone, email, role, organization, note, status, admin_note, sync_status

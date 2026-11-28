@@ -6,19 +6,31 @@ import {
 import {
   VALID_EVENT_FEEDBACK_CATEGORIES,
   VALID_EVENT_FEEDBACK_STATUSES,
+  VALID_FEEDBACK_SOURCE_KINDS,
   cleanStr,
 } from "../../../_lib/validation.js";
-
-const FEEDBACK_ADMIN_ROLES = ["super_admin", "editor"];
 
 export function serializeAdminEventFeedback(row) {
   if (!row) return null;
   const isAnonymous = Number(row.is_anonymous || 0) === 1;
+  const sourceKind = VALID_FEEDBACK_SOURCE_KINDS.has(row.source_kind)
+    ? row.source_kind
+    : row.event_id || row.event_slug
+      ? "event"
+      : "site";
   return {
     id: row.id,
     eventId: row.event_id || "",
     eventSlug: row.event_slug || "",
-    eventTitle: row.event_title || row.event_slug || "Sự kiện HolaRise",
+    eventTitle:
+      row.event_title ||
+      row.event_slug ||
+      (sourceKind === "bug" ? "Báo lỗi kỹ thuật" : sourceKind === "site" ? "Góp ý trên web" : "Sự kiện HolaRise"),
+    sourceKind,
+    topicLabel: row.topic_label || "",
+    pageUrl: row.page_url || "",
+    attachmentUrl: row.attachment_url || "",
+    diagnostics: row.diagnostics || "",
     category: row.category || "cai-thien",
     content: row.content || "",
     authorName: isAnonymous ? "Ẩn danh" : row.author_name || "Ẩn danh",
@@ -41,6 +53,7 @@ export async function onRequestGet(context) {
 
   const url = new URL(request.url);
   const eventId = cleanStr(url.searchParams.get("eventId"), 120);
+  const sourceKind = cleanStr(url.searchParams.get("sourceKind"), 24).toLowerCase();
   const category = cleanStr(url.searchParams.get("category"), 32).toLowerCase();
   const status = cleanStr(url.searchParams.get("status"), 24).toLowerCase();
   const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") || "100", 10) || 100, 1), 200);
@@ -50,6 +63,10 @@ export async function onRequestGet(context) {
   if (eventId) {
     clauses.push("(event_id = ? OR event_slug = ?)");
     binds.push(eventId, eventId);
+  }
+  if (VALID_FEEDBACK_SOURCE_KINDS.has(sourceKind)) {
+    clauses.push("source_kind = ?");
+    binds.push(sourceKind);
   }
   if (VALID_EVENT_FEEDBACK_CATEGORIES.has(category)) {
     clauses.push("category = ?");
@@ -61,7 +78,7 @@ export async function onRequestGet(context) {
   }
   const whereSql = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
 
-  const [listRes, countsRes, eventsRes] = await Promise.all([
+  const [listRes, countsRes, sourceCountsRes, eventsRes] = await Promise.all([
     env.DB.prepare(
       `SELECT * FROM event_feedbacks
        ${whereSql}
@@ -72,6 +89,9 @@ export async function onRequestGet(context) {
       .all()
       .catch(() => ({ results: [] })),
     env.DB.prepare("SELECT status, COUNT(*) AS cnt FROM event_feedbacks GROUP BY status")
+      .all()
+      .catch(() => ({ results: [] })),
+    env.DB.prepare("SELECT source_kind, COUNT(*) AS cnt FROM event_feedbacks GROUP BY source_kind")
       .all()
       .catch(() => ({ results: [] })),
     env.DB.prepare(
@@ -86,15 +106,23 @@ export async function onRequestGet(context) {
       .catch(() => ({ results: [] })),
   ]);
 
-  const counts = { new: 0, read: 0, resolved: 0 };
+  const counts = { new: 0, read: 0, resolved: 0, total: 0 };
   for (const c of countsRes.results || []) {
-    if (c.status in counts) counts[c.status] = Number(c.cnt || 0);
+    const n = Number(c.cnt || 0);
+    counts.total += n;
+    if (c.status in counts) counts[c.status] = n;
+  }
+
+  const sourceCounts = { all: counts.total, site: 0, bug: 0, event: 0 };
+  for (const s of sourceCountsRes.results || []) {
+    if (s.source_kind in sourceCounts) sourceCounts[s.source_kind] = Number(s.cnt || 0);
   }
 
   return jsonResponse({
     ok: true,
     items: (listRes.results || []).map(serializeAdminEventFeedback),
     counts,
+    sourceCounts,
     events: (eventsRes.results || []).map((e) => ({
       eventId: e.event_id || e.event_slug,
       eventSlug: e.event_slug || "",

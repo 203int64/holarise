@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=d7b9f503da">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=55f04d99ac">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
 <body data-pwa-app-name="HolaRise Manager">
@@ -790,6 +790,7 @@
           <button class="subtab-btn" type="button" role="tab" id="an-subtab-audience" aria-selected="true" data-an-subtab="audience">Chân dung &amp; Ai đang xem</button>
           <button class="subtab-btn" type="button" role="tab" id="an-subtab-funnel" aria-selected="false" data-an-subtab="funnel">Phễu Check-in &amp; Nội dung</button>
           <button class="subtab-btn" type="button" role="tab" id="an-subtab-speed" aria-selected="false" data-an-subtab="speed">Tốc độ &amp; Core Web Vitals</button>
+          <button class="subtab-btn" type="button" role="tab" id="an-subtab-cloudflare" aria-selected="false" data-an-subtab="cloudflare">Cloudflare Edge</button>
           <button class="subtab-btn" type="button" role="tab" id="an-subtab-seo-api" aria-selected="false" data-an-subtab="seo-api">Cấu hình SEO &amp; API Hub</button>
         </div>
 
@@ -943,7 +944,22 @@
           </div>
         </div>
 
-        <!-- SUB-TAB 4: SEO AUDIT & ALL-IN-ONE API HUB -->
+        <!-- SUB-TAB 4: CLOUDFLARE EDGE & SECURITY ANALYTICS -->
+        <div role="tabpanel" aria-labelledby="an-subtab-cloudflare" data-an-panel="cloudflare" hidden>
+          <section class="panel-box">
+            <div class="panel-box-head panel-box-head--row">
+              <div>
+                <h2>Thông số Cloudflare Edge &amp; Bảo mật (GraphQL API)</h2>
+                <p>Kéo trực tiếp tổng HTTP Requests, Cache Hit %, Băng thông, Unique Visitors tầng mạng biên, Threats/WAF bị chặn, mã lỗi 4xx/5xx và Top Quốc gia của <code>holarise.org</code>.</p>
+              </div>
+              <button class="btn btn--primary btn--sm" type="button" id="btn-load-cf">Đồng bộ Cloudflare ngay</button>
+            </div>
+            <div class="form-alert" id="an-cf-alert" role="status" hidden></div>
+            <div id="an-cf-container"></div>
+          </section>
+        </div>
+
+        <!-- SUB-TAB 5: SEO AUDIT & ALL-IN-ONE API HUB -->
         <div role="tabpanel" aria-labelledby="an-subtab-seo-api" data-an-panel="seo-api" hidden>
           <div class="an-two-col">
             <section class="panel-box">
@@ -1009,6 +1025,22 @@
                 <div class="field">
                   <label for="an-cfg-cf-token">Cloudflare Web Analytics Token (tùy chọn)</label>
                   <input id="an-cfg-cf-token" name="cf_web_analytics_token" type="text" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Dán token từ Cloudflare Dashboard nếu muốn đối chiếu">
+                </div>
+              </div>
+
+              <hr class="an-divider">
+
+              <div class="form-row-2">
+                <div class="field">
+                  <label for="an-cfg-cf-zone">Cloudflare Zone ID (32 ký tự hex)</label>
+                  <input id="an-cfg-cf-zone" name="cf_zone_id" type="text" maxlength="64" autocomplete="off" spellcheck="false" placeholder="Lấy ở Cloudflare Dashboard → holarise.org → Overview → API">
+                  <span class="field-hint">Dùng để kéo tổng Requests, Cache %, Bandwidth, Threats/WAF &amp; lỗi 4xx/5xx về tab <strong>Cloudflare Edge</strong>.</span>
+                </div>
+                <div class="field">
+                  <label for="an-cfg-cf-api-token">Cloudflare API Token (chỉ cần quyền <code>Zone → Analytics → Read</code>)</label>
+                  <input id="an-cfg-cf-api-token" name="cf_api_token" type="password" autocomplete="off" placeholder="Để trống nếu giữ token đã lưu">
+                  <span class="field-hint" id="an-cfg-cf-api-hint">Trạng thái: Chưa kết nối Cloudflare GraphQL API.</span>
+                  <label class="an-inline-check"><input type="checkbox" id="an-cfg-clear-cf-api"> Xóa Cloudflare API Token đã lưu</label>
                 </div>
               </div>
 
@@ -2275,11 +2307,11 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=d7b9f503da" defer></script>
-  <script src="/assets/js/admin-manager.js?v=d7b9f503da" defer></script>
-  <script src="/assets/js/admin-analytics.js?v=d7b9f503da" defer></script>
-  <script src="/assets/js/admin.js?v=d7b9f503da" defer></script>
-  <script src="/assets/js/admin-desk.js?v=d7b9f503da" defer></script>
-  <script src="/assets/js/pwa.js?v=d7b9f503da" defer></script>
+  <script src="/assets/js/passkey-client.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/admin-manager.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/admin-analytics.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/admin.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/admin-desk.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/pwa.js?v=55f04d99ac" defer></script>
 </body>
 </html>

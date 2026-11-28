@@ -8,28 +8,9 @@ import {
   getSessionMember,
   jsonResponse,
   readJsonBody,
-  sniffImageMime,
   verifyCsrfOrigin,
 } from "../_lib/security.js";
-
-const MAX_BUG_SCREENSHOT_BYTES = 512 * 1024; // 512 KB binary cap
-const BUG_SCREENSHOT_TTL_SEC = 60 * 60 * 24 * 30; // 30 days auto-expiry
-
-function decodeBase64DataUrl(dataUrl) {
-  const commaIdx = dataUrl.indexOf(",");
-  if (commaIdx < 0) return null;
-  const b64 = dataUrl.slice(commaIdx + 1);
-  try {
-    const bin = atob(b64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i += 1) {
-      bytes[i] = bin.charCodeAt(i);
-    }
-    return bytes;
-  } catch {
-    return null;
-  }
-}
+import { handleFeedbackSubmission } from "./event-feedback/index.js";
 import { cleanStr, normalizePhone, validateRegistrationInput } from "../_lib/validation.js";
 
 export async function createEventRegistrationForMember(context, member, eventPayload, ipHash = "member") {
@@ -146,6 +127,31 @@ export async function onRequestPost(context) {
   const parsed = await readJsonBody(request, 768 * 1024);
   if (!parsed.ok) return parsed.response;
 
+  // Backward-compatible redirect: legacy cached clients posting feedback to /api/registrations
+  // are routed directly into the unified Feedback Inbox (`event_feedbacks`) instead of `registrations`.
+  if (cleanStr(parsed.data?.source, 30) === "feedback") {
+    const legacy = parsed.data || {};
+    const legacyName = cleanStr(legacy.fullName || legacy.full_name, 100);
+    const legacyContact = cleanStr(legacy.phone || legacy.contact || legacy.email, 120);
+    const isAnonPlaceholder =
+      (!legacyName || legacyName === "Thành viên đóng góp" || legacyName === "Community contributor") &&
+      (!legacyContact || legacyContact === "Ẩn danh" || legacyContact === "Anonymous");
+    return handleFeedbackSubmission(context, {
+      website: legacy.website ?? legacy._hp ?? "",
+      lang: legacy.lang,
+      sourceKind: /lỗi|bug|technical/i.test(`${legacy.role || ""} ${legacy.activity || ""}`) ? "bug" : "site",
+      topicLabel: legacy.role || legacy.activity || "",
+      pageUrl: legacy.pageUrl || (String(legacy.organization || "").startsWith("/") ? legacy.organization : ""),
+      content: legacy.note || legacy.content || "",
+      diagnostics: legacy.diagnostics || "",
+      attachmentDataUrl: legacy.attachmentDataUrl || legacy.screenshotDataUrl || "",
+      authorName: isAnonPlaceholder ? "" : legacyName,
+      authorContact: isAnonPlaceholder ? "" : legacyContact,
+      isAnonymous: legacy.isAnonymous ?? isAnonPlaceholder,
+      turnstileToken: legacy.turnstileToken ?? legacy["cf-turnstile-response"] ?? "",
+    });
+  }
+
   const sessionMember = await getSessionMember(env.DB, request);
   const rawBody = { ...parsed.data };
 
@@ -260,36 +266,6 @@ export async function onRequestPost(context) {
   const now = new Date().toISOString();
   const id = `REG-${now.slice(2, 10).replace(/-/g, "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
 
-  let screenshotPath = "";
-  if (v.is_feedback && v.screenshot_data_url && env?.MEDIA_KV) {
-    const bytes = decodeBase64DataUrl(v.screenshot_data_url);
-    if (bytes && bytes.length > 0 && bytes.length <= MAX_BUG_SCREENSHOT_BYTES) {
-      const sniffed = sniffImageMime(bytes);
-      if (sniffed) {
-        const shotId = `bug-${now.slice(2, 10).replace(/-/g, "")}-${crypto.randomUUID().slice(0, 8)}.${sniffed.ext}`;
-        await env.MEDIA_KV.put(`bugshot:${shotId}`, bytes.buffer, {
-          expirationTtl: BUG_SCREENSHOT_TTL_SEC,
-          metadata: {
-            contentType: sniffed.mime,
-            regId: id,
-            createdAt: now,
-          },
-        }).catch(() => null);
-        screenshotPath = `/api/admin/bug-screenshot/${shotId}`;
-      }
-    }
-  }
-
-  let finalNote = v.note;
-  if (v.is_feedback) {
-    const extraParts = [];
-    if (screenshotPath) extraParts.push(`[Ảnh màn hình lỗi (Admin)]: ${screenshotPath}`);
-    if (v.diagnostics) extraParts.push(`[Ngữ cảnh kỹ thuật]: ${v.diagnostics}`);
-    if (extraParts.length > 0) {
-      finalNote = `${v.note}\n\n${extraParts.join("\n")}`;
-    }
-  }
-
   const record = {
     id,
     member_id: sessionMember ? sessionMember.id : "",
@@ -301,7 +277,7 @@ export async function onRequestPost(context) {
     email: v.email,
     role: v.role,
     organization: v.organization,
-    note: finalNote,
+    note: v.note,
     status: "new",
     admin_note: "",
     sync_status: "pending",
@@ -435,7 +411,6 @@ export async function onRequestPost(context) {
       memberCode: sessionMember ? sessionMember.member_code : "",
       savedMemberPhone,
       emailSentHint: Boolean(record.email),
-      screenshotSaved: Boolean(screenshotPath),
       message: confirmationMessage,
     },
     201

@@ -831,6 +831,11 @@ export async function ensureEventFeedbackSchema(db) {
           event_id TEXT NOT NULL DEFAULT '',
           event_slug TEXT NOT NULL DEFAULT '',
           event_title TEXT NOT NULL DEFAULT '',
+          source_kind TEXT NOT NULL DEFAULT 'event',
+          topic_label TEXT NOT NULL DEFAULT '',
+          page_url TEXT NOT NULL DEFAULT '',
+          attachment_url TEXT NOT NULL DEFAULT '',
+          diagnostics TEXT NOT NULL DEFAULT '',
           category TEXT NOT NULL DEFAULT 'cai-thien' CHECK(category IN ('cai-thien', 'dong-vien', 'de-xuat', 'khac')),
           content TEXT NOT NULL,
           author_name TEXT NOT NULL DEFAULT 'Ẩn danh',
@@ -844,8 +849,22 @@ export async function ensureEventFeedbackSchema(db) {
         )`
       )
       .run();
+    const extraCols = [
+      "ALTER TABLE event_feedbacks ADD COLUMN source_kind TEXT NOT NULL DEFAULT 'event'",
+      "ALTER TABLE event_feedbacks ADD COLUMN topic_label TEXT NOT NULL DEFAULT ''",
+      "ALTER TABLE event_feedbacks ADD COLUMN page_url TEXT NOT NULL DEFAULT ''",
+      "ALTER TABLE event_feedbacks ADD COLUMN attachment_url TEXT NOT NULL DEFAULT ''",
+      "ALTER TABLE event_feedbacks ADD COLUMN diagnostics TEXT NOT NULL DEFAULT ''",
+    ];
+    for (const ddl of extraCols) {
+      await db.prepare(ddl).run().catch(() => {});
+    }
     await db
       .prepare("CREATE INDEX IF NOT EXISTS idx_event_feedbacks_event_status ON event_feedbacks(event_id, status, created_at DESC)")
+      .run()
+      .catch(() => {});
+    await db
+      .prepare("CREATE INDEX IF NOT EXISTS idx_event_feedbacks_source_status ON event_feedbacks(source_kind, status, created_at DESC)")
       .run()
       .catch(() => {});
   } catch (_err) {

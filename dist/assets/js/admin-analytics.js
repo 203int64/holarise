@@ -13,6 +13,7 @@
     subtab: "audience",
     data: null,
     gsc: null,
+    cf: null,
     loading: false,
     bound: false,
   };
@@ -146,6 +147,14 @@
     return data;
   }
 
+  function fmtBytes(bytes) {
+    const b = Number(bytes || 0);
+    if (b < 1024) return `${b} B`;
+    if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+    if (b < 1024 * 1024 * 1024) return `${(b / (1024 * 1024)).toFixed(2)} MB`;
+    return `${(b / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  }
+
   function switchSubtab(subtab) {
     state.subtab = subtab;
     $$("[data-an-subtab]").forEach((btn) => {
@@ -154,6 +163,9 @@
     $$("[data-an-panel]").forEach((panel) => {
       panel.hidden = panel.getAttribute("data-an-panel") !== subtab;
     });
+    if (subtab === "cloudflare" && state.data?.config?.has_cf_api_token && !state.cf) {
+      loadCloudflareData();
+    }
   }
 
   function renderKpis(summary) {
@@ -716,6 +728,14 @@
     if ($("#an-cfg-bverify")) $("#an-cfg-bverify").value = cfg.bing_site_verification || "";
     if ($("#an-cfg-indexnow")) $("#an-cfg-indexnow").value = cfg.indexnow_key || "";
     if ($("#an-cfg-cf-token")) $("#an-cfg-cf-token").value = cfg.cf_web_analytics_token || "";
+    if ($("#an-cfg-cf-zone")) $("#an-cfg-cf-zone").value = cfg.cf_zone_id || "";
+    if ($("#an-cfg-cf-api-token")) $("#an-cfg-cf-api-token").value = "";
+    if ($("#an-cfg-clear-cf-api")) $("#an-cfg-clear-cf-api").checked = false;
+    if ($("#an-cfg-cf-api-hint")) {
+      $("#an-cfg-cf-api-hint").textContent = cfg.has_cf_api_token
+        ? `Trạng thái: Đã kết nối Cloudflare Zone (${cfg.cf_token_hint}). Để trống nếu giữ nguyên.`
+        : "Trạng thái: Chưa kết nối Cloudflare GraphQL API. Tạo Token tại dash.cloudflare.com/profile/api-tokens với quyền Zone → Analytics → Read.";
+    }
     if ($("#an-cfg-gsc-site")) $("#an-cfg-gsc-site").value = cfg.gsc_site_url || "sc-domain:holarise.org";
     if ($("#an-cfg-psi-key")) $("#an-cfg-psi-key").value = "";
     if ($("#an-cfg-gsc-json")) $("#an-cfg-gsc-json").value = "";
@@ -734,6 +754,115 @@
     }
 
     renderGscPlaceholder(cfg);
+    renderCfPlaceholder(cfg);
+  }
+
+  function renderCfPlaceholder(cfg) {
+    const el = $("#an-cf-container");
+    if (!el || state.cf) return;
+    if (cfg.has_cf_api_token) {
+      el.innerHTML = `<p class="an-empty">Đã gắn Cloudflare Zone <code>${esc(cfg.cf_zone_id)}</code>. Bấm <strong>Đồng bộ Cloudflare ngay</strong> để tải toàn bộ thông số Edge.</p>`;
+    } else {
+      el.innerHTML = `
+        <div class="an-gsc-guide">
+          <p><strong>Chưa nối Cloudflare GraphQL API.</strong> Chỉ mất 1 phút để kéo toàn bộ thông số từ Cloudflare Dashboard về đây (miễn phí 100% gói Free):</p>
+          <ol style="margin:8px 0 12px;padding-left:18px;font-size:0.84rem;color:var(--ink-secondary);display:grid;gap:4px;">
+            <li>Mở Cloudflare → chọn tên miền <strong>holarise.org</strong> → cuộn cột phải mục <strong>API</strong> để chép <strong>Zone ID</strong>.</li>
+            <li>Vào <strong>My Profile → API Tokens → Create Token → Custom Token</strong> → chọn đúng 1 quyền: <code>Zone · Analytics · Read</code> (giới hạn vào Zone <code>holarise.org</code>).</li>
+            <li>Dán cả 2 vào mục <strong>Cấu hình SEO &amp; API Hub</strong> và lưu lại.</li>
+          </ol>
+          <div class="btn-row">
+            <button class="btn btn--primary btn--sm" type="button" data-an-jump="seo-api">Đi tới Cấu hình Cloudflare API →</button>
+            <a class="btn btn--outline btn--sm" href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener">Tạo API Token trên Cloudflare ↗</a>
+          </div>
+        </div>`;
+    }
+  }
+
+  function renderCfData(cf) {
+    const el = $("#an-cf-container");
+    if (!el) return;
+    if (!cf || !cf.configured) {
+      renderCfPlaceholder(state.data?.config || {});
+      return;
+    }
+    const t = cf.totals || {};
+    const sb = cf.statusBuckets || {};
+    const errRows = (cf.errorStatuses || [])
+      .map((s) => `<span class="an-badge ${s.status >= 500 ? "an-badge--bad" : "an-badge--warn"}">HTTP ${s.status}: ${fmtNum(s.count)}</span>`)
+      .join(" ");
+
+    const countryList = (cf.countries || []).map((c) => ({
+      label: `${c.country}${c.threats > 0 ? ` (${fmtNum(c.threats)} threats)` : ""}`,
+      views: c.requests,
+    }));
+    const typeList = (cf.contentTypes || []).map((c) => ({
+      label: `${c.type} (${fmtBytes(c.bytes)})`,
+      views: c.requests,
+    }));
+
+    el.innerHTML = `
+      <div class="an-kpi-grid">
+        <article class="an-kpi-card">
+          <span class="an-kpi-label">Tổng HTTP Requests (${cf.days} ngày)</span>
+          <strong class="an-kpi-val">${fmtNum(t.requests)}</strong>
+          <span class="an-kpi-sub">Pageviews Edge: ${fmtNum(t.pageViews)} · HTTPS: ${t.httpsPct}%</span>
+        </article>
+        <article class="an-kpi-card">
+          <span class="an-kpi-label">Edge Unique Visitors</span>
+          <strong class="an-kpi-val">${fmtNum(t.uniques)}</strong>
+          <span class="an-kpi-sub">Bao gồm cả trình duyệt chặn JS/AdBlock</span>
+        </article>
+        <article class="an-kpi-card">
+          <span class="an-kpi-label">Tỷ lệ Cache Hit</span>
+          <strong class="an-kpi-val">${t.cacheHitRatePct}%</strong>
+          <span class="an-kpi-sub">${fmtNum(t.cachedRequests)} requests phục vụ từ Edge Cache</span>
+        </article>
+        <article class="an-kpi-card">
+          <span class="an-kpi-label">Băng thông (Bandwidth)</span>
+          <strong class="an-kpi-val">${esc(fmtBytes(t.bytes))}</strong>
+          <span class="an-kpi-sub">Tiết kiệm ${t.bandwidthSavedPct}% (${esc(fmtBytes(t.cachedBytes))} cached)</span>
+        </article>
+        <article class="an-kpi-card">
+          <span class="an-kpi-label">Threats / Bot xấu bị chặn</span>
+          <strong class="an-kpi-val">${fmtNum(t.threats)}</strong>
+          <span class="an-kpi-sub">Bảo vệ tự động tại Cloudflare WAF</span>
+        </article>
+        <article class="an-kpi-card">
+          <span class="an-kpi-label">Sức khỏe HTTP Status</span>
+          <strong class="an-kpi-val">${fmtNum(sb.s2xx || 0)} <small style="font-size:0.75rem;font-weight:500;color:var(--ink-muted);">2xx</small></strong>
+          <span class="an-kpi-sub">3xx: ${fmtNum(sb.s3xx || 0)} · 4xx: ${fmtNum(sb.s4xx || 0)} · 5xx: ${fmtNum(sb.s5xx || 0)}</span>
+        </article>
+      </div>
+      ${errRows ? `<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;"><span class="an-kpi-label">Chi tiết lỗi 4xx/5xx:</span> ${errRows}</div>` : ""}
+      <div class="an-dims-grid an-section-gap">
+        ${renderDimCard("Top Quốc gia (Tầng Cloudflare Edge)", "Tổng số requests theo quốc gia", countryList)}
+        ${renderDimCard("Phân bổ loại tài nguyên (Content Type)", "HTML, ảnh WebP/JPEG, CSS, JS, API", typeList)}
+      </div>
+    `;
+  }
+
+  async function loadCloudflareData() {
+    const btn = $("#btn-load-cf");
+    if (btn) btn.disabled = true;
+    showAlert("#an-cf-alert", "Đang kéo thông số từ Cloudflare GraphQL API...", "info");
+    try {
+      const cfDays = state.days === 7 ? 7 : 30;
+      const res = await api(`/api/admin/analytics/cloudflare?days=${cfDays}`);
+      state.cf = res;
+      renderCfData(res);
+      showAlert(
+        "#an-cf-alert",
+        res.configured
+          ? `Đã đồng bộ Cloudflare Edge (${res.since} → ${res.until}).`
+          : res.message || "Chưa cấu hình Cloudflare API.",
+        res.configured ? "success" : "info"
+      );
+    } catch (err) {
+      showAlert("#an-cf-alert", err.message, "error");
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
 
   function renderGscPlaceholder(cfg) {
@@ -866,10 +995,14 @@
           bing_site_verification: $("#an-cfg-bverify")?.value.trim() || "",
           indexnow_key: $("#an-cfg-indexnow")?.value.trim() || "",
           cf_web_analytics_token: $("#an-cfg-cf-token")?.value.trim() || "",
+          cf_zone_id: $("#an-cfg-cf-zone")?.value.trim() || "",
+          clear_cf_api_token: Boolean($("#an-cfg-clear-cf-api")?.checked),
           gsc_site_url: $("#an-cfg-gsc-site")?.value.trim() || "sc-domain:holarise.org",
           clear_pagespeed_key: Boolean($("#an-cfg-clear-psi")?.checked),
           clear_gsc_credentials: Boolean($("#an-cfg-clear-gsc")?.checked),
         };
+        const cfApiToken = $("#an-cfg-cf-api-token")?.value.trim();
+        if (cfApiToken) payload.cf_api_token = cfApiToken;
         const psiKey = $("#an-cfg-psi-key")?.value.trim();
         if (psiKey) payload.pagespeed_api_key = psiKey;
         const gscJson = $("#an-cfg-gsc-json")?.value.trim();
@@ -880,6 +1013,7 @@
           body: JSON.stringify(payload),
         });
         state.gsc = null;
+        state.cf = null;
         if (state.data) {
           state.data.config = res.config;
           renderSeoAndConfig(state.data.seoAudit, res.config);
@@ -936,6 +1070,9 @@
         }
       }
     });
+
+    // Load Cloudflare GraphQL Edge Analytics
+    $("#btn-load-cf")?.addEventListener("click", () => loadCloudflareData());
 
     // Load Google Search Console 28-day report
     $("#btn-load-gsc")?.addEventListener("click", async () => {

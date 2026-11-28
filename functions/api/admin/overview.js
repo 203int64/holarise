@@ -6,6 +6,7 @@ import { ensureMediaApprovalSchema } from "../../_lib/media-approval-schema.js";
 import { ensureManagerSchema, roleHasPermission } from "../../_lib/rbac.js";
 import { serializeEventRow, splitEventsByDate } from "../../_lib/render.js";
 import { jsonResponse, requireAdmin } from "../../_lib/security.js";
+import { PURE_REGISTRATION_SQL } from "./registrations/index.js";
 
 export async function onRequestGet(context) {
   const auth = await requireAdmin(context, { permission: "overview.read" });
@@ -32,11 +33,12 @@ export async function onRequestGet(context) {
     feedbackCountsRes,
     settingsMap,
   ] = await Promise.all([
-    db.prepare("SELECT status, COUNT(*) AS cnt FROM registrations GROUP BY status").all().catch(() => ({ results: [] })),
+    db.prepare(`SELECT status, COUNT(*) AS cnt FROM registrations WHERE ${PURE_REGISTRATION_SQL} GROUP BY status`).all().catch(() => ({ results: [] })),
     db
       .prepare(
         `SELECT id, source, event_id, activity_title, full_name, phone, email, organization, status, sync_status, created_at
          FROM registrations
+         WHERE ${PURE_REGISTRATION_SQL}
          ORDER BY created_at DESC
          LIMIT 6`
       )

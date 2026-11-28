@@ -1927,8 +1927,8 @@
         } else if (fromPaste && addedCount > 0) {
           prStatus.className = "form-status is-success";
           prStatus.textContent = t(
-            "Đã dán " + addedCount + " ảnh từ bộ nhớ tạm (" + selectedPhotos.length + "/" + MAX_REFLECTION_PHOTOS + ").",
-            "Pasted " + addedCount + " image(s) from clipboard."
+            "Đã thêm " + addedCount + " ảnh (" + selectedPhotos.length + "/" + MAX_REFLECTION_PHOTOS + ").",
+            "Added " + addedCount + " image(s)."
           );
         } else if (prStatus.classList.contains("is-error")) {
           prStatus.className = "form-status";
@@ -2431,13 +2431,159 @@
     var clearBtn = document.getElementById("fb-shot-clear");
     var diagDetailsEl = document.getElementById("fb-diag-details");
     var diagPreviewEl = document.getElementById("fb-diag-preview");
+    var askPaneEl = document.getElementById("hola-ask-pane");
+    var feedbackPaneEl = document.getElementById("hola-feedback-pane");
+    var hubTabBtns = dialog.querySelectorAll("[data-hub-tab]");
+    var askFormEl = document.getElementById("hola-ask-form");
+    var askInputEl = document.getElementById("hola-ask-input");
+    var askSendBtn = document.getElementById("hola-ask-send");
+    var askMessagesEl = document.getElementById("hola-ask-messages");
+    var askChipsEl = document.getElementById("hola-ask-chips");
 
+    var activeHubTab = "feedback";
+    var askHistory = [];
+    var askInFlight = false;
     var recentErrors = [];
     var currentAttachmentDataUrl = "";
     var currentDiagnostics = "";
     var modernScreenshotPromise = null;
     var captureInFlight = false;
     var userClearedAutoShot = false;
+
+    function switchHubTab(tabName) {
+      activeHubTab = tabName === "ask" ? "ask" : "feedback";
+      for (var i = 0; i < hubTabBtns.length; i += 1) {
+        var btn = hubTabBtns[i];
+        var isActive = btn.getAttribute("data-hub-tab") === activeHubTab;
+        btn.classList.toggle("is-active", isActive);
+        btn.setAttribute("aria-selected", String(isActive));
+      }
+      if (askPaneEl) askPaneEl.hidden = activeHubTab !== "ask";
+      if (feedbackPaneEl) feedbackPaneEl.hidden = activeHubTab !== "feedback";
+      if (activeHubTab === "ask" && askInputEl) {
+        setTimeout(function () { askInputEl.focus(); }, 50);
+      } else if (activeHubTab === "feedback" && noteEl) {
+        setTimeout(function () { noteEl.focus(); }, 50);
+      }
+    }
+
+    for (var tIdx = 0; tIdx < hubTabBtns.length; tIdx += 1) {
+      hubTabBtns[tIdx].addEventListener("click", function (ev) {
+        var targetTab = ev.currentTarget.getAttribute("data-hub-tab");
+        switchHubTab(targetTab);
+      });
+    }
+
+    function appendAskBubble(role, text, opts) {
+      if (!askMessagesEl) return null;
+      askMessagesEl.hidden = false;
+      var options = opts || {};
+      var wrap = document.createElement("div");
+      wrap.className =
+        "hola-ask-msg " +
+        (role === "user" ? "hola-ask-msg--user" : "hola-ask-msg--bot") +
+        (options.typing ? " hola-ask-msg--typing" : "");
+      var p = document.createElement("p");
+      p.textContent = text;
+      wrap.appendChild(p);
+
+      var hasLinks = Array.isArray(options.links) && options.links.length > 0;
+      if (hasLinks || options.handoff) {
+        var linksRow = document.createElement("div");
+        linksRow.className = "hola-ask-links";
+        if (hasLinks) {
+          for (var i = 0; i < options.links.length; i += 1) {
+            var item = options.links[i];
+            if (!item || !item.href || !item.label) continue;
+            if (!/^(\/|tel:|mailto:|https:\/\/)/i.test(item.href)) continue;
+            var a = document.createElement("a");
+            a.className = "hola-ask-link-btn";
+            a.href = item.href;
+            a.textContent = item.label;
+            linksRow.appendChild(a);
+          }
+        }
+        if (options.handoff) {
+          var fbBtn = document.createElement("button");
+          fbBtn.type = "button";
+          fbBtn.className = "hola-ask-link-btn";
+          fbBtn.textContent = t("Chuyển sang Góp ý & Báo lỗi →", "Switch to Feedback & Bug →");
+          fbBtn.addEventListener("click", function () {
+            switchHubTab("feedback");
+          });
+          linksRow.appendChild(fbBtn);
+        }
+        if (linksRow.childNodes.length > 0) wrap.appendChild(linksRow);
+      }
+
+      askMessagesEl.appendChild(wrap);
+      askMessagesEl.scrollTop = askMessagesEl.scrollHeight;
+      return wrap;
+    }
+
+    async function sendQuickAsk(questionText) {
+      var q = String(questionText || "").trim();
+      if (q.length < 2 || askInFlight) return;
+      askInFlight = true;
+      if (askInputEl) askInputEl.value = "";
+      if (askSendBtn) askSendBtn.disabled = true;
+
+      appendAskBubble("user", q);
+      var typingEl = appendAskBubble("bot", t("Đang trả lời...", "Thinking..."), { typing: true });
+      var askHp = askFormEl ? askFormEl.querySelector('input[name="website"]') : null;
+
+      try {
+        var res = await fetch("/api/chat/assistant", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: q,
+            history: askHistory.slice(-4),
+            lang: isEn ? "en" : "vi",
+            pageUrl: (window.location.pathname || "/") + (window.location.search || ""),
+            website: askHp ? askHp.value : "",
+          }),
+        });
+        var data = await res.json().catch(function () { return {}; });
+        if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
+        if (!res.ok || data.ok === false || !data.reply) {
+          throw new Error(data.message || t("Hiện chưa kết nối được trợ lý. Bạn chuyển sang tab Góp ý hoặc nhắn Zalo 077.777.1948 nhé.", "Assistant unavailable right now. Please switch to the Feedback tab or email phungsu@holarise.org."));
+        }
+        askHistory.push({ role: "user", text: q });
+        askHistory.push({ role: "model", text: data.reply });
+        if (askHistory.length > 8) askHistory = askHistory.slice(-8);
+        appendAskBubble("bot", data.reply, {
+          links: data.suggestedLinks || [],
+          handoff: Boolean(data.handoffSuggested),
+        });
+      } catch (err) {
+        if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
+        appendAskBubble(
+          "bot",
+          (err && err.message) || t("Chưa kết nối được trợ lý lúc này. Bạn chuyển sang tab Góp ý nhé.", "Could not reach the assistant right now. Try the Feedback tab."),
+          { handoff: true }
+        );
+      } finally {
+        askInFlight = false;
+        if (askSendBtn) askSendBtn.disabled = false;
+        if (askInputEl && activeHubTab === "ask") askInputEl.focus();
+      }
+    }
+
+    if (askFormEl) {
+      askFormEl.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        if (askInputEl) sendQuickAsk(askInputEl.value);
+      });
+    }
+
+    if (askChipsEl) {
+      askChipsEl.addEventListener("click", function (ev) {
+        var chip = ev.target.closest("[data-ask-prompt]");
+        if (!chip) return;
+        sendQuickAsk(chip.getAttribute("data-ask-prompt") || chip.textContent || "");
+      });
+    }
 
     function pushRuntimeError(msg) {
       var clean = String(msg || "").replace(/\s+/g, " ").trim().slice(0, 140);
@@ -2529,11 +2675,11 @@
     }
 
     function syncDiagnosticsVisibility() {
+      syncFeedbackPlaceholder();
       if (!diagDetailsEl) return;
       var show = isBugSelected();
       diagDetailsEl.hidden = !show;
       if (!show) diagDetailsEl.open = false;
-      syncFeedbackPlaceholder();
     }
 
     function setFeedbackStatus(msg, type) {
@@ -2636,7 +2782,7 @@
     function captureViewportScreenshot() {
       if (captureInFlight) return Promise.resolve();
       captureInFlight = true;
-      if (shotStateEl) shotStateEl.textContent = t("Đang chụp màn hình...", "Capturing screen...");
+      if (shotStateEl) shotStateEl.textContent = t("Đang chụp...", "Capturing...");
 
       var vw = Math.max(320, window.innerWidth || 390);
       var vh = Math.max(320, window.innerHeight || 720);
@@ -2719,18 +2865,17 @@
           restoreMasked();
           var dataUrl = resizeCanvasToJpeg(canvas, 960, 0.72);
           if (dataUrl && dataUrl.length <= 700000) {
-            var kb = Math.max(1, Math.round((dataUrl.length * 0.75) / 1024));
-            setAttachmentPreview(dataUrl, t("Đã chụp (~" + kb + " KB)", "Captured (~" + kb + " KB)"));
+            setAttachmentPreview(dataUrl, "");
           } else {
-            setAttachmentPreview("", t("Ảnh quá lớn, hãy chọn ảnh từ máy.", "Image too large — please attach from device."));
+            setAttachmentPreview("", t("Ảnh hơi lớn — hãy chọn ảnh từ máy.", "Image too large — add from device."));
           }
         })
         .catch(function () {
           restoreMasked();
           if (shotStateEl) {
             shotStateEl.textContent = t(
-              "Chưa tự chụp được, bạn có thể đính kèm hoặc dán ảnh.",
-              "Auto-capture unavailable — you can attach or paste an image."
+              "Chưa chụp được — chọn ảnh từ máy.",
+              "Could not capture — add from device."
             );
           }
         })
@@ -2758,16 +2903,14 @@
         if (bugRadio) bugRadio.checked = true;
       }
       syncDiagnosticsVisibility();
+      switchHubTab(options.tab === "ask" && !options.bugMode ? "ask" : "feedback");
 
       if (typeof dialog.showModal === "function" && !dialog.open) {
         dialog.showModal();
       }
       // Pre-warm lazy screenshot script silently while user types so 1-tap capture is instant
       loadModernScreenshot().catch(function () {});
-      if (noteEl) {
-        setTimeout(function () { noteEl.focus(); }, 60);
-      }
-      if ((options.autoCapture || isBugSelected()) && !currentAttachmentDataUrl) {
+      if (activeHubTab === "feedback" && (options.autoCapture || isBugSelected()) && !currentAttachmentDataUrl) {
         captureViewportScreenshot();
       }
     }
@@ -2813,14 +2956,13 @@
       }
       if (!imgFile) return;
       e.preventDefault();
-      if (shotStateEl) shotStateEl.textContent = t("Đang xử lý ảnh vừa dán...", "Processing pasted image...");
+      if (shotStateEl) shotStateEl.textContent = t("Đang thêm ảnh...", "Adding image...");
       compressImageBlob(imgFile)
         .then(function (dataUrl) {
-          var kb = Math.max(1, Math.round((dataUrl.length * 0.75) / 1024));
-          setAttachmentPreview(dataUrl, t("Đã dán ảnh (~" + kb + " KB)", "Image pasted (~" + kb + " KB)"));
+          setAttachmentPreview(dataUrl, "");
         })
-        .catch(function (err) {
-          setAttachmentPreview("", (err && err.message) || t("Không xử lý được ảnh vừa dán.", "Could not process pasted image."));
+        .catch(function () {
+          setAttachmentPreview("", t("Không đọc được ảnh này.", "Could not read this image."));
         });
     }
 
@@ -2830,7 +2972,8 @@
       var trigger = e.target.closest("[data-open-feedback-modal]");
       if (!trigger) return;
       var isBugQuick = trigger.getAttribute("data-feedback-bug") === "1";
-      openFeedbackDialog({ bugMode: isBugQuick });
+      var preferredTab = trigger.getAttribute("data-open-feedback-modal") === "ask" ? "ask" : "feedback";
+      openFeedbackDialog({ bugMode: isBugQuick, tab: preferredTab });
     });
 
     if (captureBtn) {
@@ -2852,14 +2995,13 @@
       fileInputEl.addEventListener("change", function () {
         var file = fileInputEl.files && fileInputEl.files[0];
         if (!file) return;
-        if (shotStateEl) shotStateEl.textContent = t("Đang nén ảnh...", "Compressing image...");
+        if (shotStateEl) shotStateEl.textContent = t("Đang thêm ảnh...", "Adding image...");
         compressImageBlob(file)
           .then(function (dataUrl) {
-            var kb = Math.max(1, Math.round((dataUrl.length * 0.75) / 1024));
-            setAttachmentPreview(dataUrl, t("Đã chọn ảnh (~" + kb + " KB)", "Image attached (~" + kb + " KB)"));
+            setAttachmentPreview(dataUrl, "");
           })
-          .catch(function (err) {
-            setAttachmentPreview("", (err && err.message) || t("Không thể đọc ảnh này.", "Could not read this image."));
+          .catch(function () {
+            setAttachmentPreview("", t("Không đọc được ảnh này.", "Could not read this image."));
           });
       });
     }
@@ -2899,7 +3041,7 @@
 
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = t("Đang gửi phản hồi...", "Sending feedback...");
+        submitBtn.textContent = t("Đang gửi...", "Sending...");
       }
       try {
         var res = await fetch("/api/event-feedback", {
@@ -2943,7 +3085,7 @@
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = t("Gửi phản hồi", "Send feedback");
+          submitBtn.textContent = t("Gửi", "Send");
         }
       }
     });

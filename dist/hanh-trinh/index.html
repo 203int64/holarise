@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=d7b9f503da">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=55f04d99ac">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -810,18 +810,38 @@
     </div>
   </dialog>
 
-  <!-- Native HTML5 <dialog> Đóng góp · Gửi Đề xuất, Phản hồi & Báo lỗi -->
-  <dialog class="club-dialog club-dialog--auth" id="feedback-modal" closedby="any" aria-labelledby="feedback-modal-heading">
-    <div class="dialog-inner auth-dialog-inner">
-      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
-      <div class="auth-dialog-brand">
-        <img src="/assets/images/logo-mark.png" alt="Logo HolaRise" width="32" height="32">
-        <div>
-          <h2 id="feedback-modal-heading" class="auth-dialog-title">Đóng góp cùng HolaRise</h2>
-          <p class="auth-dialog-sub">Gửi đề xuất hoạt động, góp ý trải nghiệm hoặc báo lỗi kỹ thuật.</p>
+  <!-- Native HTML5 <dialog> Trợ lý Hỏi nhanh & Đóng góp cùng HolaRise -->
+  <dialog class="club-dialog club-dialog--auth club-dialog--hub" id="feedback-modal" closedby="any" aria-label="Hỏi nhanh và Góp ý cùng HolaRise">
+    <div class="dialog-inner auth-dialog-inner hub-dialog-inner">
+      <div class="hub-dialog-head">
+        <div class="hola-hub-tabs" role="tablist" aria-label="Chọn chế độ hỗ trợ">
+          <button class="hola-hub-tab" type="button" role="tab" id="hub-tab-ask" aria-selected="false" aria-controls="hola-ask-pane" data-hub-tab="ask">Hỏi nhanh</button>
+          <button class="hola-hub-tab is-active" type="button" role="tab" id="hub-tab-feedback" aria-selected="true" aria-controls="hola-feedback-pane" data-hub-tab="feedback">Góp ý &amp; Báo lỗi</button>
         </div>
+        <button class="hub-close-btn" type="button" data-modal-close aria-label="Đóng cửa sổ">×</button>
       </div>
 
+      <div class="hola-ask-pane" id="hola-ask-pane" role="tabpanel" aria-labelledby="hub-tab-ask" hidden>
+        <div class="hola-ask-chips" id="hola-ask-chips" aria-label="Câu hỏi gợi ý">
+          <button class="hola-ask-chip" type="button" data-ask-prompt="Lịch tuần này của HolaRise có gì sắp tới?">Lịch tuần này có gì?</button>
+          <button class="hola-ask-chip" type="button" data-ask-prompt="Đi một mình lần đầu tới HolaRise có ngại không, có mất phí không?">Đi một mình có ngại không?</button>
+          <button class="hola-ask-chip" type="button" data-ask-prompt="3 trụ cột HolaHeart, HolaGreen, HolaConnect của HolaRise là gì?">3 trụ cột HolaRise</button>
+        </div>
+
+        <div class="hola-ask-messages" id="hola-ask-messages" aria-live="polite" hidden></div>
+
+        <form class="hola-ask-form" id="hola-ask-form" novalidate>
+          <input class="visually-hidden" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <label for="hola-ask-input" class="visually-hidden">Nhập câu hỏi của bạn</label>
+          <input id="hola-ask-input" type="text" maxlength="500" autocomplete="off" placeholder="Hỏi nhanh về lịch gặp, chi phí, ghép xe..." enterkeyhint="send">
+          <button class="hola-ask-send" type="submit" id="hola-ask-send" aria-label="Gửi câu hỏi">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </form>
+        <p class="hola-ask-foot">Cần hỗ trợ trực tiếp? <a href="https://zalo.me/0777771948" target="_blank" rel="noopener noreferrer">Zalo 077.777.1948</a></p>
+      </div>
+
+      <div id="hola-feedback-pane" role="tabpanel" aria-labelledby="hub-tab-feedback">
       <form class="auth-form" id="feedback-form" novalidate>
         <input class="visually-hidden" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <fieldset class="auth-fieldset">
@@ -857,18 +877,18 @@
 
           <div class="fb-shot-preview" id="fb-shot-preview" hidden>
             <img id="fb-shot-img" alt="Ảnh màn hình trang đang xem">
-            <button type="button" class="fb-shot-remove" id="fb-shot-clear" aria-label="Gỡ ảnh đính kèm">×</button>
+            <button type="button" class="fb-shot-remove" id="fb-shot-clear" aria-label="Gỡ ảnh">×</button>
           </div>
 
           <div class="fb-composer-toolbar" id="fb-shot-box">
             <div class="fb-toolbar-left">
-              <button type="button" class="fb-tool-chip" id="fb-capture-btn" title="Chụp ngay màn hình đang xem phía sau">
+              <button type="button" class="fb-tool-chip" id="fb-capture-btn" title="Chụp màn hình đang xem">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                <span>Chụp màn hình này</span>
+                <span>Chụp màn hình</span>
               </button>
-              <label class="fb-tool-chip" for="fb-file-input" title="Chọn ảnh từ máy hoặc dán ảnh (Ctrl+V)">
+              <label class="fb-tool-chip" for="fb-file-input" title="Thêm ảnh từ máy">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-                <span>Đính kèm ảnh</span>
+                <span>Thêm ảnh</span>
               </label>
               <input class="visually-hidden" type="file" id="fb-file-input" accept="image/jpeg,image/png,image/webp">
             </div>
@@ -876,13 +896,8 @@
           </div>
         </div>
 
-        <details class="fb-diag-details fb-diag-details--quiet" id="fb-diag-details" hidden>
-          <summary>Thông tin trang &amp; trình duyệt đính kèm (chỉ khi báo lỗi)</summary>
-          <pre class="fb-diag-preview" id="fb-diag-preview"></pre>
-        </details>
-
         <details class="rsvp-optional-note" id="fb-guest-contact-row">
-          <summary>+ Để lại tên hoặc liên hệ nếu muốn nhận phản hồi (tùy chọn)</summary>
+          <summary>+ Để lại liên hệ nếu muốn nhận phản hồi</summary>
           <div class="auth-row-2" style="margin-top: 10px;">
             <div class="auth-field">
               <label for="fb-name">Tên của bạn</label>
@@ -896,11 +911,11 @@
         </details>
 
         <div class="form-status" id="fb-status" role="status" aria-live="polite"></div>
-        <div class="fb-submit-row">
-          <span class="fb-shortcut-hint">Nhấn <kbd>Ctrl</kbd> + <kbd>Enter</kbd> để gửi nhanh</span>
-          <button class="auth-submit-btn fb-submit-btn" type="submit" id="fb-submit-btn">Gửi phản hồi</button>
+        <div class="fb-submit-row fb-submit-row--clean">
+          <button class="auth-submit-btn fb-submit-btn" type="submit" id="fb-submit-btn">Gửi</button>
         </div>
       </form>
+      </div>
     </div>
   </dialog>
 
@@ -931,12 +946,12 @@
     </div>
   </dialog>
 
-  <!-- Subtle Heartbeat Quick-Feedback Trigger -->
-  <button class="feedback-pulse-fab" id="feedback-pulse-fab" type="button" data-open-feedback-modal aria-label="Gửi góp ý nhanh" title="Gửi góp ý nhanh">
+  <!-- Subtle Heartbeat Quick-Assistant & Feedback Trigger -->
+  <button class="feedback-pulse-fab" id="feedback-pulse-fab" type="button" data-open-feedback-modal="ask" aria-label="Hỏi nhanh hoặc gửi góp ý" title="Hỏi nhanh & Góp ý">
     <span class="feedback-pulse-core" aria-hidden="true">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     </span>
-    <span class="feedback-pulse-tip" aria-hidden="true">Góp ý</span>
+    <span class="feedback-pulse-tip" aria-hidden="true">Hỏi nhanh · Góp ý</span>
   </button>
 
   <!-- Desktop Orbital Reading Progress & Back-to-Top Ring (Desktop >= 1024px only) -->
@@ -1079,7 +1094,7 @@
           <div class="gb-member-gate contribute-photo-gate" id="contribute-photo-auth-gate" hidden>
             <div class="gb-member-gate-copy">
               <strong>Đăng nhập Thành viên Hola để gửi ảnh &amp; video gốc</strong>
-              <p>Tệp gốc (ảnh ≤ 25 MB, video ≤ 50 MB) được xếp vào thư mục chuẩn hóa riêng trên Google Drive và qua kiểm duyệt tại <code>/media/</code>.</p>
+              <p>Ảnh và video bạn gửi được lưu giữ nguyên chất lượng và hiển thị sau khi Ban Điều Phối duyệt.</p>
             </div>
             <div class="gb-member-gate-actions">
               <button type="button" class="btn btn--primary btn--sm" id="contribute-photo-signin-btn">Đăng nhập Thành viên</button>
@@ -1092,7 +1107,7 @@
                 <span class="gb-member-avatar" id="contribute-member-avatar" aria-hidden="true">H</span>
                 <div class="gb-member-info">
                   <strong id="contribute-member-name">Thành viên HolaRise</strong>
-                  <span id="contribute-member-sub">Lưu vào thư mục chuẩn hóa dong-gop/</span>
+                  <span id="contribute-member-sub">Ảnh gốc của buổi gặp</span>
                 </div>
               </div>
             </div>
@@ -1117,7 +1132,7 @@
                 <button type="button" class="contribute-dropzone" id="contribute-pick-btn">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                   <span class="contribute-dropzone-title">Chọn ảnh hoặc video từ máy</span>
-                  <span class="contribute-dropzone-hint" id="contribute-files-hint">Ảnh ≤ 25 MB · Video MP4/MOV/WebM ≤ 50 MB · Hỗ trợ dán ảnh Ctrl+V</span>
+                  <span class="contribute-dropzone-hint" id="contribute-files-hint">Ảnh dưới 25 MB · Video dưới 50 MB</span>
                 </button>
               </div>
 
@@ -1203,13 +1218,13 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/vendor/gsap.min.js?v=d7b9f503da" defer></script>
-  <script src="/assets/vendor/ScrollTrigger.min.js?v=d7b9f503da" defer></script>
-  <script src="/assets/js/motion.js?v=d7b9f503da" defer></script>
-  <script src="/assets/js/main.js?v=d7b9f503da" defer></script>
-  <script src="/assets/js/join-pass.js?v=d7b9f503da" defer></script>
-  <script src="/assets/js/member.js?v=d7b9f503da" defer></script>
-  <script src="/assets/js/pwa.js?v=d7b9f503da" defer></script>
-  <script src="/assets/js/telemetry.js?v=d7b9f503da" defer></script>
+  <script src="/assets/vendor/gsap.min.js?v=55f04d99ac" defer></script>
+  <script src="/assets/vendor/ScrollTrigger.min.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/motion.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/main.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/join-pass.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/member.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/pwa.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/telemetry.js?v=55f04d99ac" defer></script>
 </body>
 </html>

@@ -127,3 +127,82 @@ export async function notifyPostReviewEvent(
     return { ok: false, status: "failed", error: String(err?.message || err) };
   }
 }
+
+const FEEDBACK_SOURCE_LABEL = {
+  bug: "Báo lỗi kỹ thuật",
+  site: "Góp ý trên web",
+  event: "Góp ý sau sự kiện",
+};
+
+const FEEDBACK_CAT_LABEL = {
+  "cai-thien": "Cần cải thiện",
+  "dong-vien": "Lời động viên",
+  "de-xuat": "Đề xuất mới",
+  khac: "Góp ý khác",
+};
+
+export async function notifyAdminNewFeedback(
+  env,
+  { feedback, notifyEmail = "", fetchImpl = fetch }
+) {
+  try {
+    let recipient = String(notifyEmail || "").trim();
+    if (!recipient && env?.DB) {
+      const row = await env.DB.prepare("SELECT value FROM settings WHERE key = 'notify_email'")
+        .first()
+        .catch(() => null);
+      recipient = String(row?.value || "").trim();
+    }
+    if (!recipient) {
+      recipient = "phungsu@holarise.org";
+    }
+
+    const sourceKind = feedback?.sourceKind || feedback?.source_kind || "site";
+    const sourceLabel = FEEDBACK_SOURCE_LABEL[sourceKind] || "Góp ý cộng đồng";
+    const topicLabel =
+      feedback?.topicLabel ||
+      feedback?.topic_label ||
+      FEEDBACK_CAT_LABEL[feedback?.category] ||
+      "Góp ý";
+    const isAnon = Boolean(feedback?.isAnonymous ?? feedback?.is_anonymous);
+    const authorLine = isAnon
+      ? "Ẩn danh (bảo mật)"
+      : `${feedback?.authorName || feedback?.author_name || "Thành viên"}${
+          feedback?.authorContact || feedback?.author_contact
+            ? ` · ${feedback?.authorContact || feedback?.author_contact}`
+            : ""
+        }`;
+    const contextLabel =
+      sourceKind === "event"
+        ? feedback?.eventTitle || feedback?.event_title || "Sự kiện HolaRise"
+        : feedback?.pageUrl || feedback?.page_url || "/";
+    const hasAttachment = Boolean(feedback?.attachmentUrl || feedback?.attachment_url);
+    const inboxUrl = `${ORIGIN}/admin/?tab=community&subtab=feedbacks`;
+
+    const subject = `[HolaRise Góp ý] ${sourceLabel} · ${topicLabel}`;
+    const bodyHtml = `
+      <p>Hệ thống vừa nhận một phản hồi mới trên <strong>holarise.org</strong>:</p>
+      <ul style="padding-left:18px;margin:10px 0;">
+        <li><strong>Phân loại:</strong> ${escapeHtml(sourceLabel)} — ${escapeHtml(topicLabel)}</li>
+        <li><strong>${sourceKind === "event" ? "Sự kiện" : "Trang gửi"}:</strong> ${escapeHtml(contextLabel)}</li>
+        <li><strong>Người gửi:</strong> ${escapeHtml(authorLine)}</li>
+        ${hasAttachment ? `<li><strong>Ảnh đính kèm:</strong> Có 1 ảnh đính kèm (mở trong HolaRise Manager để xem an toàn).</li>` : ""}
+      </ul>
+      <blockquote style="margin:14px 0;padding:12px 14px;border-left:3px solid #14532d;background:#f7f8f5;color:#111b17;white-space:pre-wrap;">${escapeHtml(feedback?.content || "")}</blockquote>
+    `;
+
+    const html = wrapCard({
+      kicker: `HolaRise Manager · ${sourceLabel}`,
+      heading: `${topicLabel}${sourceKind === "event" ? ` · ${contextLabel}` : ""}`,
+      bodyHtml,
+      ctaUrl: inboxUrl,
+      ctaLabel: "Mở Hộp thư Góp ý →",
+      footerNote: "Email này được gửi tự động về địa chỉ thông báo Admin (Cài đặt → Sheets & Drive).",
+    });
+
+    const text = `[HolaRise Góp ý] ${sourceLabel} (${topicLabel})\nNgữ cảnh: ${contextLabel}\nNgười gửi: ${authorLine}\n\n${feedback?.content || ""}\n\nMở Hộp thư Góp ý: ${inboxUrl}`;
+    return await sendTransactionalEmail(env, { to: recipient, subject, html, text, fetchImpl });
+  } catch (err) {
+    return { ok: false, status: "failed", error: String(err?.message || err) };
+  }
+}

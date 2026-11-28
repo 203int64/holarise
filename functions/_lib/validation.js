@@ -804,6 +804,7 @@ export const VALID_REFLECTION_MOODS = new Set(["", "am-long", "cham-sau", "biet-
 export const VALID_REACTION_TYPES = new Set(["heart", "warm", "inspire"]);
 export const VALID_EVENT_FEEDBACK_CATEGORIES = new Set(["cai-thien", "dong-vien", "de-xuat", "khac"]);
 export const VALID_EVENT_FEEDBACK_STATUSES = new Set(["new", "read", "resolved"]);
+export const VALID_FEEDBACK_SOURCE_KINDS = new Set(["event", "site", "bug"]);
 
 export function validateEventFeedbackInput(body) {
   if (cleanStr(body?.website || body?._hp, 100) !== "") {
@@ -815,17 +816,65 @@ export function validateEventFeedbackInput(body) {
   const eventSlug = rawSlug ? slugifyVi(rawSlug) : "";
   const eventTitle = cleanStr(body?.eventTitle ?? body?.event_title, 200);
 
-  const rawCat = cleanStr(body?.category, 32).toLowerCase() || "cai-thien";
-  const category = VALID_EVENT_FEEDBACK_CATEGORIES.has(rawCat) ? rawCat : "cai-thien";
-
-  const content = cleanStr(body?.content ?? body?.note, 1500);
-  if (content.length < 8) {
-    fields.content = "Nội dung đóng góp cần ít nhất 8 ký tự.";
+  const rawSourceKind = cleanStr(body?.sourceKind ?? body?.source_kind, 20).toLowerCase();
+  const topicLabel = cleanStr(body?.topicLabel ?? body?.topic_label ?? body?.role, 120);
+  let sourceKind = VALID_FEEDBACK_SOURCE_KINDS.has(rawSourceKind)
+    ? rawSourceKind
+    : eventId || eventSlug
+      ? "event"
+      : "site";
+  if (
+    sourceKind === "site" &&
+    /lỗi|bug|technical/i.test(topicLabel)
+  ) {
+    sourceKind = "bug";
   }
 
+  let rawCat = cleanStr(body?.category, 32).toLowerCase();
+  if (!VALID_EVENT_FEEDBACK_CATEGORIES.has(rawCat)) {
+    if (/đề xuất|idea|suggestion/i.test(topicLabel)) rawCat = "de-xuat";
+    else if (/động viên|khen|cảm ơn|praise/i.test(topicLabel)) rawCat = "dong-vien";
+    else if (/khác|other/i.test(topicLabel)) rawCat = "khac";
+    else rawCat = "cai-thien";
+  }
+  const category = VALID_EVENT_FEEDBACK_CATEGORIES.has(rawCat) ? rawCat : "cai-thien";
+
+  const rawAttachment =
+    typeof body?.attachmentDataUrl === "string"
+      ? body.attachmentDataUrl.trim()
+      : typeof body?.screenshotDataUrl === "string"
+        ? body.screenshotDataUrl.trim()
+        : "";
+  let attachmentDataUrl = "";
+  if (rawAttachment) {
+    if (rawAttachment.length > 720000) {
+      fields.attachmentDataUrl = "Ảnh đính kèm vượt quá giới hạn dung lượng cho phép.";
+    } else if (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(rawAttachment)) {
+      fields.attachmentDataUrl = "Định dạng ảnh đính kèm không hợp lệ (chỉ hỗ trợ JPEG, PNG, WebP).";
+    } else {
+      attachmentDataUrl = rawAttachment;
+    }
+  }
+
+  const content = cleanStr(body?.content ?? body?.note, 1500);
+  const minContentLen = attachmentDataUrl ? 2 : 4;
+  if (content.length < minContentLen) {
+    fields.content = attachmentDataUrl
+      ? "Vui lòng ghi chú ngắn ít nhất 2 ký tự kèm ảnh."
+      : "Nội dung đóng góp cần ít nhất 4 ký tự.";
+  }
+
+  const rawPageUrl = cleanStr(body?.pageUrl ?? body?.page_url, 260);
+  const pageUrl = rawPageUrl.startsWith("/") ? rawPageUrl : "";
+  const diagnostics = cleanStr(body?.diagnostics, 900);
+
   const isAnonymous = Boolean(body?.isAnonymous ?? body?.is_anonymous);
-  const authorName = isAnonymous ? "Ẩn danh" : cleanStr(body?.authorName ?? body?.author_name ?? body?.name, 100);
-  const authorContact = isAnonymous ? "" : cleanStr(body?.authorContact ?? body?.author_contact ?? body?.contact, 120);
+  const authorName = isAnonymous
+    ? "Ẩn danh"
+    : cleanStr(body?.authorName ?? body?.author_name ?? body?.fullName ?? body?.name, 100);
+  const authorContact = isAnonymous
+    ? ""
+    : cleanStr(body?.authorContact ?? body?.author_contact ?? body?.phone ?? body?.contact, 120);
 
   if (Object.keys(fields).length > 0) {
     return { ok: false, fields };
@@ -837,6 +886,11 @@ export function validateEventFeedbackInput(body) {
       event_id: eventId,
       event_slug: eventSlug,
       event_title: eventTitle,
+      source_kind: sourceKind,
+      topic_label: topicLabel,
+      page_url: pageUrl,
+      diagnostics,
+      attachment_data_url: attachmentDataUrl,
       category,
       content,
       author_name: authorName || "Ẩn danh",

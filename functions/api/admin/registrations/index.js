@@ -1,15 +1,14 @@
 import { jsonResponse, requireAdmin } from "../../../_lib/security.js";
 import { cleanStr, truncateUtf8Bytes, VALID_REG_STATUSES } from "../../../_lib/validation.js";
 
-const BUG_SHOT_RE = /\/api\/admin\/bug-screenshot\/[a-zA-Z0-9._-]{6,96}/;
+// Keep Registrations & Check-in strictly free of legacy feedback rows even prior to migration 0028
+export const PURE_REGISTRATION_SQL =
+  "NOT (event_id = '' AND (activity_title LIKE 'Đóng góp · %' OR activity_title LIKE 'Feedback · %' OR note LIKE '%/api/admin/bug-screenshot/%' OR note LIKE '%[Ngữ cảnh kỹ thuật]:%'))";
 
 function enrichRegistrationRow(row) {
-  const note = String(row?.note || "");
-  const shotMatch = note.match(BUG_SHOT_RE);
   return {
     ...row,
     member_id: row?.member_id || "",
-    bug_screenshot_url: shotMatch ? shotMatch[0] : "",
   };
 }
 
@@ -27,7 +26,7 @@ export async function onRequestGet(context) {
   const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") || "50", 10) || 50, 1), 200);
   const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10) || 0, 0);
 
-  const where = [];
+  const where = [PURE_REGISTRATION_SQL];
   const binds = [];
 
   if (status && VALID_REG_STATUSES.has(status)) {
@@ -41,8 +40,6 @@ export async function onRequestGet(context) {
   if (source === "event_modal" || source === "join_page") {
     where.push("source = ?");
     binds.push(source);
-  } else if (source === "feedback") {
-    where.push("(note LIKE '%/api/admin/bug-screenshot/%' OR note LIKE '%[Ngữ cảnh kỹ thuật]:%')");
   }
   if (escapedQ) {
     const pat = `%${escapedQ}%`;
@@ -52,7 +49,7 @@ export async function onRequestGet(context) {
     binds.push(pat, pat, pat, pat, pat);
   }
 
-  const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const whereSql = `WHERE ${where.join(" AND ")}`;
 
   const fetchList = async () => {
     try {
@@ -88,9 +85,11 @@ export async function onRequestGet(context) {
     context.env.DB.prepare(`SELECT COUNT(*) AS cnt FROM registrations ${whereSql}`)
       .bind(...binds)
       .first(),
-    context.env.DB.prepare("SELECT status, COUNT(*) AS cnt FROM registrations GROUP BY status").all(),
     context.env.DB.prepare(
-      "SELECT activity_title, COUNT(*) AS cnt FROM registrations GROUP BY activity_title ORDER BY cnt DESC LIMIT 60"
+      `SELECT status, COUNT(*) AS cnt FROM registrations WHERE ${PURE_REGISTRATION_SQL} GROUP BY status`
+    ).all(),
+    context.env.DB.prepare(
+      `SELECT activity_title, COUNT(*) AS cnt FROM registrations WHERE ${PURE_REGISTRATION_SQL} GROUP BY activity_title ORDER BY cnt DESC LIMIT 60`
     ).all(),
   ]);
 
