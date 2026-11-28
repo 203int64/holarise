@@ -1,4 +1,5 @@
 import { ensureMediaApprovalSchema } from "../../../../_lib/media-approval-schema.js";
+import { logAudit } from "../../../../_lib/rbac.js";
 import {
   errorResponse,
   jsonResponse,
@@ -8,11 +9,10 @@ import {
 } from "../../../../_lib/security.js";
 import { serializePhotoRow } from "../../albums/[id]/index.js";
 
-const APPROVER_ROLES = ["super_admin", "editor"];
 const MAX_COMPRESSED_BYTES = 1.5 * 1024 * 1024; // 1.5 MB max for web-optimized KV copy
 
 export async function onRequestPost(context) {
-  const auth = await requireAdmin(context, { allowedRoles: APPROVER_ROLES });
+  const auth = await requireAdmin(context, { permission: "media.approve" });
   if (!auth.ok) return auth.response;
 
   await ensureMediaApprovalSchema(context.env.DB);
@@ -98,6 +98,14 @@ export async function onRequestPost(context) {
       }
     }
 
+    await logAudit(context.env.DB, auth.user, {
+      action: `media.${nextStatus}`,
+      targetType: "media_photo",
+      targetId: id,
+      summary: `Duyệt ảnh & nén web (${nextStatus}) trong album ${existing.album_id}`,
+      meta: { albumId: existing.album_id, compressedBytes: bytes.byteLength },
+    });
+
     const updated = await context.env.DB.prepare("SELECT * FROM media_photos WHERE id = ?").bind(id).first();
     return jsonResponse({
       ok: true,
@@ -153,6 +161,14 @@ export async function onRequestPost(context) {
         .run();
     }
   }
+
+  await logAudit(context.env.DB, auth.user, {
+    action: `media.${nextStatus}`,
+    targetType: "media_photo",
+    targetId: id,
+    summary: `Chuyển trạng thái ảnh sang ${nextStatus} trong album ${existing.album_id}`,
+    meta: { albumId: existing.album_id, safeguardingChecked: Boolean(parsed.data.safeguardingChecked) },
+  });
 
   const updated = await context.env.DB.prepare("SELECT * FROM media_photos WHERE id = ?").bind(id).first();
   return jsonResponse({

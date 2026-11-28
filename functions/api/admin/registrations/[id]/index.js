@@ -2,7 +2,7 @@ import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../.
 import { cleanStr, VALID_REG_STATUSES } from "../../../../_lib/validation.js";
 
 export async function onRequestPatch(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "registrations.write" });
   if (!auth.ok) return auth.response;
 
   const id = String(context.params?.id || "");
@@ -46,7 +46,7 @@ export async function onRequestPatch(context) {
 }
 
 export async function onRequestDelete(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { superAdminOnly: true });
   if (!auth.ok) return auth.response;
 
   const id = String(context.params?.id || "");

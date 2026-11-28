@@ -55,7 +55,7 @@ async function findLinkedAlbum(db, ev) {
 }
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "events.read" });
   if (!auth.ok) return auth.response;
 
   const db = context.env.DB;
@@ -173,7 +173,7 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPatch(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "events.write" });
   if (!auth.ok) return auth.response;
 
   const db = context.env.DB;
@@ -280,7 +280,7 @@ export async function onRequestPatch(context) {
 }
 
 export async function onRequestPost(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "events.write" });
   if (!auth.ok) return auth.response;
 
   const db = context.env.DB;

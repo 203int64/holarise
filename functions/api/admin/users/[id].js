@@ -1,3 +1,10 @@
+import {
+  DELEGATABLE_ROLES,
+  getDefaultDepartmentForRole,
+  getRoleMeta,
+  logAudit,
+  normalizeRole,
+} from "../../../_lib/rbac.js";
 import { errorResponse, hashPassword, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
 import { cleanStr } from "../../../_lib/validation.js";
 
@@ -6,11 +13,22 @@ export async function onRequestPatch(context) {
   if (!auth.ok) return auth.response;
 
   const id = String(context.params?.id || "");
-  const target = await context.env.DB.prepare(
-    "SELECT id, email, name, role, is_active FROM admin_users WHERE id = ?"
-  )
-    .bind(id)
-    .first();
+  let target = null;
+  let hasExtendedCols = true;
+  try {
+    target = await context.env.DB.prepare(
+      "SELECT id, email, name, role, department, phone, is_active FROM admin_users WHERE id = ?"
+    )
+      .bind(id)
+      .first();
+  } catch {
+    hasExtendedCols = false;
+    target = await context.env.DB.prepare(
+      "SELECT id, email, name, role, is_active FROM admin_users WHERE id = ?"
+    )
+      .bind(id)
+      .first();
+  }
   if (!target) {
     return errorResponse(404, "NOT_FOUND", "Không tìm thấy tài khoản.");
   }
@@ -20,27 +38,42 @@ export async function onRequestPatch(context) {
 
   const isActive =
     parsed.data.is_active !== undefined ? (parsed.data.is_active ? 1 : 0) : target.is_active;
-  if (parsed.data.role !== undefined && parsed.data.role !== target.role && parsed.data.role !== "media") {
-    return errorResponse(
-      403,
-      "ADMIN_LOCKED",
-      "Hệ thống chỉ cho phép duy nhất 1 tài khoản Quản trị chính (203int64). Không thể nâng quyền tài khoản khác."
-    );
+
+  let role = target.role;
+  if (parsed.data.role !== undefined && parsed.data.role !== target.role) {
+    const reqRole = cleanStr(parsed.data.role, 32).toLowerCase();
+    if (reqRole === "super_admin" || !DELEGATABLE_ROLES.has(reqRole)) {
+      return errorResponse(
+        403,
+        "ADMIN_LOCKED",
+        "Hệ thống chỉ cho phép duy nhất 1 tài khoản Chủ nhiệm (super_admin). Không thể nâng quyền lên super_admin."
+      );
+    }
+    role = reqRole;
   }
-  const role = parsed.data.role === "media" ? "media" : target.role;
+
   const name = parsed.data.name !== undefined ? cleanStr(parsed.data.name, 100) || target.name : target.name;
+  const department =
+    parsed.data.department !== undefined
+      ? cleanStr(parsed.data.department, 80) || getDefaultDepartmentForRole(role)
+      : target.department || getDefaultDepartmentForRole(role);
+  const phone = parsed.data.phone !== undefined ? cleanStr(parsed.data.phone, 30) : target.phone || "";
 
   if (id === auth.user.id && (isActive === 0 || role !== "super_admin")) {
     return errorResponse(400, "SELF_LOCKOUT", "Không thể tự khóa hoặc hạ quyền chính tài khoản đang đăng nhập.");
   }
 
   const stmts = [
-    context.env.DB.prepare("UPDATE admin_users SET name = ?, role = ?, is_active = ? WHERE id = ?").bind(
-      name,
-      role,
-      isActive,
-      id
-    ),
+    hasExtendedCols
+      ? context.env.DB.prepare(
+          "UPDATE admin_users SET name = ?, role = ?, department = ?, phone = ?, is_active = ? WHERE id = ?"
+        ).bind(name, role, department, phone, isActive, id)
+      : context.env.DB.prepare("UPDATE admin_users SET name = ?, role = ?, is_active = ? WHERE id = ?").bind(
+          name,
+          role,
+          isActive,
+          id
+        ),
   ];
 
   if (parsed.data.newPassword) {
@@ -64,12 +97,39 @@ export async function onRequestPatch(context) {
   }
 
   await context.env.DB.batch(stmts);
-  const updated = await context.env.DB.prepare(
-    "SELECT id, email, name, role, is_active, created_at, last_login_at FROM admin_users WHERE id = ?"
-  )
-    .bind(id)
-    .first();
-  return jsonResponse({ ok: true, item: updated });
+
+  const canonicalRole = normalizeRole(role) || role;
+  await logAudit(context.env.DB, auth.user, {
+    action: "user.update",
+    targetType: "admin_user",
+    targetId: id,
+    summary: `Cập nhật nhân sự ${name} (${getRoleMeta(canonicalRole).shortLabel} · ${department}${isActive ? "" : " · Đã khóa"})`,
+    meta: { role, department, isActive: Boolean(isActive), passwordReset: Boolean(parsed.data.newPassword) },
+  });
+
+  const updated = hasExtendedCols
+    ? await context.env.DB.prepare(
+        "SELECT id, email, name, role, department, phone, is_active, created_at, last_login_at FROM admin_users WHERE id = ?"
+      )
+        .bind(id)
+        .first()
+    : await context.env.DB.prepare(
+        "SELECT id, email, name, role, is_active, created_at, last_login_at FROM admin_users WHERE id = ?"
+      )
+        .bind(id)
+        .first();
+
+  return jsonResponse({
+    ok: true,
+    item: {
+      ...updated,
+      canonicalRole,
+      roleLabel: getRoleMeta(canonicalRole).label,
+      roleShortLabel: getRoleMeta(canonicalRole).shortLabel,
+      department: updated?.department || department,
+      phone: updated?.phone || "",
+    },
+  });
 }
 
 export async function onRequestDelete(context) {
@@ -80,9 +140,18 @@ export async function onRequestDelete(context) {
   if (id === auth.user.id) {
     return errorResponse(400, "SELF_DELETE", "Không thể tự xóa tài khoản đang đăng nhập.");
   }
-  const res = await context.env.DB.prepare("DELETE FROM admin_users WHERE id = ?").bind(id).run();
-  if (Number(res?.meta?.changes || 0) === 0) {
+  const target = await context.env.DB.prepare("SELECT id, email, name, role FROM admin_users WHERE id = ?")
+    .bind(id)
+    .first();
+  if (!target) {
     return errorResponse(404, "NOT_FOUND", "Không tìm thấy tài khoản để xóa.");
   }
+  await context.env.DB.prepare("DELETE FROM admin_users WHERE id = ?").bind(id).run();
+  await logAudit(context.env.DB, auth.user, {
+    action: "user.delete",
+    targetType: "admin_user",
+    targetId: id,
+    summary: `Xóa tài khoản ${target.name} (${target.email})`,
+  });
   return jsonResponse({ ok: true, id });
 }

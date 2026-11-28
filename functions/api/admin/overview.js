@@ -3,18 +3,21 @@ import { isDriveConfigured } from "../../_lib/drive.js";
 import { getSettingsMap } from "../../_lib/gas.js";
 import { getMediaAccessPin } from "../../_lib/gate-token.js";
 import { ensureMediaApprovalSchema } from "../../_lib/media-approval-schema.js";
+import { ensureManagerSchema, roleHasPermission } from "../../_lib/rbac.js";
 import { serializeEventRow, splitEventsByDate } from "../../_lib/render.js";
 import { jsonResponse, requireAdmin } from "../../_lib/security.js";
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "overview.read" });
   if (!auth.ok) return auth.response;
 
   const db = context.env.DB;
   await Promise.all([
     ensureMediaApprovalSchema(db).catch(() => null),
     ensureChatAndCapabilitySchema(db).catch(() => null),
+    ensureManagerSchema(db).catch(() => null),
   ]);
+  const canReadRegs = auth.isSoleAdmin || roleHasPermission(auth.canonicalRole, "registrations.read", auth.isSoleAdmin);
 
   const [
     regCountsRes,
@@ -103,12 +106,13 @@ export async function onRequestGet(context) {
   const publishedEvents = serializedEvents.filter((e) => e.status === "published");
   const { upcoming, past } = splitEventsByDate(publishedEvents);
 
-  const posts = { published: 0, draft: 0, total: 0 };
+  const posts = { published: 0, draft: 0, pending_review: 0, total: 0 };
   for (const row of postsRes.results || []) {
     const c = Number(row.cnt || 0);
     posts.total += c;
     if (row.status === "published") posts.published = c;
     else if (row.status === "draft") posts.draft = c;
+    else if (row.status === "pending_review") posts.pending_review = c;
   }
 
   const reflections = { pending: 0, approved: 0, rejected: 0, total: 0 };
@@ -136,10 +140,27 @@ export async function onRequestGet(context) {
     .first()
     .catch(() => ({ total: 0, unread_threads: 0, open_threads: 0 }));
 
+  const todayIso = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const taskRowsRes = await db
+    .prepare("SELECT status, due_at, assignee_type, assignee_id FROM ops_tasks LIMIT 500")
+    .all()
+    .catch(() => ({ results: [] }));
+  const tasksSummary = { open: 0, done: 0, overdue: 0, mine: 0, total: 0 };
+  for (const t of taskRowsRes.results || []) {
+    tasksSummary.total += 1;
+    if (t.status === "done") tasksSummary.done += 1;
+    else {
+      tasksSummary.open += 1;
+      if (t.due_at && String(t.due_at).slice(0, 10) < todayIso) tasksSummary.overdue += 1;
+      if (t.assignee_type === "staff" && t.assignee_id === auth.user.id) tasksSummary.mine += 1;
+    }
+  }
+
   return jsonResponse({
     ok: true,
-    registrations,
-    recentRegistrations: recentRegsRes.results || [],
+    registrations: canReadRegs ? registrations : { all: registrations.all, new: 0, contacted: 0, attended: 0, cancelled: 0 },
+    recentRegistrations: canReadRegs ? recentRegsRes.results || [] : [],
+    tasks: tasksSummary,
     events: {
       total: serializedEvents.length,
       upcomingCount: upcoming.length,

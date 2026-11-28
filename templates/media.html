@@ -57,13 +57,13 @@
             <span>HolaRise · Hòa Lạc</span>
           </div>
           <div class="vault-aside-copy">
-            <p class="vault-kicker">Cổng Media · NGV</p>
+            <p class="vault-kicker">Kho Tư Liệu · NGV</p>
             <h2>Lưu giữ từng khoảnh khắc nguyên bản.</h2>
-            <p class="vault-quote">Ảnh và video gốc độ phân giải đầy đủ được lưu trực tiếp lên Google Drive tổ chức và chuyển qua hàng duyệt trước khi lên web.</p>
+            <p class="vault-quote">Ảnh và video gốc độ phân giải đầy đủ được lưu trong từng thư mục trên Google Drive để phục vụ dựng video, viết bài, phóng sự — Quản trị chủ động chọn khung hình phù hợp hiển thị công khai.</p>
           </div>
           <ul class="vault-pillars">
             <li>100% ảnh &amp; video gốc không giới hạn số lượng trên Google Drive</li>
-            <li>Phân quyền rõ ràng: Admin duyệt · NGV xem &amp; tải lên</li>
+            <li>Kho tư liệu nội bộ gọn gàng · Quản trị bật hiển thị công khai theo chọn lọc</li>
             <li>Đăng nhập trực tiếp bằng Tài khoản Thành viên đã nâng quyền NGV</li>
           </ul>
         </div>
@@ -226,7 +226,7 @@
         <div class="media-toolbar">
           <div class="seg-pills" role="group" aria-label="Lọc Album">
             <button class="seg-pill is-active" type="button" data-album-filter="all">Tất cả <span class="seg-count" id="cnt-alb-all">0</span></button>
-            <button class="seg-pill" type="button" data-album-filter="pending" id="chip-alb-pending" hidden>Chờ duyệt <span class="seg-count seg-count--warn" id="cnt-alb-pending">0</span></button>
+            <button class="seg-pill" type="button" data-album-filter="pending" id="chip-alb-pending" hidden>Có tư liệu nội bộ <span class="seg-count" id="cnt-alb-pending">0</span></button>
             <button class="seg-pill" type="button" data-album-filter="published">Công khai</button>
             <button class="seg-pill" type="button" data-album-filter="draft">Nháp</button>
           </div>
@@ -244,24 +244,23 @@
       <section id="view-workspace" hidden>
         <input type="file" id="multi-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*,video/mp4,video/quicktime,video/webm,video/x-m4v,video/*" multiple hidden>
 
-        <!-- Media Moderation Status Strip -->
+        <!-- Media Vault Status Strip -->
         <div class="ws-moderation-strip" id="ws-moderation-strip">
           <span class="ws-mod-dot" aria-hidden="true"></span>
-          <span id="ws-moderation-copy"><strong>Kiểm duyệt Media: ĐANG BẬT</strong> · Ảnh &amp; video NGV tải lên được lưu bản gốc trên Google Drive và vào hàng Chờ duyệt trước khi hiển thị công khai.</span>
+          <span id="ws-moderation-copy"><strong>Kho tư liệu nội bộ</strong> · Ảnh &amp; video gốc được giữ theo từng thư mục để dùng làm video, bài viết, phóng sự. Quản trị chọn ảnh phù hợp để bật Hiển thị công khai.</span>
         </div>
 
         <!-- Compact Status Filter & Multi-Select Bar -->
         <div class="ws-toolbar">
-          <div class="seg-pills" role="group" aria-label="Lọc ảnh trong album" id="photo-filter-group">
-            <button class="seg-pill" type="button" data-photo-filter="pending" id="tab-photo-pending" hidden>Chờ duyệt <span class="seg-count seg-count--warn" id="cnt-photo-pending">0</span></button>
-            <button class="seg-pill" type="button" data-photo-filter="contributions" id="tab-photo-contrib" hidden>Đóng góp <span class="seg-count" id="cnt-photo-contrib">0</span></button>
-            <button class="seg-pill" type="button" data-photo-filter="approved">Đã lên web <span class="seg-count" id="cnt-photo-approved">0</span></button>
-            <button class="seg-pill" type="button" data-photo-filter="featured"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:3px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Trang chủ <span class="seg-count" id="cnt-photo-featured">0</span></button>
+          <div class="seg-pills" role="group" aria-label="Lọc tư liệu trong album" id="photo-filter-group">
             <button class="seg-pill is-active" type="button" data-photo-filter="all">Tất cả <span class="seg-count" id="cnt-photo-all">0</span></button>
+            <button class="seg-pill" type="button" data-photo-filter="approved">Công khai <span class="seg-count" id="cnt-photo-approved">0</span></button>
+            <button class="seg-pill" type="button" data-photo-filter="pending" id="tab-photo-pending" hidden>Nội bộ <span class="seg-count" id="cnt-photo-pending">0</span></button>
+            <button class="seg-pill" type="button" data-photo-filter="contributions" id="tab-photo-contrib" hidden>Đóng góp <span class="seg-count" id="cnt-photo-contrib">0</span></button>
+            <button class="seg-pill" type="button" data-photo-filter="featured"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:3px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Trang chủ <span class="seg-count" id="cnt-photo-featured">0</span></button>
           </div>
 
           <div class="ws-toolbar-right">
-            <button class="btn btn--primary btn--sm" type="button" id="btn-approve-all" hidden>Duyệt hết chờ duyệt</button>
             <button class="btn btn--outline btn--sm" type="button" id="btn-toggle-select">Chọn nhiều</button>
           </div>
         </div>
@@ -307,8 +306,8 @@
           <button class="batch-link" type="button" id="btn-clear-select">Bỏ chọn</button>
         </div>
         <div class="batch-bar-actions">
-          <button class="btn btn--primary btn--sm" type="button" id="btn-batch-approve" hidden>✓ Duyệt &amp; nén lên web</button>
-          <button class="btn btn--outline btn--sm" type="button" id="btn-batch-unapprove" hidden>Ẩn khỏi web</button>
+          <button class="btn btn--primary btn--sm" type="button" id="btn-batch-approve" hidden>Hiển thị công khai</button>
+          <button class="btn btn--outline btn--sm" type="button" id="btn-batch-unapprove" hidden>Chỉ giữ trong kho</button>
           <button class="btn btn--danger-ghost btn--sm" type="button" id="btn-batch-delete">Xóa đã chọn</button>
         </div>
       </div>
@@ -316,12 +315,12 @@
   </div>
 
   <!-- DIALOG 1: QUICK-REVIEW PHOTO LIGHTBOX -->
-  <dialog class="lightbox-dialog" id="lightbox-dialog" closedby="any" aria-label="Xem và duyệt nhanh ảnh">
+  <dialog class="lightbox-dialog" id="lightbox-dialog" closedby="any" aria-label="Xem tư liệu gốc">
     <div class="lb-shell">
       <header class="lb-top">
         <div class="lb-top-left">
           <span class="lb-counter" id="lb-counter">1 / 1</span>
-          <span class="lb-status-pill" id="lb-status-pill">Đã lên web</span>
+          <span class="lb-status-pill" id="lb-status-pill">Nội bộ</span>
         </div>
         <button class="lb-icon-btn" type="button" data-close-dialog aria-label="Đóng xem ảnh">×</button>
       </header>
@@ -336,9 +335,10 @@
       <footer class="lb-dock">
         <div class="lb-meta" id="lb-meta" hidden></div>
         <div class="lb-actions">
-          <button class="btn btn--primary btn--sm" type="button" id="lb-btn-approve" hidden>✓ Duyệt &amp; nén lên web</button>
+          <button class="btn btn--primary btn--sm" type="button" id="lb-btn-approve" hidden>Hiển thị công khai</button>
+          <a class="lb-action-btn" id="lb-btn-download" href="/assets/images/logo-mark.png" download hidden>↓ Tải bản gốc</a>
           <button class="lb-action-btn lb-action-btn--ai" type="button" id="lb-btn-ai-retouch" hidden title="Phím tắt: R"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:4px;"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>AI 3 mẫu</button>
-          <button class="lb-action-btn" type="button" id="lb-btn-unapprove" hidden>Ẩn khỏi web</button>
+          <button class="lb-action-btn" type="button" id="lb-btn-unapprove" hidden>Chỉ giữ trong kho</button>
           <button class="lb-action-btn" type="button" id="lb-btn-featured" hidden>Ghim Trang chủ</button>
           <button class="lb-action-btn" type="button" id="lb-btn-cover" hidden>Làm ảnh bìa</button>
           <button class="lb-action-btn" type="button" id="lb-btn-edit">Chi tiết</button>

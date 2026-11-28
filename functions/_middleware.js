@@ -29,6 +29,9 @@ function buildLegacyRedirectPath(pathname, search) {
   if (cleanPath === "/tai-khoan") {
     return `/tham-gia/${search}`;
   }
+  if (cleanPath === "/manager") {
+    return `/admin/${search}`;
+  }
   if (cleanPath === "/tin-tuc") {
     return `/hanh-trinh/${search}`;
   }

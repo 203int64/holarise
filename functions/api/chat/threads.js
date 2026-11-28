@@ -59,7 +59,7 @@ export async function onRequestGet(context) {
 
   // 1. Admin unified inbox
   if (scope === "admin") {
-    const auth = await requireAdmin(context);
+    const auth = await requireAdmin(context, { permission: "inbox.read" });
     if (!auth.ok) return auth.response;
 
     const kind = cleanStr(url.searchParams.get("kind") || "", 24);

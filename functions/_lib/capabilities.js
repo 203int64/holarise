@@ -52,10 +52,10 @@ export const CAPABILITY_META = {
   },
   "media.portal": {
     scopeType: "global",
-    labelVi: "NGV · Cổng Media",
-    labelEn: "NGV · Media Portal",
-    summaryVi: "Đăng nhập Cổng /media/ xem toàn bộ thư mục và tải ảnh, video không giới hạn vào hàng Chờ duyệt.",
-    summaryEn: "Access the /media/ portal to view all folders and upload unlimited photos and videos for admin review.",
+    labelVi: "NGV · Kho Tư Liệu Media",
+    labelEn: "NGV · Media Vault",
+    summaryVi: "Đăng nhập Kho Media /media/ xem, tải bản gốc và đăng ảnh, video không giới hạn cho hoạt động dựng phim, bài viết, phóng sự.",
+    summaryEn: "Access the /media/ vault to view, download originals, and upload unlimited photos and videos for team production.",
     consentVi: "Tôi cam kết không đăng ảnh cận mặt trẻ vị thành niên hoặc khoảnh khắc nhạy cảm khi chưa có sự đồng ý.",
     consentEn: "I agree to follow HolaRise safeguarding rules and never publish sensitive portraits without consent.",
   },
@@ -181,15 +181,17 @@ export async function ensureChatAndCapabilitySchema(db) {
 
 /**
  * Strict Delegation Matrix (Anti-Privilege Escalation):
- * - super_admin & editor: all 4 Axis-2 capabilities
- * - media: ONLY album.view_private
- * - non-admin: none
+ * - super_admin, event_ops, editor (legacy): all 4 Axis-2 capabilities
+ * - media_manager: album.view_private + media.portal
+ * - media / media_ctv: ONLY album.view_private
+ * - content_ctv / content_editor / non-admin: none
  */
 export function canAdminGrantCapability(adminUser, capability) {
   if (!adminUser || !VALID_CAPABILITIES.has(capability)) return false;
   const role = String(adminUser.role || "").trim().toLowerCase();
-  if (role === "super_admin" || role === "editor") return true;
-  if (role === "media") return capability === "album.view_private";
+  if (role === "super_admin" || role === "event_ops" || role === "editor") return true;
+  if (role === "media_manager") return capability === "album.view_private" || capability === "media.portal";
+  if (role === "media" || role === "media_ctv") return capability === "album.view_private";
   return false;
 }
 

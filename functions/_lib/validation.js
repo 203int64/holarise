@@ -15,7 +15,11 @@ export const VALID_PILLAR_CHOICES = new Set(["holaheart", "holagreen", "holaconn
 export const VALID_PARTICIPANT_ROLES = new Set(["member", "volunteer", "speaker"]);
 export const VALID_REFLECTION_STATUSES = new Set(["pending", "approved", "rejected"]);
 export const VALID_REG_STATUSES = new Set(["new", "contacted", "attended", "cancelled"]);
-export const VALID_POST_STATUSES = new Set(["published", "draft"]);
+export const VALID_POST_STATUSES = new Set(["published", "draft", "pending_review"]);
+export const VALID_EVENT_STATUSES = new Set(["published", "draft"]);
+export const VALID_TASK_STATUSES = new Set(["todo", "in_progress", "review", "done"]);
+export const VALID_TASK_PHASES = new Set(["before", "during", "after", "general"]);
+export const VALID_TASK_PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
 export const VALID_EVENT_KINDS = new Set(["upcoming", "past"]);
 export const VALID_REEL_AUDIO_PRESETS = new Set([
   "preset:holaheart",
@@ -202,8 +206,10 @@ export function validatePostInput(body) {
   if (content.length === 0) fields.content = "Nội dung bài viết không được để trống.";
 
   const readTime = cleanStr(body.readTime || body.read_time, 30) || estimateReadTime(content);
-  const status = cleanStr(body.status, 20) || "published";
-  if (!VALID_POST_STATUSES.has(status)) fields.status = "Trạng thái bài viết chỉ nhận 'published' hoặc 'draft'.";
+  const status = cleanStr(body.status, 24) || "published";
+  if (!VALID_POST_STATUSES.has(status)) {
+    fields.status = "Trạng thái bài viết chỉ nhận 'published', 'pending_review' hoặc 'draft'.";
+  }
 
   if (Object.keys(fields).length > 0) {
     return { ok: false, fields };
@@ -288,7 +294,7 @@ export function validateEventInput(body) {
     : rawReelAudioUrl;
   const reelAudioTitle = cleanStr(body.reelAudioTitle ?? body.reel_audio_title, 120);
   const status = cleanStr(body.status, 20) || "published";
-  if (!VALID_POST_STATUSES.has(status)) fields.status = "Trạng thái sự kiện chỉ nhận 'published' hoặc 'draft'.";
+  if (!VALID_EVENT_STATUSES.has(status)) fields.status = "Trạng thái sự kiện chỉ nhận 'published' hoặc 'draft'.";
 
   const sortOrder = Number.isFinite(Number(body.sortOrder ?? body.sort_order))
     ? Math.trunc(Number(body.sortOrder ?? body.sort_order))
@@ -988,6 +994,72 @@ export function validateSiteVisualsInput(body, current = {}) {
       aboutImageAlt,
       aboutIsIllustration,
       pillars,
+    },
+  };
+}
+
+export function validateTaskInput(body) {
+  const fields = {};
+  const title = cleanStr(body.title, 200);
+  if (title.length < 3) fields.title = "Tên nhiệm vụ cần ít nhất 3 ký tự.";
+
+  const description = cleanStr(body.description, 1500);
+  const eventId = cleanStr(body.eventId ?? body.event_id, 80);
+  const phase = cleanStr(body.phase, 20) || (eventId ? "before" : "general");
+  if (!VALID_TASK_PHASES.has(phase)) {
+    fields.phase = "Giai đoạn nhiệm vụ chỉ nhận before, during, after hoặc general.";
+  }
+
+  const department = cleanStr(body.department, 80) || "Ban Sự Kiện";
+  const assigneeType = cleanStr(body.assigneeType ?? body.assignee_type, 20) || "unassigned";
+  if (!["unassigned", "staff", "member"].includes(assigneeType)) {
+    fields.assigneeType = "Loại người phụ trách không hợp lệ.";
+  }
+  const assigneeId = assigneeType === "unassigned" ? "" : cleanStr(body.assigneeId ?? body.assignee_id, 80);
+  const assigneeName = assigneeType === "unassigned" ? "" : cleanStr(body.assigneeName ?? body.assignee_name, 120);
+
+  const status = cleanStr(body.status, 20) || "todo";
+  if (!VALID_TASK_STATUSES.has(status)) {
+    fields.status = "Trạng thái nhiệm vụ chỉ nhận todo, in_progress, review hoặc done.";
+  }
+
+  const priority = cleanStr(body.priority, 20) || "normal";
+  if (!VALID_TASK_PRIORITIES.has(priority)) {
+    fields.priority = "Mức ưu tiên chỉ nhận low, normal, high hoặc urgent.";
+  }
+
+  const dueAt = cleanStr(body.dueAt ?? body.due_at, 40);
+  if (dueAt && !/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})?)?$/.test(dueAt)) {
+    fields.dueAt = "Hạn chót phải theo định dạng YYYY-MM-DD hoặc ISO datetime.";
+  }
+
+  const zaloUrl = cleanStr(body.zaloUrl ?? body.zalo_url, 500);
+  if (zaloUrl && !isSafeExternalHttpsUrl(zaloUrl)) {
+    fields.zaloUrl = "Link Nhóm Zalo phải bắt đầu bằng https://.";
+  }
+
+  const playbookKey = cleanStr(body.playbookKey ?? body.playbook_key, 60);
+
+  if (Object.keys(fields).length > 0) {
+    return { ok: false, fields };
+  }
+
+  return {
+    ok: true,
+    value: {
+      title,
+      description,
+      event_id: eventId,
+      phase,
+      department,
+      assignee_type: assigneeType,
+      assignee_id: assigneeId,
+      assignee_name: assigneeName,
+      status,
+      priority,
+      due_at: dueAt,
+      zalo_url: zaloUrl,
+      playbook_key: playbookKey,
     },
   };
 }

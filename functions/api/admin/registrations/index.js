@@ -14,7 +14,7 @@ function enrichRegistrationRow(row) {
 }
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "registrations.read" });
   if (!auth.ok) return auth.response;
 
   const url = new URL(context.request.url);

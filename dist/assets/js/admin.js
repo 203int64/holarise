@@ -1981,7 +1981,7 @@
             </label>
             <label class="check-chip">
               <input type="checkbox" id="m360-media-portal" ${ma.canAccessMediaPortal ? "checked" : ""}>
-              <span><strong>Nâng quyền NGV (Cổng <code>/media/</code>):</strong> Cho phép thành viên đăng nhập <code>/media/</code> (qua mã cổng) để xem toàn bộ thư mục và tải ảnh, video không giới hạn vào hàng Chờ duyệt.</span>
+              <span><strong>Nâng quyền NGV (Cổng <code>/media/</code>):</strong> Cho phép thành viên vào kho tư liệu nội bộ <code>/media/</code> (qua mã cổng) để xem, tải bản gốc và đăng ảnh, video không giới hạn (Quản trị chủ động chọn hiển thị công khai).</span>
             </label>
           </div>
         </div>

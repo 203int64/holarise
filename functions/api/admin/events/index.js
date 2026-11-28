@@ -9,7 +9,7 @@ import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../.
 import { slugifyVi, validateEventInput } from "../../../_lib/validation.js";
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "events.read" });
   if (!auth.ok) return auth.response;
 
   const url = new URL(context.request.url);
@@ -83,7 +83,7 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPost(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "events.write" });
   if (!auth.ok) return auth.response;
 
   const parsed = await readJsonBody(context.request, 128 * 1024);

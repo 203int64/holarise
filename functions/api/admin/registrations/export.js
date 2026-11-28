@@ -1,8 +1,9 @@
+import { logAudit } from "../../../_lib/rbac.js";
 import { requireAdmin } from "../../../_lib/security.js";
 import { buildRegistrationsCsv, cleanStr, VALID_REG_STATUSES } from "../../../_lib/validation.js";
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { superAdminOnly: true });
   if (!auth.ok) return auth.response;
 
   const url = new URL(context.request.url);
@@ -32,6 +33,13 @@ export async function onRequestGet(context) {
     .all();
 
   const csv = buildRegistrationsCsv(results || []);
+  await logAudit(context.env.DB, auth.user, {
+    action: "registrations.export_pii",
+    targetType: "registrations",
+    targetId: activity || "all",
+    summary: `Xuất CSV danh sách đăng ký (${(results || []).length} dòng)`,
+    meta: { count: (results || []).length, status, activity },
+  });
   const dateTag = new Date().toISOString().slice(0, 10);
   return new Response(csv, {
     status: 200,

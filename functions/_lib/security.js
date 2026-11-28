@@ -2,6 +2,7 @@
  * Security, Auth (PBKDF2-SHA256 + D1 Sessions), CSRF Origin Check, Rate Limit & Media Sniffing.
  * Zero external dependencies — pure Web Crypto API (Cloudflare Workers + Node 20+ compatible).
  */
+import { getRolePermissions, normalizeRole, roleHasPermission } from "./rbac.js";
 
 export const SESSION_COOKIE_NAME = "holarise_session";
 export const MEMBER_SESSION_COOKIE_NAME = "holarise_member_session";
@@ -234,7 +235,20 @@ export async function getSessionUser(db, request) {
     )
     .bind(hashedId, nowIso)
     .first();
-  return row || null;
+  if (!row) return null;
+  let department = "";
+  let phone = "";
+  try {
+    const ext = await db
+      .prepare("SELECT department, phone FROM admin_users WHERE id = ?")
+      .bind(row.id)
+      .first();
+    department = ext?.department || "";
+    phone = ext?.phone || "";
+  } catch {
+    // Legacy schema before 0010 may not have department/phone
+  }
+  return { ...row, department, phone, canonicalRole: normalizeRole(row.role) || row.role };
 }
 
 export function getSoleAdminPrefix(env) {
@@ -249,9 +263,30 @@ export function isSoleAdminAccount(user, env) {
   return Boolean(localPart) && localPart === getSoleAdminPrefix(env);
 }
 
+function matchesAllowedRole(canonicalRole, allowedRoles) {
+  if (!Array.isArray(allowedRoles) || allowedRoles.length === 0) return false;
+  const normalizedAllowed = new Set();
+  for (const r of allowedRoles) {
+    const raw = String(r || "").trim().toLowerCase();
+    if (!raw) continue;
+    normalizedAllowed.add(raw);
+    const mapped = normalizeRole(raw);
+    if (mapped) normalizedAllowed.add(mapped);
+    // Legacy 'media' in allowedRoles covers both media_ctv & media_manager
+    if (raw === "media") {
+      normalizedAllowed.add("media_ctv");
+      normalizedAllowed.add("media_manager");
+    }
+    if (raw === "editor") {
+      normalizedAllowed.add("content_editor");
+    }
+  }
+  return normalizedAllowed.has(canonicalRole);
+}
+
 export async function requireAdmin(
   context,
-  { superAdminOnly = false, allowedRoles = null } = {}
+  { superAdminOnly = false, permission = null, allowedRoles = null } = {}
 ) {
   const { request, env } = context;
   if (!env?.DB) {
@@ -265,27 +300,76 @@ export async function requireAdmin(
     return { ok: false, response: errorResponse(401, "UNAUTHORIZED", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.") };
   }
   const soleAdmin = isSoleAdminAccount(user, env);
-  const allowsMediaPortal = !superAdminOnly && Array.isArray(allowedRoles) && allowedRoles.includes("media");
-  if (allowsMediaPortal) {
-    if (!soleAdmin && user.role !== "media") {
+  const canonicalRole = normalizeRole(user.role);
+
+  // Security invariant: a rogue `super_admin` row whose email prefix != SOLE_ADMIN_PREFIX is NEVER trusted.
+  if (canonicalRole === "super_admin" && !soleAdmin) {
+    return {
+      ok: false,
+      response: errorResponse(
+        403,
+        "FORBIDDEN",
+        "Tài khoản quản trị chính không khớp cấu hình bảo mật hệ thống."
+      ),
+    };
+  }
+
+  const permissions = getRolePermissions(canonicalRole, soleAdmin);
+
+  if (superAdminOnly) {
+    if (!soleAdmin) {
       return {
         ok: false,
-        response: errorResponse(403, "FORBIDDEN", "Tài khoản của bạn không có quyền truy cập Cổng Ban Hình Ảnh."),
+        response: errorResponse(
+          403,
+          "FORBIDDEN",
+          "Chức năng này chỉ mở cho Chủ nhiệm (Quản trị chính)."
+        ),
       };
     }
-    return { ok: true, user, isSoleAdmin: soleAdmin };
+    return { ok: true, user, canonicalRole, permissions, isSoleAdmin: true };
   }
+
+  if (permission) {
+    if (!soleAdmin && !roleHasPermission(canonicalRole, permission, soleAdmin)) {
+      return {
+        ok: false,
+        response: errorResponse(
+          403,
+          "FORBIDDEN",
+          "Vai trò của bạn chưa có quyền thực hiện thao tác này."
+        ),
+      };
+    }
+    return { ok: true, user, canonicalRole, permissions, isSoleAdmin: soleAdmin };
+  }
+
+  if (Array.isArray(allowedRoles) && allowedRoles.length > 0) {
+    if (!soleAdmin && !matchesAllowedRole(canonicalRole, allowedRoles)) {
+      return {
+        ok: false,
+        response: errorResponse(
+          403,
+          "FORBIDDEN",
+          "Tài khoản của bạn không có quyền truy cập khu vực này."
+        ),
+      };
+    }
+    return { ok: true, user, canonicalRole, permissions, isSoleAdmin: soleAdmin };
+  }
+
+  // Fail-closed default: endpoints without explicit permission/allowedRoles stay locked to soleAdmin.
   if (!soleAdmin) {
     return {
       ok: false,
       response: errorResponse(
         403,
         "FORBIDDEN",
-        "Khu vực quản trị CMS chỉ mở cho duy nhất tài khoản Quản trị chính (203int64)."
+        "Khu vực quản trị này chỉ mở cho tài khoản Chủ nhiệm (Quản trị chính)."
       ),
     };
   }
-  return { ok: true, user, isSoleAdmin: true };
+  return { ok: true, user, canonicalRole, permissions, isSoleAdmin: true };
 }
 
 export function formatVnDateYYMMDD(nowDate = new Date()) {

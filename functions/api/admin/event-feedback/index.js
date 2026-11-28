@@ -33,7 +33,7 @@ export function serializeAdminEventFeedback(row) {
 }
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "reflections.read" });
   if (!auth.ok) return auth.response;
 
   const { env, request } = context;

@@ -464,11 +464,13 @@
     grid.innerHTML = list
       .map((a) => {
         const cornerPill =
-          Number(a.pendingCount || 0) > 0
-            ? `<span class="album-corner-pill album-corner-pill--pending">${a.pendingCount} chờ duyệt</span>`
-            : a.status === "draft"
-              ? '<span class="album-corner-pill album-corner-pill--draft">Nháp</span>'
-              : "";
+          Number(a.approvedCount || 0) > 0
+            ? `<span class="album-corner-pill album-corner-pill--public">${a.approvedCount} công khai</span>`
+            : Number(a.pendingCount || 0) > 0
+              ? `<span class="album-corner-pill album-corner-pill--pending">${a.pendingCount} nội bộ</span>`
+              : a.status === "draft"
+                ? '<span class="album-corner-pill album-corner-pill--draft">Nháp</span>'
+                : "";
         const coverHtml = a.coverUrl
           ? `<img src="${esc(formatCoverThumb(a.coverUrl, 480))}" alt="${esc(a.title)}" loading="lazy" decoding="async">`
           : `<div class="album-card-cover--empty">Chưa có ảnh</div>`;
@@ -483,7 +485,7 @@
           </div>
           <div class="album-card-body">
             <h3 class="album-card-title">${esc(a.title)}</h3>
-            <div class="album-card-meta">${esc(dateLabel)} · ${a.photoCount} ảnh</div>
+            <div class="album-card-meta">${esc(dateLabel)} · ${a.photoCount} tư liệu</div>
           </div>
         </article>`;
       })
@@ -494,7 +496,10 @@
      VIEW 2: Photo-First Album Workspace
      ========================================================================= */
   function isContributionPhoto(p) {
-    return p?.sourceKind === "member_contribution" || Boolean(p?.contributorMemberId);
+    return (
+      p?.sourceKind === "member_contribution" ||
+      (Boolean(p?.contributorMemberId) && p?.sourceKind !== "ngv_upload")
+    );
   }
 
   function getFilteredPhotos() {
@@ -526,8 +531,7 @@
       const res = await apiFetch(`/api/admin/albums/${encodeURIComponent(albumId)}`);
       state.activeAlbum = res.album;
       state.photos = res.photos || [];
-      const pendingCount = state.photos.filter((p) => p.approvalStatus === "pending").length;
-      state.photoFilter = pendingCount > 0 && isApproverRole() ? "pending" : "all";
+      state.photoFilter = "all";
       renderWorkspaceHeader();
       renderPhotosGrid();
     } catch (err) {
@@ -548,7 +552,7 @@
     ).length;
 
     $("#ws-title").textContent = a.title;
-    $("#ws-meta").textContent = `${a.dateDisplay || a.eventDate || "Hòa Lạc"} · ${total} ảnh${contributions > 0 ? ` · ${contributions} ảnh đóng góp` : ""}${pending > 0 ? ` · ${pending} chờ duyệt` : ""}`;
+    $("#ws-meta").textContent = `${a.dateDisplay || a.eventDate || "Hòa Lạc"} · ${total} tư liệu · ${approved} công khai · ${pending} nội bộ`;
 
     const driveLink = $("#ws-drive-link");
     if (driveLink) {
@@ -585,12 +589,6 @@
       btn.classList.toggle("is-active", btn.getAttribute("data-photo-filter") === state.photoFilter);
     });
 
-    const approveAllBtn = $("#btn-approve-all");
-    if (approveAllBtn) {
-      approveAllBtn.hidden = !isApproverRole() || pending === 0 || state.selectMode || state.batchBusy;
-      approveAllBtn.textContent = `✓ Duyệt hết (${pending})`;
-    }
-
     const selectBtn = $("#btn-toggle-select");
     if (selectBtn) {
       selectBtn.hidden = !canManageMedia() || total === 0;
@@ -602,8 +600,8 @@
     const modCopy = $("#ws-moderation-copy");
     if (modCopy) {
       modCopy.innerHTML = isNgvRole()
-        ? "<strong>Chế độ NGV: Đang mở tải lên</strong> · Bạn có thể xem toàn bộ thư mục và tải ảnh, video gốc không giới hạn số lượng. Tệp tải lên sẽ vào hàng <em>Chờ duyệt</em> để Quản trị duyệt lên web."
-        : "<strong>Kiểm duyệt Media: ĐANG BẬT</strong> · Ảnh &amp; video NGV và thành viên tải lên được lưu bản gốc trên Google Drive và chờ Quản trị duyệt trước khi hiển thị công khai.";
+        ? "<strong>Kho tư liệu nội bộ · NGV</strong> · Tải ảnh &amp; video gốc không giới hạn để phục vụ dựng video, viết bài, phóng sự. Quản trị sẽ chủ động chọn những khung hình phù hợp để hiển thị công khai."
+        : "<strong>Kho tư liệu nội bộ</strong> · Tệp tải lên được giữ an toàn trong kho cho đội làm video, bài viết, phóng sự. Chọn ảnh hoặc clip phù hợp rồi bấm <em>Hiển thị công khai</em> để đưa lên web.";
     }
   }
 
@@ -639,8 +637,10 @@
         const isCover = a.coverUrl === p.url || (p.webUrl && a.coverUrl === p.webUrl);
         const isSelected = state.selectedIds.has(p.id);
         const markers = [];
-        if (status === "pending") {
-          markers.push('<span class="tile-pill tile-pill--pending">Chờ duyệt</span>');
+        if (status === "approved") {
+          markers.push('<span class="tile-pill tile-pill--public">Công khai</span>');
+        } else if (status === "pending") {
+          markers.push('<span class="tile-pill tile-pill--pending">Nội bộ</span>');
         } else if (status === "rejected") {
           markers.push('<span class="tile-pill tile-pill--rejected">Đã ẩn</span>');
         }
@@ -695,12 +695,12 @@
     if (approveBtn) {
       approveBtn.hidden = !isApproverRole() || pendingInSelection.length === 0;
       approveBtn.disabled = state.batchBusy;
-      approveBtn.textContent = `✓ Duyệt & nén (${pendingInSelection.length})`;
+      approveBtn.textContent = `Hiển thị công khai (${pendingInSelection.length})`;
     }
     if (unapproveBtn) {
       unapproveBtn.hidden = !isApproverRole() || pendingInSelection.length > 0 || approvedInSelection.length === 0;
       unapproveBtn.disabled = state.batchBusy;
-      unapproveBtn.textContent = `Ẩn khỏi web (${approvedInSelection.length})`;
+      unapproveBtn.textContent = `Chỉ giữ trong kho (${approvedInSelection.length})`;
     }
     if (deleteBtn) {
       deleteBtn.disabled = state.batchBusy;
@@ -743,7 +743,7 @@
       const pct = Math.round(((done + failed) / Math.max(1, total)) * 100);
       if (fill) fill.style.width = `${pct}%`;
       if (summary) {
-        summary.textContent = `Đang duyệt nhanh: ${done}/${total}${failed ? ` · ${failed} lỗi` : ""}`;
+        summary.textContent = `Đang bật công khai: ${done}/${total}${failed ? ` · ${failed} lỗi` : ""}`;
       }
     };
     updateProgress();
@@ -776,9 +776,9 @@
     await loadAlbums(true);
 
     if (failed === 0) {
-      toast(`Đã duyệt & nén ${done} ảnh lên web thành công.`, "success");
+      toast(`Đã bật hiển thị công khai ${done} tư liệu lên web.`, "success");
     } else {
-      toast(`Đã duyệt ${done}/${total} ảnh (${failed} ảnh gặp lỗi).`, "error");
+      toast(`Đã bật công khai ${done}/${total} tư liệu (${failed} gặp lỗi).`, "error");
     }
   }
 
@@ -810,7 +810,7 @@
     renderPhotosGrid();
     updateBatchBar();
     await loadAlbums(true);
-    toast(failed ? `Đã ẩn ${done} ảnh (${failed} lỗi).` : `Đã ẩn ${done} ảnh khỏi web công khai.`, failed ? "error" : "info");
+    toast(failed ? `Đã chuyển ${done} tư liệu về kho (${failed} lỗi).` : `Đã chuyển ${done} tư liệu về kho nội bộ.`, failed ? "error" : "info");
   }
 
   async function runBatchDelete(photosToDelete) {
@@ -884,8 +884,16 @@
 
     $("#lb-counter").textContent = `${activeIdx + 1} / ${activeList.length}`;
     const pill = $("#lb-status-pill");
-    pill.textContent = isApproved ? (photo.webUrl ? "Đã duyệt · WebP" : "Đã lên web") : status === "rejected" ? "Đã ẩn" : "Chờ duyệt";
+    pill.textContent = isApproved ? "Công khai" : status === "rejected" ? "Đã ẩn" : "Nội bộ";
     pill.className = `lb-status-pill ${isApproved ? "lb-status-pill--approved" : "lb-status-pill--pending"}`;
+
+    const dlBtn = $("#lb-btn-download");
+    if (dlBtn) {
+      const rawUrl = String(photo.url || photo.displayUrl || "").trim();
+      const basePath = rawUrl.split("?")[0];
+      dlBtn.href = basePath.startsWith("/api/media/drive/") ? `${basePath}?download=1` : rawUrl || "#";
+      dlBtn.hidden = !rawUrl;
+    }
 
     const isVideo =
       String(photo.mediaType || "image").toLowerCase() === "video" ||
@@ -939,7 +947,7 @@
 
     $("#lb-btn-approve").hidden = !canApprove || isApproved;
     $("#lb-btn-approve").disabled = false;
-    $("#lb-btn-approve").textContent = "✓ Duyệt & nén lên web";
+    $("#lb-btn-approve").textContent = "Hiển thị công khai";
 
     $("#lb-btn-unapprove").hidden = !canApprove || !isApproved;
     $("#lb-btn-unapprove").disabled = false;
@@ -1621,7 +1629,7 @@
           alt: state.activeAlbum.title,
           photographer,
           isFeaturedHome: false,
-          approvalStatus: isNgvRole() || storageInfo.driveConfigured ? "pending" : undefined,
+          approvalStatus: "pending",
         },
       });
 
@@ -2242,17 +2250,16 @@
       if (!photo) return;
       const btn = $("#lb-btn-approve");
       btn.disabled = true;
-      btn.textContent = "Đang duyệt...";
+      btn.textContent = "Đang bật công khai...";
       try {
         const listBefore = getFilteredPhotos();
         const curIdx = listBefore.findIndex((p) => p.id === photo.id);
         await approveSinglePhoto(photo);
-        toast("Đã duyệt lên web ngay!", "success");
+        toast("Đã bật hiển thị công khai trên web!", "success");
         renderWorkspaceHeader();
         renderPhotosGrid();
         loadAlbums(true).catch(() => {});
 
-        // If viewing 'pending' tab, smoothly advance to next pending photo immediately
         if (state.photoFilter === "pending") {
           const remaining = getFilteredPhotos();
           if (remaining.length > 0) {
@@ -2266,8 +2273,8 @@
         }
       } catch (err) {
         btn.disabled = false;
-        btn.textContent = "✓ Duyệt lên web";
-        toast(err.message || "Không thể duyệt ảnh lúc này.", "error");
+        btn.textContent = "Hiển thị công khai";
+        toast(err.message || "Không thể bật hiển thị công khai lúc này.", "error");
       }
     });
 
@@ -2287,10 +2294,10 @@
         renderPhotosGrid();
         renderLightbox();
         await loadAlbums(true);
-        toast("Đã ẩn ảnh khỏi web công khai.", "info");
+        toast("Đã chuyển về kho tư liệu nội bộ.", "info");
       } catch (err) {
         btn.disabled = false;
-        toast(err.message || "Không thể ẩn ảnh.", "error");
+        toast(err.message || "Không thể chuyển về kho nội bộ.", "error");
       }
     });
 

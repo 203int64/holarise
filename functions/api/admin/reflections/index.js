@@ -95,7 +95,7 @@ export function serializeAdminReflection(row, kind = "member") {
 }
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "reflections.read" });
   if (!auth.ok) return auth.response;
 
   await Promise.all([
@@ -182,7 +182,7 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPost(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "reflections.moderate" });
   if (!auth.ok) return auth.response;
 
   await Promise.all([

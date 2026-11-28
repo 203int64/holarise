@@ -60,7 +60,7 @@ export function serializeAdminMember(row) {
 }
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "members.read" });
   if (!auth.ok) return auth.response;
 
   await Promise.all([

@@ -1,4 +1,13 @@
 import {
+  canAccessManagerShell,
+  canAccessMediaPortalRole,
+  getDefaultDepartmentForRole,
+  getRoleMeta,
+  getRolePermissions,
+  logAudit,
+  normalizeRole,
+} from "../../_lib/rbac.js";
+import {
   buildSessionCookie,
   checkRateLimit,
   createSession,
@@ -69,11 +78,40 @@ export async function onRequestPost({ request, env }) {
     env.DB.prepare("DELETE FROM sessions WHERE expires_at <= ?").bind(now).run(),
   ]);
 
+  const isSole = isSoleAdminAccount(user, env);
+  const canonicalRole = normalizeRole(user.role) || user.role;
+  const roleMeta = getRoleMeta(canonicalRole);
+  const permissions = getRolePermissions(canonicalRole, isSole);
+  let department = "";
+  try {
+    const ext = await env.DB.prepare("SELECT department FROM admin_users WHERE id = ?").bind(user.id).first();
+    department = ext?.department || "";
+  } catch {}
+  await logAudit(env.DB, user, {
+    action: "auth.login",
+    targetType: "admin_user",
+    targetId: user.id,
+    summary: `${user.name} (${roleMeta.shortLabel}) đăng nhập HolaRise Manager`,
+  });
+
   return jsonResponse(
     {
       ok: true,
-      isSoleAdmin: isSoleAdminAccount(user, env),
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      isSoleAdmin: isSole,
+      canAccessManager: canAccessManagerShell(canonicalRole, isSole),
+      canAccessMedia: canAccessMediaPortalRole(canonicalRole, isSole),
+      permissions,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        canonicalRole,
+        roleLabel: roleMeta.label,
+        roleShortLabel: roleMeta.shortLabel,
+        department: department || getDefaultDepartmentForRole(canonicalRole),
+        permissions,
+      },
     },
     200,
     { "Set-Cookie": buildSessionCookie(rawToken, request, false) }

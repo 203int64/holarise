@@ -20,7 +20,7 @@ import {
 import { ensureMemberProfileColumns, serializeAdminMember } from "./index.js";
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "members.read" });
   if (!auth.ok) return auth.response;
 
   const db = context.env.DB;

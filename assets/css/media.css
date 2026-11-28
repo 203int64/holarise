@@ -441,7 +441,11 @@ html.is-standalone .media-topbar {
 }
 
 .album-corner-pill--pending {
-  background: rgba(184, 93, 59, 0.94);
+  background: rgba(34, 46, 42, 0.86);
+}
+
+.album-corner-pill--public {
+  background: rgba(20, 90, 64, 0.9);
 }
 
 .album-corner-pill--draft {
@@ -724,7 +728,11 @@ html.is-standalone .media-topbar {
 }
 
 .tile-pill--pending {
-  background: rgba(184, 93, 59, 0.94);
+  background: rgba(34, 46, 42, 0.84);
+}
+
+.tile-pill--public {
+  background: rgba(20, 90, 64, 0.92);
 }
 
 .tile-pill--rejected {
@@ -988,11 +996,17 @@ html.is-standalone .media-topbar {
 }
 
 .lb-status-pill--pending {
-  background: rgba(184, 93, 59, 0.92);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .lb-status-pill--approved {
   background: rgba(20, 90, 64, 0.92);
+}
+
+a.lb-action-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
 }
 
 .lb-icon-btn {

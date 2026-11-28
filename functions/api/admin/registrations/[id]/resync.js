@@ -2,7 +2,7 @@ import { syncRegistrationToGas } from "../../../../_lib/gas.js";
 import { errorResponse, jsonResponse, requireAdmin } from "../../../../_lib/security.js";
 
 export async function onRequestPost(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "registrations.write" });
   if (!auth.ok) return auth.response;
 
   const id = String(context.params?.id || "");

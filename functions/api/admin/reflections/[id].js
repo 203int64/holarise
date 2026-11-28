@@ -10,7 +10,7 @@ import {
 import { ensureCommunityTestimonialsTable, serializeAdminReflection } from "./index.js";
 
 export async function onRequestPatch(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "reflections.moderate" });
   if (!auth.ok) return auth.response;
 
   await ensureCommunityTestimonialsTable(context.env.DB);
@@ -133,7 +133,7 @@ export async function onRequestPatch(context) {
 }
 
 export async function onRequestDelete(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { superAdminOnly: true });
   if (!auth.ok) return auth.response;
 
   await ensureCommunityTestimonialsTable(context.env.DB);

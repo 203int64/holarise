@@ -4,7 +4,7 @@ import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../.
 import { validateEventInput } from "../../../_lib/validation.js";
 
 export async function onRequestGet(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "events.read" });
   if (!auth.ok) return auth.response;
 
   const id = String(context.params?.id || "");
@@ -16,7 +16,7 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPut(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { permission: "events.write" });
   if (!auth.ok) return auth.response;
 
   const id = String(context.params?.id || "");
@@ -257,7 +257,7 @@ export async function onRequestPut(context) {
 }
 
 export async function onRequestDelete(context) {
-  const auth = await requireAdmin(context);
+  const auth = await requireAdmin(context, { superAdminOnly: true });
   if (!auth.ok) return auth.response;
 
   const id = String(context.params?.id || "");
