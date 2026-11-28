@@ -6,6 +6,8 @@
 (function () {
   "use strict";
 
+  var CANONICAL_ORIGIN = "https://holarise.org";
+
   var isEn =
     (document.documentElement &&
       (document.documentElement.lang === "en" ||
@@ -829,7 +831,10 @@
           modalIcsBtn.hidden = false;
           modalIcsBtn.setAttribute("data-ics-title", title);
           modalIcsBtn.setAttribute("data-ics-location", eventLocation);
-          modalIcsBtn.setAttribute("data-ics-url", eventHref ? window.location.origin + eventHref : window.location.href);
+          modalIcsBtn.setAttribute(
+            "data-ics-url",
+            eventHref ? CANONICAL_ORIGIN + eventHref : CANONICAL_ORIGIN + (window.location.pathname || "/")
+          );
           if (icsStart) modalIcsBtn.setAttribute("data-ics-start", icsStart);
           else modalIcsBtn.removeAttribute("data-ics-start");
           if (icsEnd) modalIcsBtn.setAttribute("data-ics-end", icsEnd);
@@ -3550,7 +3555,9 @@
     // 3. Share Button (native Web Share API + clipboard fallback)
     stageRoot.querySelectorAll("[data-memory-share]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        var url = window.location.href.split("#")[0];
+        var canonicalLink = document.querySelector('link[rel="canonical"]');
+        var canonicalHref = canonicalLink ? canonicalLink.getAttribute("href") : "";
+        var url = canonicalHref || (CANONICAL_ORIGIN + (window.location.pathname || "/"));
         var title = btn.getAttribute("data-share-title") || document.title;
         var labelSpan = btn.querySelector("span");
         var origText = labelSpan ? labelSpan.textContent : "";

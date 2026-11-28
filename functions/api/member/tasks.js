@@ -19,20 +19,50 @@ export async function onRequestGet(context) {
   }
 
   await ensureManagerSchema(env.DB);
-  const { results } = await env.DB.prepare(
-    `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date
-     FROM ops_tasks t
-     LEFT JOIN events e ON e.id = t.event_id
-     WHERE t.assignee_type = 'member' AND t.assignee_id = ?
-     ORDER BY CASE t.status WHEN 'done' THEN 1 ELSE 0 END ASC, CASE WHEN t.due_at = '' THEN 1 ELSE 0 END ASC, t.due_at ASC, t.created_at DESC
-     LIMIT 60`
-  )
-    .bind(member.id)
-    .all();
+  const [tasksRes, capsRes] = await Promise.all([
+    env.DB.prepare(
+      `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date
+       FROM ops_tasks t
+       LEFT JOIN events e ON e.id = t.event_id
+       WHERE t.assignee_type = 'member' AND t.assignee_id = ?
+       ORDER BY CASE t.status WHEN 'done' THEN 1 ELSE 0 END ASC, CASE WHEN t.due_at = '' THEN 1 ELSE 0 END ASC, t.due_at ASC, t.created_at DESC
+       LIMIT 60`
+    )
+      .bind(member.id)
+      .all(),
+    env.DB.prepare(
+      `SELECT capability, scope_id, status, created_at
+       FROM member_capabilities
+       WHERE member_id = ? AND status IN ('active', 'expired')`
+    )
+      .bind(member.id)
+      .all()
+      .catch(() => ({ results: [] })),
+  ]);
+
+  const items = (tasksRes.results || []).map(serializeTaskRow);
+  const completedTasks = items.filter((t) => t.status === "done").length;
+  const servedEventIds = new Set();
+  for (const t of items) {
+    if (t.status === "done" && t.eventId) servedEventIds.add(t.eventId);
+  }
+  const roleCountMap = {};
+  for (const c of capsRes.results || []) {
+    if (c.capability === "event.checkin" || c.capability === "event.companion") {
+      if (c.scope_id) servedEventIds.add(c.scope_id);
+    }
+    roleCountMap[c.capability] = (roleCountMap[c.capability] || 0) + 1;
+  }
 
   return jsonResponse({
     ok: true,
-    items: (results || []).map(serializeTaskRow),
+    items,
+    serviceRecord: {
+      completedTasks,
+      openTasks: items.length - completedTasks,
+      eventsServed: servedEventIds.size,
+      rolesCount: roleCountMap,
+    },
   });
 }
 

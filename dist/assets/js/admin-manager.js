@@ -292,19 +292,22 @@
     setHidden("#box-audit-log", !effSuper);
     setHidden("#box-team-accounts", !effSuper);
 
-    // 3. Maker-Checker on Post Status select: CTV Content cannot choose 'published'
+    // 3. Maker-Checker on Post Status select: CTV Content cannot choose 'published' or 'changes_requested'
     const postStatusSel = $("#post-status");
     if (postStatusSel) {
-      const pubOpt = postStatusSel.querySelector('option[value="published"]');
       const canPublish = hasPerm("posts.publish");
-      if (pubOpt) {
-        pubOpt.disabled = !canPublish;
-        pubOpt.hidden = !canPublish;
-      }
-      if (!canPublish && postStatusSel.value === "published") {
+      ["published", "changes_requested"].forEach((val) => {
+        const opt = postStatusSel.querySelector(`option[value="${val}"]`);
+        if (opt) {
+          opt.disabled = !canPublish;
+          opt.hidden = !canPublish;
+        }
+      });
+      if (!canPublish && (postStatusSel.value === "published" || postStatusSel.value === "changes_requested")) {
         postStatusSel.value = "pending_review";
       }
     }
+    setHidden("#btn-new-invite", !effSuper);
 
     renderWorkspaceBanner();
   }
@@ -463,6 +466,7 @@
                       : ""
                   }
                   <button type="button" class="btn btn--outline btn--sm" data-mgr-filter-event="${esc(ev.id)}">Xem việc (${ts.total})</button>
+                  <button type="button" class="btn btn--outline btn--sm" data-mgr-resources="${esc(ev.id)}" data-mgr-event-title="${esc(ev.title)}">📦 Nguồn lực</button>
                   ${
                     canPlaybook
                       ? `<button type="button" class="btn btn--primary btn--sm" data-mgr-playbook="${esc(ev.id)}">⚡ Tạo 6 việc mẫu</button>`
@@ -710,8 +714,9 @@
     if (usersBox) usersBox.innerHTML = '<div class="skeleton-card"><div class="sk sk-line"></div></div>';
     if (auditBox) auditBox.innerHTML = '<div class="skeleton-card"><div class="sk sk-line"></div></div>';
 
-    const [uRes, aRes] = await Promise.allSettled([
+    const [uRes, iRes, aRes] = await Promise.allSettled([
       api("/api/admin/users"),
+      api("/api/admin/invites"),
       api(`/api/admin/audit?limit=80${state.auditFilter ? `&action=${encodeURIComponent(state.auditFilter)}` : ""}`),
     ]);
 
@@ -723,9 +728,156 @@
       }
       renderTeamUsers();
     }
+    if (iRes.status === "fulfilled") {
+      renderTeamInvites(iRes.value.items || []);
+    }
     if (aRes.status === "fulfilled") {
       state.auditLogs = aRes.value.items || [];
       renderAuditLogs();
+    }
+  }
+
+  function renderTeamInvites(invites) {
+    const box = $("#team-invites-container");
+    if (!box) return;
+    const pending = (invites || []).filter((i) => i.status === "pending");
+    if (!pending.length) {
+      box.innerHTML = "";
+      return;
+    }
+    box.innerHTML = `<div style="display:grid;gap:8px;">
+      <strong style="font-size:0.84rem;color:var(--muted);">Lời mời đang chờ kích hoạt (${pending.length})</strong>
+      ${pending
+        .map(
+          (inv) => `<div class="user-row" style="background:#fffbeb;border-color:rgba(180,83,9,0.25);">
+            <div>
+              <strong>${esc(inv.name)}</strong>
+              <span class="badge badge--new">Chờ kích hoạt</span>
+              <span class="mgr-chip">${esc(inv.department)}</span>
+              <span class="cell-sub">${esc(inv.email)} · ${esc(inv.roleLabel)} · Hết hạn: ${esc(formatDateTime(inv.expiresAt))}</span>
+            </div>
+            <div class="item-actions">
+              <button type="button" class="btn btn--danger-ghost btn--sm" data-mgr-revoke-invite="${esc(inv.id)}">Thu hồi</button>
+            </div>
+          </div>`
+        )
+        .join("")}
+    </div>`;
+  }
+
+  let activeResourceEventId = "";
+  let activeTransparencyMd = "";
+
+  async function openResourceDialog(eventId, eventTitle) {
+    activeResourceEventId = eventId;
+    const dlg = $("#resource-dialog");
+    if (!dlg) return;
+    $("#resource-dialog-title").textContent = `Nguồn lực & Hiện vật — ${eventTitle || eventId}`;
+    $("#res-event-id").value = eventId;
+    $("#resource-alert").hidden = true;
+    dlg.showModal();
+    await loadEventResources(eventId);
+  }
+
+  async function loadEventResources(eventId) {
+    const box = $("#resource-list-container");
+    if (!box) return;
+    box.innerHTML = '<div class="skeleton-card"><div class="sk sk-line"></div></div>';
+    try {
+      const data = await api(`/api/admin/events/${encodeURIComponent(eventId)}/resources`);
+      const items = data.items || [];
+      activeTransparencyMd = data.transparencySummary || "";
+      if (!items.length) {
+        box.innerHTML = '<p class="field-hint" style="margin:0;">Chưa ghi nhận nguồn lực/hiện vật nào cho sự kiện này.</p>';
+        return;
+      }
+      const nextSt = { pledged: "received", received: "delivered", delivered: "pledged" };
+      const nextLbl = { pledged: "Đã tiếp nhận", received: "Đã bàn giao", delivered: "Đã cam kết" };
+      const canWrite = hasPerm("events.write");
+      box.innerHTML = `<div style="display:grid;gap:8px;">${items
+        .map(
+          (it) => `<div class="user-row">
+            <div>
+              <span class="mgr-chip">${esc(it.kindLabel)}</span>
+              <span class="badge badge--${it.status === "delivered" ? "published" : it.status === "received" ? "contacted" : "new"}">${esc(it.statusLabel)}</span>
+              <strong style="display:block;margin-top:4px;">${esc(it.title)}${it.quantity ? ` (${esc(it.quantity)})` : ""}</strong>
+              <span class="cell-sub">${it.donorName ? `Đồng hành: ${esc(it.donorName)} · ` : ""}Ghi nhận bởi ${esc(it.recordedBy || "BTC")}</span>
+            </div>
+            ${
+              canWrite
+                ? `<div class="item-actions">
+                    <button type="button" class="btn btn--outline btn--sm" data-res-status="${esc(it.id)}" data-res-next="${esc(nextSt[it.status] || "delivered")}">→ ${esc(nextLbl[it.status] || "Đã bàn giao")}</button>
+                    <button type="button" class="btn btn--danger-ghost btn--sm" data-res-delete="${esc(it.id)}">Xóa</button>
+                  </div>`
+                : ""
+            }
+          </div>`
+        )
+        .join("")}</div>`;
+    } catch (err) {
+      box.innerHTML = `<div class="form-alert">${esc(err.message)}</div>`;
+    }
+  }
+
+  async function openInviteOnboarding(token, onSuccess) {
+    $("#boot-loader").hidden = true;
+    $("#admin-shell").hidden = true;
+    $("#auth-screen").hidden = false;
+    $("#auth-signin-box").hidden = true;
+    $("#auth-forbidden-box").hidden = true;
+    $("#bootstrap-form").hidden = true;
+    const box = $("#auth-invite-box");
+    const form = $("#invite-accept-form");
+    const errEl = $("#inv-acc-error");
+    const metaEl = $("#invite-accept-meta");
+    if (!box) return;
+    box.hidden = false;
+    form.hidden = true;
+    errEl.hidden = true;
+
+    try {
+      const data = await api(`/api/auth/invite?token=${encodeURIComponent(token)}`);
+      const inv = data.invite;
+      $("#invite-accept-heading").textContent = `Chào ${inv.name} · Tham gia ${inv.department}`;
+      metaEl.textContent = `${inv.invitedByName} mời bạn đảm nhận vai trò "${inv.roleLabel}" (${inv.email}). ${inv.roleSummary}`;
+      $("#inv-acc-token").value = token;
+      $("#inv-acc-name").value = inv.name || "";
+      form.hidden = false;
+
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const alertEl = $("#inv-acc-alert");
+        alertEl.hidden = true;
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        try {
+          const res = await api("/api/auth/invite", {
+            method: "POST",
+            body: {
+              token,
+              name: $("#inv-acc-name").value.trim(),
+              password: $("#inv-acc-password").value,
+              consentAccepted: Boolean($("#inv-acc-consent").checked),
+            },
+          });
+          history.replaceState(null, "", "/admin/");
+          toast("Đã kích hoạt tài khoản thành công!", "success");
+          if (res.canAccessManager === false && res.canAccessMedia) {
+            window.location.replace("/media/");
+            return;
+          }
+          onSuccess?.(res);
+        } catch (err) {
+          alertEl.textContent = err.message;
+          alertEl.hidden = false;
+        } finally {
+          btn.disabled = false;
+        }
+      };
+    } catch (err) {
+      metaEl.textContent = "";
+      errEl.textContent = err.message;
+      errEl.hidden = false;
     }
   }
 
@@ -824,6 +976,94 @@
     $("#btn-new-staff-team")?.addEventListener("click", () => {
       $("#btn-new-media-user")?.click();
     });
+    $("#btn-new-invite")?.addEventListener("click", () => {
+      $("#invite-form")?.reset();
+      const rb = $("#invite-result-box");
+      if (rb) rb.hidden = true;
+      const al = $("#invite-alert");
+      if (al) al.hidden = true;
+      $("#invite-dialog")?.showModal();
+    });
+    $("#invite-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const alertEl = $("#invite-alert");
+      alertEl.hidden = true;
+      const btn = e.currentTarget.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      try {
+        const res = await api("/api/admin/invites", {
+          method: "POST",
+          body: {
+            name: $("#inv-name").value.trim(),
+            email: $("#inv-email").value.trim(),
+            role: $("#inv-role").value,
+            department: $("#inv-department").value,
+            pillarScope: $("#inv-pillar").value,
+            note: $("#inv-note").value.trim(),
+          },
+        });
+        $("#invite-result-url").value = res.inviteUrl || "";
+        $("#invite-email-status").textContent =
+          res.emailStatus === "sent" ? "Đã gửi email mời tự động ✓" : "Copy link gửi Zalo trực tiếp";
+        $("#invite-result-box").hidden = false;
+        toast("Đã tạo link mời 48h!", "success");
+        loadTeamAndAudit();
+      } catch (err) {
+        alertEl.textContent = err.message;
+        alertEl.hidden = false;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+    $("#btn-copy-invite-url")?.addEventListener("click", async () => {
+      const val = $("#invite-result-url")?.value || "";
+      if (!val) return;
+      try {
+        await navigator.clipboard.writeText(val);
+        toast("Đã sao chép link mời — dán thẳng vào Zalo!", "success");
+      } catch {
+        toast("Hãy bôi đen ô link để sao chép.", "info");
+      }
+    });
+    $("#resource-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const alertEl = $("#resource-alert");
+      alertEl.hidden = true;
+      const evId = $("#res-event-id").value;
+      if (!evId) return;
+      try {
+        await api(`/api/admin/events/${encodeURIComponent(evId)}/resources`, {
+          method: "POST",
+          body: {
+            kind: $("#res-kind").value,
+            title: $("#res-title").value.trim(),
+            quantity: $("#res-qty").value.trim(),
+            donorName: $("#res-donor").value.trim(),
+            status: $("#res-status").value,
+          },
+        });
+        $("#res-title").value = "";
+        $("#res-qty").value = "";
+        $("#res-donor").value = "";
+        toast("Đã ghi nhận nguồn lực minh bạch.", "success");
+        loadEventResources(evId);
+      } catch (err) {
+        alertEl.textContent = err.message;
+        alertEl.hidden = false;
+      }
+    });
+    $("#btn-copy-transparency-md")?.addEventListener("click", async () => {
+      if (!activeTransparencyMd) {
+        toast("Chưa có mục nguồn lực nào để trích xuất.", "info");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(activeTransparencyMd);
+        toast("Đã copy đoạn Minh bạch nguồn lực — dán thẳng vào bài Hành trình!", "success");
+      } catch {
+        toast("Không sao chép được tự động.", "error");
+      }
+    });
     $("#btn-mobile-drawer")?.addEventListener("click", () => {
       const isOpen = $("#admin-sidebar")?.classList.contains("is-open");
       if (isOpen) closeMobileDrawer();
@@ -896,6 +1136,54 @@
       const pvBtn = e.target.closest("[data-mgr-preview-role]");
       if (pvBtn) {
         setPreviewRole(pvBtn.getAttribute("data-mgr-preview-role") || "super_admin");
+        return;
+      }
+
+      const resBtn = e.target.closest("[data-mgr-resources]");
+      if (resBtn) {
+        openResourceDialog(resBtn.getAttribute("data-mgr-resources"), resBtn.getAttribute("data-mgr-event-title"));
+        return;
+      }
+
+      const revInv = e.target.closest("[data-mgr-revoke-invite]");
+      if (revInv) {
+        const invId = revInv.getAttribute("data-mgr-revoke-invite");
+        if (!window.confirm("Thu hồi link mời này?")) return;
+        try {
+          await api(`/api/admin/invites/${encodeURIComponent(invId)}`, { method: "DELETE" });
+          toast("Đã thu hồi link mời.", "success");
+          loadTeamAndAudit();
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+
+      const resSt = e.target.closest("[data-res-status]");
+      if (resSt && activeResourceEventId) {
+        try {
+          await api(`/api/admin/events/${encodeURIComponent(activeResourceEventId)}/resources`, {
+            method: "PATCH",
+            body: { resourceId: resSt.getAttribute("data-res-status"), status: resSt.getAttribute("data-res-next") },
+          });
+          loadEventResources(activeResourceEventId);
+        } catch (err) {
+          toast(err.message, "error");
+        }
+        return;
+      }
+
+      const resDel = e.target.closest("[data-res-delete]");
+      if (resDel && activeResourceEventId) {
+        try {
+          await api(
+            `/api/admin/events/${encodeURIComponent(activeResourceEventId)}/resources?resourceId=${encodeURIComponent(resDel.getAttribute("data-res-delete"))}`,
+            { method: "DELETE" }
+          );
+          loadEventResources(activeResourceEventId);
+        } catch (err) {
+          toast(err.message, "error");
+        }
         return;
       }
 
@@ -1009,6 +1297,7 @@
     loadTimeline,
     loadTasks,
     loadTeamAndAudit,
+    openInviteOnboarding,
     closeMobileDrawer,
   };
 })();

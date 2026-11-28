@@ -361,12 +361,61 @@ export async function ensureManagerSchema(db) {
       .run()
       .catch(() => {});
 
-    // Self-heal missing review columns on posts if migration 0026 has not run yet
+    // Staff invites table (Migration 0027 self-heal)
+    await db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS staff_invites (
+          id TEXT PRIMARY KEY,
+          email TEXT NOT NULL,
+          name TEXT NOT NULL,
+          role TEXT NOT NULL DEFAULT 'content_ctv',
+          department TEXT NOT NULL DEFAULT 'Ban Sự Kiện',
+          pillar_scope TEXT NOT NULL DEFAULT 'all',
+          token_hash TEXT NOT NULL UNIQUE,
+          note TEXT NOT NULL DEFAULT '',
+          status TEXT NOT NULL DEFAULT 'pending',
+          invited_by TEXT NOT NULL DEFAULT '',
+          invited_by_name TEXT NOT NULL DEFAULT '',
+          accepted_user_id TEXT NOT NULL DEFAULT '',
+          consent_accepted_at TEXT NOT NULL DEFAULT '',
+          accepted_at TEXT NOT NULL DEFAULT '',
+          expires_at TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )`
+      )
+      .run()
+      .catch(() => {});
+
+    // Event In-Kind Resources ledger (Migration 0027 self-heal)
+    await db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS event_resources (
+          id TEXT PRIMARY KEY,
+          event_id TEXT NOT NULL,
+          kind TEXT NOT NULL DEFAULT 'space',
+          title TEXT NOT NULL,
+          quantity TEXT NOT NULL DEFAULT '',
+          donor_name TEXT NOT NULL DEFAULT '',
+          status TEXT NOT NULL DEFAULT 'pledged',
+          note TEXT NOT NULL DEFAULT '',
+          recorded_by TEXT NOT NULL DEFAULT '',
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )`
+      )
+      .run()
+      .catch(() => {});
+
+    // Self-heal missing review columns on posts if migration 0026/0027 has not run yet
     const postCols = await db.prepare("PRAGMA table_info(posts)").all().catch(() => ({ results: [] }));
     const colNames = new Set((postCols.results || []).map((c) => c.name));
     if (colNames.size > 0) {
       if (!colNames.has("submitted_by")) {
         await db.prepare("ALTER TABLE posts ADD COLUMN submitted_by TEXT NOT NULL DEFAULT ''").run().catch(() => {});
+      }
+      if (!colNames.has("submitted_by_id")) {
+        await db.prepare("ALTER TABLE posts ADD COLUMN submitted_by_id TEXT NOT NULL DEFAULT ''").run().catch(() => {});
       }
       if (!colNames.has("reviewed_by")) {
         await db.prepare("ALTER TABLE posts ADD COLUMN reviewed_by TEXT NOT NULL DEFAULT ''").run().catch(() => {});
@@ -374,6 +423,15 @@ export async function ensureManagerSchema(db) {
       if (!colNames.has("reviewed_at")) {
         await db.prepare("ALTER TABLE posts ADD COLUMN reviewed_at TEXT NOT NULL DEFAULT ''").run().catch(() => {});
       }
+      if (!colNames.has("review_note")) {
+        await db.prepare("ALTER TABLE posts ADD COLUMN review_note TEXT NOT NULL DEFAULT ''").run().catch(() => {});
+      }
+    }
+
+    const userCols = await db.prepare("PRAGMA table_info(admin_users)").all().catch(() => ({ results: [] }));
+    const uColNames = new Set((userCols.results || []).map((c) => c.name));
+    if (uColNames.size > 0 && !uColNames.has("pillar_scope")) {
+      await db.prepare("ALTER TABLE admin_users ADD COLUMN pillar_scope TEXT NOT NULL DEFAULT 'all'").run().catch(() => {});
     }
   } catch {
     // Non-fatal on minimal DB mocks

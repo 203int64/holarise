@@ -1587,19 +1587,27 @@
       return;
     }
 
+    const POST_STATUS_LABEL = {
+      published: "Công khai",
+      pending_review: "Chờ duyệt",
+      changes_requested: "Cần sửa lại",
+      draft: "Nháp",
+    };
+
     box.innerHTML = `<div class="item-list">${filtered
       .map(
         (p) => `<article class="item-row">
           <img class="item-thumb" src="${esc(p.image)}" alt="${esc(p.imageAlt || p.title)}" loading="lazy">
           <div class="item-body">
             <div class="item-meta">
-              <span class="badge badge--${esc(p.status)}">${p.status === "published" ? "Công khai" : "Nháp"}</span>
+              <span class="badge badge--${p.status === "published" ? "published" : p.status === "changes_requested" ? "cancelled" : p.status === "pending_review" ? "new" : "draft"}">${esc(POST_STATUS_LABEL[p.status] || p.status)}</span>
               <span>${esc(p.category)}</span>
               <span>· ${esc(p.dateDisplay)}</span>
               <span>· ${esc(p.readTime || "")}</span>
             </div>
             <h3>${esc(p.title)}</h3>
             <p class="item-excerpt">${esc(p.excerpt)}</p>
+            ${p.reviewNote ? `<p class="item-excerpt" style="color:#b45309;font-weight:500;">Góp ý duyệt: ${esc(p.reviewNote)}</p>` : ""}
           </div>
           <div class="item-actions">
             ${p.status === "published" ? `<button class="btn btn--outline btn--sm" type="button" data-copy-url="${esc(`${SITE_ORIGIN}/hanh-trinh/${p.slug}/`)}">Copy link</button>` : ""}
@@ -1651,6 +1659,21 @@
     $$('input[name="filters"]', form).forEach((cb) => {
       cb.checked = filters.has(cb.value);
     });
+
+    const canPub = !window.__holariseManager || window.__holariseManager.hasPerm("posts.publish");
+    const noteField = $("#post-review-note-field");
+    const noteInput = $("#post-review-note");
+    const noteBanner = $("#post-review-note-banner");
+    if (noteField) noteField.hidden = !canPub;
+    if (noteInput) noteInput.value = post?.reviewNote || "";
+    if (noteBanner) {
+      if (post?.reviewNote) {
+        noteBanner.textContent = `Góp ý từ người duyệt (${post.reviewedBy || "Ban Nội Dung"}): ${post.reviewNote}`;
+        noteBanner.hidden = false;
+      } else {
+        noteBanner.hidden = true;
+      }
+    }
 
     setPostEditorMode("write");
     updatePostWordCount();
@@ -3237,6 +3260,7 @@
         imageAlt: $("#post-image-alt").value.trim(),
         excerpt: $("#post-excerpt").value.trim(),
         content: $("#post-content").value,
+        reviewNote: $("#post-review-note")?.value?.trim() || "",
         filters,
       };
 
@@ -4664,6 +4688,13 @@
     bindEvents();
 
     try {
+      const inviteParam = new URLSearchParams(window.location.search).get("invite");
+      if (inviteParam && window.__holariseManager?.openInviteOnboarding) {
+        await window.__holariseManager.openInviteOnboarding(inviteParam, (res) => {
+          handleAuthenticatedUser(res.user, Boolean(res.isSoleAdmin), res);
+        });
+        return;
+      }
       const status = await api("/api/auth/status");
       if (status.authenticated && status.user) {
         handleAuthenticatedUser(status.user, Boolean(status.isSoleAdmin), status);

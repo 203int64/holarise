@@ -929,12 +929,26 @@ test("SEO edge middleware: www + legacy route 301 redirects and pages.dev noinde
     assert.equal(r.headers.get("Location"), toUrl);
   }
 
-  const pagesDevRes = await rootMiddleware({
-    request: new Request("https://holarise.pages.dev/"),
+  const pagesDevRootRes = await rootMiddleware({
+    request: new Request("https://holarise.pages.dev/su-kien/leo-nui-luot/?gui=An"),
+    next: async () => new Response("should-not-run", { status: 200 }),
+  });
+  assert.equal(pagesDevRootRes.status, 301);
+  assert.equal(pagesDevRootRes.headers.get("Location"), "https://holarise.org/su-kien/leo-nui-luot/?gui=An");
+
+  const pagesDevLegacyRes = await rootMiddleware({
+    request: new Request("https://holarise.pages.dev/tin-tuc/?ref=zalo"),
+    next: async () => new Response("should-not-run", { status: 200 }),
+  });
+  assert.equal(pagesDevLegacyRes.status, 301);
+  assert.equal(pagesDevLegacyRes.headers.get("Location"), "https://holarise.org/hanh-trinh/?ref=zalo");
+
+  const previewPagesDevRes = await rootMiddleware({
+    request: new Request("https://abc123.holarise.pages.dev/"),
     next: async () => new Response("ok", { status: 200 }),
   });
-  assert.equal(pagesDevRes.status, 200);
-  assert.equal(pagesDevRes.headers.get("X-Robots-Tag"), "noindex, nofollow");
+  assert.equal(previewPagesDevRes.status, 200);
+  assert.equal(previewPagesDevRes.headers.get("X-Robots-Tag"), "noindex, nofollow");
 
   const prodRes = await rootMiddleware({
     request: new Request("https://holarise.org/"),

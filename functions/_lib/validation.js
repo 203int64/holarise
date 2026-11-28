@@ -15,11 +15,14 @@ export const VALID_PILLAR_CHOICES = new Set(["holaheart", "holagreen", "holaconn
 export const VALID_PARTICIPANT_ROLES = new Set(["member", "volunteer", "speaker"]);
 export const VALID_REFLECTION_STATUSES = new Set(["pending", "approved", "rejected"]);
 export const VALID_REG_STATUSES = new Set(["new", "contacted", "attended", "cancelled"]);
-export const VALID_POST_STATUSES = new Set(["published", "draft", "pending_review"]);
+export const VALID_POST_STATUSES = new Set(["published", "draft", "pending_review", "changes_requested"]);
 export const VALID_EVENT_STATUSES = new Set(["published", "draft"]);
 export const VALID_TASK_STATUSES = new Set(["todo", "in_progress", "review", "done"]);
 export const VALID_TASK_PHASES = new Set(["before", "during", "after", "general"]);
 export const VALID_TASK_PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
+export const VALID_RESOURCE_KINDS = new Set(["space", "books", "plants", "supplies", "logistics", "other"]);
+export const VALID_RESOURCE_STATUSES = new Set(["pledged", "received", "delivered"]);
+export const VALID_PILLAR_SCOPES = new Set(["all", "holaheart", "holagreen", "holaconnect"]);
 export const VALID_EVENT_KINDS = new Set(["upcoming", "past"]);
 export const VALID_REEL_AUDIO_PRESETS = new Set([
   "preset:holaheart",
@@ -208,7 +211,7 @@ export function validatePostInput(body) {
   const readTime = cleanStr(body.readTime || body.read_time, 30) || estimateReadTime(content);
   const status = cleanStr(body.status, 24) || "published";
   if (!VALID_POST_STATUSES.has(status)) {
-    fields.status = "Trạng thái bài viết chỉ nhận 'published', 'pending_review' hoặc 'draft'.";
+    fields.status = "Trạng thái bài viết chỉ nhận 'published', 'pending_review', 'changes_requested' hoặc 'draft'.";
   }
 
   if (Object.keys(fields).length > 0) {
@@ -1060,6 +1063,41 @@ export function validateTaskInput(body) {
       due_at: dueAt,
       zalo_url: zaloUrl,
       playbook_key: playbookKey,
+    },
+  };
+}
+
+export function validateResourceInput(body) {
+  const fields = {};
+  const title = cleanStr(body.title, 180);
+  if (title.length < 2) fields.title = "Tên hạng mục hiện vật/nguồn lực cần ít nhất 2 ký tự.";
+
+  const kind = cleanStr(body.kind, 24) || "space";
+  if (!VALID_RESOURCE_KINDS.has(kind)) {
+    fields.kind = "Phân loại hiện vật không hợp lệ.";
+  }
+
+  const quantity = cleanStr(body.quantity, 80);
+  const donorName = cleanStr(body.donorName ?? body.donor_name, 140);
+  const status = cleanStr(body.status, 24) || "pledged";
+  if (!VALID_RESOURCE_STATUSES.has(status)) {
+    fields.status = "Trạng thái bàn giao chỉ nhận pledged, received hoặc delivered.";
+  }
+  const note = cleanStr(body.note, 500);
+
+  if (Object.keys(fields).length > 0) {
+    return { ok: false, fields };
+  }
+
+  return {
+    ok: true,
+    value: {
+      kind,
+      title,
+      quantity,
+      donor_name: donorName,
+      status,
+      note,
     },
   };
 }

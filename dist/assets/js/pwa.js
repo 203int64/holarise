@@ -307,7 +307,14 @@
   /* 5. Copy URL helper inside Zalo/FB WebView guidance modal */
   if (copyUrlBtn) {
     copyUrlBtn.addEventListener("click", function () {
-      var urlToCopy = window.location.href;
+      var host = ((window.location && window.location.hostname) || "").toLowerCase();
+      var urlToCopy =
+        host === "holarise.pages.dev" || host === "www.holarise.org"
+          ? "https://holarise.org" +
+            ((window.location && window.location.pathname) || "/") +
+            ((window.location && window.location.search) || "") +
+            ((window.location && window.location.hash) || "")
+          : window.location.href;
       var onCopied = function () {
         if (copyFeedback) {
           copyFeedback.textContent = t(

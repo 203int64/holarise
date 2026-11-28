@@ -1,3 +1,4 @@
+import { notifyTaskAssigned } from "../../../_lib/manager-notify.js";
 import {
   DEPARTMENTS,
   ensureManagerSchema,
@@ -145,18 +146,21 @@ export async function onRequestPost(context) {
 
   const v = validated.value;
   let assigneeName = v.assignee_name;
+  let assigneeEmail = "";
   if (v.assignee_type === "staff" && v.assignee_id) {
-    const staff = await db.prepare("SELECT id, name FROM admin_users WHERE id = ?").bind(v.assignee_id).first();
+    const staff = await db.prepare("SELECT id, name, email FROM admin_users WHERE id = ?").bind(v.assignee_id).first();
     if (!staff) {
       return errorResponse(404, "ASSIGNEE_NOT_FOUND", "Không tìm thấy thành viên Ban được giao việc.");
     }
     assigneeName = staff.name || assigneeName;
+    assigneeEmail = staff.email || "";
   } else if (v.assignee_type === "member" && v.assignee_id) {
-    const mem = await db.prepare("SELECT id, name FROM members WHERE id = ?").bind(v.assignee_id).first();
+    const mem = await db.prepare("SELECT id, name, email FROM members WHERE id = ?").bind(v.assignee_id).first();
     if (!mem) {
       return errorResponse(404, "ASSIGNEE_NOT_FOUND", "Không tìm thấy CTV/Thành viên được giao việc.");
     }
     assigneeName = mem.name || assigneeName;
+    assigneeEmail = mem.email || "";
   }
 
   let zaloUrl = v.zalo_url;
@@ -215,5 +219,15 @@ export async function onRequestPost(context) {
     .bind(id)
     .first();
 
-  return jsonResponse({ ok: true, item: serializeTaskRow(created) }, 201);
+  const serialized = serializeTaskRow(created);
+  if (assigneeEmail && assigneeEmail !== auth.user.email) {
+    await notifyTaskAssigned(context.env, {
+      recipientEmail: assigneeEmail,
+      recipientName: assigneeName,
+      task: serialized,
+      isMember: v.assignee_type === "member",
+    });
+  }
+
+  return jsonResponse({ ok: true, item: serialized }, 201);
 }

@@ -1,5 +1,5 @@
 import { generateQrSvg } from "../_lib/qr.js";
-import { escHtml, resolveEventHref } from "../_lib/render.js";
+import { absUrl, escHtml, resolveEventHref, SITE_URL } from "../_lib/render.js";
 import { normalizePhone } from "../_lib/validation.js";
 
 const PILLAR_META = {
@@ -183,7 +183,7 @@ export async function onRequestGet({ params, request, env }) {
       .catch(() => ({ results: [] })),
   ]);
 
-  const origin = reqUrl.origin || "https://holarise.org";
+  const origin = SITE_URL;
   const canonicalUrl = `${origin}/tv/${encodeURIComponent(member.member_code)}`;
   const altLangUrl = isEn ? canonicalUrl : `${canonicalUrl}?lang=en`;
   const qrSvg = generateQrSvg(canonicalUrl, {
@@ -365,7 +365,7 @@ export async function onRequestGet({ params, request, env }) {
   <meta property="og:title" content="${escHtml(member.name)} · ${escHtml(member.member_code)} | HolaRise">
   <meta property="og:description" content="${escHtml(ogDescription)}">
   <meta property="og:url" content="${escHtml(canonicalUrl)}">
-  <meta property="og:image" content="${escHtml(safeAvatar || `${origin}/assets/images/logo-holarise.png`)}">
+  <meta property="og:image" content="${escHtml(absUrl(safeAvatar || "/assets/images/logo-holarise.png"))}">
   <link rel="icon" type="image/png" href="/assets/images/favicon-96.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

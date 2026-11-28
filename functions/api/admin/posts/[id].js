@@ -1,7 +1,8 @@
+import { notifyPostReviewEvent } from "../../../_lib/manager-notify.js";
 import { ensureManagerSchema, logAudit, roleHasPermission } from "../../../_lib/rbac.js";
 import { serializePostRow } from "../../../_lib/render.js";
 import { errorResponse, jsonResponse, readJsonBody, requireAdmin } from "../../../_lib/security.js";
-import { validatePostInput } from "../../../_lib/validation.js";
+import { cleanStr, validatePostInput } from "../../../_lib/validation.js";
 
 export async function onRequestGet(context) {
   const auth = await requireAdmin(context, { permission: "posts.read" });
@@ -37,7 +38,7 @@ export async function onRequestPut(context) {
   }
 
   const v = validated.value;
-  if (!canPublish && (v.status === "published" || existing.status === "published")) {
+  if (!canPublish && (v.status === "published" || v.status === "changes_requested" || existing.status === "published")) {
     return errorResponse(
       403,
       "PUBLISH_FORBIDDEN",
@@ -59,21 +60,30 @@ export async function onRequestPut(context) {
     v.status === "pending_review"
       ? auth.user.name || auth.user.email
       : existing.submitted_by || "";
-  const reviewedBy =
-    v.status === "published" && existing.status !== "published"
-      ? auth.user.name || auth.user.email
-      : existing.reviewed_by || "";
-  const reviewedAt =
-    v.status === "published" && existing.status !== "published"
-      ? now
-      : existing.reviewed_at || "";
+  const submittedById =
+    v.status === "pending_review"
+      ? auth.user.id || existing.submitted_by_id || ""
+      : existing.submitted_by_id || "";
+  const isReviewAction =
+    (v.status === "published" || v.status === "changes_requested") && v.status !== existing.status;
+  const reviewedBy = isReviewAction ? auth.user.name || auth.user.email : existing.reviewed_by || "";
+  const reviewedAt = isReviewAction ? now : existing.reviewed_at || "";
+  const incomingNote = parsed.data.reviewNote !== undefined || parsed.data.review_note !== undefined
+    ? cleanStr(parsed.data.reviewNote ?? parsed.data.review_note, 600)
+    : existing.review_note || "";
+  const reviewNote =
+    v.status === "published"
+      ? ""
+      : canPublish
+        ? incomingNote
+        : existing.review_note || "";
 
   try {
     await context.env.DB.prepare(
       `UPDATE posts
        SET slug = ?, title = ?, category = ?, category_slug = ?, filters_json = ?, date = ?, date_display = ?,
            read_time = ?, author = ?, image = ?, image_alt = ?, excerpt = ?, content_json = ?, status = ?,
-           submitted_by = ?, reviewed_by = ?, reviewed_at = ?, updated_at = ?
+           submitted_by = ?, submitted_by_id = ?, reviewed_by = ?, reviewed_at = ?, review_note = ?, updated_at = ?
        WHERE id = ?`
     )
       .bind(
@@ -92,8 +102,10 @@ export async function onRequestPut(context) {
         JSON.stringify(v.content),
         v.status,
         submittedBy,
+        submittedById,
         reviewedBy,
         reviewedAt,
+        reviewNote,
         now,
         id
       )
@@ -126,13 +138,37 @@ export async function onRequestPut(context) {
       .run();
   }
 
+  const auditAction =
+    v.status === "published" && existing.status !== "published"
+      ? "post.publish"
+      : v.status === "changes_requested"
+        ? "post.changes_requested"
+        : "post.update";
+
   await logAudit(context.env.DB, auth.user, {
-    action: v.status === "published" && existing.status !== "published" ? "post.publish" : "post.update",
+    action: auditAction,
     targetType: "post",
     targetId: id,
-    summary: `Cập nhật bài viết "${v.title}" (${existing.status} → ${v.status})`,
-    meta: { fromStatus: existing.status, toStatus: v.status },
+    summary: `Cập nhật bài viết "${v.title}" (${existing.status} → ${v.status})${reviewNote ? ` · Ghi chú: ${reviewNote.slice(0, 80)}` : ""}`,
+    meta: { fromStatus: existing.status, toStatus: v.status, reviewNote },
   });
+
+  if (submittedById && (v.status === "changes_requested" || (v.status === "published" && existing.status !== "published"))) {
+    const authorRow = await context.env.DB.prepare("SELECT email, name FROM admin_users WHERE id = ?")
+      .bind(submittedById)
+      .first()
+      .catch(() => null);
+    if (authorRow?.email && authorRow.email !== auth.user.email) {
+      await notifyPostReviewEvent(context.env, {
+        recipientEmail: authorRow.email,
+        recipientName: authorRow.name,
+        post: { title: v.title, slug: v.slug, category: v.category },
+        kind: v.status === "changes_requested" ? "changes_requested" : "published",
+        reviewNote,
+        actorName: auth.user.name || auth.user.email,
+      });
+    }
+  }
 
   const updated = await context.env.DB.prepare("SELECT * FROM posts WHERE id = ?").bind(id).first();
   return jsonResponse({ ok: true, item: serializePostRow(updated) });

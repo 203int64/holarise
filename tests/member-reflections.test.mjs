@@ -665,9 +665,9 @@ test("HR-YYMMDD-STT sequential member codes, QR SVG & /tv/[code] privacy-safe ac
   assert.ok(svg.includes("<path d=\"M"));
   assert.ok(svg.endsWith("</svg>"));
 
-  // Verify /tv/[code] SSR renders public achievement card + QR and NEVER leaks PII
+  // Verify /tv/[code] SSR renders public achievement card + QR and NEVER leaks PII or pages.dev origin
   const tvRes = await memberPassGet({
-    request: makeReq(`/tv/${m1.memberCode}`),
+    request: new Request(`https://holarise.pages.dev/tv/${m1.memberCode}`),
     params: { code: m1.memberCode },
     env,
   });
@@ -677,6 +677,8 @@ test("HR-YYMMDD-STT sequential member codes, QR SVG & /tv/[code] privacy-safe ac
   assert.ok(tvHtml.includes(m1.memberCode));
   assert.ok(tvHtml.includes("Đại học FPT Hà Nội (Hòa Lạc)"));
   assert.ok(tvHtml.includes("<svg xmlns=\"http://www.w3.org/2000/svg\""));
+  assert.ok(tvHtml.includes(`https://holarise.org/tv/${m1.memberCode}`));
+  assert.ok(!tvHtml.includes("holarise.pages.dev"));
   // Strict Nghị định 13 privacy checks
   assert.ok(!tvHtml.includes("0981 222 333"));
   assert.ok(!tvHtml.includes("0981222333"));

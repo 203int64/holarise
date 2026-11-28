@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=93d2272f53">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=212bcf0a88">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
 <body data-pwa-app-name="HolaRise Manager">
@@ -114,6 +114,34 @@
               <div class="form-alert" id="login-alert" role="alert" hidden></div>
               <button class="btn btn--outline btn--full btn--lg" type="submit">Đăng nhập bằng Email</button>
             </form>
+          </div>
+
+          <!-- INVITE ACCEPTANCE VIEW (?invite=<token>) -->
+          <div id="auth-invite-box" hidden>
+            <span class="vault-step-badge vault-step-badge--ok">Lời mời vào HolaRise Manager</span>
+            <h1 class="vault-title" id="invite-accept-heading">Kích hoạt tài khoản Ban</h1>
+            <p class="vault-subtitle" id="invite-accept-meta">Đang kiểm tra link mời...</p>
+            <form class="admin-form" id="invite-accept-form" novalidate hidden>
+              <input type="hidden" id="inv-acc-token">
+              <div class="field">
+                <label for="inv-acc-name">Họ và tên hiển thị</label>
+                <input id="inv-acc-name" name="name" type="text" required minlength="2">
+              </div>
+              <div class="field">
+                <label for="inv-acc-password">Tự đặt mật khẩu của bạn (tối thiểu 8 ký tự) <span aria-hidden="true">*</span></label>
+                <div class="password-wrap">
+                  <input id="inv-acc-password" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="Nhập mật khẩu riêng của bạn">
+                  <button type="button" class="pw-toggle" data-pw-toggle="inv-acc-password" aria-pressed="false" aria-label="Hiện mật khẩu">Hiện</button>
+                </div>
+              </div>
+              <label style="display:flex;gap:8px;align-items:flex-start;font-size:0.84rem;line-height:1.45;cursor:pointer;">
+                <input type="checkbox" id="inv-acc-consent" required style="margin-top:3px;">
+                <span>Tôi cam kết bảo mật dữ liệu cá nhân người tham dự theo <strong>Nghị định 13/2023/NĐ-CP</strong> và tuân thủ quy tắc an toàn cộng đồng (<strong>Safeguarding</strong>) của HolaRise.</span>
+              </label>
+              <div class="form-alert" id="inv-acc-alert" role="alert" hidden></div>
+              <button class="btn btn--primary btn--full btn--lg" type="submit">Kích hoạt &amp; Vào làm việc →</button>
+            </form>
+            <div class="form-alert" id="inv-acc-error" role="alert" hidden></div>
           </div>
 
           <!-- ACCESS DENIED VIEW (AUTHENTICATED AS NON-SOLE-ADMIN) -->
@@ -365,7 +393,8 @@
             <p class="page-sub">Ma trận 4 Ban công tác × 6 Vai hệ thống, quản lý tài khoản Ban và Nhật ký thao tác minh bạch.</p>
           </div>
           <div class="page-actions">
-            <button class="btn btn--primary" type="button" id="btn-new-staff-team">+ Cấp tài khoản Ban</button>
+            <button class="btn btn--primary" type="button" id="btn-new-invite">✉️ Gửi link mời (48h)</button>
+            <button class="btn btn--outline" type="button" id="btn-new-staff-team">+ Cấp trực tiếp</button>
           </div>
         </div>
 
@@ -382,10 +411,11 @@
         <section class="panel-box" id="box-team-accounts" style="margin-bottom:16px;">
           <div class="panel-box-head">
             <div>
-              <h2>Danh sách tài khoản Ban chuyên môn</h2>
-              <p>Chủ nhiệm (<code>203int64</code>) cấp tài khoản, đổi Ban/Vai, khóa hoặc thu hồi quyền tức thì.</p>
+              <h2>Lời mời đang chờ &amp; Tài khoản Ban chuyên môn</h2>
+              <p>Gửi link mời 48h để thành viên tự đặt mật khẩu và ký cam kết bảo mật, hoặc chỉnh trực tiếp Ban/Vai bên dưới.</p>
             </div>
           </div>
+          <div id="team-invites-container" style="margin-bottom:14px;"></div>
           <div id="team-users-container"></div>
         </section>
 
@@ -1204,9 +1234,16 @@
             <select id="post-status" name="status">
               <option value="published">Công khai ngay trên web</option>
               <option value="pending_review">Gửi duyệt Trưởng ban Nội dung</option>
+              <option value="changes_requested">Trả lại cần chỉnh sửa</option>
               <option value="draft">Lưu nháp (ẩn)</option>
             </select>
           </div>
+        </div>
+
+        <div id="post-review-note-banner" class="form-alert" role="status" hidden style="background:#fffbeb;border-color:#f59e0b;color:#78350f;"></div>
+        <div class="field" id="post-review-note-field" hidden>
+          <label for="post-review-note">Góp ý duyệt bài (gửi kèm khi trả bài cần chỉnh sửa)</label>
+          <textarea id="post-review-note" name="reviewNote" rows="2" maxlength="600" placeholder="Ví dụ: Bỏ câu sáo rỗng đoạn 2, bổ sung số người check-in thực tế..."></textarea>
         </div>
 
         <div class="form-row-3">
@@ -1471,6 +1508,136 @@
           <button class="btn btn--primary" type="submit">Lưu nhiệm vụ</button>
         </div>
       </form>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 4C: 1-CLICK STAFF INVITE LINK (48H + SAFEGUARDING CONSENT) -->
+  <dialog class="cms-dialog" id="invite-dialog" closedby="any" aria-labelledby="invite-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="invite-dialog-title">Gửi link mời thành viên Ban (48h)</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <form class="admin-form dialog-body" id="invite-form" novalidate>
+        <p class="field-hint" style="margin:0;">Không cần tự đặt mật khẩu gửi qua Zalo. Hệ thống tạo link dùng 1 lần (hạn 48h) để người nhận tự đặt mật khẩu &amp; xác nhận cam kết bảo mật.</p>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="inv-name">Họ và tên <span aria-hidden="true">*</span></label>
+            <input id="inv-name" name="name" type="text" required minlength="2" placeholder="Nguyễn Minh Anh">
+          </div>
+          <div class="field">
+            <label for="inv-email">Email nhận lời mời <span aria-hidden="true">*</span></label>
+            <input id="inv-email" name="email" type="email" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="minhanh@holarise.org">
+          </div>
+        </div>
+        <div class="form-row-3">
+          <div class="field">
+            <label for="inv-role">Vai trò hệ thống</label>
+            <select id="inv-role" name="role">
+              <option value="event_ops">Điều phối Sự kiện</option>
+              <option value="content_editor">Trưởng ban Nội dung</option>
+              <option value="content_ctv">CTV Nội dung</option>
+              <option value="media_manager">Trưởng ban Hình ảnh</option>
+              <option value="media_ctv">CTV Hình ảnh</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="inv-department">Ban công tác</label>
+            <select id="inv-department" name="department">
+              <option value="Ban Sự Kiện">Ban Sự Kiện</option>
+              <option value="Ban Nội Dung">Ban Nội Dung</option>
+              <option value="Ban Hình Ảnh">Ban Hình Ảnh</option>
+              <option value="Ban Đối Ngoại">Ban Đối Ngoại</option>
+              <option value="Ban Điều Hành">Ban Điều Hành</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="inv-pillar">Phạm vi Trụ cột</label>
+            <select id="inv-pillar" name="pillarScope">
+              <option value="all">Toàn bộ HolaRise</option>
+              <option value="holaheart">HolaHeart</option>
+              <option value="holagreen">HolaGreen</option>
+              <option value="holaconnect">HolaConnect</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="inv-note">Lời nhắn chào mừng (tùy chọn)</label>
+          <input id="inv-note" name="note" type="text" maxlength="400" placeholder="Chào mừng bạn đồng hành cùng Ban Sự Kiện chặng tới!">
+        </div>
+        <div id="invite-result-box" hidden style="padding:12px;border-radius:10px;background:#ecfdf3;border:1px solid #a6f4c5;display:grid;gap:8px;">
+          <strong style="color:#027a48;font-size:0.88rem;">Link mời đã sẵn sàng (hiệu lực 48 giờ)</strong>
+          <input type="text" id="invite-result-url" readonly style="font-size:0.82rem;background:#fff;">
+          <div class="btn-row">
+            <button type="button" class="btn btn--primary btn--sm" id="btn-copy-invite-url">📋 Copy link gửi Zalo</button>
+            <span id="invite-email-status" class="cell-sub" style="display:inline;"></span>
+          </div>
+        </div>
+        <div class="form-alert" id="invite-alert" role="alert" hidden></div>
+        <div class="dialog-foot">
+          <button class="btn btn--ghost" type="button" data-close-dialog>Đóng</button>
+          <button class="btn btn--primary" type="submit">Tạo &amp; Gửi link mời</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 4D: EVENT IN-KIND RESOURCES & TRANSPARENCY LEDGER -->
+  <dialog class="cms-dialog cms-dialog--wide" id="resource-dialog" closedby="any" aria-labelledby="resource-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="resource-dialog-title">Sổ Minh bạch Nguồn lực &amp; Hiện vật</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <div class="dialog-body" style="display:grid;gap:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <p class="field-hint" style="margin:0;">Đối soát hiện vật (không gian, sách, cây giống, học cụ) theo chuẩn minh bạch NGO và trích 1 chạm sang bài Hành trình.</p>
+          <button type="button" class="btn btn--outline btn--sm" id="btn-copy-transparency-md">📋 Copy đoạn Minh bạch</button>
+        </div>
+        <div id="resource-list-container"></div>
+        <form class="admin-form" id="resource-form" novalidate style="border-top:1px solid var(--line);padding-top:12px;">
+          <input type="hidden" id="res-event-id">
+          <div class="form-row-3">
+            <div class="field">
+              <label for="res-kind">Phân loại</label>
+              <select id="res-kind" name="kind">
+                <option value="space">Không gian đồng hành</option>
+                <option value="books">Sách &amp; Tủ sách</option>
+                <option value="plants">Cây giống &amp; Vật tư xanh</option>
+                <option value="supplies">Học cụ &amp; Đồ dùng</option>
+                <option value="logistics">Hậu cần buổi gặp</option>
+                <option value="other">Nguồn lực khác</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="res-title">Hạng mục <span aria-hidden="true">*</span></label>
+              <input id="res-title" name="title" type="text" required minlength="2" placeholder="Ví dụ: 45 đầu sách thiếu nhi">
+            </div>
+            <div class="field">
+              <label for="res-qty">Số lượng / Quy mô</label>
+              <input id="res-qty" name="quantity" type="text" placeholder="45 cuốn / 1 buổi">
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="res-donor">Đơn vị / Cá nhân đồng hành</label>
+              <input id="res-donor" name="donorName" type="text" placeholder="CLB / Quán cafe / Bạn đóng góp">
+            </div>
+            <div class="field">
+              <label for="res-status">Trạng thái bàn giao</label>
+              <select id="res-status" name="status">
+                <option value="pledged">Đã cam kết</option>
+                <option value="received">Đã tiếp nhận</option>
+                <option value="delivered">Đã bàn giao</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-alert" id="resource-alert" role="alert" hidden></div>
+          <div class="btn-row">
+            <button type="submit" class="btn btn--primary btn--sm">+ Ghi nhận nguồn lực</button>
+          </div>
+        </form>
+      </div>
     </div>
   </dialog>
 
@@ -1813,10 +1980,10 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=93d2272f53" defer></script>
-  <script src="/assets/js/admin-manager.js?v=93d2272f53" defer></script>
-  <script src="/assets/js/admin.js?v=93d2272f53" defer></script>
-  <script src="/assets/js/admin-desk.js?v=93d2272f53" defer></script>
-  <script src="/assets/js/pwa.js?v=93d2272f53" defer></script>
+  <script src="/assets/js/passkey-client.js?v=212bcf0a88" defer></script>
+  <script src="/assets/js/admin-manager.js?v=212bcf0a88" defer></script>
+  <script src="/assets/js/admin.js?v=212bcf0a88" defer></script>
+  <script src="/assets/js/admin-desk.js?v=212bcf0a88" defer></script>
+  <script src="/assets/js/pwa.js?v=212bcf0a88" defer></script>
 </body>
 </html>

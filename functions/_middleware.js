@@ -1,9 +1,9 @@
 /**
  * Global Pages Functions middleware:
- * - Canonicalizes www.holarise.org -> https://holarise.org (301 permanent redirect)
+ * - Canonicalizes www.holarise.org & holarise.pages.dev -> https://holarise.org (301 permanent redirect)
  * - 301 Permanent Redirects for legacy IA routes (/workshop/, /hoat-dong/, /tin-tuc/)
  * - Blocks direct external access to internal SSR templates (/_templates/*)
- * - Marks *.pages.dev preview/default hosts with X-Robots-Tag: noindex, nofollow
+ * - Marks *.pages.dev preview hosts with X-Robots-Tag: noindex, nofollow
  * - Ensures consistent baseline security headers on dynamic Function responses.
  */
 
@@ -62,7 +62,7 @@ export async function onRequest(context) {
   const url = new URL(context.request.url);
   const host = url.hostname.toLowerCase();
 
-  if (host === "www.holarise.org") {
+  if (host === "www.holarise.org" || host === "holarise.pages.dev") {
     const redirectPath = buildLegacyRedirectPath(url.pathname, url.search) || `${url.pathname}${url.search}`;
     const target = `${CANONICAL_ORIGIN}${redirectPath}`;
     return new Response(null, {

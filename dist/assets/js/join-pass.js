@@ -18,6 +18,18 @@
   var prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var isFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   var SITE_URL = "https://holarise.org";
+  function canonicalizeShareUrl(rawUrl) {
+    try {
+      var u = new URL(rawUrl || (window.location && window.location.pathname) || "/", SITE_URL);
+      var host = (u.hostname || "").toLowerCase();
+      if (host === "holarise.pages.dev" || host.endsWith(".pages.dev") || host === "www.holarise.org") {
+        return new URL(u.pathname + u.search, SITE_URL).toString();
+      }
+      return u.toString();
+    } catch (_e) {
+      return SITE_URL + ((window.location && window.location.pathname) || "/");
+    }
+  }
   var DEFAULT_SCHEDULE = t("1–2 buổi / tuần", "1–2 sessions / week");
 
   var joinForm = document.querySelector("[data-join-studio]");
@@ -1580,7 +1592,7 @@
       var startUtc = btn.getAttribute("data-ics-start") || "";
       var endUtc = btn.getAttribute("data-ics-end") || "";
       var location = btn.getAttribute("data-ics-location") || "Hòa Lạc, Hà Nội";
-      var url = btn.getAttribute("data-ics-url") || window.location.href;
+      var url = canonicalizeShareUrl(btn.getAttribute("data-ics-url") || ((window.location && window.location.pathname) || "/"));
       if (!startUtc || !endUtc) {
         var now = new Date();
         var fallbackStart = new Date(now.getTime() + 86400000);
@@ -1928,7 +1940,7 @@
 
     if (!modal) return;
 
-    var baseUrl = modal.getAttribute("data-share-url") || window.location.href.split("?")[0];
+    var baseUrl = canonicalizeShareUrl(modal.getAttribute("data-share-url") || ((window.location && window.location.pathname) || "/"));
     var baseShareTitle = modal.getAttribute("data-share-title") || document.title;
     var shareTime = modal.getAttribute("data-share-time") || "";
     var shareVenue = modal.getAttribute("data-share-venue") || "";
@@ -1951,7 +1963,7 @@
       var inviter = inviterInput ? inviterInput.value.trim() : "";
       var note = noteInput ? noteInput.value.trim() : "";
       try {
-        var u = new URL(baseUrl, window.location.origin);
+        var u = new URL(baseUrl, SITE_URL);
         if (rec) u.searchParams.set("gui", rec);
         if (inviter) u.searchParams.set("moi", inviter);
         if (note) u.searchParams.set("loi", note);

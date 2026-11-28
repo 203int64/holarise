@@ -174,8 +174,10 @@ export function serializePostRow(row) {
     content: safeJsonParse(row.content_json, []),
     status: row.status,
     submittedBy: row.submitted_by || "",
+    submittedById: row.submitted_by_id || "",
     reviewedBy: row.reviewed_by || "",
     reviewedAt: row.reviewed_at || "",
+    reviewNote: row.review_note || "",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

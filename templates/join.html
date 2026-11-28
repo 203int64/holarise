@@ -506,7 +506,8 @@
             <div class="member-panel-head">
               <div>
                 <span class="kicker">HolaRise Manager · Phân công CTV</span>
-                <h2>Nhiệm vụ được giao cho bạn</h2>
+                <h2>Nhiệm vụ &amp; Hồ sơ Phụng sự</h2>
+                <p class="member-empty-hint" id="member-service-summary"></p>
               </div>
             </div>
             <div id="member-tasks-list" class="member-cap-grid"></div>
@@ -515,12 +516,22 @@
           <section class="member-panel-box" id="member-checkin-section" hidden>
             <div class="member-panel-head">
               <div>
-                <span class="kicker">Điểm danh hiện trường · Bảo mật thông tin</span>
+                <span class="kicker">Điểm danh hiện trường · Quét QR &amp; Bảo mật thông tin</span>
                 <h2 id="member-checkin-title">Check-in buổi gặp</h2>
                 <p class="member-empty-hint" id="member-checkin-stats">Danh sách chỉ hiển thị tên gọi và 4 số cuối để bảo vệ dữ liệu người tham dự.</p>
               </div>
               <button type="button" class="btn btn--outline btn--sm" id="btn-close-member-checkin">Đóng</button>
             </div>
+            <div class="member-checkin-qr-bar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
+              <button type="button" class="btn btn--primary btn--sm" id="btn-checkin-qr-scan">📷 Quét QR Thẻ</button>
+              <input type="text" id="member-checkin-qr-input" placeholder="Hoặc nhập/dán mã thẻ HR-YYMMDD-STT..." aria-label="Mã thẻ thành viên QR" style="flex:1 1 200px;min-width:0;padding:8px 10px;border-radius:8px;border:1px solid rgba(11,17,15,0.16);font:inherit;">
+              <button type="button" class="btn btn--outline btn--sm" id="btn-checkin-qr-submit">Check-in QR</button>
+            </div>
+            <div id="member-checkin-qr-video-wrap" hidden style="margin-bottom:10px;border-radius:10px;overflow:hidden;border:1px solid rgba(11,17,15,0.14);background:#0b110f;position:relative;">
+              <video id="member-checkin-qr-video" playsinline muted style="width:100%;max-height:260px;object-fit:cover;display:block;"></video>
+              <button type="button" class="btn btn--outline btn--sm" id="btn-checkin-qr-stop" style="position:absolute;top:8px;right:8px;background:#fff;">Tắt camera</button>
+            </div>
+            <div id="member-checkin-qr-status" class="member-empty-hint" role="status" aria-live="polite" hidden style="margin-bottom:10px;padding:8px 12px;border-radius:8px;background:#ecfdf3;color:#027a48;font-weight:500;"></div>
             <div class="member-checkin-toolbar">
               <input type="search" id="member-checkin-search" placeholder="Tìm nhanh theo tên hoặc 4 số cuối..." aria-label="Tìm người tham dự">
             </div>

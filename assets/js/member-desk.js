@@ -35,6 +35,16 @@
   var closeCheckinBtn = document.getElementById("btn-close-member-checkin");
   var tasksSection = document.getElementById("member-tasks-section");
   var tasksListEl = document.getElementById("member-tasks-list");
+  var serviceSummaryEl = document.getElementById("member-service-summary");
+  var qrScanBtn = document.getElementById("btn-checkin-qr-scan");
+  var qrStopBtn = document.getElementById("btn-checkin-qr-stop");
+  var qrInputEl = document.getElementById("member-checkin-qr-input");
+  var qrSubmitBtn = document.getElementById("btn-checkin-qr-submit");
+  var qrVideoWrap = document.getElementById("member-checkin-qr-video-wrap");
+  var qrVideoEl = document.getElementById("member-checkin-qr-video");
+  var qrStatusEl = document.getElementById("member-checkin-qr-status");
+  var qrStream = null;
+  var qrScanRaf = 0;
 
   var state = {
     threads: [],
@@ -150,11 +160,150 @@
       .then(function (data) {
         if (data && data.ok) {
           state.assignedTasks = data.items || [];
+          var rec = data.serviceRecord || {};
+          if (serviceSummaryEl) {
+            var evCnt = Number(rec.eventsServed || 0);
+            var doneCnt = Number(rec.completedTasks || 0);
+            serviceSummaryEl.textContent =
+              evCnt > 0 || doneCnt > 0
+                ? t(
+                    "Hồ sơ phụng sự: " + evCnt + " buổi đã đồng hành · " + doneCnt + " nhiệm vụ hoàn thành.",
+                    "Service record: " + evCnt + " gatherings served · " + doneCnt + " tasks completed."
+                  )
+                : "";
+          }
           renderAssignedTasks();
           updateBadge();
         }
       })
       .catch(function () {});
+  }
+
+  function stopQrScanner() {
+    if (qrScanRaf) {
+      cancelAnimationFrame(qrScanRaf);
+      qrScanRaf = 0;
+    }
+    if (qrStream) {
+      qrStream.getTracks().forEach(function (tr) {
+        tr.stop();
+      });
+      qrStream = null;
+    }
+    if (qrVideoWrap) qrVideoWrap.hidden = true;
+  }
+
+  function submitQrCheckin(rawCode) {
+    var code = String(rawCode || "").trim();
+    if (!code || !state.checkinEventId) return;
+    if (qrStatusEl) {
+      qrStatusEl.hidden = false;
+      qrStatusEl.style.background = "#f3f4f6";
+      qrStatusEl.style.color = "#374151";
+      qrStatusEl.textContent = t("Đang xác thực mã thẻ...", "Checking member card...");
+    }
+    fetch("/api/member/checkin", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventId: state.checkinEventId, qrCode: code, allowWalkIn: true }),
+    })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (data) {
+        if (!data || !data.ok) {
+          if (qrStatusEl) {
+            qrStatusEl.style.background = "#fef3f2";
+            qrStatusEl.style.color = "#b42318";
+            qrStatusEl.textContent = (data && data.error && data.error.message) || t("Không thể check-in mã này.", "QR check-in failed.");
+          }
+          return;
+        }
+        if (qrInputEl) qrInputEl.value = "";
+        if (qrStatusEl) {
+          qrStatusEl.style.background = "#ecfdf3";
+          qrStatusEl.style.color = "#027a48";
+          var welcomeTag = data.isFirstTime
+            ? t(" · ✨ Lần đầu tham dự — ưu tiên đón tiếp!", " · ✨ First-time guest — warm welcome!")
+            : "";
+          qrStatusEl.textContent =
+            t("✓ Đã check-in: ", "✓ Checked in: ") +
+            (data.fullName || data.memberCode || "Thành viên") +
+            (data.walkInCreated ? t(" (bổ sung tại cửa)", " (door walk-in)") : "") +
+            welcomeTag;
+        }
+        openCheckinPanel(state.checkinEventId);
+      })
+      .catch(function () {});
+  }
+
+  if (qrSubmitBtn && qrInputEl) {
+    qrSubmitBtn.addEventListener("click", function () {
+      submitQrCheckin(qrInputEl.value);
+    });
+    qrInputEl.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitQrCheckin(qrInputEl.value);
+      }
+    });
+  }
+  if (qrStopBtn) {
+    qrStopBtn.addEventListener("click", stopQrScanner);
+  }
+  if (qrScanBtn) {
+    qrScanBtn.addEventListener("click", function () {
+      if (!("BarcodeDetector" in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (qrStatusEl) {
+          qrStatusEl.hidden = false;
+          qrStatusEl.style.background = "#fffbeb";
+          qrStatusEl.style.color = "#92400e";
+          qrStatusEl.textContent = t(
+            "Trình duyệt này chưa hỗ trợ quét QR trực tiếp — bạn hãy quét bằng camera máy rồi dán mã HR-YYMMDD-STT vào ô bên cạnh.",
+            "Direct QR camera is unavailable in this browser — paste the HR-YYMMDD-STT code in the box."
+          );
+        }
+        if (qrInputEl) qrInputEl.focus();
+        return;
+      }
+      var detector = new window.BarcodeDetector({ formats: ["qr_code"] });
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: "environment" } })
+        .then(function (stream) {
+          qrStream = stream;
+          if (qrVideoEl) {
+            qrVideoEl.srcObject = stream;
+            qrVideoEl.play();
+          }
+          if (qrVideoWrap) qrVideoWrap.hidden = false;
+          var tick = function () {
+            if (!qrStream || !qrVideoEl) return;
+            detector
+              .detect(qrVideoEl)
+              .then(function (codes) {
+                if (codes && codes.length && codes[0].rawValue) {
+                  stopQrScanner();
+                  submitQrCheckin(codes[0].rawValue);
+                  return;
+                }
+                qrScanRaf = requestAnimationFrame(tick);
+              })
+              .catch(function () {
+                qrScanRaf = requestAnimationFrame(tick);
+              });
+          };
+          qrScanRaf = requestAnimationFrame(tick);
+        })
+        .catch(function () {
+          if (qrStatusEl) {
+            qrStatusEl.hidden = false;
+            qrStatusEl.style.background = "#fef3f2";
+            qrStatusEl.style.color = "#b42318";
+            qrStatusEl.textContent = t("Không mở được camera. Hãy nhập mã thẻ thủ công.", "Camera access denied.");
+          }
+        });
+    });
   }
 
   function renderCapabilities() {
