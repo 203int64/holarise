@@ -273,6 +273,10 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <span>Phân quyền</span>
           </button>
+          <button class="nav-item" type="button" data-tab="analytics" hidden>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span>Phân tích &amp; SEO</span>
+          </button>
           <button class="nav-item" type="button" data-tab="settings">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span>Cài đặt</span>
@@ -497,7 +501,6 @@
                 <option value="">Mọi nguồn gửi</option>
                 <option value="event_modal">Giữ chỗ sự kiện</option>
                 <option value="join_page">Trang Tham gia</option>
-                <option value="feedback">Góp ý / Báo lỗi</option>
               </select>
             </div>
             <button class="btn btn--outline" type="submit">Lọc</button>
@@ -683,7 +686,7 @@
         <div class="subtab-bar" role="tablist" aria-label="Mục con Cộng đồng">
           <button class="subtab-btn" type="button" role="tab" id="subtab-reflections" aria-selected="true" data-comm-subtab="reflections">Lưu bút &amp; Cảm nhận</button>
           <button class="subtab-btn" type="button" role="tab" id="subtab-members" aria-selected="false" data-comm-subtab="members">Thành viên &amp; Quyền Media</button>
-          <button class="subtab-btn" type="button" role="tab" id="subtab-feedbacks" aria-selected="false" data-comm-subtab="feedbacks">Góp ý sự kiện</button>
+          <button class="subtab-btn" type="button" role="tab" id="subtab-feedbacks" aria-selected="false" data-comm-subtab="feedbacks">Hộp thư Góp ý <span class="nav-badge" id="badge-new-feedbacks" hidden style="margin-left:6px;">0</span></button>
         </div>
 
         <div role="tabpanel" aria-labelledby="subtab-reflections" data-comm-panel="reflections">
@@ -725,10 +728,17 @@
           <section class="panel-box">
             <div class="panel-box-head panel-box-head--row">
               <div>
-                <h2>Hộp thư Góp ý sau sự kiện</h2>
-                <p>Góp ý gửi kín từ Sân khấu Kỷ niệm — bảo toàn ẩn danh tuyệt đối nếu người gửi chọn ẩn danh.</p>
+                <h2>Hộp thư Góp ý &amp; Báo lỗi</h2>
+                <p>Tập trung toàn bộ góp ý trên web, báo lỗi kỹ thuật và góp ý sau sự kiện — tự động báo email về địa chỉ Quản trị khi có phản hồi mới.</p>
               </div>
               <div class="btn-row">
+                <label for="fb-source-filter" class="visually-hidden">Lọc theo nguồn góp ý</label>
+                <select id="fb-source-filter" style="min-height:34px;padding:4px 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;">
+                  <option value="">Mọi nguồn góp ý</option>
+                  <option value="site">Góp ý trên web</option>
+                  <option value="bug">Báo lỗi kỹ thuật</option>
+                  <option value="event">Sau sự kiện</option>
+                </select>
                 <label for="fb-event-filter" class="visually-hidden">Lọc theo sự kiện</label>
                 <select id="fb-event-filter" style="min-height:34px;padding:4px 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;">
                   <option value="">Tất cả sự kiện</option>
@@ -750,6 +760,288 @@
               </div>
             </div>
             <div id="feedbacks-admin-container"></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- PANEL 4B: ANALYTICS, AUDIENCE INTELLIGENCE, SPEED & SEO API HUB (SUPER ADMIN ONLY) -->
+      <section class="tab-panel" id="panel-analytics" data-panel="analytics" hidden>
+        <div class="page-head">
+          <div>
+            <div class="an-head-title-row">
+              <h1>Phân tích, Tốc độ &amp; SEO Hub</h1>
+              <span class="an-live-pill" id="an-online-pill" title="Người xem hoạt động trong 5 phút gần nhất">
+                <span class="an-live-dot" aria-hidden="true"></span>
+                <span id="an-online-count">0 đang xem</span>
+              </span>
+            </div>
+            <p class="page-sub">Toàn cảnh người xem thực tế (không cookie), phễu check-in sự kiện, tốc độ tải trang và cổng kết nối toàn bộ API SEO tại một nơi.</p>
+          </div>
+          <div class="page-actions">
+            <div class="pill-group" role="group" aria-label="Khoảng thời gian thống kê">
+              <button class="pill-btn" type="button" data-an-days="7">7 ngày</button>
+              <button class="pill-btn is-active" type="button" data-an-days="30">30 ngày</button>
+              <button class="pill-btn" type="button" data-an-days="90">90 ngày</button>
+            </div>
+            <button class="btn btn--outline" type="button" id="btn-refresh-analytics">Làm mới</button>
+          </div>
+        </div>
+
+        <div class="subtab-bar" role="tablist" aria-label="Mục con Phân tích và SEO">
+          <button class="subtab-btn" type="button" role="tab" id="an-subtab-audience" aria-selected="true" data-an-subtab="audience">Chân dung &amp; Ai đang xem</button>
+          <button class="subtab-btn" type="button" role="tab" id="an-subtab-funnel" aria-selected="false" data-an-subtab="funnel">Phễu Check-in &amp; Nội dung</button>
+          <button class="subtab-btn" type="button" role="tab" id="an-subtab-speed" aria-selected="false" data-an-subtab="speed">Tốc độ &amp; Core Web Vitals</button>
+          <button class="subtab-btn" type="button" role="tab" id="an-subtab-seo-api" aria-selected="false" data-an-subtab="seo-api">Cấu hình SEO &amp; API Hub</button>
+        </div>
+
+        <div id="an-status-banner" class="form-alert" role="status" hidden></div>
+
+        <!-- SUB-TAB 1: AUDIENCE & LIVE FEED -->
+        <div role="tabpanel" aria-labelledby="an-subtab-audience" data-an-panel="audience">
+          <div id="an-kpis-container" class="an-kpi-grid"></div>
+
+          <section class="panel-box an-section-gap">
+            <div class="panel-box-head">
+              <div>
+                <h2>Hướng xây dựng ưu tiên (Tự động từ dữ liệu thật)</h2>
+                <p>Hệ thống đối chiếu lưu lượng, thời gian ở lại, phễu check-in, tốc độ tải và sức khỏe SEO để đề xuất việc cần làm trước.</p>
+              </div>
+            </div>
+            <div id="an-recommendations-container" class="an-recs-grid"></div>
+          </section>
+
+          <section class="panel-box an-section-gap">
+            <div class="panel-box-head panel-box-head--row">
+              <div>
+                <h2>Xu hướng lượt xem &amp; phiên truy cập</h2>
+                <p id="an-chart-caption">Biểu đồ lưu lượng công khai theo ngày (đã lọc toàn bộ bot tìm kiếm &amp; trang quản trị).</p>
+              </div>
+            </div>
+            <div id="an-trend-chart" class="an-chart-wrap"></div>
+          </section>
+
+          <div class="an-dims-grid an-section-gap" id="an-dims-container"></div>
+
+          <section class="panel-box an-section-gap">
+            <div class="panel-box-head panel-box-head--row">
+              <div>
+                <h2>35 lượt ghé web gần nhất (Ẩn danh chuẩn Nghị định 13/2023)</h2>
+                <p>Hiển thị địa điểm &amp; nhà mạng từ Cloudflare Edge, thiết bị, kênh vào (Zalo/Google/Facebook), trạng thái Thành viên hay Khách, thời gian ở lại và độ sâu cuộn.</p>
+              </div>
+            </div>
+            <div id="an-live-visits-container" class="table-wrap"></div>
+          </section>
+        </div>
+
+        <!-- SUB-TAB 2: CHECK-IN FUNNEL & CONTENT -->
+        <div role="tabpanel" aria-labelledby="an-subtab-funnel" data-an-panel="funnel" hidden>
+          <div id="an-funnel-kpis" class="an-kpi-grid"></div>
+
+          <section class="panel-box an-section-gap">
+            <div class="panel-box-head">
+              <div>
+                <h2>Hiệu quả theo 3 Trụ cột (HolaHeart · HolaGreen · HolaConnect)</h2>
+                <p>Tổng hợp lượt xem thư mời, giữ chỗ và người có mặt thực tế ngoài đời theo từng mảng hoạt động.</p>
+              </div>
+            </div>
+            <div id="an-pillars-container" class="an-pillars-grid"></div>
+          </section>
+
+          <section class="panel-box an-section-gap">
+            <div class="panel-box-head">
+              <div>
+                <h2>Phễu Sự kiện: Xem trang → Đăng ký → Check-in thật</h2>
+                <p>Nối trực tiếp dữ liệu Telemetry với sổ đăng ký và check-in D1 để nhận diện buổi nào thu hút hoặc cần nhắc lịch Zalo sát giờ.</p>
+              </div>
+            </div>
+            <div id="an-event-funnel-container" class="table-wrap"></div>
+          </section>
+
+          <div class="an-two-col an-section-gap">
+            <section class="panel-box">
+              <div class="panel-box-head">
+                <div>
+                  <h2>Top trang được xem &amp; đọc sâu nhất</h2>
+                  <p>Thời gian ở lại thật, độ sâu cuộn, tỷ lệ thoát và tốc độ LCP trung bình từng đường dẫn.</p>
+                </div>
+              </div>
+              <div id="an-top-pages-container" class="table-wrap"></div>
+            </section>
+
+            <section class="panel-box">
+              <div class="panel-box-head">
+                <div>
+                  <h2>Hành động chuyển đổi (CTA Goals)</h2>
+                  <p>Các thao tác có chủ đích của người xem trên website công khai.</p>
+                </div>
+              </div>
+              <div id="an-goals-container"></div>
+            </section>
+          </div>
+        </div>
+
+        <!-- SUB-TAB 3: SPEED & CORE WEB VITALS -->
+        <div role="tabpanel" aria-labelledby="an-subtab-speed" data-an-panel="speed" hidden>
+          <div id="an-cwv-kpis" class="an-kpi-grid"></div>
+
+          <section class="panel-box an-section-gap">
+            <div class="panel-box-head">
+              <div>
+                <h2>Quét Google PageSpeed Insights v5 trực tiếp</h2>
+                <p>Đo điểm Performance, SEO, Accessibility, Best Practices của <code>holarise.org</code> và lưu lịch sử vào D1 để đối chiếu trước/sau tối ưu.</p>
+              </div>
+            </div>
+
+            <form class="an-psi-form" id="an-psi-form" novalidate>
+              <div class="field">
+                <label for="an-psi-url">Đường dẫn cần quét (thuộc holarise.org)</label>
+                <input id="an-psi-url" name="url" type="text" value="/" list="an-psi-url-presets" placeholder="/ hoặc /lich-hoat-dong/ hoặc /en/">
+                <datalist id="an-psi-url-presets">
+                  <option value="/"></option>
+                  <option value="/gioi-thieu/"></option>
+                  <option value="/lich-hoat-dong/"></option>
+                  <option value="/hanh-trinh/"></option>
+                  <option value="/tham-gia/"></option>
+                  <option value="/en/"></option>
+                </datalist>
+              </div>
+              <div class="field">
+                <label for="an-psi-strategy">Thiết bị mô phỏng</label>
+                <select id="an-psi-strategy" name="strategy">
+                  <option value="mobile">Mobile (4G · Ưu tiên Google &amp; Zalo)</option>
+                  <option value="desktop">Desktop</option>
+                </select>
+              </div>
+              <div class="an-psi-actions">
+                <button class="btn btn--primary" type="submit" id="btn-run-psi">Quét tốc độ ngay</button>
+              </div>
+            </form>
+
+            <div class="form-alert" id="an-psi-alert" role="status" hidden></div>
+            <div id="an-psi-latest-result" class="an-section-gap"></div>
+          </section>
+
+          <div class="an-two-col an-section-gap">
+            <section class="panel-box">
+              <div class="panel-box-head">
+                <div>
+                  <h2>Trang tải chậm nhất ngoài thực tế (RUM)</h2>
+                  <p>Sắp xếp theo thời gian hiển thị nội dung chính (LCP) từ máy người dùng thật.</p>
+                </div>
+              </div>
+              <div id="an-slow-pages-container" class="table-wrap"></div>
+            </section>
+
+            <section class="panel-box">
+              <div class="panel-box-head">
+                <div>
+                  <h2>Lịch sử các lần quét PageSpeed</h2>
+                  <p>Theo dõi biến động điểm số qua từng đợt nâng cấp giao diện.</p>
+                </div>
+              </div>
+              <div id="an-psi-history-container" class="table-wrap"></div>
+            </section>
+          </div>
+        </div>
+
+        <!-- SUB-TAB 4: SEO AUDIT & ALL-IN-ONE API HUB -->
+        <div role="tabpanel" aria-labelledby="an-subtab-seo-api" data-an-panel="seo-api" hidden>
+          <div class="an-two-col">
+            <section class="panel-box">
+              <div class="panel-box-head panel-box-head--row">
+                <div>
+                  <h2>Sức khỏe SEO kỹ thuật &amp; IndexNow</h2>
+                  <p>Kiểm tra trực tiếp từ D1 và đẩy toàn bộ URL mới lên Bing, ChatGPT Search, Copilot, DuckDuckGo chỉ bằng 1 chạm.</p>
+                </div>
+                <button class="btn btn--primary btn--sm" type="button" id="btn-ping-indexnow">Ping IndexNow ngay</button>
+              </div>
+              <div class="form-alert" id="an-indexnow-alert" role="status" hidden></div>
+              <div id="an-seo-health-container"></div>
+            </section>
+
+            <section class="panel-box">
+              <div class="panel-box-head panel-box-head--row">
+                <div>
+                  <h2>Google Search Console (Từ khóa &amp; Hiển thị)</h2>
+                  <p>Kéo trực tiếp Clicks, Impressions, CTR và Top từ khóa 28 ngày từ Google Search.</p>
+                </div>
+                <button class="btn btn--outline btn--sm" type="button" id="btn-load-gsc">Tải dữ liệu GSC</button>
+              </div>
+              <div class="form-alert" id="an-gsc-alert" role="status" hidden></div>
+              <div id="an-gsc-container"></div>
+            </section>
+          </div>
+
+          <section class="panel-box an-section-gap">
+            <div class="panel-box-head">
+              <div>
+                <h2>Cổng Cấu hình Tập trung Tất cả API &amp; Xác minh SEO</h2>
+                <p>Mọi mã xác minh thẻ <code>&lt;meta&gt;</code> và beacon sẽ tự động được bơm ở tầng Cloudflare Edge (không cần sửa code hay rebuild). Toàn bộ khóa bí mật được ẩn hoàn toàn sau khi lưu.</p>
+              </div>
+            </div>
+
+            <form class="admin-form" id="an-config-form" novalidate>
+              <label class="check-chip" style="margin-bottom: 14px;">
+                <input type="checkbox" id="an-cfg-telemetry" name="telemetry_enabled" checked>
+                <span><strong>Bật thu thập Telemetry nội bộ (Không cookie · Chuẩn Nghị định 13/2023)</strong> — đo lượt xem, thời gian ở lại, độ sâu cuộn, Zalo WebView và Core Web Vitals thực địa.</span>
+              </label>
+
+              <div class="form-row-2">
+                <div class="field">
+                  <label for="an-cfg-gverify">Google Site Verification (Mã nội dung <code>content="..."</code>)</label>
+                  <input id="an-cfg-gverify" name="google_site_verification" type="text" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Ví dụ: AbCdEf123456...">
+                  <span class="field-hint">Tự động gắn thẻ <code>&lt;meta name="google-site-verification"&gt;</code> vào mọi trang công khai.</span>
+                </div>
+                <div class="field">
+                  <label for="an-cfg-bverify">Bing Webmaster Verification (<code>msvalidate.01</code>)</label>
+                  <input id="an-cfg-bverify" name="bing_site_verification" type="text" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Mã xác minh Bing (tùy chọn)">
+                  <span class="field-hint">Hoặc import thẳng từ Google Search Console trong Bing Webmaster Tools.</span>
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="field">
+                  <label for="an-cfg-indexnow">IndexNow Key (tự phục vụ tại <code>/&lt;key&gt;.txt</code>)</label>
+                  <div class="an-input-with-btn">
+                    <input id="an-cfg-indexnow" name="indexnow_key" type="text" maxlength="128" autocomplete="off" spellcheck="false" placeholder="32 ký tự chữ và số">
+                    <button class="btn btn--outline btn--sm" type="button" id="btn-gen-indexnow">Tạo mã mới</button>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="an-cfg-cf-token">Cloudflare Web Analytics Token (tùy chọn)</label>
+                  <input id="an-cfg-cf-token" name="cf_web_analytics_token" type="text" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Dán token từ Cloudflare Dashboard nếu muốn đối chiếu">
+                </div>
+              </div>
+
+              <hr class="an-divider">
+
+              <div class="form-row-2">
+                <div class="field">
+                  <label for="an-cfg-psi-key">Google PageSpeed Insights API Key (tùy chọn tăng hạn mức)</label>
+                  <input id="an-cfg-psi-key" name="pagespeed_api_key" type="password" autocomplete="off" placeholder="Để trống nếu giữ khóa đã lưu hoặc dùng hạn mức miễn phí">
+                  <span class="field-hint" id="an-cfg-psi-hint">Trạng thái: Chưa gắn khóa riêng (vẫn quét được bằng hạn mức công khai).</span>
+                  <label class="an-inline-check"><input type="checkbox" id="an-cfg-clear-psi"> Xóa khóa PageSpeed đã lưu</label>
+                </div>
+                <div class="field">
+                  <label for="an-cfg-gsc-site">Google Search Console Property URL</label>
+                  <input id="an-cfg-gsc-site" name="gsc_site_url" type="text" maxlength="200" autocomplete="off" spellcheck="false" placeholder="sc-domain:holarise.org">
+                  <span class="field-hint">Dùng <code>sc-domain:holarise.org</code> (Domain property) hoặc <code>https://holarise.org/</code> (URL prefix).</span>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="an-cfg-gsc-json">Google Search Console Service Account JSON (tùy chọn — ký JWT trực tiếp trên Edge)</label>
+                <span class="field-hint" id="an-cfg-gsc-hint">Trạng thái: Chưa kết nối GSC API. Tạo Service Account trên Google Cloud → bật Search Console API → thêm email Service Account làm người dùng Restricted trong GSC → dán nội dung file JSON vào đây.</span>
+                <textarea id="an-cfg-gsc-json" name="gsc_service_account_json" rows="4" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder='{"type":"service_account","client_email":"...@....iam.gserviceaccount.com","private_key":"-----BEGIN PRIVATE KEY-----\n..."}'></textarea>
+                <label class="an-inline-check"><input type="checkbox" id="an-cfg-clear-gsc"> Ngắt kết nối &amp; xóa khóa GSC Service Account đã lưu</label>
+              </div>
+
+              <div class="form-alert" id="an-config-alert" role="status" hidden></div>
+
+              <div class="btn-row">
+                <button class="btn btn--primary" type="submit" id="btn-save-an-config">Lưu cấu hình SEO &amp; API</button>
+              </div>
+            </form>
           </section>
         </div>
       </section>
@@ -1986,6 +2278,7 @@
 
   <script src="/assets/js/passkey-client.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/admin-manager.js?v={{CACHE_BUST}}" defer></script>
+  <script src="/assets/js/admin-analytics.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/admin.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/admin-desk.js?v={{CACHE_BUST}}" defer></script>
   <script src="/assets/js/pwa.js?v={{CACHE_BUST}}" defer></script>

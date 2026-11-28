@@ -29,7 +29,7 @@
     reflections: [],
     refStatus: "pending",
     feedbacks: [],
-    fbFilter: { status: "new", eventId: "", category: "" },
+    fbFilter: { status: "new", sourceKind: "", eventId: "", category: "" },
     members: [],
     memberSearch: "",
     partners: [],
@@ -50,6 +50,7 @@
     posts: "Bài viết",
     inbox: "Hộp thoại & Trao quyền",
     community: "Cộng đồng",
+    analytics: "Phân tích & SEO",
     settings: "Giao diện & Cài đặt",
   };
 
@@ -97,8 +98,14 @@
   const FB_CAT_LABEL = {
     "cai-thien": "Cần cải thiện",
     "dong-vien": "Lời động viên",
-    "de-xuat": "Đề xuất chặng tới",
+    "de-xuat": "Đề xuất mới",
     khac: "Khác",
+  };
+
+  const FB_SOURCE_LABEL = {
+    site: "Góp ý trên web",
+    bug: "Báo lỗi kỹ thuật",
+    event: "Sau sự kiện",
   };
 
   const FB_STATUS_LABEL = {
@@ -918,6 +925,11 @@
 
     const params = new URLSearchParams(window.location.search);
     const initialTab = params.get("tab");
+    const initialSubtab = params.get("subtab");
+    if (initialTab === "community" && ["reflections", "members", "feedbacks"].includes(initialSubtab || "")) {
+      state.commSubtab = initialSubtab;
+      switchSubtab("data-comm-subtab", "data-comm-panel", state.commSubtab);
+    }
     state.regFilter.status = params.get("status") || "";
     state.regFilter.activity = params.get("activity") || "";
     state.regFilter.source = params.get("source") || "";
@@ -944,6 +956,8 @@
       if (state.regFilter.activity) params.set("activity", state.regFilter.activity);
       if (state.regFilter.source) params.set("source", state.regFilter.source);
       if (state.regFilter.q) params.set("q", state.regFilter.q);
+    } else if (state.activeTab === "community" && state.commSubtab && state.commSubtab !== "reflections") {
+      params.set("subtab", state.commSubtab);
     }
     history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
   }
@@ -983,6 +997,7 @@
     else if (tab === "posts") loadPosts();
     else if (tab === "inbox") window.__holariseAdminDesk?.open();
     else if (tab === "community") loadCommunity();
+    else if (tab === "analytics") window.__holariseAnalytics?.open();
     else if (tab === "settings") loadSettings();
     if (tab !== "inbox") window.__holariseAdminDesk?.pause();
   }
@@ -1012,7 +1027,11 @@
       state.overview = data;
 
       setBadgeCount(["badge-new-regs", "badge-new-regs-mobile"], data.registrations?.new || 0);
-      setBadgeCount(["badge-pending-refs", "badge-pending-refs-mobile"], data.reflections?.pending || 0);
+      setBadgeCount(
+        ["badge-pending-refs", "badge-pending-refs-mobile"],
+        Number(data.reflections?.pending || 0) + Number(data.feedbacks?.new || 0)
+      );
+      setBadgeCount(["badge-new-feedbacks"], data.feedbacks?.new || 0);
       setBadgeCount(["badge-pending-photos"], data.media?.pendingPhotoCount || 0);
       setBadgeCount(["badge-unread-chat"], data.chat?.unreadThreads || 0);
       setBadgeCount(["badge-open-tasks", "badge-open-tasks-mobile"], data.tasks?.open || 0);
@@ -1195,7 +1214,6 @@
               return `<tr>
                 <th>
                   ${esc(r.full_name)}
-                  ${r.bug_screenshot_url ? `<span class="badge badge--pending">Có ảnh lỗi</span>` : ""}
                   <span class="cell-sub">${esc(r.id)} · ${esc(formatVnDateTime(r.created_at))}</span>
                   ${r.organization ? `<span class="cell-sub">${esc(r.organization)}</span>` : ""}
                 </th>
@@ -1850,19 +1868,46 @@
     return `<div class="item-list">${items
       .map((fb) => {
         const badgeCls = fb.status === "resolved" ? "published" : fb.status === "read" ? "past" : "pending";
+        const srcCls = fb.sourceKind === "bug" ? "pending" : fb.sourceKind === "event" ? "published" : "new";
+        const sourceLabel = FB_SOURCE_LABEL[fb.sourceKind] || "Góp ý trên web";
+        const topicLabel = fb.topicLabel || FB_CAT_LABEL[fb.category] || fb.category;
         const authorLine = fb.isAnonymous
           ? "Ẩn danh (bảo mật)"
           : `${fb.authorName || "Thành viên"}${fb.authorContact ? ` · ${fb.authorContact}` : ""}`;
+        const contextHtml =
+          fb.sourceKind === "event"
+            ? ctx === "global"
+              ? `<span>${esc(fb.eventTitle)}</span>`
+              : ""
+            : fb.pageUrl
+              ? `<a class="quick-link" href="${esc(fb.pageUrl)}" target="_blank" rel="noopener">${esc(fb.pageUrl)} ↗</a>`
+              : "";
+        const attachHtml = fb.attachmentUrl
+          ? `<div style="margin-top:10px;">
+              <a href="${esc(fb.attachmentUrl)}" target="_blank" rel="noopener" style="display:inline-block;border:1px solid var(--line);border-radius:8px;overflow:hidden;max-width:260px;">
+                <img src="${esc(fb.attachmentUrl)}" alt="Ảnh đính kèm từ người góp ý" style="display:block;width:100%;max-height:170px;object-fit:cover;">
+              </a>
+            </div>`
+          : "";
+        const diagHtml = fb.diagnostics
+          ? `<details style="margin-top:8px;font-size:12px;color:var(--muted);">
+              <summary style="cursor:pointer;">Ngữ cảnh kỹ thuật</summary>
+              <pre style="margin:6px 0 0;padding:8px 10px;background:var(--surface-2, #f5f5f2);border-radius:8px;white-space:pre-wrap;font-size:11.5px;overflow:auto;">${esc(fb.diagnostics)}</pre>
+            </details>`
+          : "";
         return `<article class="item-row">
           <div class="item-body">
             <div class="item-meta">
               <span class="badge badge--${badgeCls}">${esc(FB_STATUS_LABEL[fb.status] || fb.status)}</span>
-              <span class="badge badge--new">${esc(FB_CAT_LABEL[fb.category] || fb.category)}</span>
-              ${ctx === "global" ? `<span>${esc(fb.eventTitle)}</span>` : ""}
+              <span class="badge badge--${srcCls}">${esc(sourceLabel)}</span>
+              <span class="badge badge--new">${esc(topicLabel)}</span>
+              ${contextHtml}
               <span>· ${esc(authorLine)}</span>
               <span>· ${esc(formatVnDateTime(fb.createdAt))}</span>
             </div>
             <p class="item-excerpt" style="color:var(--ink);white-space:pre-wrap;">${esc(fb.content)}</p>
+            ${attachHtml}
+            ${diagHtml}
             ${fb.adminNote ? `<p class="cell-sub" style="margin-top:6px;">Ghi chú nội bộ: ${esc(fb.adminNote)}</p>` : ""}
           </div>
           <div class="item-actions">
@@ -1883,10 +1928,14 @@
     try {
       const qs = new URLSearchParams();
       if (state.fbFilter.status) qs.set("status", state.fbFilter.status);
+      if (state.fbFilter.sourceKind) qs.set("sourceKind", state.fbFilter.sourceKind);
       if (state.fbFilter.eventId) qs.set("eventId", state.fbFilter.eventId);
       if (state.fbFilter.category) qs.set("category", state.fbFilter.category);
       const data = await api(`/api/admin/event-feedback?${qs.toString()}`);
       state.feedbacks = data.items || [];
+      if (data.counts && typeof data.counts.new !== "undefined") {
+        setBadgeCount(["badge-new-feedbacks"], data.counts.new);
+      }
 
       const evSel = $("#fb-event-filter");
       if (evSel && Array.isArray(data.events)) {
@@ -1905,7 +1954,7 @@
         renderEmptyState(
           box,
           "Chưa có góp ý nào trong bộ lọc này",
-          "Khi người tham dự gửi góp ý hoặc lời động viên từ Sân khấu Kỷ niệm sau sự kiện, nội dung sẽ tập trung tại đây."
+          "Mọi góp ý trên web, báo lỗi kỹ thuật và góp ý sau sự kiện sẽ tập trung gọn tại đây (kèm thông báo email về Ban Điều Phối)."
         );
         return;
       }
@@ -2832,6 +2881,7 @@
       btn.addEventListener("click", () => {
         state.commSubtab = btn.getAttribute("data-comm-subtab");
         switchSubtab("data-comm-subtab", "data-comm-panel", state.commSubtab);
+        syncUrlParams();
       });
     });
     $$("[data-set-subtab]").forEach((btn) => {
@@ -3284,6 +3334,10 @@
         $$("[data-fb-status]").forEach((b) => b.classList.toggle("is-active", b === btn));
         loadAdminFeedbacks();
       });
+    });
+    $("#fb-source-filter")?.addEventListener("change", (e) => {
+      state.fbFilter.sourceKind = e.target.value || "";
+      loadAdminFeedbacks();
     });
     $("#fb-event-filter")?.addEventListener("change", (e) => {
       state.fbFilter.eventId = e.target.value || "";

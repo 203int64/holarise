@@ -19,6 +19,7 @@
     posts: "posts.read",
     inbox: "inbox.read",
     community: "reflections.read",
+    analytics: "analytics.super_admin_only",
     settings: "settings.manage",
   };
 
