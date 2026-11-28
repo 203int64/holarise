@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=15ed3fbc8f">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=93d2272f53">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
 <body data-pwa-app-name="HolaRise Manager">
@@ -181,8 +181,9 @@
 
   <!-- MAIN ADMIN SHELL -->
   <div class="admin-shell" id="admin-shell" hidden>
-    <!-- Desktop Sidebar -->
-    <aside class="admin-sidebar" aria-label="Điều hướng quản trị">
+    <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+    <!-- Desktop Sidebar (also slides out as Mobile Drawer) -->
+    <aside class="admin-sidebar" id="admin-sidebar" aria-label="Điều hướng quản trị">
       <div class="sidebar-top">
         <a class="sidebar-brand" href="/">
           <img src="/assets/images/logo-mark.png" alt="HR" width="34" height="34">
@@ -264,7 +265,10 @@
     <!-- Mobile Top Header -->
     <header class="mobile-topbar">
       <div class="mobile-topbar-left">
-        <img src="/assets/images/logo-mark.png" alt="HR" width="30" height="30">
+        <button class="icon-btn" type="button" id="btn-mobile-drawer" aria-label="Mở danh mục các Ban &amp; Quản lý" aria-expanded="false" aria-controls="admin-sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <img src="/assets/images/logo-mark.png" alt="HR" width="28" height="28">
         <strong id="mobile-page-title">Tổng quan</strong>
       </div>
       <div class="mobile-topbar-right">
@@ -285,6 +289,9 @@
 
     <!-- Main Workspace -->
     <main class="admin-main" id="admin-main">
+      <!-- ROLE-ADAPTIVE WORKSPACE BANNER & LIVE ROLE PREVIEW (SUPER ADMIN) -->
+      <section class="mgr-workspace-banner" id="mgr-workspace-banner" hidden aria-label="Không gian làm việc theo vai trò"></section>
+
       <!-- PANEL 0: OVERVIEW DASHBOARD -->
       <section class="tab-panel" id="panel-overview" data-panel="overview">
         <div class="page-head">
@@ -919,10 +926,13 @@
             <section class="panel-box" id="box-users">
               <div class="panel-box-head panel-box-head--row">
                 <div>
-                  <h2>Tài khoản Ban Hình Ảnh (<code>/media/</code>)</h2>
-                  <p>Hệ thống khóa duy nhất 1 Quản trị chính (<code>203int64</code>). Danh sách dưới đây giúp quản lý, khóa hoặc thu hồi quyền tài khoản Ban Hình Ảnh.</p>
+                  <h2>Tài khoản Ban chuyên môn &amp; Phân quyền</h2>
+                  <p>Cấp tài khoản theo đúng Ban &amp; Vai (<code>Ban Sự Kiện</code>, <code>Ban Nội Dung</code>, <code>Ban Hình Ảnh</code>). Xem đầy đủ Ma trận Quyền &amp; Audit Log tại mục <strong>Đội ngũ &amp; Quyền</strong>.</p>
                 </div>
-                <button class="btn btn--outline btn--sm" type="button" id="btn-new-media-user">+ Cấp tài khoản Ban Hình Ảnh</button>
+                <div class="btn-row">
+                  <button class="btn btn--ghost btn--sm" type="button" data-go-tab="team">Mở Đội ngũ &amp; Quyền →</button>
+                  <button class="btn btn--primary btn--sm" type="button" id="btn-new-media-user">+ Cấp tài khoản Ban</button>
+                </div>
               </div>
               <div id="users-container"></div>
             </section>
@@ -931,29 +941,28 @@
       </section>
     </main>
 
-    <!-- Mobile Bottom Navigation (5 primary destinations; Settings & /media/ in Topbar) -->
+    <!-- Mobile Bottom Navigation (HolaRise Manager core hubs + full drawer menu) -->
     <nav class="mobile-bottom-nav" aria-label="Điều hướng chính trên điện thoại">
       <button class="bottom-nav-item is-active" type="button" data-tab="overview">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
         <span>Tổng quan</span>
       </button>
-      <button class="bottom-nav-item" type="button" data-tab="registrations">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <span>Đơn</span>
-        <span class="bottom-badge" id="badge-new-regs-mobile" hidden>0</span>
+      <button class="bottom-nav-item" type="button" data-tab="timeline">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+        <span>Timeline</span>
       </button>
-      <button class="bottom-nav-item" type="button" data-tab="events">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Sự kiện</span>
+      <button class="bottom-nav-item" type="button" data-tab="tasks">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Nhiệm vụ</span>
+        <span class="bottom-badge" id="badge-open-tasks-mobile" hidden>0</span>
       </button>
-      <button class="bottom-nav-item" type="button" data-tab="posts">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <span>Bài viết</span>
+      <button class="bottom-nav-item" type="button" data-tab="team">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Phân quyền</span>
       </button>
-      <button class="bottom-nav-item" type="button" data-tab="community">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span>Cộng đồng</span>
-        <span class="bottom-badge" id="badge-pending-refs-mobile" hidden>0</span>
+      <button class="bottom-nav-item" type="button" id="btn-mobile-more">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <span>Quản lý</span>
       </button>
     </nav>
   </div>
@@ -1804,10 +1813,10 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=15ed3fbc8f" defer></script>
-  <script src="/assets/js/admin-manager.js?v=15ed3fbc8f" defer></script>
-  <script src="/assets/js/admin.js?v=15ed3fbc8f" defer></script>
-  <script src="/assets/js/admin-desk.js?v=15ed3fbc8f" defer></script>
-  <script src="/assets/js/pwa.js?v=15ed3fbc8f" defer></script>
+  <script src="/assets/js/passkey-client.js?v=93d2272f53" defer></script>
+  <script src="/assets/js/admin-manager.js?v=93d2272f53" defer></script>
+  <script src="/assets/js/admin.js?v=93d2272f53" defer></script>
+  <script src="/assets/js/admin-desk.js?v=93d2272f53" defer></script>
+  <script src="/assets/js/pwa.js?v=93d2272f53" defer></script>
 </body>
 </html>

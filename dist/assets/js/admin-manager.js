@@ -50,9 +50,62 @@
     urgent: "Gấp",
   };
 
+  const ROLE_WORKSPACE_META = {
+    super_admin: {
+      code: "super_admin",
+      title: "Ban Điều Hành · Không gian Chủ nhiệm",
+      short: "Chủ nhiệm (Đầy đủ)",
+      subtitle: "Toàn quyền điều phối, phân quyền 4 Ban, xuất danh sách gốc và xem Nhật ký thao tác.",
+      permissions: ["*"],
+    },
+    event_ops: {
+      code: "event_ops",
+      title: "Ban Sự Kiện · Điều phối & Hiện trường",
+      short: "Ban Sự Kiện",
+      subtitle: "Quản lý lịch sự kiện, đơn đăng ký, hộp thoại đón khách, phân công CTV và bộ nhiệm vụ mẫu. Ẩn cài đặt hệ thống & xuất CSV SĐT gốc.",
+      permissions: [
+        "manager.access", "overview.read", "timeline.read", "tasks.read", "tasks.write", "tasks.assign",
+        "events.read", "events.write", "registrations.read", "registrations.write", "inbox.read",
+        "inbox.write", "members.read", "members.capabilities", "reflections.read", "media.read", "team.read",
+      ],
+    },
+    content_editor: {
+      code: "content_editor",
+      title: "Ban Nội Dung · Trưởng ban Biên tập",
+      short: "Trưởng ban ND",
+      subtitle: "Biên tập, duyệt xuất bản bài Hành trình, kiểm duyệt lưu bút và giao việc Ban Nội Dung. Ẩn danh sách SĐT đăng ký & cài đặt.",
+      permissions: [
+        "manager.access", "overview.read", "timeline.read", "tasks.read", "tasks.write", "tasks.assign",
+        "events.read", "posts.read", "posts.draft", "posts.publish", "reflections.read",
+        "reflections.moderate", "media.read", "media.upload", "team.read",
+      ],
+    },
+    content_ctv: {
+      code: "content_ctv",
+      title: "Ban Nội Dung · Góc CTV Viết bài",
+      short: "CTV Nội dung",
+      subtitle: "Soạn bản nháp bài Hành trình, gửi duyệt cho Trưởng ban Nội dung (khóa nút Công khai) và cập nhật nhiệm vụ được giao.",
+      permissions: [
+        "manager.access", "overview.read", "timeline.read", "tasks.read", "tasks.update_own",
+        "events.read", "posts.read", "posts.draft", "media.read", "team.read",
+      ],
+    },
+    media_manager: {
+      code: "media_manager",
+      title: "Ban Hình Ảnh · Trưởng ban Media & Safeguarding",
+      short: "Quản lý Ảnh",
+      subtitle: "Duyệt ảnh Safeguarding lên web tại /media/, theo dõi Timeline sự kiện và giao việc Ban Hình Ảnh. Ẩn đơn đăng ký & bài viết.",
+      permissions: [
+        "manager.access", "overview.read", "timeline.read", "tasks.read", "tasks.write", "tasks.assign",
+        "events.read", "media.read", "media.upload", "media.albums_write", "media.approve", "members.album_grant", "team.read",
+      ],
+    },
+  };
+
   const state = {
     user: null,
     isSoleAdmin: false,
+    previewRole: "", // super_admin UI preview mode only
     permissions: [],
     rolesCatalog: [],
     departments: ["Ban Điều Hành", "Ban Sự Kiện", "Ban Nội Dung", "Ban Hình Ảnh", "Ban Đối Ngoại"],
@@ -77,11 +130,31 @@
       .replace(/'/g, "&#x27;");
   }
 
+  function getEffectiveRole() {
+    if (state.isSoleAdmin && state.previewRole && ROLE_WORKSPACE_META[state.previewRole]) {
+      return state.previewRole;
+    }
+    return state.user?.canonicalRole || state.user?.role || (state.isSoleAdmin ? "super_admin" : "content_ctv");
+  }
+
+  function getEffectivePermissions() {
+    if (state.isSoleAdmin && state.previewRole && ROLE_WORKSPACE_META[state.previewRole]) {
+      return ROLE_WORKSPACE_META[state.previewRole].permissions;
+    }
+    if (state.isSoleAdmin) return ["*"];
+    return state.permissions;
+  }
+
+  function isEffectiveSuperAdmin() {
+    return state.isSoleAdmin && (!state.previewRole || state.previewRole === "super_admin");
+  }
+
   function hasPerm(perm) {
-    if (state.isSoleAdmin || state.permissions.includes("*")) return true;
+    const perms = getEffectivePermissions();
+    if (perms.includes("*")) return true;
     if (!perm) return false;
-    if (Array.isArray(perm)) return perm.some((p) => state.permissions.includes(p));
-    return state.permissions.includes(perm);
+    if (Array.isArray(perm)) return perm.some((p) => perms.includes(p));
+    return perms.includes(perm);
   }
 
   function formatDate(iso) {
@@ -138,7 +211,7 @@
 
   function canAccessTab(tab) {
     const req = TAB_PERMISSIONS[tab];
-    if (!req) return state.isSoleAdmin;
+    if (!req) return isEffectiveSuperAdmin();
     return hasPerm(req);
   }
 
@@ -151,13 +224,52 @@
     return "overview";
   }
 
-  function applyRoleShell(user, permissions, isSoleAdmin, statusPayload = {}) {
-    state.user = user || null;
-    state.isSoleAdmin = Boolean(isSoleAdmin);
-    state.permissions = Array.isArray(permissions) ? permissions : [];
-    if (Array.isArray(statusPayload.rolesCatalog)) state.rolesCatalog = statusPayload.rolesCatalog;
-    if (Array.isArray(statusPayload.departments)) state.departments = statusPayload.departments;
+  function renderWorkspaceBanner() {
+    const el = $("#mgr-workspace-banner");
+    if (!el || !state.user) return;
+    const effRole = getEffectiveRole();
+    const meta = ROLE_WORKSPACE_META[effRole] || ROLE_WORKSPACE_META.super_admin;
+    document.body.setAttribute("data-role-theme", effRole);
+    el.hidden = false;
 
+    const previewControls = state.isSoleAdmin
+      ? `<div class="mgr-preview-bar" role="group" aria-label="Xem thử giao diện theo từng vai trò">
+          <span class="mgr-preview-label">Xem thử giao diện vai:</span>
+          ${Object.values(ROLE_WORKSPACE_META)
+            .map(
+              (r) => `<button type="button" class="mgr-preview-pill ${effRole === r.code ? "is-active" : ""}" data-mgr-preview-role="${esc(r.code)}">${esc(r.short)}</button>`
+            )
+            .join("")}
+        </div>`
+      : "";
+
+    const previewNotice =
+      state.isSoleAdmin && state.previewRole && state.previewRole !== "super_admin"
+        ? `<div class="mgr-preview-notice">Đang mô phỏng giao diện của <strong>${esc(meta.short)}</strong> (chỉ ẩn/hiện UI để bạn kiểm tra trải nghiệm phân quyền). <button type="button" class="btn btn--outline btn--sm" data-mgr-preview-role="super_admin">Quay về Chủ nhiệm</button></div>`
+        : "";
+
+    el.innerHTML = `
+      <div class="mgr-banner-top">
+        <div class="mgr-banner-copy">
+          <span class="mgr-role-dot"></span>
+          <div>
+            <strong>${esc(meta.title)}</strong>
+            <p>${esc(meta.subtitle)}</p>
+          </div>
+        </div>
+        <div class="mgr-banner-quick">
+          ${canAccessTab("timeline") ? '<button type="button" class="btn btn--outline btn--sm" data-go-tab="timeline">Timeline</button>' : ""}
+          ${canAccessTab("tasks") ? '<button type="button" class="btn btn--outline btn--sm" data-go-tab="tasks">Nhiệm vụ</button>' : ""}
+          ${canAccessTab("team") ? '<button type="button" class="btn btn--primary btn--sm" data-go-tab="team">Phân quyền &amp; Ban</button>' : ""}
+        </div>
+      </div>
+      ${previewControls}
+      ${previewNotice}
+    `;
+  }
+
+  function applyRoleVisuals() {
+    const effSuper = isEffectiveSuperAdmin();
     // 1. Hide unauthorized nav items (sidebar + mobile bottom nav + quick topbar icons)
     $$("[data-tab]").forEach((btn) => {
       const tab = btn.getAttribute("data-tab");
@@ -169,14 +281,16 @@
       const el = $(sel);
       if (el) el.hidden = Boolean(shouldHide);
     };
-    setHidden("#btn-export-csv", !state.isSoleAdmin);
+    setHidden("#btn-export-csv", !effSuper);
     setHidden("#btn-new-event", !hasPerm("events.write"));
+    setHidden('[data-quick-action="new-event"]', !hasPerm("events.write"));
     setHidden("#btn-new-post", !hasPerm("posts.draft"));
+    setHidden('[data-quick-action="new-post"]', !hasPerm("posts.draft"));
     setHidden("#btn-new-task", !hasPerm("tasks.write"));
-    setHidden("#btn-new-staff-team", !state.isSoleAdmin);
-    setHidden("#btn-new-media-user", !state.isSoleAdmin);
-    setHidden("#box-audit-log", !state.isSoleAdmin);
-    setHidden("#box-team-accounts", !state.isSoleAdmin);
+    setHidden("#btn-new-staff-team", !effSuper);
+    setHidden("#btn-new-media-user", !effSuper);
+    setHidden("#box-audit-log", !effSuper);
+    setHidden("#box-team-accounts", !effSuper);
 
     // 3. Maker-Checker on Post Status select: CTV Content cannot choose 'published'
     const postStatusSel = $("#post-status");
@@ -192,7 +306,44 @@
       }
     }
 
-    // 4. Update sidebar role pill cleanly
+    renderWorkspaceBanner();
+  }
+
+  function setPreviewRole(roleCode) {
+    if (!state.isSoleAdmin) return;
+    state.previewRole = roleCode === "super_admin" ? "" : roleCode;
+    applyRoleVisuals();
+    const curActive = document.querySelector(".tab-panel:not([hidden])")?.getAttribute("data-panel") || "overview";
+    const targetTab = canAccessTab(curActive) ? curActive : getFirstAllowedTab("overview");
+    if (window.__holariseSwitchTab) {
+      window.__holariseSwitchTab(targetTab, false);
+    }
+  }
+
+  function closeMobileDrawer() {
+    $("#admin-sidebar")?.classList.remove("is-open");
+    const bd = $("#sidebar-backdrop");
+    if (bd) bd.hidden = true;
+    $("#btn-mobile-drawer")?.setAttribute("aria-expanded", "false");
+  }
+
+  function openMobileDrawer() {
+    $("#admin-sidebar")?.classList.add("is-open");
+    const bd = $("#sidebar-backdrop");
+    if (bd) bd.hidden = false;
+    $("#btn-mobile-drawer")?.setAttribute("aria-expanded", "true");
+  }
+
+  function applyRoleShell(user, permissions, isSoleAdmin, statusPayload = {}) {
+    state.user = user || null;
+    state.isSoleAdmin = Boolean(isSoleAdmin);
+    state.permissions = Array.isArray(permissions) ? permissions : [];
+    if (Array.isArray(statusPayload.rolesCatalog)) state.rolesCatalog = statusPayload.rolesCatalog;
+    if (Array.isArray(statusPayload.departments)) state.departments = statusPayload.departments;
+
+    applyRoleVisuals();
+
+    // Update sidebar role pill cleanly
     const nameEl = $("#sidebar-user-name");
     const metaEl = $("#sidebar-user-meta");
     if (nameEl && user) nameEl.textContent = user.name || "Thành viên Ban";
@@ -552,7 +703,7 @@
      ========================================================================= */
   async function loadTeamAndAudit() {
     renderRolesMatrix();
-    if (!state.isSoleAdmin) return;
+    if (!isEffectiveSuperAdmin()) return;
 
     const usersBox = $("#team-users-container");
     const auditBox = $("#audit-logs-container");
@@ -592,9 +743,10 @@
           { code: "media_ctv", label: "CTV Hình ảnh", department: "Ban Hình Ảnh", summary: "Tải ảnh/video vào hàng chờ duyệt tại Cổng Media (/media/)." },
         ];
 
+    const currentEffRole = getEffectiveRole();
     box.innerHTML = `<div class="mgr-roles-grid">${catalog
       .map((r) => {
-        const isCurrent = state.user?.canonicalRole === r.code;
+        const isCurrent = currentEffRole === r.code;
         return `<article class="mgr-role-card ${isCurrent ? "is-current" : ""}">
           <div class="mgr-role-head">
             <span class="mgr-chip">${esc(r.department)}</span>
@@ -672,6 +824,16 @@
     $("#btn-new-staff-team")?.addEventListener("click", () => {
       $("#btn-new-media-user")?.click();
     });
+    $("#btn-mobile-drawer")?.addEventListener("click", () => {
+      const isOpen = $("#admin-sidebar")?.classList.contains("is-open");
+      if (isOpen) closeMobileDrawer();
+      else openMobileDrawer();
+    });
+    $("#btn-mobile-more")?.addEventListener("click", () => openMobileDrawer());
+    $("#sidebar-backdrop")?.addEventListener("click", () => closeMobileDrawer());
+    $("#admin-sidebar")?.addEventListener("click", (e) => {
+      if (e.target.closest("[data-tab], a.nav-item")) closeMobileDrawer();
+    });
 
     $("#task-filter-dept")?.addEventListener("change", (e) => {
       state.taskFilter.department = e.target.value;
@@ -731,6 +893,12 @@
     });
 
     document.addEventListener("click", async (e) => {
+      const pvBtn = e.target.closest("[data-mgr-preview-role]");
+      if (pvBtn) {
+        setPreviewRole(pvBtn.getAttribute("data-mgr-preview-role") || "super_admin");
+        return;
+      }
+
       const pb = e.target.closest("[data-mgr-playbook]");
       if (pb) {
         const eventId = pb.getAttribute("data-mgr-playbook");
@@ -834,9 +1002,13 @@
     applyRoleShell,
     canAccessTab,
     getFirstAllowedTab,
+    getEffectiveRole,
+    isEffectiveSuperAdmin,
     hasPerm,
+    setPreviewRole,
     loadTimeline,
     loadTasks,
     loadTeamAndAudit,
+    closeMobileDrawer,
   };
 })();

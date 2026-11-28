@@ -986,6 +986,7 @@
     else if (tab === "settings") loadSettings();
     if (tab !== "inbox") window.__holariseAdminDesk?.pause();
   }
+  window.__holariseSwitchTab = switchTab;
 
   function switchSubtab(attr, panelAttr, value) {
     $$(`[${attr}]`).forEach((tabBtn) => {
@@ -1014,11 +1015,18 @@
       setBadgeCount(["badge-pending-refs", "badge-pending-refs-mobile"], data.reflections?.pending || 0);
       setBadgeCount(["badge-pending-photos"], data.media?.pendingPhotoCount || 0);
       setBadgeCount(["badge-unread-chat"], data.chat?.unreadThreads || 0);
-      setBadgeCount(["badge-open-tasks"], data.tasks?.open || 0);
+      setBadgeCount(["badge-open-tasks", "badge-open-tasks-mobile"], data.tasks?.open || 0);
+
+      const mgr = window.__holariseManager;
+      const can = (p) => (!mgr ? true : mgr.hasPerm(p));
+      const isSuper = !mgr ? true : mgr.isEffectiveSuperAdmin();
 
       const newRegs = Number(data.registrations?.new || 0);
       const pendingRefs = Number(data.reflections?.pending || 0);
       const pendingPhotos = Number(data.media?.pendingPhotoCount || 0);
+      const pendingPosts = Number(data.posts?.pending_review || 0);
+      const openTasks = Number(data.tasks?.open || 0);
+      const overdueTasks = Number(data.tasks?.overdue || 0);
       const upcomingEvents = data.events?.upcoming || [];
       const recentRegs = data.recentRegistrations || [];
       const integ = data.integrations || {};
@@ -1035,7 +1043,7 @@
                   <span class="overview-row-sub">${esc(ev.dateDisplay || ev.date)} · ${esc(ev.time || "")} · ${esc(seatText)}</span>
                 </div>
                 <div class="btn-row">
-                  <button class="btn btn--primary btn--sm" type="button" data-event-command="${esc(ev.id)}">Điều hành</button>
+                  ${can("events.write") ? `<button class="btn btn--primary btn--sm" type="button" data-event-command="${esc(ev.id)}">Điều hành</button>` : ""}
                   <button class="btn btn--outline btn--sm" type="button" data-copy-url="${esc(url)}">Copy link</button>
                 </div>
               </div>`;
@@ -1061,49 +1069,60 @@
             .join("")}</div>`
         : `<p class="page-sub">Chưa có đơn đăng ký nào.</p>`;
 
-      box.innerHTML = `
-        <div class="overview-kpis">
-          <button class="kpi-card ${newRegs > 0 ? "kpi-card--accent" : ""}" type="button" data-go-tab="registrations" data-go-status="new">
-            <span class="kpi-label">Đơn mới cần liên hệ</span>
-            <strong class="kpi-value">${newRegs}</strong>
-            <span class="kpi-foot">Tổng ${data.registrations?.all || 0} đơn · ${data.registrations?.attended || 0} đã tham gia</span>
-          </button>
-          <button class="kpi-card" type="button" data-go-tab="events">
-            <span class="kpi-label">Sự kiện sắp diễn ra</span>
-            <strong class="kpi-value">${data.events?.upcomingCount || 0}</strong>
-            <span class="kpi-foot">${data.events?.pastCount || 0} đã tổ chức · ${data.events?.draftCount || 0} nháp</span>
-          </button>
-          <button class="kpi-card ${pendingRefs > 0 || Number(data.feedbacks?.new || 0) > 0 ? "kpi-card--warn" : ""}" type="button" data-go-tab="community">
-            <span class="kpi-label">Lưu bút &amp; Góp ý mới</span>
-            <strong class="kpi-value">${pendingRefs + Number(data.feedbacks?.new || 0)}</strong>
-            <span class="kpi-foot">${pendingRefs} lưu bút · ${Number(data.feedbacks?.new || 0)} góp ý · ${data.members?.total || 0} thành viên</span>
-          </button>
-          <a class="kpi-card ${pendingPhotos > 0 ? "kpi-card--warn" : ""}" href="/media/">
-            <span class="kpi-label">Ảnh góp chờ duyệt (/media/)</span>
-            <strong class="kpi-value">${pendingPhotos}</strong>
-            <span class="kpi-foot">${data.media?.albumCount || 0} album · ${data.media?.photoCount || 0} ảnh · Mở cổng ↗</span>
-          </a>
-        </div>
+      const kpiCards = [];
+      if (can("tasks.read")) {
+        kpiCards.push(`<button class="kpi-card ${overdueTasks > 0 ? "kpi-card--warn" : openTasks > 0 ? "kpi-card--accent" : ""}" type="button" data-go-tab="tasks">
+          <span class="kpi-label">Nhiệm vụ đang mở</span>
+          <strong class="kpi-value">${openTasks}</strong>
+          <span class="kpi-foot">${overdueTasks} quá hạn · ${Number(data.tasks?.mine || 0)} giao cho bạn · ${Number(data.tasks?.done || 0)} đã xong</span>
+        </button>`);
+      }
+      if (can("registrations.read")) {
+        kpiCards.push(`<button class="kpi-card ${newRegs > 0 ? "kpi-card--accent" : ""}" type="button" data-go-tab="registrations" data-go-status="new">
+          <span class="kpi-label">Đơn mới cần liên hệ</span>
+          <strong class="kpi-value">${newRegs}</strong>
+          <span class="kpi-foot">Tổng ${data.registrations?.all || 0} đơn · ${data.registrations?.attended || 0} đã tham gia</span>
+        </button>`);
+      }
+      if (can("posts.read")) {
+        kpiCards.push(`<button class="kpi-card ${pendingPosts > 0 ? "kpi-card--warn" : ""}" type="button" data-go-tab="posts">
+          <span class="kpi-label">Bài Hành trình chờ duyệt</span>
+          <strong class="kpi-value">${pendingPosts}</strong>
+          <span class="kpi-foot">${Number(data.posts?.published || 0)} đã đăng · ${Number(data.posts?.draft || 0)} nháp</span>
+        </button>`);
+      }
+      if (can("events.read")) {
+        kpiCards.push(`<button class="kpi-card" type="button" data-go-tab="events">
+          <span class="kpi-label">Sự kiện sắp diễn ra</span>
+          <strong class="kpi-value">${data.events?.upcomingCount || 0}</strong>
+          <span class="kpi-foot">${data.events?.pastCount || 0} đã tổ chức · ${data.events?.draftCount || 0} nháp</span>
+        </button>`);
+      }
+      if (can("reflections.read")) {
+        kpiCards.push(`<button class="kpi-card ${pendingRefs > 0 || Number(data.feedbacks?.new || 0) > 0 ? "kpi-card--warn" : ""}" type="button" data-go-tab="community">
+          <span class="kpi-label">Lưu bút &amp; Góp ý mới</span>
+          <strong class="kpi-value">${pendingRefs + Number(data.feedbacks?.new || 0)}</strong>
+          <span class="kpi-foot">${pendingRefs} lưu bút · ${Number(data.feedbacks?.new || 0)} góp ý</span>
+        </button>`);
+      }
+      if (can("media.read")) {
+        kpiCards.push(`<a class="kpi-card ${pendingPhotos > 0 ? "kpi-card--warn" : ""}" href="/media/">
+          <span class="kpi-label">Ảnh chờ duyệt Safeguarding</span>
+          <strong class="kpi-value">${pendingPhotos}</strong>
+          <span class="kpi-foot">${data.media?.albumCount || 0} album · ${data.media?.photoCount || 0} ảnh · Mở /media/ ↗</span>
+        </a>`);
+      }
 
-        <div class="health-strip" aria-label="Trạng thái kết nối hệ thống">
-          <span class="health-pill ${integ.driveConfigured ? "is-ok" : "is-warn"}"><span class="health-dot"></span>Google Drive: ${integ.driveConfigured ? "Đã nối ảnh gốc" : "Đang dùng MEDIA_KV"}</span>
-          <span class="health-pill ${integ.gasConfigured ? "is-ok" : "is-warn"}"><span class="health-dot"></span>Google Sheets: ${integ.gasConfigured ? "Đang đồng bộ" : "Chưa cấu hình"}</span>
-          <span class="health-pill ${integ.mediaGateEnabled ? "is-ok" : "is-warn"}"><span class="health-dot"></span>PIN Ban Hình Ảnh: ${integ.mediaGateEnabled ? "Đang bật" : "Chưa đặt"}</span>
-        </div>
+      const healthStripHtml = isSuper
+        ? `<div class="health-strip" aria-label="Trạng thái kết nối hệ thống">
+            <span class="health-pill ${integ.driveConfigured ? "is-ok" : "is-warn"}"><span class="health-dot"></span>Google Drive: ${integ.driveConfigured ? "Đã nối ảnh gốc" : "Đang dùng MEDIA_KV"}</span>
+            <span class="health-pill ${integ.gasConfigured ? "is-ok" : "is-warn"}"><span class="health-dot"></span>Google Sheets: ${integ.gasConfigured ? "Đang đồng bộ" : "Chưa cấu hình"}</span>
+            <span class="health-pill ${integ.mediaGateEnabled ? "is-ok" : "is-warn"}"><span class="health-dot"></span>PIN Ban Hình Ảnh: ${integ.mediaGateEnabled ? "Đang bật" : "Chưa đặt"}</span>
+          </div>`
+        : "";
 
-        <div class="overview-grid">
-          <section class="panel-box">
-            <div class="panel-box-head panel-box-head--row">
-              <div>
-                <h2>Sự kiện sắp diễn ra</h2>
-                <p>Lấy số giữ chỗ trực tiếp từ bảng đơn đăng ký D1.</p>
-              </div>
-              <button class="btn btn--ghost btn--sm" type="button" data-go-tab="events">Tất cả →</button>
-            </div>
-            ${upcomingHtml}
-          </section>
-
-          <section class="panel-box">
+      const rightPanelHtml = can("registrations.read")
+        ? `<section class="panel-box">
             <div class="panel-box-head panel-box-head--row">
               <div>
                 <h2>Đơn đăng ký mới nhất</h2>
@@ -1112,7 +1131,38 @@
               <button class="btn btn--ghost btn--sm" type="button" data-go-tab="registrations">Tất cả →</button>
             </div>
             ${recentRegsHtml}
+          </section>`
+        : `<section class="panel-box">
+            <div class="panel-box-head panel-box-head--row">
+              <div>
+                <h2>Lối tắt nhanh của Ban bạn</h2>
+                <p>Chỉ hiển thị các đầu mục thuộc phạm vi vai trò hiện tại (che danh sách SĐT người tham dự).</p>
+              </div>
+            </div>
+            <div class="btn-row" style="flex-wrap:wrap;">
+              ${can("timeline.read") ? '<button class="btn btn--primary btn--sm" type="button" data-go-tab="timeline">Mở Timeline Sự kiện</button>' : ""}
+              ${can("tasks.read") ? '<button class="btn btn--outline btn--sm" type="button" data-go-tab="tasks">Xem Nhiệm vụ của tôi</button>' : ""}
+              ${can("posts.draft") ? '<button class="btn btn--outline btn--sm" type="button" data-go-tab="posts">Soạn / Duyệt Bài viết</button>' : ""}
+              ${can("media.read") ? '<a class="btn btn--outline btn--sm" href="/media/">Mở Kho Ban Hình Ảnh ↗</a>' : ""}
+              ${can("team.read") ? '<button class="btn btn--ghost btn--sm" type="button" data-go-tab="team">Xem Ma trận Quyền</button>' : ""}
+            </div>
+          </section>`;
+
+      box.innerHTML = `
+        <div class="overview-kpis">${kpiCards.join("")}</div>
+        ${healthStripHtml}
+        <div class="overview-grid">
+          <section class="panel-box">
+            <div class="panel-box-head panel-box-head--row">
+              <div>
+                <h2>Sự kiện sắp diễn ra</h2>
+                <p>Lấy số giữ chỗ trực tiếp từ bảng đơn đăng ký D1.</p>
+              </div>
+              ${can("events.read") ? '<button class="btn btn--ghost btn--sm" type="button" data-go-tab="events">Tất cả →</button>' : ""}
+            </div>
+            ${upcomingHtml}
           </section>
+          ${rightPanelHtml}
         </div>
       `;
     } catch (err) {
@@ -2649,20 +2699,20 @@
     const box = $("#users-container");
     if (!box) return;
     if (!state.users.length) {
-      renderEmptyState(box, "Chưa có tài khoản Ban Hình Ảnh nào", "Thành viên Ban Hình Ảnh có thể đăng ký tại /media/ bằng mã PIN hoặc bạn cấp trực tiếp tại đây.");
+      renderEmptyState(box, "Chưa có tài khoản Ban nào", "Bấm '+ Cấp tài khoản Ban' để phân quyền cho Ban Sự Kiện, Ban Nội Dung hoặc Ban Hình Ảnh.");
       return;
     }
     box.innerHTML = state.users
       .map((u) => {
         const isSelf = u.id === state.user?.id;
-        const roleLabel =
-          u.role === "super_admin" ? "Quản trị chính duy nhất" : u.role === "media" ? "Ban Hình Ảnh (/media/)" : "Tài khoản cũ (đã khóa /admin/)";
+        const roleLabel = u.roleLabel || u.roleShortLabel || u.role;
+        const deptLabel = u.department ? ` · ${u.department}` : "";
         return `<div class="user-row">
           <div>
             <strong>${esc(u.name)}</strong>
             ${isSelf ? '<span class="badge badge--new">Bạn</span>' : ""}
             <span class="badge badge--${u.is_active ? "published" : "cancelled"}">${u.is_active ? "Hoạt động" : "Đã khóa"}</span>
-            <span class="cell-sub">${esc(u.email)} · ${esc(roleLabel)}${u.last_login_at ? ` · Lần cuối: ${esc(formatVnDateTime(u.last_login_at))}` : ""}</span>
+            <span class="cell-sub">${esc(u.email)} · ${esc(roleLabel)}${esc(deptLabel)}${u.last_login_at ? ` · Lần cuối: ${esc(formatVnDateTime(u.last_login_at))}` : ""}</span>
           </div>
           ${
             !isSelf
