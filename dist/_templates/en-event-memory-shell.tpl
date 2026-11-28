@@ -52,7 +52,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" crossorigin></noscript>
 
   <script>(function(){var d=document.documentElement;if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){d.classList.add("is-standalone");try{if(sessionStorage.getItem("holarise_dock_k")==="0")d.classList.add("is-dock-compact");}catch(e){ } } })();</script>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=55f04d99ac">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=39366a2975">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -829,12 +829,9 @@
   <!-- Native HTML5 <dialog> Quick Assistant & Feedback Hub -->
   <dialog class="club-dialog club-dialog--auth club-dialog--hub" id="feedback-modal" closedby="any" aria-label="HolaRise Quick Ask and Feedback">
     <div class="dialog-inner auth-dialog-inner hub-dialog-inner">
-      <div class="hub-dialog-head">
-        <div class="hola-hub-tabs" role="tablist" aria-label="Choose assistant or feedback">
-          <button class="hola-hub-tab" type="button" role="tab" id="hub-tab-ask" aria-selected="false" aria-controls="hola-ask-pane" data-hub-tab="ask">Quick Ask</button>
-          <button class="hola-hub-tab is-active" type="button" role="tab" id="hub-tab-feedback" aria-selected="true" aria-controls="hola-feedback-pane" data-hub-tab="feedback">Feedback &amp; Bug</button>
-        </div>
-        <button class="hub-close-btn" type="button" data-modal-close aria-label="Close dialog">×</button>
+      <div class="hola-hub-tabs" role="tablist" aria-label="Choose assistant or feedback">
+        <button class="hola-hub-tab" type="button" role="tab" id="hub-tab-ask" aria-selected="false" aria-controls="hola-ask-pane" data-hub-tab="ask">Quick Ask</button>
+        <button class="hola-hub-tab is-active" type="button" role="tab" id="hub-tab-feedback" aria-selected="true" aria-controls="hola-feedback-pane" data-hub-tab="feedback">Feedback &amp; Bug</button>
       </div>
 
       <div class="hola-ask-pane" id="hola-ask-pane" role="tabpanel" aria-labelledby="hub-tab-ask" hidden>
@@ -1233,11 +1230,11 @@
 
   <span class="sr-only" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/motion.js?v=55f04d99ac" defer></script>
-  <script src="/assets/js/main.js?v=55f04d99ac" defer></script>
-  <script src="/assets/js/join-pass.js?v=55f04d99ac" defer></script>
-  <script src="/assets/js/member.js?v=55f04d99ac" defer></script>
-  <script src="/assets/js/pwa.js?v=55f04d99ac" defer></script>
-  <script src="/assets/js/telemetry.js?v=55f04d99ac" defer></script>
+  <script src="/assets/js/motion.js?v=39366a2975" defer></script>
+  <script src="/assets/js/main.js?v=39366a2975" defer></script>
+  <script src="/assets/js/join-pass.js?v=39366a2975" defer></script>
+  <script src="/assets/js/member.js?v=39366a2975" defer></script>
+  <script src="/assets/js/pwa.js?v=39366a2975" defer></script>
+  <script src="/assets/js/telemetry.js?v=39366a2975" defer></script>
 </body>
 </html>

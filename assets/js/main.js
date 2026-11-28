@@ -2968,9 +2968,130 @@
 
     dialog.addEventListener("paste", handleImagePaste);
 
+    // Draggable AssistiveTouch-style positioning for #feedback-pulse-fab (Pointer Events + edge snap)
+    var pulseFab = document.getElementById("feedback-pulse-fab");
+    var fabSuppressClickUntil = 0;
+    if (pulseFab) {
+      var FAB_POS_KEY = "holarise_fab_pos_v1";
+      var FAB_MARGIN = 12;
+      var FAB_SIZE = 26;
+      var dragActive = false;
+      var dragMoved = false;
+      var dragPointerId = null;
+      var startClientX = 0;
+      var startClientY = 0;
+      var startLeft = 0;
+      var startTop = 0;
+
+      function getFabBounds() {
+        var vw = window.innerWidth || 390;
+        var vh = window.innerHeight || 720;
+        var minTop = 64;
+        var isStandaloneMobile =
+          document.documentElement.classList.contains("is-standalone") && vw <= 820;
+        var bottomPad = isStandaloneMobile ? 84 : 16;
+        var maxTop = Math.max(minTop, vh - FAB_SIZE - bottomPad);
+        return {
+          vw: vw,
+          vh: vh,
+          minLeft: FAB_MARGIN,
+          maxLeft: Math.max(FAB_MARGIN, vw - FAB_SIZE - FAB_MARGIN),
+          minTop: minTop,
+          maxTop: maxTop,
+        };
+      }
+
+      function applyFabPos(left, top, snapAnimate) {
+        var b = getFabBounds();
+        var clampedL = Math.min(b.maxLeft, Math.max(b.minLeft, Math.round(left)));
+        var clampedT = Math.min(b.maxTop, Math.max(b.minTop, Math.round(top)));
+        pulseFab.classList.toggle("is-snapping", Boolean(snapAnimate));
+        pulseFab.style.left = clampedL + "px";
+        pulseFab.style.top = clampedT + "px";
+        pulseFab.style.bottom = "auto";
+        pulseFab.style.right = "auto";
+        pulseFab.classList.toggle("is-right-edge", clampedL + FAB_SIZE / 2 > b.vw / 2);
+        return { left: clampedL, top: clampedT, side: clampedL + FAB_SIZE / 2 > b.vw / 2 ? "right" : "left", yRatio: (clampedT - b.minTop) / Math.max(1, b.maxTop - b.minTop) };
+      }
+
+      function restoreFabPos() {
+        try {
+          var raw = localStorage.getItem(FAB_POS_KEY);
+          if (!raw) return;
+          var saved = JSON.parse(raw);
+          if (!saved || typeof saved.yRatio !== "number") return;
+          var b = getFabBounds();
+          var targetLeft = saved.side === "right" ? b.maxLeft : b.minLeft;
+          var targetTop = b.minTop + Math.min(1, Math.max(0, saved.yRatio)) * (b.maxTop - b.minTop);
+          applyFabPos(targetLeft, targetTop, false);
+        } catch (_) {}
+      }
+
+      restoreFabPos();
+      window.addEventListener("resize", function () {
+        if (!dragActive) restoreFabPos();
+      }, { passive: true });
+
+      pulseFab.addEventListener("pointerdown", function (ev) {
+        if (ev.button && ev.button !== 0) return;
+        var rect = pulseFab.getBoundingClientRect();
+        dragActive = true;
+        dragMoved = false;
+        dragPointerId = ev.pointerId;
+        startClientX = ev.clientX;
+        startClientY = ev.clientY;
+        startLeft = rect.left;
+        startTop = rect.top;
+        pulseFab.classList.remove("is-snapping");
+        if (typeof pulseFab.setPointerCapture === "function") {
+          try { pulseFab.setPointerCapture(ev.pointerId); } catch (_) {}
+        }
+      });
+
+      pulseFab.addEventListener("pointermove", function (ev) {
+        if (!dragActive || ev.pointerId !== dragPointerId) return;
+        var dx = ev.clientX - startClientX;
+        var dy = ev.clientY - startClientY;
+        if (!dragMoved && Math.hypot(dx, dy) >= 6) {
+          dragMoved = true;
+          pulseFab.classList.add("is-dragging");
+        }
+        if (dragMoved) {
+          applyFabPos(startLeft + dx, startTop + dy, false);
+        }
+      });
+
+      function finishFabDrag(ev) {
+        if (!dragActive || (ev && ev.pointerId !== dragPointerId)) return;
+        dragActive = false;
+        pulseFab.classList.remove("is-dragging");
+        if (typeof pulseFab.releasePointerCapture === "function" && dragPointerId !== null) {
+          try { pulseFab.releasePointerCapture(dragPointerId); } catch (_) {}
+        }
+        dragPointerId = null;
+        if (dragMoved) {
+          fabSuppressClickUntil = Date.now() + 260;
+          var rect = pulseFab.getBoundingClientRect();
+          var b = getFabBounds();
+          var snapLeft = rect.left + FAB_SIZE / 2 > b.vw / 2 ? b.maxLeft : b.minLeft;
+          var snapped = applyFabPos(snapLeft, rect.top, true);
+          try {
+            localStorage.setItem(FAB_POS_KEY, JSON.stringify({ side: snapped.side, yRatio: snapped.yRatio }));
+          } catch (_) {}
+        }
+      }
+
+      pulseFab.addEventListener("pointerup", finishFabDrag);
+      pulseFab.addEventListener("pointercancel", finishFabDrag);
+    }
+
     document.addEventListener("click", function (e) {
       var trigger = e.target.closest("[data-open-feedback-modal]");
       if (!trigger) return;
+      if (trigger.id === "feedback-pulse-fab" && Date.now() < fabSuppressClickUntil) {
+        e.preventDefault();
+        return;
+      }
       var isBugQuick = trigger.getAttribute("data-feedback-bug") === "1";
       var preferredTab = trigger.getAttribute("data-open-feedback-modal") === "ask" ? "ask" : "feedback";
       openFeedbackDialog({ bugMode: isBugQuick, tab: preferredTab });
