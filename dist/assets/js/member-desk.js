@@ -33,11 +33,14 @@
   var checkinSearchEl = document.getElementById("member-checkin-search");
   var checkinListEl = document.getElementById("member-checkin-list");
   var closeCheckinBtn = document.getElementById("btn-close-member-checkin");
+  var tasksSection = document.getElementById("member-tasks-section");
+  var tasksListEl = document.getElementById("member-tasks-list");
 
   var state = {
     threads: [],
     companionThreads: [],
     capabilities: [],
+    assignedTasks: [],
     activeThreadId: "",
     activeMessages: [],
     lastCreatedAt: "",
@@ -78,8 +81,80 @@
     state.capabilities.forEach(function (c) {
       if (c.status === "pending_accept") unread += 1;
     });
+    state.assignedTasks.forEach(function (tk) {
+      if (tk.status !== "done") unread += 1;
+    });
     badgeEl.hidden = unread <= 0;
     badgeEl.textContent = String(unread);
+  }
+
+  function renderAssignedTasks() {
+    if (!tasksSection || !tasksListEl) return;
+    if (!state.assignedTasks.length) {
+      tasksSection.hidden = true;
+      tasksListEl.innerHTML = "";
+      return;
+    }
+    tasksSection.hidden = false;
+    var statusMap = {
+      todo: t("Cần làm", "To do"),
+      in_progress: t("Đang làm", "In progress"),
+      review: t("Chờ duyệt", "In review"),
+      done: t("Hoàn thành", "Done"),
+    };
+    var nextMap = { todo: "in_progress", in_progress: "review", review: "done", done: "todo" };
+    tasksListEl.innerHTML = state.assignedTasks
+      .map(function (tk) {
+        var nextSt = nextMap[tk.status] || "done";
+        return (
+          '<article class="member-cap-card' +
+          (tk.status === "done" ? "" : " is-pending") +
+          '">' +
+          '<div class="member-cap-top"><span class="cap-status-pill">' +
+          esc(statusMap[tk.status] || tk.status) +
+          "</span>" +
+          (tk.eventTitle ? '<span class="cap-scope-pill">' + esc(tk.eventTitle) + "</span>" : "") +
+          "</div>" +
+          "<h3>" +
+          esc(tk.title) +
+          "</h3>" +
+          (tk.description ? "<p>" + esc(tk.description) + "</p>" : "") +
+          '<div class="member-cap-actions">' +
+          '<button type="button" class="btn btn--primary btn--sm" data-member-task-id="' +
+          esc(tk.id) +
+          '" data-member-task-next="' +
+          esc(nextSt) +
+          '">' +
+          esc(t("Chuyển: ", "Move to: ")) +
+          esc(statusMap[nextSt] || nextSt) +
+          "</button>" +
+          (tk.zaloUrl
+            ? '<a class="btn btn--outline btn--sm" href="' +
+              esc(tk.zaloUrl) +
+              '" target="_blank" rel="noopener">' +
+              esc(t("Nhóm Zalo ↗", "Zalo Group ↗")) +
+              "</a>"
+            : "") +
+          "</div>" +
+          "</article>"
+        );
+      })
+      .join("");
+  }
+
+  function loadAssignedTasks() {
+    fetch("/api/member/tasks", { credentials: "same-origin" })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (data) {
+        if (data && data.ok) {
+          state.assignedTasks = data.items || [];
+          renderAssignedTasks();
+          updateBadge();
+        }
+      })
+      .catch(function () {});
   }
 
   function renderCapabilities() {
@@ -596,6 +671,29 @@
       return;
     }
 
+    var taskBtn = e.target.closest("[data-member-task-id]");
+    if (taskBtn) {
+      var taskId = taskBtn.getAttribute("data-member-task-id");
+      var nextStatus = taskBtn.getAttribute("data-member-task-next");
+      taskBtn.disabled = true;
+      fetch("/api/member/tasks", {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId: taskId, status: nextStatus }),
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          if (data && data.ok) loadAssignedTasks();
+        })
+        .finally(function () {
+          taskBtn.disabled = false;
+        });
+      return;
+    }
+
     var checkinBtn = e.target.closest("[data-open-checkin]");
     if (checkinBtn) {
       openCheckinPanel(checkinBtn.getAttribute("data-open-checkin"));
@@ -709,11 +807,13 @@
   window.__holariseMemberDesk = {
     open: function () {
       loadDesk();
+      loadAssignedTasks();
       startPoll();
     },
     pause: stopPoll,
     refreshBadge: function () {
       loadDesk();
+      loadAssignedTasks();
     },
   };
 })();

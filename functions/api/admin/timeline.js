@@ -31,7 +31,7 @@ export async function onRequestGet(context) {
       .catch(() => ({ results: [] })),
     db
       .prepare(
-        `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date, COALESCE(e.slug, '') AS event_slug
+        `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date
          FROM ops_tasks t
          LEFT JOIN events e ON e.id = t.event_id
          ORDER BY CASE WHEN t.due_at = '' THEN 1 ELSE 0 END ASC, t.due_at ASC, t.created_at DESC

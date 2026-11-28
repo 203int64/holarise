@@ -155,7 +155,7 @@ export async function onRequestPatch(context) {
 
   const updated = await db
     .prepare(
-      `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date, COALESCE(e.slug, '') AS event_slug
+      `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date
        FROM ops_tasks t LEFT JOIN events e ON e.id = t.event_id WHERE t.id = ?`
     )
     .bind(id)

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>HolaRise CMS – Cổng Điều Phối &amp; Xuất Bản Nội Dung</title>
-  <meta name="description" content="Không gian điều phối sự kiện, xuất bản tường thuật và quản lý đăng ký dành cho Quản trị viên Cộng đồng Thanh niên Hòa Lạc – HolaRise.">
+  <title>HolaRise Manager – Trung tâm Điều phối, Timeline &amp; Phân quyền</title>
+  <meta name="description" content="Trung tâm điều phối sự kiện, timeline, nhiệm vụ, phân quyền theo ban và xuất bản nội dung của Cộng đồng Thanh niên Hòa Lạc – HolaRise.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0B110F">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Hola CMS">
+  <meta name="apple-mobile-web-app-title" content="Hola Manager">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/admin-manifest.webmanifest">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -38,10 +38,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/admin.css?v=e283d1d672">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=15ed3fbc8f">
   <script>(function(){if((window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true){document.documentElement.classList.add("is-standalone");} })();</script>
 </head>
-<body data-pwa-app-name="HolaRise CMS">
+<body data-pwa-app-name="HolaRise Manager">
   <a class="skip-link" href="#admin-main">Chuyển tới khu vực quản trị</a>
 
   <div class="visually-hidden" id="aria-announcer" aria-live="polite"></div>
@@ -58,14 +58,14 @@
             <span>HolaRise · Hòa Lạc</span>
           </div>
           <div class="vault-aside-copy">
-            <p class="vault-kicker">Quản trị hệ thống</p>
+            <p class="vault-kicker">HolaRise Manager</p>
             <h2>Điều phối gọn gàng, minh bạch từng buổi gặp.</h2>
-            <p class="vault-quote">Một bảng điều khiển thống nhất cho thư mời sự kiện, danh sách giữ chỗ, bài tường thuật và lưu bút thành viên.</p>
+            <p class="vault-quote">Một không gian thống nhất cho Timeline, Nhiệm vụ theo Ban, Phân quyền nội bộ, Thư mời sự kiện và Lưu bút thành viên.</p>
           </div>
           <ul class="vault-pillars">
-            <li>Cập nhật tức thì lên Edge SSR &amp; Cloudflare D1</li>
-            <li>Khóa quyền truy cập duy nhất cho Quản trị chính</li>
-            <li>Liên thông trực tiếp với Cổng Ban Hình Ảnh (/media/)</li>
+            <li>Phân quyền rõ ràng theo 4 Ban &amp; quy trình duyệt hai lớp</li>
+            <li>Timeline hợp nhất và bộ nhiệm vụ mẫu cho từng sự kiện</li>
+            <li>Liên thông trực tiếp với Cổng Ban Hình Ảnh (/media/) và CTV (/tham-gia/)</li>
           </ul>
         </div>
       </aside>
@@ -82,9 +82,9 @@
 
           <!-- SIGN-IN VIEW (INITIALIZED DB) -->
           <div id="auth-signin-box">
-            <span class="vault-step-badge vault-step-badge--ok">Quản trị chính</span>
-            <h1 class="vault-title" id="auth-heading">Đăng nhập HolaRise CMS</h1>
-            <p class="vault-subtitle">Xác thực nhanh bằng Face ID / Touch ID hoặc đăng nhập bằng tài khoản quản trị duy nhất.</p>
+            <span class="vault-step-badge vault-step-badge--ok">HolaRise Manager</span>
+            <h1 class="vault-title" id="auth-heading">Đăng nhập HolaRise Manager</h1>
+            <p class="vault-subtitle">Dành cho Ban Điều Hành, Ban Sự Kiện, Ban Nội Dung và Ban Hình Ảnh — giao diện tự hiển thị đúng phạm vi công việc của bạn.</p>
 
             <button class="btn btn--primary btn--full btn--lg" type="button" id="btn-passkey-login">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3H5a2 2 0 0 0-2 2v2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 21h2a2 2 0 0 0 2-2v-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M9 10v.01"/><path d="M15 10v.01"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg>
@@ -187,8 +187,8 @@
         <a class="sidebar-brand" href="/">
           <img src="/assets/images/logo-mark.png" alt="HR" width="34" height="34">
           <div>
-            <strong>HolaRise CMS</strong>
-            <span>Hòa Lạc · Quản trị</span>
+            <strong>HolaRise Manager</strong>
+            <span>Điều phối · Phân quyền</span>
           </div>
         </a>
       </div>
@@ -197,6 +197,19 @@
         <button class="nav-item is-active" type="button" data-tab="overview">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
           <span>Tổng quan</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="timeline">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+          <span>Timeline</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="tasks">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <span>Nhiệm vụ</span>
+          <span class="nav-badge" id="badge-open-tasks" hidden>0</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="team">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Đội ngũ &amp; Quyền</span>
         </button>
         <button class="nav-item" type="button" data-tab="registrations">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -287,6 +300,106 @@
         </div>
 
         <div id="overview-container"></div>
+      </section>
+
+      <!-- PANEL 0B: UNIFIED TIMELINE -->
+      <section class="tab-panel" id="panel-timeline" data-panel="timeline" hidden>
+        <div class="page-head">
+          <div>
+            <h1>Timeline &amp; Tiến độ Sự kiện</h1>
+            <p class="page-sub">Dòng thời gian hợp nhất từ lịch sự kiện, hạn chót nhiệm vụ theo Ban và hàng chờ duyệt bài/ảnh.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn--outline" type="button" id="btn-refresh-timeline">Làm mới</button>
+            <button class="btn btn--primary" type="button" data-go-tab="tasks">Mở bảng Nhiệm vụ</button>
+          </div>
+        </div>
+        <div id="timeline-container"></div>
+      </section>
+
+      <!-- PANEL 0C: OPS TASKS & PLAYBOOKS -->
+      <section class="tab-panel" id="panel-tasks" data-panel="tasks" hidden>
+        <div class="page-head">
+          <div>
+            <h1>Nhiệm vụ &amp; Phân công</h1>
+            <p class="page-sub">Giao việc cho Ban chuyên môn hoặc CTV sự kiện (/tham-gia/), đổi trạng thái 1 chạm và gắn link Nhóm Zalo.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn--primary" type="button" id="btn-new-task">+ Giao nhiệm vụ</button>
+          </div>
+        </div>
+
+        <div class="mgr-stats-strip" id="tasks-stats-strip"></div>
+
+        <div class="toolbar">
+          <select id="task-filter-dept" aria-label="Lọc theo Ban">
+            <option value="">Tất cả các Ban</option>
+          </select>
+          <select id="task-filter-event" aria-label="Lọc theo Sự kiện">
+            <option value="">Tất cả sự kiện</option>
+          </select>
+          <select id="task-filter-status" aria-label="Lọc theo Trạng thái">
+            <option value="">Mọi trạng thái</option>
+            <option value="todo">Cần làm</option>
+            <option value="in_progress">Đang làm</option>
+            <option value="review">Chờ duyệt</option>
+            <option value="done">Hoàn thành</option>
+          </select>
+        </div>
+
+        <div id="tasks-container"></div>
+      </section>
+
+      <!-- PANEL 0D: TEAM, ROLES MATRIX & AUDIT LOG -->
+      <section class="tab-panel" id="panel-team" data-panel="team" hidden>
+        <div class="page-head">
+          <div>
+            <h1>Đội ngũ, Phân quyền &amp; Nhật ký</h1>
+            <p class="page-sub">Ma trận 4 Ban công tác × 6 Vai hệ thống, quản lý tài khoản Ban và Nhật ký thao tác minh bạch.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn--primary" type="button" id="btn-new-staff-team">+ Cấp tài khoản Ban</button>
+          </div>
+        </div>
+
+        <section class="panel-box" style="margin-bottom:16px;">
+          <div class="panel-box-head">
+            <div>
+              <h2>Khung 4 Ban &amp; Vai trò hệ thống</h2>
+              <p>Mỗi tài khoản chỉ thấy và thực hiện đúng quyền trong phạm vi Ban phụ trách; CTV sự kiện dùng thẻ quyền có hạn ngay tại <code>/tham-gia/</code>.</p>
+            </div>
+          </div>
+          <div id="roles-matrix-container"></div>
+        </section>
+
+        <section class="panel-box" id="box-team-accounts" style="margin-bottom:16px;">
+          <div class="panel-box-head">
+            <div>
+              <h2>Danh sách tài khoản Ban chuyên môn</h2>
+              <p>Chủ nhiệm (<code>203int64</code>) cấp tài khoản, đổi Ban/Vai, khóa hoặc thu hồi quyền tức thì.</p>
+            </div>
+          </div>
+          <div id="team-users-container"></div>
+        </section>
+
+        <section class="panel-box" id="box-audit-log">
+          <div class="panel-box-head panel-box-head--row">
+            <div>
+              <h2>Nhật ký thao tác (Audit Log)</h2>
+              <p>Truy vết các thao tác phân quyền, tạo/duyệt bài, duyệt ảnh, nhiệm vụ và xuất dữ liệu.</p>
+            </div>
+            <select id="audit-filter-action" aria-label="Lọc loại thao tác" style="max-width:220px;">
+              <option value="">Tất cả thao tác</option>
+              <option value="task.">Nhiệm vụ &amp; Playbook</option>
+              <option value="post.">Bài viết &amp; Duyệt bài</option>
+              <option value="media.">Duyệt ảnh Safeguarding</option>
+              <option value="user.">Phân quyền nhân sự</option>
+              <option value="registrations.">Xuất dữ liệu đăng ký</option>
+              <option value="auth.">Đăng nhập</option>
+            </select>
+          </div>
+          <div id="audit-logs-container"></div>
+        </section>
       </section>
 
       <!-- PANEL 1: REGISTRATIONS -->
@@ -1081,6 +1194,7 @@
             <label for="post-status">Trạng thái xuất bản</label>
             <select id="post-status" name="status">
               <option value="published">Công khai ngay trên web</option>
+              <option value="pending_review">Gửi duyệt Trưởng ban Nội dung</option>
               <option value="draft">Lưu nháp (ẩn)</option>
             </select>
           </div>
@@ -1220,15 +1334,15 @@
     </div>
   </dialog>
 
-  <!-- DIALOG 4: ADD MEDIA TEAM ACCOUNT (ONLY ROLE='media' FOR /media/) -->
+  <!-- DIALOG 4: ADD STAFF ACCOUNT (MULTI-ROLE RBAC) -->
   <dialog class="cms-dialog" id="media-user-dialog" closedby="any" aria-labelledby="media-user-dialog-title">
     <div class="dialog-shell">
       <div class="dialog-head">
-        <h2 id="media-user-dialog-title">Cấp tài khoản Ban Hình Ảnh (/media/)</h2>
+        <h2 id="media-user-dialog-title">Cấp tài khoản Ban chuyên môn</h2>
         <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
       </div>
       <form class="admin-form dialog-body" id="media-user-form" novalidate>
-        <p class="field-hint" style="margin:0;">Tài khoản này chỉ dùng cho <code>/media/</code> (tải ảnh &amp; duyệt album), không có quyền truy cập <code>/admin/</code>.</p>
+        <p class="field-hint" style="margin:0;">Chọn đúng Vai trò &amp; Ban công tác. Hệ thống tự ẩn các khu vực ngoài phạm vi quyền.</p>
         <div class="field">
           <label for="u-name">Họ và tên <span aria-hidden="true">*</span></label>
           <input id="u-name" name="name" type="text" required minlength="2" placeholder="Ví dụ: Phạm Minh Tuấn">
@@ -1237,6 +1351,28 @@
           <label for="u-email">Email đăng nhập <span aria-hidden="true">*</span></label>
           <input id="u-email" name="email" type="email" autocorrect="off" autocapitalize="none" spellcheck="false" required placeholder="tuan@holarise.org">
         </div>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="u-role">Vai trò hệ thống <span aria-hidden="true">*</span></label>
+            <select id="u-role" name="role">
+              <option value="event_ops">Điều phối Sự kiện (Ban Sự Kiện)</option>
+              <option value="content_editor">Trưởng ban Nội dung (duyệt &amp; đăng bài)</option>
+              <option value="content_ctv">CTV Nội dung (soạn &amp; gửi duyệt)</option>
+              <option value="media_manager">Trưởng ban Hình ảnh (duyệt ảnh Safeguarding)</option>
+              <option value="media_ctv" selected>CTV Hình ảnh (chỉ Cổng /media/)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="u-department">Ban công tác</label>
+            <select id="u-department" name="department">
+              <option value="Ban Sự Kiện">Ban Sự Kiện</option>
+              <option value="Ban Nội Dung">Ban Nội Dung</option>
+              <option value="Ban Hình Ảnh" selected>Ban Hình Ảnh</option>
+              <option value="Ban Đối Ngoại">Ban Đối Ngoại</option>
+              <option value="Ban Điều Hành">Ban Điều Hành</option>
+            </select>
+          </div>
+        </div>
         <div class="field">
           <label for="u-password">Mật khẩu tạm (tối thiểu 8 ký tự) <span aria-hidden="true">*</span></label>
           <input id="u-password" name="password" type="password" autocomplete="new-password" required minlength="8">
@@ -1244,7 +1380,86 @@
         <div class="form-alert" id="user-alert" role="alert" hidden></div>
         <div class="dialog-foot">
           <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
-          <button class="btn btn--primary" type="submit">Tạo tài khoản /media/</button>
+          <button class="btn btn--primary" type="submit">Cấp tài khoản</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 4B: CREATE / EDIT OPS TASK -->
+  <dialog class="cms-dialog" id="task-dialog" closedby="any" aria-labelledby="task-dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="task-dialog-title">Giao nhiệm vụ mới</h2>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Đóng cửa sổ">×</button>
+      </div>
+      <form class="admin-form dialog-body" id="task-form" novalidate>
+        <input type="hidden" id="task-id" name="id">
+        <div class="field">
+          <label for="task-title">Tên nhiệm vụ <span aria-hidden="true">*</span></label>
+          <input id="task-title" name="title" type="text" required minlength="3" maxlength="200" placeholder="Ví dụ: Khảo sát không gian &amp; chốt sơ đồ ghế ngồi">
+        </div>
+        <div class="field">
+          <label for="task-description">Mô tả / Tiêu chí hoàn thành</label>
+          <textarea id="task-description" name="description" rows="3" maxlength="1500" placeholder="Ghi rõ đầu việc cụ thể, địa mốc hoặc lưu ý an toàn..."></textarea>
+        </div>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="task-event-id">Gắn với Sự kiện</label>
+            <select id="task-event-id" name="eventId"></select>
+          </div>
+          <div class="field">
+            <label for="task-phase">Chặng trong Timeline</label>
+            <select id="task-phase" name="phase">
+              <option value="before">Trước buổi gặp</option>
+              <option value="during">Trong buổi gặp</option>
+              <option value="after">Sau buổi gặp</option>
+              <option value="general">Việc chung</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="task-department">Ban phụ trách</label>
+            <select id="task-department" name="department"></select>
+          </div>
+          <div class="field">
+            <label for="task-assignee">Giao cho (Ban hoặc CTV)</label>
+            <select id="task-assignee" name="assignee"></select>
+          </div>
+        </div>
+        <div class="form-row-3">
+          <div class="field">
+            <label for="task-due-at">Hạn chót</label>
+            <input id="task-due-at" name="dueAt" type="date">
+          </div>
+          <div class="field">
+            <label for="task-priority">Mức ưu tiên</label>
+            <select id="task-priority" name="priority">
+              <option value="low">Thấp</option>
+              <option value="normal" selected>Bình thường</option>
+              <option value="high">Quan trọng</option>
+              <option value="urgent">Gấp</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="task-status">Trạng thái</label>
+            <select id="task-status" name="status">
+              <option value="todo">Cần làm</option>
+              <option value="in_progress">Đang làm</option>
+              <option value="review">Chờ duyệt</option>
+              <option value="done">Hoàn thành</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="task-zalo-url">Link Nhóm Zalo trao đổi (tùy chọn)</label>
+          <input id="task-zalo-url" name="zaloUrl" type="url" placeholder="https://zalo.me/g/...">
+        </div>
+        <div class="form-alert" id="task-alert" role="alert" hidden></div>
+        <div class="dialog-foot">
+          <button class="btn btn--ghost" type="button" data-close-dialog>Hủy</button>
+          <button class="btn btn--primary" type="submit">Lưu nhiệm vụ</button>
         </div>
       </form>
     </div>
@@ -1589,9 +1804,10 @@
   </dialog>
   <span class="visually-hidden" id="pwa-install-status" role="status" aria-live="polite"></span>
 
-  <script src="/assets/js/passkey-client.js?v=e283d1d672" defer></script>
-  <script src="/assets/js/admin.js?v=e283d1d672" defer></script>
-  <script src="/assets/js/admin-desk.js?v=e283d1d672" defer></script>
-  <script src="/assets/js/pwa.js?v=e283d1d672" defer></script>
+  <script src="/assets/js/passkey-client.js?v=15ed3fbc8f" defer></script>
+  <script src="/assets/js/admin-manager.js?v=15ed3fbc8f" defer></script>
+  <script src="/assets/js/admin.js?v=15ed3fbc8f" defer></script>
+  <script src="/assets/js/admin-desk.js?v=15ed3fbc8f" defer></script>
+  <script src="/assets/js/pwa.js?v=15ed3fbc8f" defer></script>
 </body>
 </html>

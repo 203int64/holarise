@@ -20,7 +20,7 @@ export async function onRequestGet(context) {
 
   await ensureManagerSchema(env.DB);
   const { results } = await env.DB.prepare(
-    `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date, COALESCE(e.slug, '') AS event_slug
+    `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date
      FROM ops_tasks t
      LEFT JOIN events e ON e.id = t.event_id
      WHERE t.assignee_type = 'member' AND t.assignee_id = ?
@@ -88,7 +88,7 @@ export async function onRequestPatch(context) {
   );
 
   const updated = await env.DB.prepare(
-    `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date, COALESCE(e.slug, '') AS event_slug
+    `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date
      FROM ops_tasks t LEFT JOIN events e ON e.id = t.event_id WHERE t.id = ?`
   )
     .bind(taskId)

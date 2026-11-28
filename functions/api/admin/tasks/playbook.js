@@ -88,7 +88,7 @@ export async function onRequestPost(context) {
 
   const { results } = await db
     .prepare(
-      `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date, COALESCE(e.slug, '') AS event_slug
+      `SELECT t.*, COALESCE(e.title, '') AS event_title, COALESCE(e.date, '') AS event_date
        FROM ops_tasks t LEFT JOIN events e ON e.id = t.event_id
        WHERE t.event_id = ?
        ORDER BY CASE t.phase WHEN 'before' THEN 0 WHEN 'during' THEN 1 WHEN 'after' THEN 2 ELSE 3 END ASC, t.due_at ASC`
