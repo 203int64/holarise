@@ -119,7 +119,7 @@ export async function onRequestPost(context) {
       );
     }
 
-    const rl = await checkRateLimit(env.DB, `ai_retouch:${auth.user.id}`, 20, 15 * 60 * 1000);
+    const rl = await checkRateLimit(env.DB, `ai_retouch:${auth.user.id}`, 45, 15 * 60 * 1000);
     if (!rl.allowed) {
       return errorResponse(
         429,
@@ -130,7 +130,7 @@ export async function onRequestPost(context) {
       );
     }
 
-    let sourceBytes = null;
+    let sourceBase64 = "";
     let sourceMime = "image/jpeg";
 
     if (typeof parsed.data?.imageDataUrl === "string" && parsed.data.imageDataUrl) {
@@ -142,7 +142,7 @@ export async function onRequestPost(context) {
       if (!sniffed) {
         return errorResponse(415, "UNSUPPORTED_IMAGE", "Chỉ hỗ trợ ảnh JPEG, PNG hoặc WebP.");
       }
-      sourceBytes = decoded.bytes;
+      sourceBase64 = decoded.base64;
       sourceMime = sniffed.mime;
     } else {
       const loaded = await loadPhotoBytesFromStorage(env, existing, fetchImpl);
@@ -156,7 +156,7 @@ export async function onRequestPost(context) {
           "Ảnh gốc vượt quá 3 MB — vui lòng gửi ảnh đã thu nhỏ từ trình duyệt."
         );
       }
-      sourceBytes = loaded.bytes;
+      sourceBase64 = bytesToBase64(loaded.bytes);
       sourceMime = loaded.mime;
     }
 
@@ -166,38 +166,46 @@ export async function onRequestPost(context) {
     const aspectRatio = normalizeAspectRatio(parsed.data?.aspectRatio || runtime.defaultAspectRatio);
     const presetId = String(parsed.data?.presetId || "").trim().slice(0, 40);
     const preferredSlotId = String(parsed.data?.providerSlot || "auto").trim().slice(0, 24);
-    const { variants, errors } = await generateThreeRetouchVariants({
-      keyPool: runtime.keyPool,
-      preferredSlotId,
-      model,
-      fallbackModel,
-      imageBase64: bytesToBase64(sourceBytes),
-      mimeType: sourceMime,
-      imageSize,
-      aspectRatio,
-      presetId,
-      fetchImpl,
-    });
+    try {
+      const { variants, errors } = await generateThreeRetouchVariants({
+        keyPool: runtime.keyPool,
+        preferredSlotId,
+        model,
+        fallbackModel,
+        imageBase64: sourceBase64,
+        mimeType: sourceMime,
+        imageSize,
+        aspectRatio,
+        presetId,
+        fetchImpl,
+      });
 
-    if (variants.length === 0) {
+      if (variants.length === 0) {
+        return errorResponse(
+          502,
+          "AI_RETOUCH_FAILED",
+          `Không thể tạo mẫu ảnh AI lúc này (${errors[0] || "lỗi kết nối Gemini"}).`
+        );
+      }
+
+      return jsonResponse({
+        ok: true,
+        photoId: id,
+        model,
+        imageSize,
+        aspectRatio,
+        keyCount: runtime.keyPool.length,
+        slots: runtime.slots,
+        variants,
+        partialErrors: errors.length > 0 ? errors : undefined,
+      });
+    } catch (err) {
       return errorResponse(
         502,
-        "AI_RETOUCH_FAILED",
-        `Không thể tạo mẫu ảnh AI lúc này (${errors[0] || "lỗi kết nối Gemini"}).`
+        "AI_RETOUCH_ERROR",
+        `Lỗi xử lý ảnh AI: ${String(err?.message || "không xác định").slice(0, 220)}`
       );
     }
-
-    return jsonResponse({
-      ok: true,
-      photoId: id,
-      model,
-      imageSize,
-      aspectRatio,
-      keyCount: runtime.keyPool.length,
-      slots: runtime.slots,
-      variants,
-      partialErrors: errors.length > 0 ? errors : undefined,
-    });
   }
 
   if (action === "apply") {

@@ -1134,67 +1134,73 @@
     );
   }
 
-  function renderAiRetouchSkeleton(count = 3) {
+  const AI_PRESET_SPECS = [
+    { id: "warm_film", title: "Mẫu 1 · Phim ấm Hòa Lạc", sub: "Kodak Portra 400 · Đang chỉnh ánh sáng & màu gỗ ấm..." },
+    { id: "natural_clean", title: "Mẫu 2 · Sáng trong tự nhiên", sub: "Leica Natural · Đang cân bằng trắng & khử chói..." },
+    { id: "cinematic_deep", title: "Mẫu 3 · Điện ảnh trầm sâu", sub: "Classic Chrome · Đang tạo chiều sâu vùng tối..." },
+  ];
+
+  function renderAiRetouchSkeleton(presetIds = null) {
     const grid = $("#ai-retouch-grid");
     if (!grid) return;
-    const labels = [
-      ["Mẫu 1 · Phim ấm Hòa Lạc", "Kodak Portra 400 · Đang chỉnh ánh sáng & màu gỗ ấm..."],
-      ["Mẫu 2 · Sáng trong tự nhiên", "Leica Natural · Đang cân bằng trắng & khử chói..."],
-      ["Mẫu 3 · Điện ảnh trầm sâu", "Classic Chrome · Đang tạo chiều sâu vùng tối..."],
-    ].slice(0, count);
-    grid.innerHTML = labels
+    const targets = Array.isArray(presetIds) && presetIds.length
+      ? AI_PRESET_SPECS.filter((p) => presetIds.includes(p.id))
+      : AI_PRESET_SPECS;
+    grid.innerHTML = targets
       .map(
-        ([title, sub]) => `
-        <article class="ai-variant-card ai-variant-card--loading">
+        (p) => `
+        <article class="ai-variant-card ai-variant-card--loading" data-ai-slot-id="${esc(p.id)}">
           <div class="ai-variant-frame"><div class="ai-variant-shimmer"></div></div>
           <div class="ai-variant-info">
-            <strong>${esc(title)}</strong>
-            <span>${esc(sub)}</span>
+            <strong>${esc(p.title)}</strong>
+            <span>${esc(p.sub)}</span>
           </div>
         </article>`
       )
       .join("");
   }
 
+  function renderSingleVariantCardHtml(v, idx) {
+    const is4k = String(v.imageSize || aiRetouchState.imageSize).toUpperCase() === "4K";
+    const sizeTag = v.imageSize || aiRetouchState.imageSize || "2K";
+    const ratioTag = v.aspectRatio && v.aspectRatio !== "auto" ? ` · ${v.aspectRatio}` : "";
+    return `
+      <article class="ai-variant-card" data-ai-variant-idx="${idx}" data-ai-slot-id="${esc(v.id)}">
+        <div class="ai-variant-frame">
+          <img src="${esc(v.previewUrl || v.dataUrl)}" alt="${esc(v.label)}" data-ai-preview-img="${idx}">
+          <span class="ai-variant-badge" data-ai-badge="${idx}">Mẫu ${idx + 1} · ${esc(sizeTag)}${esc(ratioTag)}</span>
+        </div>
+        <div class="ai-variant-info">
+          <strong>${esc(v.label)}</strong>
+          <span>${esc(v.subtitle || "")}</span>
+        </div>
+        <div class="ai-variant-actions">
+          <button class="btn btn--outline btn--sm" type="button" data-ai-compare="${idx}">So ảnh gốc</button>
+          <button class="btn btn--outline btn--sm" type="button" data-ai-download="${idx}">Tải ${esc(sizeTag)}</button>
+          ${!is4k ? `<button class="btn btn--outline btn--sm" type="button" data-ai-upscale4k="${idx}">✦ Xuất 4K</button>` : ""}
+          <button class="btn btn--primary btn--sm" type="button" data-ai-apply="${idx}">Chọn thay thế</button>
+        </div>
+      </article>`;
+  }
+
   function renderAiRetouchVariants() {
     const grid = $("#ai-retouch-grid");
     if (!grid) return;
     grid.innerHTML = aiRetouchState.variants
-      .map(
-        (v, idx) => {
-          const is4k = String(v.imageSize || aiRetouchState.imageSize).toUpperCase() === "4K";
-          const sizeTag = v.imageSize || aiRetouchState.imageSize || "2K";
-          const ratioTag = v.aspectRatio && v.aspectRatio !== "auto" ? ` · ${v.aspectRatio}` : "";
-          return `
-        <article class="ai-variant-card" data-ai-variant-idx="${idx}">
-          <div class="ai-variant-frame">
-            <img src="${esc(v.previewUrl || v.dataUrl)}" alt="${esc(v.label)}" data-ai-preview-img="${idx}">
-            <span class="ai-variant-badge" data-ai-badge="${idx}">Mẫu ${idx + 1} · ${esc(sizeTag)}${esc(ratioTag)}</span>
-          </div>
-          <div class="ai-variant-info">
-            <strong>${esc(v.label)}</strong>
-            <span>${esc(v.subtitle || "")}</span>
-          </div>
-          <div class="ai-variant-actions">
-            <button class="btn btn--outline btn--sm" type="button" data-ai-compare="${idx}">So ảnh gốc</button>
-            <button class="btn btn--outline btn--sm" type="button" data-ai-download="${idx}">Tải ${esc(sizeTag)}</button>
-            ${!is4k ? `<button class="btn btn--outline btn--sm" type="button" data-ai-upscale4k="${idx}">✦ Xuất 4K</button>` : ""}
-            <button class="btn btn--primary btn--sm" type="button" data-ai-apply="${idx}">Chọn thay thế</button>
-          </div>
-        </article>`;
-        }
-      )
+      .map((v, idx) => renderSingleVariantCardHtml(v, idx))
       .join("");
     refreshAiBrandedPreviews();
   }
 
   let aiDefaultsSynced = false;
+  let aiServerKeyCount = 1;
 
   async function syncAiDefaultsFromServer(photoId) {
     if (aiDefaultsSynced || !photoId) return;
     try {
       const cfg = await apiFetch(`/api/admin/photos/${encodeURIComponent(photoId)}/ai-retouch`);
       if (Array.isArray(cfg.slots)) populateAiKeySlots(cfg.slots);
+      if (Number(cfg.keyCount) > 0) aiServerKeyCount = Number(cfg.keyCount);
       if (cfg.defaultImageSize && $("#ai-opt-size")) $("#ai-opt-size").value = cfg.defaultImageSize;
       if (cfg.defaultAspectRatio && $("#ai-opt-ratio")) $("#ai-opt-ratio").value = cfg.defaultAspectRatio;
       if (typeof cfg.defaultSlogan === "string" && $("#ai-opt-slogan")) $("#ai-opt-slogan").value = cfg.defaultSlogan;
@@ -1215,7 +1221,11 @@
     const opts = getAiBrandOptions();
     const imageSize = forceSize || opts.imageSize || "2K";
     const aspectRatio = opts.aspectRatio || "auto";
-    const isSingle4k = imageSize === "4K" || Boolean(presetId);
+    const targetPresetIds = presetId
+      ? [presetId]
+      : imageSize === "4K"
+        ? [AI_PRESET_SPECS[0].id]
+        : AI_PRESET_SPECS.map((p) => p.id);
 
     aiRetouchState = {
       photoId: photo.id,
@@ -1231,34 +1241,80 @@
       statusEl.textContent =
         imageSize === "4K"
           ? `Đang xuất bản sắc nét 4K (${aspectRatio === "auto" ? "giữ tỉ lệ gốc" : aspectRatio}) — mất khoảng 15–35 giây...`
-          : `Đang tạo 3 mẫu màu phim ${imageSize} (${aspectRatio === "auto" ? "giữ tỉ lệ gốc" : aspectRatio})...`;
+          : `Đang tạo từng mẫu màu phim ${imageSize} (0/${targetPresetIds.length})...`;
     }
     if (regenBtn) regenBtn.disabled = true;
-    renderAiRetouchSkeleton(isSingle4k ? 1 : 3);
+    renderAiRetouchSkeleton(targetPresetIds);
     if (dlg && !dlg.open) dlg.showModal();
 
     try {
-      const sourceDataUrl = await compressImageUrlToDataUrl(aiRetouchState.originalUrl, 1280, 0.88);
-      const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}/ai-retouch`, {
-        method: "POST",
-        json: {
-          action: "generate",
-          imageDataUrl: sourceDataUrl,
-          imageSize,
-          aspectRatio,
-          presetId,
-          providerSlot: opts.providerSlot || "auto",
-        },
-      });
-      if (Array.isArray(res.slots)) populateAiKeySlots(res.slots);
-      aiRetouchState.variants = Array.isArray(res.variants) ? res.variants : [];
-      aiRetouchState.imageSize = res.imageSize || imageSize;
-      aiRetouchState.aspectRatio = res.aspectRatio || aspectRatio;
+      const sourceDataUrl = await compressImageUrlToDataUrl(aiRetouchState.originalUrl, 1024, 0.85);
+      const errors = [];
+      let latestKeyCount = aiServerKeyCount;
+
+      const generateOnePreset = async (pid) => {
+        try {
+          const res = await apiFetch(`/api/admin/photos/${encodeURIComponent(photo.id)}/ai-retouch`, {
+            method: "POST",
+            json: {
+              action: "generate",
+              imageDataUrl: sourceDataUrl,
+              imageSize,
+              aspectRatio,
+              presetId: pid,
+              providerSlot: opts.providerSlot || "auto",
+            },
+          });
+          if (Array.isArray(res.slots)) populateAiKeySlots(res.slots);
+          if (Number(res.keyCount) > 0) {
+            latestKeyCount = Number(res.keyCount);
+            aiServerKeyCount = latestKeyCount;
+          }
+          const v = Array.isArray(res.variants) ? res.variants[0] : null;
+          if (!v) throw new Error("Gemini không trả về ảnh cho mẫu này.");
+          const idx = aiRetouchState.variants.push(v) - 1;
+          aiRetouchState.imageSize = res.imageSize || imageSize;
+          aiRetouchState.aspectRatio = res.aspectRatio || aspectRatio;
+
+          const slotEl = document.querySelector(`#ai-retouch-grid [data-ai-slot-id="${CSS.escape(pid)}"]`);
+          if (slotEl) {
+            const temp = document.createElement("div");
+            temp.innerHTML = renderSingleVariantCardHtml(v, idx).trim();
+            if (temp.firstElementChild) slotEl.replaceWith(temp.firstElementChild);
+            refreshAiBrandedPreviews();
+          }
+          if (statusEl && targetPresetIds.length > 1) {
+            statusEl.textContent = `Đã xong ${aiRetouchState.variants.length}/${targetPresetIds.length} mẫu (${aiRetouchState.imageSize})...`;
+          }
+        } catch (err) {
+          const msg = err?.message || "Lỗi kết nối Gemini";
+          errors.push(msg);
+          const slotEl = document.querySelector(`#ai-retouch-grid [data-ai-slot-id="${CSS.escape(pid)}"]`);
+          if (slotEl) slotEl.remove();
+        }
+      };
+
+      // Run 1 preset per Worker invocation (prevents 128 MB Cloudflare Worker OOM on 2K/4K images).
+      // Run sequentially on 1-key pools to avoid RPM burst 429s; parallel when 2+ keys are available.
+      if (latestKeyCount >= 2 && targetPresetIds.length > 1) {
+        await Promise.all(targetPresetIds.map((pid) => generateOnePreset(pid)));
+      } else {
+        for (const pid of targetPresetIds) {
+          await generateOnePreset(pid);
+        }
+      }
+
+      if (aiRetouchState.variants.length === 0) {
+        throw new Error(errors[0] || "Không thể kết nối Gemini AI Retouch.");
+      }
+
       if (statusEl) {
-        const keyNote = res.keyCount > 1 ? ` · Pool ${res.keyCount} key` : "";
+        const keyNote = latestKeyCount > 1 ? ` · Pool ${latestKeyCount} key` : "";
         statusEl.textContent = `Đã tạo xong ${aiRetouchState.variants.length} mẫu (${aiRetouchState.imageSize}${keyNote}). Bật/tắt Logo & Slogan bên dưới để xem trực tiếp không tốn API.`;
       }
-      renderAiRetouchVariants();
+      if (errors.length > 0 && alertEl) {
+        showAlert(alertEl, `Một số mẫu chưa tạo được: ${errors[0]}`);
+      }
     } catch (err) {
       if (statusEl) statusEl.textContent = "Chưa tạo được mẫu AI.";
       if (alertEl) showAlert(alertEl, err.message || "Không thể kết nối Gemini AI Retouch.");

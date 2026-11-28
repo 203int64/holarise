@@ -6,6 +6,7 @@
  */
 
 export const DEFAULT_GEMINI_IMAGE_MODEL = "gemini-nano-banana-2.1";
+export const BUILTIN_FALLBACK_IMAGE_MODEL = "gemini-3.1-flash-lite-image";
 export const GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
 export const GEMINI_API_REVISION = "2026-05-20";
 export const AI_CONFIG_SETTING_KEY = "ai_image_config";
@@ -332,16 +333,10 @@ export async function runGeminiImageEdit({
     responseFormat.aspect_ratio = normRatio;
   }
 
-  const res = await fetchImpl(GEMINI_INTERACTIONS_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": apiKey,
-      "Api-Revision": GEMINI_API_REVISION,
-    },
-    signal: AbortSignal.timeout(normSize === "4K" ? 90000 : 45000),
-    body: JSON.stringify({
+  const callGemini = async (includeFormat) => {
+    const reqBody = {
       model,
+      store: false,
       input: [
         { type: "text", text: prompt },
         {
@@ -350,13 +345,37 @@ export async function runGeminiImageEdit({
           data: imageBase64,
         },
       ],
-      response_format: responseFormat,
-    }),
-  });
+    };
+    if (includeFormat) {
+      reqBody.response_format = responseFormat;
+    }
+    return fetchImpl(GEMINI_INTERACTIONS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+        "Api-Revision": GEMINI_API_REVISION,
+      },
+      signal: AbortSignal.timeout(normSize === "4K" ? 90000 : 45000),
+      body: JSON.stringify(reqBody),
+    });
+  };
+
+  let res = await callGemini(true);
+  if (!res.ok && res.status === 400) {
+    const errText = await res.text().catch(() => "");
+    if (/response_format|image_size|mime_type|aspect_ratio/i.test(errText)) {
+      res = await callGemini(false);
+    } else {
+      const err = new Error(`Gemini HTTP ${res.status}: ${errText.slice(0, 180)}`);
+      err.httpStatus = res.status;
+      throw err;
+    }
+  }
 
   if (!res.ok) {
     const errText = await res.text().catch(() => "");
-    const err = new Error(`Gemini HTTP ${res.status}: ${errText.slice(0, 160)}`);
+    const err = new Error(`Gemini HTTP ${res.status}: ${errText.slice(0, 180)}`);
     err.httpStatus = res.status;
     throw err;
   }
@@ -404,7 +423,10 @@ export async function runGeminiImageEditWithFallback({
 
   const modelsToTry = [model];
   const fb = String(fallbackModel || "").trim();
-  if (fb && fb !== model) modelsToTry.push(fb);
+  if (fb && !modelsToTry.includes(fb)) modelsToTry.push(fb);
+  if (BUILTIN_FALLBACK_IMAGE_MODEL && !modelsToTry.includes(BUILTIN_FALLBACK_IMAGE_MODEL)) {
+    modelsToTry.push(BUILTIN_FALLBACK_IMAGE_MODEL);
+  }
 
   const attemptErrors = [];
   for (const activeModel of modelsToTry) {
@@ -425,7 +447,11 @@ export async function runGeminiImageEditWithFallback({
         const status = Number(err?.httpStatus || 0);
         const msg = err?.message || "failed";
         attemptErrors.push(`${slot.id}/${activeModel}: ${msg}`);
-        if (!isRetryableGeminiError(status, msg) && ordered.length === 1) {
+        if (status === 404) {
+          // Model unavailable on this key/tier -> skip remaining keys and try fallback model
+          break;
+        }
+        if (!isRetryableGeminiError(status, msg) && ordered.length === 1 && modelsToTry.length === 1) {
           throw err;
         }
       }
