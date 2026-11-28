@@ -42,6 +42,9 @@
 
   const TAB_TITLES = {
     overview: "Tổng quan",
+    timeline: "Timeline & Tiến độ",
+    tasks: "Nhiệm vụ & Phân công",
+    team: "Đội ngũ, Quyền & Nhật ký",
     registrations: "Đơn đăng ký",
     events: "Lịch sự kiện",
     posts: "Bài viết",
@@ -866,33 +869,52 @@
     }
   }
 
-  function handleAuthenticatedUser(user, isSoleAdmin) {
+  function handleAuthenticatedUser(user, isSoleAdmin, statusPayload = {}) {
     if (!user) {
       showAuthScreen({ initialized: true });
       return;
     }
-    if (user.role === "media") {
+    const canonicalRole = user.canonicalRole || user.role;
+    const canAccessManager =
+      Boolean(isSoleAdmin) ||
+      Boolean(statusPayload.canAccessManager) ||
+      Boolean(user.canAccessManager) ||
+      ["event_ops", "content_editor", "content_ctv", "media_manager", "editor"].includes(canonicalRole);
+
+    if (!canAccessManager && (canonicalRole === "media" || canonicalRole === "media_ctv")) {
       window.location.replace("/media/");
       return;
     }
-    if (!isSoleAdmin) {
+    if (!canAccessManager) {
       showAuthScreen({
         initialized: true,
-        forbiddenMsg: `Tài khoản ${user.email} không có quyền mở cổng Quản trị CMS. Khu vực này khóa riêng cho Quản trị chính duy nhất (203int64).`,
+        forbiddenMsg: `Tài khoản ${user.email} chưa được cấp quyền truy cập HolaRise Manager. Liên hệ Chủ nhiệm để kiểm tra vai trò.`,
       });
       return;
     }
-    enterAdminShell(user);
+    const perms = Array.isArray(statusPayload.permissions)
+      ? statusPayload.permissions
+      : Array.isArray(user.permissions)
+        ? user.permissions
+        : isSoleAdmin
+          ? ["*"]
+          : [];
+    enterAdminShell(user, Boolean(isSoleAdmin), perms, statusPayload);
   }
 
-  function enterAdminShell(user) {
+  function enterAdminShell(user, isSoleAdmin = false, permissions = [], statusPayload = {}) {
     state.user = user;
+    state.isSoleAdmin = Boolean(isSoleAdmin);
+    state.permissions = permissions;
     $("#boot-loader").hidden = true;
     $("#auth-screen").hidden = true;
     $("#admin-shell").hidden = false;
 
-    $("#sidebar-user-name").textContent = user.name || "Quản trị chính";
-    $("#sidebar-user-meta").textContent = `Quản trị chính · ${user.email}`;
+    const roleDisplay = user.roleShortLabel || user.roleLabel || (isSoleAdmin ? "Chủ nhiệm" : user.role || "Thành viên Ban");
+    $("#sidebar-user-name").textContent = user.name || "Thành viên Ban";
+    $("#sidebar-user-meta").textContent = `${roleDisplay}${user.department ? ` · ${user.department}` : ""} · ${user.email}`;
+
+    window.__holariseManager?.applyRoleShell(user, permissions, isSoleAdmin, statusPayload);
 
     const params = new URLSearchParams(window.location.search);
     const initialTab = params.get("tab");
@@ -906,7 +928,12 @@
       chip.classList.toggle("is-active", (chip.getAttribute("data-reg-status") || "") === state.regFilter.status);
     });
 
-    switchTab(TAB_TITLES[initialTab] ? initialTab : "overview", false);
+    const safeInitialTab = window.__holariseManager
+      ? window.__holariseManager.getFirstAllowedTab(TAB_TITLES[initialTab] ? initialTab : "overview")
+      : TAB_TITLES[initialTab]
+        ? initialTab
+        : "overview";
+    switchTab(safeInitialTab, false);
   }
 
   function syncUrlParams() {
@@ -932,6 +959,9 @@
   }
 
   function switchTab(tab, updateUrl = true) {
+    if (window.__holariseManager && !window.__holariseManager.canAccessTab(tab)) {
+      tab = window.__holariseManager.getFirstAllowedTab("overview");
+    }
     state.activeTab = tab;
     $$("[data-tab]").forEach((btn) => {
       btn.classList.toggle("is-active", btn.getAttribute("data-tab") === tab);
@@ -940,11 +970,14 @@
       panel.hidden = panel.getAttribute("data-panel") !== tab;
     });
     if ($("#mobile-page-title")) {
-      $("#mobile-page-title").textContent = TAB_TITLES[tab] || "HolaRise CMS";
+      $("#mobile-page-title").textContent = TAB_TITLES[tab] || "HolaRise Manager";
     }
     if (updateUrl) syncUrlParams();
 
     if (tab === "overview") loadOverview();
+    else if (tab === "timeline") window.__holariseManager?.loadTimeline();
+    else if (tab === "tasks") window.__holariseManager?.loadTasks();
+    else if (tab === "team") window.__holariseManager?.loadTeamAndAudit();
     else if (tab === "registrations") loadRegistrations(false);
     else if (tab === "events") loadEvents();
     else if (tab === "posts") loadPosts();
@@ -981,6 +1014,7 @@
       setBadgeCount(["badge-pending-refs", "badge-pending-refs-mobile"], data.reflections?.pending || 0);
       setBadgeCount(["badge-pending-photos"], data.media?.pendingPhotoCount || 0);
       setBadgeCount(["badge-unread-chat"], data.chat?.unreadThreads || 0);
+      setBadgeCount(["badge-open-tasks"], data.tasks?.open || 0);
 
       const newRegs = Number(data.registrations?.new || 0);
       const pendingRefs = Number(data.reflections?.pending || 0);
@@ -1550,7 +1584,8 @@
     $("#post-id").value = post ? post.id : "";
     $("#post-title").value = post ? post.title : "";
     $("#post-slug").value = post ? post.slug : "";
-    $("#post-status").value = post ? post.status : "published";
+    const canPublish = !window.__holariseManager || window.__holariseManager.hasPerm("posts.publish");
+    $("#post-status").value = post ? post.status : canPublish ? "published" : "pending_review";
     $("#post-category").value = post ? post.category : "HolaGreen · Sạch";
     $("#post-date").value = post ? post.date : new Date().toISOString().slice(0, 10);
     $("#post-author").value = post ? post.author : "Ban Điều Phối HolaRise";
@@ -2787,7 +2822,7 @@
       try {
         const res = await window.HolaPasskey.loginWithPasskey("");
         toast(`Chào mừng trở lại, ${res.user.name}!`, "success");
-        handleAuthenticatedUser(res.user, Boolean(res.isSoleAdmin));
+        handleAuthenticatedUser(res.user, Boolean(res.isSoleAdmin), res);
       } catch (err) {
         showAlert(alertEl, err?.message || "Đăng nhập sinh trắc học không thành công.");
       } finally {
@@ -2819,7 +2854,7 @@
           },
         });
         form.reset();
-        handleAuthenticatedUser(res.user, Boolean(res.isSoleAdmin));
+        handleAuthenticatedUser(res.user, Boolean(res.isSoleAdmin), res);
       } catch (err) {
         showAlert(alertEl, formatApiError(err));
       } finally {
@@ -2853,7 +2888,7 @@
         });
         toast("Khởi tạo Quản trị chính thành công!", "success");
         const st = await api("/api/auth/status");
-        handleAuthenticatedUser(st.user || res.user, Boolean(st.isSoleAdmin));
+        handleAuthenticatedUser(st.user || res.user, Boolean(st.isSoleAdmin), st);
       } catch (err) {
         showAlert(alertEl, formatApiError(err));
       } finally {
@@ -3943,23 +3978,27 @@
       btn.disabled = true;
       btn.textContent = "Đang tạo...";
       try {
+        const selectedRole = $("#u-role")?.value || "media_ctv";
+        const selectedDept = $("#u-department")?.value || "";
         await api("/api/admin/users", {
           method: "POST",
           body: {
             name: $("#u-name").value.trim(),
             email: $("#u-email").value.trim(),
-            role: "media",
+            role: selectedRole,
+            department: selectedDept,
             password: $("#u-password").value,
           },
         });
         $("#media-user-dialog").close();
-        toast("Đã tạo tài khoản Ban Hình Ảnh (/media/).", "success");
-        loadSettings();
+        toast("Đã cấp tài khoản thành viên Ban.", "success");
+        if (state.activeTab === "team") window.__holariseManager?.loadTeamAndAudit();
+        else loadSettings();
       } catch (err) {
         showAlert(alertEl, formatApiError(err));
       } finally {
         btn.disabled = false;
-        btn.textContent = "Tạo tài khoản /media/";
+        btn.textContent = "Cấp tài khoản";
       }
     });
 
@@ -4577,7 +4616,7 @@
     try {
       const status = await api("/api/auth/status");
       if (status.authenticated && status.user) {
-        handleAuthenticatedUser(status.user, Boolean(status.isSoleAdmin));
+        handleAuthenticatedUser(status.user, Boolean(status.isSoleAdmin), status);
       } else {
         showAuthScreen({ initialized: Boolean(status.initialized) });
       }

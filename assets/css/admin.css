@@ -2730,3 +2730,352 @@ dialog.cms-dialog::backdrop {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================================
+   HOLARISE MANAGER — TIMELINE, TASKS, ROLES MATRIX & AUDIT TRAIL
+   ========================================================================= */
+.mgr-queue-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.mgr-queue-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 15px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.16s ease, transform 0.16s ease;
+}
+
+.mgr-queue-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.mgr-queue-card span {
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.mgr-queue-card strong {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.mgr-queue-card.is-alert {
+  border-color: rgba(180, 83, 9, 0.35);
+  background: #fffbeb;
+}
+
+.mgr-queue-card.is-alert strong {
+  color: #b45309;
+}
+
+.mgr-timeline-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.mgr-event-list,
+.mgr-task-list,
+.mgr-pending-list,
+.mgr-milestone-list,
+.mgr-audit-list {
+  display: grid;
+  gap: 12px;
+}
+
+.mgr-event-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  background: var(--bg);
+}
+
+.mgr-event-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mgr-event-head h3 {
+  margin: 6px 0 2px;
+  font-size: 1rem;
+}
+
+.mgr-event-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mgr-progress-wrap {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mgr-progress-bar {
+  flex: 1 1 160px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(11, 17, 15, 0.08);
+  overflow: hidden;
+}
+
+.mgr-progress-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.mgr-progress-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.mgr-phase-pills {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.mgr-milestone-item {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.mgr-milestone-item.is-overdue {
+  border-color: rgba(180, 35, 24, 0.35);
+  background: #fef3f2;
+}
+
+.mgr-milestone-date {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.mgr-milestone-body {
+  display: grid;
+  gap: 3px;
+}
+
+.mgr-milestone-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mgr-stats-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.mgr-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+button.mgr-stat-pill {
+  cursor: pointer;
+}
+
+.mgr-stat-pill.is-active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.mgr-stat-pill.is-danger {
+  border-color: rgba(180, 35, 24, 0.35);
+  color: #b42318;
+  background: #fef3f2;
+}
+
+.mgr-stat-pill.is-ok {
+  border-color: rgba(16, 122, 74, 0.25);
+  color: #107a4a;
+}
+
+.mgr-task-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.mgr-task-card.is-done {
+  opacity: 0.76;
+}
+
+.mgr-task-card.is-overdue {
+  border-left: 3px solid #b42318;
+}
+
+.mgr-task-main h3 {
+  margin: 6px 0 4px;
+  font-size: 0.98rem;
+}
+
+.mgr-task-desc {
+  margin: 0 0 8px;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.mgr-task-badges,
+.mgr-task-meta,
+.mgr-task-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mgr-task-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+  gap: 12px;
+}
+
+.mgr-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  background: rgba(11, 17, 15, 0.06);
+  color: var(--ink);
+}
+
+.mgr-chip--urgent {
+  background: #fee4e2;
+  color: #b42318;
+  font-weight: 600;
+}
+
+.mgr-chip--high {
+  background: #fef0c7;
+  color: #b54708;
+  font-weight: 600;
+}
+
+.mgr-roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+}
+
+.mgr-role-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  background: var(--bg);
+}
+
+.mgr-role-card.is-current {
+  border-color: var(--accent);
+  background: rgba(20, 83, 45, 0.04);
+}
+
+.mgr-role-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.mgr-role-card h3 {
+  margin: 0 0 6px;
+  font-size: 0.96rem;
+}
+
+.mgr-role-card p {
+  margin: 0;
+  font-size: 0.83rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.mgr-pending-row,
+.mgr-audit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.mgr-audit-row {
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.mgr-audit-time {
+  flex: 0 0 132px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.mgr-audit-body {
+  display: grid;
+  gap: 2px;
+}
+
+@media (max-width: 960px) {
+  .mgr-timeline-grid {
+    grid-template-columns: 1fr;
+  }
+  .mgr-task-card,
+  .mgr-audit-row {
+    flex-direction: column;
+  }
+  .mgr-audit-time {
+    flex: none;
+  }
+}

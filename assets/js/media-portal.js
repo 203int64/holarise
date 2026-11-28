@@ -93,7 +93,8 @@
   }
 
   function isApproverRole() {
-    return state.user?.role === "super_admin" || state.user?.role === "editor";
+    const r = state.user?.canonicalRole || state.user?.role;
+    return r === "super_admin" || r === "media_manager" || r === "editor";
   }
 
   function isNgvRole() {
@@ -101,10 +102,14 @@
   }
 
   function canManageMedia() {
+    const r = state.user?.canonicalRole || state.user?.role;
     return (
-      state.user?.role === "super_admin" ||
-      state.user?.role === "editor" ||
-      state.user?.role === "media"
+      r === "super_admin" ||
+      r === "media_manager" ||
+      r === "media_ctv" ||
+      r === "media" ||
+      r === "content_editor" ||
+      r === "editor"
     );
   }
 

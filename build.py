@@ -3848,9 +3848,9 @@ Sitemap: {abs_url(b['siteUrl'], '/sitemap.xml')}
     pwa_icons = manifest["icons"]
     admin_manifest = {
         "id": "/admin/",
-        "name": "HolaRise CMS – Cổng Điều Phối",
-        "short_name": "Hola CMS",
-        "description": "Điều phối sự kiện, đơn đăng ký, lưu bút và giao diện dành cho Ban Điều Phối HolaRise.",
+        "name": "HolaRise Manager – Cổng Điều Phối & Phân Quyền",
+        "short_name": "Hola Manager",
+        "description": "Không gian điều phối sự kiện, timeline, nhiệm vụ, phân quyền theo ban và xuất bản nội dung của HolaRise.",
         "lang": "vi-VN",
         "dir": "ltr",
         "start_url": "/admin/?source=pwa",
